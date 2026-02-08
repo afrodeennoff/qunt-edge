@@ -16,11 +16,12 @@ import { toast } from "sonner"
 interface AddWidgetSheetProps {
   onAddWidget: (type: WidgetType, size?: WidgetSize) => void
   isCustomizing: boolean
-  trigger?: React.ReactNode
 }
 
-interface PreviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PreviewCardProps {
+  onClick: () => void
   children: React.ReactNode
+  className?: string
 }
 
 interface LazyWidgetPreviewProps {
@@ -95,13 +96,12 @@ const LazyWidgetPreview: React.FC<LazyWidgetPreviewProps> = ({
 }
 
 const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
-  ({ onClick, className, children, ...props }, ref) => {
+  ({ onClick, className, children }, ref) => {
     const t = useI18n()
     const { isMobile } = useData()
     return (
-      <div
+      <div 
         ref={ref}
-        {...props}
         className={cn(
           "cursor-pointer rounded-md relative group m-1 w-full overflow-hidden px-2",
           "active:scale-[0.98] transition-all duration-150 ease-in-out",
@@ -122,7 +122,7 @@ const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
 PreviewCard.displayName = "PreviewCard"
 
 export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>(
-  ({ onAddWidget, isCustomizing, trigger }, ref) => {
+  ({ onAddWidget, isCustomizing }, ref) => {
     const t = useI18n()
     const { isMobile } = useData()
     const [isOpen, setIsOpen] = React.useState(false)
@@ -146,16 +146,14 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
     const onWidgetLoaded = useCallback((index: number) => {
       setLoadedItems(prev => {
         const newSet = new Set(prev)
-        if (newSet.has(index)) return prev // Avoid redundant updates
         newSet.add(index)
-
-        // Only load next batch when the last item of the current batch is loaded
-        if ((index + 1) % 3 === 0) {
-          const nextStart = index + 1
-          const nextBatch = Array.from({ length: 3 }, (_, i) => nextStart + i)
+        
+        // Load next batch when current batch is loaded
+        if (newSet.size > 0 && newSet.size % 3 === 0) {
+          const nextBatch = Array.from({ length: 3 }, (_, i) => newSet.size + i)
           nextBatch.forEach(i => newSet.add(i))
         }
-
+        
         return newSet
       })
     }, [])
@@ -176,8 +174,9 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
             <PreviewCard
               key={config.type}
               onClick={() => handleAddWidget(config.type)}
-              style={{ height: `${config.previewHeight}px` }}
-              className="m-0"
+              className={cn(
+                `h-[${config.previewHeight}px]`,
+              )}
             >
               {
                 category === 'charts' ? (
@@ -207,23 +206,21 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
     return (
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          {trigger || (
-            <Button
-              ref={ref}
-              variant="ghost"
-              className={cn(
-                "h-10 rounded-full flex items-center justify-center transition-transform active:scale-95",
-                isMobile ? "w-10 p-0" : "min-w-[120px] gap-3 px-4"
-              )}
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              {!isMobile && (
-                <span className="text-sm font-medium">
-                  {t('widgets.addWidget')}
-                </span>
-              )}
-            </Button>
-          )}
+          <Button
+            ref={ref}
+            variant="ghost"
+            className={cn(
+              "h-10 rounded-full flex items-center justify-center transition-transform active:scale-95",
+              isMobile ? "w-10 p-0" : "min-w-[120px] gap-3 px-4"
+            )}
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            {!isMobile && (
+              <span className="text-sm font-medium">
+                {t('widgets.addWidget')}
+              </span>
+            )}
+          </Button>
         </SheetTrigger>
         <SheetContent side="right" className="w-[90vw] sm:max-w-[640px] flex flex-col h-dvh overflow-hidden">
           <SheetHeader>

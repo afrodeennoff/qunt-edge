@@ -104,11 +104,6 @@ export function DashboardHeader() {
                             <AddWidgetSheet
                                 onAddWidget={addWidget}
                                 isCustomizing={isCustomizing}
-                                trigger={
-                                    <button className="flex items-center gap-2 rounded-md px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">
-                                        <span>+ ADD</span>
-                                    </button>
-                                }
                             />
 
                             <button
