@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.example.com/widget-policy-manifest.schema.json",
+  "title": "Widget Policy Manifest Schema",
+  "description": "Schema for widget policy compliance manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the manifest schema"
+    },
+    "widgetId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-_]+$",
+      "description": "Unique widget identifier"
+    },
+    "widgetVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semver version of the widget"
+    },
+    "policyVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the policy framework this widget complies with"
+    },
+    "riskAssessment": {
+      "type": "object",
+      "properties": {
+        "severityTier": {
+          "type": "string",
+          "enum": ["Critical", "High", "Medium", "Low"]
+        },
+        "probabilityScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "impactWeight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "controlEffectiveness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "residualRiskScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": ["severityTier", "probabilityScore", "impactWeight", "controlEffectiveness", "residualRiskScore"]
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "threatVector": { "type": "string" },
+          "residualRiskScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "compensatingControls": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "riskTier": {
+            "type": "string",
+            "enum": ["Critical", "High", "Medium", "Low"]
+          }
+        },
+        "required": ["id", "name", "threatVector", "residualRiskScore", "compensatingControls", "riskTier"]
+      }
+    },
+    "dataHandling": {
+      "type": "object",
+      "properties": {
+        "inputSchema": { "type": "string" },
+        "outputSchema": { "type": "string" },
+        "dataClassification": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted"]
+        },
+        "encryptionRequired": { "type": "boolean" },
+        "auditLogging": { "type": "boolean" },
+        "retentionPeriod": { "type": "string" }
+      },
+      "required": ["inputSchema", "outputSchema", "dataClassification", "encryptionRequired", "auditLogging"]
+    },
+    "compliance": {
+      "type": "object",
+      "properties": {
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "auditHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string", "format": "date-time" },
+              "auditor": { "type": "string" },
+              "findings": { "type": "string" },
+              "severity": {
+                "type": "string",
+                "enum": ["Critical", "High", "Medium", "Low"]
+              },
+              "status": {
+                "type": "string",
+                "enum": ["open", "closed", "mitigated"]
+              }
+            },
+            "required": ["date", "auditor", "findings", "severity", "status"]
+          }
+        },
+        "signoffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": { "type": "string" },
+              "name": { "type": "string" },
+              "date": { "type": "string", "format": "date-time" },
+              "approved": { "type": "boolean" }
+            },
+            "required": ["role", "name", "date", "approved"]
+          }
+        }
+      },
+      "required": ["frameworks", "auditHistory", "signoffs"]
+    },
+    "slos": {
+      "type": "object",
+      "properties": {
+        "p99LatencyMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300
+        },
+        "errorRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.001
+        },
+        "riskScoreDrift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.05
+        },
+        "availability": {
+          "type": "number",
+          "minimum": 0.99,
+          "maximum": 1
+        }
+      },
+      "required": ["p99LatencyMs", "errorRate", "riskScoreDrift", "availability"]
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["schemaVersion", "widgetId", "widgetVersion", "policyVersion", "riskAssessment", "features", "dataHandling", "compliance", "slos", "lastUpdated"]
+}

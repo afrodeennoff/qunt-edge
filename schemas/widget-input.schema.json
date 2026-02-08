@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.example.com/widget-input.schema.json",
+  "title": "Widget Input Schema",
+  "description": "Unified schema for validating widget input data across all widget types",
+  "type": "object",
+  "properties": {
+    "widgetId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-_]+$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Unique identifier for the widget instance"
+    },
+    "widgetType": {
+      "type": "string",
+      "enum": [
+        "equityChart",
+        "pnlChart",
+        "timeOfDayChart",
+        "timeInPositionChart",
+        "weekdayPnlChart",
+        "pnlBySideChart",
+        "pnlPerContractChart",
+        "pnlPerContractDailyChart",
+        "tickDistribution",
+        "dailyTickTarget",
+        "commissionsPnl",
+        "calendarWidget",
+        "averagePositionTime",
+        "cumulativePnl",
+        "longShortPerformance",
+        "tradePerformance",
+        "winningStreak",
+        "profitFactor",
+        "statisticsWidget",
+        "tradeTableReview",
+        "chatWidget",
+        "tradeDistribution",
+        "propFirm",
+        "timeRangePerformance",
+        "tagWidget",
+        "riskRewardRatio",
+        "mindsetWidget",
+        "tradingScore",
+        "expectancy",
+        "riskMetrics"
+      ],
+      "description": "Type of widget being initialized"
+    },
+    "size": {
+      "type": "string",
+      "enum": ["tiny", "small", "small-long", "medium", "large", "extra-large"],
+      "description": "Size category for the widget"
+    },
+    "data": {
+      "type": "object",
+      "description": "Widget-specific data payload",
+      "properties": {
+        "trades": {
+          "type": "array",
+          "description": "Array of trade data for chart widgets",
+          "items": {
+            "$ref": "#/definitions/trade"
+          }
+        },
+        "filters": {
+          "type": "object",
+          "description": "Filter configurations",
+          "properties": {
+            "startDate": { "type": "string", "format": "date" },
+            "endDate": { "type": "string", "format": "date" },
+            "accounts": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "config": {
+          "type": "object",
+          "description": "Widget configuration options",
+          "additionalProperties": true
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "version": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    },
+    "userContext": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "roles": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "permissions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["userId"]
+    }
+  },
+  "required": ["widgetId", "widgetType"],
+  "anyOf": [
+    { "required": ["data"] },
+    { "required": ["metadata"] }
+  ],
+  "definitions": {
+    "trade": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "entryDate": { "type": "string", "format": "date-time" },
+        "exitDate": { "type": "string", "format": "date-time" },
+        "symbol": { "type": "string" },
+        "side": { "enum": ["long", "short"] },
+        "quantity": { "type": "number" },
+        "entryPrice": { "type": "number" },
+        "exitPrice": { "type": "number" },
+        "pnl": { "type": "number" },
+        "commission": { "type": "number" }
+      },
+      "required": ["id", "entryDate", "symbol", "side", "pnl"]
+    }
+  }
+}

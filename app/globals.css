@@ -1,0 +1,775 @@
+@import "tailwindcss";
+
+@config '../tailwind.config.ts';
+
+@plugin "@tailwindcss/typography";
+
+@source "../app/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../pages/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../src/**/*.{ts,tsx}";
+
+@source "../node_modules/streamdown/dist/index.js";
+
+@import "../styles/tokens.css";
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+@utility react-grid-item {
+  &.react-grid-placeholder {
+    @apply !bg-accent/40 !border-2 !border-dashed !border-accent !rounded-lg !opacity-100 !transition-all !duration-200 !backdrop-blur-xs !shadow-[0_0_0_1px_hsl(var(--accent)/0.4)] !origin-center;
+  }
+
+  &.react-draggable-dragging {
+    @apply !transition-none !z-100 !cursor-grabbing !opacity-90;
+  }
+
+  &>.react-resizable-handle {
+    @apply rounded-br-sm;
+  }
+
+  @media (max-width: 768px) {
+    @apply select-none;
+
+    &[data-customizing='true'] {
+      @apply touch-none;
+    }
+
+    & [data-scrollable='true'] {
+      @apply touch-pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+@utility react-grid-placeholder {
+  &.react-grid-item {
+    @apply !bg-accent/40 !border-2 !border-dashed !border-accent !rounded-lg !opacity-100 !transition-all !duration-200 !backdrop-blur-xs !shadow-[0_0_0_1px_hsl(var(--accent)/0.4)] !origin-center;
+  }
+}
+
+@utility react-draggable-dragging {
+  &.react-grid-item {
+    @apply !transition-none !z-100 !cursor-grabbing !opacity-90;
+  }
+}
+
+@utility react-resizable-handle {
+  .react-grid-item>& {
+    @apply rounded-br-sm;
+  }
+}
+
+@utility touch-hitbox {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    min-height: 44px;
+    min-width: 44px;
+    z-index: 9999;
+  }
+}
+
+@layer utilities {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --foreground-rgb: 255, 255, 255;
+      --background-start-rgb: 0, 0, 0;
+      --background-end-rgb: 0, 0, 0;
+    }
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% var(--theme-intensity, 100%);
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% var(--theme-intensity, 100%);
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% var(--theme-intensity, 100%);
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 173 58% 39%;
+    --success-foreground: 355.7 100% 97.3%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% var(--theme-intensity, 98%);
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    /* Refined to keep palette consistency beyond first five */
+    --chart-6: 206 72% 50%;
+    /* blue */
+    --chart-7: 260 60% 55%;
+    /* purple */
+    --chart-8: 336 70% 58%;
+    /* rose */
+    --chart-loss: 12 76% 61%;
+    --chart-win: 173 58% 39%;
+  }
+
+  .dark {
+    --background: 0 0% calc(100% - var(--theme-intensity, 100%));
+    --foreground: 0 0% 98%;
+    --card: 0 0% calc(100% - var(--theme-intensity, 100%));
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% calc(100% - var(--theme-intensity, 100%));
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 173 58% 39%;
+    --success-foreground: 144.9 80.4% 10%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --sidebar-background: 240 5.9% calc(100% - var(--theme-intensity, 100%));
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark theme realigned to mirror light theme hues for consistency */
+    --chart-1: 217 91% 60%;
+    /* blue */
+    --chart-2: 173 60% 55%;
+    /* teal-green */
+    --chart-3: 197 55% 60%;
+    /* blue-gray */
+    --chart-4: 43 85% 60%;
+    /* golden yellow */
+    --chart-5: 27 85% 60%;
+    /* orange */
+    --chart-6: 206 80% 60%;
+    /* blue */
+    --chart-7: 260 65% 65%;
+    /* purple */
+    --chart-8: 336 70% 65%;
+    /* rose */
+    --chart-loss: 12 75% 65%;
+    --chart-win: 173 60% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  img {
+    @apply inline-block;
+  }
+}
+
+@layer utilities {
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Responsive Container System - Sophisticated Fluid Approach */
+  .container-fluid {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 5vw, 3rem);
+    max-width: 1400px; /* Cap global max width */
+  }
+
+  /* Breakpoints for smaller screens to maintain fluid behavior */
+  @media (min-width: 640px) {
+    .container-fluid {
+      max-width: 640px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-fluid {
+      max-width: 768px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-fluid {
+      max-width: 1024px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-fluid {
+      max-width: 1280px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .container-fluid {
+      max-width: 1400px;
+    }
+  }
+  
+  /* Removed 1920px rule to keep it centered at max 1400px */
+
+  /* Fluid Grid System - Auto-adapting layout engine */
+  .grid-fluid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(280px, 30vw, 450px)), 1fr));
+    gap: var(--fluid-gap, clamp(1rem, 2.5vw, 2.5rem));
+    width: 100%;
+  }
+
+  /* Fixed Aspect Ratio Utilities for Dynamic Responsiveness */
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .aspect-portrait {
+    aspect-ratio: 3 / 4;
+  }
+
+  /* Container Query Entry Points (Modern adaptation) */
+  .cq-container {
+    container-type: inline-size;
+    width: 100%;
+  }
+
+  /* Fluid Spacing Grid */
+  .grid-fluid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(250px, 30vw, 400px), 1fr));
+    gap: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  /* Touch-Optimized Interactives */
+  .touch-optimized {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Responsive Text Truncation */
+  .text-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .text-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Ultra fluid typography overrides */
+  @layer base {
+    html {
+      font-size: 16px;
+    }
+
+    @media (min-width: 1920px) {
+      html {
+        font-size: 18px;
+      }
+    }
+
+    @media (min-width: 2560px) {
+      html {
+        font-size: 20px;
+      }
+    }
+  }
+
+  /* Enhanced Scroll Behavior */
+  .scroll-smooth-native {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Improved Touch Targets for Form Elements */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  /* Safe Area Utilities */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .focus-ring {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .high-contrast-border {
+    border: 2px solid currentColor;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+
+  /* Code block styles */
+  pre {
+    overflow-x: auto;
+    padding: 1rem 0;
+  }
+
+  pre [data-line] {
+    padding: 0 1rem;
+  }
+
+  pre [data-highlighted-line] {
+    background: rgba(200, 200, 255, 0.1);
+    padding: 0 1rem;
+    width: 100%;
+    display: block;
+    position: relative;
+  }
+
+  pre [data-highlighted-line]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #60a5fa;
+  }
+
+  pre [data-highlighted-chars] {
+    background: rgba(200, 200, 255, 0.1);
+    padding: 2px;
+    border-radius: 2px;
+  }
+
+  code {
+    counter-reset: line;
+  }
+
+  code>[data-line]::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    width: 1rem;
+    margin-right: 1rem;
+    text-align: right;
+    color: gray;
+  }
+
+  .prose pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .prose pre code {
+    font-size: 0.875em;
+    line-height: 1.7142857;
+    display: block;
+    overflow-x: auto;
+    border-radius: 0.375rem;
+  }
+
+  /* MDX Typography Overrides */
+  .prose {
+    --tw-prose-body: var(--color-neutral-700);
+    --tw-prose-headings: var(--color-neutral-900);
+    --tw-prose-links: var(--color-neutral-900);
+    --tw-prose-links-hover: var(--color-neutral-800);
+    --tw-prose-underline: var(--color-neutral-400);
+    --tw-prose-underline-hover: var(--color-neutral-800);
+    --tw-prose-bold: var(--color-neutral-900);
+    --tw-prose-counters: var(--color-neutral-500);
+    --tw-prose-bullets: var(--color-neutral-300);
+    --tw-prose-hr: var(--color-neutral-200);
+    --tw-prose-quote-borders: var(--color-neutral-200);
+    --tw-prose-captions: var(--color-neutral-500);
+    --tw-prose-code: var(--color-neutral-900);
+    --tw-prose-code-bg: var(--color-neutral-100);
+    --tw-prose-pre-code: var(--color-neutral-200);
+    --tw-prose-pre-bg: var(--color-neutral-800);
+    --tw-prose-pre-border: transparent;
+    --tw-prose-th-borders: var(--color-neutral-200);
+    --tw-prose-td-borders: var(--color-neutral-100);
+  }
+
+  .dark .prose {
+    --tw-prose-body: var(--color-neutral-300);
+    --tw-prose-headings: var(--color-neutral-100);
+    --tw-prose-links: var(--color-neutral-100);
+    --tw-prose-links-hover: var(--color-neutral-200);
+    --tw-prose-underline: var(--color-neutral-600);
+    --tw-prose-underline-hover: var(--color-neutral-200);
+    --tw-prose-bold: var(--color-neutral-100);
+    --tw-prose-counters: var(--color-neutral-400);
+    --tw-prose-bullets: var(--color-neutral-600);
+    --tw-prose-hr: var(--color-neutral-700);
+    --tw-prose-quote-borders: var(--color-neutral-700);
+    --tw-prose-captions: var(--color-neutral-400);
+    --tw-prose-code: var(--color-neutral-200);
+    --tw-prose-code-bg: var(--color-neutral-800);
+    --tw-prose-pre-code: var(--color-neutral-100);
+    --tw-prose-pre-bg: var(--color-neutral-900);
+    --tw-prose-pre-border: transparent;
+    --tw-prose-th-borders: var(--color-neutral-700);
+    --tw-prose-td-borders: var(--color-neutral-800);
+  }
+
+  /* Remove underline from anchor links wrapping headings (from rehype-autolink-headings) */
+  .prose a.anchor,
+  .prose .anchor,
+  .prose h1 a,
+  .prose h2 a,
+  .prose h3 a,
+  .prose h4 a,
+  .prose h5 a,
+  .prose h6 a,
+  .prose h1>a,
+  .prose h2>a,
+  .prose h3>a,
+  .prose h4>a,
+  .prose h5>a,
+  .prose h6>a {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-color: transparent !important;
+    text-decoration-thickness: 0 !important;
+  }
+
+  .dark .prose a.anchor,
+  .dark .prose .anchor,
+  .dark .prose h1 a,
+  .dark .prose h2 a,
+  .dark .prose h3 a,
+  .dark .prose h4 a,
+  .dark .prose h5 a,
+  .dark .prose h6 a,
+  .dark .prose h1>a,
+  .dark .prose h2>a,
+  .dark .prose h3>a,
+  .dark .prose h4>a,
+  .dark .prose h5>a,
+  .dark .prose h6>a {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-color: transparent !important;
+    text-decoration-thickness: 0 !important;
+  }
+}
+
+@layer components {
+
+  [data-radix-popper-content-wrapper] {
+    @apply !z-9999;
+  }
+}
+
+@layer utilities {
+
+  /* Mobile navbar overlay styles */
+  body[data-mobile-navbar='open'] .max-w-screen-xl {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  body[data-mobile-navbar='open'] .max-w-screen-xl>* {
+    pointer-events: none;
+  }
+
+  /* Hide accordion arrow for theme selector */
+  [data-accordion-trigger] [data-accordion-icon] {
+    display: none;
+  }
+
+  /* Shimmer animation for AI loading states */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+
+  /* Premium Design Utilities */
+  .mesh-gradient {
+    background-image:
+      radial-gradient(at 0% 0%, hsla(173, 58%, 39%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(240, 10%, 15%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(173, 58%, 39%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(240, 10%, 5%, 0.15) 0px, transparent 50%);
+  }
+
+  .premium-glow {
+    box-shadow: 0 0 20px -5px hsl(var(--accent-teal) / 0.2);
+  }
+
+  .premium-glow-hover:hover {
+    box-shadow: 0 0 30px -5px hsl(var(--accent-teal) / 0.4);
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes pulse-slow {
+
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  /* Entrance animations */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s ease-out forwards;
+  }
+}
+
+@utility touch-hitbox {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    min-height: 44px;
+    min-width: 44px;
+    z-index: 9999;
+  }
+}
+
+/* Landing Page Styles */
+@layer utilities {
+  .landing-selection ::selection {
+    background-color: #2dd4bf;
+    color: black;
+  }
+
+  .noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    content: "";
+    opacity: 0.03;
+    z-index: 9999;
+    pointer-events: none;
+    background: url('https://grainy-gradients.vercel.app/noise.svg');
+  }
+
+  .grid-pattern {
+    background-image: linear-gradient(to right, #111 1px, transparent 1px),
+      linear-gradient(to bottom, #111 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Custom Scrollbar for landing */
+  .landing-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .landing-scrollbar::-webkit-scrollbar-track {
+    background: #050505;
+  }
+
+  .landing-scrollbar::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 4px;
+  }
+
+  .landing-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #333;
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
+  }
+}

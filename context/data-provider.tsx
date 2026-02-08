@@ -807,16 +807,6 @@ export const DataProvider: React.FC<{
     // Apply all filters in a single pass
     return trades
       .filter((trade) => {
-        // Basic plan limit: 3 months of data
-        if (!isPlusUser()) {
-          const threeMonthsAgo = new Date();
-          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-          const tradeDate = new Date(trade.entryDate);
-          if (tradeDate < threeMonthsAgo) {
-            return false;
-          }
-        }
-
         // Skip trades from hidden accounts
         if (hiddenAccountNumbers.includes(trade.accountNumber)) {
           return false;

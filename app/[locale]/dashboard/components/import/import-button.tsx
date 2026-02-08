@@ -158,16 +158,14 @@ export default function ImportButton() {
           numberOfTradesAdded: result.numberOfTradesAdded,
         }),
       });
-      setIsOpen(false);
-      // Reset the import process
-      resetImportState();
-
-      // Refresh in background to keep import UX snappy.
-      // Run in parallel and don't block the success flow.
-      void Promise.allSettled([
+      await Promise.all([
         refreshTradesOnly({ force: true }),
         refreshUserDataOnly({ force: true }),
       ]);
+
+      setIsOpen(false);
+      // Reset the import process
+      resetImportState();
     } catch (error) {
       console.error("Error saving trades:", error);
       toast.error(t("import.error.failed"), {

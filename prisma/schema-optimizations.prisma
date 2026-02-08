@@ -1,0 +1,198 @@
+// ============================================================================
+// DATABASE INDEX OPTIMIZATIONS
+// ============================================================================
+// Add these indexes to your existing schema to improve query performance
+
+// ============================================================================
+// TRADE MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Trade model:
+// @@index([accountNumber])
+// @@index([groupId])
+// @@index([entryDate])
+// @@index([closeDate])
+// @@index([userId, accountNumber, instrument])
+
+// ADDITIONAL RECOMMENDED INDEXES for Trade model:
+
+// Composite index for userId + entryDate (most common query pattern)
+@@index([userId, entryDate])
+
+// Composite index for userId + accountNumber (filtering by user and account)
+@@index([userId, accountNumber])
+
+// Composite index for tags filtering (PostgreSQL array operations)
+@@index([userId], opClass: Gin, map: "tags")
+
+// Partial index for active trades only (reduces index size)
+@@index([userId, entryDate], where: { entryDate: { gte: "2024-01-01" } })
+
+// Composite index for date range queries with account
+@@index([accountNumber, entryDate, closeDate])
+
+// Composite index for pnl filtering
+@@index([userId, pnl])
+
+// ============================================================================
+// ACCOUNT MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Account model:
+// @@unique([number, userId])
+// @@index([number])
+// @@index([groupId])
+// @@index([nextPaymentDate])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for userId + groupId (user's groups)
+@@index([userId, groupId])
+
+// Index for reset date filtering
+@@index([userId, resetDate])
+
+// Partial index for active accounts only
+@@index([userId, resetDate], where: { resetDate: { not: null } })
+
+// ============================================================================
+// PAYOUT MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Payout model:
+// @@index([accountNumber])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for account + date (payout history queries)
+@@index([accountNumber, date])
+
+// Composite index with status
+@@index([accountNumber, status, date])
+
+// ============================================================================
+// MOOD MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Mood model:
+// @@unique([userId, day])
+// @@index([userId])
+// @@index([day])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for date range queries
+@@index([userId, day], opClass: BTree)
+
+// ============================================================================
+// FINANCIAL EVENT MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on FinancialEvent model:
+// @@unique([title, date, lang, timezone])
+// @@index([date])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for importance + date filtering
+@@index([importance, date])
+
+// Composite index for type + date
+@@index([type, date])
+
+// Composite index for lang + date (language-specific queries)
+@@index([lang, date])
+
+// ============================================================================
+// SYNCHRONIZATION MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Synchronization model:
+// @@unique([userId, service, accountId])
+// @@index([userId])
+// @@index([service])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for lastSyncedAt (stale sync detection)
+@@index([userId, service, lastSyncedAt])
+
+// ============================================================================
+// USAGE METRIC MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on UsageMetric model:
+// @@index([userId])
+// @@index([email])
+// @@index([metricType])
+// @@index([periodStart, periodEnd])
+// @@unique([userId, metricType, periodStart])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for time-based analytics
+@@index([userId, metricType, periodStart, periodEnd])
+
+// ============================================================================
+// PAYMENT TRANSACTION MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on PaymentTransaction model:
+// @@index([userId])
+// @@index([email])
+// @@index([whopTransactionId])
+// @@index([status])
+// @@index([createdAt])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for user's transaction history
+@@index([userId, createdAt])
+
+// Composite index for status + date filtering
+@@index([userId, status, createdAt])
+
+// ============================================================================
+// NOTIFICATION MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Notification model:
+// @@index([userId])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for unread notifications
+@@index([userId, readAt], where: { readAt: null })
+
+// Composite index for sorting by createdAt
+@@index([userId, createdAt])
+
+// ============================================================================
+// TEAM ANALYTICS MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on TeamAnalytics model:
+// @@unique([teamId, period])
+// @@index([teamId])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for time-series data
+@@index([teamId, period, updatedAt])
+
+// ============================================================================
+// POST/COMMUNITY MODEL OPTIMIZATIONS
+// ============================================================================
+
+// Current indexes on Post model:
+// @@index([userId])
+// @@index([type])
+// @@index([status])
+
+// ADDITIONAL RECOMMENDED INDEXES:
+
+// Composite index for filtering posts
+@@index([type, status, createdAt])
+
+// Composite index for user's posts by type
+@@index([userId, type, createdAt])
