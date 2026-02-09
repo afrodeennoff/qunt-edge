@@ -1,5 +1,6 @@
 import { Trade } from "@/prisma/generated/prisma";
 import { startOfDay, differenceInDays } from "date-fns";
+import { addMoney, netPnl, toDecimal, toMoneyNumber } from "@/lib/financial-math";
 
 export interface DatePnL {
     date: Date;
@@ -32,14 +33,14 @@ export function calculateAdvancedMetrics(trades: Trade[]): RiskMetrics {
     }
 
     // --- Expectancy & Kelly ---
-    const wins = trades.filter((t) => (t.pnl ?? 0) > 0);
-    const losses = trades.filter((t) => (t.pnl ?? 0) <= 0);
+    const wins = trades.filter((t) => netPnl(t.pnl ?? 0, t.commission ?? 0).gt(0));
+    const losses = trades.filter((t) => netPnl(t.pnl ?? 0, t.commission ?? 0).lte(0));
     const nbWins = wins.length;
     const nbLosses = losses.length;
-    const grossWin = wins.reduce((acc, t) => acc + (t.pnl ?? 0), 0);
-    const grossLoss = Math.abs(losses.reduce((acc, t) => acc + (t.pnl ?? 0), 0));
-    const avgWin = nbWins > 0 ? grossWin / nbWins : 0;
-    const avgLoss = nbLosses > 0 ? grossLoss / nbLosses : 0;
+    const grossWin = wins.reduce((acc, t) => addMoney(acc, netPnl(t.pnl ?? 0, t.commission ?? 0)), toDecimal(0));
+    const grossLoss = losses.reduce((acc, t) => addMoney(acc, netPnl(t.pnl ?? 0, t.commission ?? 0).abs()), toDecimal(0));
+    const avgWin = nbWins > 0 ? grossWin.div(nbWins).toNumber() : 0;
+    const avgLoss = nbLosses > 0 ? grossLoss.div(nbLosses).toNumber() : 0;
     const winRate = trades.length > 0 ? nbWins / trades.length : 0;
     const lossRate = trades.length > 0 ? nbLosses / trades.length : 0;
 
@@ -59,7 +60,7 @@ export function calculateAdvancedMetrics(trades: Trade[]): RiskMetrics {
     trades.forEach(trade => {
         const dateKey = startOfDay(new Date(trade.entryDate)).toISOString();
         const current = dailyPnLs.get(dateKey) || 0;
-        dailyPnLs.set(dateKey, current + (trade.pnl ?? 0));
+        dailyPnLs.set(dateKey, toMoneyNumber(addMoney(current, netPnl(trade.pnl ?? 0, trade.commission ?? 0)), 8));
     });
 
     const dailyReturns = Array.from(dailyPnLs.values());
@@ -94,34 +95,35 @@ export function calculateAdvancedMetrics(trades: Trade[]): RiskMetrics {
     // Sort trades by date
     const sortedTrades = [...trades].sort((a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime());
 
-    let peak = -Infinity;
-    let maxDrawdown = 0;
-    let runningPnl = 0; // Cumulative PnL from start of period
+    let peak = toDecimal(0);
+    let maxDrawdown = toDecimal(0);
+    let runningPnl = toDecimal(0); // Cumulative PnL from start of period
 
     // Note: This calculate DD based on PnL curve, not account equity (unless we knew starting balance). 
     // We will assume a relative drawdown from the peak of the PnL curve.
 
     sortedTrades.forEach(t => {
-        runningPnl += (t.pnl ?? 0);
-        if (runningPnl > peak) {
+        runningPnl = addMoney(runningPnl, netPnl(t.pnl ?? 0, t.commission ?? 0));
+        if (runningPnl.gt(peak)) {
             peak = runningPnl;
         }
-        const dd = peak - runningPnl;
-        if (dd > maxDrawdown) {
+        const dd = peak.minus(runningPnl);
+        if (dd.gt(maxDrawdown)) {
             maxDrawdown = dd;
         }
     });
 
     // Calmar Ratio = Annualized Return / Max Drawdown
     // To get Annualized Return: Total Return / Years
-    const totalReturn = runningPnl; // Sum of PnL
+    const totalReturn = runningPnl.toNumber(); // Sum of PnL
 
     // Calculate duration in days, avoid division by zero
     const durationInDays = differenceInDays(new Date(sortedTrades[sortedTrades.length - 1].entryDate), new Date(sortedTrades[0].entryDate)) + 1;
     const years = durationInDays / 365.25;
     const annualizedReturn = years > 0 ? totalReturn / years : totalReturn; // Fallback if < 1 year? usually totalReturn
 
-    const calmarRatio = maxDrawdown > 0 ? annualizedReturn / maxDrawdown : 0;
+    const maxDrawdownNumber = maxDrawdown.toNumber();
+    const calmarRatio = maxDrawdownNumber > 0 ? annualizedReturn / maxDrawdownNumber : 0;
 
     return {
         expectancy,
@@ -130,7 +132,7 @@ export function calculateAdvancedMetrics(trades: Trade[]): RiskMetrics {
         sharpeRatio,
         sortinoRatio,
         calmarRatio,
-        maxDrawdown,
+        maxDrawdown: maxDrawdownNumber,
         maxDrawdownPercent: 0 // Cannot calc without balance
     };
 }

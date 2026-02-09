@@ -1,5 +1,7 @@
 import { orderSchema } from '../fifo-computation/schema'
 import { type FinancialInstrument } from './schema'
+import { addMoney, toMoneyNumber } from '@/lib/financial-math'
+import { normalizeToUtcTimestamp } from '@/lib/date-utils'
 
 export const maxDuration = 60 // Allow up to 60 seconds for AI processing
 
@@ -13,6 +15,15 @@ interface TradeOrder {
   accountNumber?: string;
   orderId?: string;
   orderType?: string;
+}
+
+function parseNumericValue(rawValue: string): number {
+  const normalized = rawValue.replace(/,/g, '')
+  const parsed = Number(normalized)
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid numeric value: ${rawValue}`)
+  }
+  return parsed
 }
 
 const parseOrders = (text: string): TradeOrder[] => {
@@ -49,7 +60,7 @@ const parseOrders = (text: string): TradeOrder[] => {
     ] = match;
 
     // Convert datetime to ISO format
-    const isoTimestamp = new Date(`${date}T${time}`).toISOString();
+    const isoTimestamp = normalizeToUtcTimestamp(`${date}T${time}Z`)
     
     // Generate a short unique ID: side + index + last 2 digits of seconds
     const timeSeconds = time.split(':')[2];
@@ -59,9 +70,12 @@ const parseOrders = (text: string): TradeOrder[] => {
       rawSymbol: symbol,
       side: side as 'BUY' | 'SELL',
       quantity: Math.abs(parseInt(quantity)), // Use absolute value for quantity
-      price: parseFloat(price.replace(/,/g, '')),
+      price: parseNumericValue(price),
       timestamp: isoTimestamp,
-      commission: parseFloat(fee.replace(/,/g, ''))+parseFloat(commission.replace(/,/g, '')),
+      commission: toMoneyNumber(
+        addMoney(parseNumericValue(fee), parseNumericValue(commission)),
+        8
+      ),
       accountNumber: `U***${accountId}`,
       orderId: orderId,
       orderType: orderType

@@ -1,7 +1,8 @@
 // Shared, environment-agnostic account metrics utilities
 // These functions can be used on both server and client for consistent results.
-import type { Trade as PrismaTrade } from '@/prisma/generated/prisma'
+import { Trade as PrismaTrade, Prisma } from '@/prisma/generated/prisma'
 import type { Account } from '@/context/data-provider'
+import Decimal from 'decimal.js'
 
 export type AccountMetrics = {
   // Balance and progress
@@ -83,33 +84,32 @@ export function computeAccountMetrics(
 
     const tradeEvents: Event[] = sortedTrades.map(tr => ({
       kind: 'trade',
-      date: toDate(tr.entryDate)!,
-      pnl: tr.pnl - (tr.commission || 0),
+      date: (tr.entryDate as Date),
+      pnl: new Prisma.Decimal(tr.pnl).minus(new Prisma.Decimal(tr.commission || 0)).toNumber(),
       trade: tr,
     }))
     const payoutEvents: Event[] = validPayouts.map(p => ({
       kind: 'payout',
       date: p.date,
-      amount: p.amount,
+      amount: new Prisma.Decimal(p.amount).toNumber(),
     }))
     const events: Event[] = [...tradeEvents, ...payoutEvents].sort(
       (a, b) => a.date.getTime() - b.date.getTime()
     )
 
     const out: PrismaTrade[] = []
-    let accProfit = 0 // accumulated profit since last baseline (reset/payouts effect included)
-    const threshold = account.buffer || 0
+    let accProfit = new Prisma.Decimal(0) // accumulated profit since last baseline
+    const threshold = new Prisma.Decimal(account.buffer || 0)
 
     for (const ev of events) {
       if (ev.kind === 'payout') {
-        // Payout reduces accumulated profit; can push us back under buffer
-        accProfit -= ev.amount
+        accProfit = accProfit.minus(ev.amount)
         continue
       }
 
-      const next = accProfit + ev.pnl
-      const wasAbove = accProfit >= threshold
-      const crossesNow = accProfit < threshold && next >= threshold
+      const next = accProfit.plus(ev.pnl)
+      const wasAbove = accProfit.gte(threshold)
+      const crossesNow = accProfit.lt(threshold) && next.gte(threshold)
       if (wasAbove || crossesNow) {
         out.push(ev.trade)
       }
@@ -117,63 +117,63 @@ export function computeAccountMetrics(
     }
 
     filteredTrades = out
-    aboveBuffer = Math.max(0, accProfit - threshold)
+    aboveBuffer = Decimal.max(0, accProfit.minus(threshold)).toNumber()
   }
 
   const dailyPnL: { [date: string]: number } = {}
-  let totalProfit = 0
+  let totalProfit = new Prisma.Decimal(0)
   for (const trade of filteredTrades) {
-    const d = toDate(trade.entryDate)!
+    const d = (trade.entryDate as Date)
     const key = d.toISOString().split('T')[0]
-    const pnl = trade.pnl - (trade.commission || 0)
-    dailyPnL[key] = (dailyPnL[key] || 0) + pnl
-    totalProfit += pnl
+    const pnl = new Prisma.Decimal(trade.pnl).minus(new Prisma.Decimal(trade.commission || 0))
+    dailyPnL[key] = new Prisma.Decimal(dailyPnL[key] || 0).plus(pnl).toNumber()
+    totalProfit = totalProfit.plus(pnl)
   }
 
-  const hasProfitableData = totalProfit > 0
+  const hasProfitableData = totalProfit.gt(0)
   const isConfigured = (account.profitTarget ?? 0) > 0 || (account.drawdownThreshold ?? 0) > 0
   const highestProfitDay = Object.values(dailyPnL).length > 0 ? Math.max(...Object.values(dailyPnL)) : 0
 
   let maxAllowedDailyProfit: number | null = null
   let isConsistent = false
   if (hasProfitableData && isConfigured && (account.consistencyPercentage ?? 0) > 0) {
-    const target = account.profitTarget ?? 0
-    const baseAmount = totalProfit <= target ? target : totalProfit
-    maxAllowedDailyProfit = baseAmount * ((account.consistencyPercentage ?? 0) / 100)
-    isConsistent = highestProfitDay <= maxAllowedDailyProfit
+    const target = new Prisma.Decimal(account.profitTarget ?? 0)
+    const baseAmount = totalProfit.lte(target) ? target : totalProfit
+    maxAllowedDailyProfit = baseAmount.times(new Prisma.Decimal(account.consistencyPercentage ?? 0).div(100)).toNumber()
+    isConsistent = highestProfitDay <= (maxAllowedDailyProfit || 0)
   }
 
   const validPayouts = (account.payouts || []).filter(p => ['PAID', 'VALIDATED'].includes(p.status))
-  let runningBalance = account.startingBalance || 0
-  let highestBalance = account.startingBalance || 0
+  let runningBalance = new Prisma.Decimal(account.startingBalance || 0)
+  let highestBalance = new Prisma.Decimal(account.startingBalance || 0)
 
   for (const trade of filteredTrades) {
-    const pnl = trade.pnl - (trade.commission || 0)
-    runningBalance += pnl
-    if (runningBalance > highestBalance) highestBalance = runningBalance
+    const pnl = new Prisma.Decimal(trade.pnl).minus(new Prisma.Decimal(trade.commission || 0))
+    runningBalance = runningBalance.plus(pnl)
+    if (runningBalance.gt(highestBalance)) highestBalance = runningBalance
   }
-  const totalPayouts = validPayouts.reduce((s, p) => s + p.amount, 0)
-  const currentBalance = runningBalance - totalPayouts
+  const totalPayouts = validPayouts.reduce((s, p) => s.plus(new Prisma.Decimal(p.amount)), new Prisma.Decimal(0))
+  const currentBalance = runningBalance.minus(totalPayouts)
 
-  let drawdownLevel: number
+  let drawdownLevel: Prisma.Decimal
   if (account.trailingDrawdown) {
-    const profitMade = Math.max(0, highestBalance - (account.startingBalance || 0))
-    if (account.trailingStopProfit && profitMade >= account.trailingStopProfit) {
-      drawdownLevel = ((account.startingBalance || 0) + account.trailingStopProfit) - (account.drawdownThreshold || 0)
+    const profitMade = Decimal.max(0, highestBalance.minus(account.startingBalance || 0))
+    if (account.trailingStopProfit && profitMade.gte(new Prisma.Decimal(account.trailingStopProfit))) {
+      drawdownLevel = new Prisma.Decimal(account.startingBalance || 0).plus(account.trailingStopProfit).minus(account.drawdownThreshold || 0)
     } else {
-      drawdownLevel = highestBalance - (account.drawdownThreshold || 0)
+      drawdownLevel = highestBalance.minus(account.drawdownThreshold || 0)
     }
   } else {
-    drawdownLevel = (account.startingBalance || 0) - (account.drawdownThreshold || 0)
+    drawdownLevel = new Prisma.Decimal(account.startingBalance || 0).minus(account.drawdownThreshold || 0)
   }
-  const remainingLoss = Math.max(0, currentBalance - drawdownLevel)
-  const dd = account.drawdownThreshold || 0
-  const drawdownProgress = dd > 0 ? (((dd) - remainingLoss) / dd) * 100 : 0
+  const remainingLoss = Decimal.max(0, currentBalance.minus(drawdownLevel))
+  const dd = new Prisma.Decimal(account.drawdownThreshold || 0)
+  const drawdownProgress = dd.gt(0) ? dd.minus(remainingLoss).div(dd).times(100).toNumber() : 0
 
-  const currentProfit = currentBalance - (account.startingBalance || 0)
-  const pt = account.profitTarget || 0
-  const progress = pt > 0 ? (currentProfit / pt) * 100 : 0
-  const remainingToTarget = pt > 0 ? Math.max(0, pt - currentProfit) : 0
+  const currentProfit = currentBalance.minus(account.startingBalance || 0)
+  const pt = new Prisma.Decimal(account.profitTarget || 0)
+  const progress = pt.gt(0) ? currentProfit.div(pt).times(100).toNumber() : 0
+  const remainingToTarget = pt.gt(0) ? Decimal.max(0, pt.minus(currentProfit)).toNumber() : 0
 
   // Trading days metrics
   const dailyTrades: { [date: string]: PrismaTrade[] } = {}
@@ -184,40 +184,40 @@ export function computeAccountMetrics(
   }
   const totalTradingDays = Object.keys(dailyTrades).length
   const validTradingDays = Object.entries(dailyTrades).filter(([_, dayTrades]) => {
-    const dayPnL = dayTrades.reduce((sum, t) => sum + (t.pnl - (t.commission || 0)), 0)
-    return dayPnL >= (account.minPnlToCountAsDay || 0)
+    const dayPnL = dayTrades.reduce((sum, t) => sum.plus(new Prisma.Decimal(t.pnl).minus(new Prisma.Decimal(t.commission || 0))), new Prisma.Decimal(0))
+    return dayPnL.gte(new Prisma.Decimal(account.minPnlToCountAsDay || 0))
   }).length
 
   // Daily metrics (merge trade and payout dates)
   const allDates = new Set<string>()
   filteredTrades.forEach(t => allDates.add(toDate(t.entryDate)!.toISOString().split('T')[0]))
-  ;(account.payouts || []).forEach(p => allDates.add(toDate(p.date)!.toISOString().split('T')[0]))
+    ; (account.payouts || []).forEach(p => allDates.add(toDate(p.date)!.toISOString().split('T')[0]))
 
-  let dailyRunningBalance = account.startingBalance || 0
+  let dailyRunningBalance = new Prisma.Decimal(account.startingBalance || 0)
   const dailyMetrics: NonNullable<Account['dailyMetrics']> = Array.from(allDates)
     .sort()
     .map(date => {
-      const dailyTradesPnL = dailyPnL[date] || 0
-      dailyRunningBalance += dailyTradesPnL
+      const dailyTradesPnL = new Prisma.Decimal(dailyPnL[date] || 0)
+      dailyRunningBalance = dailyRunningBalance.plus(dailyTradesPnL)
 
-      const dayConsistent = totalProfit <= 0
+      const dayConsistent = totalProfit.lte(0)
         ? true
-        : dailyTradesPnL <= (totalProfit * ((account.consistencyPercentage || 30) / 100))
+        : dailyTradesPnL.lte(totalProfit.times(new Prisma.Decimal(account.consistencyPercentage || 30).div(100)))
 
       const payout = (account.payouts || []).find(p => toDate(p.date)!.toISOString().split('T')[0] === date)
       if (payout?.status === 'PAID') {
-        dailyRunningBalance -= payout.amount
+        dailyRunningBalance = dailyRunningBalance.minus(new Prisma.Decimal(payout.amount))
       }
 
       return {
         date: new Date(date),
-        pnl: dailyTradesPnL,
-        totalBalance: dailyRunningBalance,
-        percentageOfTarget: pt > 0 ? (totalProfit / pt) * 100 : 0,
+        pnl: dailyTradesPnL.toNumber(),
+        totalBalance: dailyRunningBalance.toNumber(),
+        percentageOfTarget: pt.gt(0) ? totalProfit.div(pt).times(100).toNumber() : 0,
         isConsistent: dayConsistent,
         payout: payout ? {
           id: payout.id,
-          amount: payout.amount,
+          amount: new Prisma.Decimal(payout.amount).toNumber(),
           date: toDate(payout.date)!,
           status: payout.status
         } : undefined
@@ -225,17 +225,17 @@ export function computeAccountMetrics(
     }) as NonNullable<Account['dailyMetrics']>
 
   return {
-    balanceToDate: currentBalance,
+    balanceToDate: currentBalance.toNumber(),
     metrics: {
-      currentBalance,
+      currentBalance: currentBalance.toNumber(),
       remainingToTarget,
       progress,
       isConfigured,
       drawdownProgress,
-      remainingLoss,
-      highestBalance,
-      drawdownLevel,
-      totalProfit,
+      remainingLoss: remainingLoss.toNumber(),
+      highestBalance: highestBalance.toNumber(),
+      drawdownLevel: drawdownLevel.toNumber(),
+      totalProfit: totalProfit.toNumber(),
       maxAllowedDailyProfit,
       highestProfitDay,
       isConsistent,

@@ -15,6 +15,7 @@ import {
   DashboardLayout as PrismaDashboardLayout,
   Subscription as PrismaSubscription,
   Tag,
+  Prisma,
 } from "@/prisma/generated/prisma";
 import { SharedParams } from "@/server/shared";
 import {
@@ -29,6 +30,7 @@ import {
   ungroupTradesAction,
   updateTradesAction,
   saveDashboardLayoutAction,
+  SerializedTrade,
 } from "@/server/database";
 import {
   deletePayoutAction,
@@ -66,7 +68,7 @@ import { useMoodStore } from "@/store/mood-store";
 import { useSubscriptionStore } from "@/store/subscription-store";
 import { getSubscriptionData } from "@/server/billing";
 import { defaultLayouts } from "@/lib/default-layouts";
-import { Decimal } from "@prisma/client-runtime-utils";
+import Decimal from "decimal.js";
 
 // Types from trades-data.tsx
 type StatisticsProps = {
@@ -181,13 +183,13 @@ export interface Account extends Omit<PrismaAccount, "payouts" | "group"> {
   // Daily metrics for account table
   dailyMetrics?: Array<{
     date: Date;
-    pnl: number;
-    totalBalance: number;
-    percentageOfTarget: number;
+    pnl: number | Prisma.Decimal;
+    totalBalance: number | Prisma.Decimal;
+    percentageOfTarget: number | Prisma.Decimal;
     isConsistent: boolean;
     payout?: {
       id: string;
-      amount: number;
+      amount: number | Prisma.Decimal;
       date: Date;
       status: string;
     };
@@ -274,14 +276,28 @@ interface DataContextType {
   saveDashboardLayout: (layout: PrismaDashboardLayout) => Promise<void>;
 }
 
-function normalizeTradeForClient(trade: PrismaTrade): PrismaTrade {
+function normalizeTradeForClient(trade: PrismaTrade | SerializedTrade): PrismaTrade {
+  if ('entryDate' in trade && typeof trade.entryDate === 'string') {
+    return {
+      ...(trade as any),
+      entryPrice: new Prisma.Decimal((trade as SerializedTrade).entryPrice),
+      closePrice: new Prisma.Decimal((trade as SerializedTrade).closePrice),
+      pnl: new Prisma.Decimal((trade as SerializedTrade).pnl),
+      commission: new Prisma.Decimal((trade as SerializedTrade).commission),
+      quantity: new Prisma.Decimal((trade as SerializedTrade).quantity),
+      timeInPosition: new Prisma.Decimal((trade as SerializedTrade).timeInPosition),
+      entryDate: new Date((trade as SerializedTrade).entryDate),
+      closeDate: (trade as SerializedTrade).closeDate ? new Date((trade as SerializedTrade).closeDate!) : null,
+      tags: Array.isArray(trade.tags) ? trade.tags : [],
+    } as PrismaTrade;
+  }
   return {
     ...trade,
     tags: Array.isArray(trade.tags) ? trade.tags : [],
-  };
+  } as PrismaTrade;
 }
 
-function normalizeTradesForClient(trades: PrismaTrade[]): PrismaTrade[] {
+function normalizeTradesForClient(trades: (PrismaTrade | SerializedTrade)[]): PrismaTrade[] {
   return trades.map(normalizeTradeForClient);
 }
 
@@ -394,9 +410,9 @@ export const DataProvider: React.FC<{
 
       while (hasMore) {
         const response = await getTradesAction(userId, page, pageSize, force && page === 1);
-          const pageTrades = Array.isArray(response?.trades)
-            ? normalizeTradesForClient(response.trades as PrismaTrade[])
-            : [];
+        const pageTrades = Array.isArray(response?.trades)
+          ? normalizeTradesForClient(response.trades as (PrismaTrade | SerializedTrade)[])
+          : [];
 
         allTrades.push(...pageTrades);
         hasMore = Boolean(response?.metadata?.hasMore) && pageTrades.length > 0;
@@ -416,6 +432,7 @@ export const DataProvider: React.FC<{
 
   // Load data from the server
   const loadData = useCallback(async () => {
+    console.log("[DataProvider] loadData triggered, isSharedView:", isSharedView);
     // Prevent multiple simultaneous loads
     try {
       setIsLoading(true);
@@ -444,7 +461,7 @@ export const DataProvider: React.FC<{
 
           // Batch state updates
           const updates = async () => {
-            setTrades(normalizeTradesForClient(processedSharedTrades as PrismaTrade[]));
+            setTrades(normalizeTradesForClient(processedSharedTrades as (PrismaTrade | SerializedTrade)[]));
             setSharedParams(sharedData.params);
 
             setDashboardLayout(defaultLayouts);
@@ -468,7 +485,7 @@ export const DataProvider: React.FC<{
 
       if (adminView) {
         const allTrades = await fetchAllTrades(adminView.userId as string, false);
-        setTrades(normalizeTradesForClient(allTrades));
+        setTrades(normalizeTradesForClient(allTrades as (PrismaTrade | SerializedTrade)[]));
         // RESET ALL OTHER STATES
         setUser(null);
         setSubscription(null);
@@ -794,6 +811,7 @@ export const DataProvider: React.FC<{
   }, [trades, supabaseUser?.id]);
 
   const formattedTrades = useMemo(() => {
+    console.log("[DataProvider] computing formattedTrades, trades count:", trades?.length);
     // Early return if no trades or if trades is not an array
     if (!trades || !Array.isArray(trades) || trades.length === 0)
       return [];
@@ -911,7 +929,7 @@ export const DataProvider: React.FC<{
           const tickValue = matchingTicker
             ? tickDetails[matchingTicker].tickValue
             : 1;
-          const pnlPerContract = Number(trade.pnl) / Number(trade.quantity);
+          const pnlPerContract = new Prisma.Decimal(trade.pnl).div(new Prisma.Decimal(trade.quantity)).toNumber();
           const tradeTicks = Math.round(pnlPerContract / tickValue);
           const filterValue = tickFilter.value;
           if (

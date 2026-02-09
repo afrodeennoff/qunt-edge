@@ -5,7 +5,7 @@ export const orderSchema = z.object({
   side: z.enum(["BUY", "SELL"]).describe("Order side - BUY or SELL"),
   quantity: z.number().describe("Number of shares/contracts"),
   price: z.number().describe("Execution price"),
-  timestamp: z.string().describe("ISO string timestamp of execution"),
+  timestamp: z.string().datetime().describe("ISO string timestamp of execution"),
   commission: z.number().optional().describe("Commission charged for this order accounting for additional fees"),
   accountNumber: z.string().optional().describe("Account number"),
   orderId: z.string().optional().describe("Unique identifier for the order if available"),
@@ -18,8 +18,8 @@ export const tradeSchema = z.object({
   commission: z.number().describe("The commission charged for the trade or 0 if not available"),
   timeInPosition: z.number().describe("The duration for which the position was held in seconds"),
   side: z.enum(["long", "short"]).describe("The direction of the trade"),
-  entryDate: z.string().describe("The ISO string date when the entry transaction occurred"),
-  closeDate: z.string().describe("The ISO string date when the close transaction occurred"),
+  entryDate: z.string().datetime().describe("The ISO string date when the entry transaction occurred"),
+  closeDate: z.string().datetime().describe("The ISO string date when the close transaction occurred"),
   instrument: z.string().describe("The trading instrument (e.g. MES, ES, NG, ZN, ZB, etc.) without expiry code"),
   accountNumber: z.string().describe("The account number associated with the trade"),
   entryPrice: z.number().describe("The price at which the instrument was bought"),
@@ -27,4 +27,7 @@ export const tradeSchema = z.object({
   entryId: z.string().optional().describe("The unique identifier for the entry transaction"),
   closeId: z.string().optional().describe("The unique identifier for the close transaction"),
   orderIds: z.array(z.string()).describe("List of unique identifiers for the entry and close orders creating the trade"),
-})
+}).refine(
+  (trade) => new Date(trade.closeDate).getTime() >= new Date(trade.entryDate).getTime(),
+  { message: 'Close date must be equal to or later than entry date', path: ['closeDate'] }
+)

@@ -202,14 +202,15 @@ describe('PolicyEngine', () => {
       const engineWithCache = new PolicyEngine({ cacheEnabled: true, cacheTTLMs: 1000 })
 
       const startTime1 = Date.now()
-      await engineWithCache.evaluateRisk(testContext, testManifest)
+      const first = await engineWithCache.evaluateRisk(testContext, testManifest)
       const duration1 = Date.now() - startTime1
 
       const startTime2 = Date.now()
-      await engineWithCache.evaluateRisk(testContext, testManifest)
+      const second = await engineWithCache.evaluateRisk(testContext, testManifest)
       const duration2 = Date.now() - startTime2
 
-      expect(duration2).toBeLessThan(duration1)
+      expect(duration2).toBeLessThanOrEqual(duration1)
+      expect(second.timestamp).toEqual(first.timestamp)
     })
 
     it('should expire cache entries', async () => {

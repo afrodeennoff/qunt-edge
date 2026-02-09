@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from "@/lib/prisma"
+import { addMoney, netPnl, toMoneyNumber } from "@/lib/financial-math"
 
 interface UserData {
   user: {
@@ -98,7 +99,7 @@ export async function computeTradingStats(
   }
 
   const winLossStats = trades.reduce((acc, trade) => {
-    if (trade.pnl > 0) {
+    if (netPnl(trade.pnl, trade.commission).gt(0)) {
       acc.wins++
     } else {
       acc.losses++
@@ -106,31 +107,26 @@ export async function computeTradingStats(
     return acc
   }, { wins: 0, losses: 0 })
 
-  const dailyPnL = trades.reduce((acc, trade) => {
+  const dailyPnLMap = trades.reduce((acc, trade) => {
     const tradeDate = new Date(trade.entryDate)
-    // Set time to 00:00:00 to ensure proper date comparison
-    tradeDate.setHours(0, 0, 0, 0)
-    
-    // Convert from Sunday-based (0-6) to Monday-based (0-6) weekday
-    const weekday = tradeDate.getDay() === 0 ? 6 : tradeDate.getDay() - 1
-    
-    const existingEntry = acc.find(entry => {
-      const entryDate = new Date(entry.date)
-      entryDate.setHours(0, 0, 0, 0)
-      return entryDate.getTime() === tradeDate.getTime()
-    })
-
-    if (existingEntry) {
-      existingEntry.pnl = Number((existingEntry.pnl + trade.pnl - trade.commission).toFixed(2))
-    } else {
-      acc.push({
-        date: tradeDate,
-        pnl: Number((trade.pnl - trade.commission).toFixed(2)),
-        weekday
-      })
-    }
+    const dateKey = tradeDate.toISOString().slice(0, 10)
+    const weekdayRaw = tradeDate.getUTCDay()
+    const weekday = weekdayRaw === 0 ? 6 : weekdayRaw - 1
+    const current = acc.get(dateKey) || 0
+    const updated = addMoney(current, netPnl(trade.pnl, trade.commission))
+    acc.set(dateKey, toMoneyNumber(updated))
     return acc
-  }, [] as { date: Date, pnl: number, weekday: number }[])
+  }, new Map<string, number>())
+
+  const dailyPnL = Array.from(dailyPnLMap.entries()).map(([dateKey, pnl]) => {
+    const date = new Date(`${dateKey}T00:00:00.000Z`)
+    const weekdayRaw = date.getUTCDay()
+    return {
+      date,
+      pnl: toMoneyNumber(pnl),
+      weekday: weekdayRaw === 0 ? 6 : weekdayRaw - 1,
+    }
+  })
 
   // Sort by date
   dailyPnL.sort((a, b) => a.date.getTime() - b.date.getTime())

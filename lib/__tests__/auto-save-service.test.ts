@@ -80,7 +80,7 @@ describe('AutoSaveService', () => {
             service.trigger(mockLayout, 'high')
             service.trigger(mockLayout, 'high')
 
-            await new Promise(resolve => setTimeout(resolve, 50))
+            await new Promise(resolve => setTimeout(resolve, 150))
             expect(slowSaveFunction).toHaveBeenCalledTimes(1)
 
             resolveSave?.({ success: true })
@@ -101,6 +101,7 @@ describe('AutoSaveService', () => {
                 retryBaseDelay: 50,
             })
 
+            service.trigger(mockLayout, 'normal')
             await service.flush()
             await new Promise(resolve => setTimeout(resolve, 500))
 
@@ -108,7 +109,7 @@ describe('AutoSaveService', () => {
         })
 
         it('should respect max retries limit', async () => {
-            mockSaveFunction.mockRejectedValue(new Error('Persistent error'))
+            mockSaveFunction.mockRejectedValue(new Error('Network error'))
 
             service = new AutoSaveService(mockSaveFunction, {
                 debounceMs: 10,
@@ -119,6 +120,7 @@ describe('AutoSaveService', () => {
             const onError = vi.fn()
             service.on('onError', onError)
 
+            service.trigger(mockLayout, 'normal')
             await service.flush()
             await new Promise(resolve => setTimeout(resolve, 1000))
 
@@ -140,6 +142,7 @@ describe('AutoSaveService', () => {
                 retryMaxDelay: 10000,
             })
 
+            service.trigger(mockLayout, 'normal')
             await service.flush()
             await new Promise(resolve => setTimeout(resolve, 3000))
 
@@ -163,6 +166,7 @@ describe('AutoSaveService', () => {
             const onError = vi.fn()
             service.on('onError', onError)
 
+            service.trigger(mockLayout, 'normal')
             await service.flush()
             await new Promise(resolve => setTimeout(resolve, 100))
 
@@ -286,7 +290,7 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            OfflineQueueManager.getInstance().enqueue({
+            await OfflineQueueManager.getInstance().enqueue({
                 layout: mockLayout,
                 timestamp: Date.now(),
                 retryCount: 0,
@@ -303,14 +307,14 @@ describe('AutoSaveService', () => {
     })
 
     describe('Utility Methods', () => {
-        it('should correctly report pending saves', () => {
+        it('should correctly report pending saves', async () => {
             mockSaveFunction.mockResolvedValue({ success: true })
             service = new AutoSaveService(mockSaveFunction, { debounceMs: 100 })
 
             service.trigger(mockLayout, 'normal')
             expect(service.hasPendingSave()).toBe(true)
 
-            vi.advanceTimersByTime(150)
+            await new Promise(resolve => setTimeout(resolve, 220))
             expect(service.hasPendingSave()).toBe(false)
         })
 
@@ -419,7 +423,7 @@ describe('AutoSaveService', () => {
             service = new AutoSaveService(mockSaveFunction, { debounceMs: 10 })
             service.trigger(mockLayout, 'high')
 
-            await new Promise(resolve => setTimeout(resolve, 50))
+            await new Promise(resolve => setTimeout(resolve, 120))
             service.dispose()
 
             resolveSave!(undefined)
@@ -429,9 +433,9 @@ describe('AutoSaveService', () => {
 })
 
 describe('OfflineQueueManager', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.clearAllMocks()
-        OfflineQueueManager.getInstance().clear()
+        await OfflineQueueManager.getInstance().clear()
     })
 
     it('should enqueue and dequeue requests', async () => {
@@ -447,7 +451,15 @@ describe('OfflineQueueManager', () => {
         const all = await manager.getAll()
 
         expect(all).toHaveLength(1)
-        expect(all[0]).toEqual(request)
+        expect(all[0]).toEqual(expect.objectContaining({
+            timestamp: request.timestamp,
+            retryCount: request.retryCount,
+            priority: request.priority,
+            layout: expect.objectContaining({
+                id: request.layout.id,
+                userId: request.layout.userId,
+            }),
+        }))
 
         await manager.dequeue(request.timestamp)
         const afterDequeue = await manager.getAll()

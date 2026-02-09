@@ -1,6 +1,7 @@
 import { groupBy } from "@/lib/utils";
-import { getTradesAction } from "@/server/database";
-import { Trade } from "@/prisma/generated/prisma";
+import { getTradesAction, SerializedTrade } from "@/server/database";
+import { Prisma } from "@/prisma/generated/prisma";
+import Decimal from "decimal.js";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";

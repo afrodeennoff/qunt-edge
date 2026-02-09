@@ -153,37 +153,37 @@ model Account {
   accountSize     String?
   accountSizeName String?
 
-  startingBalance   Float   @default(0)
-  balanceRequired   Float?
-  drawdownThreshold Float   @default(0)
-  dailyLoss         Float   @default(0)
-  profitTarget      Float   @default(0)
-  buffer            Float   @default(0)
+  startingBalance   Decimal   @default(0)
+  balanceRequired   Decimal?
+  drawdownThreshold Decimal   @default(0)
+  dailyLoss         Decimal   @default(0)
+  profitTarget      Decimal   @default(0)
+  buffer            Decimal   @default(0)
   considerBuffer    Boolean @default(true)
 
   trailingDrawdown   Boolean @default(false)
-  trailingStopProfit Float?
+  trailingStopProfit Decimal?
   trailing           String?
 
   isPerformance Boolean @default(false)
   evaluation    Boolean @default(true)
 
   payoutCount   Int     @default(0)
-  minPayout     Float?
+  minPayout     Decimal?
   maxPayout     String?
-  profitSharing Float?
-  payoutBonus   Float?
+  profitSharing Decimal?
+  payoutBonus   Decimal?
   payoutPolicy  String?
 
-  consistencyPercentage   Float? @default(30)
+  consistencyPercentage   Decimal? @default(30)
   minTradingDaysForPayout Int?
   minDays                 Int?
-  minPnlToCountAsDay      Float?
+  minPnlToCountAsDay      Decimal?
 
-  activationFees  Float?
-  price           Float?
-  priceWithPromo  Float?
-  promoPercentage Float?
+  activationFees  Decimal?
+  price           Decimal?
+  priceWithPromo  Decimal?
+  promoPercentage Decimal?
   promoType       PromoType?
 
   tradingNewsAllowed Boolean @default(true)
@@ -211,6 +211,7 @@ model Account {
   user User @relation("UserAccounts", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([number, userId])
+  @@index([userId])
   @@index([number])
   @@index([groupId])
   @@index([nextPaymentDate])
@@ -224,20 +225,20 @@ model Trade {
 
   instrument String
   side       String? @default("")
-  quantity   Int
+  quantity   Decimal
 
-  entryPrice Float
-  closePrice Float
-  pnl        Float
-  commission Float @default(0)
+  entryPrice Decimal
+  closePrice Decimal
+  pnl        Decimal
+  commission Decimal @default(0)
 
   entryId String? @default("")
   closeId String? @default("")
 
-  entryDate String
-  closeDate String
+  entryDate DateTime
+  closeDate DateTime
 
-  timeInPosition Float @default(0)
+  timeInPosition Decimal @default(0)
 
   comment String?
   tags    String[] @default([])
@@ -257,6 +258,7 @@ model Trade {
   @@index([entryDate])
   @@index([closeDate])
   @@index([userId, entryDate])
+  @@index([userId, closeDate])
   @@index([userId, accountNumber, instrument])
   @@schema("public")
 }
@@ -282,7 +284,7 @@ model Payout {
   accountId     String
   accountNumber String
 
-  amount Float
+  amount Decimal
   status String @default("PENDING")
 
   date      DateTime
@@ -304,8 +306,8 @@ model Order {
   instrumentType String
   orderAction    String
 
-  quantity           Int
-  averageFilledPrice Float
+  quantity           Decimal
+  averageFilledPrice Decimal
   isOpeningOrder     Boolean
 
   time DateTime
@@ -349,8 +351,8 @@ model Synchronization {
 model TickDetails {
   id        String @id @unique @default(uuid())
   ticker    String
-  tickValue Float
-  tickSize  Float
+  tickValue Decimal
+  tickSize  Decimal
 
   @@schema("public")
 }
@@ -359,12 +361,12 @@ model TradeAnalytics {
   id      String @id @default(uuid())
   tradeId String @unique
 
-  mae                Float  @default(0)
-  mfe                Float  @default(0)
-  entryPriceFromData Float?
-  priceDifference    Float?
-  riskRewardRatio    Float?
-  efficiency         Float?
+  mae                Decimal @default(0)
+  mfe                Decimal @default(0)
+  entryPriceFromData Decimal?
+  priceDifference    Decimal?
+  riskRewardRatio    Decimal?
+  efficiency         Decimal?
 
   dataSource String @default("DATABENTO")
 
@@ -382,11 +384,11 @@ model HistoricalData {
   databentSymbol String
   timestamp      DateTime
 
-  open   Float
-  high   Float
-  low    Float
-  close  Float
-  volume Int
+  open   Decimal
+  high   Decimal
+  low    Decimal
+  close  Decimal
+  volume Decimal
 
   dataSource String   @default("DATABENTO")
   createdAt  DateTime @default(now())
@@ -618,12 +620,12 @@ model TeamAnalytics {
   teamId String
   period String @default("monthly")
 
-  totalPnl      Float   @default(0)
+  totalPnl      Decimal @default(0)
   totalTrades   Int     @default(0)
-  winRate       Float   @default(0)
-  averageRr     Float   @default(0)
+  winRate       Decimal @default(0)
+  averageRr     Decimal @default(0)
   bestMemberId  String?
-  bestMemberPnl Float?
+  bestMemberPnl Decimal?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -888,7 +890,7 @@ model PaymentTransaction {
   whopTransactionId String  @unique
   whopMembershipId  String?
 
-  amount   Float
+  amount   Decimal
   currency String            @default("USD")
   status   TransactionStatus @default(PENDING)
 
@@ -918,8 +920,8 @@ model Invoice {
   whopInvoiceId    String  @unique
   whopMembershipId String?
 
-  amountDue  Float
-  amountPaid Float         @default(0)
+  amountDue  Decimal
+  amountPaid Decimal       @default(0)
   currency   String        @default("USD")
   status     InvoiceStatus @default(DRAFT)
 
@@ -953,7 +955,7 @@ model Refund {
   whopPaymentId String
 
   transactionId String
-  amount        Float
+  amount        Decimal
   currency      String       @default("USD")
   status        RefundStatus @default(PENDING)
 
@@ -1030,7 +1032,7 @@ model Promotion {
   name String
 
   type  PromotionType
-  value Float
+  value Decimal
 
   durationType     DurationType
   durationInMonths Int?
@@ -1062,7 +1064,7 @@ model UsageMetric {
   email  String
 
   metricType  String
-  metricValue Float
+  metricValue Decimal
 
   periodStart DateTime
   periodEnd   DateTime

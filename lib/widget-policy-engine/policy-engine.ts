@@ -47,11 +47,20 @@ export class PolicyEngine {
     context: PolicyEvaluationContext,
     manifest: WidgetPolicyManifest
   ): Promise<RiskEvaluationResult> {
-    const cacheKey = this.generateCacheKey(context)
+    const cacheKey = this.generateCacheKey(context, manifest)
     
     if (this.config.cacheEnabled) {
       const cached = this.getFromCache(cacheKey)
       if (cached) {
+        if (this.config.auditLogEnabled) {
+          this.addToAuditLog({
+            context,
+            result: cached,
+            duration: 0,
+            timestamp: new Date(),
+            fromCache: true,
+          })
+        }
         return cached
       }
     }
@@ -135,11 +144,11 @@ export class PolicyEngine {
       errors.push('Missing risk assessment')
     } else {
       if (manifest.riskAssessment.probabilityScore < 0 || manifest.riskAssessment.probabilityScore > 1) {
-        errors.push('Probability score must be between 0 and 1')
+        errors.push('probability score must be between 0 and 1')
       }
 
       if (manifest.riskAssessment.impactWeight < 0 || manifest.riskAssessment.impactWeight > 100) {
-        errors.push('Impact weight must be between 0 and 100')
+        errors.push('impact weight must be between 0 and 100')
       }
 
       if (manifest.riskAssessment.controlEffectiveness < 0 || manifest.riskAssessment.controlEffectiveness > 5) {
@@ -202,8 +211,15 @@ export class PolicyEngine {
     this.policyCache.clear()
   }
 
-  private generateCacheKey(context: PolicyEvaluationContext): string {
-    return `${context.widgetId}:${context.action}:${JSON.stringify(context.inputs)}`
+  private generateCacheKey(context: PolicyEvaluationContext, manifest: WidgetPolicyManifest): string {
+    return [
+      context.widgetId,
+      context.action,
+      manifest.policyVersion,
+      manifest.widgetVersion,
+      JSON.stringify(context.inputs),
+      JSON.stringify(manifest.riskAssessment),
+    ].join(':')
   }
 
   private getFromCache(key: string): RiskEvaluationResult | null {
@@ -258,6 +274,7 @@ export class PolicyEngine {
   }
 
   private emitTelemetry(context: PolicyEvaluationContext, result: RiskEvaluationResult): void {
+    if (process.env.NODE_ENV === 'test') return
     if (typeof window === 'undefined') return
 
     const event = {
@@ -288,6 +305,7 @@ export interface AuditLogEntry {
   result: RiskEvaluationResult
   duration: number
   timestamp: Date
+  fromCache?: boolean
 }
 
 export interface AuditLogFilter {

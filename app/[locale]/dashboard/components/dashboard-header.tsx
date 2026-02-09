@@ -100,43 +100,63 @@ export function DashboardHeader() {
 
                     {/* Customization Group (Conditional) */}
                     {isDashboardRoot && isWidgetsTab && (
-                        <div className="ml-1 flex items-center gap-1.5 rounded-lg border border-border/70 bg-card/70 p-1">
-                            <AddWidgetSheet
-                                onAddWidget={addWidget}
-                                isCustomizing={isCustomizing}
-                            />
-
+                        <div className="ml-1 flex items-center gap-1.5 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm p-1.5 shadow-sm ring-1 ring-white/5">
                             <button
                                 type="button"
                                 onClick={toggleCustomizing}
                                 className={cn(
-                                    "text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-md transition-all duration-300 border",
+                                    "relative group flex h-8 items-center gap-2 px-3 rounded-lg transition-all duration-300",
                                     isCustomizing
-                                        ? "border-primary bg-primary text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.25)]"
-                                        : "border-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                                        ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
+                                        : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                                 )}
                             >
-                                {isCustomizing ? 'LOCK' : 'EDIT'}
+                                <motion.div
+                                    animate={{ rotate: isCustomizing ? 180 : 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    {isCustomizing ? (
+                                        <CheckCircle2 className="h-4 w-4" />
+                                    ) : (
+                                        <Sparkles className="h-4 w-4" />
+                                    )}
+                                </motion.div>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">
+                                    {isCustomizing ? 'FINISH' : 'CUSTOMIZE'}
+                                </span>
                             </button>
 
-                            {isCustomizing && autoSaveStatus.hasPending && (
-                                <button
-                                    type="button"
-                                    onClick={flushPendingSaves}
-                                    className="animate-pulse rounded-md p-1.5 text-primary transition-all hover:bg-primary/10"
-                                    title="Save Changes"
+                            {isCustomizing && (
+                                <motion.div
+                                    initial={{ width: 0, opacity: 0, scale: 0.9 }}
+                                    animate={{ width: 'auto', opacity: 1, scale: 1 }}
+                                    exit={{ width: 0, opacity: 0, scale: 0.9 }}
+                                    className="flex items-center gap-1.5"
                                 >
-                                    <CloudUpload className="w-4 h-4" />
-                                </button>
+                                    <div className="h-4 w-px bg-border/50 mx-0.5" />
+                                    <AddWidgetSheet
+                                        onAddWidget={addWidget}
+                                        isCustomizing={isCustomizing}
+                                    />
+
+                                    {autoSaveStatus.hasPending ? (
+                                        <button
+                                            type="button"
+                                            onClick={flushPendingSaves}
+                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 transition-colors animate-pulse"
+                                            title="Save Changes"
+                                        >
+                                            <CloudUpload className="w-4 h-4" />
+                                        </button>
+                                    ) : (
+                                        <div className="flex h-8 w-8 items-center justify-center text-primary/70" title="All changes saved">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        </div>
+                                    )}
+                                </motion.div>
                             )}
 
-                            {!autoSaveStatus.hasPending && isCustomizing && (
-                                <div className="px-2 text-primary/70">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                </div>
-                            )}
-
-                            <div className="mx-1 h-4 w-px bg-border/70" />
+                            <div className="mx-1 h-4 w-px bg-border/50" />
                             <ShareButton currentLayout={currentLayout} />
                         </div>
                     )}

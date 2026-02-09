@@ -1,7 +1,7 @@
 'use server'
 
 import { getDatabaseUserId } from '@/server/auth'
-import { Trade, Payout } from '@/prisma/generated/prisma'
+import { Trade, Payout, Prisma } from '@/prisma/generated/prisma'
 import { computeMetricsForAccounts } from '@/lib/account-metrics'
 import { Account } from '@/context/data-provider'
 import { updateTag } from 'next/cache'
@@ -100,7 +100,7 @@ export async function updateCommissionForGroupAction(accountNumber: string, inst
   })
   // For each trade, update the commission
   for (const trade of trades) {
-    const updatedCommission = newCommission * trade.quantity
+    const updatedCommission = new Prisma.Decimal(newCommission).times(new Prisma.Decimal(trade.quantity))
     await prisma.trade.update({
       where: {
         id: trade.id
@@ -207,10 +207,10 @@ export async function setupAccountAction(account: Account): Promise<Account> {
 
   // Extract fields that should not be included in the database operation
   // Remove computed fields (metrics, dailyMetrics) and relation fields
-  const { 
-    id, 
-    userId: _, 
-    payouts, 
+  const {
+    id,
+    userId: _,
+    payouts,
     groupId,
     balanceToDate,
     group,
@@ -219,7 +219,7 @@ export async function setupAccountAction(account: Account): Promise<Account> {
     aboveBuffer,
     considerBuffer,
     trades,
-    ...baseAccountData 
+    ...baseAccountData
   } = account
 
   // Only include considerBuffer when explicitly provided to avoid overriding unintentionally
@@ -234,17 +234,17 @@ export async function setupAccountAction(account: Account): Promise<Account> {
     ...(groupId !== undefined &&
       (groupId
         ? {
-            group: {
-              connect: {
-                id: groupId,
-              },
+          group: {
+            connect: {
+              id: groupId,
             },
-          }
+          },
+        }
         : {
-            group: {
-              disconnect: true,
-            },
-          })),
+          group: {
+            disconnect: true,
+          },
+        })),
   }
 
   const accountDataForCreate = {
@@ -252,12 +252,12 @@ export async function setupAccountAction(account: Account): Promise<Account> {
     ...considerBufferUpdate,
     ...(groupId
       ? {
-          group: {
-            connect: {
-              id: groupId,
-            },
+        group: {
+          connect: {
+            id: groupId,
           },
-        }
+        },
+      }
       : {}),
   }
 
@@ -357,7 +357,7 @@ export async function getAccountsAction() {
 }
 
 export async function savePayoutAction(payout: Payout) {
-  
+
   try {
     // First find the account to get its ID
     const userId = await getDatabaseUserId()
@@ -544,15 +544,15 @@ export async function calculateAccountBalanceAction(
     });
   }
   const userId = await getDatabaseUserId()
-  
+
   // Early return if no accounts
   if (accounts.length === 0) {
     return [];
   }
-  
+
   // Collect all account numbers needed
   const accountNumbers = accounts.map(account => account.number);
-  
+
   // Fetch only required fields for better performance
   const trades = await prisma.trade.findMany({
     where: {
@@ -568,14 +568,14 @@ export async function calculateAccountBalanceAction(
     },
   });
 
-  // Group trades by account number in a single pass for O(n) performance
+  // Group trades by account number
   const tradesByAccount = trades.reduce((acc, trade) => {
     if (!acc[trade.accountNumber]) {
       acc[trade.accountNumber] = [];
     }
     acc[trade.accountNumber].push(trade);
     return acc;
-  }, {} as Record<string, Array<{ accountNumber: string; pnl: number; commission: number }>>);
+  }, {} as Record<string, Array<{ accountNumber: string; pnl: Prisma.Decimal; commission: Prisma.Decimal }>>);
 
   return accounts.map(account => {
     const accountTrades = tradesByAccount[account.number] || [];
@@ -593,21 +593,16 @@ export async function calculateAccountBalanceAction(
  * @returns The calculated balance
  */
 function calculateAccountBalance(
-  account: Account, 
-  trades: Array<{ accountNumber: string; pnl: number; commission: number }>
+  account: Account,
+  trades: Array<{ accountNumber: string; pnl: Prisma.Decimal; commission: Prisma.Decimal }>
 ): number {
-  let balance = account.startingBalance || 0;
-  
-  // Calculate PnL from trades (trades are already filtered by account)
-  const tradesPnL = trades.reduce((sum, trade) => sum + (trade.pnl - trade.commission), 0);
-  balance += tradesPnL;
-  
-  // Add payouts
-  // const payouts = account.payouts || [];
-  // const payoutsSum = payouts.reduce((sum, payout) => sum + payout.amount, 0);
-  // balance += payoutsSum;
-  
-  return balance;
+  let balance = new Prisma.Decimal(account.startingBalance || 0);
+
+  // Calculate PnL from trades
+  const tradesPnL = trades.reduce((sum, trade) => sum.plus(trade.pnl.minus(trade.commission)), new Prisma.Decimal(0));
+  balance = balance.plus(tradesPnL);
+
+  return balance.toNumber();
 }
 
 /**

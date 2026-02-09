@@ -1,8 +1,8 @@
-import { openai } from "@ai-sdk/openai"
-import { streamObject } from "ai"
 import { tradeSchema, orderSchema } from './schema'
 import { type FinancialInstrument } from '../extract-orders/schema'
 import { z } from 'zod/v3';
+import { addMoney, mulMoney, subMoney, toDecimal, toMoneyNumber } from '@/lib/financial-math'
+import { normalizeToUtcTimestamp } from '@/lib/date-utils'
 
 export const maxDuration = 60 // Allow up to 60 seconds for AI processing
 
@@ -61,33 +61,35 @@ function matchOrdersWithFIFO(orders: Order[], instruments: FinancialInstrument[]
         }
         
         // Calculate P&L
-        let grossPnl: number;
-        if (isLongTrade) {
-          // Long: (Exit Price - Entry Price) × Quantity × Multiplier
-          grossPnl = (exitOrder.price - entryOrder.price) * matchQuantity * multiplier;
-        } else {
-          // Short: (Entry Price - Exit Price) × Quantity × Multiplier
-          grossPnl = (entryOrder.price - exitOrder.price) * matchQuantity * multiplier;
-        }
+        const quantityDecimal = toDecimal(matchQuantity)
+        const multiplierDecimal = toDecimal(multiplier)
+        const entryPriceDecimal = toDecimal(entryOrder.price)
+        const closePriceDecimal = toDecimal(exitOrder.price)
+        const grossPnl = isLongTrade
+          ? mulMoney(subMoney(closePriceDecimal, entryPriceDecimal), mulMoney(quantityDecimal, multiplierDecimal))
+          : mulMoney(subMoney(entryPriceDecimal, closePriceDecimal), mulMoney(quantityDecimal, multiplierDecimal))
         
         // Calculate time in position (in seconds)
         const entryTime = new Date(entryOrder.timestamp).getTime();
         const exitTime = new Date(exitOrder.timestamp).getTime();
         const timeInPosition = Math.floor((exitTime - entryTime) / 1000);
-        
+        if (timeInPosition < 0) {
+          continue
+        }
+
         // Calculate total commission
-        const totalCommission = (entryOrder.commission || 0) + (exitOrder.commission || 0);
+        const totalCommission = addMoney(entryOrder.commission || 0, exitOrder.commission || 0)
         // Create trade
         const trade: Trade = {
           instrument: symbol.slice(0, -2),
           side: isLongTrade ? 'long' : 'short',
           quantity: matchQuantity,
-          entryPrice: parseFloat(entryOrder.price.toString()),
-          closePrice: parseFloat(exitOrder.price.toString()),
-          entryDate: entryOrder.timestamp,
-          closeDate: exitOrder.timestamp,
-          pnl: grossPnl,
-          commission: totalCommission,
+          entryPrice: toMoneyNumber(entryPriceDecimal, 8),
+          closePrice: toMoneyNumber(closePriceDecimal, 8),
+          entryDate: normalizeToUtcTimestamp(entryOrder.timestamp),
+          closeDate: normalizeToUtcTimestamp(exitOrder.timestamp),
+          pnl: toMoneyNumber(grossPnl, 8),
+          commission: toMoneyNumber(totalCommission, 8),
           timeInPosition: timeInPosition,
           entryId: entryOrder.orderId,
           closeId: exitOrder.orderId,

@@ -1,5 +1,6 @@
-import { getTradesAction } from "@/server/database";
-import { Trade } from "@/prisma/generated/prisma";
+import { getTradesAction, SerializedTrade } from "@/server/database";
+import { Prisma } from "@/prisma/generated/prisma";
+import Decimal from "decimal.js";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -24,7 +25,7 @@ interface OverallMetrics {
   totalVolume: number;
 }
 
-function calculateOverallMetrics(trades: Trade[]): OverallMetrics {
+function calculateOverallMetrics(trades: SerializedTrade[]): OverallMetrics {
   if (!trades || trades.length === 0) {
     return {
       totalTrades: 0,
@@ -49,87 +50,88 @@ function calculateOverallMetrics(trades: Trade[]): OverallMetrics {
   }
 
   const totalTrades = trades.length;
-  const winningTrades = trades.filter(t => t.pnl > 0).length;
-  const losingTrades = trades.filter(t => t.pnl < 0).length;
+  const winningTrades = trades.filter(t => new Decimal(t.pnl).gt(0)).length;
+  const losingTrades = trades.filter(t => new Decimal(t.pnl).lt(0)).length;
   const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
-  
-  const totalPnL = trades.reduce((sum, t) => sum + t.pnl, 0);
-  const totalCommission = trades.reduce((sum, t) => sum + t.commission, 0);
-  const netPnL = totalPnL - totalCommission;
-  
-  const wins = trades.filter(t => t.pnl > 0);
-  const losses = trades.filter(t => t.pnl < 0);
-  
-  const averageWin = wins.length > 0 ? wins.reduce((sum, t) => sum + t.pnl, 0) / wins.length : 0;
-  const averageLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, t) => sum + t.pnl, 0) / losses.length) : 0;
-  
-  const profitFactor = averageLoss > 0 ? averageWin / averageLoss : 0;
-  
-  const largestWin = wins.length > 0 ? Math.max(...wins.map(t => t.pnl)) : 0;
-  const largestLoss = losses.length > 0 ? Math.min(...losses.map(t => t.pnl)) : 0;
-  
-  const averageTradeSize = trades.reduce((sum, t) => sum + t.quantity, 0) / totalTrades;
-  const totalVolume = trades.reduce((sum, t) => sum + t.quantity, 0);
-  
+
+  const totalPnL = trades.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0));
+  const totalCommission = trades.reduce((sum, t) => sum.plus(new Decimal(t.commission)), new Decimal(0));
+  const netPnL = totalPnL.minus(totalCommission);
+
+  const wins = trades.filter(t => new Decimal(t.pnl).gt(0));
+  const losses = trades.filter(t => new Decimal(t.pnl).lt(0));
+
+  const averageWin = wins.length > 0 ? wins.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(wins.length) : new Decimal(0);
+  const averageLoss = losses.length > 0 ? wins.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(losses.length).abs() : new Decimal(0);
+
+  const profitFactor = averageLoss.gt(0) ? averageWin.div(averageLoss).toNumber() : 0;
+
+  const largestWin = wins.length > 0 ? Decimal.max(...wins.map(t => new Decimal(t.pnl))) : new Decimal(0);
+  const largestLoss = losses.length > 0 ? Decimal.min(...losses.map(t => new Decimal(t.pnl))) : new Decimal(0);
+
+  const averageTradeSize = trades.reduce((sum, t) => sum.plus(new Decimal(t.quantity)), new Decimal(0)).div(totalTrades);
+  const totalVolume = trades.reduce((sum, t) => sum.plus(new Decimal(t.quantity)), new Decimal(0));
+
   // Calculate consecutive wins/losses
   let maxConsecutiveWins = 0;
   let maxConsecutiveLosses = 0;
   let currentWinStreak = 0;
   let currentLossStreak = 0;
-  
+
   for (const trade of trades) {
-    if (trade.pnl > 0) {
+    const pnl = new Decimal(trade.pnl);
+    if (pnl.gt(0)) {
       currentWinStreak++;
       currentLossStreak = 0;
       maxConsecutiveWins = Math.max(maxConsecutiveWins, currentWinStreak);
-    } else if (trade.pnl < 0) {
+    } else if (pnl.lt(0)) {
       currentLossStreak++;
       currentWinStreak = 0;
       maxConsecutiveLosses = Math.max(maxConsecutiveLosses, currentLossStreak);
     }
   }
-  
+
   // Calculate max drawdown
-  let runningPnL = 0;
-  let peak = 0;
-  let maxDrawdown = 0;
-  
+  let runningPnL = new Decimal(0);
+  let peak = new Decimal(0);
+  let maxDrawdown = new Decimal(0);
+
   for (const trade of trades) {
-    runningPnL += trade.pnl - trade.commission;
-    if (runningPnL > peak) {
+    runningPnL = runningPnL.plus(new Decimal(trade.pnl).minus(new Decimal(trade.commission)));
+    if (runningPnL.gt(peak)) {
       peak = runningPnL;
     }
-    const drawdown = peak - runningPnL;
-    if (drawdown > maxDrawdown) {
+    const drawdown = peak.minus(runningPnL);
+    if (drawdown.gt(maxDrawdown)) {
       maxDrawdown = drawdown;
     }
   }
-  
+
   // Simple Sharpe ratio calculation (assuming risk-free rate of 0)
-  const dailyReturns = trades.map(t => t.pnl - t.commission);
+  const dailyReturns = trades.map(t => new Decimal(t.pnl).minus(new Decimal(t.commission)).toNumber());
   const avgDailyReturn = dailyReturns.reduce((sum, r) => sum + r, 0) / dailyReturns.length;
   const stdDev = Math.sqrt(dailyReturns.reduce((sum, r) => sum + Math.pow(r - avgDailyReturn, 2), 0) / dailyReturns.length);
   const sharpeRatio = stdDev > 0 ? avgDailyReturn / stdDev : 0;
-  
+
   return {
     totalTrades,
     winningTrades,
     losingTrades,
     winRate: Math.round(winRate * 100) / 100,
-    totalPnL: Math.round(totalPnL * 100) / 100,
-    totalCommission: Math.round(totalCommission * 100) / 100,
-    netPnL: Math.round(netPnL * 100) / 100,
-    averageWin: Math.round(averageWin * 100) / 100,
-    averageLoss: Math.round(averageLoss * 100) / 100,
+    totalPnL: totalPnL.toDecimalPlaces(2).toNumber(),
+    totalCommission: totalCommission.toDecimalPlaces(2).toNumber(),
+    netPnL: netPnL.toDecimalPlaces(2).toNumber(),
+    averageWin: averageWin.toDecimalPlaces(2).toNumber(),
+    averageLoss: averageLoss.toDecimalPlaces(2).toNumber(),
     profitFactor: Math.round(profitFactor * 100) / 100,
-    largestWin: Math.round(largestWin * 100) / 100,
-    largestLoss: Math.round(largestLoss * 100) / 100,
-    averageTradeSize: Math.round(averageTradeSize),
+    largestWin: largestWin.toDecimalPlaces(2).toNumber(),
+    largestLoss: largestLoss.toDecimalPlaces(2).toNumber(),
+    averageTradeSize: averageTradeSize.toNumber(),
     maxConsecutiveWins,
     maxConsecutiveLosses,
     sharpeRatio: Math.round(sharpeRatio * 100) / 100,
-    maxDrawdown: Math.round(maxDrawdown * 100) / 100,
-    totalVolume: Math.round(totalVolume)
+    maxDrawdown: maxDrawdown.toDecimalPlaces(2).toNumber(),
+    totalVolume: totalVolume.toNumber()
   };
 }
 
@@ -155,6 +157,6 @@ export const getOverallPerformanceMetrics = tool({
       });
     }
 
-    return calculateOverallMetrics(trades);
+    return calculateOverallMetrics(trades as SerializedTrade[]);
   }
 }); 

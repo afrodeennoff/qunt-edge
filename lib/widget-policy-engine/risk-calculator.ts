@@ -8,6 +8,7 @@ export class RiskScoreCalculator {
     const baseAssessment = manifest.riskAssessment
     const contextualAdjustment = this.calculateContextualAdjustment(context, manifest)
     const featureRisk = this.aggregateFeatureRisks(manifest.features)
+    const featureImpactAdjustment = Math.min(20, featureRisk * 0.05)
 
     const adjustedProbability = Math.min(
       1,
@@ -16,14 +17,18 @@ export class RiskScoreCalculator {
 
     const adjustedImpact = Math.min(
       100,
-      Math.max(0, baseAssessment.impactWeight + contextualAdjustment.impactAdjustment)
+      Math.max(0, baseAssessment.impactWeight + contextualAdjustment.impactAdjustment + featureImpactAdjustment)
     )
 
-    const residualRisk = this.calculateResidualRisk({
+    const calculatedResidualRisk = this.calculateResidualRisk({
       probabilityScore: adjustedProbability,
       impactWeight: adjustedImpact,
       controlEffectiveness: baseAssessment.controlEffectiveness,
     })
+    const residualRisk = Math.min(
+      100,
+      Math.max(0, Math.max(calculatedResidualRisk, baseAssessment.residualRiskScore))
+    )
 
     const severityTier = this.determineSeverityTier(residualRisk)
 

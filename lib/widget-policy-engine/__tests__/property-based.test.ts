@@ -4,6 +4,9 @@ import { PolicyEngine } from '../policy-engine'
 import { RiskScoreCalculator } from '../risk-calculator'
 import { SeverityTier } from '../types'
 
+const boundedDecimal = (min: number, max: number) =>
+  fc.double({ min, max, noNaN: true, noDefaultInfinity: true })
+
 describe('Property-Based Tests', () => {
   describe('Risk Score Calculations', () => {
     it('should always produce risk scores between 0 and 100', () => {
@@ -13,7 +16,7 @@ describe('Property-Based Tests', () => {
       fc.assert(
         fc.asyncProperty(
           fc.record({
-            probabilityScore: fc.float({ min: 0, max: 1 }),
+            probabilityScore: boundedDecimal(0, 1),
             impactWeight: fc.integer({ min: 0, max: 100 }),
             controlEffectiveness: fc.integer({ min: 0, max: 5 }),
           }),
@@ -78,8 +81,8 @@ describe('Property-Based Tests', () => {
           fc.integer({ min: 0, max: 100 }).chain(impact =>
             fc.integer({ min: 0, max: 5 }).map(control => ({ impact, control }))
           ),
-          fc.float({ min: 0.3, max: 0.7 }),
-          fc.float({ min: 0.01, max: 0.2 }),
+          boundedDecimal(0.3, 0.7),
+          boundedDecimal(0.01, 0.2),
           async ({ impact, control }, prob1, prob2) => {
             if (prob1 === prob2) return true
 
@@ -221,8 +224,8 @@ describe('Property-Based Tests', () => {
       fc.assert(
         fc.property(
           fc.integer({ min: 301, max: 1000 }),
-          fc.float({ min: 0.0011, max: 0.1 }),
-          fc.float({ min: 0.051, max: 1 }),
+          boundedDecimal(0.0011, 0.1),
+          boundedDecimal(0.051, 1),
           (latency, errorRate, drift) => {
             const manifest = {
               schemaVersion: '1.0.0',

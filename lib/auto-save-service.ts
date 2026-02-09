@@ -90,6 +90,7 @@ export class AutoSaveService {
       retryCount: 0,
       priority,
     }
+    this.currentRequest = request
 
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
@@ -98,7 +99,8 @@ export class AutoSaveService {
     const debounceTime = priority === 'high' ? 100 : this.config.debounceMs
 
     this.debounceTimer = setTimeout(() => {
-      this.executeSave(request)
+      this.debounceTimer = null
+      void this.executeSave(request)
     }, debounceTime)
 
     logger.debug('[AutoSave] Save scheduled', {
@@ -114,8 +116,9 @@ export class AutoSaveService {
       this.debounceTimer = null
     }
 
-    if (this.currentRequest && !this.isSaving) {
-      await this.executeSave(this.currentRequest)
+    const request = this.currentRequest
+    if (request && !this.isSaving) {
+      await this.executeSave(request)
     }
   }
 
@@ -188,6 +191,9 @@ export class AutoSaveService {
         })
 
         const result = await this.saveFunction(request.layout)
+        if (!result || typeof result.success !== 'boolean') {
+          throw new Error('Save function returned an invalid response')
+        }
 
         if (result.success) {
           return result
@@ -226,11 +232,10 @@ export class AutoSaveService {
   }
 
   private calculateRetryDelay(attempt: number): number {
-    const delay = Math.min(
+    return Math.min(
       this.config.retryBaseDelay * Math.pow(2, attempt),
       this.config.retryMaxDelay
     )
-    return delay + Math.random() * 500
   }
 
   private shouldRetry(error: Error): boolean {
@@ -239,6 +244,7 @@ export class AutoSaveService {
       /timeout/i,
       /fetch/i,
       /connection/i,
+      /invalid response/i,
       /ECONNRESET/i,
       /ETIMEDOUT/i,
       /5\d\d/, // Server errors
@@ -252,12 +258,17 @@ export class AutoSaveService {
   }
 
   private isOnline(): boolean {
-    if (typeof navigator === 'undefined') return true
+    if (typeof navigator === 'undefined' || typeof navigator.onLine !== 'boolean') return true
     return navigator.onLine
   }
 
   private setupOfflineListeners(): void {
-    if (typeof window === 'undefined' || !this.config.enableOfflineSupport) {
+    if (!this.config.enableOfflineSupport) {
+      return
+    }
+
+    const eventTarget = (typeof window !== 'undefined' && window) as (Window & typeof globalThis) | undefined
+    if (!eventTarget || typeof eventTarget.addEventListener !== 'function') {
       return
     }
 
@@ -272,12 +283,12 @@ export class AutoSaveService {
       this.emit('onOffline')
     }
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    eventTarget.addEventListener('online', handleOnline)
+    eventTarget.addEventListener('offline', handleOffline)
 
     this.cleanup = () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      eventTarget.removeEventListener('online', handleOnline)
+      eventTarget.removeEventListener('offline', handleOffline)
     }
   }
 
@@ -313,6 +324,7 @@ export class AutoSaveService {
       this.debounceTimer = null
       logger.debug('[AutoSave] Pending save cancelled')
     }
+    this.currentRequest = null
   }
 
   cleanup: () => void = () => {}
@@ -332,7 +344,7 @@ export class AutoSaveService {
 export class OfflineQueueManager {
   private static instance: OfflineQueueManager
   private queueKey = 'autosave-offline-queue'
-  private isProcessing = false
+  private memoryQueue: SaveRequest[] = []
 
   static getInstance(): OfflineQueueManager {
     if (!OfflineQueueManager.instance) {
@@ -342,8 +354,6 @@ export class OfflineQueueManager {
   }
 
   async enqueue(request: SaveRequest): Promise<void> {
-    if (typeof window === 'undefined') return
-
     try {
       const queue = await this.getQueue()
       
@@ -365,8 +375,6 @@ export class OfflineQueueManager {
   }
 
   async dequeue(timestamp: number): Promise<void> {
-    if (typeof window === 'undefined') return
-
     try {
       const queue = await this.getQueue()
       const filtered = queue.filter(r => r.timestamp !== timestamp)
@@ -377,8 +385,6 @@ export class OfflineQueueManager {
   }
 
   async getAll(): Promise<SaveRequest[]> {
-    if (typeof window === 'undefined') return []
-
     try {
       return await this.getQueue()
     } catch (error) {
@@ -388,10 +394,13 @@ export class OfflineQueueManager {
   }
 
   async clear(): Promise<void> {
-    if (typeof window === 'undefined') return
-
     try {
-      localStorage.removeItem(this.queueKey)
+      const storage = this.getStorage()
+      if (storage) {
+        storage.removeItem(this.queueKey)
+      } else {
+        this.memoryQueue = []
+      }
       logger.info('[AutoSave] Offline queue cleared')
     } catch (error) {
       logger.error('[AutoSave] Failed to clear queue', { error })
@@ -399,7 +408,12 @@ export class OfflineQueueManager {
   }
 
   private async getQueue(): Promise<SaveRequest[]> {
-    const data = localStorage.getItem(this.queueKey)
+    const storage = this.getStorage()
+    if (!storage) {
+      return [...this.memoryQueue]
+    }
+
+    const data = storage.getItem(this.queueKey)
     if (!data) return []
 
     try {
@@ -410,7 +424,19 @@ export class OfflineQueueManager {
   }
 
   private async saveQueue(queue: SaveRequest[]): Promise<void> {
-    localStorage.setItem(this.queueKey, JSON.stringify(queue))
+    const storage = this.getStorage()
+    if (storage) {
+      storage.setItem(this.queueKey, JSON.stringify(queue))
+      return
+    }
+    this.memoryQueue = [...queue]
+  }
+
+  private getStorage(): Storage | null {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage
+    }
+    return null
   }
 }
 

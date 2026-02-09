@@ -23,3 +23,21 @@ export function formatDateToTimestamp(date: Date): string {
   return formatTimestamp(date.toISOString())
 }
 
+/**
+ * Parse any date-like string and normalize it to a UTC timestamp.
+ * Throws when the input cannot be parsed.
+ */
+export function normalizeToUtcTimestamp(value: string): string {
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid timestamp: ${value}`)
+  }
+  return formatDateToTimestamp(parsed)
+}
+
+/**
+ * Ensures an entry/exit pair is chronologically valid.
+ */
+export function isChronologicalRange(entryDate: string, closeDate: string): boolean {
+  return new Date(closeDate).getTime() >= new Date(entryDate).getTime()
+}

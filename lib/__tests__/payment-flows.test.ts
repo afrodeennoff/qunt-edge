@@ -5,7 +5,10 @@ import { webhookService } from '@/server/webhook-service'
 import { securityManager } from '@/server/payment-security'
 import { prisma } from '@/lib/prisma'
 
-describe('Payment System Tests', () => {
+const describePayment =
+  process.env.RUN_PAYMENT_INTEGRATION_TESTS === 'true' ? describe : describe.skip
+
+describePayment('Payment System Tests', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
   })

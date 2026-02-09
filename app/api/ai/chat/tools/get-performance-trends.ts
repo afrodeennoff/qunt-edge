@@ -1,5 +1,6 @@
-import { getTradesAction } from "@/server/database";
-import { Trade } from "@/prisma/generated/prisma";
+import { getTradesAction, SerializedTrade } from "@/server/database";
+import { Prisma } from "@/prisma/generated/prisma";
+import Decimal from "decimal.js";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -25,25 +26,25 @@ interface TrendAnalysis {
   overallTrend: 'improving' | 'declining' | 'stable';
 }
 
-function calculatePeriodMetrics(trades: Trade[]): PerformanceTrend | null {
+function calculatePeriodMetrics(trades: SerializedTrade[]): PerformanceTrend | null {
   if (!trades || trades.length === 0) return null;
-  
-  const netPnL = trades.reduce((sum, t) => sum + t.pnl - t.commission, 0);
-  const wins = trades.filter(t => t.pnl > 0);
-  const losses = trades.filter(t => t.pnl < 0);
-  
+
+  const netPnL = trades.reduce((sum, t) => sum.plus(new Decimal(t.pnl).minus(new Decimal(t.commission))), new Decimal(0));
+  const wins = trades.filter(t => new Decimal(t.pnl).gt(0));
+  const losses = trades.filter(t => new Decimal(t.pnl).lt(0));
+
   const winRate = trades.length > 0 ? (wins.length / trades.length) * 100 : 0;
-  const averageWin = wins.length > 0 ? wins.reduce((sum, t) => sum + t.pnl, 0) / wins.length : 0;
-  const averageLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, t) => sum + t.pnl, 0) / losses.length) : 0;
-  const profitFactor = averageLoss > 0 ? averageWin / averageLoss : 0;
-  
+  const averageWin = wins.length > 0 ? wins.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(wins.length) : new Decimal(0);
+  const averageLoss = losses.length > 0 ? losses.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(losses.length).abs() : new Decimal(0);
+  const profitFactor = averageLoss.gt(0) ? averageWin.div(averageLoss).toNumber() : 0;
+
   return {
     period: '',
-    netPnL: Math.round(netPnL * 100) / 100,
+    netPnL: netPnL.toDecimalPlaces(2).toNumber(),
     tradeCount: trades.length,
     winRate: Math.round(winRate * 100) / 100,
-    averageWin: Math.round(averageWin * 100) / 100,
-    averageLoss: Math.round(averageLoss * 100) / 100,
+    averageWin: averageWin.toDecimalPlaces(2).toNumber(),
+    averageLoss: averageLoss.toDecimalPlaces(2).toNumber(),
     profitFactor: Math.round(profitFactor * 100) / 100
   };
 }
@@ -54,7 +55,7 @@ function getWeekNumber(date: Date): number {
   return Math.ceil((((date.getTime() - onejan.getTime()) / millisecsInDay) + onejan.getDay() + 1) / 7);
 }
 
-function analyzeTrends(trades: Trade[]): TrendAnalysis {
+function analyzeTrends(trades: SerializedTrade[]): TrendAnalysis {
   if (!trades || trades.length === 0) {
     return {
       monthly: [],
@@ -68,7 +69,7 @@ function analyzeTrends(trades: Trade[]): TrendAnalysis {
       overallTrend: 'stable'
     };
   }
-  
+
   // Group trades by month
   const monthlyGroups = trades.reduce((groups, trade) => {
     const date = new Date(trade.entryDate);
@@ -76,8 +77,8 @@ function analyzeTrends(trades: Trade[]): TrendAnalysis {
     if (!groups[monthKey]) groups[monthKey] = [];
     groups[monthKey].push(trade);
     return groups;
-  }, {} as Record<string, Trade[]>);
-  
+  }, {} as Record<string, SerializedTrade[]>);
+
   // Group trades by week
   const weeklyGroups = trades.reduce((groups, trade) => {
     const date = new Date(trade.entryDate);
@@ -85,8 +86,8 @@ function analyzeTrends(trades: Trade[]): TrendAnalysis {
     if (!groups[weekKey]) groups[weekKey] = [];
     groups[weekKey].push(trade);
     return groups;
-  }, {} as Record<string, Trade[]>);
-  
+  }, {} as Record<string, SerializedTrade[]>);
+
   // Group trades by day
   const dailyGroups = trades.reduce((groups, trade) => {
     const date = new Date(trade.entryDate);
@@ -94,67 +95,67 @@ function analyzeTrends(trades: Trade[]): TrendAnalysis {
     if (!groups[dayKey]) groups[dayKey] = [];
     groups[dayKey].push(trade);
     return groups;
-  }, {} as Record<string, Trade[]>);
-  
+  }, {} as Record<string, SerializedTrade[]>);
+
   // Calculate monthly trends
   const monthly = Object.entries(monthlyGroups)
     .map(([period, trades]) => {
       const metrics = calculatePeriodMetrics(trades);
       return metrics ? { ...metrics, period } : null;
     })
-    .filter(m => m !== null)
+    .filter((m): m is PerformanceTrend => m !== null)
     .sort((a, b) => a.period.localeCompare(b.period));
-  
+
   // Calculate weekly trends
   const weekly = Object.entries(weeklyGroups)
     .map(([period, trades]) => {
       const metrics = calculatePeriodMetrics(trades);
       return metrics ? { ...metrics, period } : null;
     })
-    .filter(m => m !== null)
+    .filter((m): m is PerformanceTrend => m !== null)
     .sort((a, b) => a.period.localeCompare(b.period));
-  
+
   // Calculate daily trends (last 30 days only)
   const daily = Object.entries(dailyGroups)
     .map(([period, trades]) => {
       const metrics = calculatePeriodMetrics(trades);
       return metrics ? { ...metrics, period } : null;
     })
-    .filter(m => m !== null)
+    .filter((m): m is PerformanceTrend => m !== null)
     .sort((a, b) => b.period.localeCompare(a.period))
     .slice(0, 30);
-  
+
   // Find best and worst periods
-  const bestMonth = monthly.length > 0 ? monthly.reduce((best, current) => 
+  const bestMonth = monthly.length > 0 ? monthly.reduce((best, current) =>
     current.netPnL > best.netPnL ? current : best
   ) : null;
-  
-  const worstMonth = monthly.length > 0 ? monthly.reduce((worst, current) => 
+
+  const worstMonth = monthly.length > 0 ? monthly.reduce((worst, current) =>
     current.netPnL < worst.netPnL ? current : worst
   ) : null;
-  
-  const bestWeek = weekly.length > 0 ? weekly.reduce((best, current) => 
+
+  const bestWeek = weekly.length > 0 ? weekly.reduce((best, current) =>
     current.netPnL > best.netPnL ? current : best
   ) : null;
-  
-  const worstWeek = weekly.length > 0 ? weekly.reduce((worst, current) => 
+
+  const worstWeek = weekly.length > 0 ? weekly.reduce((worst, current) =>
     current.netPnL < worst.netPnL ? current : worst
   ) : null;
-  
+
   // Calculate consistency (percentage of profitable periods)
   const profitableMonths = monthly.filter(m => m.netPnL > 0).length;
   const consistency = monthly.length > 0 ? (profitableMonths / monthly.length) * 100 : 0;
-  
+
   // Determine overall trend
   let overallTrend: 'improving' | 'declining' | 'stable' = 'stable';
   if (monthly.length >= 3) {
     const recentMonths = monthly.slice(-3);
     const earlierMonths = monthly.slice(-6, -3);
-    
+
     if (recentMonths.length >= 2 && earlierMonths.length >= 2) {
       const recentAvg = recentMonths.reduce((sum, m) => sum + m.netPnL, 0) / recentMonths.length;
       const earlierAvg = earlierMonths.reduce((sum, m) => sum + m.netPnL, 0) / earlierMonths.length;
-      
+
       if (recentAvg > earlierAvg * 1.1) {
         overallTrend = 'improving';
       } else if (recentAvg < earlierAvg * 0.9) {
@@ -162,7 +163,7 @@ function analyzeTrends(trades: Trade[]): TrendAnalysis {
       }
     }
   }
-  
+
   return {
     monthly,
     weekly,
@@ -198,6 +199,6 @@ export const getPerformanceTrends = tool({
       });
     }
 
-    return analyzeTrends(trades);
+    return analyzeTrends(trades as SerializedTrade[]);
   }
-}); 
+});

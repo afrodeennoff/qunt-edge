@@ -156,10 +156,13 @@ export class MetricsCollector {
   }
 
   getMetrics(widgetId?: string): WidgetMetrics[] {
+    const bufferedMetrics = Array.from(this.metricsBuffer.values()).flat()
+    const allMetrics = [...this.metricsHistory, ...bufferedMetrics]
+
     if (widgetId) {
-      return this.metricsHistory.filter(m => m.widgetId === widgetId)
+      return allMetrics.filter(m => m.widgetId === widgetId)
     }
-    return [...this.metricsHistory]
+    return allMetrics
   }
 
   getSnapshot(): MetricsSnapshot {

@@ -8,9 +8,9 @@ import { isAfter } from 'date-fns'
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
 import { defaultLayouts } from '@/lib/default-layouts'
-import { formatTimestamp } from '@/lib/date-utils'
+import { formatTimestamp, isChronologicalRange, normalizeToUtcTimestamp } from '@/lib/date-utils'
 import { v5 as uuidv5 } from 'uuid'
-import { Decimal } from '@prisma/client-runtime-utils'
+// Removed Decimal import from @prisma/client-runtime-utils
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
 
@@ -18,19 +18,36 @@ const importTradeSchema = z.object({
   accountNumber: z.string().min(1, 'Account number is required'),
   instrument: z.string().min(1, 'Instrument is required'),
   side: z.string().optional(),
-  quantity: z.coerce.number().positive('Quantity must be positive'),
-  entryPrice: z.coerce.number(),
-  closePrice: z.coerce.number(),
-  pnl: z.coerce.number(),
-  commission: z.coerce.number().default(0),
-  entryDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid entry date'),
-  closeDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid close date'),
-  timeInPosition: z.coerce.number().optional(),
+  quantity: z.union([z.string(), z.number()]).transform(v => v.toString()),
+  entryPrice: z.union([z.string(), z.number()]).transform(v => v.toString()),
+  closePrice: z.union([z.string(), z.number()]).transform(v => v.toString()),
+  pnl: z.union([z.string(), z.number()]).transform(v => v.toString()),
+  commission: z.union([z.string(), z.number()]).default('0').transform(v => v.toString()),
+  entryDate: z.string().transform((value, ctx) => {
+    try {
+      return normalizeToUtcTimestamp(value)
+    } catch {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid entry date' })
+      return z.NEVER
+    }
+  }),
+  closeDate: z.string().transform((value, ctx) => {
+    try {
+      return normalizeToUtcTimestamp(value)
+    } catch {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid close date' })
+      return z.NEVER
+    }
+  }),
+  timeInPosition: z.union([z.string(), z.number()]).optional().transform(v => v?.toString()),
   entryId: z.string().optional(),
   closeId: z.string().optional(),
   comment: z.string().optional(),
   tags: z.array(z.string()).optional(),
   groupId: z.string().nullish(),
+}).refine((trade) => isChronologicalRange(trade.entryDate, trade.closeDate), {
+  path: ['closeDate'],
+  message: 'Close date must be equal to or later than entry date',
 })
 
 type TradeError =
@@ -45,13 +62,15 @@ interface TradeResponse {
   details?: unknown
 }
 
-export type SerializedTrade = Omit<Trade, 'entryPrice' | 'closePrice' | 'pnl' | 'commission'> & {
-  entryPrice: number
-  closePrice: number
-  pnl: number
-  commission: number
+export type SerializedTrade = Omit<Trade, 'entryPrice' | 'closePrice' | 'pnl' | 'commission' | 'quantity' | 'timeInPosition' | 'entryDate' | 'closeDate'> & {
+  entryPrice: string
+  closePrice: string
+  pnl: string
+  commission: string
+  quantity: string
+  timeInPosition: string
   entryDate: string
-  closeDate: string
+  closeDate: string | null
 }
 
 export interface PaginatedTrades {
@@ -94,13 +113,15 @@ function validateLayouts(layouts: DashboardLayout): boolean {
 function serializeTrade(trade: Trade): SerializedTrade {
   return {
     ...trade,
-    entryPrice: trade.entryPrice,
-    closePrice: trade.closePrice,
-    pnl: trade.pnl,
-    commission: trade.commission,
-    entryDate: new Date(trade.entryDate).toISOString(),
-    closeDate: new Date(trade.closeDate).toISOString(),
-  }
+    entryPrice: trade.entryPrice?.toString() || "0",
+    closePrice: trade.closePrice?.toString() || "0",
+    pnl: trade.pnl?.toString() || "0",
+    commission: trade.commission?.toString() || "0",
+    quantity: trade.quantity?.toString() || "0",
+    timeInPosition: trade.timeInPosition?.toString() || "0",
+    entryDate: trade.entryDate instanceof Date ? trade.entryDate.toISOString() : new Date(trade.entryDate).toISOString(),
+    closeDate: trade.closeDate ? (trade.closeDate instanceof Date ? trade.closeDate.toISOString() : new Date(trade.closeDate).toISOString()) : null,
+  } as SerializedTrade
 }
 
 export async function revalidateCache(tags: string[]) {
@@ -163,13 +184,13 @@ async function resolveWritableUserId(rawUserId: string): Promise<string> {
   return created.id
 }
 
-function generateTradeUUID(trade: Partial<Trade>): string {
+function generateTradeUUID(trade: Partial<Trade> | any): string {
   const tradeSignature = [
     trade.userId || '',
     trade.accountNumber || '',
     trade.instrument || '',
-    trade.entryDate || '',
-    trade.closeDate || '',
+    trade.entryDate instanceof Date ? trade.entryDate.toISOString() : (trade.entryDate || ''),
+    trade.closeDate instanceof Date ? trade.closeDate.toISOString() : (trade.closeDate || ''),
     trade.entryPrice?.toString() || '',
     trade.closePrice?.toString() || '',
     (trade.quantity || 0).toString(),
@@ -216,15 +237,23 @@ export async function saveTradesAction(
         validationErrors.push(`Trade ${trade.instrument} has a future entry date`)
         continue
       }
+      if (isAfter(new Date(trade.closeDate), now)) {
+        validationErrors.push(`Trade ${trade.instrument} has a future close date`)
+        continue
+      }
 
       userAssignedTrades.push({
         ...trade,
         userId: userId,
         accountNumber: trade.accountNumber.trim(),
-        entryPrice: new Decimal(trade.entryPrice),
-        closePrice: new Decimal(trade.closePrice),
-        pnl: new Decimal(trade.pnl),
-        commission: new Decimal(trade.commission || 0),
+        entryPrice: new Prisma.Decimal(trade.entryPrice),
+        closePrice: new Prisma.Decimal(trade.closePrice),
+        pnl: new Prisma.Decimal(trade.pnl),
+        commission: new Prisma.Decimal(trade.commission || '0'),
+        quantity: new Prisma.Decimal(trade.quantity),
+        timeInPosition: new Prisma.Decimal(trade.timeInPosition || '0'),
+        entryDate: new Date(trade.entryDate),
+        closeDate: new Date(trade.closeDate),
         id: generateTradeUUID({ ...trade, userId: userId }),
       })
     }
