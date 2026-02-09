@@ -104,7 +104,7 @@ export default function AnalysisDemo() {
               </div>
             </div>
 
-            <div className="h-[300px] w-full relative z-10">
+            <div data-chart-surface="modern" className="h-[300px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={mockData}>
                   <defs>

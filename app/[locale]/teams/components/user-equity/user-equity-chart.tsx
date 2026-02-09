@@ -207,7 +207,7 @@ export function UserEquityChart({ equityCurve, userId, totalPnL, showDailyView =
   }
 
   return (
-    <div className="h-32">
+    <div data-chart-surface="modern" className="h-32">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart 
           data={chartData}

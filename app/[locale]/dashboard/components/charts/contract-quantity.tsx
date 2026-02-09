@@ -94,7 +94,7 @@ export default function ContractQuantityChart({
   };
 
   return (
-    <Card>
+    <Card data-chart-surface="modern">
       <CardHeader className="sm:min-h-[120px] flex flex-col items-stretch space-y-0 border-b p-6">
         <CardTitle>{t("contracts.title")}</CardTitle>
         <CardDescription>{t("contracts.description")}</CardDescription>

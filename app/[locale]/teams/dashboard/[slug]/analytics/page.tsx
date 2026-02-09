@@ -172,7 +172,7 @@ export default function TeamAnalyticsPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-12">
-        <Card className="border-border/70 bg-card/70 xl:col-span-8">
+        <Card data-chart-surface="modern" className="border-border/70 bg-card/70 xl:col-span-8">
           <CardHeader>
             <CardTitle className="text-lg">Cumulative Equity</CardTitle>
             <CardDescription>Rolling team performance over time</CardDescription>

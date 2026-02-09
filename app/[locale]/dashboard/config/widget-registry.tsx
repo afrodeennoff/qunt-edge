@@ -57,7 +57,7 @@ export interface WidgetConfig {
 // Helper function to create table preview
 function createTablePreview(type: 'tradeTableReview' | 'consistencyTable') {
   return (
-    <Card className="h-[300px]">
+    <Card data-chart-surface="modern" className="h-[300px]">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium">
           {type === 'tradeTableReview' ? 'Trade Review' : 'Consistency Analysis'}
@@ -105,7 +105,7 @@ function createPropfirmPreview() {
   ]
 
   return (
-    <Card className="h-[300px]">
+    <Card data-chart-surface="modern" className="h-[300px]">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium">Propfirm</CardTitle>
       </CardHeader>
@@ -224,7 +224,7 @@ function CreateCalendarPreview() {
   ] as const
 
   return (
-    <Card className="h-[500px] flex flex-col">
+    <Card data-chart-surface="modern" className="h-[500px] flex flex-col">
       <CardHeader className="pb-3 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

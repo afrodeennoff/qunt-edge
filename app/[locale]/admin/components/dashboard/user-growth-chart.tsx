@@ -86,7 +86,7 @@ export function UserGrowthChart({ dailyData, allUsers }: UserGrowthChartProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card data-chart-surface="modern">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>User Growth Analysis</CardTitle>
           <Select value={timePeriod} onValueChange={(value: 'daily' | 'weekly' | 'monthly' | 'yearly') => setTimePeriod(value)}>

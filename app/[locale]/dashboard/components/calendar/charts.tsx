@@ -183,7 +183,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
 
   return (
     <div className="space-y-4">
-      <Card className="w-full">
+      <Card data-chart-surface="modern" className="w-full">
         <CardHeader>
           <CardTitle className="text-base md:text-lg">
             {isWeekly ? t('calendar.charts.weeklyEquityVariation') : t('calendar.charts.equityVariation')}
@@ -258,7 +258,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
         </CardContent>
       </Card>
 
-      <Card className="w-full">
+      <Card data-chart-surface="modern" className="w-full">
         <CardHeader>
           <CardTitle className="text-base md:text-lg">
             {isWeekly ? t('calendar.charts.weeklyPnlDistribution') : t('calendar.charts.dailyPnlDistribution')}

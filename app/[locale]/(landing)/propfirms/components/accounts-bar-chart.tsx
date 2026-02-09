@@ -44,7 +44,7 @@ export function AccountsBarChart({
   )
 
   return (
-    <Card>
+    <Card data-chart-surface="modern">
       <CardHeader>
         <CardTitle>{chartTitle}</CardTitle>
       </CardHeader>

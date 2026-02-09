@@ -184,7 +184,7 @@ export default function TimeRangePerformanceChart({
   };
 
   return (
-    <Card className="h-[500px] flex flex-col" style={themeVarsToStyle(theme)}>
+    <Card data-chart-surface="modern" className="h-[500px] flex flex-col" style={themeVarsToStyle(theme)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b shrink-0 p-3 sm:p-4 h-[56px]">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1.5">

@@ -200,7 +200,7 @@ export function TradeProgressChart({
   }
 
   return (
-    <div className="w-full space-y-2">
+    <div data-chart-surface="modern" className="w-full space-y-2">
       <ChartContainer
         config={chartConfig}
         className={cn("h-[200px] w-full", className)}

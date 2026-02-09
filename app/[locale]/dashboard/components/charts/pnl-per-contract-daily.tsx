@@ -201,7 +201,7 @@ export default function PnLPerContractDailyChart({
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card data-chart-surface="modern" className="h-full flex flex-col">
       <CardHeader
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b shrink-0",

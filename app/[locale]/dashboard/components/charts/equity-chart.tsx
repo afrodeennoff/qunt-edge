@@ -151,8 +151,8 @@ const renderDot = (props: any) => {
           cx={cx}
           cy={cy}
           r={5}
-          fill="#ff6b6b"
-          stroke="white"
+          fill="hsl(var(--destructive))"
+          stroke="hsl(var(--background))"
           strokeWidth={2}
         />
       );
@@ -172,7 +172,7 @@ const renderDot = (props: any) => {
           cy={cy}
           r={4}
           fill={fg}
-          stroke="white"
+          stroke="hsl(var(--background))"
           strokeWidth={1}
         />
       );
@@ -189,7 +189,7 @@ const renderDot = (props: any) => {
           cy={cy}
           r={5}
           fill="hsl(var(--destructive))"
-          stroke="white"
+          stroke="hsl(var(--background))"
           strokeWidth={2}
         />
       );
@@ -205,7 +205,7 @@ const renderDot = (props: any) => {
           cy={cy}
           r={4}
           fill={fg}
-          stroke="white"
+          stroke="hsl(var(--background))"
           strokeWidth={1}
         />
       );
@@ -889,7 +889,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [isSharedView, showIndividual, chartData]);
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card data-chart-surface="modern" className="h-full flex flex-col">
       <CardHeader
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b shrink-0 h-14",

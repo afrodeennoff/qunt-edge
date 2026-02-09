@@ -57,6 +57,7 @@ function SparkChartFrame<T extends Record<string, unknown>>({
 
   return (
     <ChartContainer
+      data-chart-surface="modern"
       config={config}
       className={cn("w-full", className)}
       style={{ height }}

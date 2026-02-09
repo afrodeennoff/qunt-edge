@@ -86,7 +86,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card data-chart-surface="modern" className="h-full flex flex-col">
       <CardHeader 
         className={cn(
           "flex flex-row items-center justify-between space-y-0 border-b shrink-0",

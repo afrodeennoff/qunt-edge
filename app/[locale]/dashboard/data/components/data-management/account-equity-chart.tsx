@@ -13,15 +13,15 @@ import { cn } from "@/lib/utils"
 const chartConfig = {
   balance: {
     label: "Balance",
-    color: "#2563eb",
+    color: "hsl(var(--chart-6))",
   },
   target: {
     label: "Profit Target",
-    color: "#16a34a",
+    color: "hsl(var(--chart-win))",
   },
   drawdown: {
     label: "Drawdown Level",
-    color: "#dc2626",
+    color: "hsl(var(--chart-loss))",
   },
 } satisfies ChartConfig
 
@@ -217,11 +217,11 @@ export function AccountEquityChart({
 
     const getPayoutColor = (status: string) => {
       switch (status) {
-        case 'PENDING': return '#9CA3AF'
-        case 'VALIDATED': return '#F97316'
-        case 'REFUSED': return '#DC2626'
-        case 'PAID': return '#16A34A'
-        default: return '#9CA3AF'
+        case 'PENDING': return 'hsl(var(--muted-foreground))'
+        case 'VALIDATED': return 'hsl(var(--chart-4))'
+        case 'REFUSED': return 'hsl(var(--destructive))'
+        case 'PAID': return 'hsl(var(--chart-win))'
+        default: return 'hsl(var(--muted-foreground))'
       }
     }
 
@@ -231,7 +231,7 @@ export function AccountEquityChart({
         cy={cy}
         r={4}
         fill={getPayoutColor(payload.payoutStatus)}
-        stroke="white"
+        stroke="hsl(var(--background))"
         strokeWidth={1}
       />
     )
@@ -239,6 +239,7 @@ export function AccountEquityChart({
 
   return (
     <ChartContainer
+      data-chart-surface="modern"
       config={chartConfig}
       className="aspect-auto h-[250px] w-full"
     >
@@ -281,24 +282,24 @@ export function AccountEquityChart({
                       {format(safeParseDate(data.date) || new Date(), 'MMM dd, yyyy')}
                     </p>
                     <p className="text-sm">Balance: ${data.balance.toLocaleString()}</p>
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-destructive">
                       Drawdown Level: ${data.drawdownLevel.toLocaleString()}
                     </p>
                     {data.isPayout && data.payoutStatus && (
                       <p className={cn(
                         "text-sm font-medium",
                         {
-                          "text-gray-500": data.payoutStatus === 'PENDING',
-                          "text-orange-500": data.payoutStatus === 'VALIDATED',
-                          "text-red-500": data.payoutStatus === 'REFUSED',
-                          "text-green-500": data.payoutStatus === 'PAID',
+                          "text-muted-foreground": data.payoutStatus === 'PENDING',
+                          "text-[hsl(var(--chart-4))]": data.payoutStatus === 'VALIDATED',
+                          "text-destructive": data.payoutStatus === 'REFUSED',
+                          "text-[hsl(var(--chart-win))]": data.payoutStatus === 'PAID',
                         }
                       )}>
                         Payout ({data.payoutStatus.toLowerCase()})
                       </p>
                     )}
                     {data.isAfterReset && (
-                      <p className="text-sm font-medium text-purple-500">After Reset Date</p>
+                      <p className="text-sm font-medium text-[hsl(var(--chart-7))]">After Reset Date</p>
                     )}
                   </div>
                 )
@@ -338,12 +339,12 @@ export function AccountEquityChart({
           {resetDate && (
             <ReferenceLine
               x={resetDate}
-              stroke="#FF8C00"
+              stroke="hsl(var(--chart-5))"
               strokeDasharray="3 3"
               label={{
                 value: "Reset Date",
                 position: "insideTopLeft",
-                fill: "#FF8C00",
+                fill: "hsl(var(--chart-5))",
                 fontSize: 12,
               }}
             />

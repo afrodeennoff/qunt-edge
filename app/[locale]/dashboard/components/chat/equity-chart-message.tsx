@@ -97,8 +97,8 @@ const renderDot = (props: any) => {
           cx={cx}
           cy={cy}
           r={5}
-          fill="#ff6b6b"
-          stroke="white"
+          fill="hsl(var(--destructive))"
+          stroke="hsl(var(--background))"
           strokeWidth={2}
         />
       );
@@ -118,7 +118,7 @@ const renderDot = (props: any) => {
           cy={cy}
           r={4}
           fill={getPayoutColor(status)}
-          stroke="white"
+          stroke="hsl(var(--background))"
           strokeWidth={1}
         />
       );
@@ -135,8 +135,8 @@ const renderDot = (props: any) => {
           cx={cx}
           cy={cy}
           r={5}
-          fill="#ff6b6b"
-          stroke="white"
+          fill="hsl(var(--destructive))"
+          stroke="hsl(var(--background))"
           strokeWidth={2}
         />
       );
@@ -151,7 +151,7 @@ const renderDot = (props: any) => {
           cy={cy}
           r={4}
           fill={getPayoutColor(status)}
-          stroke="white"
+          stroke="hsl(var(--background))"
           strokeWidth={1}
         />
       );
@@ -167,15 +167,15 @@ const renderDot = (props: any) => {
 const getPayoutColor = (status: string) => {
   switch (status) {
     case "PENDING":
-      return "#9CA3AF";
+      return "hsl(var(--muted-foreground))";
     case "VALIDATED":
-      return "#F97316";
+      return "hsl(var(--chart-4))";
     case "REFUSED":
-      return "#DC2626";
+      return "hsl(var(--destructive))";
     case "PAID":
-      return "#16A34A";
+      return "hsl(var(--chart-win))";
     default:
-      return "#9CA3AF";
+      return "hsl(var(--muted-foreground))";
   }
 };
 
@@ -413,7 +413,7 @@ export function EquityChartMessage({
         </div>
       </div>
 
-      <div className="w-full h-[300px] border rounded-lg p-2 bg-background">
+      <div data-chart-surface="modern" className="w-full h-[300px] border rounded-lg p-2 bg-background">
         <ChartContainer config={chartConfig} className="w-full h-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart

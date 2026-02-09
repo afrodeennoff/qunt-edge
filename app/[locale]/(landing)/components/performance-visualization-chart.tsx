@@ -41,15 +41,15 @@ export function PerformanceVisualizationChart() {
   const mid = chartHeight / 2
 
   return (
-    <div className="h-full w-full rounded-xl border bg-card px-4 py-3 shadow-sm">
+    <div data-chart-surface="modern" className="h-full w-full rounded-xl border bg-card px-4 py-3 shadow-sm">
       <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="h-2 w-2 rounded-full bg-[hsl(var(--chart-win))]" />
             PnL / contract
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-sky-500" />
+            <span className="h-2 w-2 rounded-full bg-[hsl(var(--chart-6))]" />
             Contracts
           </span>
         </div>
@@ -76,7 +76,7 @@ export function PerformanceVisualizationChart() {
                 width={18}
                 height={barHeight}
                 rx={4}
-                className={isPositive ? "fill-emerald-500/80" : "fill-rose-500/80"}
+                className={isPositive ? "fill-[hsl(var(--chart-win)/0.85)]" : "fill-[hsl(var(--chart-loss)/0.85)]"}
               />
             )
           })}
@@ -91,7 +91,7 @@ export function PerformanceVisualizationChart() {
                 cx={x}
                 cy={y}
                 r={4}
-                className="fill-sky-500"
+                className="fill-[hsl(var(--chart-6))]"
               />
             )
           })}
@@ -102,7 +102,7 @@ export function PerformanceVisualizationChart() {
               const y = mid - ((point.contracts / 4) * (chartHeight / 2 - 30))
               return `${idx === 0 ? "M" : "L"} ${x} ${y}`
             }).join(" ")}
-            className="stroke-sky-500"
+            className="stroke-[hsl(var(--chart-6))]"
             strokeWidth={2}
             fill="none"
             strokeLinecap="round"
