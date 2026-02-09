@@ -43,32 +43,42 @@ export function FreeUsersTable() {
         return sortConfig.direction === 'asc'
           ? a.trades.length - b.trades.length
           : b.trades.length - a.trades.length
-      } 
-      else if (sortConfig.key === 'tradeStart'){
-        const aFirst = a.trades.reduce((earliest, trade) => 
-          trade.entryDate < earliest ? trade.entryDate : earliest,
-          a.trades[0]?.entryDate || ''
-        )
-        const bFirst = b.trades.reduce((earliest, trade) => 
-          trade.entryDate < earliest ? trade.entryDate : earliest,
-          b.trades[0]?.entryDate || ''
-        )
-        return sortConfig.direction === 'asc'
-          ? aFirst.localeCompare(bFirst) ?? 0
-          : bFirst.localeCompare(aFirst) ?? 0
       }
-      else if(sortConfig.key === 'tradeLast') {
-        const aLatest = a.trades.reduce((latest, trade) => 
-          trade.entryDate > latest ? trade.entryDate : latest, 
-          a.trades[0]?.entryDate || ''
+      else if (sortConfig.key === 'tradeStart') {
+        const aFirst = a.trades.reduce((earliest, trade) =>
+          trade.entryDate < earliest ? trade.entryDate : earliest,
+          a.trades[0]?.entryDate
         )
-        const bLatest = b.trades.reduce((latest, trade) => 
-          trade.entryDate > latest ? trade.entryDate : latest,
-          b.trades[0]?.entryDate || ''
+        const bFirst = b.trades.reduce((earliest, trade) =>
+          trade.entryDate < earliest ? trade.entryDate : earliest,
+          b.trades[0]?.entryDate
         )
+
+        if (!aFirst || !bFirst) return 0
+        const aTime = new Date(aFirst).getTime()
+        const bTime = new Date(bFirst).getTime()
+
         return sortConfig.direction === 'asc'
-          ? aLatest.localeCompare(bLatest) ?? 0
-          : bLatest.localeCompare(aLatest) ?? 0
+          ? aTime - bTime
+          : bTime - aTime
+      }
+      else if (sortConfig.key === 'tradeLast') {
+        const aLatest = a.trades.reduce((latest, trade) =>
+          trade.entryDate > latest ? trade.entryDate : latest,
+          a.trades[0]?.entryDate
+        )
+        const bLatest = b.trades.reduce((latest, trade) =>
+          trade.entryDate > latest ? trade.entryDate : latest,
+          b.trades[0]?.entryDate
+        )
+
+        if (!aLatest || !bLatest) return 0
+        const aTime = new Date(aLatest).getTime()
+        const bTime = new Date(bLatest).getTime()
+
+        return sortConfig.direction === 'asc'
+          ? aTime - bTime
+          : bTime - aTime
       }
       else {
         return sortConfig.direction === 'asc'
@@ -141,13 +151,13 @@ export function FreeUsersTable() {
               <TableRow key={user.email}>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.trades.length}</TableCell>
-                <TableCell>{user.trades[0]?.entryDate?.slice(0,10) || '-'}</TableCell>
+                <TableCell>{user.trades[0]?.entryDate ? format(new Date(user.trades[0].entryDate), 'yyyy-MM-dd') : '-'}</TableCell>
                 <TableCell>
-                  {user.trades.length > 0 
-                    ? user.trades.reduce((latest, trade) => 
-                        trade.entryDate > latest ? trade.entryDate : latest,
-                        user.trades[0].entryDate
-                      ).slice(0,10)
+                  {user.trades.length > 0
+                    ? format(new Date(user.trades.reduce((latest, trade) =>
+                      trade.entryDate > latest ? trade.entryDate : latest,
+                      user.trades[0].entryDate
+                    )), 'yyyy-MM-dd')
                     : '-'
                   }
                 </TableCell>
