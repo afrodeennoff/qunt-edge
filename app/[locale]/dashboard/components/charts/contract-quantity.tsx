@@ -69,6 +69,7 @@ export default function ContractQuantityChart({
   }, [trades]);
 
   const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
+  const hasData = chartData.some((data) => data.tradeCount > 0);
 
   const getColor = (count: number) => {
     const intensity = Math.max(0.2, count / maxTradeCount);
@@ -100,56 +101,62 @@ export default function ContractQuantityChart({
         <CardDescription>{t("contracts.description")}</CardDescription>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[350px] w-full"
-        >
-          <BarChart
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-              top: 12,
-              bottom: 12,
-            }}
+        {hasData ? (
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[350px] w-full"
           >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              className="text-border dark:opacity-[0.12] opacity-[0.2]"
-            />
-            <XAxis
-              dataKey="hour"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value: number) =>
-                `${value}${t("contracts.tooltip.hour")}`
-              }
-              ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value: number) => value.toFixed(0)}
-              label={{
-                value: t("contracts.axis.contracts"),
-                angle: -90,
-                position: "insideLeft",
+            <BarChart
+              data={chartData}
+              margin={{
+                left: 12,
+                right: 12,
+                top: 12,
+                bottom: 12,
               }}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar
-              dataKey="totalQuantity"
-              radius={[4, 4, 0, 0]}
-              className="transition-all duration-300 ease-in-out"
             >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getColor(entry.tradeCount)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="text-border dark:opacity-[0.12] opacity-[0.2]"
+              />
+              <XAxis
+                dataKey="hour"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value: number) =>
+                  `${value}${t("contracts.tooltip.hour")}`
+                }
+                ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value: number) => value.toFixed(0)}
+                label={{
+                  value: t("contracts.axis.contracts"),
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar
+                dataKey="totalQuantity"
+                radius={[4, 4, 0, 0]}
+                className="transition-all duration-300 ease-in-out"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getColor(entry.tradeCount)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        ) : (
+          <div className="h-[350px] w-full flex items-center justify-center text-sm text-muted-foreground">
+            No data for current filters
+          </div>
+        )}
       </CardContent>
     </Card>
   );

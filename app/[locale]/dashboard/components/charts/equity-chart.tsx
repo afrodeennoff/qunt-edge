@@ -877,6 +877,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       );
     });
   }, [selectedAccounts, showIndividual, accountColorMap, isSharedView]);
+  const hasData = chartData.length > 0;
 
   React.useEffect(() => {
     console.log("[EquityChart Render] isSharedView:", isSharedView);
@@ -951,7 +952,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                   {t("equity.loading")}
                 </div>
               </div>
-            ) : (
+            ) : hasData ? (
               <ChartContainer config={chartConfig} className="w-full h-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -1022,6 +1023,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                No data for current filters
+              </div>
             )}
           </div>
 

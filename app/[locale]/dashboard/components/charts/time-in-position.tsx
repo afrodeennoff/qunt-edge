@@ -80,6 +80,7 @@ export default function TimeInPositionChart({
   }, [trades]);
 
   const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
+  const hasData = chartData.some((data) => data.tradeCount > 0);
 
   const getColor = (count: number) => {
     const intensity = Math.max(0.2, count / maxTradeCount);
@@ -169,8 +170,9 @@ export default function TimeInPositionChart({
         )}
       >
         <div className={cn("w-full h-full")}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
               data={chartData}
               margin={
                 size === "small"
@@ -230,8 +232,13 @@ export default function TimeInPositionChart({
                   />
                 ))}
               </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              No data for current filters
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

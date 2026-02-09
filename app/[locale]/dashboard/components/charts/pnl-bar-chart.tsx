@@ -122,6 +122,9 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
         ),
     [calendarData],
   );
+  const hasData = chartData.some(
+    (entry) => (entry.shortNumber || 0) + (entry.longNumber || 0) > 0,
+  );
 
   const maxPnL = Math.max(...chartData.map((d) => d.pnl));
   const minPnL = Math.min(...chartData.map((d) => d.pnl));
@@ -195,8 +198,9 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
         )}
       >
         <div className={cn("w-full h-full")}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={getChartMargins()}>
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={getChartMargins()}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 className="text-border dark:opacity-[0.12] opacity-[0.2]"
@@ -250,8 +254,13 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                   />
                 ))}
               </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              No data for current filters
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
