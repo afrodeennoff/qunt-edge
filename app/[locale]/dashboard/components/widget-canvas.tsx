@@ -23,6 +23,7 @@ import { useUserStore, DashboardLayoutWithWidgets } from '../../../../store/user
 import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { Prisma, DashboardLayout } from "@/prisma/generated/prisma"
+import { useDashboard } from '../dashboard-context'
 
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
@@ -366,7 +367,7 @@ export default function WidgetCanvas() {
   const { isMobile, dashboardLayout:layouts, setDashboardLayout:setLayouts } = useUserStore(state => state)
   const  user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useData()
-  const [isCustomizing, setIsCustomizing] = useState(false)
+  const { isCustomizing, setIsCustomizing } = useDashboard()
   const [isUserAction, setIsUserAction] = useState(false)
   const t = useI18n()
 
