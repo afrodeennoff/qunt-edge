@@ -107,6 +107,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
       }
     })
   }, [trades])
+  const hasData = chartData.some((d) => d.trades > 0)
 
   const handleClick = React.useCallback(() => {
     if (!activeRange) return
@@ -230,8 +231,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
           className="w-full h-full cursor-pointer" 
           onClick={handleClick}
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
               data={chartData}
               margin={
                 size === 'small'
@@ -303,8 +305,13 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   />
                 ))}
               </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              No data for current filters
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

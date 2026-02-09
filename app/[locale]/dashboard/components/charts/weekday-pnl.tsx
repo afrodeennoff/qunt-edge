@@ -94,6 +94,7 @@ export default function WeekdayPNLChart({
 
   const maxPnL = Math.max(...weekdayData.map((d) => d.pnl));
   const minPnL = Math.min(...weekdayData.map((d) => d.pnl));
+  const hasData = weekdayData.some((d) => d.tradeCount > 0);
 
   const getColor = (value: number) => {
     const ratio = Math.abs((value - minPnL) / (maxPnL - minPnL));
@@ -215,8 +216,9 @@ export default function WeekdayPNLChart({
         )}
       >
         <div className="w-full h-full cursor-pointer" onClick={handleClick}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
               data={weekdayData}
               margin={
                 size === "small"
@@ -279,8 +281,13 @@ export default function WeekdayPNLChart({
                   />
                 ))}
               </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              No data for current filters
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

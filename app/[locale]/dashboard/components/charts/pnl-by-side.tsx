@@ -137,6 +137,7 @@ export default function PnLBySideChart({
 
   const maxPnL = Math.max(...chartData.map((d) => d.pnl));
   const minPnL = Math.min(...chartData.map((d) => d.pnl));
+  const hasData = chartData.some((d) => d.tradeCount > 0);
   const absMax = Math.max(Math.abs(maxPnL), Math.abs(minPnL));
 
   const getColor = (value: number) => {
@@ -204,8 +205,9 @@ export default function PnLBySideChart({
         )}
       >
         <div className={cn("w-full h-full")}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
               data={chartData}
               margin={
                 size === "small"
@@ -258,8 +260,13 @@ export default function PnLBySideChart({
                   <Cell key={`cell-${index}`} fill={getColor(entry.pnl)} />
                 ))}
               </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              No data for current filters
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

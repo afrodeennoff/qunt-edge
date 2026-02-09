@@ -74,6 +74,7 @@ export default function CommissionsPnLChart({
       },
     ];
   }, [trades, t]);
+  const hasData = chartData.some((item) => item.value > 0);
 
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: any }> }) => {
@@ -161,8 +162,9 @@ export default function CommissionsPnLChart({
         )}
       >
         <div className="w-full h-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
@@ -232,8 +234,13 @@ export default function CommissionsPnLChart({
                   zIndex: 1000
                 }}
               />
-            </PieChart>
-          </ResponsiveContainer>
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+              No data for current filters
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
