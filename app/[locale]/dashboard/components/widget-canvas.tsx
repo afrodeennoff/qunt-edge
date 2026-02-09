@@ -635,7 +635,7 @@ export default function WidgetCanvas() {
       effectiveSize = 'medium'
     }
     
-    const grid = sizeToGrid(effectiveSize)
+    const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
     const updatedWidgets = layouts[activeLayout].map(widget => 
       widget.i === i ? { ...widget, size: effectiveSize, ...grid } : widget
     )
