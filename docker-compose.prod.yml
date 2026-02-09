@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.bun
+    image: deltalytix:prod
+    container_name: deltalytix-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      ENV: container
+    ports:
+      - "${APP_BIND_IP:-127.0.0.1}:${PORT:-3000}:3000"
+
+  migrate:
+    image: oven/bun:1
+    container_name: deltalytix-migrate
+    working_dir: /app
+    profiles:
+      - migrate
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    command: sh -c "bun install --frozen-lockfile && bunx prisma migrate deploy"

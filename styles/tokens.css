@@ -1,0 +1,313 @@
+/**
+ * Centralized Design Token System
+ * Replaces CDN-based Tailwind approach with token-based architecture
+ * All colors use HSL format for consistency and theme support
+ */
+
+@layer base {
+  :root {
+    /* ===== BACKGROUND HIERARCHY (7 levels) ===== */
+    /* Semantic background tokens from darkest to lightest */
+    --bg-base: 240 10% 3.9%;
+    --bg-elevated: 240 10% 5%;
+    --bg-card: 240 10% 7%;
+    --bg-card-hover: 240 10% 9%;
+    --bg-overlay: 240 10% 11%;
+    --bg-modal: 240 10% 13%;
+    --bg-highlight: 240 10% 15%;
+
+    /* ===== PRIMARY ACCENT (Teal-500: #2dd4bf) ===== */
+    --accent-teal: 173 58% 39%;
+    --accent-teal-hover: 173 58% 44%;
+    --accent-teal-active: 173 58% 34%;
+    --accent-teal-subtle: 173 58% 39%;
+    --accent-teal-glow: 173 58% 39%;
+
+    /* ===== NEUTRAL PALETTE (Zinc scale) ===== */
+    --neutral-50: 240 5% 96%;
+    --neutral-100: 240 5% 90%;
+    --neutral-200: 240 4% 80%;
+    --neutral-300: 240 4% 70%;
+    --neutral-400: 240 4% 60%;
+    --neutral-500: 240 5% 50%;
+    --neutral-600: 240 5% 40%;
+    --neutral-700: 240 5% 30%;
+    --neutral-800: 240 4% 20%;
+    --neutral-900: 240 6% 10%;
+    --neutral-950: 240 10% 3.9%;
+
+    /* ===== FOREGROUND COLORS ===== */
+    --fg-primary: 0 0% 98%;
+    --fg-secondary: 240 5% 65%;
+    --fg-tertiary: 240 5% 45%;
+    --fg-muted: 240 5% 35%;
+    --fg-disabled: 240 5% 25%;
+
+    /* ===== BORDER COLORS ===== */
+    --border-default: 240 4% 20%;
+    --border-subtle: 240 4% 15%;
+    --border-strong: 240 4% 25%;
+    --border-focus: var(--accent-teal);
+    --border-error: 0 62% 50%;
+    --border-warning: 35 85% 55%;
+    --border-success: var(--accent-teal);
+
+    /* ===== GLASSMORPHISM TOKENS ===== */
+    --glass-bg: var(--bg-elevated) / 0.6;
+    --glass-bg-strong: var(--bg-card) / 0.8;
+    --glass-bg-subtle: var(--bg-base) / 0.4;
+    --glass-blur: blur(20px);
+    --glass-blur-strong: blur(40px);
+    --glass-border: 255 255 255 / 0.05;
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    /* ===== INTERACTIVE STATES ===== */
+    --hover-overlay: 255 255 255 / 0.05;
+    --hover-accent: var(--accent-teal) / 0.1;
+    --active-overlay: 255 255 255 / 0.1;
+    --focus-ring: var(--accent-teal) / 0.5;
+    --focus-ring-offset: 0 0 0 2px var(--bg-base);
+
+    /* ===== SEMANTIC COLORS ===== */
+    --color-error: 0 62% 50%;
+    --color-error-bg: 0 62% 50% / 0.1;
+    --color-warning: 35 85% 55%;
+    --color-warning-bg: 35 85% 55% / 0.1;
+    --color-success: var(--accent-teal);
+    --color-success-bg: var(--accent-teal) / 0.1;
+    --color-info: 217 91% 60%;
+    --color-info-bg: 217 91% 60% / 0.1;
+
+    /* ===== CHART COLORS ===== */
+    --chart-positive: var(--accent-teal);
+    --chart-negative: 0 62% 55%;
+    --chart-neutral: 240 5% 50%;
+    --chart-1: 217 91% 60%;
+    --chart-2: var(--accent-teal);
+    --chart-3: 197 55% 60%;
+    --chart-4: 43 85% 60%;
+    --chart-5: 27 85% 60%;
+    --chart-6: 206 80% 60%;
+    --chart-7: 260 65% 65%;
+    --chart-8: 336 70% 65%;
+
+    /* ===== ANIMATION TIMING ===== */
+    --transition-fast: 150ms;
+    --transition-base: 200ms;
+    --transition-slow: 300ms;
+    --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --easing-in: cubic-bezier(0.4, 0, 1, 1);
+    --easing-out: cubic-bezier(0, 0, 0.2, 1);
+    --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* ===== SPACING ARCHITECTURE (Fluid & Logical) ===== */
+    --space-3xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+    --space-2xs: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+    --space-xs: clamp(0.75rem, 0.6rem + 0.75vw, 1rem);
+    --space-sm: clamp(1rem, 0.85rem + 0.75vw, 1.5rem);
+    --space-md: clamp(1.5rem, 1.25rem + 1.25vw, 2.5rem);
+    --space-lg: clamp(2rem, 1.75rem + 1.25vw, 3.5rem);
+    --space-xl: clamp(3rem, 2.5rem + 2.5vw, 5rem);
+    --space-2xl: clamp(4rem, 3.5rem + 2.5vw, 7rem);
+    --space-3xl: clamp(5rem, 4.5rem + 2.5vw, 10rem);
+
+    /* ===== CARD DESIGN TOKENS ===== */
+    --card-radius-sm: 0.5rem;
+    --card-radius-md: 0.75rem;
+    --card-radius-lg: 1rem;
+    --card-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --card-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --card-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --card-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --card-padding-sm: var(--space-xs);
+    --card-padding-md: var(--space-sm);
+    --card-padding-lg: var(--space-md);
+    --card-padding-xl: var(--space-lg);
+  }
+
+  .dark {
+    /* Dark theme inherits same structure, ensuring consistency */
+    --bg-base: 240 10% 3.9%;
+    --bg-elevated: 240 10% 5%;
+    --bg-card: 240 10% 7%;
+    --bg-card-hover: 240 10% 9%;
+    --bg-overlay: 240 10% 11%;
+    --bg-modal: 240 10% 13%;
+    --bg-highlight: 240 10% 15%;
+  }
+}
+
+/* ===== TOKEN UTILITY CLASSES ===== */
+@layer utilities {
+
+  /* Background hierarchy tokens */
+  .bg-base {
+    background-color: hsl(var(--bg-base));
+  }
+
+  .bg-elevated {
+    background-color: hsl(var(--bg-elevated));
+  }
+
+  .bg-card {
+    background-color: hsl(var(--bg-card));
+  }
+
+  .bg-card-hover {
+    background-color: hsl(var(--bg-card-hover));
+  }
+
+  .bg-overlay {
+    background-color: hsl(var(--bg-overlay));
+  }
+
+  .bg-modal {
+    background-color: hsl(var(--bg-modal));
+  }
+
+  .bg-highlight {
+    background-color: hsl(var(--bg-highlight));
+  }
+
+  /* Primary accent tokens */
+  .bg-accent-teal {
+    background-color: hsl(var(--accent-teal));
+  }
+
+  .bg-accent-teal-hover {
+    background-color: hsl(var(--accent-teal-hover));
+  }
+
+  .bg-accent-teal-subtle {
+    background-color: hsl(var(--accent-teal) / 0.1);
+  }
+
+  .text-accent-teal {
+    color: hsl(var(--accent-teal));
+  }
+
+  .border-accent-teal {
+    border-color: hsl(var(--accent-teal));
+  }
+
+  /* Foreground tokens */
+  .text-fg-primary {
+    color: hsl(var(--fg-primary));
+  }
+
+  .text-fg-secondary {
+    color: hsl(var(--fg-secondary));
+  }
+
+  .text-fg-tertiary {
+    color: hsl(var(--fg-tertiary));
+  }
+
+  .text-fg-muted {
+    color: hsl(var(--fg-muted));
+  }
+
+  /* Glassmorphism tokens */
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-strong {
+    background: hsl(var(--glass-bg-strong));
+    backdrop-filter: var(--glass-blur-strong);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-subtle {
+    background: hsl(var(--glass-bg-subtle));
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  /* Interactive state tokens */
+  .hover-lift {
+    transition: transform var(--transition-base) var(--easing-out),
+      box-shadow var(--transition-base) var(--easing-out);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Focus state tokens */
+  .focus-ring-teal:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-ring-offset),
+      0 0 0 4px hsl(var(--focus-ring));
+  }
+
+  /* Chart color tokens */
+  .chart-positive {
+    color: hsl(var(--chart-positive));
+  }
+
+  .chart-negative {
+    color: hsl(var(--chart-negative));
+  }
+
+  .chart-neutral {
+    color: hsl(var(--chart-neutral));
+  }
+
+  /* Card utility classes */
+  .card-shadow-sm {
+    box-shadow: var(--card-shadow-sm);
+  }
+
+  .card-shadow-md {
+    box-shadow: var(--card-shadow-md);
+  }
+
+  .card-shadow-lg {
+    box-shadow: var(--card-shadow-lg);
+  }
+
+  .card-shadow-xl {
+    box-shadow: var(--card-shadow-xl);
+  }
+
+  .card-radius-sm {
+    border-radius: var(--card-radius-sm);
+  }
+
+  .card-radius-md {
+    border-radius: var(--card-radius-md);
+  }
+
+  .card-radius-lg {
+    border-radius: var(--card-radius-lg);
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    transition: transform var(--transition-base) var(--easing-out),
+      box-shadow var(--transition-base) var(--easing-out),
+      border-color var(--transition-base) var(--easing-out);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-lg);
+    border-color: hsl(var(--border-focus));
+  }
+
+  .card-clickable {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .card-clickable:active {
+    transform: scale(0.98);
+  }
+}

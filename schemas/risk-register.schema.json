@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.example.com/risk-register.schema.json",
+  "title": "Widget Risk Register Schema",
+  "description": "Schema for widget risk register documentation",
+  "type": "object",
+  "properties": {
+    "widgetId": {
+      "type": "string",
+      "description": "Widget identifier"
+    },
+    "widgetVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "registerVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastCalculated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "overallRiskScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "featureId": { "type": "string" },
+          "featureName": { "type": "string" },
+          "threatVector": { "type": "string" },
+          "riskDescription": { "type": "string" },
+          "likelihood": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "impact": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "riskScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "riskTier": {
+            "type": "string",
+            "enum": ["Critical", "High", "Medium", "Low"]
+          },
+          "compensatingControls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "controlId": { "type": "string" },
+                "controlDescription": { "type": "string" },
+                "controlType": {
+                  "type": "string",
+                  "enum": ["preventive", "detective", "corrective", "compensating"]
+                },
+                "effectiveness": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5
+                },
+                "implemented": { "type": "boolean" }
+              },
+              "required": ["controlId", "controlDescription", "controlType", "effectiveness", "implemented"]
+            }
+          },
+          "residualRisk": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "mitigationStrategy": { "type": "string" },
+          "owner": { "type": "string" },
+          "reviewDate": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": ["featureId", "featureName", "threatVector", "riskDescription", "likelihood", "impact", "riskScore", "riskTier", "compensatingControls", "residualRisk"]
+      }
+    },
+    "monteCarloResults": {
+      "type": "object",
+      "properties": {
+        "iterations": { "type": "number" },
+        "meanRiskScore": { "type": "number" },
+        "percentile95": { "type": "number" },
+        "percentile99": { "type": "number" },
+        "standardDeviation": { "type": "number" },
+        "lastRun": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "properties": {
+        "policyCompliant": { "type": "boolean" },
+        "driftPercentage": {
+          "type": "number",
+          "minimum": 0
+        },
+        "thresholdExceeded": { "type": "boolean" },
+        "lastAuditDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nextAuditDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "required": ["widgetId", "widgetVersion", "registerVersion", "lastUpdated", "overallRiskScore", "features", "compliance"]
+}
