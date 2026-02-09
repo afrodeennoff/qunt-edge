@@ -1,10 +1,5 @@
-import dynamic from 'next/dynamic'
 import Hero from './Hero'
-
-const Features = dynamic(() => import('./Features'))
-const AnalysisDemo = dynamic(() => import('./AnalysisDemo'))
-const HowItWorks = dynamic(() => import('./HowItWorks'))
-const CTA = dynamic(() => import('./CTA'))
+import DeferredHomeSections from './DeferredHomeSections'
 
 export default function HomeContent() {
   return (
@@ -14,10 +9,7 @@ export default function HomeContent() {
 
       <main className="relative z-10 mx-auto w-full max-w-[1400px]">
         <Hero />
-        <AnalysisDemo />
-        <Features />
-        <HowItWorks />
-        <CTA />
+        <DeferredHomeSections />
       </main>
     </div>
   )

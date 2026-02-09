@@ -73,7 +73,9 @@ export default function TradingViewChart({ size = "large" }: TradingViewChartPro
     container.innerHTML = "";
 
     const widgetHost = document.createElement("div");
-    widgetHost.className = "tradingview-widget-container__widget h-full w-full";
+    widgetHost.className = "tradingview-widget-container__widget";
+    widgetHost.style.width = "100%";
+    widgetHost.style.height = "100%";
     container.appendChild(widgetHost);
 
     const script = document.createElement("script");
@@ -81,7 +83,9 @@ export default function TradingViewChart({ size = "large" }: TradingViewChartPro
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.async = true;
     script.text = JSON.stringify({
-      autosize: true,
+      autosize: false,
+      width: "100%",
+      height: "100%",
       symbol,
       interval,
       timezone,
@@ -144,6 +148,15 @@ export default function TradingViewChart({ size = "large" }: TradingViewChartPro
       <CardContent className="min-h-0 flex-1 p-0">
         <div className="tradingview-widget-container h-full w-full" ref={containerRef} />
       </CardContent>
+      <style jsx global>{`
+        .tradingview-widget-container,
+        .tradingview-widget-container__widget,
+        .tradingview-widget-container__widget > div,
+        .tradingview-widget-container__widget iframe {
+          width: 100% !important;
+          height: 100% !important;
+        }
+      `}</style>
     </Card>
   );
 }

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { Menu, Moon, Sun, Laptop } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -89,10 +88,7 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="container-fluid pt-3 sm:pt-4">
-        <motion.div
-          initial={{ y: -12, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        <div
           className={cn(
             'mx-auto flex h-16 items-center rounded-2xl border px-3 backdrop-blur-xl transition-all duration-300 sm:h-[68px] sm:px-4',
             scrolled
@@ -189,7 +185,7 @@ export default function Navbar() {
               </SheetContent>
             </Sheet>
           </div>
-        </motion.div>
+        </div>
       </div>
     </header>
   )

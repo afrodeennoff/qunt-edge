@@ -19,7 +19,6 @@ import { WIDGET_REGISTRY, getWidgetComponent } from '../config/widget-registry'
 import { useAutoScroll } from '../../../../hooks/use-auto-scroll'
 import { cn } from '@/lib/utils'
 import { Widget, WidgetType, WidgetSize, LayoutItem } from '../types/dashboard'
-import { Toolbar } from './toolbar'
 import { useUserStore, DashboardLayoutWithWidgets } from '../../../../store/user-store'
 import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
@@ -744,18 +743,8 @@ export default function WidgetCanvas() {
 
   return (
     <div className={cn(
-      "relative mt-6 pb-16 w-full min-h-screen",
+      "relative mt-6 w-full min-h-screen",
     )}>
-      <Toolbar 
-        onAddWidget={addWidget}
-        isCustomizing={isCustomizing}
-        onEditToggle={() => {
-          setIsCustomizing(!isCustomizing)
-        }}
-        currentLayout={layouts || { desktop: [], mobile: [] }}
-        onRemoveAll={removeAllWidgets}
-        onRestoreDefaults={restoreDefaultLayout}
-      />
       {layouts && (
         <div className="relative">
           <div id="tooltip-portal" className="fixed inset-0 pointer-events-none z-9999" />

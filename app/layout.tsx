@@ -3,7 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import { ScrollLockFix } from "@/components/scroll-lock-fix";
+import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -243,7 +243,7 @@ export default function RootLayout({
         </style>
       </head>
       <body className="font-sans">
-        <ScrollLockFix />
+        <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}
         {children}

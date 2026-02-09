@@ -53,13 +53,13 @@ export default function Navbar() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-auto flex flex-col glass-strong rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300 hover:shadow-accent-teal/10 hover:border-white/20"
+        className="pointer-events-auto flex flex-col glass-strong rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300"
       >
         <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
 
           {/* Left Side: Sidebar Toggle & Brand */}
           <div className="flex items-center gap-4">
-            <SidebarTrigger className="-ml-1 text-fg-muted hover:text-fg-primary hover:bg-white/10 transition-all rounded-2xl w-10 h-10" />
+            <SidebarTrigger className="-ml-1 text-fg-muted transition-all rounded-2xl w-10 h-10" />
             <div className="h-6 w-px bg-white/10 hidden sm:block mx-1" />
           </div>
 
@@ -72,21 +72,23 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
 
             {/* Config Group */}
-            <div className="hidden md:flex items-center gap-1.5 p-1.5 bg-black/40 backdrop-blur-2xl rounded-[1.5rem] border border-white/5">
+            <div className="flex items-center gap-1.5 p-1.5 bg-black/40 backdrop-blur-2xl rounded-[1.5rem] border border-white/5">
               <Button
                 id="customize-mode"
                 variant="ghost"
                 size="sm"
                 onClick={toggleCustomizing}
                 className={cn(
-                  "h-9 px-4 gap-2 rounded-xl transition-all duration-500",
+                  "h-9 w-9 px-0 sm:w-auto sm:px-4 gap-2 rounded-xl transition-all duration-500",
                   isCustomizing
-                    ? "bg-accent-teal text-white shadow-[0_0_20px_rgba(45,212,191,0.4)] hover:bg-accent-teal-hover"
-                    : "text-fg-muted hover:text-fg-primary hover:bg-white/10"
+                    ? "bg-accent-teal text-white shadow-[0_0_20px_rgba(45,212,191,0.4)]"
+                    : "text-fg-muted"
                 )}
               >
                 <Pencil className={cn("w-3.5 h-3.5", isCustomizing && "animate-pulse")} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{isCustomizing ? "Lock Grid" : "Edit Layout"}</span>
+                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+                  {isCustomizing ? "Lock Grid" : "Edit Layout"}
+                </span>
               </Button>
 
               {isCustomizing && autoSaveStatus.hasPending && (
@@ -94,7 +96,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={flushPendingSaves}
-                  className="h-9 px-3 gap-2 rounded-xl text-accent-teal hover:bg-accent-teal/10 transition-all border border-accent-teal/20"
+                  className="hidden sm:flex h-9 px-3 gap-2 rounded-xl text-accent-teal transition-all border border-accent-teal/20"
                 >
                   <CloudUpload className="w-3.5 h-3.5 animate-bounce" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Save Now</span>
@@ -102,7 +104,7 @@ export default function Navbar() {
               )}
 
               {!autoSaveStatus.hasPending && isCustomizing && (
-                <div className="flex items-center gap-2 px-3 text-accent-teal/60">
+                <div className="hidden sm:flex items-center gap-2 px-3 text-accent-teal/60">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
                 </div>
@@ -110,7 +112,7 @@ export default function Navbar() {
 
               <AddWidgetSheet onAddWidget={addWidget} isCustomizing={isCustomizing} />
 
-              <div className="w-px h-5 bg-white/10 mx-1" />
+              <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
 
               <ShareButton currentLayout={currentLayout} />
             </div>
@@ -124,7 +126,7 @@ export default function Navbar() {
 
                 {!isPlusUser() && (
                   <Link href="/dashboard/billing">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-gradient-to-br from-amber-400/20 via-orange-500/10 to-transparent border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] hover:border-amber-500/50 hover:from-amber-500/30 hover:scale-[1.02] transition-all duration-500 shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
+                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-gradient-to-br from-amber-400/20 via-orange-500/10 to-transparent border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
                       <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                       <span>Elite</span>
                     </Button>
@@ -141,7 +143,7 @@ export default function Navbar() {
                   size="icon"
                   onClick={handleRefresh}
                   disabled={isLoading}
-                  className="h-8 w-8 rounded-xl text-fg-muted hover:text-fg-primary hover:bg-white/10 transition-all active:scale-90"
+                  className="h-8 w-8 rounded-xl text-fg-muted transition-all active:scale-90"
                   title="Manual Sync"
                 >
                   <RefreshCw className={cn("w-3.5 h-3.5 transition-transform duration-1000", (isRefreshing || isLoading) && "animate-spin")} />
