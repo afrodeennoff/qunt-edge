@@ -179,10 +179,10 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
   return (
     <div 
       ref={widgetRef}
-      className="relative h-full w-full rounded-lg bg-background shadow-[0_2px_4px_rgba(0,0,0,0.05)] group isolate animate-[fadeIn_1.5s_ease-in-out] overflow-clip"
+      className="relative h-full min-h-0 w-full rounded-lg bg-background shadow-[0_2px_4px_rgba(0,0,0,0.05)] group isolate animate-[fadeIn_1.5s_ease-in-out] overflow-hidden"
       onTouchStart={handleTouchStart}
     >
-      <div className={cn("h-full w-full", 
+      <div className={cn("h-full min-h-0 w-full", 
         isCustomizing && "group-hover:blur-[2px]",
         isCustomizing && isMobile && "blur-[2px]"
       )}>
@@ -362,19 +362,6 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
   )
 }
 
-// Add a function to pre-calculate widget dimensions
-function getWidgetDimensions(widget: Widget, isMobile: boolean) {
-  const grid = getWidgetGrid(widget.type as WidgetType, widget.size as WidgetSize, isMobile)
-  return {
-    w: grid.w,
-    h: grid.h,
-    width: `${(grid.w * 100) / 12}%`,
-    height: `${grid.h * (isMobile ? 65 : 70)}px`
-  }
-}
-
-type WidgetDimensions = { w: number; h: number; width: string; height: string }
-
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout:layouts, setDashboardLayout:setLayouts } = useUserStore(state => state)
   const  user = useUserStore(state => state.user)
@@ -388,17 +375,6 @@ export default function WidgetCanvas() {
   
   // Move all memoized values up, out of conditional rendering paths
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), [])
-
-  // Group all useMemo hooks together
-  const widgetDimensions = useMemo(() => {
-    if (!layouts?.[activeLayout]) return {}
-    
-    const widgets = layouts[activeLayout]
-    return widgets.reduce((acc: Record<string, WidgetDimensions>, widget) => {
-      acc[widget.i] = getWidgetDimensions(widget, isMobile)
-      return acc
-    }, {} as Record<string, WidgetDimensions>)
-  }, [layouts, activeLayout, isMobile])
 
   const responsiveLayout = useMemo(() => {
     if (!layouts) return {}
@@ -763,17 +739,11 @@ export default function WidgetCanvas() {
             useCSSTransforms={true}
           >
             {currentLayout.map((widget) => {
-              const dimensions = widgetDimensions[widget.i]
-              
               return (
                 <div 
                   key={widget.i} 
-                  className="h-full" 
+                  className="h-full min-h-0" 
                   data-customizing={isCustomizing}
-                  style={{
-                    width: dimensions.width,
-                    height: dimensions.height
-                  }}
                 >
                   <WidgetWrapper
                     onRemove={() => removeWidget(widget.i)}
