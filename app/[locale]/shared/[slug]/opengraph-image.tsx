@@ -679,9 +679,9 @@ export default async function Image({ params }: { params: { slug: string } }) {
         return new ImageResponse(element, {
             ...size,
             headers: {
-                "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=3600",
-                "CDN-Cache-Control": "public, max-age=3600", 
-                "Vercel-CDN-Cache-Control": "public, max-age=3600",
+                "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+                "CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+                "Vercel-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
             },
         })
     } catch (e: unknown) {

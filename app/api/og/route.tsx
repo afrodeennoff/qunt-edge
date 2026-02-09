@@ -250,7 +250,9 @@ export async function GET(req: NextRequest) {
   return new Response(new Uint8Array(buffer), {
     headers: {
       'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=3600, immutable',
+      'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
+      'CDN-Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+      'Vercel-CDN-Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
     },
   });
 }

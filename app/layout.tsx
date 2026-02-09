@@ -104,6 +104,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const isProduction = process.env.NODE_ENV === "production";
+
   return (
     <html
       lang="en"
@@ -242,8 +244,8 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         <ScrollLockFix />
-        <SpeedInsights />
-        <Analytics />
+        {isProduction ? <SpeedInsights /> : null}
+        {isProduction ? <Analytics /> : null}
         {children}
       </body>
     </html>
