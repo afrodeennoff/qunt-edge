@@ -26,73 +26,90 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
   const drawdownProgress = metrics?.drawdownProgress ?? 0
   const remainingLoss = metrics?.remainingLoss ?? 0
 
-  const cardSize = size === 'small' || size === 'small-long' ? 'sm' : 'md'
-  const daysUntilPayment = account.nextPaymentDate 
-    ? Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null
-
   return (
     <Card
-      variant="elevated"
-      hover
-      clickable={!!onClick}
-      size={cardSize}
       className={cn(
-        "flex flex-col",
+        "flex flex-col cursor-pointer hover:border-primary/50 transition-colors shadow-xs hover:shadow-md",
         size === 'small' || size === 'small-long' ? "w-72" : "w-96"
       )}
       onClick={onClick}
     >
-      <CardHeader size={cardSize} className="flex-none pb-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+      <CardHeader className={cn(
+        "flex-none pb-2",
+        size === 'small' || size === 'small-long' ? "p-2" : "p-3"
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0 w-full">
             <div className="truncate w-full">
-              <CardTitle size={cardSize === 'sm' ? 'sm' : 'md'} className="flex items-center justify-between w-full">
-                <span className="truncate">{account.propfirm || t('propFirm.card.unnamedAccount')}</span>
-                {daysUntilPayment !== null && (
-                  <div className={cn(
-                    "shrink-0 ml-2 text-xs font-medium",
-                    daysUntilPayment < 5 ? 'text-red-500 animate-pulse' : 'text-muted-foreground'
-                  )}>
-                    {daysUntilPayment}{t('propFirm.card.daysBeforeNextPayment')}
-                  </div>
-                )}
+              <CardTitle className={cn(
+                "truncate flex items-center gap-2 w-full",
+                size === 'small' || size === 'small-long' ? "text-xs" : "text-sm"
+              )}>
+
+                <div className="flex w-full justify-between min-w-0">
+                  <span className="truncate">{account.propfirm || t('propFirm.card.unnamedAccount')}</span>
+                  {
+                    account.nextPaymentDate && (
+                      <div className={cn(
+                        "self-center ml-2 shrink-0",
+                        size === 'small' || size === 'small-long' ? "text-xs" : "text-xs",
+                        Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) < 5 ? 'text-red-500 blink' : 'text-muted-foreground'
+                      )}>
+                        {Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
+                        {t('propFirm.card.daysBeforeNextPayment')}
+                      </div>
+                    )
+                  }
+                </div>
               </CardTitle>
-              <p className="text-xs text-muted-foreground truncate mt-1">
+              <p className={cn(
+                "text-muted-foreground truncate",
+                size === 'small' || size === 'small-long' ? "text-xs" : "text-xs"
+              )}>
                 {account.number}
               </p>
             </div>
           </div>
         </div>
       </CardHeader>
-
-      <CardContent size={cardSize} className={cn(
-        "flex-1 space-y-3",
-        size === 'small' || size === 'small-long' ? "space-y-2" : "space-y-3"
+      <CardContent className={cn(
+        "flex-1 pt-0",
+        size === 'small' || size === 'small-long' ? "p-2 space-y-1.5" : "p-3 space-y-2"
       )}>
-        <div className="flex justify-between items-baseline pb-2 border-b">
-          <span className="text-sm text-muted-foreground">{t('propFirm.card.balance')}</span>
-          <span className="text-lg font-semibold">${currentBalance.toFixed(2)}</span>
+        <div className="flex justify-between items-baseline">
+          <span className={cn(
+            "text-muted-foreground",
+            size === 'small' || size === 'small-long' ? "text-xs" : "text-sm"
+          )}>{t('propFirm.card.balance')}</span>
+          <span className={cn(
+            "font-semibold truncate ml-2",
+            size === 'small' || size === 'small-long' ? "text-sm" : "text-base"
+          )}>${currentBalance.toFixed(2)}</span>
         </div>
-
         {isConfigured ? (
-          <div className="space-y-3">
+          <div className={cn(
+            size === 'small' || size === 'small-long' ? "space-y-1.5" : "space-y-2"
+          )}>
             {/* Trade Progress Chart - only show for larger sizes */}
             {(size === 'large' || size === 'extra-large') && account.payouts && (
-              <TradeProgressChart account={account} />
+              <TradeProgressChart
+                account={account}
+              />
             )}
 
             {/* Profit Target Section */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-sm">
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{t('propFirm.card.remainingToTarget')}</span>
-                <span className="font-medium">${remainingToTarget.toFixed(2)}</span>
+                <span>${remainingToTarget.toFixed(2)}</span>
               </div>
               <Progress
                 value={progress}
-                className="h-2"
+                className={cn(
+                  size === 'small' || size === 'small-long' ? "h-1" : "h-1.5"
+                )}
                 indicatorClassName={cn(
-                  "transition-all duration-300",
+                  "transition-colors duration-300",
                   "bg-[hsl(var(--chart-6))]",
                   progress <= 20 ? "opacity-20" :
                     progress <= 40 ? "opacity-40" :
@@ -104,8 +121,8 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
             </div>
 
             {/* Drawdown Section */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-sm">
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{t('propFirm.card.drawdown')}</span>
                 <span className={cn(
                   "font-medium",
@@ -119,9 +136,11 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
               </div>
               <Progress
                 value={drawdownProgress}
-                className="h-2"
+                className={cn(
+                  size === 'small' || size === 'small-long' ? "h-1" : "h-1.5"
+                )}
                 indicatorClassName={cn(
-                  "transition-all duration-300",
+                  "transition-colors duration-300",
                   "bg-destructive",
                   drawdownProgress <= 20 ? "opacity-20" :
                     drawdownProgress <= 40 ? "opacity-40" :
@@ -134,8 +153,8 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
 
             {/* Consistency Section - only show for larger sizes */}
             {metrics && (size === 'large' || size === 'extra-large') && (
-              <div className="space-y-2 pt-3 border-t">
-                <div className="flex justify-between items-center text-sm">
+              <div className="space-y-1 pt-2 border-t">
+                <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">{t('propFirm.card.consistency')}</span>
                   <span className={cn(
                     "font-medium",
@@ -146,18 +165,18 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                       (metrics.isConsistent || account.consistencyPercentage === 100) ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
                   </span>
                 </div>
-                <div className="space-y-1.5 text-sm text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>{t('propFirm.card.maxAllowedDailyProfit')}</span>
-                    <span>${metrics.maxAllowedDailyProfit?.toFixed(2) || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t('propFirm.card.highestDailyProfit')}</span>
-                    <span>${metrics.highestProfitDay?.toFixed(2) || '-'}</span>
-                  </div>
-                  
-                  {/* Trading Days Section */}
-                  <div className="flex justify-between">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{t('propFirm.card.maxAllowedDailyProfit')}</span>
+                  <span>${metrics.maxAllowedDailyProfit?.toFixed(2) || '-'}</span>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{t('propFirm.card.highestDailyProfit')}</span>
+                  <span>${metrics.highestProfitDay?.toFixed(2) || '-'}</span>
+                </div>
+                
+                {/* Trading Days Section */}
+                {metrics && (
+                  <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{t('propFirm.card.tradingDays')}</span>
                     <span className={cn(
                       "font-medium",
@@ -171,12 +190,15 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                       )}
                     </span>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center pt-4 text-sm">
+          <p className={cn(
+            "text-muted-foreground text-center pt-2",
+            size === 'small' || size === 'small-long' ? "text-xs" : "text-sm"
+          )}>
             {t('propFirm.card.needsConfiguration')}
           </p>
         )}

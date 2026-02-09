@@ -317,19 +317,18 @@ function AccountsTableSection({
 
   return (
     <div className="relative">
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-gradient-to-b from-background via-background to-muted/20 shadow-sm">
-        <div className="overflow-x-auto" ref={tableWrapperRef}>
-          <table className="w-full min-w-[1200px] border-separate border-spacing-0 text-sm">
-        <thead className="sticky top-0 z-10 bg-muted/85 backdrop-blur-sm supports-[backdrop-filter]:bg-muted/70 shadow-xs border-b border-border/60 [&_tr]:border-b [&_tr]:border-border/60">
+      <div className="overflow-x-auto" ref={tableWrapperRef}>
+        <table className="w-full border-separate border-spacing-0 text-sm">
+        <thead className="sticky top-0 z-10 bg-muted/90 backdrop-blur-xs shadow-xs border-b [&_tr]:border-b">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr
               key={headerGroup.id}
-              className="border-b border-border/60 transition-colors"
+              className="border-b transition-colors hover:bg-muted/50"
             >
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="whitespace-nowrap px-3 py-2.5 text-left text-sm font-semibold bg-muted/85 border-r border-border/60 last:border-r-0 align-middle text-muted-foreground"
+                  className="whitespace-nowrap px-3 py-2 text-left text-sm font-semibold bg-muted/90 border-r border-border last:border-r-0 first:border-l align-middle text-muted-foreground"
                   style={{ width: header.getSize() }}
                 >
                   {header.isPlaceholder
@@ -343,18 +342,18 @@ function AccountsTableSection({
             </tr>
           ))}
         </thead>
-        <tbody className="bg-background/70 [&_tr:last-child]:border-0">
+        <tbody className="bg-background [&_tr:last-child]:border-0">
           {displayRows.map((entry, rowIndex) => {
             if (entry.type === "summary") {
               return (
                 <tr
                   key={entry.summary.id}
-                className="border-b border-border/60 bg-muted/55 font-semibold"
+                className="border-b border-border bg-muted/50 font-semibold"
                 >
                   {table.getVisibleLeafColumns().map((column) => (
                     <td
                       key={`${entry.summary.id}-${column.id}`}
-                      className="px-3 py-2.5 text-sm border-r border-border/50 last:border-r-0 align-middle"
+                      className="px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l align-middle"
                       style={{ width: column.getSize() }}
                     >
                       {renderSummaryCell(column.id, entry.summary)}
@@ -369,9 +368,9 @@ function AccountsTableSection({
               <tr
                 key={row.id}
                 className={cn(
-                  "border-b border-border/50 transition-all duration-100 hover:bg-accent/40",
-                  rowIndex % 2 === 1 && "bg-muted/15",
-                  row.getCanExpand() && "bg-muted/30 font-semibold",
+                  "border-b border-border transition-all duration-75 hover:bg-muted/40",
+                  rowIndex % 2 === 1 && "bg-muted/20",
+                  row.getCanExpand() && "bg-muted/30 font-medium",
                   isDrawdownBreached(row.original) && "opacity-50",
                   (row.getCanExpand() || row.depth > 0) && "cursor-pointer"
                 )}
@@ -387,7 +386,7 @@ function AccountsTableSection({
                   <td
                     key={cell.id}
                     className={cn(
-                      "px-3 py-2.5 text-sm border-r border-border/40 last:border-r-0 align-middle",
+                      "px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l align-middle",
                       row.depth > 0 && cell.column.id === "account" && "pl-6"
                     )}
                     style={{ width: cell.column.getSize() }}
@@ -402,19 +401,18 @@ function AccountsTableSection({
             )
           })}
         </tbody>
-          </table>
-        </div>
+        </table>
       </div>
       {showScrollHint && (
         <div className="pointer-events-none absolute bottom-2 right-2">
-          <div className="pointer-events-auto flex items-start gap-2 rounded-lg border border-border/60 bg-background/90 px-3 py-2 text-xs text-muted-foreground shadow-md backdrop-blur-sm">
+          <div className="pointer-events-auto flex items-start gap-2 rounded-md border border-border/60 bg-background/90 px-3 py-2 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
             <span className="max-w-[220px] leading-snug">
               {t("accounts.table.scrollHint")}
             </span>
             <button
               type="button"
               onClick={handleDismissHint}
-              className="cursor-pointer text-muted-foreground/70 transition-colors hover:text-foreground"
+              className="text-muted-foreground/70 transition-colors hover:text-muted-foreground pointer-cursor"
             >
               <XCircle className="h-4 w-4" />
               <span className="sr-only">{t("accounts.table.dismissHint")}</span>
@@ -483,9 +481,9 @@ export function AccountsTableView({
           />
         ),
         cell: ({ row }) => (
-          <div className="min-w-[160px] font-medium truncate text-foreground/90">
+          <div className="min-w-[160px] font-medium truncate">
             {isGroupRow(row.original) ? (
-              <span className="inline-flex items-center rounded-md bg-muted/55 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <span>
                 {row.original.name} ({row.original.accounts.length})
               </span>
             ) : (
@@ -511,12 +509,12 @@ export function AccountsTableView({
           />
         ),
         cell: ({ row }) => (
-          <div className="flex min-w-[160px] flex-col">
+          <div className="flex flex-col min-w-[160px]">
             {isGroupRow(row.original) ? (
               <span className="text-sm text-muted-foreground">—</span>
             ) : (
               <>
-                <span className="truncate font-semibold tracking-tight">
+                <span className="font-medium truncate">
                   {row.original.number}
                 </span>
                 {row.original.accountSizeName && (
@@ -550,7 +548,7 @@ export function AccountsTableView({
           />
         ),
         cell: ({ row }) => (
-          <div className="min-w-[160px] truncate font-medium">
+          <div className="min-w-[160px] font-medium truncate">
             {isGroupRow(row.original)
               ? "—"
               : row.original.propfirm || t("propFirm.card.unnamedAccount")}
@@ -592,7 +590,7 @@ export function AccountsTableView({
             )
           }
           return (
-            <div className="text-sm font-medium text-foreground/90">
+            <div className="text-sm font-medium">
               {dateFormatter.format(startDate)}
             </div>
           )
@@ -768,9 +766,9 @@ export function AccountsTableView({
               </div>
               <Progress
                 value={progress}
-                className="h-2 rounded-full bg-muted/70"
+                className="h-1.5"
                 indicatorClassName={cn(
-                  "rounded-full transition-colors duration-300",
+                  "transition-colors duration-300",
                   "bg-[hsl(var(--chart-6))]"
                 )}
               />

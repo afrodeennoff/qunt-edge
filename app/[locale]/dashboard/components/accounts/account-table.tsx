@@ -63,13 +63,13 @@ export function AccountTable({
   if (!isConfigured) {
     return (
       <div className="space-y-4">
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-background/80 shadow-sm">
+        <div className="rounded-md border">
           <Table>
             {renderTableHeader()}
             <TableBody>
               <TableRow>
-                <TableCell colSpan={8} className="h-[400px] text-center relative">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/80 backdrop-blur-[2px]">
+                <TableCell colSpan={7} className="h-[400px] text-center relative">
+                  <div className="absolute inset-0 backdrop-blur-[2px] bg-background/80 flex flex-col items-center justify-center gap-2">
                     <h3 className="font-semibold text-lg">
                       {hasPendingChanges 
                         ? t('propFirm.setup.saveFirst.title') 
@@ -108,22 +108,22 @@ export function AccountTable({
 
   function renderTableHeader() {
     return (
-      <TableHeader className="sticky top-0 z-10 bg-muted/85 backdrop-blur-sm supports-[backdrop-filter]:bg-muted/70">
-        <TableRow className="border-b border-border/60 hover:bg-transparent">
-          <TableHead className="px-4 py-3 font-semibold text-muted-foreground">{t('propFirm.dailyStats.date')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.dailyStats.pnl')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.dailyStats.balance')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.dailyStats.target')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.consistency.modal.percentageOfTotal')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.dailyStats.maxAllowed')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.dailyStats.status')}</TableHead>
-          <TableHead className="px-4 py-3 text-right font-semibold text-muted-foreground">{t('propFirm.dailyStats.payout')}</TableHead>
+      <TableHeader className="sticky top-0 bg-background z-10">
+        <TableRow>
+          <TableHead>{t('propFirm.dailyStats.date')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.dailyStats.pnl')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.dailyStats.balance')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.dailyStats.target')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.consistency.modal.percentageOfTotal')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.dailyStats.maxAllowed')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.dailyStats.status')}</TableHead>
+          <TableHead className="text-right">{t('propFirm.dailyStats.payout')}</TableHead>
         </TableRow>
       </TableHeader>
     )
   }
 
-  function renderMetricRow(metric: typeof sortedMetrics[0], runningBalance: number, totalPnL: number, rowIndex: number) {
+  function renderMetricRow(metric: typeof sortedMetrics[0], runningBalance: number, totalPnL: number) {
     // Calculate total payouts for the entire period (not just up to this date)
     const totalPayouts = sortedMetrics
       .filter(m => m.payout?.status === 'PAID')
@@ -145,39 +145,33 @@ export function AccountTable({
     const percentageOfTotal = totalPnL > 0 && metric.pnl > 0 ? (metric.pnl / totalPnL) * 100 : null
 
     return (
-      <TableRow
-        key={metric.date.toISOString()}
-        className={cn(
-          "border-b border-border/50 transition-colors hover:bg-accent/35",
-          rowIndex % 2 === 1 && "bg-muted/15"
-        )}
-      >
-        <TableCell className="px-4 py-2.5 font-medium">{format(metric.date, 'PP', { locale: dateLocale })}</TableCell>
+      <TableRow key={metric.date.toISOString()}>
+        <TableCell>{format(metric.date, 'PP', { locale: dateLocale })}</TableCell>
         <TableCell className={cn(
-          "px-4 py-2.5 text-right font-semibold",
+          "text-right font-medium",
           metric.pnl > 0 ? "text-green-500" : metric.pnl < 0 ? "text-destructive" : ""
         )}>
           ${metric.pnl.toFixed(2)}
         </TableCell>
-        <TableCell className="px-4 py-2.5 text-right">
+        <TableCell className="text-right">
           ${runningBalance.toFixed(2)}
         </TableCell>
-        <TableCell className="px-4 py-2.5 text-right">
+        <TableCell className="text-right">
           {calculatePercentageOfTarget(runningBalance, startingBalance, profitTarget)}
         </TableCell>
-        <TableCell className="px-4 py-2.5 text-right">
+        <TableCell className="text-right">
           {percentageOfTotal !== null ? `${percentageOfTotal.toFixed(1)}%` : '-'}
         </TableCell>
-        <TableCell className="px-4 py-2.5 text-right font-medium">
+        <TableCell className="text-right font-medium">
           ${maxAllowedDailyProfit.toFixed(2)}
         </TableCell>
         <TableCell className={cn(
-          "px-4 py-2.5 text-right font-medium",
+          "text-right font-medium",
           !isConsistent ? "text-destructive" : "text-green-500"
         )}>
           {isConsistent ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
         </TableCell>
-        <TableCell className="px-4 py-2.5 text-right">
+        <TableCell className="text-right">
           {metric.payout && (
             <div className="flex items-center justify-end gap-2">
               <div 
@@ -193,7 +187,6 @@ export function AccountTable({
                   -${metric.payout.amount.toFixed(2)}
                 </span>
                 <Badge 
-                  className="border border-border/50 shadow-[inset_0_1px_0_hsl(var(--background))]"
                   variant={metric.payout.status === 'PENDING' ? 'secondary' : 'default'}
                 >
                   {metric.payout.status}
@@ -253,28 +246,28 @@ export function AccountTable({
     const hasInconsistentDays = metrics.some(metric => metric.pnl > maxAllowedDailyProfit)
 
     return (
-      <TableRow className="border-t border-border/70 bg-muted/55 font-semibold">
-        <TableCell className="px-4 py-3">{t('calendar.modal.total')}</TableCell>
+      <TableRow className="bg-muted/50 font-medium">
+        <TableCell>{t('calendar.modal.total')}</TableCell>
         <TableCell className={cn(
-          "px-4 py-3 text-right",
+          "text-right",
           totalPnL > 0 ? "text-green-500" : totalPnL < 0 ? "text-destructive" : ""
         )}>
           ${totalPnL.toFixed(2)}
         </TableCell>
-        <TableCell className="px-4 py-3 text-right">
+        <TableCell className="text-right">
           ${runningBalance.toFixed(2)}
         </TableCell>
-        <TableCell className="px-4 py-3 text-right">
+        <TableCell className="text-right">
           {calculatePercentageOfTarget(runningBalance, startingBalance, profitTarget)}
         </TableCell>
-        <TableCell className="px-4 py-3 text-right">
+        <TableCell className="text-right">
           {totalPnL > 0 ? '100%' : '-'}
         </TableCell>
-        <TableCell className="px-4 py-3 text-right">
+        <TableCell className="text-right">
           ${maxAllowedDailyProfit.toFixed(2)}
         </TableCell>
         <TableCell className={cn(
-          "px-4 py-3 text-right",
+          "text-right",
           hasInconsistentDays ? "text-destructive" : "text-green-500"
         )}>
           {hasInconsistentDays ? 
@@ -282,7 +275,7 @@ export function AccountTable({
             t('propFirm.consistency.consistent')
           }
         </TableCell>
-        <TableCell className="px-4 py-3 text-right">
+        <TableCell className="text-right">
           -${totalPayouts.toFixed(2)}
         </TableCell>
       </TableRow>
@@ -296,18 +289,18 @@ export function AccountTable({
           <div className="mb-2 text-sm font-medium text-muted-foreground">
             {t('propFirm.beforeReset')}
           </div>
-          <div className="overflow-hidden rounded-xl border border-border/60 bg-background/80 shadow-sm">
+          <div className="rounded-md border">
             <Table>
               {renderTableHeader()}
               <TableBody>
                 {(() => {
                   let runningBalance = startingBalance
-                  return metricsBeforeReset.map((metric, index) => {
+                  return metricsBeforeReset.map(metric => {
                     runningBalance += metric.pnl
                     if (metric.payout?.status === 'PAID') {
                       runningBalance -= metric.payout.amount
                     }
-                    return renderMetricRow(metric, runningBalance, totalPnLBefore, index)
+                    return renderMetricRow(metric, runningBalance, totalPnLBefore)
                   })
                 })()}
                 {renderTotalRow(metricsBeforeReset, totalPnLBefore, metricsBeforeReset.reduce((balance, metric) => {
@@ -324,7 +317,7 @@ export function AccountTable({
       )}
 
       {resetDate && (
-        <div className="rounded-xl border border-yellow-300/50 bg-yellow-100/45 p-4 shadow-sm dark:border-yellow-700/40 dark:bg-yellow-900/25">
+        <div className="rounded-md border bg-yellow-100/50 dark:bg-yellow-900/20 p-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">{t('propFirm.resetDate.label')}</div>
@@ -344,18 +337,18 @@ export function AccountTable({
             {t('propFirm.afterReset')}
           </div>
         )}
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-background/80 shadow-sm">
+        <div className="rounded-md border">
           <Table>
             {renderTableHeader()}
             <TableBody>
               {(() => {
                 let runningBalance = startingBalance
-                return metricsAfterReset.map((metric, index) => {
+                return metricsAfterReset.map(metric => {
                   runningBalance += metric.pnl
                   if (metric.payout?.status === 'PAID') {
                     runningBalance -= metric.payout.amount
                   }
-                  return renderMetricRow(metric, runningBalance, totalPnLAfter, index)
+                  return renderMetricRow(metric, runningBalance, totalPnLAfter)
                 })
               })()}
               {renderTotalRow(metricsAfterReset, totalPnLAfter, metricsAfterReset.reduce((balance, metric) => {

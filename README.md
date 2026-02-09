@@ -177,6 +177,13 @@ DISCORD_CLIENT_SECRET=your_discord_client_secret
 
 # Application
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Optional local Redis cache (preferred in local development)
+REDIS_URL=redis://localhost:6379
+
+# Optional Upstash Redis cache (recommended in production)
+UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token
 ```
 
 ### Step 3: Database Setup

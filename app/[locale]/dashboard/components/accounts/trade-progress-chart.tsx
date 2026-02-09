@@ -7,7 +7,6 @@ import { useI18n } from "@/locales/client"
 import { useMemo } from "react"
 import { Account } from "@/context/data-provider"
 import { useTradesStore } from "@/store/trades-store"
-import { Decimal } from "@prisma/client-runtime-utils"
 
 // Add interface for event type
 interface ChartEvent {
@@ -84,13 +83,13 @@ export function TradeProgressChart({
   const allEvents: ChartEvent[] = [
     ...trades.map(trade => ({
       date: new Date(trade.entryDate),
-      amount: new Decimal(trade.pnl).toNumber() - (trade.commission ? new Decimal(trade.commission).toNumber() : 0),
+      amount: trade.pnl - (trade.commission || 0),
       isPayout: false,
       isReset: false
     })),
     ...payouts.map(payout => ({
       date: new Date(payout.date),
-      amount: ['PENDING', 'VALIDATED', 'PAID'].includes(payout.status) ? -new Decimal(payout.amount).toNumber() : 0,
+      amount: ['PENDING', 'VALIDATED', 'PAID'].includes(payout.status) ? -payout.amount : 0,
       isPayout: true,
       isReset: false,
       payoutStatus: payout.status

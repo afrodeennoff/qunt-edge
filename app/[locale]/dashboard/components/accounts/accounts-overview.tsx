@@ -866,33 +866,30 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
   }, [accounts, selectedAccountForTable])
 
   const { filteredAccounts, unconfiguredAccounts } = useMemo(() => {
+    const uniqueAccounts = new Set(trades.map(trade => trade.accountNumber))
     // Find the hidden group
     const hiddenGroup = groups.find(g => g.name === "Hidden Accounts")
     const hiddenAccountNumbers = hiddenGroup ? new Set(hiddenGroup.accounts.map(a => a.number)) : new Set()
 
-    const selectedAccountNumbers =
-      accountNumbers.length > 0 ? new Set(accountNumbers) : null
+    const configuredAccounts: Account[] = []
+    const unconfiguredAccounts: string[] = []
 
-    const isVisibleAccount = (accountNumber: string) => {
-      if (!accountNumber) return false
-      if (hiddenAccountNumbers.has(accountNumber)) return false
-      if (selectedAccountNumbers && !selectedAccountNumbers.has(accountNumber)) return false
-      return true
-    }
+    Array.from(uniqueAccounts)
+      .filter(accountNumber =>
+        (accountNumbers.length === 0 || accountNumbers.includes(accountNumber)) &&
+        !hiddenAccountNumbers.has(accountNumber)
+      )
+      .forEach(accountNumber => {
+        const dbAccount = accounts.find(acc => acc.number === accountNumber)
 
-    // Show configured accounts even when current trade page/date window has no rows for them.
-    const configuredAccounts = accounts.filter(account =>
-      isVisibleAccount(account.number ?? "")
-    )
-    const configuredAccountNumbers = new Set(
-      configuredAccounts.map(account => account.number)
-    )
-
-    const unconfiguredAccounts = Array.from(
-      new Set(trades.map(trade => trade.accountNumber))
-    ).filter(accountNumber =>
-      isVisibleAccount(accountNumber) && !configuredAccountNumbers.has(accountNumber)
-    )
+        if (dbAccount) {
+          // Account is configured - use it with all its pre-computed metrics
+          configuredAccounts.push(dbAccount)
+        } else {
+          // Account exists in trades but not configured in database
+          unconfiguredAccounts.push(accountNumber)
+        }
+      })
 
     return { filteredAccounts: configuredAccounts, unconfiguredAccounts }
   }, [trades, accounts, accountNumbers, groups])
@@ -1128,10 +1125,10 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
 
 
   return (
-    <Card className="w-full h-full flex flex-col overflow-hidden border-border/60 bg-gradient-to-b from-background via-background to-muted/20 shadow-sm">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader
         className={cn(
-          "flex flex-row items-center justify-between space-y-0 border-b border-border/60 bg-background/80 backdrop-blur-xs shrink-0",
+          "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
           size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
         )}
       >
@@ -1165,7 +1162,7 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
               size="sm"
               onClick={() => setAccountGroupBoardOpen(true)}
               className={cn(
-                "gap-1.5 border-border/60 bg-background/90 hover:bg-accent/70 shadow-xs",
+                "gap-1.5",
                 size === "small" ? "h-7 px-2 text-xs" : "h-8"
               )}
             >
@@ -1180,7 +1177,7 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
                   variant="outline"
                   size="sm"
                   className={cn(
-                    "gap-1.5 border-border/60 bg-background/90 hover:bg-accent/70 shadow-xs",
+                    "gap-1.5",
                     size === "small" ? "h-7 px-2 text-xs" : "h-8"
                   )}
                 >
@@ -1192,7 +1189,7 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
                   </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 rounded-xl border-border/60 bg-background/95 p-3 shadow-lg backdrop-blur-xs">
+              <PopoverContent align="end" className="w-80 p-3">
                 <div className="space-y-3">
                   {sorting.length === 0 ? (
                     <div className="text-sm text-muted-foreground">
@@ -1307,14 +1304,14 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
             <Tabs value={view} onValueChange={(value) => setView(value as "cards" | "table")}>
               <TabsList
                 className={cn(
-                  "gap-1 rounded-lg border border-border/60 bg-muted/60 p-1 shadow-xs",
+                  "gap-1",
                   size === "small" ? "h-7 px-1" : "h-8 px-1"
                 )}
               >
                 <TabsTrigger
                   value="cards"
                   className={cn(
-                    "gap-1.5 rounded-md border border-transparent data-[state=active]:border-border/60 data-[state=active]:bg-background data-[state=active]:shadow-xs",
+                    "gap-1.5",
                     size === "small" ? "h-6 px-2 text-xs" : "h-7"
                   )}
                 >
@@ -1326,7 +1323,7 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
                 <TabsTrigger
                   value="table"
                   className={cn(
-                    "gap-1.5 rounded-md border border-transparent data-[state=active]:border-border/60 data-[state=active]:bg-background data-[state=active]:shadow-xs",
+                    "gap-1.5",
                     size === "small" ? "h-6 px-2 text-xs" : "h-7"
                   )}
                 >
@@ -1396,7 +1393,7 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
 
       <CardContent
         className={cn(
-          "flex-1 overflow-hidden bg-gradient-to-b from-transparent via-transparent to-muted/10",
+          "flex-1 overflow-hidden",
           view === "table" && "p-0"
         )}
       >
@@ -1543,20 +1540,19 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
           open={!!selectedAccountForTable}
           onOpenChange={(open) => !open && setSelectedAccountForTable(null)}
         >
-          <DialogContent className="max-w-7xl h-[82vh] overflow-hidden border border-border/60 bg-gradient-to-b from-background via-background to-muted/25 p-0 shadow-2xl">
-            <DialogHeader className="border-b border-border/60 bg-muted/30 px-6 py-5">
+          <DialogContent className="max-w-7xl h-[80vh] flex flex-col overflow-y-auto">
+            <DialogHeader className="pb-4 border-b">
               <div className="flex items-center justify-between">
                 <div>
                   <DialogTitle>{t('propFirm.configurator.title', { accountNumber: selectedAccountForTable?.number })}</DialogTitle>
                   <DialogDescription>{t('propFirm.configurator.description')}</DialogDescription>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 pr-4">
 
                   <Button
                     variant="default"
                     onClick={handleSave}
                     disabled={pendingChanges === null}
-                    className="h-9 rounded-md px-4 shadow-xs"
                   >
                     {isSaving ? t('common.saving') : t('common.save')}
                   </Button>
@@ -1566,7 +1562,6 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
                       setSelectedPayout(undefined)
                       setPayoutDialogOpen(true)
                     }}
-                    className="h-9 rounded-md border-border/60 bg-background/90 hover:bg-accent/70"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     {t('propFirm.payout.add')}
@@ -1577,7 +1572,6 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
                         variant="destructive"
                         size="sm"
                         disabled={isDeleting || !canDeleteAccount}
-                        className="h-9 rounded-md"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         {t('propFirm.common.delete')}
@@ -1605,72 +1599,58 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
               </div>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6 pt-5">
+            <div className="p-6 pt-4 flex-1 overflow-y-auto">
               {selectedAccountForTable && (
                 <Tabs
                   defaultValue={selectedAccountForTable.profitTarget === 0 ? "configurator" : "table"}
-                  className="w-full space-y-4"
+                  className="w-full"
                 >
-                  <TabsList className="grid w-full grid-cols-2 rounded-xl border border-border/60 bg-muted/60 p-1">
-                    <TabsTrigger
-                      value="table"
-                      className="rounded-lg border border-transparent data-[state=active]:border-border/60 data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                    >
-                      {t('propFirm.table.title')}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="configurator"
-                      className="rounded-lg border border-transparent data-[state=active]:border-border/60 data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                    >
-                      {t('propFirm.table.configurator')}
-                    </TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="table">{t('propFirm.table.title')}</TabsTrigger>
+                    <TabsTrigger value="configurator">{t('propFirm.table.configurator')}</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="table" className="mt-0">
-                    <div className="rounded-xl border border-border/60 bg-background/90 p-4 shadow-xs">
-                      <AccountTable
-                        accountNumber={selectedAccountForTable.number}
-                        startingBalance={selectedAccountForTable.startingBalance}
-                        profitTarget={selectedAccountForTable.profitTarget}
-                        dailyMetrics={dailyMetrics}
-                        consistencyPercentage={selectedAccountForTable.consistencyPercentage ?? 30}
-                        resetDate={selectedAccountForTable.resetDate ? new Date(selectedAccountForTable.resetDate) : undefined}
-                        onDeletePayout={async (payoutId) => {
-                          try {
-                            await deletePayout(payoutId)
+                  <TabsContent value="table" className="mt-4">
+                    <AccountTable
+                      accountNumber={selectedAccountForTable.number}
+                      startingBalance={selectedAccountForTable.startingBalance}
+                      profitTarget={selectedAccountForTable.profitTarget}
+                      dailyMetrics={dailyMetrics}
+                      consistencyPercentage={selectedAccountForTable.consistencyPercentage ?? 30}
+                      resetDate={selectedAccountForTable.resetDate ? new Date(selectedAccountForTable.resetDate) : undefined}
+                      onDeletePayout={async (payoutId) => {
+                        try {
+                          await deletePayout(payoutId)
 
-                            shouldUpdateSelectedAccount.current = true
+                          shouldUpdateSelectedAccount.current = true
 
-                            toast.success(t('propFirm.payout.deleteSuccess'), {
-                              description: t('propFirm.payout.deleteSuccessDescription'),
-                            })
-                          } catch (error) {
-                            console.error('Failed to delete payout:', error)
-                            toast.error(t('propFirm.payout.deleteError'), {
-                              description: t('propFirm.payout.deleteErrorDescription'),
-                            })
-                          }
-                        }}
-                        onEditPayout={(payout) => {
-                          setSelectedPayout({
-                            id: payout.id,
-                            date: new Date(payout.date),
-                            amount: payout.amount,
-                            status: payout.status
+                          toast.success(t('propFirm.payout.deleteSuccess'), {
+                            description: t('propFirm.payout.deleteSuccessDescription'),
                           })
-                          setPayoutDialogOpen(true)
-                        }}
-                      />
-                    </div>
+                        } catch (error) {
+                          console.error('Failed to delete payout:', error)
+                          toast.error(t('propFirm.payout.deleteError'), {
+                            description: t('propFirm.payout.deleteErrorDescription'),
+                          })
+                        }
+                      }}
+                      onEditPayout={(payout) => {
+                        setSelectedPayout({
+                          id: payout.id,
+                          date: new Date(payout.date),
+                          amount: payout.amount,
+                          status: payout.status
+                        })
+                        setPayoutDialogOpen(true)
+                      }}
+                    />
                   </TabsContent>
-                  <TabsContent value="configurator" className="mt-0">
-                    <div className="rounded-xl border border-border/60 bg-background/90 p-4 shadow-xs">
-                      <AccountConfigurator
-                        account={selectedAccountForTable}
-                        pendingChanges={pendingChanges as Partial<Account> | null}
-                        setPendingChanges={setPendingChanges}
-                        isSaving={isSaving}
-                      />
-                    </div>
+                  <TabsContent value="configurator" className="mt-4">
+                    <AccountConfigurator
+                      account={selectedAccountForTable}
+                      pendingChanges={pendingChanges as Partial<Account> | null}
+                      setPendingChanges={setPendingChanges}
+                      isSaving={isSaving}
+                    />
                   </TabsContent>
                 </Tabs>
               )}
