@@ -13,6 +13,20 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewrite",
 })
 
+const LOCALES = ["en", "fr", "de", "es", "it", "pt", "vi", "hi", "ja", "zh", "yo"] as const
+
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  // Supabase cookies are typically shaped like sb-<project-ref>-auth-token (often chunked).
+  return request.cookies
+    .getAll()
+    .some(({ name }) => name.includes("sb-") && name.includes("auth-token"))
+}
+
+function isRootOrLocaleRootPath(pathname: string): boolean {
+  if (pathname === "/") return true
+  return LOCALES.some((locale) => pathname === `/${locale}`)
+}
+
 async function updateSession(request: NextRequest) {
   // Create a proper NextResponse first
   const response = NextResponse.next({
@@ -113,32 +127,26 @@ export default async function proxy(req: NextRequest) {
   // Apply i18n middleware first
   const response = I18nMiddleware(req)
 
-
-  // Then update session
-  const { response: authResponse, user, error } = await updateSession(req)
-
-  // Embed route check
+  // Embed route check (public path, no auth/session roundtrip needed)
   if (pathname.includes("/embed")) {
-    response.headers.delete('X-Frame-Options'); // Allow framing
-    
+    response.headers.delete("X-Frame-Options") // Allow framing
+
     // Check if request is from a local file or development environment
-    const origin = req.headers.get('origin');
-    const referer = req.headers.get('referer');
-    const isLocalFile = origin === 'null' || referer?.startsWith('file://') || (!origin && !referer);
-    const isDev = process.env.NODE_ENV === 'development';
-    
-    console.log('Embed request debug:', { origin, referer, isLocalFile, nodeEnv: process.env.NODE_ENV, pathname });
-    
+    const origin = req.headers.get("origin")
+    const referer = req.headers.get("referer")
+    const isLocalFile = origin === "null" || referer?.startsWith("file://") || (!origin && !referer)
+    const isDev = process.env.NODE_ENV === "development"
+
     // If embedding from a local file (file://), omit CSP entirely so browsers don't block
     if (isLocalFile) {
-      response.headers.delete('Content-Security-Policy');
-      return response;
+      response.headers.delete("Content-Security-Policy")
+      return response
     }
 
     // Development: omit CSP entirely to prevent frame-ancestors blocking during local testing
     if (isDev) {
-      response.headers.delete('Content-Security-Policy');
-      return response;
+      response.headers.delete("Content-Security-Policy")
+      return response
     }
 
     // Production CSP - more restrictive
@@ -148,46 +156,72 @@ export default async function proxy(req: NextRequest) {
       "https://*.deltalytix.app", // Main domain
       "https://*.beta.deltalytix.app", // Beta subdomain
       "http://localhost:*", // For local testing
-      "http://127.0.0.1:*",  // For local testing
+      "http://127.0.0.1:*", // For local testing
       "file:", // For local HTML file testing (may be ignored by some browsers)
       "https://thortradecopier.com",
       "https://app.thortradecopier.com",
-    ].join(" ");
-    
-    response.headers.set('Content-Security-Policy',
-      `frame-ancestors ${allowedOrigins}; ` +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data: blob:; " +
-      "connect-src 'self' https://vercel.live; " +
-      "font-src 'self' data:; " +
-      "object-src 'none'; " +
-      "base-uri 'self'; " +
-      "form-action 'self';"
-    );
-    
-    return response;
-  }
-  // Merge responses - copy headers from auth response to i18n response
-  authResponse.headers.forEach((value, key) => {
-    response.headers.set(key, value)
-  })
+    ].join(" ")
 
-  // Copy cookies from auth response
-  authResponse.cookies.getAll().forEach((cookie) => {
-    response.cookies.set(cookie.name, cookie.value, {
-      path: cookie.path,
-      domain: cookie.domain,
-      expires: cookie.expires,
-      httpOnly: cookie.httpOnly,
-      secure: cookie.secure,
-      sameSite: cookie.sameSite as any,
+    response.headers.set(
+      "Content-Security-Policy",
+      `frame-ancestors ${allowedOrigins}; ` +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: blob:; " +
+        "connect-src 'self' https://vercel.live; " +
+        "font-src 'self' data:; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self';",
+    )
+
+    return response
+  }
+
+  const needsSessionCheck =
+    pathname.includes("/dashboard") || pathname.includes("/admin") || pathname.includes("/authentication")
+  const hasAuthCookie = hasSupabaseAuthCookie(req)
+  const shouldRunSessionCheck = needsSessionCheck && hasAuthCookie
+
+  let user: User | null = null
+  let error: unknown = null
+
+  if (shouldRunSessionCheck) {
+    const { response: authResponse, user: sessionUser, error: sessionError } = await updateSession(req)
+    user = sessionUser
+    error = sessionError
+
+    // Merge responses - copy headers from auth response to i18n response
+    authResponse.headers.forEach((value, key) => {
+      response.headers.set(key, value)
     })
-  })
+
+    // Copy cookies from auth response
+    authResponse.cookies.getAll().forEach((cookie) => {
+      response.cookies.set(cookie.name, cookie.value, {
+        path: cookie.path,
+        domain: cookie.domain,
+        expires: cookie.expires,
+        httpOnly: cookie.httpOnly,
+        secure: cookie.secure,
+        sameSite: cookie.sameSite as any,
+      })
+    })
+  }
 
   // Maintenance mode check
   if (MAINTENANCE_MODE && !pathname.includes("/maintenance") && pathname.includes("/dashboard")) {
     return NextResponse.redirect(new URL("/maintenance", req.url))
+  }
+
+  // Fast path: protected route with no auth cookie should skip upstream auth call and redirect.
+  if (!hasAuthCookie && (pathname.includes("/dashboard") || pathname.includes("/admin"))) {
+    const authUrl = new URL("/authentication", req.url)
+    const encodedSearchParams = `${pathname.substring(1)}${req.nextUrl.search}`
+    if (encodedSearchParams) {
+      authUrl.searchParams.append("next", encodedSearchParams)
+    }
+    return NextResponse.redirect(authUrl)
   }
 
   // Admin route check with better error handling
@@ -205,9 +239,8 @@ export default async function proxy(req: NextRequest) {
   }
 
   // Authentication checks with better error handling
-  if (!user || error) {
-    const isPublicRoute = !pathname.includes("/dashboard")
-    if (!isPublicRoute) {
+  if (pathname.includes("/dashboard")) {
+    if (!user || error) {
       const encodedSearchParams = `${pathname.substring(1)}${req.nextUrl.search}`
       const authUrl = new URL("/authentication", req.url)
 
@@ -222,53 +255,57 @@ export default async function proxy(req: NextRequest) {
 
       return NextResponse.redirect(authUrl)
     }
-  } else {
+  } else if (pathname.includes("/authentication")) {
     // Authenticated - redirect from auth to dashboard
-    if (pathname.includes("/authentication")) {
+    if (user && !error) {
       const nextParam = req.nextUrl.searchParams.get("next")
       const redirectUrl = nextParam ? `/${nextParam}` : "/dashboard"
       return NextResponse.redirect(new URL(redirectUrl, req.url))
     }
   }
 
-  // Geolocation handling with better error handling
-  try {
-    const geo = geolocation(req)
+  // Geolocation handling: run once per visitor (cookie cache) to reduce edge work.
+  const hasCountryCookie = Boolean(req.cookies.get("user-country")?.value)
+  const shouldResolveGeolocation = !hasCountryCookie && isRootOrLocaleRootPath(pathname)
+  if (shouldResolveGeolocation) {
+    try {
+      const geo = geolocation(req)
 
-    if (geo.country) {
-      response.headers.set("x-user-country", geo.country)
-      response.cookies.set("user-country", geo.country, {
-        path: "/",
-        maxAge: 60 * 60 * 24, // 24 hours
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      })
-    }
+      if (geo.country) {
+        response.headers.set("x-user-country", geo.country)
+        response.cookies.set("user-country", geo.country, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 30, // 30 days to minimize repeated edge geo work
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+        })
+      }
 
-    if (geo.city) {
-      response.headers.set("x-user-city", encodeURIComponent(geo.city))
-    }
+      if (geo.city) {
+        response.headers.set("x-user-city", encodeURIComponent(geo.city))
+      }
 
-    if (geo.countryRegion) {
-      response.headers.set("x-user-region", encodeURIComponent(geo.countryRegion))
-    }
-  } catch (geoError) {
-    // Fallback to Vercel headers
-    const country = req.headers.get("x-vercel-ip-country")
-    const city = req.headers.get("x-vercel-ip-city")
-    const region = req.headers.get("x-vercel-ip-country-region")
+      if (geo.countryRegion) {
+        response.headers.set("x-user-region", encodeURIComponent(geo.countryRegion))
+      }
+    } catch (geoError) {
+      // Fallback to Vercel headers
+      const country = req.headers.get("x-vercel-ip-country")
+      const city = req.headers.get("x-vercel-ip-city")
+      const region = req.headers.get("x-vercel-ip-country-region")
 
-    if (country) {
-      response.headers.set("x-user-country", country)
-      response.cookies.set("user-country", country, {
-        path: "/",
-        maxAge: 60 * 60 * 24,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      })
+      if (country) {
+        response.headers.set("x-user-country", country)
+        response.cookies.set("user-country", country, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 30,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+        })
+      }
+      if (city) response.headers.set("x-user-city", encodeURIComponent(city))
+      if (region) response.headers.set("x-user-region", encodeURIComponent(region))
     }
-    if (city) response.headers.set("x-user-city", encodeURIComponent(city))
-    if (region) response.headers.set("x-user-region", encodeURIComponent(region))
   }
 
   return response
@@ -285,6 +322,6 @@ export const config = {
      * - opengraph-image (Open Graph image generation)
      * - public files with extensions
      */
-    "/((?!_next/static|_next/image|favicon.ico|api|opengraph-image|.*\\.(?:svg|png|jpg|jpeg|mp4|webm|gif|html|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|twitter-image|icon|.*\\..*).*)",
   ],
 }
