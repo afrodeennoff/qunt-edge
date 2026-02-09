@@ -34,16 +34,16 @@ export function DashboardHeader() {
     } = useDashboard();
     const { isPlusUser } = useData();
     const searchParams = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'widgets';
+    const normalizedPathname = pathname.replace(/\/+$/, '') || '/';
+    const isDashboardRoot = /^\/(?:[a-z]{2}(?:-[A-Za-z]{2})?)?\/dashboard$/i.test(normalizedPathname);
+    const isWidgetsTab = activeTab === 'widgets';
 
     const getTitle = () => {
-        const tab = searchParams.get('tab');
-        // Check if we are on the dashboard root (handling possible locale prefix)
-        const isDashboardRoot = pathname === '/dashboard' || pathname.match(/\/[a-z]{2}\/dashboard$/);
-
         if (isDashboardRoot) {
-            if (tab === 'table') return 'Trades';
-            if (tab === 'accounts') return 'Accounts';
-            if (tab === 'chart') return 'Chart the Future';
+            if (activeTab === 'table') return 'Trades';
+            if (activeTab === 'accounts') return 'Accounts';
+            if (activeTab === 'chart') return 'Chart the Future';
             return 'Overview';
         }
         if (pathname.includes('strategies')) return 'Trade Desk';
@@ -99,7 +99,7 @@ export function DashboardHeader() {
                     </div>
 
                     {/* Customization Group (Conditional) */}
-                    {title === 'Overview' && (
+                    {isDashboardRoot && isWidgetsTab && (
                         <div className="ml-1 flex items-center gap-1.5 rounded-lg border border-border/70 bg-card/70 p-1">
                             <AddWidgetSheet
                                 onAddWidget={addWidget}
@@ -107,6 +107,7 @@ export function DashboardHeader() {
                             />
 
                             <button
+                                type="button"
                                 onClick={toggleCustomizing}
                                 className={cn(
                                     "text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-md transition-all duration-300 border",
@@ -120,6 +121,7 @@ export function DashboardHeader() {
 
                             {isCustomizing && autoSaveStatus.hasPending && (
                                 <button
+                                    type="button"
                                     onClick={flushPendingSaves}
                                     className="animate-pulse rounded-md p-1.5 text-primary transition-all hover:bg-primary/10"
                                     title="Save Changes"
