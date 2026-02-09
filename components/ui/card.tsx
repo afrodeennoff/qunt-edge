@@ -27,15 +27,15 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         tabIndex={clickable ? 0 : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
         className={cn(
-          "relative overflow-hidden rounded-xl transition-all duration-300 group",
+          "relative overflow-hidden rounded-xl group",
           {
-            "bg-[#09090b]/40 backdrop-blur-md border border-white/[0.05] hover:border-teal-500/20 shadow-2xl": variant === "default" || variant === "glass",
+            "bg-black border border-white/[0.08] shadow-2xl": variant === "default" || variant === "glass",
             "bg-card text-card-foreground border border-border shadow-sm": variant === "elevated",
             "border-2 border-border bg-transparent shadow-none": variant === "outlined",
             "border-0 bg-transparent shadow-none": variant === "flat",
           },
           {
-            "hover:-translate-y-1 hover:shadow-teal-500/5": hover || variant === "default" || variant === "glass",
+            "transition-all duration-300 hover:-translate-y-1 hover:shadow-teal-500/5": hover,
             "cursor-pointer active:scale-[0.98]": clickable,
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2": clickable,
           },
@@ -49,11 +49,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         onClick={isInteractive ? onClick : undefined}
         {...props}
       >
-        {/* Scanning Line Animation */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/30 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-
-        {/* Subtle Background Glow */}
-        <div className="absolute -inset-px bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {hover && (
+          <>
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/30 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+            <div className="absolute -inset-px bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          </>
+        )}
 
         <div className="relative z-10">
           {children}

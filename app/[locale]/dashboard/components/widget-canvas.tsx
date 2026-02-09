@@ -180,26 +180,25 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
   return (
     <div 
       ref={widgetRef}
-      className="relative h-full min-h-0 w-full rounded-lg bg-background shadow-[0_2px_4px_rgba(0,0,0,0.05)] group isolate animate-[fadeIn_1.5s_ease-in-out] overflow-hidden"
+      className="relative h-full min-h-0 w-full rounded-lg bg-black group isolate overflow-hidden"
       onTouchStart={handleTouchStart}
     >
       <div className={cn("h-full min-h-0 w-full", 
-        isCustomizing && "group-hover:blur-[2px]",
-        isCustomizing && isMobile && "blur-[2px]"
+        isCustomizing && "blur-[2px]"
       )}>
         {children}
       </div>
       {isCustomizing && (
         <>
-          <div className="absolute inset-0 border-2 border-dashed border-transparent group-hover:border-accent group-focus-within:border-accent transition-colors duration-200" />
-          <div className="absolute inset-0 bg-background/50 dark:bg-background/70 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200" />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 drag-handle cursor-grab active:cursor-grabbing">
+          <div className="absolute inset-0 border-2 border-dashed border-accent" />
+          <div className="absolute inset-0 bg-black/60 opacity-100" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-100 drag-handle cursor-grab active:cursor-grabbing">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <GripVertical className="h-6 w-4" />
               <p className="text-sm font-medium">{t('widgets.dragToMove')}</p>
             </div>
           </div>
-          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 z-10">
+          <div className="absolute top-2 right-2 flex gap-2 opacity-100 z-10">
             <Popover open={isSizePopoverOpen} onOpenChange={setIsSizePopoverOpen}>
               <PopoverTrigger asChild>
                 <Button

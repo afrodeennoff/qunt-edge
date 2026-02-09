@@ -19,7 +19,7 @@ type WidgetComponentProps = {
 }
 
 const loadingShell = (
-  <div className="h-full w-full animate-pulse rounded-2xl border border-border/40 bg-card/50" aria-hidden="true" />
+  <div className="h-full w-full animate-pulse rounded-2xl border border-white/10 bg-black" aria-hidden="true" />
 )
 
 const widgetLoaders: Record<WidgetType, () => Promise<{ default: React.ComponentType<WidgetComponentProps> }>> = {
