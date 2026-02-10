@@ -259,6 +259,11 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
+            if (!global.navigator) {
+                // @ts-ignore
+                global.navigator = {}
+            }
+
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
                 value: false,
