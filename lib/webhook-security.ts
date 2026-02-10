@@ -272,10 +272,11 @@ export async function processWebhook<T = any>(
 
     } catch (error) {
         console.error('Webhook processing error:', error)
+        const capturedError = error instanceof Error ? error : new Error(String(error))
 
         // Send to Sentry if available
         if (typeof window !== 'undefined' && window.Sentry) {
-            window.Sentry.captureException(error, {
+            window.Sentry.captureException(capturedError, {
                 tags: { context: 'webhook_processing' }
             })
         }

@@ -289,7 +289,7 @@ export async function resetRateLimit(
   }
 
   try {
-    await limiter.resetLimit(identifier)
+    await limiter.resetUsedTokens(identifier)
     return true
   } catch (error) {
     console.error(`Failed to reset rate limit for ${identifier}:`, error)
@@ -314,8 +314,15 @@ export async function getRateLimitAnalytics(tier: RateLimitTierType): Promise<{
   }
 
   try {
-    const analytics = await limiter.getAnalytics(tier)
-    return analytics
+    // Current @upstash/ratelimit RegionRatelimit API does not expose getAnalytics().
+    // Keep this helper non-breaking and return a minimal snapshot-compatible shape.
+    // Consumers should treat these values as unavailable until a dedicated analytics backend is wired.
+    void limiter
+    return {
+      totalRequests: 0,
+      blockedRequests: 0,
+      uniqueIdentifiers: 0,
+    }
   } catch (error) {
     console.error(`Failed to get analytics for ${tier}:`, error)
     return null

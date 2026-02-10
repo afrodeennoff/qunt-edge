@@ -36,7 +36,7 @@ export function sanitizeHtml(
     return ''
   }
 
-  const config: DOMPurify.Config = {
+  const config = {
     ALLOWED_TAGS: options?.allowedTags || [
       'p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li',
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -52,7 +52,7 @@ export function sanitizeHtml(
   }
 
   // Additional security: ensure safe protocols in links
-  DOMPurify.addHook('afterSanitizeAttributes', (node: HTMLElement) => {
+  DOMPurify.addHook('afterSanitizeAttributes' as any, (node: Element) => {
     if (node.tagName === 'A') {
       const href = node.getAttribute('href')
       if (href && !href.match(/^(https?|mailto):/i)) {
@@ -66,7 +66,7 @@ export function sanitizeHtml(
     }
   })
 
-  return DOMPurify.sanitize(dirty, config)
+  return DOMPurify.sanitize(dirty, config as any) as unknown as string
 }
 
 /**
@@ -87,7 +87,7 @@ export function sanitizePlainText(input: string): string {
   }
 
   // Remove all HTML tags
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] })
+  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] }) as unknown as string
 }
 
 /**
