@@ -2,11 +2,11 @@
 
 ## Build and Quality Gates
 
-- [ ] `npm run typecheck` passes
-- [ ] `npm run lint` has 0 errors
-- [ ] `npm run test` passes
-- [ ] `npm run build` passes
-- [ ] Prisma schema validates (`npx prisma validate`)
+- [x] `npm run typecheck` passes
+- [x] `npm run lint` has 0 errors
+- [x] `npm run test` passes
+- [x] `npm run build` passes
+- [x] Prisma schema validates (`npx prisma validate`)
 
 ## Data and Migrations
 
@@ -17,10 +17,10 @@
 
 ## Security and Privacy
 
-- [ ] Secrets present in environment and rotated as required
+- [x] Secrets present in environment and rotated as required
 - [ ] AuthZ checks validated on critical endpoints
 - [ ] Import/webhook input validation paths tested
-- [ ] Audit/security scan reviewed (`npm audit`)
+- [x] Audit/security scan reviewed (`npm audit`)
 
 ## Reliability and Observability
 
@@ -35,4 +35,3 @@
 - [ ] Dashboard metrics load and match expected values
 - [ ] Team analytics page loads without contract errors
 - [ ] Billing webhook test event processes successfully
-
