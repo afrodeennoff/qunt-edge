@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/server/auth'
+import { isAdmin as checkAdmin } from '@/server/admin'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 
@@ -10,14 +11,11 @@ export async function GET(req: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user?.email) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const adminDomains = process.env.ADMIN_EMAIL_DOMAINS?.split(',') || []
-    const isAdmin = adminDomains.some((domain) =>
-      user.email?.toLowerCase().endsWith(domain.toLowerCase())
-    )
+    const isAdmin = await checkAdmin(user)
 
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
