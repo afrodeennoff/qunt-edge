@@ -52,7 +52,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center rounded-xl border border-border/60 bg-card/85 p-1 text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[hsl(var(--chart-axis))] [&_.recharts-cartesian-axis-tick_text]:font-medium [&_.recharts-cartesian-grid_line]:stroke-[hsl(var(--chart-grid)/0.5)] [&_.recharts-cartesian-grid_line]:[stroke-dasharray:3_3] [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[hsl(var(--border))] [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_line]:stroke-[hsl(var(--chart-grid)/0.5)] [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[hsl(var(--muted)/0.35)] [&_.recharts-reference-line_line]:stroke-[hsl(var(--chart-axis)/0.6)] [&_.recharts-reference-line_line]:[stroke-dasharray:4_4] [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
+          "flex aspect-video justify-center rounded-xl border border-border/70 bg-card/92 p-1.5 text-xs [&_.recharts-cartesian-axis-tick_text]:fill-[hsl(var(--chart-axis))] [&_.recharts-cartesian-axis-tick_text]:text-[10px] [&_.recharts-cartesian-axis-tick_text]:font-medium [&_.recharts-cartesian-grid_line]:stroke-[hsl(var(--chart-grid)/0.45)] [&_.recharts-cartesian-grid_line]:[stroke-dasharray:2_4] [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[hsl(var(--border))] [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_line]:stroke-[hsl(var(--chart-grid)/0.45)] [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[hsl(var(--muted)/0.32)] [&_.recharts-reference-line_line]:stroke-[hsl(var(--chart-axis)/0.55)] [&_.recharts-reference-line_line]:[stroke-dasharray:4_4] [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
           className
         )}
         {...props}
@@ -179,7 +179,7 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "grid min-w-36 items-start gap-1.5 rounded-xl border border-[hsl(var(--chart-tooltip-border))] bg-[hsl(var(--chart-tooltip)/0.96)] px-3 py-2 text-xs shadow-2xl backdrop-blur-sm",
+          "grid min-w-36 items-start gap-1.5 rounded-xl border border-[hsl(var(--chart-tooltip-border))] bg-[hsl(var(--chart-tooltip)/0.98)] px-3 py-2 text-xs shadow-[0_18px_40px_-24px_hsl(var(--background)/0.8)] backdrop-blur-sm",
           className
         )}
       >

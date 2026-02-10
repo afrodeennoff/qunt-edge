@@ -72,7 +72,6 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={`/${locale}${link.href}`}
-                  prefetch={false}
                   className={cn(
                     'rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] transition-all',
                     isActive(link.href)
@@ -88,7 +87,7 @@ export default function Navbar() {
 
           <div className="ml-auto flex items-center gap-2">
             <Button asChild className="hidden h-10 rounded-full bg-[hsl(var(--brand-primary))] px-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] md:inline-flex">
-              <Link href={`/${locale}/authentication`} prefetch={false}>Start Free Audit</Link>
+              <Link href={`/${locale}/authentication`}>Start Free Audit</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -104,7 +103,6 @@ export default function Navbar() {
                       <Link
                         key={link.href}
                         href={`/${locale}${link.href}`}
-                        prefetch={false}
                         onClick={() => setMobileOpen(false)}
                         className="block rounded-xl px-3 py-2 text-sm text-[hsl(var(--mk-text))]"
                       >
@@ -113,7 +111,7 @@ export default function Navbar() {
                     ))}
                   </div>
                   <Button asChild className="mt-auto h-11 rounded-full bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">
-                    <Link href={`/${locale}/authentication`} prefetch={false} onClick={() => setMobileOpen(false)}>
+                    <Link href={`/${locale}/authentication`} onClick={() => setMobileOpen(false)}>
                       Start Free Audit
                     </Link>
                   </Button>

@@ -26,7 +26,6 @@ export default function CTA() {
         <div className="mt-8">
           <Link
             href={`/${locale}/authentication?next=dashboard`}
-            prefetch={false}
             className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
           >
             Access Dashboard

@@ -363,14 +363,14 @@
   }
 
   .surface-frame {
-    @apply rounded-2xl border border-border/70 bg-card/75 p-4 sm:p-5;
+    @apply rounded-2xl border border-border/70 bg-card/88 p-4 sm:p-5;
   }
 
   .surface-panel-md {
-    @apply rounded-2xl border border-border/70 bg-card/75 p-3 sm:p-4;
+    @apply rounded-2xl border border-border/70 bg-card/88 p-3 sm:p-4;
   }
 
   .tooltip-surface {
-    @apply rounded-lg border border-border/70 bg-card/95 p-3 text-xs shadow-sm;
+    @apply rounded-xl border border-border/75 bg-card/96 p-3 text-xs shadow-[0_18px_40px_-24px_hsl(var(--background)/0.8)];
   }
 }
