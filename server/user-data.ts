@@ -1,7 +1,8 @@
 'use server'
 
 import { getShared } from './shared'
-import { TickDetails, User, Tag, DashboardLayout, FinancialEvent, Mood, Trade, Subscription, Account, Group } from '@/prisma/generated/prisma'
+import { TickDetails, User, Tag, DashboardLayout, FinancialEvent, Mood, Subscription, Account, Group } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
 import { GroupWithAccounts } from './groups'
 import { getCurrentLocale } from '@/locales/server'
 import { prisma } from '@/lib/prisma'

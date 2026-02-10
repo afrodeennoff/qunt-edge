@@ -1,6 +1,7 @@
 'use server'
 
-import { Trade, Prisma, PrismaClient, Group, TickDetails } from '@/prisma/generated/prisma'
+import { Trade as PrismaTrade, Prisma, PrismaClient, Group, TickDetails } from '@/prisma/generated/prisma'
+import { normalizeTradesForClient, Trade } from '@/lib/data-types'
 import { endOfDay, startOfDay } from 'date-fns'
 import { parseISO, isValid } from 'date-fns'
 import { revalidatePath } from 'next/cache'
@@ -170,16 +171,18 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   try {
     const result = await getCachedShared(slug)
 
-    if (result) {
-      // Background update of view count to not block response
-      // We don't await this to keep the response fast
-      prisma.shared.update({
-        where: { slug },
-        data: { viewCount: { increment: 1 } }
-      }).catch(err => console.error('[getShared] Failed to update view count:', err))
-    }
+    if (!result) return null
 
-    return result
+    // Background update of view count to not block response
+    prisma.shared.update({
+      where: { slug },
+      data: { viewCount: { increment: 1 } }
+    }).catch(err => console.error('[getShared] Failed to update view count:', err))
+
+    return {
+      ...result,
+      trades: normalizeTradesForClient(result.trades)
+    }
   } catch (error) {
     console.error('[getShared] Error:', error)
     return null

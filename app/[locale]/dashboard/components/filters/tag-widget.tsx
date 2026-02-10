@@ -37,7 +37,8 @@ import { HexColorPicker } from 'react-colorful'
 import { cn } from '@/lib/utils'
 import { createTagAction, updateTagAction, deleteTagAction, syncTradeTagsToTagTableAction } from '@/server/tags'
 import { toast } from "sonner"
-import { Trade, Tag } from '@/prisma/generated/prisma'
+import { Tag } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import {
   AlertDialog,
@@ -74,10 +75,10 @@ interface TagWidgetProps {
 
 export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetProps) {
   const t = useI18n()
-  const { 
-    tagFilter, 
-    setTagFilter, 
-  updateTrades,
+  const {
+    tagFilter,
+    setTagFilter,
+    updateTrades,
   } = useData()
   const contextTrades = useTradesStore(state => state.trades)
   const tags = useUserStore(state => state.tags)
@@ -105,7 +106,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
 
     try {
       const trimmedName = formData.name.trim()
-      
+
       // Check if name is empty
       if (!trimmedName) {
         toast.error(t('widgets.tags.error'), {
@@ -116,13 +117,13 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
 
       // Close dialog immediately
       setIsAddDialogOpen(false)
-      
+
       if (editingTag) {
         const oldTagName = editingTag.name
         const newTagName = trimmedName
 
         // Check if new name already exists (excluding the current tag)
-        const tagExists = tags.some(tag => 
+        const tagExists = tags.some(tag =>
           tag.id !== editingTag.id && tag.name === newTagName
         )
 
@@ -140,7 +141,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
         })
 
         // Update tag metadata in context and cache
-        const newTags = tags.map(tag => 
+        const newTags = tags.map(tag =>
           tag.name === oldTagName
             ? { ...tag, name: newTagName, color: formData.color, description: formData.description }
             : tag
@@ -157,21 +158,21 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
           // We need to find each trade which include the old tag name and replace it with the new tag name
           contextTrades.forEach((trade: Trade) => {
             if (trade.tags.includes(oldTagName)) {
-              trade.tags = trade.tags.map((tag: string) => 
+              trade.tags = trade.tags.map((tag: string) =>
                 tag === oldTagName ? newTagName : tag
               )
               updateTrades([trade.id], {
-                tags: trade.tags.map((tag: string) => 
+                tags: trade.tags.map((tag: string) =>
                   tag === oldTagName ? newTagName : tag
                 )
               })
             }
           })
-          
+
           // Update tag filter if the renamed tag was selected
           if (tagFilter.tags.includes(oldTagName)) {
             setTagFilter(prev => ({
-              tags: prev.tags.map(tag => 
+              tags: prev.tags.map(tag =>
                 tag === oldTagName ? newTagName : tag
               )
             }))
@@ -183,7 +184,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
         })
       } else {
         // Check if tag already exists
-        const tagExists = tags.some(tag => 
+        const tagExists = tags.some(tag =>
           tag.name === trimmedName
         )
 
@@ -208,7 +209,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
           description: t('widgets.tags.createSuccess'),
         })
       }
-      
+
       setEditingTag(null)
       setFormData({ name: '', description: null, color: '#CBD5E1' })
     } catch (error) {
@@ -227,14 +228,14 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
 
   const confirmDelete = async () => {
     if (!tagToDelete) return
-    
+
     setIsLoading(true)
     try {
       await deleteTagAction(tagToDelete.id)
-      
+
       // Update local tags state and cache
       setTags(tags.filter(tag => tag.id !== tagToDelete.id))
-      
+
       // Remove the tag from all trades 
       contextTrades.forEach((trade: Trade) => {
         if (trade.tags.includes(tagToDelete.name)) {
@@ -244,14 +245,14 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
           })
         }
       })
-      
+
       // Also remove from tag filter if it's selected
       if (tagFilter.tags.includes(tagToDelete.name)) {
         setTagFilter(prev => ({
           tags: prev.tags.filter(t => t !== tagToDelete.name)
         }))
       }
-      
+
       toast.success(t('widgets.tags.success'), {
         description: t('widgets.tags.deleteSuccess'),
       })
@@ -278,7 +279,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
 
   useEffect(() => {
     // Filter tags based on search query
-    const filteredTags = tags?.filter(tag => 
+    const filteredTags = tags?.filter(tag =>
       tag.name.includes(searchQuery)
     ) ?? []
     setFilteredTags(filteredTags)
@@ -287,7 +288,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
   return (
     <>
       <Card className="h-full flex flex-col">
-        <CardHeader 
+        <CardHeader
           className={cn(
             "flex flex-row items-center justify-between space-y-0 pb-2 shrink-0",
             size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
@@ -295,7 +296,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-1.5">
-              <CardTitle 
+              <CardTitle
                 className={cn(
                   "line-clamp-1",
                   size === 'small' ? "text-sm" : "text-base"
@@ -335,8 +336,8 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
               )}
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     className={cn(
                       "shrink-0 hover:bg-muted/50",
@@ -416,7 +417,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
             </div>
           </div>
         </CardHeader>
-        <CardContent 
+        <CardContent
           className={cn(
             "flex-1 min-h-0 overflow-hidden pt-0",
             size === 'small' ? "px-1" : "px-2 sm:px-4"
@@ -442,7 +443,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
 
             {/* Tag filters */}
             <div className="flex-1 min-h-0 -mx-1">
-              <ScrollArea 
+              <ScrollArea
                 className="h-full px-1"
                 type="hover"
               >
@@ -463,7 +464,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
                           checked={tagFilter.tags.includes(tag.name)}
                           onCheckedChange={(checked) => {
                             setTagFilter(prev => ({
-                              tags: checked 
+                              tags: checked
                                 ? [...prev.tags, tag.name]
                                 : prev.tags.filter(t => t !== tag.name)
                             }))

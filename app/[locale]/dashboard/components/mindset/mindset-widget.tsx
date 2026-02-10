@@ -27,6 +27,7 @@ import { useFinancialEventsStore } from "@/store/financial-events-store"
 import { useTradesStore } from "@/store/trades-store"
 import { useCurrentLocale } from "@/locales/client"
 import { FinancialEvent } from "@/prisma/generated/prisma"
+import { Trade } from "@/lib/data-types"
 
 interface MindsetWidgetProps {
   size: WidgetSize
@@ -114,7 +115,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
   const handleApplyTagToAll = async (tag: string) => {
     try {
       const dateKey = format(selectedDate, 'yyyy-MM-dd')
-      
+
       // Find all trades for this day
       const tradesForDay = trades.filter(trade => {
         const entryDate = trade.entryDate
@@ -123,9 +124,9 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
         const closeMatches = closeDate && format(new Date(closeDate), 'yyyy-MM-dd') === dateKey
         return entryMatches || closeMatches
       })
-      
+
       const tradeIds = tradesForDay.map(trade => trade.id)
-      
+
       // Update local state immediately for instant feedback
       const updatedTrades = trades.map(trade => {
         if (tradeIds.includes(trade.id)) {
@@ -137,10 +138,10 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
         return trade
       })
       setTrades(updatedTrades)
-      
+
       // Then update on server
       await addTagsToTradesForDay(dateKey, [tag])
-      
+
       toast.success(t('mindset.tags.tagApplied'), {
         description: t('mindset.tags.tagAppliedDescription', { tag }),
       })
@@ -211,7 +212,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date)
-    
+
     // Find if we have data for the selected date
     const moodForDate = moods?.find(mood => {
       if (!mood?.day) return false
@@ -243,11 +244,11 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
       try {
         const eventDate = new Date(event.date)
         const compareDate = new Date(date)
-        
+
         // Set hours to start of day for comparison
         eventDate.setHours(0, 0, 0, 0)
         compareDate.setHours(0, 0, 0, 0)
-        
+
         return eventDate.getTime() === compareDate.getTime() && event.lang === locale
       } catch (error) {
         console.error('Error parsing event date:', error)
@@ -258,7 +259,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
 
   const handleEdit = (section?: 'emotion' | 'journal' | 'news') => {
     setIsEditing(true)
-    
+
     // Navigate to the appropriate section
     switch (section) {
       case 'news':
@@ -282,7 +283,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
   const steps = [
     {
       title: t('mindset.journaling.title'),
-      component: <Journaling 
+      component: <Journaling
         content={journalContent}
         onChange={handleJournalChange}
         onSave={handleSave}
@@ -310,7 +311,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
 
   return (
     <Card className="flex flex-col p-0 h-full w-full">
-      <CardHeader 
+      <CardHeader
         className={cn(
           "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
           size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
@@ -318,7 +319,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1.5">
-            <CardTitle 
+            <CardTitle
               className={cn(
                 "line-clamp-1",
                 size === 'small' ? "text-sm" : "text-base"
@@ -379,20 +380,20 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0 flex flex-row relative">
         {/* Timeline with animation */}
-        <div 
+        <div
           className={cn(
             "relative transition-all duration-300 ease-out-quart",
             isTimelineVisible ? "w-auto" : "w-0 overflow-hidden"
           )}
         >
-          <Timeline 
+          <Timeline
             className="shrink-0"
             selectedDate={selectedDate}
             onSelectDate={handleDateSelect}
             moodHistory={moods}
             onDeleteEntry={handleDeleteEntry}
           />
-          
+
           {/* Hide/Show Button - positioned at right edge of timeline */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
             <TooltipProvider>
@@ -418,7 +419,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
             </TooltipProvider>
           </div>
         </div>
-        
+
         {/* Show Button when timeline is collapsed */}
         {!isTimelineVisible && (
           <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">

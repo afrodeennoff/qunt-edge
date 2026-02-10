@@ -1,5 +1,7 @@
 "use client"
 
+import { Group } from "@/lib/data-types"
+import { useData } from "@/context/data-provider"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,14 +10,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Check, Loader2, Pencil, Trash2, X, Search } from "lucide-react"
 import { useI18n } from "@/locales/client"
@@ -23,7 +18,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useTradesStore } from "@/store/trades-store"
 import { useUserStore } from "@/store/user-store"
-import { useData, Account, Group } from "@/context/data-provider"
+import { Account } from "@/lib/data-types"
 import { removeAccountsFromTradesAction } from "@/server/accounts"
 
 export const HIDDEN_GROUP_NAME = "Hidden Accounts"

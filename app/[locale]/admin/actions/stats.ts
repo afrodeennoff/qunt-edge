@@ -11,6 +11,9 @@ const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '', {
   }
 })
 import { prisma } from '@/lib/prisma'
+import { normalizeTradesForClient } from '@/lib/data-types'
+import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
+import { Subscription } from '@/prisma/generated/prisma'
 
 export async function getUserStats() {
   let allUsers: any[] = []
@@ -78,10 +81,10 @@ export async function getFreeUsers() {
     select: { userId: true }
   })
   console.log(`Found ${subscribedUsers.length} subscribed users`)
-  const subscribedUserIds = new Set(subscribedUsers.map(sub => sub.userId))
+  const subscribedUserIds = new Set(subscribedUsers.map((sub: { userId: string }) => sub.userId))
 
   // Get unique user IDs who have trades but no subscription
-  const freeUserIds = [...new Set(trades.map(trade => trade.userId))]
+  const freeUserIds = [...new Set(trades.map((trade: PrismaTrade) => trade.userId))]
     .filter(userId => !subscribedUserIds.has(userId))
   console.log(`Found ${freeUserIds.length} free users with trades`)
 
@@ -118,11 +121,11 @@ export async function getFreeUsers() {
   // Map free users to their emails and trades
   const mappedUsers = freeUserIds.map(userId => {
     const user = allUsers.find(u => u.id === userId)
-    const userTrades = trades.filter(trade => trade.userId === userId)
+    const userTrades = trades.filter((trade: PrismaTrade) => trade.userId === userId)
     console.log(`Mapping user ${userId}: Found email: ${!!user?.email}, Trades: ${userTrades.length}`)
     return {
       email: user?.email || '',
-      trades: userTrades
+      trades: normalizeTradesForClient(userTrades as any)
     }
   }).filter(user => user.email !== '')
 

@@ -87,7 +87,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
 
     // ---------- PWA ----------
-    manifest: "/site.webmanifest",
+    manifest: "/manifest.json",
 
     // ---------- ROBOTS ----------
     robots: {

@@ -60,7 +60,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Account } from '@/context/data-provider'
+import { Account } from "@/lib/data-types"
 import { useUserStore } from '@/store/user-store'
 import { useTradesStore } from '@/store/trades-store'
 import { useAccountOrderStore } from '@/store/account-order-store'

@@ -8,7 +8,7 @@ import { Info, Trophy } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
-import { Trade } from "@/prisma/generated/prisma"
+import { Trade } from "@/lib/data-types"
 
 export default function TradingScoreWidget({ size }: { size?: string }) {
     const { formattedTrades: trades } = useData()

@@ -5,7 +5,7 @@ import { ChartContainer } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
 import { useMemo } from "react"
-import { Account } from "@/context/data-provider"
+import { Account } from "@/lib/data-types"
 import { useTradesStore } from "@/store/trades-store"
 
 // Add interface for event type

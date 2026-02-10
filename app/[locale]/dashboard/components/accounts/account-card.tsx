@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
 import { TradeProgressChart } from "./trade-progress-chart"
-import { Account } from "@/context/data-provider"
+import { Account } from "@/lib/data-types"
 import { WidgetSize } from '../../types/dashboard'
 
 interface AccountCardProps {

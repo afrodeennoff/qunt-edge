@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useData } from "@/context/data-provider"
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, parseISO, isWithinInterval, format } from "date-fns"
 import { calculateTradingScore, getScoreColor, getScoreLabel } from "@/lib/score-calculator"
-import { type Account } from "@/context/data-provider"
+import { type Account } from "@/lib/data-types"
 import html2canvas from "html2canvas"
 import { useUserStore } from "@/store/user-store"
 

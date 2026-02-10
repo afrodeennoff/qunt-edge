@@ -12,7 +12,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table"
-import { Account, Group } from "@/context/data-provider"
+import { Account, Group } from "@/lib/data-types"
 import { cn } from "@/lib/utils"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import { Progress } from "@/components/ui/progress"

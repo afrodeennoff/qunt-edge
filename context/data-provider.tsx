@@ -99,6 +99,12 @@ import {
   GroupInput,
   Trade,
   TradeInput,
+  normalizeTradeForClient,
+  normalizeTradesForClient,
+  normalizePayoutForClient,
+  normalizeAccountForClient,
+  normalizeAccountsForClient,
+  normalizeGroupsForClient,
 } from "@/lib/data-types";
 
 // Combined Context Type
@@ -179,121 +185,6 @@ interface DataContextType {
   // Dashboard layout
   saveDashboardLayout: (layout: PrismaDashboardLayout) => Promise<void>;
 }
-
-function normalizeTradeForClient(trade: TradeInput | SerializedTrade): Trade {
-  const raw = trade as any;
-  return {
-    ...raw,
-    entryPrice: decimalToNumber(raw.entryPrice),
-    closePrice: decimalToNumber(raw.closePrice, null),
-    pnl: decimalToNumber(raw.pnl),
-    commission: decimalToNumber(raw.commission, null),
-    quantity: decimalToNumber(raw.quantity),
-    timeInPosition: decimalToNumber(raw.timeInPosition, null),
-    entryDate: raw.entryDate instanceof Date ? raw.entryDate : new Date(raw.entryDate),
-    closeDate: raw.closeDate ? (raw.closeDate instanceof Date ? raw.closeDate : new Date(raw.closeDate)) : null,
-    tags: Array.isArray(raw.tags) ? raw.tags : [],
-    trades: Array.isArray(raw.trades) ? raw.trades.map(normalizeTradeForClient) : [],
-  } as Trade;
-}
-
-function normalizeTradesForClient(trades: (TradeInput | SerializedTrade)[]): Trade[] {
-  return trades.map(normalizeTradeForClient);
-}
-
-function normalizePayoutForClient(
-  payout: PrismaPayout | AccountPayout
-): AccountPayout {
-  return {
-    ...payout,
-    amount: decimalToNumber(payout.amount),
-  }
-}
-
-function normalizeAccountForClient(account: AccountInput): Account {
-  const raw = account as AccountInput
-  const normalized = {
-    ...raw,
-    startingBalance: decimalToNumber(raw.startingBalance),
-    balanceRequired:
-      raw.balanceRequired === null || raw.balanceRequired === undefined
-        ? null
-        : decimalToNumber(raw.balanceRequired),
-    drawdownThreshold: decimalToNumber(raw.drawdownThreshold),
-    dailyLoss: decimalToNumber(raw.dailyLoss),
-    profitTarget: decimalToNumber(raw.profitTarget),
-    buffer: decimalToNumber(raw.buffer),
-    trailingStopProfit:
-      raw.trailingStopProfit === null || raw.trailingStopProfit === undefined
-        ? null
-        : decimalToNumber(raw.trailingStopProfit),
-    minPayout:
-      raw.minPayout === null || raw.minPayout === undefined
-        ? null
-        : decimalToNumber(raw.minPayout),
-    profitSharing:
-      raw.profitSharing === null || raw.profitSharing === undefined
-        ? null
-        : decimalToNumber(raw.profitSharing),
-    payoutBonus:
-      raw.payoutBonus === null || raw.payoutBonus === undefined
-        ? null
-        : decimalToNumber(raw.payoutBonus),
-    consistencyPercentage:
-      raw.consistencyPercentage === null || raw.consistencyPercentage === undefined
-        ? null
-        : decimalToNumber(raw.consistencyPercentage),
-    minPnlToCountAsDay:
-      raw.minPnlToCountAsDay === null || raw.minPnlToCountAsDay === undefined
-        ? null
-        : decimalToNumber(raw.minPnlToCountAsDay),
-    activationFees:
-      raw.activationFees === null || raw.activationFees === undefined
-        ? null
-        : decimalToNumber(raw.activationFees),
-    price:
-      raw.price === null || raw.price === undefined
-        ? null
-        : decimalToNumber(raw.price),
-    priceWithPromo:
-      raw.priceWithPromo === null || raw.priceWithPromo === undefined
-        ? null
-        : decimalToNumber(raw.priceWithPromo),
-    promoPercentage:
-      raw.promoPercentage === null || raw.promoPercentage === undefined
-        ? null
-        : decimalToNumber(raw.promoPercentage),
-    payouts: Array.isArray(raw.payouts)
-      ? raw.payouts.map(normalizePayoutForClient)
-      : [],
-    dailyMetrics: raw.dailyMetrics?.map((metric) => ({
-      ...metric,
-      pnl: decimalToNumber(metric.pnl),
-      totalBalance: decimalToNumber(metric.totalBalance),
-      percentageOfTarget: decimalToNumber(metric.percentageOfTarget),
-      payout: metric.payout
-        ? {
-          ...metric.payout,
-          amount: decimalToNumber(metric.payout.amount),
-        }
-        : undefined,
-    })),
-  } as Account
-
-  return normalized
-}
-
-function normalizeAccountsForClient(accounts: AccountInput[]): Account[] {
-  return accounts.map(normalizeAccountForClient)
-}
-
-function normalizeGroupsForClient(groups: GroupInput[]): Group[] {
-  return groups.map((group) => ({
-    ...group,
-    accounts: normalizeAccountsForClient(group.accounts),
-  })) as Group[]
-}
-
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Add this hook before the UserDataProvider component
@@ -448,7 +339,7 @@ export const DataProvider: React.FC<{
 
           // Batch state updates
           const updates = async () => {
-            setTrades(normalizeTradesForClient(processedSharedTrades as (PrismaTrade | SerializedTrade)[]));
+            setTrades(processedSharedTrades as Trade[]);
             setSharedParams(sharedData.params);
 
             setDashboardLayout(defaultLayouts);
@@ -1347,6 +1238,7 @@ export const DataProvider: React.FC<{
   // Add moveAccountToGroup function
   const moveAccountToGroup = useCallback(
     async (accountId: string, targetGroupId: string | null) => {
+      const { accounts: previousAccounts, groups: previousGroups } = useUserStore.getState();
       try {
         const { accounts: currentAccounts, groups: currentGroups } =
           useUserStore.getState();
@@ -1366,7 +1258,7 @@ export const DataProvider: React.FC<{
 
         // Update groups state using the freshest snapshot
         const accountToMove = currentAccounts.find(
-          (acc) => acc.id === accountId
+          (acc: Account) => acc.id === accountId
         );
         if (accountToMove) {
           // We have to ensure that the target group is created
@@ -1394,7 +1286,7 @@ export const DataProvider: React.FC<{
                   // If this is the target group, add the account only if it's not already there
                   if (group.id === targetGroupId) {
                     const accountExists = group.accounts.some(
-                      (acc) => acc.id === accountId
+                      (acc: Account) => acc.id === accountId
                     );
                     return {
                       ...group,
@@ -1407,7 +1299,7 @@ export const DataProvider: React.FC<{
                   return {
                     ...group,
                     accounts: group.accounts.filter(
-                      (acc) => acc.id !== accountId
+                      (acc: Account) => acc.id !== accountId
                     ),
                   };
                 })
@@ -1418,7 +1310,9 @@ export const DataProvider: React.FC<{
 
         await moveAccountToGroupAction(accountId, targetGroupId);
       } catch (error) {
-        console.error("Error moving account to group:", error);
+        console.error("Error moving account to group, rolling back:", error);
+        setAccounts(previousAccounts);
+        setGroups(previousGroups);
         throw error;
       }
     },
@@ -1427,6 +1321,7 @@ export const DataProvider: React.FC<{
 
   const moveAccountsToGroup = useCallback(
     async (accountIds: string[], targetGroupId: string | null) => {
+      const { accounts: previousAccounts, groups: previousGroups } = useUserStore.getState();
       try {
         const { accounts: currentAccounts, groups: currentGroups } =
           useUserStore.getState();
@@ -1438,12 +1333,12 @@ export const DataProvider: React.FC<{
           return;
 
         const idSet = new Set(accountIds);
-        const accountsToMove = currentAccounts.filter((acc) =>
+        const accountsToMove = currentAccounts.filter((acc: Account) =>
           idSet.has(acc.id)
         );
 
         // Update accounts state using the freshest snapshot
-        const updatedAccounts = currentAccounts.map((account) =>
+        const updatedAccounts = currentAccounts.map((account: Account) =>
           idSet.has(account.id)
             ? { ...account, groupId: targetGroupId }
             : account
@@ -1454,7 +1349,7 @@ export const DataProvider: React.FC<{
         setGroups(
           currentGroups.map((group) => {
             const remainingAccounts = group.accounts.filter(
-              (acc) => !idSet.has(acc.id)
+              (acc: Account) => !idSet.has(acc.id)
             );
             if (group.id === targetGroupId) {
               const missingToAdd = accountsToMove.filter(
@@ -1474,7 +1369,9 @@ export const DataProvider: React.FC<{
           accountIds.map((id) => moveAccountToGroupAction(id, targetGroupId))
         );
       } catch (error) {
-        console.error("Error moving accounts to group:", error);
+        console.error("Error moving accounts to group, rolling back:", error);
+        setAccounts(previousAccounts);
+        setGroups(previousGroups);
         throw error;
       }
     },
@@ -1482,16 +1379,17 @@ export const DataProvider: React.FC<{
   );
 
   // Add savePayout function
-  const savePayoutFallback = useCallback(
+  const savePayout = useCallback(
     async (payout: PrismaPayout | AccountPayout) => {
       if (!supabaseUser?.id || isSharedView) return;
 
-      try {
-        // Add to database
-        const newPayout = await savePayoutAction(payout as any);
-        const normalizedPayout = normalizePayoutForClient(newPayout);
+      // Capture state for rollback
+      const previousAccounts = [...accounts];
 
-        // Update the account with the new/updated payout
+      try {
+        const normalizedPayout = normalizePayoutForClient(payout as any);
+
+        // Update the account with the new/updated payout immediately
         const updatedAccounts = accounts.map((account: Account) => {
           if (account.number === payout.accountNumber) {
             const existingPayouts = account.payouts || [];
@@ -1499,7 +1397,6 @@ export const DataProvider: React.FC<{
               payout.id && existingPayouts.some((p) => p.id === payout.id);
 
             if (isUpdate) {
-              // Update existing payout
               return {
                 ...account,
                 payouts: existingPayouts.map((p) =>
@@ -1507,7 +1404,6 @@ export const DataProvider: React.FC<{
                 ),
               };
             } else {
-              // Add new payout
               return {
                 ...account,
                 payouts: [...existingPayouts, normalizedPayout],
@@ -1521,14 +1417,13 @@ export const DataProvider: React.FC<{
         const affectedAccount = updatedAccounts.find(
           (acc) => acc.number === payout.accountNumber
         );
+
         if (affectedAccount) {
           const accountsWithMetrics = computeMetricsForAccounts(
             [affectedAccount],
             trades
           );
           const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
-
-          // Update accounts with recalculated metrics
           setAccounts(
             updatedAccounts.map((acc) =>
               acc.number === payout.accountNumber ? accountWithMetrics : acc
@@ -1537,8 +1432,12 @@ export const DataProvider: React.FC<{
         } else {
           setAccounts(updatedAccounts);
         }
+
+        // Perform server action in background
+        await savePayoutAction(payout as any);
       } catch (error) {
-        console.error("Error saving payout:", error);
+        console.error("Error saving payout, rolling back:", error);
+        setAccounts(previousAccounts);
         throw error;
       }
     },
@@ -1550,13 +1449,15 @@ export const DataProvider: React.FC<{
     async (account: Account) => {
       if (!supabaseUser?.id || isSharedView) return;
 
+      const previousAccounts = [...accounts];
       try {
-        // Update local state
-        setAccounts(accounts.filter((acc) => acc.id !== account.id));
+        // Update local state immediately
+        setAccounts(accounts.filter((acc: Account) => acc.id !== account.id));
         // Delete from database
         await deleteAccountAction(account);
       } catch (error) {
-        console.error("Error deleting account:", error);
+        console.error("Error deleting account, rolling back:", error);
+        setAccounts(previousAccounts);
         throw error;
       }
     },
@@ -1625,19 +1526,29 @@ export const DataProvider: React.FC<{
     [supabaseUser?.id, setIsFirstConnection]
   );
 
-  const updateTradesFallback = useCallback(
-    async (tradeIds: string[], update: Partial<NormalizedTrade>) => {
+  const updateTrades = useCallback(
+    async (tradeIds: string[], update: Partial<Trade>) => {
       if (!supabaseUser?.id) return;
-      const updatedTrades = trades.map((trade) =>
-        tradeIds.includes(trade.id)
-          ? {
-            ...trade,
-            ...update,
-          }
-          : trade
-      );
-      setTrades(updatedTrades);
-      await updateTradesAction(tradeIds, update);
+
+      const previousTrades = [...trades];
+
+      try {
+        const updatedTrades = trades.map((trade: Trade) =>
+          tradeIds.includes(trade.id)
+            ? {
+              ...trade,
+              ...update,
+            }
+            : trade
+        );
+        setTrades(updatedTrades);
+        // Cast to any to bypass strict Decimal vs Number mismatch in server action signature
+        await updateTradesAction(tradeIds, update as any);
+      } catch (error) {
+        console.error("Error updating trades, rolling back:", error);
+        setTrades(previousTrades);
+        throw error;
+      }
     },
     [supabaseUser?.id, trades, setTrades]
   );
@@ -1645,13 +1556,20 @@ export const DataProvider: React.FC<{
   const groupTrades = useCallback(
     async (tradeIds: string[]) => {
       if (!supabaseUser?.id) return;
-      setTrades(
-        trades.map((trade) => ({
-          ...trade,
-          groupId: tradeIds[0],
-        }))
-      );
-      await groupTradesAction(tradeIds);
+      const previousTrades = [...trades];
+      try {
+        const targetGroupId = tradeIds[0];
+        setTrades(
+          trades.map((trade: Trade) =>
+            tradeIds.includes(trade.id) ? { ...trade, groupId: targetGroupId } : trade
+          )
+        );
+        await groupTradesAction(tradeIds);
+      } catch (error) {
+        console.error("Error grouping trades, rolling back:", error);
+        setTrades(previousTrades);
+        throw error;
+      }
     },
     [supabaseUser?.id, trades, setTrades]
   );
@@ -1659,13 +1577,19 @@ export const DataProvider: React.FC<{
   const ungroupTrades = useCallback(
     async (tradeIds: string[]) => {
       if (!supabaseUser?.id) return;
-      setTrades(
-        trades.map((trade) => ({
-          ...trade,
-          groupId: null,
-        }))
-      );
-      await ungroupTradesAction(tradeIds);
+      const previousTrades = [...trades];
+      try {
+        setTrades(
+          trades.map((trade: Trade) =>
+            tradeIds.includes(trade.id) ? { ...trade, groupId: null } : trade
+          )
+        );
+        await ungroupTradesAction(tradeIds);
+      } catch (error) {
+        console.error("Error ungrouping trades, rolling back:", error);
+        setTrades(previousTrades);
+        throw error;
+      }
     },
     [supabaseUser?.id, trades, setTrades]
   );

@@ -238,3 +238,108 @@ export type AccountInput = (
 export type GroupInput = (Omit<PrismaGroup, "accounts"> & {
     accounts: AccountInput[]
 })
+
+import { decimalToNumber } from "./trade-types";
+
+export function normalizeTradeForClient(trade: TradeInput | SerializedTrade): Trade {
+    const raw = trade as any;
+    return {
+        ...raw,
+        entryPrice: decimalToNumber(raw.entryPrice),
+        closePrice: decimalToNumber(raw.closePrice, null),
+        pnl: decimalToNumber(raw.pnl),
+        commission: decimalToNumber(raw.commission, null),
+        quantity: decimalToNumber(raw.quantity),
+        timeInPosition: decimalToNumber(raw.timeInPosition, null),
+        entryDate: raw.entryDate instanceof Date ? raw.entryDate : new Date(raw.entryDate),
+        closeDate: raw.closeDate ? (raw.closeDate instanceof Date ? raw.closeDate : new Date(raw.closeDate)) : null,
+        tags: Array.isArray(raw.tags) ? raw.tags : [],
+        trades: Array.isArray(raw.trades) ? raw.trades.map(normalizeTradeForClient) : [],
+    } as Trade;
+}
+
+export function normalizeTradesForClient(trades: (TradeInput | SerializedTrade)[]): Trade[] {
+    return trades.map(normalizeTradeForClient);
+}
+
+export function normalizePayoutForClient(
+    payout: PrismaPayout | AccountPayout
+): AccountPayout {
+    return {
+        ...payout,
+        amount: decimalToNumber(payout.amount),
+    }
+}
+
+export function normalizeAccountForClient(account: AccountInput): Account {
+    const raw = account as AccountInput
+    const normalized = {
+        ...raw,
+        startingBalance: decimalToNumber(raw.startingBalance),
+        balanceRequired:
+            raw.balanceRequired === null || raw.balanceRequired === undefined
+                ? null
+                : decimalToNumber(raw.balanceRequired),
+        drawdownThreshold: decimalToNumber(raw.drawdownThreshold),
+        dailyLoss: decimalToNumber(raw.dailyLoss),
+        profitTarget: decimalToNumber(raw.profitTarget),
+        buffer: decimalToNumber(raw.buffer),
+        trailingStopProfit:
+            raw.trailingStopProfit === null || raw.trailingStopProfit === undefined
+                ? null
+                : decimalToNumber(raw.trailingStopProfit),
+        minPayout:
+            raw.minPayout === null || raw.minPayout === undefined
+                ? null
+                : decimalToNumber(raw.minPayout),
+        profitSharing:
+            raw.profitSharing === null || raw.profitSharing === undefined
+                ? null
+                : decimalToNumber(raw.profitSharing),
+        payoutBonus:
+            raw.payoutBonus === null || raw.payoutBonus === undefined
+                ? null
+                : decimalToNumber(raw.payoutBonus),
+        consistencyPercentage:
+            raw.consistencyPercentage === null || raw.consistencyPercentage === undefined
+                ? null
+                : decimalToNumber(raw.consistencyPercentage),
+        minPnlToCountAsDay:
+            raw.minPnlToCountAsDay === null || raw.minPnlToCountAsDay === undefined
+                ? null
+                : decimalToNumber(raw.minPnlToCountAsDay),
+        activationFees:
+            raw.activationFees === null || raw.activationFees === undefined
+                ? null
+                : decimalToNumber(raw.activationFees),
+        price:
+            raw.price === null || raw.price === undefined
+                ? null
+                : decimalToNumber(raw.price),
+        priceWithPromo:
+            raw.priceWithPromo === null || raw.priceWithPromo === undefined
+                ? null
+                : decimalToNumber(raw.priceWithPromo),
+        promoPercentage:
+            raw.promoPercentage === null || raw.promoPercentage === undefined
+                ? null
+                : decimalToNumber(raw.promoPercentage),
+        resetDate: raw.resetDate ? new Date(raw.resetDate as string | Date) : null,
+        createdAt: new Date(raw.createdAt as string | Date),
+        updatedAt: new Date(raw.updatedAt as string | Date),
+        payouts: Array.isArray(raw.payouts) ? raw.payouts.map(normalizePayoutForClient) : [],
+        trades: Array.isArray(raw.trades) ? raw.trades.map(normalizeTradeForClient) : [],
+    } as Account
+    return normalized
+}
+
+export function normalizeAccountsForClient(accounts: AccountInput[]): Account[] {
+    return accounts.map(normalizeAccountForClient);
+}
+
+export function normalizeGroupsForClient(groups: GroupInput[]): Group[] {
+    return groups.map((group) => ({
+        ...group,
+        accounts: normalizeAccountsForClient(group.accounts),
+    })) as Group[];
+}

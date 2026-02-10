@@ -24,7 +24,7 @@ import WeeklyCalendarPnl from "./weekly-calendar"
 import { CalendarData } from "@/app/[locale]/dashboard/types/calendar"
 import { useFinancialEventsStore } from "@/store/financial-events-store"
 import { useUserStore } from "@/store/user-store"
-import { Account } from "@/context/data-provider"
+import { Account } from "@/lib/data-types"
 import { HIDDEN_GROUP_NAME } from "../filters/account-group-board"
 
 

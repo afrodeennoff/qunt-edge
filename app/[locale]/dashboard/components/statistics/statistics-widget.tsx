@@ -9,7 +9,7 @@ import { cn, calculateStatistics } from "@/lib/utils"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import { Progress } from "@/components/ui/progress"
 import { CalendarEntry } from "@/app/[locale]/dashboard/types/calendar"
-import { Trade } from "@/prisma/generated/prisma"
+import { Trade } from "@/lib/data-types"
 
 interface StatisticsWidgetProps {
   size?: 'tiny' | 'small' | 'medium' | 'large' | 'small-long' | 'extra-large'

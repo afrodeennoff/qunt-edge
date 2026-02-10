@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { TrashIcon, AlertCircle, ChevronDown, ChevronUp, MoreVertical, Edit2, Loader2 } from "lucide-react"
-import { 
-  removeAccountsFromTradesAction, 
-  deleteInstrumentGroupAction, 
-  updateCommissionForGroupAction, 
+import {
+  removeAccountsFromTradesAction,
+  deleteInstrumentGroupAction,
+  updateCommissionForGroupAction,
   renameAccountAction,
-  renameInstrumentAction 
+  renameInstrumentAction
 } from "@/server/accounts"
 import { useData } from '@/context/data-provider'
 import { toast } from 'sonner'
@@ -21,7 +21,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Prisma, Trade } from '@/prisma/generated/prisma'
+import { Prisma } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
 import ExportButton from '@/components/export-button'
 import { useI18n } from "@/locales/client"
 import { useUserStore } from '@/store/user-store'
@@ -146,7 +147,7 @@ export function DataManagementCard() {
     const originalCommission = firstTrade
       ? Number(firstTrade.commission) / Number(firstTrade.quantity || 1)
       : undefined
-    
+
     // Only set as pending if the value is different from the original and is a valid number
     if (originalCommission !== undefined && !isNaN(newCommission) && newCommission !== originalCommission) {
       setPendingCommissionUpdates(prev => ({
@@ -166,7 +167,7 @@ export function DataManagementCard() {
   const handleValidateCommission = useCallback(async (accountNumber: string, instrumentGroup: string) => {
     const updateKey = `${accountNumber}-${instrumentGroup}`
     const pendingUpdate = pendingCommissionUpdates[updateKey]
-    
+
     if (!pendingUpdate) return
 
     try {
@@ -175,23 +176,23 @@ export function DataManagementCard() {
       // Optimistically update commissions locally
       const updatedTrades = trades.map((trade) =>
         trade.accountNumber === accountNumber &&
-        trade.instrument.startsWith(instrumentGroup)
+          trade.instrument.startsWith(instrumentGroup)
           ? {
-              ...trade,
-              commission: new Prisma.Decimal(pendingUpdate.newCommission).times(trade.quantity),
-            }
+            ...trade,
+            commission: pendingUpdate.newCommission * trade.quantity,
+          }
           : trade
       )
       setTradesStore(updatedTrades)
       await refreshTradesOnly({ force: false })
-      
+
       // Clear pending update
       setPendingCommissionUpdates(prev => {
         const newState = { ...prev }
         delete newState[updateKey]
         return newState
       })
-      
+
       toast.success(t('dataManagement.toast.commissionUpdated'))
     } catch (error) {
       console.error("Failed to update commission:", error)
@@ -220,7 +221,7 @@ export function DataManagementCard() {
       setTradesStore(
         trades.map((trade) =>
           trade.accountNumber === instrumentToRename.accountNumber &&
-          trade.instrument === instrumentToRename.currentName
+            trade.instrument === instrumentToRename.currentName
             ? { ...trade, instrument: newInstrumentName }
             : trade
         )
@@ -484,27 +485,27 @@ export function DataManagementCard() {
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                           <div className="relative w-full sm:w-32">
-                              <Input
-                                type="number"
-                                placeholder="Commission"
-                                defaultValue={Number(trades[0].commission) / Number(trades[0].quantity || 1)}
-                                className={`w-full ${pendingCommissionUpdates[`${accountNumber}-${instrumentGroup}`] ? 'pr-8' : ''}`}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value)
-                                  if (!isNaN(value)) {
-                                    handleUpdateCommission(accountNumber, instrumentGroup, value)
-                                  } else {
-                                    // If invalid input, clear any pending updates
-                                    const updateKey = `${accountNumber}-${instrumentGroup}`
-                                    setPendingCommissionUpdates(prev => {
-                                      const newState = { ...prev }
-                                      delete newState[updateKey]
-                                      return newState
-                                    })
-                                  }
-                                }}
-                                aria-label={`Update commission for ${instrumentGroup}`}
-                              />
+                            <Input
+                              type="number"
+                              placeholder="Commission"
+                              defaultValue={Number(trades[0].commission) / Number(trades[0].quantity || 1)}
+                              className={`w-full ${pendingCommissionUpdates[`${accountNumber}-${instrumentGroup}`] ? 'pr-8' : ''}`}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value)
+                                if (!isNaN(value)) {
+                                  handleUpdateCommission(accountNumber, instrumentGroup, value)
+                                } else {
+                                  // If invalid input, clear any pending updates
+                                  const updateKey = `${accountNumber}-${instrumentGroup}`
+                                  setPendingCommissionUpdates(prev => {
+                                    const newState = { ...prev }
+                                    delete newState[updateKey]
+                                    return newState
+                                  })
+                                }
+                              }}
+                              aria-label={`Update commission for ${instrumentGroup}`}
+                            />
                             {pendingCommissionUpdates[`${accountNumber}-${instrumentGroup}`] && (
                               <TooltipProvider>
                                 <Tooltip>

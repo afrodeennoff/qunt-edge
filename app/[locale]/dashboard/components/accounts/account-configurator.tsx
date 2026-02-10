@@ -19,7 +19,7 @@ import { propFirms } from './config'
 import { HIDDEN_GROUP_NAME } from "../filters/account-group-board"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Account } from '@/context/data-provider'
+import { Account } from "@/lib/data-types"
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { useData } from '@/context/data-provider'

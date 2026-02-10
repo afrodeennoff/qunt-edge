@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/tooltip"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { useI18n } from "@/locales/client"
-import { Trade } from "@/prisma/generated/prisma"
+import { Trade } from "@/lib/data-types"
 import { Button } from "@/components/ui/button"
 import { ChartConfig } from "@/components/ui/chart"
 
