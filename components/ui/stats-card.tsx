@@ -59,9 +59,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
     return (
       <Card
         ref={ref}
-        hover={!!onClick}
-        clickable={!!onClick}
-        className={cn("group", currentSize.padding, className)}
+        className={cn("group", currentSize.padding, className, onClick && "hover:shadow-md cursor-pointer transition-all")}
         onClick={onClick}
         aria-label={title}
         {...props}
