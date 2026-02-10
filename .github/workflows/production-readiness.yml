@@ -1,0 +1,83 @@
+name: Production Readiness
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+env:
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+  DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+  NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-anon-key"
+  SUPABASE_SERVICE_ROLE_KEY: "dummy-service-role-key"
+  WHOP_API_KEY: "dummy-key"
+  WHOP_APP_ID: "dummy-app-id"
+  WHOP_COMPANY_ID: "dummy-company-id"
+  WHOP_CLIENT_SECRET: "dummy-client-secret"
+  WHOP_WEBHOOK_SECRET: "dummy-webhook-secret"
+  TRADOVATE_CLIENT_ID: "dummy-client-id"
+  TRADOVATE_CLIENT_SECRET: "dummy-client-secret"
+  TRADOVATE_REDIRECT_URI: "http://localhost:3000/api/tradovate/callback"
+  DATABENTO_API_KEY: "dummy-databento-key"
+  WIDGET_MESSAGE_BUS_SECRET: "dummy-widget-secret"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate Prisma Client
+      run: npx prisma generate
+
+    - name: Push Database Schema
+      run: npx prisma db push --skip-generate
+
+    - name: Type Check
+      run: npm run typecheck
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
+
+    - name: Run Tests
+      run: npm run test
+
+    - name: Security Audit
+      run: npm audit --audit-level=high --json > npm-audit-report.json || true
+
+    - name: Upload Audit Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: npm-audit-report
+        path: npm-audit-report.json

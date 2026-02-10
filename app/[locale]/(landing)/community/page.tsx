@@ -1,11 +1,9 @@
-import { Metadata } from 'next'
 import { getPosts } from '@/app/[locale]/(landing)/actions/community'
 import { PostList } from './components/post-list'
 import { CreatePost } from './components/create-post'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getI18n } from '@/locales/server'
-import { DataProvider } from '@/context/data-provider'
 
 export const metadata = {
   title: 'Community | Qunt Edge',
@@ -35,4 +33,4 @@ export default async function CommunityPage() {
       <PostList initialPosts={posts} />
     </div>
   )
-} 
+}

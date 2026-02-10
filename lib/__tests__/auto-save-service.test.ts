@@ -259,10 +259,8 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: false,
-            })
+            // Stub navigator.onLine
+            vi.stubGlobal('navigator', { onLine: false })
 
             const onOffline = vi.fn()
             service.on('onOffline', onOffline)
@@ -277,10 +275,8 @@ describe('AutoSaveService', () => {
             const queued = await queue.getAll()
             expect(queued.length).toBeGreaterThan(0)
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: true,
-            })
+            // Restore navigator
+            vi.unstubAllGlobals()
         })
 
         it('should process offline queue when connection restored', async () => {
