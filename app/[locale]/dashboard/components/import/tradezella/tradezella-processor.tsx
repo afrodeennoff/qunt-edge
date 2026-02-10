@@ -33,8 +33,6 @@ export default function TradezellaProcessor({ headers, csvData, setProcessedTrad
 
   const processTrades = useCallback(() => {
     const newTrades: Trade[] = [];
-    //TODO: Ask user for account number using account selection component
-    const accountNumber = 'default-account';
 
     csvData.forEach(row => {
       const item: Partial<Trade> = {};
