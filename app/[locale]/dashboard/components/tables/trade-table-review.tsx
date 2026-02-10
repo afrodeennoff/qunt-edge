@@ -286,6 +286,9 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
   const tags = useUserStore((state) => state.tags);
   const timezone = useUserStore((state) => state.timezone);
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
+  // Pre-sort tickers by length (descending) to avoid re-sorting for every row/cell render
+  // This significantly improves performance when calculating ticks/points for many trades
+  const sortedTickers = useMemo(() => Object.keys(tickDetails).sort((a, b) => b.length - a.length), [tickDetails]);
   let contextTrades = formattedTrades;
 
   if (tradesParam) {
@@ -1019,6 +1022,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           const calculation = calculateTicksAndPointsForGroupedTrade(
             row,
             tickDetails,
+            sortedTickers,
           );
           return showPoints ? calculation.points : calculation.ticks;
         },
@@ -1026,6 +1030,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           const calculation = calculateTicksAndPointsForGroupedTrade(
             row.original,
             tickDetails,
+            sortedTickers,
           );
           const value = showPoints ? calculation.points : calculation.ticks;
           return (
@@ -1156,7 +1161,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         size: 200,
       },
     ],
-    [t, timezone, tags, expanded, tickDetails, showPoints, getAllTradeIds, areAllTradesSelected, selectedTrades],
+    [t, timezone, tags, expanded, tickDetails, sortedTickers, showPoints, getAllTradeIds, areAllTradesSelected, selectedTrades],
   );
 
   // Filter columns based on config
