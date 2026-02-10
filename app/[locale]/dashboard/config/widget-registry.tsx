@@ -21,7 +21,6 @@ import CalendarPnl from '../components/calendar/calendar-widget'
 import CommissionsPnLChart from '../components/charts/commissions-pnl'
 import StatisticsWidget from '../components/statistics/statistics-widget'
 import { TradeTableReview } from '../components/tables/trade-table-review'
-import { MoodSelector } from '../components/calendar/mood-selector'
 import TradeDistributionChart from '../components/charts/trade-distribution'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,7 +38,6 @@ import ExpectancyWidget from '../components/widgets/expectancy-widget'
 import RiskMetricsWidget from '../components/widgets/risk-metrics-widget'
 import { useI18n } from '@/locales/client'
 import { translateWeekday } from '@/lib/translation-utils'
-// import MarketChart from '../components/market/market-chart'
 
 export interface WidgetConfig {
   type: WidgetType
@@ -629,15 +627,6 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetConfig> = {
     getComponent: ({ size }) => <RiskMetricsWidget size={size} />,
     getPreview: () => <RiskMetricsWidget size="small" />
   },
-  // marketChart: {
-  //   type: 'marketChart',
-  //   defaultSize: 'large',
-  //   allowedSizes: ['small', 'medium', 'large'],
-  //   category: 'charts',
-  //   previewHeight: 300,
-  //   getComponent: ({ size }) => <MarketChart />,
-  //   getPreview: () => <MarketChart />
-  // },
 }
 
 export function getWidgetsByCategory(category: WidgetConfig['category']) {
