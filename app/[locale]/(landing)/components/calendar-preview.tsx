@@ -50,6 +50,7 @@ function buildDemoCalendarData(): CalendarData {
       shortNumber: shorts,
       // Minimal trade stubs so the preview shows intra-day stats without
       // requiring full trade objects from the dashboard.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       trades: tradeStubs as any[]
     }
 

@@ -5,9 +5,8 @@ import { CreatePost } from './components/create-post'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getI18n } from '@/locales/server'
-import { DataProvider } from '@/context/data-provider'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Community | Qunt Edge',
   description: 'Join the Qunt Edge community of traders.',
 }
