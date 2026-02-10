@@ -46,10 +46,14 @@ if (typeof (globalThis as { localStorage?: unknown }).localStorage === 'undefine
   })
 }
 
-if (typeof navigator !== 'undefined') {
-  Object.defineProperty(navigator, 'onLine', {
-    value: true,
+// Polyfill navigator if it's undefined
+if (typeof navigator === 'undefined') {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: {
+      onLine: true,
+      userAgent: 'node',
+    },
     writable: true,
     configurable: true,
-  })
+  });
 }
