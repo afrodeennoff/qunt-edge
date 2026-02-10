@@ -46,7 +46,15 @@ if (typeof (globalThis as { localStorage?: unknown }).localStorage === 'undefine
   })
 }
 
-if (typeof navigator !== 'undefined') {
+if (typeof navigator === 'undefined') {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: {
+      onLine: true,
+    },
+    writable: true,
+    configurable: true,
+  })
+} else {
   Object.defineProperty(navigator, 'onLine', {
     value: true,
     writable: true,
