@@ -70,7 +70,8 @@ type UserStore = {
   setIsLoading: (value: boolean) => void;
   setIsMobile: (value: boolean) => void;
   setIsSharedView: (value: boolean) => void;
-  resetUser: () => void;
+  reset: () => void; // Renamed from resetUser for consistency
+  resetUser: () => void; // Deprecated, use reset() instead
 };
 
 export const useUserStore = create<UserStore>()(
@@ -192,7 +193,7 @@ export const useUserStore = create<UserStore>()(
       setIsLoading: (value) => set({ isLoading: value }),
       setIsMobile: (value) => set({ isMobile: value }),
       setIsSharedView: (value) => set({ isSharedView: value }),
-      resetUser: () =>
+      reset: () =>
         set({
           user: null,
           supabaseUser: null,
@@ -201,7 +202,13 @@ export const useUserStore = create<UserStore>()(
           accounts: [],
           groups: [],
           dashboardLayout: null,
+          isLoading: false,
+          // Keep timezone, isMobile, isSharedView (UI preferences)
         }),
+      resetUser: () => {
+        // Deprecated: use reset() instead
+        useUserStore.getState().reset()
+      },
     }),
     {
       name: "qunt-edge-user-store",

@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
-import { Geist, Poppins } from "next/font/google";
+import { Geist, IBM_Plex_Mono, Poppins } from "next/font/google";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -15,6 +15,12 @@ const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
   weight: ["400", "600", "700"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -121,7 +127,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`bg-background ${geist.variable} ${poppins.variable}`}
+      className={`bg-background ${geist.variable} ${poppins.variable} ${ibmPlexMono.variable}`}
       translate="no"
       suppressHydrationWarning
       style={{ ["--theme-intensity" as string]: "100%" }}
@@ -254,7 +260,7 @@ export default function RootLayout({
           `}
         </style>
       </head>
-      <body className="font-sans [font-family:var(--font-geist)]">
+      <body className="font-sans [font-family:var(--font-ibm-plex-mono)]">
         <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}

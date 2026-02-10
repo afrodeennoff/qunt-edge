@@ -78,6 +78,7 @@ export function AIModelSidebar() {
                 { label: 'Trades', href: '/dashboard?tab=table', icon: <TrendingUp className="size-4.5" />, group: 'Inventory' },
                 { label: 'Accounts', href: '/dashboard?tab=accounts', icon: <Activity className="size-4.5" />, group: 'Inventory' },
                 { label: 'Trade Desk', href: '/dashboard/strategies', icon: <BookOpen className="size-4.5" />, group: 'Inventory' },
+                { label: 'Trader Profile', href: '/dashboard/trader-profile', icon: <Brain className="size-4.5" />, group: 'Inventory' },
 
                 { label: 'Reports', href: '/dashboard/reports', icon: <BarChart3 className="size-4.5" />, group: 'Insights' },
                 { label: 'Behavior', href: '/dashboard/behavior', icon: <Brain className="size-4.5" />, group: 'Insights' },
@@ -161,6 +162,7 @@ export function AIModelSidebar() {
                 { label: 'Trades', href: '/dashboard?tab=table', icon: <TrendingUp className="size-4.5" />, group: 'Inventory' },
                 { label: 'Accounts', href: '/dashboard?tab=accounts', icon: <Activity className="size-4.5" />, group: 'Inventory' },
                 { label: 'Trade Desk', href: '/dashboard/strategies', icon: <BookOpen className="size-4.5" />, group: 'Inventory' },
+                { label: 'Trader Profile', href: '/dashboard/trader-profile', icon: <Brain className="size-4.5" />, group: 'Inventory' },
 
                 { label: 'Reports', href: '/dashboard/reports', icon: <BarChart3 className="size-4.5" />, group: 'Insights' },
                 { label: 'Behavior', href: '/dashboard/behavior', icon: <Brain className="size-4.5" />, group: 'Insights' },

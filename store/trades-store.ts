@@ -22,8 +22,10 @@ interface TradesState {
   // Trades data
   trades: Trade[]
   setTrades: (trades: Trade[]) => void
+  reset: () => void
 }
 export const useTradesStore = createSelectors(create<TradesState>()((set) => ({
   trades: [],
   setTrades: (trades: Trade[]) => set({ trades }),
+  reset: () => set({ trades: [] }),
 }))) as UseBoundStore<StoreApi<TradesState>>

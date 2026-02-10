@@ -26,10 +26,38 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    // Content Security Policy - Enterprise Grade
+    const ContentSecurityPolicy = `
+      default-src 'self';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel-scripts.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      img-src 'self' data: blob: https: http:;
+      font-src 'self' data: https://fonts.gstatic.com;
+      connect-src 'self' 
+        https://*.supabase.co 
+        https://api.openai.com 
+        https://api.whop.com
+        https://*.upstash.io
+        https://*.sentry.io
+        https://vercel.live
+        https://*.vercel.app
+        wss://*.supabase.co;
+      media-src 'self' blob: data:;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self' https://*.whop.com;
+      frame-ancestors 'self';
+      upgrade-insecure-requests;
+    `.replace(/\s{2,}/g, ' ').trim()
+
     return [
       {
         source: "/:path*",
         headers: [
+          {
+            key: "Content-Security-Policy",
+            value: ContentSecurityPolicy,
+          },
           {
             key: "X-DNS-Prefetch-Control",
             value: "on",
@@ -44,7 +72,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "X-Frame-Options",
-            value: "SAMEORIGIN",
+            value: "DENY", // Changed from SAMEORIGIN to DENY for better security
           },
           {
             key: "X-Content-Type-Options",
@@ -52,11 +80,11 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
+            value: "strict-origin-when-cross-origin", // More strict
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()", // Added FLoC blocking
           },
         ],
       },
