@@ -42,7 +42,7 @@ export default function Features() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center sm:mb-14">
           <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Features</p>
-          <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+          <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight">
             Built for serious
             <span className="block text-[hsl(var(--brand-primary))]">trading journal workflows</span>
           </h2>

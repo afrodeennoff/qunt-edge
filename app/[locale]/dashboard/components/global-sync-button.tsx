@@ -146,24 +146,24 @@ export function GlobalSyncButton() {
                     )}
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-[#0a0a0a] border-white/10 text-zinc-200">
+            <DropdownMenuContent align="end" className="w-64 bg-card border-border/70 text-foreground">
                 <DropdownMenuLabel className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white uppercase tracking-widest">Sync Status</span>
+                    <span className="text-xs font-bold text-foreground uppercase tracking-widest">Sync Status</span>
                     {isAnySyncing ? (
-                        <Badge variant="outline" className="bg-teal-500/10 text-teal-500 border-teal-500/20 text-[8px] animate-pulse">Syncing...</Badge>
+                        <Badge variant="outline" className="bg-[hsl(var(--brand-primary))/0.1] text-[hsl(var(--brand-primary))] border-[hsl(var(--brand-primary))/0.25] text-[8px] animate-pulse">Syncing...</Badge>
                     ) : (
-                        <Badge variant="outline" className="bg-white/5 text-zinc-500 border-white/5 text-[8px]">Standby</Badge>
+                        <Badge variant="outline" className="bg-muted/60 text-muted-foreground border-border/60 text-[8px]">Standby</Badge>
                     )}
                 </DropdownMenuLabel>
 
-                <DropdownMenuSeparator className="bg-white/5" />
+                <DropdownMenuSeparator className="bg-border/60" />
 
                 <div className="p-2 space-y-3">
                     {/* Auto Sync Rithmic */}
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-white">Rithmic Auto-Sync</span>
-                            <span className="text-[8px] text-zinc-500">Every {rithmicInterval} minutes</span>
+                            <span className="text-[10px] font-bold text-foreground">Rithmic Auto-Sync</span>
+                            <span className="text-[8px] text-muted-foreground">Every {rithmicInterval} minutes</span>
                         </div>
                         <Switch
                             checked={rithmicAutoEnabled}
@@ -175,8 +175,8 @@ export function GlobalSyncButton() {
                     {/* Auto Sync Tradovate */}
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-white">Tradovate Auto-Sync</span>
-                            <span className="text-[8px] text-zinc-500">Every {tradovate.syncInterval} minutes</span>
+                            <span className="text-[10px] font-bold text-foreground">Tradovate Auto-Sync</span>
+                            <span className="text-[8px] text-muted-foreground">Every {tradovate.syncInterval} minutes</span>
                         </div>
                         <Switch
                             checked={tradovate.enableAutoSync}
@@ -186,21 +186,21 @@ export function GlobalSyncButton() {
                     </div>
                 </div>
 
-                <DropdownMenuSeparator className="bg-white/5" />
+                <DropdownMenuSeparator className="bg-border/60" />
 
                 <div className="p-2">
-                    <div className="flex items-center justify-between text-[9px] text-zinc-500 mb-2">
+                    <div className="flex items-center justify-between text-[9px] text-muted-foreground mb-2">
                         <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>Next Sync</span>
                         </div>
-                        <span className="font-mono text-white">{nextSyncText}</span>
+                        <span className="font-mono text-foreground">{nextSyncText}</span>
                     </div>
 
                     <button
                         onClick={handleGlobalSync}
                         disabled={isAnySyncing}
-                        className="w-full h-8 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50"
+                        className="w-full h-8 rounded-md bg-muted/50 hover:bg-muted/70 border border-border/70 text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50"
                     >
                         <RefreshCw className={cn("w-3.5 h-3.5", isAnySyncing && "animate-spin")} />
                         <span>Force Sync Now</span>

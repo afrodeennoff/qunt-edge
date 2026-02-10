@@ -228,7 +228,7 @@ export function DailySummaryModal() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2 flex border-white/10 hover:bg-white/5 bg-zinc-950/50 backdrop-blur-sm group h-10 items-center px-3 md:px-4">
+                <Button variant="outline" className="gap-2 flex border-border/70 hover:bg-accent/40 bg-card/70 backdrop-blur-sm group h-10 items-center px-3 md:px-4">
                     <BarChart3 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                     <span className="hidden md:inline">PnL Summary</span>
                 </Button>
@@ -239,7 +239,7 @@ export function DailySummaryModal() {
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-full aspect-[7/4] bg-[#050505] text-white rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative flex flex-col"
+                    className="w-full aspect-[7/4] bg-card text-foreground rounded-3xl overflow-hidden border border-border/70 shadow-2xl relative flex flex-col"
                     ref={cardRef}
                 >
                     {/* Refined Background Mesh */}

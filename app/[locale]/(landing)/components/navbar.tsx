@@ -63,7 +63,7 @@ export default function Navbar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface-muted)/0.85)]">
               <Logo className="h-4.5 w-4.5 fill-[hsl(var(--mk-text))]" />
             </div>
-            <span className="hidden text-sm font-semibold tracking-tight [font-family:var(--font-poppins)] sm:inline-flex">Qunt Edge</span>
+            <span className="hidden text-sm font-semibold tracking-tight sm:inline-flex">Qunt Edge</span>
           </Link>
 
           <nav className="mx-auto hidden items-center gap-1 lg:flex">
@@ -72,6 +72,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={`/${locale}${link.href}`}
+                  prefetch={false}
                   className={cn(
                     'rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] transition-all',
                     isActive(link.href)
@@ -87,7 +88,7 @@ export default function Navbar() {
 
           <div className="ml-auto flex items-center gap-2">
             <Button asChild className="hidden h-10 rounded-full bg-[hsl(var(--brand-primary))] px-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] md:inline-flex">
-              <Link href={`/${locale}/authentication`}>Start Free Audit</Link>
+              <Link href={`/${locale}/authentication`} prefetch={false}>Start Free Audit</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -103,6 +104,7 @@ export default function Navbar() {
                       <Link
                         key={link.href}
                         href={`/${locale}${link.href}`}
+                        prefetch={false}
                         onClick={() => setMobileOpen(false)}
                         className="block rounded-xl px-3 py-2 text-sm text-[hsl(var(--mk-text))]"
                       >
@@ -111,7 +113,7 @@ export default function Navbar() {
                     ))}
                   </div>
                   <Button asChild className="mt-auto h-11 rounded-full bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">
-                    <Link href={`/${locale}/authentication`} onClick={() => setMobileOpen(false)}>
+                    <Link href={`/${locale}/authentication`} prefetch={false} onClick={() => setMobileOpen(false)}>
                       Start Free Audit
                     </Link>
                   </Button>

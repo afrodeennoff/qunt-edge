@@ -223,38 +223,38 @@ const SIDEBAR_STYLE_CLASSES: Record<
   },
   glassy: {
     sidebar:
-      "border-r border-white/5 bg-[#030303] text-zinc-300",
-    rail: "after:bg-white/5 after:transition-colors after:duration-200 hover:bg-teal-500/10 hover:after:bg-teal-500/40",
-    header: "border-b border-white/5 px-4 py-4",
+      "border-r border-border/60 bg-background text-foreground/85",
+    rail: "after:bg-border/60 after:transition-colors after:duration-200 hover:bg-accent/30 hover:after:bg-[hsl(var(--brand-primary))/0.5]",
+    header: "border-b border-border/60 px-4 py-4",
     brandCard:
       "flex h-10 items-center gap-3 overflow-hidden rounded-xl bg-transparent px-0 transition-all duration-300",
     brandIcon:
-      "flex size-10 shrink-0 items-center justify-center rounded-xl border border-teal-500/10 bg-teal-500/5 text-teal-400 relative overflow-hidden group",
-    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-widest text-teal-500 mt-1",
+      "flex size-10 shrink-0 items-center justify-center rounded-xl border border-[hsl(var(--brand-primary))/0.2] bg-[hsl(var(--brand-primary))/0.1] text-[hsl(var(--brand-primary))] relative overflow-hidden group",
+    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-widest text-[hsl(var(--brand-primary))] mt-1",
     userCard:
-      "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors duration-200 hover:bg-white/5",
-    avatar: "size-9 border border-white/10 ring-1 ring-transparent group-hover:ring-teal-500/30 rounded-lg",
-    avatarFallback: "bg-zinc-800 text-[10px] font-bold text-zinc-300",
+      "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors duration-200 hover:bg-accent/30",
+    avatar: "size-9 border border-border/60 ring-1 ring-transparent group-hover:ring-[hsl(var(--brand-primary))/0.35] rounded-lg",
+    avatarFallback: "bg-muted text-[10px] font-bold text-foreground/80",
     content: "flex flex-col px-3 py-4 overflow-x-hidden",
-    groupLabel: "text-[9px] font-bold uppercase tracking-widest text-zinc-600 px-3 mb-2 animate-in fade-in slide-in-from-left-2",
-    groupLine: "h-px flex-1 bg-white/5",
-    itemTrack: "bg-teal-500 shadow-[0_0_10px_#2dd4bf]",
+    groupLabel: "text-[9px] font-bold uppercase tracking-widest text-muted-foreground px-3 mb-2 animate-in fade-in slide-in-from-left-2",
+    groupLine: "h-px flex-1 bg-border/60",
+    itemTrack: "bg-[hsl(var(--brand-primary))]",
     itemIconActive:
-      "text-teal-400",
+      "text-[hsl(var(--brand-primary))]",
     itemIconInactive:
-      "text-zinc-500 group-hover/item:text-zinc-300",
+      "text-muted-foreground group-hover/item:text-foreground",
     itemButtonActive:
-      "bg-teal-500/10 text-white",
-    itemButtonInactive: "hover:bg-white/5 hover:text-zinc-200 text-zinc-500",
+      "bg-[hsl(var(--brand-primary))/0.12] text-foreground",
+    itemButtonInactive: "hover:bg-accent/30 hover:text-foreground text-muted-foreground",
     selectTrigger:
-      "h-9 rounded-lg border-white/10 bg-zinc-900/50 text-[12px] font-medium hover:border-white/20 hover:text-white focus:ring-teal-500/50 transition-colors",
-    footer: "border-t border-white/5 bg-[#020202] p-4",
+      "h-9 rounded-lg border-border/60 bg-background/80 text-[12px] font-medium hover:border-border hover:text-foreground focus:ring-[hsl(var(--brand-primary))/0.5] transition-colors",
+    footer: "border-t border-border/60 bg-background p-4",
     logout:
-      "flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 ml-auto",
+      "flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive ml-auto",
     collapse:
-      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#030303] text-zinc-500 shadow-lg transition-all duration-200 hover:border-teal-500/50 hover:text-teal-400 absolute -right-3 top-8 z-50",
+      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground shadow-sm transition-all duration-200 hover:border-[hsl(var(--brand-primary))/0.5] hover:text-[hsl(var(--brand-primary))] absolute -right-3 top-8 z-50",
     edgeCollapse:
-      "absolute -right-3 top-8 z-50 hidden border border-white/10 bg-[#030303] shadow-lg md:flex",
+      "absolute -right-3 top-8 z-50 hidden border border-border/60 bg-background shadow-sm md:flex",
   },
 }
 

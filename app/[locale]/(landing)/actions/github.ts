@@ -6,7 +6,7 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN
 })
 
-const REPO_OWNER = 'hugodemenez'
+const REPO_OWNER = 'TIMON'
 const REPO_NAME = 'qunt-edge'
 
 export async function getGithubStats() {

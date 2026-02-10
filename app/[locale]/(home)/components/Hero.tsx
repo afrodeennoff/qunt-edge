@@ -39,7 +39,7 @@ export default function Hero() {
 
           <motion.h1
             variants={fadeUp}
-            className="mx-auto max-w-5xl text-center text-[clamp(2.4rem,8vw,5.6rem)] font-semibold leading-[0.92] tracking-tight [font-family:var(--font-poppins)]"
+            className="mx-auto max-w-5xl text-center text-[clamp(2.4rem,8vw,5.6rem)] font-semibold leading-[0.92] tracking-tight"
           >
             Stop auditing the money.
             <span className="block text-[hsl(var(--brand-primary))]">
@@ -55,12 +55,14 @@ export default function Hero() {
           <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href={`/${locale}/authentication?next=dashboard`}
+              prefetch={false}
               className="inline-flex h-12 min-w-[220px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
             >
               Start Free Audit
             </Link>
             <Link
               href={`/${locale}/updates`}
+              prefetch={false}
               className="inline-flex h-12 min-w-[220px] items-center justify-center gap-2 rounded-full border border-[hsl(var(--mk-border)/0.4)] bg-[hsl(var(--mk-surface)/0.7)] px-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text))] transition-all duration-300 hover:border-[hsl(var(--brand-primary)/0.55)]"
             >
               View Documentation

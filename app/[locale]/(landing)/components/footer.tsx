@@ -37,7 +37,7 @@ export default function Footer() {
 
   const socialLinks: SocialLink[] = [
     { name: 'GitHub', href: 'https://github.com/afrodeennoff/lassttry-edge-', icon: Github },
-    { name: 'YouTube', href: 'https://www.youtube.com/@hugodemenez', icon: Youtube },
+    { name: 'YouTube', href: 'https://www.youtube.com/@TIMON', icon: Youtube },
     { name: 'Discord', href: process.env.NEXT_PUBLIC_DISCORD_INVITATION || '', icon: MessageCircle },
   ].filter((item) => item.href)
 
@@ -59,7 +59,7 @@ export default function Footer() {
                 <Logo className="h-5 w-5 fill-[hsl(var(--mk-text))]" />
               </div>
               <div className="leading-none">
-                <div className="text-base font-semibold tracking-tight [font-family:var(--font-poppins)]">Qunt Edge</div>
+                <div className="text-base font-semibold tracking-tight">Qunt Edge</div>
                 <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Trading Intelligence</div>
               </div>
             </div>
@@ -67,10 +67,10 @@ export default function Footer() {
             <p className="max-w-md text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">{t('footer.description')}</p>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Link href={`/${locale}/authentication`} className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
+              <Link href={`/${locale}/authentication`} prefetch={false} className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
                 Sign In
               </Link>
-              <Link href={`/${locale}/support`} className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
+              <Link href={`/${locale}/support`} prefetch={false} className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
                 Contact Support
               </Link>
             </div>
@@ -125,7 +125,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
             viewport={{ once: true }}
             transition={{ delay: idx * 0.04, duration: 0.35 }}
           >
-            <Link href={`/${locale}${item.href}`} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
+            <Link href={`/${locale}${item.href}`} prefetch={false} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
               {item.name}
             </Link>
           </motion.li>

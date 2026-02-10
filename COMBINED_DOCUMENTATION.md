@@ -11263,7 +11263,7 @@ Unit-test set is based on [node-glob](https://www.npmjs.com/package/glob) tests.
   
   <a href="https://trustmrr.com/startup/qunt edge" target="_blank"><img src="https://trustmrr.com/api/embed/qunt edge?format=svg" alt="TrustMRR verified revenue badge" width="220" height="90" /></a>
   
-  [🚀 Live Demo](https://qunt edge.app) • [💬 Discord Community](https://discord.gg/a5YVF5Ec2n) • [🐛 Report Bug](https://github.com/hugodemenez/qunt edge/issues)
+  [🚀 Live Demo](https://qunt edge.app) • [💬 Discord Community](https://discord.gg/a5YVF5Ec2n) • [🐛 Report Bug](https://github.com/TIMON/qunt edge/issues)
 </div>
 
 ---
@@ -11388,7 +11388,7 @@ Before you begin, ensure you have the following:
 ### Step 1: Clone and Install
 
 ```bash
-git clone https://github.com/hugodemenez/qunt edge.git
+git clone https://github.com/TIMON/qunt edge.git
 cd qunt edge
 npm install  # or bun install
 ```
@@ -11738,7 +11738,7 @@ Read the full license text in the [LICENSE](LICENSE) file.
 <div align="center">
   <p>Made with ❤️ by Qunt Edge community</p>
   <p>
-    <a href="https://github.com/hugodemenez/qunt edge">GitHub</a> •
+    <a href="https://github.com/TIMON/qunt edge">GitHub</a> •
     <a href="https://discord.gg/a5YVF5Ec2n">Discord</a> •
     <a href="https://qunt edge.app">Website</a>
   </p>

@@ -16,7 +16,7 @@ export default function HowItWorks() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center sm:mb-14">
           <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">How It Works</p>
-          <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+          <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight">
             A clear process pipeline,
             <span className="block text-[hsl(var(--brand-primary))]">from raw data to better habits</span>
           </h2>

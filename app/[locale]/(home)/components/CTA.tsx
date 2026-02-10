@@ -16,7 +16,7 @@ export default function CTA() {
         className="marketing-panel mx-auto max-w-4xl rounded-[30px] px-6 py-11 text-center sm:px-10"
       >
         <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Ready</p>
-        <h2 className="mt-2 text-[clamp(1.8rem,5vw,3.4rem)] font-semibold leading-[0.98] tracking-tight [font-family:var(--font-poppins)]">
+        <h2 className="mt-2 text-[clamp(1.8rem,5vw,3.4rem)] font-semibold leading-[0.98] tracking-tight">
           Keep your old trading journal context.
           <span className="block text-[hsl(var(--brand-primary))]">Upgrade everything around it.</span>
         </h2>
@@ -26,6 +26,7 @@ export default function CTA() {
         <div className="mt-8">
           <Link
             href={`/${locale}/authentication?next=dashboard`}
+            prefetch={false}
             className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
           >
             Access Dashboard

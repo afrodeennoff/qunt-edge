@@ -27,22 +27,22 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         tabIndex={clickable ? 0 : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
         className={cn(
-          "relative overflow-hidden rounded-xl group transition-all duration-300",
+          "relative overflow-hidden rounded-2xl group transition-all duration-200",
           {
-            "bg-card text-card-foreground border border-border/70 shadow-sm": variant === "default" || variant === "glass",
-            "bg-card text-card-foreground border border-border shadow-sm": variant === "elevated",
-            "border-2 border-border bg-transparent shadow-none": variant === "outlined",
+            "bg-card/90 text-card-foreground border border-border/70 shadow-[0_1px_0_hsl(var(--foreground)/0.03)]": variant === "default" || variant === "glass",
+            "bg-card text-card-foreground border border-border/80 shadow-sm": variant === "elevated",
+            "border border-border/80 bg-transparent shadow-none": variant === "outlined",
             "border-0 bg-transparent shadow-none": variant === "flat",
           },
           {
-            "transition-all duration-300 hover:-translate-y-1 hover:shadow-teal-500/5": hover,
+            "transition-all duration-200 hover:border-border/85 hover:bg-card": hover,
             "cursor-pointer active:scale-[0.98]": clickable,
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2": clickable,
           },
           {
             "p-3": size === "sm",
-            "p-6": size === "md",
-            "p-8": size === "lg",
+            "p-4": size === "md",
+            "p-5": size === "lg",
           },
           className
         )}

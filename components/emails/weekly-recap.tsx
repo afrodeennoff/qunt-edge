@@ -289,7 +289,7 @@ const ActionButtons = ({ t }: { t: typeof translations.fr }) => (
           <td className="w-[50%] pr-[8px]">
             <div className="bg-[#3469DF] rounded-[6px] text-center py-[12px] px-[16px] box-border">
               <Link
-                href="https://cal.com/hugo-demenez/qunt-edge-discussion"
+                href="https://cal.com/TIMON/qunt-edge-discussion"
                 className="text-white font-medium no-underline text-[14px]"
               >
                 {t.bookCall}

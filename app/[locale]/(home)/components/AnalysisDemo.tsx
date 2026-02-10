@@ -52,7 +52,7 @@ export default function AnalysisDemo() {
         <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Trading Journal Intelligence</p>
-            <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+            <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight">
               Real-time review for
               <span className="block text-[hsl(var(--brand-primary))]">process over outcome</span>
             </h2>
