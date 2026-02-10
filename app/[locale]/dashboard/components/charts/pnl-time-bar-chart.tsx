@@ -72,7 +72,7 @@ export default function TimeOfDayTradeChart({
     // Sum up PNL and count trades for each hour in user's timezone
     trades.forEach((trade: Trade) => {
       const hour = formatInTimeZone(new Date(trade.entryDate), timezone, "H");
-      hourlyData[hour].totalPnl += trade.pnl;
+      hourlyData[hour].totalPnl += Number(trade.pnl);
       hourlyData[hour].count++;
     });
 

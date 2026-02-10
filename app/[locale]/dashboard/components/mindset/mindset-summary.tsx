@@ -151,7 +151,13 @@ export function MindsetSummary({
           <HourlyFinancialTimeline
             date={date}
             events={events}
-            trades={dayTrades}
+            trades={dayTrades.map((trade) => ({
+              id: trade.id,
+              entryDate: new Date(trade.entryDate).toISOString(),
+              instrument: trade.instrument,
+              pnl: Number(trade.pnl),
+              commission: Number(trade.commission),
+            }))}
             selectedEventIds={selectedNews}
           />
         </div>

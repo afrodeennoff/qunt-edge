@@ -18,11 +18,11 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
         if (!trades || trades.length === 0) return { winRate: 0, profitFactor: 0, totalTrades: 0 }
 
         // Logic similar to statistics but kept simple for score
-        const wins = trades.filter(t => (t.pnl ?? 0) > 0)
-        const losses = trades.filter(t => (t.pnl ?? 0) <= 0) // considering BE as loss for strict PF? usually PF = GrossWin / GrossLoss
+        const wins = trades.filter(t => Number(t.pnl ?? 0) > 0)
+        const losses = trades.filter(t => Number(t.pnl ?? 0) <= 0) // considering BE as loss for strict PF? usually PF = GrossWin / GrossLoss
         // Strictly, PF = GrossWin / GrossLoss. WinRate = Win / Total.
-        const grossWin = wins.reduce((acc, t) => acc + (t.pnl ?? 0), 0)
-        const grossLoss = Math.abs(losses.reduce((acc, t) => acc + (t.pnl ?? 0), 0))
+        const grossWin = wins.reduce((acc, t) => acc + Number(t.pnl ?? 0), 0)
+        const grossLoss = Math.abs(losses.reduce((acc, t) => acc + Number(t.pnl ?? 0), 0))
 
         const profitFactor = grossLoss > 0 ? grossWin / grossLoss : grossWin > 0 ? 100 : 0 // Cap at 100 if no loss
         const winRate = (wins.length / trades.length) * 100

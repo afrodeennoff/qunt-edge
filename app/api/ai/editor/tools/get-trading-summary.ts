@@ -1,6 +1,6 @@
 import { groupBy } from "@/lib/utils";
+import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalization";
 import { getTradesAction } from "@/server/database";
-import { Trade } from "@/prisma/generated/prisma";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { isSameDay, isToday } from "date-fns";
@@ -15,7 +15,7 @@ interface TradeSummary {
     tradeCount: number;
 }
 
-function generateTradeSummary(trades: Trade[]): TradeSummary[] {
+function generateTradeSummary(trades: AnalyticsTrade[]): TradeSummary[] {
     if (!trades || trades.length === 0) return [];
 
     const accountGroups = groupBy(trades, 'accountNumber');
@@ -46,8 +46,8 @@ export const getDayData = tool({
     execute: async ({ date }) => {
       console.log("Called tool getDayData for day", date)
         const paginatedTrades = await getTradesAction();
-        const filteredTrades = paginatedTrades.trades.filter(trade => {
-            const tradeDate = new Date(trade.entryDate);
+        const filteredTrades = normalizeTrades(paginatedTrades.trades).filter(trade => {
+            const tradeDate = trade.entryDate;
             return isSameDay(tradeDate, new Date(date));
         })
 

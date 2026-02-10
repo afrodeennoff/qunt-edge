@@ -24,16 +24,16 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
   
   const { avgWin, avgLoss, riskRewardRatio, profitPercentage } = useMemo(() => {
     // Filter winning and losing trades
-    const winningTrades = formattedTrades.filter(trade => trade.pnl > 0)
-    const losingTrades = formattedTrades.filter(trade => trade.pnl < 0)
+    const winningTrades = formattedTrades.filter(trade => Number(trade.pnl) > 0)
+    const losingTrades = formattedTrades.filter(trade => Number(trade.pnl) < 0)
 
     // Calculate averages
     const avgWin = winningTrades.length > 0
-      ? winningTrades.reduce((sum, trade) => sum + trade.pnl, 0) / winningTrades.length
+      ? winningTrades.reduce((sum, trade) => sum + Number(trade.pnl), 0) / winningTrades.length
       : 0
 
     const avgLoss = losingTrades.length > 0
-      ? losingTrades.reduce((sum, trade) => sum + trade.pnl, 0) / losingTrades.length
+      ? losingTrades.reduce((sum, trade) => sum + Number(trade.pnl), 0) / losingTrades.length
       : 0
 
     // Calculate Risk-Reward ratio

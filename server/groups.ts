@@ -1,11 +1,11 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { Group, Account } from '@/context/data-provider'
+import { Group as PrismaGroup, Account as PrismaAccount } from '@/prisma/generated/prisma'
 import { getDatabaseUserId } from './auth'
 
-export interface GroupWithAccounts extends Group {
-  accounts: Account[]
+export interface GroupWithAccounts extends PrismaGroup {
+  accounts: PrismaAccount[]
 }
 
 export async function getGroupsAction(): Promise<GroupWithAccounts[]> {
@@ -24,7 +24,7 @@ export async function getGroupsAction(): Promise<GroupWithAccounts[]> {
   }
 }
 
-export async function renameGroupAction(groupId: string, name: string): Promise<Group> {
+export async function renameGroupAction(groupId: string, name: string): Promise<GroupWithAccounts> {
   const userId = await getDatabaseUserId()
   try {
     const existingGroup = await prisma.group.findFirst({
@@ -49,7 +49,7 @@ export async function renameGroupAction(groupId: string, name: string): Promise<
   }
 }
 
-export async function saveGroupAction(name: string): Promise<Group> {
+export async function saveGroupAction(name: string): Promise<GroupWithAccounts> {
   const userId = await getDatabaseUserId()
   try {
     // Check if group already exists
@@ -79,7 +79,7 @@ export async function saveGroupAction(name: string): Promise<Group> {
   }
 }
 
-export async function updateGroupAction(groupId: string, name: string): Promise<Group> {
+export async function updateGroupAction(groupId: string, name: string): Promise<GroupWithAccounts> {
   const userId = await getDatabaseUserId()
   try {
     const existingGroup = await prisma.group.findFirst({

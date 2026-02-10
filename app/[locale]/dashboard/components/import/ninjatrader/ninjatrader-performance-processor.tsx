@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import { generateTradeHash } from '@/lib/utils'
 import { PlatformProcessorProps } from '../config/platforms'
 import {
@@ -325,7 +325,7 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
       }
 
       if (item.pnl !== undefined && item.commission !== undefined) {
-        item.pnl = item.pnl + item.commission;
+        item.pnl = Number(item.pnl) + Number(item.commission ?? 0);
       }
 
       // Add rowIndex to the trade object for unique identification
@@ -418,7 +418,7 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
                       {trade.closePrice || '-'}
                     </TableCell>
                     <TableCell className="whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l">
-                      {new Date(trade.entryDate).toLocaleString()}
+                      {trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}
                     </TableCell>
                     <TableCell className="whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l">
                       {trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}

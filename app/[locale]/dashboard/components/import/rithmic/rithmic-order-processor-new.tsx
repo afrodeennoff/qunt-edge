@@ -5,13 +5,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { TickDetails, Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import { getTickDetails } from '@/server/tick-details'
 import { PlatformProcessorProps } from '../config/platforms'
 
 interface ContractSpec {
   tickSize: number;
   tickValue: number;
+}
+
+interface TickDetailConfig extends ContractSpec {
+  id?: string;
+  ticker: string;
 }
 
 interface Order {
@@ -88,13 +93,20 @@ function cleanCsvData(csvData: string[][], headers: string[]): [string[][], stri
 }
 
 export default function RithmicOrderProcessor({ csvData, headers, processedTrades, setProcessedTrades }: PlatformProcessorProps) {
-  const [tickDetails, setTickDetails] = useState<TickDetails[]>([])
+  const [tickDetails, setTickDetails] = useState<TickDetailConfig[]>([])
   const [incompleteTrades, setIncompleteTrades] = useState<IncompleteTrade[]>([])
   
   useEffect(() => {
     const fetchTickDetails = async () => {
       const details = await getTickDetails()
-      setTickDetails(details)
+      setTickDetails(
+        details.map((detail) => ({
+          id: detail.id,
+          ticker: detail.ticker,
+          tickSize: Number(detail.tickSize),
+          tickValue: Number(detail.tickValue),
+        }))
+      )
     }
     fetchTickDetails()
   }, [])
@@ -334,7 +346,7 @@ export default function RithmicOrderProcessor({ csvData, headers, processedTrade
     [tickDetails, uniqueSymbols]
   )
 
-  const handleContractSpecChange = (symbol: string, field: keyof TickDetails, value: string) => {
+  const handleContractSpecChange = (symbol: string, field: keyof ContractSpec, value: string) => {
     const updatedTickDetails = tickDetails.map(detail => {
       if (detail.ticker === symbol) {
         return {

@@ -129,7 +129,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
         const pnlPerContract = Number(trade.pnl) / Number(trade.quantity)
         if (isNaN(pnlPerContract)) return
         
-        const ticks = Math.round(pnlPerContract / tickValue)
+        const ticks = Math.round(pnlPerContract / Number(tickValue))
         if (!isNaN(ticks)) {
           totalTicks += ticks
           totalAbsoluteTicks += Math.abs(ticks)

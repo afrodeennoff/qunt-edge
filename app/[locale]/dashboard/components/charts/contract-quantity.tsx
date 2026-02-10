@@ -54,7 +54,7 @@ export default function ContractQuantityChart({
     // Sum up quantities for each hour in UTC
     trades.forEach((trade: Trade) => {
       const hour = formatInTimeZone(new Date(trade.entryDate), "UTC", "H");
-      hourlyData[hour].totalQuantity += trade.quantity;
+      hourlyData[hour].totalQuantity += Number(trade.quantity);
       hourlyData[hour].count++;
     });
 

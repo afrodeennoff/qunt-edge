@@ -116,7 +116,7 @@ export default function TickDistributionChartEmbed({
       const netPnlPerTrade = Number(trade.pnl) - Number(trade.commission || 0);
       const pnlPerContract =
         netPnlPerTrade / Math.max(1, Number(trade.quantity));
-      const ticks = Math.round(pnlPerContract / tickValue);
+      const ticks = Math.round(pnlPerContract / Number(tickValue));
       tickCounts[ticks] = (tickCounts[ticks] || 0) + 1;
     });
 

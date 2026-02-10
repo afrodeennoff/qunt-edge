@@ -340,7 +340,7 @@ async function calculateARPU(): Promise<number> {
   ])
 
   return activeSubs > 0
-    ? Math.round((totalRevenue._sum.amount || 0) / activeSubs)
+    ? Math.round(Number(totalRevenue._sum.amount ?? 0) / activeSubs)
     : 0
 }
 

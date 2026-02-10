@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import { PlatformProcessorProps } from '../config/platforms'
 
 const newMappings: { [key: string]: string } = {
@@ -123,7 +123,7 @@ export default function TradezellaProcessor({ headers, csvData, setProcessedTrad
                 <TableCell>{trade.quantity}</TableCell>
                 <TableCell>{trade.entryPrice}</TableCell>
                 <TableCell>{trade.closePrice || '-'}</TableCell>
-                <TableCell>{new Date(trade.entryDate).toLocaleString()}</TableCell>
+                <TableCell>{trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}</TableCell>
                 <TableCell>{trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}</TableCell>
                 <TableCell>{trade.pnl?.toFixed(2)}</TableCell>
                 <TableCell>{`${Math.floor((trade.timeInPosition || 0) / 60)}m ${Math.floor((trade.timeInPosition || 0) % 60)}s`}</TableCell>

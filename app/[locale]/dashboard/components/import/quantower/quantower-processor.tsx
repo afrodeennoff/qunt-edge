@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import { Input } from "@/components/ui/input"
 
 interface ContractSpec {

@@ -664,7 +664,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
 
     const sortedTrades = [...formattedTrades].sort(
       (a, b) =>
-        parseISO(a.entryDate).getTime() - parseISO(b.entryDate).getTime()
+        new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
     );
 
     const dates = sortedTrades.map((t) =>
@@ -700,7 +700,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       const dayTrades = tradesMap.get(dateKey) || [];
 
       dayTrades.forEach((trade) => {
-        cumulativeEquity += trade.pnl - (trade.commission || 0);
+        cumulativeEquity += Number(trade.pnl) - Number(trade.commission || 0);
       });
 
       chartData.push({

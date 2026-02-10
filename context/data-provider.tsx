@@ -57,7 +57,7 @@ import { useFinancialEventsStore } from "@/store/financial-events-store";
 import { useTradesStore } from "@/store/trades-store";
 import { getTradesCache, setTradesCache } from "@/lib/indexeddb/trades-cache";
 import { generateMockTrades } from "@/lib/mock-trades";
-import { endOfDay, isValid, parseISO, set, startOfDay } from "date-fns";
+import { endOfDay, isValid, set, startOfDay } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { calculateStatistics, formatCalendarData } from "@/lib/utils";
 import { useParams } from "next/navigation";
@@ -69,6 +69,7 @@ import { useSubscriptionStore } from "@/store/subscription-store";
 import { getSubscriptionData } from "@/server/billing";
 import { defaultLayouts } from "@/lib/default-layouts";
 import Decimal from "decimal.js";
+import { decimalToNumber } from "@/lib/trade-types";
 
 // Types from trades-data.tsx
 type StatisticsProps = {
@@ -140,12 +141,53 @@ interface TagFilter {
 }
 
 export interface Group extends PrismaGroup {
-  accounts: PrismaAccount[];
+  accounts: Account[];
 }
 
-// Update Account type to include payouts, balanceToDate, and all computed metrics
-export interface Account extends Omit<PrismaAccount, "payouts" | "group"> {
-  payouts?: PrismaPayout[];
+type AccountDecimalFields =
+  | "startingBalance"
+  | "balanceRequired"
+  | "drawdownThreshold"
+  | "dailyLoss"
+  | "profitTarget"
+  | "buffer"
+  | "trailingStopProfit"
+  | "minPayout"
+  | "profitSharing"
+  | "payoutBonus"
+  | "consistencyPercentage"
+  | "minPnlToCountAsDay"
+  | "activationFees"
+  | "price"
+  | "priceWithPromo"
+  | "promoPercentage";
+
+type AccountPayout = Omit<PrismaPayout, "amount"> & {
+  amount: number;
+};
+
+type AccountBase = Omit<PrismaAccount, AccountDecimalFields | "group"> & {
+  startingBalance: number;
+  balanceRequired: number | null;
+  drawdownThreshold: number;
+  dailyLoss: number;
+  profitTarget: number;
+  buffer: number;
+  trailingStopProfit: number | null;
+  minPayout: number | null;
+  profitSharing: number | null;
+  payoutBonus: number | null;
+  consistencyPercentage: number | null;
+  minPnlToCountAsDay: number | null;
+  activationFees: number | null;
+  price: number | null;
+  priceWithPromo: number | null;
+  promoPercentage: number | null;
+};
+
+// Client account model keeps decimal-like DB fields normalized to numbers.
+export interface Account extends AccountBase {
+  payouts?: AccountPayout[];
   balanceToDate?: number;
   group?: PrismaGroup | null;
   aboveBuffer?: number;
@@ -183,13 +225,13 @@ export interface Account extends Omit<PrismaAccount, "payouts" | "group"> {
   // Daily metrics for account table
   dailyMetrics?: Array<{
     date: Date;
-    pnl: number | Prisma.Decimal;
-    totalBalance: number | Prisma.Decimal;
-    percentageOfTarget: number | Prisma.Decimal;
+    pnl: number;
+    totalBalance: number;
+    percentageOfTarget: number;
     isConsistent: boolean;
     payout?: {
       id: string;
-      amount: number | Prisma.Decimal;
+      amount: number;
       date: Date;
       status: string;
     };
@@ -299,6 +341,113 @@ function normalizeTradeForClient(trade: PrismaTrade | SerializedTrade): PrismaTr
 
 function normalizeTradesForClient(trades: (PrismaTrade | SerializedTrade)[]): PrismaTrade[] {
   return trades.map(normalizeTradeForClient);
+}
+
+function normalizePayoutForClient(
+  payout: PrismaPayout | AccountPayout
+): AccountPayout {
+  return {
+    ...payout,
+    amount: decimalToNumber(payout.amount),
+  }
+}
+
+type AccountInput = (Account | PrismaAccount) & {
+  payouts?: (PrismaPayout | AccountPayout)[]
+  dailyMetrics?: Account["dailyMetrics"]
+  metrics?: Account["metrics"]
+  balanceToDate?: number
+  aboveBuffer?: number
+  trades?: PrismaTrade[]
+  group?: PrismaGroup | null
+}
+
+type GroupInput = (Group | PrismaGroup) & {
+  accounts: AccountInput[]
+}
+
+function normalizeAccountForClient(account: AccountInput): Account {
+  const raw = account as AccountInput
+  const normalized = {
+    ...raw,
+    startingBalance: decimalToNumber(raw.startingBalance),
+    balanceRequired:
+      raw.balanceRequired === null || raw.balanceRequired === undefined
+        ? null
+        : decimalToNumber(raw.balanceRequired),
+    drawdownThreshold: decimalToNumber(raw.drawdownThreshold),
+    dailyLoss: decimalToNumber(raw.dailyLoss),
+    profitTarget: decimalToNumber(raw.profitTarget),
+    buffer: decimalToNumber(raw.buffer),
+    trailingStopProfit:
+      raw.trailingStopProfit === null || raw.trailingStopProfit === undefined
+        ? null
+        : decimalToNumber(raw.trailingStopProfit),
+    minPayout:
+      raw.minPayout === null || raw.minPayout === undefined
+        ? null
+        : decimalToNumber(raw.minPayout),
+    profitSharing:
+      raw.profitSharing === null || raw.profitSharing === undefined
+        ? null
+        : decimalToNumber(raw.profitSharing),
+    payoutBonus:
+      raw.payoutBonus === null || raw.payoutBonus === undefined
+        ? null
+        : decimalToNumber(raw.payoutBonus),
+    consistencyPercentage:
+      raw.consistencyPercentage === null || raw.consistencyPercentage === undefined
+        ? null
+        : decimalToNumber(raw.consistencyPercentage),
+    minPnlToCountAsDay:
+      raw.minPnlToCountAsDay === null || raw.minPnlToCountAsDay === undefined
+        ? null
+        : decimalToNumber(raw.minPnlToCountAsDay),
+    activationFees:
+      raw.activationFees === null || raw.activationFees === undefined
+        ? null
+        : decimalToNumber(raw.activationFees),
+    price:
+      raw.price === null || raw.price === undefined
+        ? null
+        : decimalToNumber(raw.price),
+    priceWithPromo:
+      raw.priceWithPromo === null || raw.priceWithPromo === undefined
+        ? null
+        : decimalToNumber(raw.priceWithPromo),
+    promoPercentage:
+      raw.promoPercentage === null || raw.promoPercentage === undefined
+        ? null
+        : decimalToNumber(raw.promoPercentage),
+    payouts: Array.isArray(raw.payouts)
+      ? raw.payouts.map(normalizePayoutForClient)
+      : [],
+    dailyMetrics: raw.dailyMetrics?.map((metric) => ({
+      ...metric,
+      pnl: decimalToNumber(metric.pnl),
+      totalBalance: decimalToNumber(metric.totalBalance),
+      percentageOfTarget: decimalToNumber(metric.percentageOfTarget),
+      payout: metric.payout
+        ? {
+            ...metric.payout,
+            amount: decimalToNumber(metric.payout.amount),
+          }
+        : undefined,
+    })),
+  } as Account
+
+  return normalized
+}
+
+function normalizeAccountsForClient(accounts: AccountInput[]): Account[] {
+  return accounts.map(normalizeAccountForClient)
+}
+
+function normalizeGroupsForClient(groups: GroupInput[]): Group[] {
+  return groups.map((group) => ({
+    ...group,
+    accounts: normalizeAccountsForClient(group.accounts),
+  })) as Group[]
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -470,11 +619,14 @@ export const DataProvider: React.FC<{
               setTickDetails(sharedData.params.tickDetails);
             }
 
-            const accountsWithMetrics = await calculateAccountMetricsAction(
-              sharedData.groups?.flatMap((group) => group.accounts) || []
+            const sharedAccounts = normalizeAccountsForClient(
+              (sharedData.groups?.flatMap((group) => group.accounts) || []) as AccountInput[]
             );
-            setGroups(sharedData.groups || []);
-            setAccounts(accountsWithMetrics);
+            const accountsWithMetrics = await calculateAccountMetricsAction(
+              sharedAccounts
+            );
+            setGroups(normalizeGroupsForClient(sharedData.groups || []));
+            setAccounts(normalizeAccountsForClient(accountsWithMetrics));
           };
 
           await updates();
@@ -577,15 +729,18 @@ export const DataProvider: React.FC<{
       }
 
       // Calculate metrics for each account
-      const accountsWithMetrics = await calculateAccountMetricsAction(
-        data.accounts || []
+      const normalizedAccounts = normalizeAccountsForClient(
+        (data.accounts || []) as AccountInput[]
       );
-      setAccounts(accountsWithMetrics);
+      const accountsWithMetrics = await calculateAccountMetricsAction(
+        normalizedAccounts
+      );
+      setAccounts(normalizeAccountsForClient(accountsWithMetrics));
 
       setUser(data.userData);
       setSubscription(data.subscription as PrismaSubscription | null);
       setTags(data.tags);
-      setGroups(data.groups);
+      setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
       setMoods(data.moodHistory);
       setEvents(data.financialEvents);
       setTickDetails(data.tickDetails);
@@ -733,15 +888,18 @@ export const DataProvider: React.FC<{
           return;
         }
 
-        const accountsWithMetrics = await calculateAccountMetricsAction(
-          data.accounts || []
+        const normalizedAccounts = normalizeAccountsForClient(
+          (data.accounts || []) as AccountInput[]
         );
-        setAccounts(accountsWithMetrics);
+        const accountsWithMetrics = await calculateAccountMetricsAction(
+          normalizedAccounts
+        );
+        setAccounts(normalizeAccountsForClient(accountsWithMetrics));
 
         setUser(data.userData);
         setSubscription(data.subscription as PrismaSubscription | null);
         setTags(data.tags);
-        setGroups(data.groups);
+        setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
         setMoods(data.moodHistory);
         setEvents(data.financialEvents);
         setTickDetails(data.tickDetails);
@@ -930,7 +1088,7 @@ export const DataProvider: React.FC<{
             ? tickDetails[matchingTicker].tickValue
             : 1;
           const pnlPerContract = new Prisma.Decimal(trade.pnl).div(new Prisma.Decimal(trade.quantity)).toNumber();
-          const tradeTicks = Math.round(pnlPerContract / tickValue);
+          const tradeTicks = Math.round(pnlPerContract / Number(tickValue));
           const filterValue = tickFilter.value;
           if (
             filterValue &&
@@ -943,7 +1101,7 @@ export const DataProvider: React.FC<{
         // Time range filter
         if (
           timeRange.range &&
-          getTimeRangeKey(trade.timeInPosition) !== timeRange.range
+          getTimeRangeKey(Number(trade.timeInPosition)) !== timeRange.range
         ) {
           return false;
         }
@@ -975,7 +1133,7 @@ export const DataProvider: React.FC<{
       })
       .sort(
         (a, b) =>
-          parseISO(a.entryDate).getTime() - parseISO(b.entryDate).getTime()
+          new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
       );
   }, [
     trades,
@@ -1077,7 +1235,7 @@ export const DataProvider: React.FC<{
             ],
             trades
           );
-          const accountWithMetrics = accountsWithMetrics[0];
+          const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
 
           setAccounts([...accounts, accountWithMetrics]);
 
@@ -1116,7 +1274,7 @@ export const DataProvider: React.FC<{
           ],
           trades
         );
-        const accountWithMetrics = accountsWithMetrics[0];
+        const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
 
         // Check if groupId changed
         const oldGroupId = currentAccount.groupId;
@@ -1192,7 +1350,7 @@ export const DataProvider: React.FC<{
                 }));
                 setGroups([
                   ...updatedGroups,
-                  { ...foundGroup, accounts: [accountWithMetrics] },
+                  ...normalizeGroupsForClient([{ ...foundGroup, accounts: [accountWithMetrics] } as Group]),
                 ]);
               } else {
                 // Fallback: create minimal group object (shouldn't happen, but just in case)
@@ -1267,14 +1425,15 @@ export const DataProvider: React.FC<{
       if (!supabaseUser?.id) return;
       try {
         const newGroup = await saveGroupAction(name);
-        setGroups([...groups, newGroup]);
-        return newGroup;
+        const normalizedNewGroup = normalizeGroupsForClient([newGroup as GroupInput])[0];
+        setGroups([...groups, normalizedNewGroup]);
+        return normalizedNewGroup;
       } catch (error) {
         console.error("Error creating group:", error);
         throw error;
       }
     },
-    [supabaseUser?.id, accounts, groups, setGroups]
+    [supabaseUser?.id, groups, setGroups]
   );
 
   const renameGroup = useCallback(
@@ -1462,6 +1621,7 @@ export const DataProvider: React.FC<{
       try {
         // Add to database
         const newPayout = await savePayoutAction(payout);
+        const normalizedPayout = normalizePayoutForClient(newPayout);
 
         // Update the account with the new/updated payout
         const updatedAccounts = accounts.map((account: Account) => {
@@ -1475,14 +1635,14 @@ export const DataProvider: React.FC<{
               return {
                 ...account,
                 payouts: existingPayouts.map((p) =>
-                  p.id === payout.id ? newPayout : p
+                  p.id === payout.id ? normalizedPayout : p
                 ),
               };
             } else {
               // Add new payout
               return {
                 ...account,
-                payouts: [...existingPayouts, newPayout],
+                payouts: [...existingPayouts, normalizedPayout],
               };
             }
           }
@@ -1498,7 +1658,7 @@ export const DataProvider: React.FC<{
             [affectedAccount],
             trades
           );
-          const accountWithMetrics = accountsWithMetrics[0];
+          const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
 
           // Update accounts with recalculated metrics
           setAccounts(
@@ -1565,7 +1725,7 @@ export const DataProvider: React.FC<{
               [accountToRecalculate],
               trades
             );
-            const accountWithMetrics = accountsWithMetrics[0];
+            const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
 
             // Update accounts with recalculated metrics
             setAccounts(

@@ -65,7 +65,7 @@ export default function TimeInPositionChart({
     // Sum up time in position and count trades for each hour in UTC
     trades.forEach((trade: Trade) => {
       const hour = formatInTimeZone(new Date(trade.entryDate), "UTC", "H");
-      hourlyData[hour].totalTime += trade.timeInPosition / 60; // Convert seconds to minutes
+      hourlyData[hour].totalTime += Number(trade.timeInPosition) / 60; // Convert seconds to minutes
       hourlyData[hour].count++;
     });
 

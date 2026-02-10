@@ -86,10 +86,10 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     }
 
     trades.forEach((trade: Trade) => {
-      const timeRange = getTimeRangeKey(trade.timeInPosition)
-      timeRangeData[timeRange].totalPnl += trade.pnl
+      const timeRange = getTimeRangeKey(Number(trade.timeInPosition))
+      timeRangeData[timeRange].totalPnl += Number(trade.pnl)
       timeRangeData[timeRange].totalTrades++
-      if (trade.pnl > 0) {
+      if (Number(trade.pnl) > 0) {
         timeRangeData[timeRange].winCount++
       } else {
         timeRangeData[timeRange].lossCount++

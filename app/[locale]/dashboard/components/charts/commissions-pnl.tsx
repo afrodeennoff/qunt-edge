@@ -51,9 +51,9 @@ export default function CommissionsPnLChart({
 
 
   const chartData = React.useMemo(() => {
-    const totalPnL = trades.reduce((sum, trade) => sum + trade.pnl, 0);
+    const totalPnL = trades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
     const totalCommissions = trades.reduce(
-      (sum, trade) => sum + trade.commission,
+      (sum, trade) => sum + Number(trade.commission),
       0,
     );
     const total = Math.abs(totalPnL) + Math.abs(totalCommissions);

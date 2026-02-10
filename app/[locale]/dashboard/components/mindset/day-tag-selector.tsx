@@ -51,8 +51,8 @@ export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelector
       const entryDate = trade.entryDate
       const closeDate = trade.closeDate
       // Check if the date matches (handling both exact match and date with time)
-      const entryMatches = entryDate && (entryDate === dateKey || entryDate.startsWith(dateKey))
-      const closeMatches = closeDate && (closeDate === dateKey || closeDate.startsWith(dateKey))
+      const entryMatches = entryDate && format(new Date(entryDate), 'yyyy-MM-dd') === dateKey
+      const closeMatches = closeDate && format(new Date(closeDate), 'yyyy-MM-dd') === dateKey
       return entryMatches || closeMatches
     })
   }, [trades, date])

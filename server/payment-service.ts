@@ -163,7 +163,7 @@ export class PaymentService {
 
       return {
         valid: true,
-        discount: promotion.value,
+        discount: Number(promotion.value),
         type: promotion.type === PromotionType.PERCENTAGE ? 'percentage' : 'fixed',
       }
     } catch (error) {
@@ -377,7 +377,7 @@ export class PaymentService {
         },
       })
 
-      const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0)
+      const totalSpent = transactions.reduce((sum, t) => sum + Number(t.amount), 0)
 
       const subscription = await prisma.subscription.findUnique({
         where: { userId },

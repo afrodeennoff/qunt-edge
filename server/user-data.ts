@@ -1,12 +1,11 @@
 'use server'
 
 import { getShared } from './shared'
-import { TickDetails, User, Tag, DashboardLayout, FinancialEvent, Mood, Trade, Subscription } from '@/prisma/generated/prisma'
+import { TickDetails, User, Tag, DashboardLayout, FinancialEvent, Mood, Trade, Subscription, Account, Group } from '@/prisma/generated/prisma'
 import { GroupWithAccounts } from './groups'
 import { getCurrentLocale } from '@/locales/server'
 import { prisma } from '@/lib/prisma'
 import { getDatabaseUserId, getUserId } from './auth'
-import { Account, Group } from '@/context/data-provider'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
 export type SharedDataResponse = {

@@ -38,7 +38,7 @@ import { experimental_useObject as useObject } from '@ai-sdk/react'
 import { z } from 'zod/v3';
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { DataTableColumnHeader } from '../../tables/column-header'
-import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft } from '@/lib/trade-types'
 import { generateDeterministicTradeId } from '@/lib/trade-id-utils'
 import { createTradeWithDefaults } from '@/lib/trade-factory'
 
@@ -48,8 +48,8 @@ type Trade = z.infer<typeof tradeSchema>
 interface PdfProcessingProps {
   setError: React.Dispatch<React.SetStateAction<string | null>>
   setStep: React.Dispatch<React.SetStateAction<any>>
-  processedTrades: Partial<PrismaTrade>[]
-  setProcessedTrades: (trades: Partial<PrismaTrade>[]) => void;
+  processedTrades: Partial<ImportTradeDraft>[]
+  setProcessedTrades: (trades: Partial<ImportTradeDraft>[]) => void;
   extractedText: string
   userId: string
 }
@@ -137,8 +137,7 @@ export default function PdfProcessing({
       // Replace all trades instead of appending to avoid duplicates during streaming
       setTrades(newTrades);
       
-      // Convert ApiTrade to Prisma Trade format for processedTrades
-      const convertedTrades: PrismaTrade[] = newTrades.map(trade => {
+      const convertedTrades: ImportTradeDraft[] = newTrades.map(trade => {
         return createTradeWithDefaults({
           accountNumber: '',
           quantity: trade.quantity,

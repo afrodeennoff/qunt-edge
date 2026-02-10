@@ -1,6 +1,6 @@
 "use client";
 
-import { Trade } from "@/prisma/generated/prisma";
+import type { ImportTradeDraft } from "@/lib/trade-types";
 import { useEffect, useState, useMemo, useRef } from "react";
 import {
   Table,
@@ -39,8 +39,8 @@ import { Progress } from "@/components/ui/progress";
 
 interface FormatPreviewProps {
   trades: string[][];
-  processedTrades: Partial<Trade>[];
-  setProcessedTrades: (trades: Partial<Trade>[]) => void;
+  processedTrades: Partial<ImportTradeDraft>[];
+  setProcessedTrades: (trades: Partial<ImportTradeDraft>[]) => void;
   setIsLoading: (isLoading: boolean) => void;
   isLoading: boolean;
   headers: string[];
@@ -128,7 +128,7 @@ export function FormatPreview({
   const totalBatches = Math.ceil(validTrades.length / batchSize);
 
   // Use refs to avoid infinite loops in useEffect
-  const processedTradesRef = useRef<Partial<Trade>[]>(processedTrades);
+  const processedTradesRef = useRef<Partial<ImportTradeDraft>[]>(processedTrades);
   const completedBatchesRef = useRef<Set<number>>(completedBatches);
   const batchSet1Ref = useRef<number[]>(batchSet1);
   const batchSet2Ref = useRef<number[]>(batchSet2);
@@ -383,7 +383,7 @@ export function FormatPreview({
   // Handle streaming results from first useObject
   useEffect(() => {
     if (object1) {
-      const newTrades = object1.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<Trade>[];
+      const newTrades = object1.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<ImportTradeDraft>[];
       const uniqueTrades = newTrades.filter(newTrade =>
         !processedTradesRef.current.some(existingTrade =>
           existingTrade.entryDate === newTrade.entryDate &&
@@ -408,7 +408,7 @@ export function FormatPreview({
   // Handle streaming results from second useObject
   useEffect(() => {
     if (object2) {
-      const newTrades = object2.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<Trade>[];
+      const newTrades = object2.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<ImportTradeDraft>[];
       const uniqueTrades = newTrades.filter(newTrade =>
         !processedTradesRef.current.some(existingTrade =>
           existingTrade.entryDate === newTrade.entryDate &&
@@ -430,7 +430,7 @@ export function FormatPreview({
     }
   }, [object2])
 
-  const columns = useMemo<ColumnDef<Partial<Trade>>[]>(() => [
+  const columns = useMemo<ColumnDef<Partial<ImportTradeDraft>>[]>(() => [
     {
       accessorKey: "entryDate",
       header: ({ column }) => (

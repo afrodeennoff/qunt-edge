@@ -281,6 +281,43 @@ qunt edge/
 
 ---
 
+## ✅ Operational Readiness
+
+### Health / Readiness
+
+- Health endpoint: `GET /api/health`
+- Returns:
+  - overall status (`ok` or `degraded`)
+  - DB readiness check and latency
+  - request id and uptime
+
+### Analytics Metric Versioning
+
+- Current metric version and formulas are documented in:
+  - `docs/ANALYTICS_METRIC_DEFINITIONS.md`
+- Runtime metric implementation:
+  - `lib/analytics/metrics-v1.ts`
+
+### Payment Test Environment
+
+- Payment integration tests are opt-in.
+- To run DB-backed payment tests, set:
+  - `DATABASE_URL` (or `DATABASE_URL_TEST`)
+  - `RUN_PAYMENT_INTEGRATION_TESTS=true`
+
+Example:
+
+```bash
+RUN_PAYMENT_INTEGRATION_TESTS=true DATABASE_URL=postgresql://... npm run test:payment -- --run
+```
+
+### Runbooks and Checklists
+
+- Incident runbook: `docs/INCIDENT_RUNBOOK.md`
+- Production readiness checklist: `docs/PRODUCTION_READINESS_CHECKLIST.md`
+
+---
+
 ## 🧑‍💻 Development Guidelines
 
 ### Code Style

@@ -34,7 +34,7 @@ export const getLastTradesData = tool({
         trades = trades.slice(0, number);
         return trades.map(trade => ({
             ...trade,
-            timeInPosition: parsePositionTime(trade.timeInPosition)
+            timeInPosition: parsePositionTime(Number(trade.timeInPosition))
         }));
     }
 })

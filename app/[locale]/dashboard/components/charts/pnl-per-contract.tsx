@@ -97,7 +97,7 @@ export default function PnLPerContractChart({
     const instrumentGroups = trades.reduce(
       (acc, trade) => {
         const instrument = trade.instrument || "Unknown";
-        const netPnl = trade.pnl - (trade.commission || 0); // Calculate net PnL (gross PnL - commission)
+        const netPnl = Number(trade.pnl) - Number(trade.commission || 0); // Calculate net PnL (gross PnL - commission)
 
         if (!acc[instrument]) {
           acc[instrument] = {
@@ -109,7 +109,7 @@ export default function PnLPerContractChart({
         }
         acc[instrument].trades.push(trade);
         acc[instrument].totalPnl += netPnl;
-        acc[instrument].totalContracts += trade.quantity;
+        acc[instrument].totalContracts += Number(trade.quantity);
         if (netPnl > 0) {
           acc[instrument].winCount++;
         }

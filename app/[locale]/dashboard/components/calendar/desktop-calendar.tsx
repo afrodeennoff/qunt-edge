@@ -428,7 +428,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
       const equity = [0];
       let cumulative = 0;
       sortedTrades.forEach(trade => {
-        cumulative += trade.pnl - (trade.commission || 0);
+        cumulative += Number(trade.pnl) - Number(trade.commission || 0);
         equity.push(cumulative);
       });
 

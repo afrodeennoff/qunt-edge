@@ -154,10 +154,10 @@ export default function PnLPerContractDailyChart({
           };
         }
 
-        const netPnl = trade.pnl - (trade.commission || 0);
+        const netPnl = Number(trade.pnl) - Number(trade.commission || 0);
         acc[dateKey].trades.push(trade);
         acc[dateKey].totalPnl += netPnl;
-        acc[dateKey].totalContracts += trade.quantity;
+        acc[dateKey].totalContracts += Number(trade.quantity);
         if (netPnl > 0) {
           acc[dateKey].winCount++;
         }

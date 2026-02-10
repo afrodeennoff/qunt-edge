@@ -25,6 +25,9 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
   const progress = metrics?.progress ?? 0
   const drawdownProgress = metrics?.drawdownProgress ?? 0
   const remainingLoss = metrics?.remainingLoss ?? 0
+  const drawdownThreshold = Number(account.drawdownThreshold ?? 0)
+  const consistencyPercentage = Number(account.consistencyPercentage ?? 0)
+  const minPnlToCountAsDay = Number(account.minPnlToCountAsDay ?? 0)
 
   return (
     <Card
@@ -126,8 +129,8 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                 <span className="text-muted-foreground">{t('propFirm.card.drawdown')}</span>
                 <span className={cn(
                   "font-medium",
-                  remainingLoss > account.drawdownThreshold * 0.5 ? "text-success" :
-                    remainingLoss > account.drawdownThreshold * 0.2 ? "text-warning" : "text-destructive"
+                  remainingLoss > drawdownThreshold * 0.5 ? "text-success" :
+                    remainingLoss > drawdownThreshold * 0.2 ? "text-warning" : "text-destructive"
                 )}>
                   {remainingLoss > 0
                     ? t('propFirm.card.remainingLoss', { amount: remainingLoss.toFixed(2) })
@@ -159,10 +162,10 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                   <span className={cn(
                     "font-medium",
                     !metrics.hasProfitableData ? "text-muted-foreground italic" :
-                      (metrics.isConsistent || account.consistencyPercentage === 100) ? "text-success" : "text-destructive"
+                      (metrics.isConsistent || consistencyPercentage === 100) ? "text-success" : "text-destructive"
                   )}>
                     {!metrics.hasProfitableData ? t('propFirm.status.unprofitable') :
-                      (metrics.isConsistent || account.consistencyPercentage === 100) ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
+                      (metrics.isConsistent || consistencyPercentage === 100) ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -183,9 +186,9 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                       metrics.validTradingDays === metrics.totalTradingDays ? "text-success" : "text-warning"
                     )}>
                       {metrics.validTradingDays}/{metrics.totalTradingDays}
-                      {account.minPnlToCountAsDay && account.minPnlToCountAsDay > 0 && (
+                      {minPnlToCountAsDay > 0 && (
                         <span className="ml-1 text-xs opacity-75">
-                          (≥${account.minPnlToCountAsDay})
+                          (≥${minPnlToCountAsDay})
                         </span>
                       )}
                     </span>

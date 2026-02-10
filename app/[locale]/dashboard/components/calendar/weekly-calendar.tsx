@@ -231,9 +231,9 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
                                           </div>
                                           <div className={cn(
                                             "text-sm font-semibold",
-                                            trade.pnl > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                                            Number(trade.pnl) > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                                           )}>
-                                            {formatCurrency(trade.pnl)}
+                                            {formatCurrency(Number(trade.pnl))}
                                           </div>
                                         </div>
                                       ))}

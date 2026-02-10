@@ -603,7 +603,15 @@ export class SubscriptionManager {
         take: 50,
       })
 
-      return { success: true, metrics }
+      return {
+        success: true,
+        metrics: metrics.map((metric) => ({
+          metricType: metric.metricType,
+          metricValue: Number(metric.metricValue),
+          periodStart: metric.periodStart,
+          periodEnd: metric.periodEnd,
+        })),
+      }
     } catch (error) {
       logger.error('[SubscriptionManager] Failed to fetch usage metrics', { error, userId })
       return { success: false, error: 'Failed to fetch usage metrics' }

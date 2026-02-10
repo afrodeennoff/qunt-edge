@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from 'sonner'
-import { Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import { useI18n } from '@/locales/client'
 import { useTradesStore } from '@/store/trades-store'
 import { generateTradeHash } from '@/lib/utils'
@@ -82,7 +82,7 @@ export default function TradovateProcessor({ headers, csvData, processedTrades, 
             .filter(trade => accountNumbers.includes(trade.accountNumber))
             .forEach(trade => {
                 if (trade.instrument && trade.commission && trade.quantity) {
-                    commissions[trade.instrument] = trade.commission / trade.quantity
+                    commissions[trade.instrument] = Number(trade.commission) / Number(trade.quantity)
                 }
             })
         return commissions
@@ -199,7 +199,7 @@ export default function TradovateProcessor({ headers, csvData, processedTrades, 
 
                 // Swap the buy and sell prices
                 const tempPrice = item.entryPrice;
-                item.entryPrice = item.closePrice;
+                item.entryPrice = item.closePrice ?? 0;
                 item.closePrice = tempPrice;
             } else {
                 item.side = 'long'

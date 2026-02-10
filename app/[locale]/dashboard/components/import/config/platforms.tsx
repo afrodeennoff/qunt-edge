@@ -1,5 +1,5 @@
 'use client'
-import { Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft } from '@/lib/trade-types'
 import { ThorSync } from '../thor/thor-sync'
 import { TradovateSync } from '../tradovate/tradovate-sync'
 import { ImportType } from '../import-type-selection'
@@ -159,8 +159,8 @@ type StepComponent =
 export interface PlatformProcessorProps {
   csvData: string[][]
   headers: string[]
-  processedTrades: Partial<Trade>[]
-  setProcessedTrades: React.Dispatch<React.SetStateAction<Partial<Trade>[]>>
+  processedTrades: Partial<ImportTradeDraft>[]
+  setProcessedTrades: React.Dispatch<React.SetStateAction<Partial<ImportTradeDraft>[]>>
   accountNumbers?: string[]
   selectedAccountNumbers?: string[]
   setSelectedAccountNumbers?: React.Dispatch<React.SetStateAction<string[]>>

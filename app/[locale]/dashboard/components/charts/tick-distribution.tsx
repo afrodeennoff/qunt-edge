@@ -122,7 +122,7 @@ export default function TickDistributionChart({
 
       // Calculate PnL per contract first
       const pnlPerContract = Number(trade.pnl) / Number(trade.quantity);
-      const ticks = Math.round(pnlPerContract / tickValue);
+      const ticks = Math.round(pnlPerContract / Number(tickValue));
       tickCounts[ticks] = (tickCounts[ticks] || 0) + 1;
     });
 

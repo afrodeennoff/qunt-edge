@@ -316,14 +316,14 @@ export default function TradeExportDialog({ trades, open: externalOpen, onOpenCh
                           <TableCell>{trade.accountNumber}</TableCell>
                           <TableCell>{trade.instrument}</TableCell>
                           <TableCell>{trade.side}</TableCell>
-                          <TableCell>{trade.quantity}</TableCell>
+                          <TableCell>{Number(trade.quantity)}</TableCell>
                           <TableCell>{trade.formattedEntryDate}</TableCell>
                           <TableCell>{trade.formattedCloseDate}</TableCell>
                           <TableCell className="text-right">
                             {trade.commission?.toFixed(2) || '0.00'}
                           </TableCell>
                           <TableCell className="text-right">
-                            <span className={trade.pnl >= 0 ? "text-green-500" : "text-red-500"}>
+                            <span className={Number(trade.pnl) >= 0 ? "text-green-500" : "text-red-500"}>
                               {trade.pnl.toFixed(2)}
                             </span>
                           </TableCell>

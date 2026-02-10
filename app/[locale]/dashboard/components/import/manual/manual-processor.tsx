@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from 'sonner'
-import { Trade } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import { useI18n } from '@/locales/client'
 import { useTradesStore } from '@/store/trades-store'
 import { generateTradeHash } from '@/lib/utils'
@@ -57,7 +57,7 @@ export default function ManualProcessor({ processedTrades, setProcessedTrades, a
       .filter(trade => accountNumbers.includes(trade.accountNumber))
       .forEach(trade => {
         if (trade.instrument && trade.commission && trade.quantity) {
-          commissions[trade.instrument] = trade.commission / trade.quantity
+          commissions[trade.instrument] = Number(trade.commission) / Number(trade.quantity)
         }
       })
     return commissions
@@ -133,7 +133,7 @@ export default function ManualProcessor({ processedTrades, setProcessedTrades, a
       tags: ['manual'],
     }
 
-    trade.id = generateTradeHash(trade as Trade).toString()
+    trade.id = generateTradeHash(trade).toString()
 
     if (editingIndex !== null) {
       // Update existing trade
@@ -395,4 +395,3 @@ export default function ManualProcessor({ processedTrades, setProcessedTrades, a
     </div>
   )
 }
-

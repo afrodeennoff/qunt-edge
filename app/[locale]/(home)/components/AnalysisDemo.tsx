@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ResponsiveContainer,
@@ -11,7 +11,7 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip
+  Tooltip,
 } from 'recharts'
 
 const mockData = [
@@ -28,213 +28,118 @@ const mockData = [
 ]
 
 const logs = [
-  { time: "10:42:01", level: "INFO", msg: "Initializing neural handshake with Broker API..." },
-  { time: "10:42:03", level: "INFO", msg: "Parsing last 50 execution ticks..." },
-  { time: "10:42:08", level: "WARN", msg: "Analysis: Entry slippage > 2.5s detected on Trade #491." },
-  { time: "10:42:15", level: "CRIT", msg: "Pattern Match: 'Revenge Tilt' detected (Confidence: 94%)." },
-  { time: "10:42:16", level: "WARN", msg: "Position size deviation +150% from baseline." },
-  { time: "10:42:18", level: "ACTN", msg: "Intervention: Locking terminal for 15m cooling period..." },
-  { time: "10:42:25", level: "SYST", msg: "Optimizing: Risk parameters adjusted for next session." }
+  'Reviewing last 50 executions and journal entries.',
+  'Detected consistency drift after two consecutive losses.',
+  'Flagged oversized position relative to baseline.',
+  'Suggested cooldown and reduced size profile.',
+  'Session stabilized, plan compliance restored.',
 ]
 
 export default function AnalysisDemo() {
   const [logIndex, setLogIndex] = useState(0)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLogIndex((prev) => (prev < logs.length - 1 ? prev + 1 : 0))
-    }, 1500)
-    return () => clearInterval(interval)
+    const timer = setInterval(() => {
+      setLogIndex((prev) => (prev + 1) % logs.length)
+    }, 1700)
+
+    return () => clearInterval(timer)
   }, [])
 
   return (
-    <section className="py-32 px-6 relative bg-[#050505] border-t border-white/5">
-      <div className="absolute inset-0 grid-pattern opacity-[0.02] pointer-events-none"></div>
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-20"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500"></span>
-              </span>
-              <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-teal-500 font-mono">Live Interceptor</h2>
-            </div>
-            <h3 className="text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-              Predictive <span className="text-zinc-600">Intervention.</span>
-            </h3>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-zinc-500 text-sm max-w-sm md:max-w-md leading-relaxed border-l-2 border-zinc-800 pl-6"
-          >
-            Our AI models don&apos;t just record your trades. They <strong className="text-white">predict failure points</strong> before they happen and intervene in real-time.
-          </motion.div>
+    <section className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Trading Journal Intelligence</p>
+            <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+              Real-time review for
+              <span className="block text-[hsl(var(--brand-primary))]">process over outcome</span>
+            </h2>
+          </div>
+          <p className="max-w-md text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">
+            Old journal context stays intact while the interface mirrors a modern SaaS presentation style.
+          </p>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="grid lg:grid-cols-3 bg-[#080808] border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="marketing-panel overflow-hidden rounded-[28px]"
         >
-          {/* Main Chart Area */}
-          <div className="lg:col-span-2 p-8 md:p-10 relative bg-gradient-to-b from-[#0b0b0d] to-[#08080a]">
-
-            <div className="flex flex-wrap items-center justify-between gap-6 mb-12 relative z-10">
-              <div className="space-y-1">
-                <h4 className="font-mono text-[10px] uppercase text-zinc-500 tracking-[0.2em]">Market Structure</h4>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl font-bold tracking-tighter text-white">4,367.00</span>
-                  <span className="text-xs text-teal-500 font-mono bg-teal-500/10 px-2 py-0.5 rounded">+1.27%</span>
+          <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
+            <div className="border-b border-[hsl(var(--mk-border)/0.24)] p-5 sm:p-7 lg:border-b-0 lg:border-r">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Execution Stream</p>
+                  <p className="mt-1 text-2xl font-semibold">4,367.00</p>
                 </div>
+                <span className="rounded-full border border-[hsl(var(--brand-primary)/0.35)] bg-[hsl(var(--brand-primary)/0.1)] px-3 py-1 text-xs font-semibold text-[hsl(var(--brand-primary))]">
+                  +1.27%
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-400">
-                <span className="rounded border border-zinc-700 px-2 py-1 text-white">1D</span>
-                <span className="rounded border border-zinc-800 px-2 py-1">1W</span>
-                <span className="rounded border border-zinc-800 px-2 py-1">1M</span>
-              </div>
-            </div>
 
-            <div data-chart-surface="modern" className="h-[300px] w-full relative z-10">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={mockData}>
-                  <defs>
-                    <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="2 2" stroke="#23232a" />
-                  <XAxis
-                    dataKey="time"
-                    stroke="#52525b"
-                    fontSize={10}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#71717a' }}
-                  />
-                  <YAxis
-                    yAxisId="price"
-                    stroke="#52525b"
-                    fontSize={10}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#71717a' }}
-                    domain={['dataMin - 10', 'dataMax + 10']}
-                  />
-                  <YAxis yAxisId="volume" hide orientation="right" />
-                  <Tooltip
-                    cursor={{ stroke: '#3f3f46', strokeWidth: 1 }}
-                    contentStyle={{
-                      backgroundColor: '#0b0b0f',
-                      border: '1px solid #27272a',
-                      fontSize: '11px',
-                      borderRadius: '6px',
-                      color: '#f4f4f5'
-                    }}
-                  />
-                  <Bar
-                    yAxisId="volume"
-                    dataKey="volume"
-                    fill="#334155"
-                    opacity={0.35}
-                    radius={[2, 2, 0, 0]}
-                    barSize={9}
-                    animationDuration={700}
-                  />
-                  <Area
-                    yAxisId="price"
-                    type="monotone"
-                    dataKey="price"
-                    stroke="none"
-                    fill="url(#priceGradient)"
-                    animationDuration={1200}
-                  />
-                  <Line
-                    yAxisId="price"
-                    type="monotone"
-                    dataKey="price"
-                    stroke="#2dd4bf"
-                    strokeWidth={2}
-                    dot={false}
-                    animationDuration={1200}
-                  />
-                  <Line
-                    yAxisId="price"
-                    type="monotone"
-                    dataKey="ema"
-                    stroke="#94a3b8"
-                    strokeWidth={1.5}
-                    strokeDasharray="6 4"
-                    dot={false}
-                    animationDuration={1200}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* AI Terminal Sidebar */}
-          <div className="bg-[#050505] p-0 flex flex-col border-t lg:border-t-0 lg:border-l border-white/5 font-mono text-xs relative">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#080808]">
-              <h4 className="text-[10px] uppercase text-zinc-400 tracking-widest font-bold">Terminal Output</h4>
-              <div className="flex gap-1.5">
-                <span className="w-2 h-2 bg-red-500/20 rounded-full border border-red-500/50"></span>
-                <span className="w-2 h-2 bg-yellow-500/20 rounded-full border border-yellow-500/50"></span>
-                <span className="w-2 h-2 bg-green-500/20 rounded-full border border-green-500/50"></span>
+              <div className="h-[300px] overflow-hidden rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.8)] p-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={mockData}>
+                    <defs>
+                      <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--brand-primary))" stopOpacity={0.28} />
+                        <stop offset="95%" stopColor="hsl(var(--brand-primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="hsl(var(--mk-border)/0.22)" strokeDasharray="3 3" />
+                    <XAxis dataKey="time" axisLine={false} tickLine={false} fontSize={11} stroke="hsl(var(--mk-text-muted))" />
+                    <YAxis yAxisId="price" axisLine={false} tickLine={false} fontSize={11} stroke="hsl(var(--mk-text-muted))" />
+                    <YAxis yAxisId="volume" hide />
+                    <Tooltip
+                      cursor={{ stroke: 'hsl(var(--mk-border)/0.45)' }}
+                      contentStyle={{
+                        background: 'hsl(var(--mk-surface))',
+                        border: '1px solid hsl(var(--mk-border)/0.45)',
+                        borderRadius: '10px',
+                        color: 'hsl(var(--mk-text))',
+                      }}
+                    />
+                    <Bar yAxisId="volume" dataKey="volume" fill="hsl(var(--brand-secondary))" opacity={0.16} barSize={8} />
+                    <Area yAxisId="price" dataKey="price" stroke="none" fill="url(#chartArea)" />
+                    <Line yAxisId="price" dataKey="price" dot={false} stroke="hsl(var(--brand-primary))" strokeWidth={2} />
+                    <Line yAxisId="price" dataKey="ema" dot={false} stroke="hsl(var(--mk-text-muted))" strokeDasharray="6 4" strokeWidth={1.5} />
+                  </ComposedChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="flex-grow p-6 overflow-hidden relative min-h-[250px] lg:min-h-0">
-              <div className="flex flex-col justify-end h-full gap-3">
-                <AnimatePresence mode="popLayout">
-                  {logs.slice(0, logIndex + 1).slice(-6).map((log, i) => (
-                    <motion.div
-                      key={`${logIndex}-${i}`}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="flex gap-3 text-[10px] md:text-[11px] leading-relaxed font-mono"
-                    >
-                      <span className="text-zinc-600 flex-shrink-0">[{log.time}]</span>
-                      <span className={`font-bold w-8 flex-shrink-0 ${log.level === 'INFO' ? 'text-blue-400' :
-                        log.level === 'WARN' ? 'text-yellow-400' :
-                          log.level === 'CRIT' ? 'text-red-500' :
-                            log.level === 'ACTN' ? 'text-teal-400' :
-                              'text-zinc-400'
-                        }`}>{log.level}</span>
-                      <span className="text-zinc-300">{log.msg}</span>
-                    </motion.div>
-                  ))}
+            <div className="bg-[hsl(var(--mk-surface-muted)/0.42)] p-5 sm:p-6">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Journal Signals</p>
+              <div className="mt-4 min-h-[220px] space-y-3">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={logIndex}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.35 }}
+                    className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))]"
+                  >
+                    {logs[logIndex]}
+                  </motion.div>
                 </AnimatePresence>
-                <motion.div
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ repeat: Infinity, duration: 0.8 }}
-                  className="w-2 h-4 bg-teal-500/50 mt-1"
-                />
               </div>
-            </div>
 
-            <div className="p-6 border-t border-white/5 bg-[#080808]">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] uppercase text-zinc-500 tracking-widest">Anomaly Probability</span>
-                <span className="text-xs font-bold text-red-400">Critical (89%)</span>
-              </div>
-              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: '89%' }}
-                  transition={{ delay: 0.5, duration: 1 }}
-                  className="h-full bg-gradient-to-r from-red-600 to-red-400"
-                ></motion.div>
+              <div className="mt-5 rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Anomaly Probability</p>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-[hsl(var(--mk-border)/0.22)]">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: '72%' }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
+                  />
+                </div>
               </div>
             </div>
           </div>

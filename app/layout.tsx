@@ -4,6 +4,18 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
+import { Geist, Poppins } from "next/font/google";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  weight: ["400", "600", "700"],
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -109,7 +121,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="bg-background"
+      className={`bg-background ${geist.variable} ${poppins.variable}`}
       translate="no"
       suppressHydrationWarning
       style={{ ["--theme-intensity" as string]: "100%" }}
@@ -242,7 +254,7 @@ export default function RootLayout({
           `}
         </style>
       </head>
-      <body className="font-sans">
+      <body className="font-sans [font-family:var(--font-geist)]">
         <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}

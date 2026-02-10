@@ -83,7 +83,7 @@ export function TradeProgressChart({
   const allEvents: ChartEvent[] = [
     ...trades.map(trade => ({
       date: new Date(trade.entryDate),
-      amount: trade.pnl - (trade.commission || 0),
+      amount: Number(trade.pnl) - Number(trade.commission || 0),
       isPayout: false,
       isReset: false
     })),

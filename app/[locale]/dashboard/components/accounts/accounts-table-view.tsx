@@ -823,10 +823,10 @@ export function AccountsTableView({
               <span
                 className={cn(
                   "font-medium",
-                  remainingLoss > (row.original.drawdownThreshold ?? 0) * 0.5
+                  remainingLoss > Number(row.original.drawdownThreshold ?? 0) * 0.5
                     ? "text-success"
                     : remainingLoss >
-                        (row.original.drawdownThreshold ?? 0) * 0.2
+                        Number(row.original.drawdownThreshold ?? 0) * 0.2
                       ? "text-warning"
                       : "text-destructive"
                 )}
@@ -857,7 +857,7 @@ export function AccountsTableView({
           if (isGroupRow(row)) return -1
           const metrics = row.metrics
           if (!metrics?.hasProfitableData) return 0
-          return metrics.isConsistent || row.consistencyPercentage === 100 ? 2 : 1
+          return metrics.isConsistent || Number(row.consistencyPercentage ?? 0) === 100 ? 2 : 1
         },
         header: ({ column }) => (
           <DataTableColumnHeader
@@ -887,7 +887,7 @@ export function AccountsTableView({
             )
           }
           const isConsistent =
-            metrics.isConsistent || row.original.consistencyPercentage === 100
+            metrics.isConsistent || Number(row.original.consistencyPercentage ?? 0) === 100
           return (
             <div
               className={cn(
@@ -906,7 +906,7 @@ export function AccountsTableView({
             ? -1
             : rowA.original.metrics?.hasProfitableData
               ? rowA.original.metrics.isConsistent ||
-                rowA.original.consistencyPercentage === 100
+                Number(rowA.original.consistencyPercentage ?? 0) === 100
                 ? 2
                 : 1
               : 0
@@ -914,7 +914,7 @@ export function AccountsTableView({
             ? -1
             : rowB.original.metrics?.hasProfitableData
               ? rowB.original.metrics.isConsistent ||
-                rowB.original.consistencyPercentage === 100
+                Number(rowB.original.consistencyPercentage ?? 0) === 100
                 ? 2
                 : 1
               : 0

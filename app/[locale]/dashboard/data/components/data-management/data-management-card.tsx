@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Trade } from '@/prisma/generated/prisma'
+import { Prisma, Trade } from '@/prisma/generated/prisma'
 import ExportButton from '@/components/export-button'
 import { useI18n } from "@/locales/client"
 import { useUserStore } from '@/store/user-store'
@@ -140,9 +140,12 @@ export function DataManagementCard() {
 
   const handleUpdateCommission = useCallback(async (accountNumber: string, instrumentGroup: string, newCommission: number) => {
     const updateKey = `${accountNumber}-${instrumentGroup}`
-    
+
     // Find the original commission value for this instrument group
-    const originalCommission = groupedTrades[accountNumber]?.[instrumentGroup]?.[0]?.commission / groupedTrades[accountNumber]?.[instrumentGroup]?.[0]?.quantity
+    const firstTrade = groupedTrades[accountNumber]?.[instrumentGroup]?.[0]
+    const originalCommission = firstTrade
+      ? Number(firstTrade.commission) / Number(firstTrade.quantity || 1)
+      : undefined
     
     // Only set as pending if the value is different from the original and is a valid number
     if (originalCommission !== undefined && !isNaN(newCommission) && newCommission !== originalCommission) {
@@ -173,7 +176,10 @@ export function DataManagementCard() {
       const updatedTrades = trades.map((trade) =>
         trade.accountNumber === accountNumber &&
         trade.instrument.startsWith(instrumentGroup)
-          ? { ...trade, commission: pendingUpdate.newCommission * trade.quantity }
+          ? {
+              ...trade,
+              commission: new Prisma.Decimal(pendingUpdate.newCommission).times(trade.quantity),
+            }
           : trade
       )
       setTradesStore(updatedTrades)
@@ -481,7 +487,7 @@ export function DataManagementCard() {
                               <Input
                                 type="number"
                                 placeholder="Commission"
-                                defaultValue={trades[0].commission / trades[0].quantity}
+                                defaultValue={Number(trades[0].commission) / Number(trades[0].quantity || 1)}
                                 className={`w-full ${pendingCommissionUpdates[`${accountNumber}-${instrumentGroup}`] ? 'pr-8' : ''}`}
                                 onChange={(e) => {
                                   const value = parseFloat(e.target.value)

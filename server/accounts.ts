@@ -307,7 +307,7 @@ export async function setupAccountAction(account: Account): Promise<Account> {
     ...savedAccount,
     payouts: savedAccount.payouts,
     group: savedAccount.group,
-  } as Account
+  } as unknown as Account
   updateTag(`user-data-${userId}`)
   updateTag(`trades-${userId}`)
   return result

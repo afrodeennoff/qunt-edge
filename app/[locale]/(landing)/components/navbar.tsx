@@ -46,7 +46,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    const onScroll = () => setScrolled(window.scrollY > 14)
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
@@ -74,11 +74,13 @@ export default function Navbar() {
       href={link.href}
       onClick={() => setMobileOpen(false)}
       className={cn(
-        mobile ? 'block rounded-xl px-3 py-2.5 text-sm font-medium' : 'rounded-lg px-3 py-2 text-[11px] font-semibold',
-        'transition-colors duration-150',
+        mobile
+          ? 'block rounded-xl px-3 py-2.5 text-sm font-semibold tracking-tight'
+          : 'rounded-full px-3 py-2 text-[11px] font-semibold tracking-[0.08em] uppercase',
+        'transition-all duration-200',
         isActive(link.href)
-          ? 'bg-primary/12 text-primary'
-          : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+          ? 'bg-primary/12 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border)/0.75)]'
+          : 'text-muted-foreground hover:bg-background/70 hover:text-foreground'
       )}
     >
       {link.title}
@@ -90,19 +92,17 @@ export default function Navbar() {
       <div className="container-fluid pt-3 sm:pt-4">
         <div
           className={cn(
-            'mx-auto flex h-16 items-center rounded-2xl border px-3 backdrop-blur-xl transition-all duration-300 sm:h-[68px] sm:px-4',
-            scrolled
-              ? 'border-border/70 bg-background/92 shadow-[0_14px_34px_-20px_rgba(0,0,0,0.55)]'
-              : 'border-border/50 bg-background/76'
+            'marketing-glass mx-auto flex h-16 items-center rounded-[1.25rem] px-3 transition-all duration-300 sm:h-[68px] sm:px-4',
+            scrolled ? 'translate-y-0 shadow-[0_20px_42px_-32px_hsl(var(--brand-ink)/0.52)]' : 'translate-y-0'
           )}
         >
           <Link href="/" className="flex items-center gap-2.5 rounded-xl px-1.5 py-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/25 bg-primary/10">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/80 bg-background/70 shadow-[0_8px_16px_-12px_hsl(var(--brand-ink)/0.45)]">
               <Logo className="h-4.5 w-4.5 fill-foreground" />
             </div>
             <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-sm font-black tracking-tight">Qunt Edge</span>
-              <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Trading Intelligence</span>
+              <span className="text-sm tracking-tight [font-family:var(--font-poppins)] font-semibold">Qunt Edge</span>
+              <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Execution Intel</span>
             </div>
           </Link>
 
@@ -113,11 +113,11 @@ export default function Navbar() {
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 xl:ml-0">
-            <LanguageSelector triggerClassName="h-9 w-9 rounded-xl hover:bg-muted/70" />
+            <LanguageSelector triggerClassName="h-9 w-9 rounded-full hover:bg-background/80" />
 
             <Popover modal>
               <PopoverTrigger asChild>
-                <Button variant="ghost" className="hidden h-9 w-9 rounded-xl px-0 hover:bg-muted/70 sm:inline-flex">
+                <Button variant="ghost" className="hidden h-9 w-9 rounded-full px-0 hover:bg-background/80 sm:inline-flex">
                   {themeIcon()}
                   <span className="sr-only">{t('landing.navbar.toggleTheme')}</span>
                 </Button>
@@ -135,13 +135,13 @@ export default function Navbar() {
               </PopoverContent>
             </Popover>
 
-            <Button asChild className="hidden h-9 rounded-xl px-4 text-[11px] font-bold md:inline-flex">
+            <Button asChild className="hidden h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.08em] uppercase md:inline-flex">
               <Link href="/authentication">{t('landing.navbar.signIn')}</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" className="h-9 w-9 rounded-xl px-0 xl:hidden hover:bg-muted/70">
+                <Button variant="ghost" className="h-9 w-9 rounded-full px-0 xl:hidden hover:bg-background/80">
                   <Menu className="h-4.5 w-4.5" />
                   <span className="sr-only">{t('landing.navbar.openMenu')}</span>
                 </Button>
@@ -149,11 +149,11 @@ export default function Navbar() {
               <SheetContent side="right" className="w-[320px] border-l border-border/70 p-0">
                 <div className="flex h-full flex-col bg-background">
                   <div className="flex items-center gap-3 border-b border-border/70 px-5 py-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/25 bg-primary/10">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/80 bg-background/70">
                       <Logo className="h-4.5 w-4.5 fill-foreground" />
                     </div>
                     <div className="flex flex-col leading-none">
-                      <span className="text-sm font-black tracking-tight">Qunt Edge</span>
+                      <span className="text-sm tracking-tight [font-family:var(--font-poppins)] font-semibold">Qunt Edge</span>
                       <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Navigation</span>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export default function Navbar() {
                   </div>
 
                   <div className="border-t border-border/70 p-4">
-                    <Button asChild className="h-10 w-full rounded-xl text-[11px] font-bold">
+                    <Button asChild className="h-10 w-full rounded-xl text-[11px] font-bold tracking-[0.08em] uppercase">
                       <Link href="/authentication" onClick={() => setMobileOpen(false)}>
                         {t('landing.navbar.signIn')}
                       </Link>

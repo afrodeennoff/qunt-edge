@@ -23,8 +23,8 @@ export function calculateTicksAndPoints(
 
   if (matchingTicker) {
     const details = tickDetails[matchingTicker]
-    tickValue = details.tickValue
-    tickSize = details.tickSize
+    tickValue = Number(details.tickValue)
+    tickSize = Number(details.tickSize)
   }
 
   // Calculate PnL per contract

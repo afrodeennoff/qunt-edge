@@ -36,8 +36,8 @@ export async function getTeamAnalyticsDataAction(teamId: string, userId: string)
         // Aggregate data
         const membersData = team.members.map(member => {
             const trades = member.user.accounts.flatMap(a => a.trades)
-            const totalPnL = trades.reduce((sum, t) => sum + t.pnl, 0)
-            const winCount = trades.filter(t => t.pnl > 0).length
+            const totalPnL = trades.reduce((sum, t) => sum + Number(t.pnl), 0)
+            const winCount = trades.filter(t => Number(t.pnl) > 0).length
             const totalTrades = trades.length
             const winRate = totalTrades > 0 ? (winCount / totalTrades) * 100 : 0
 
@@ -62,11 +62,11 @@ export async function getTeamAnalyticsDataAction(teamId: string, userId: string)
 
         membersData.forEach(m => {
             m.trades.forEach(t => {
-                if (t.pnl > 0) grossProfit += t.pnl
-                else grossLoss += Math.abs(t.pnl)
+                if (Number(t.pnl) > 0) grossProfit += Number(t.pnl)
+                else grossLoss += Math.abs(Number(t.pnl))
 
                 const date = t.createdAt.toISOString().split('T')[0]
-                dailyPnLMap[date] = (dailyPnLMap[date] || 0) + t.pnl
+                dailyPnLMap[date] = (dailyPnLMap[date] || 0) + Number(t.pnl)
             })
         })
 

@@ -8,7 +8,6 @@ import {
   UploadIcon,
   type UploadIconHandle,
 } from "@/components/animated-icons/upload";
-import { Trade } from "@/prisma/generated/prisma";
 import { saveTradesAction } from "@/server/database";
 import ImportTypeSelection, { ImportType } from "./import-type-selection";
 import FileUpload from "./file-upload";
@@ -28,8 +27,8 @@ import { usePdfProcessingStore } from "@/store/pdf-processing-store";
 import PdfUpload from "./ibkr-pdf/pdf-upload";
 import PdfProcessing from "./ibkr-pdf/pdf-processing";
 import AtasFileUpload from "./atas/atas-file-upload";
-import { generateTradeHash } from "@/lib/utils";
 import { createTradeWithDefaults } from "@/lib/trade-factory";
+import type { ImportTradeDraft } from "@/lib/trade-types";
 
 type ColumnConfig = {
   [key: string]: {
@@ -61,7 +60,7 @@ export default function ImportButton() {
   const [newAccountNumber, setNewAccountNumber] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [processedTrades, setProcessedTrades] = useState<Partial<Trade>[]>([]);
+  const [processedTrades, setProcessedTrades] = useState<Partial<ImportTradeDraft>[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const uploadIconRef = useRef<UploadIconHandle>(null);
   const [text, setText] = useState<string>("");
@@ -95,7 +94,7 @@ export default function ImportButton() {
         );
       }
 
-      let newTrades: Trade[] = [];
+      let newTrades: ImportTradeDraft[] = [];
       // If accountNumbers is empty, we should just save processedTrades with the accountNumber from the processedTrades
       if (accountNumbers.length === 0) {
         newTrades = tradesToSave.map((trade) => {

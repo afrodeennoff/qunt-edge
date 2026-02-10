@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Trade } from '@/prisma/generated/prisma'
 import { prisma } from '@/lib/prisma'
 import { saveTradesAction } from '@/server/database';
+import type { ImportTradeDraft } from '@/lib/trade-types';
 
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     const data: ThorRequest = await req.json();
     
     // Transform the data to match the Trade schema
-    const trades: Partial<Trade>[] = data.dates.flatMap(dateData => 
+    const trades: ImportTradeDraft[] = data.dates.flatMap(dateData => 
       dateData.trades.map(trade => {
         const entryTime = new Date(trade.entry_time)
         const exitTime = new Date(trade.exit_time)
@@ -100,8 +100,8 @@ export async function POST(req: NextRequest) {
           instrument: trade.symbol.slice(0, -2),
           entryDate: entryTime.toISOString(),
           closeDate: exitTime.toISOString(),
-          entryPrice: parseFloat(trade.entry_price.toString()),
-          closePrice: parseFloat(trade.exit_price.toString()),
+          entryPrice: trade.entry_price,
+          closePrice: trade.exit_price,
           quantity: Math.abs(trade.quantity),
           side: trade.quantity > 0 ? 'Long' : 'Short',
           pnl: trade.pnl,
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       })
     )
 
-    const result = await saveTradesAction(trades as Trade[], { userId: user.id })
+    const result = await saveTradesAction(trades, { userId: user.id })
 
     // Handle duplicate trades as success, but return errors for other cases
     if (result.error && result.error !== 'DUPLICATE_TRADES') {

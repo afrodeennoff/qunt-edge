@@ -2,7 +2,8 @@
 
 import { createClient } from '@/server/auth'
 import { saveTradesAction } from '@/server/database'
-import { Trade, TickDetails } from '@/prisma/generated/prisma'
+import { TickDetails } from '@/prisma/generated/prisma'
+import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import crypto from 'crypto'
 import { generateDeterministicTradeId } from '@/lib/trade-id-utils'
 import { getTickDetails } from '@/server/tick-details'
@@ -1071,8 +1072,8 @@ async function buildTradesFromFillPairs(
 
       // Calculate price difference (exit - entry)
       const priceDifference = exitPrice - entryPrice
-      const ticks = priceDifference / tickSize
-      let pnl = ticks * tickValue * fillPair.qty
+      const ticks = priceDifference / Number(tickSize)
+      let pnl = ticks * Number(tickValue) * fillPair.qty
 
       // For short trades, we need to reverse the P&L calculation
       // Short: sell first (entry), buy later (exit) = profit when exit price < entry price

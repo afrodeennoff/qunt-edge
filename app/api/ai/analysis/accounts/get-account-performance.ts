@@ -1,8 +1,7 @@
 import { getTradesAction } from "@/server/database";
 import { getGroupsAction } from "@/server/groups";
-import { Trade } from "@/prisma/generated/prisma";
+import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
-import { groups } from "d3";
 import { z } from 'zod/v3';
 
 // Define Zod schemas first
@@ -45,7 +44,11 @@ export type AccountAnalysis = z.infer<typeof AccountAnalysisSchema>;
 // Export schemas for reuse
 export { AccountMetricsSchema, AccountAnalysisSchema };
 
-function calculateAccountMetrics(accountNumber: string, trades: Trade[], allTrades: Trade[]): AccountMetrics {
+function calculateAccountMetrics(
+  accountNumber: string,
+  trades: AnalyticsTrade[],
+  allTrades: AnalyticsTrade[]
+): AccountMetrics {
   const accountTrades = trades.filter(t => t.accountNumber === accountNumber);
   
   if (accountTrades.length === 0) {
@@ -106,7 +109,7 @@ function calculateAccountMetrics(accountNumber: string, trades: Trade[], allTrad
   let maxDrawdown = 0;
   
   for (const trade of accountTrades) {
-    runningPnL += trade.pnl - trade.commission;
+    runningPnL += tradeNetPnl(trade);
     if (runningPnL > peak) {
       peak = runningPnL;
     }
@@ -117,7 +120,7 @@ function calculateAccountMetrics(accountNumber: string, trades: Trade[], allTrad
   }
   
   // Calculate Sharpe ratio
-  const returns = accountTrades.map(t => t.pnl - t.commission);
+  const returns = accountTrades.map(tradeNetPnl);
   const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
   const stdDev = Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length);
   const sharpeRatio = stdDev > 0 ? avgReturn / stdDev : 0;
@@ -152,10 +155,10 @@ function calculateAccountMetrics(accountNumber: string, trades: Trade[], allTrad
     if (!groups[weekKey]) groups[weekKey] = [];
     groups[weekKey].push(trade);
     return groups;
-  }, {} as Record<string, Trade[]>);
+  }, {} as Record<string, AnalyticsTrade[]>);
   
   const profitableWeeks = Object.values(weeklyGroups).filter(weekTrades => 
-    weekTrades.reduce((sum, t) => sum + t.pnl - t.commission, 0) > 0
+    weekTrades.reduce((sum, trade) => sum + tradeNetPnl(trade), 0) > 0
   ).length;
   
   const consistency = Object.keys(weeklyGroups).length > 0 ? (profitableWeeks / Object.keys(weeklyGroups).length) * 100 : 0;
@@ -206,7 +209,7 @@ function calculateAccountMetrics(accountNumber: string, trades: Trade[], allTrad
   };
 }
 
-function analyzeAccounts(trades: Trade[]): AccountAnalysis {
+function analyzeAccounts(trades: AnalyticsTrade[]): AccountAnalysis {
   if (!trades || trades.length === 0) {
     return {
       accounts: [],
@@ -239,7 +242,7 @@ export const getAccountPerformance = tool({
     console.log(`[getAccountPerformance] startDate: ${startDate}, endDate: ${endDate}, minTrades: ${minTrades}`);
 
     const paginatedTrades = await getTradesAction();
-    let trades = paginatedTrades.trades;
+    let trades = normalizeTrades(paginatedTrades.trades);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
@@ -251,8 +254,8 @@ export const getAccountPerformance = tool({
       });
     }
 
-    const groups = await getGroupsAction();
-    const hiddenGroup = groups.find(g => g.name === "Hidden Accounts")
+    const userGroups = await getGroupsAction();
+    const hiddenGroup = userGroups.find(g => g.name === "Hidden Accounts")
     const hiddenAccountNumbers = hiddenGroup ? new Set(hiddenGroup.accounts.map(a => a.number)) : new Set()
     // Filter out hidden accounts
     trades = trades.filter(trade => !hiddenAccountNumbers.has(trade.accountNumber));

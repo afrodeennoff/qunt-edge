@@ -1,5 +1,5 @@
 import { getTradesAction } from "@/server/database";
-import { Trade } from "@/prisma/generated/prisma";
+import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -40,7 +40,7 @@ interface InstrumentAnalysis {
   recommendations: string[];
 }
 
-function calculateInstrumentMetrics(instrument: string, trades: Trade[]): InstrumentMetrics {
+function calculateInstrumentMetrics(instrument: string, trades: AnalyticsTrade[]): InstrumentMetrics {
   const instrumentTrades = trades.filter(t => t.instrument === instrument);
   
   if (instrumentTrades.length === 0) {
@@ -101,7 +101,7 @@ function calculateInstrumentMetrics(instrument: string, trades: Trade[]): Instru
   let maxDrawdown = 0;
   
   for (const trade of instrumentTrades) {
-    runningPnL += trade.pnl - trade.commission;
+    runningPnL += tradeNetPnl(trade);
     if (runningPnL > peak) {
       peak = runningPnL;
     }
@@ -112,7 +112,7 @@ function calculateInstrumentMetrics(instrument: string, trades: Trade[]): Instru
   }
   
   // Calculate Sharpe ratio
-  const returns = instrumentTrades.map(t => t.pnl - t.commission);
+  const returns = instrumentTrades.map(tradeNetPnl);
   const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
   const stdDev = Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length);
   const sharpeRatio = stdDev > 0 ? avgReturn / stdDev : 0;
@@ -150,10 +150,10 @@ function calculateInstrumentMetrics(instrument: string, trades: Trade[]): Instru
     if (!groups[weekKey]) groups[weekKey] = [];
     groups[weekKey].push(trade);
     return groups;
-  }, {} as Record<string, Trade[]>);
+  }, {} as Record<string, AnalyticsTrade[]>);
   
   const profitableWeeks = Object.values(weeklyGroups).filter(weekTrades => 
-    weekTrades.reduce((sum, t) => sum + t.pnl - t.commission, 0) > 0
+    weekTrades.reduce((sum, trade) => sum + tradeNetPnl(trade), 0) > 0
   ).length;
   
   const consistency = Object.keys(weeklyGroups).length > 0 ? (profitableWeeks / Object.keys(weeklyGroups).length) * 100 : 0;
@@ -186,7 +186,7 @@ function calculateInstrumentMetrics(instrument: string, trades: Trade[]): Instru
   };
 }
 
-function analyzeInstruments(trades: Trade[]): InstrumentAnalysis {
+function analyzeInstruments(trades: AnalyticsTrade[]): InstrumentAnalysis {
   if (!trades || trades.length === 0) {
     return {
       instruments: [],
@@ -266,12 +266,12 @@ export const getInstrumentPerformance = tool({
     console.log(`[getInstrumentPerformance] startDate: ${startDate}, endDate: ${endDate}, minTrades: ${minTrades}`);
 
     const paginatedTrades = await getTradesAction();
-    let trades = paginatedTrades.trades;
+    let trades = normalizeTrades(paginatedTrades.trades);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
       trades = trades.filter(trade => {
-        const tradeDate = new Date(trade.entryDate);
+        const tradeDate = trade.entryDate;
         const start = startDate ? new Date(startDate) : new Date('1970-01-01');
         const end = endDate ? new Date(endDate) : new Date('2100-01-01');
         return tradeDate >= start && tradeDate <= end;

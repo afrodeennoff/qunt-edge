@@ -1,73 +1,35 @@
 'use client'
 
-import { motion, Variants } from 'framer-motion';
-import Link from 'next/link';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
 
-const CTA: React.FC = () => {
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      }
-    },
-  };
-
+export default function CTA() {
   return (
-    <section className="py-32 px-6 relative overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/5 blur-[100px] rounded-full pointer-events-none" />
-
+    <section className="relative px-4 pb-28 pt-20 sm:px-6 sm:pb-32 sm:pt-28 lg:px-8">
       <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-100px" }}
-        className="max-w-4xl mx-auto text-center relative z-10"
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="marketing-panel mx-auto max-w-4xl rounded-[30px] px-6 py-11 text-center sm:px-10"
       >
-        <motion.h2
-          variants={itemVariants}
-          className="text-4xl md:text-6xl font-semibold tracking-tighter mb-8 text-white"
-        >
-          The market rewards <br />
-          <span className="text-teal-500">process, not luck.</span>
-        </motion.h2>
-        <motion.p
-          variants={itemVariants}
-          className="text-zinc-400 text-lg mb-12 max-w-xl mx-auto leading-relaxed font-normal"
-        >
-          Start identifying the behavioral leakages that are draining your account. Qunt Edge is the clinical intelligence layer for your trading career.
-        </motion.p>
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col items-center gap-6"
-        >
+        <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Ready</p>
+        <h2 className="mt-2 text-[clamp(1.8rem,5vw,3.4rem)] font-semibold leading-[0.98] tracking-tight [font-family:var(--font-poppins)]">
+          Keep your old trading journal context.
+          <span className="block text-[hsl(var(--brand-primary))]">Upgrade everything around it.</span>
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] sm:text-base">
+          Same core information, modern interface precision.
+        </p>
+        <div className="mt-8">
           <Link
             href="/authentication?next=dashboard"
-            className="group relative bg-teal-500 hover:bg-teal-400 text-black text-sm px-10 py-5 rounded-full font-bold uppercase tracking-widest transition-all hover:-translate-y-1 shadow-[0_0_30px_-5px_rgba(45,212,191,0.3)] hover:shadow-[0_0_40px_-5px_rgba(45,212,191,0.5)] active:scale-95"
+            className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
           >
-            <span className="relative z-10">Apply for Early Access</span>
-            <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent z-0 w-full transform skew-x-12" />
+            Access Dashboard
           </Link>
-          <p className="text-xs mono text-zinc-600">Limited availability to ensure quality support.</p>
-        </motion.div>
+        </div>
       </motion.div>
     </section>
-  );
-};
-
-export default CTA;
+  )
+}

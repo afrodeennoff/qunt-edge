@@ -496,7 +496,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
       if (!groups.has(key)) {
         groups.set(key, {
           instrument: trade.instrument,
-          entryDate: roundedEntryDate.toISOString(),
+          entryDate: roundedEntryDate,
           closeDate: trade.closeDate,
           tags: trade.tags,
           images: trade.images,
@@ -531,9 +531,9 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           ...trade,
           trades: [],
         });
-        group.pnl += trade.pnl || 0;
-        group.commission += trade.commission || 0;
-        group.quantity += trade.quantity || 0;
+        group.pnl = (Number(group.pnl || 0) + Number(trade.pnl || 0)) as any;
+        group.commission = (Number(group.commission || 0) + Number(trade.commission || 0)) as any;
+        group.quantity = (Number(group.quantity || 0) + Number(trade.quantity || 0)) as any;
         // Update closeDate to the latest one
         if (new Date(trade.closeDate) > new Date(group.closeDate)) {
           group.closeDate = trade.closeDate;
@@ -590,15 +590,15 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
       // If row has sub-trades, sum from sub-trades
       if (row.trades.length > 0) {
         row.trades.forEach((trade) => {
-          totalPnl += trade.pnl || 0;
-          totalCommission += trade.commission || 0;
-          totalQuantity += trade.quantity || 0;
+          totalPnl += Number(trade.pnl || 0);
+          totalCommission += Number(trade.commission || 0);
+          totalQuantity += Number(trade.quantity || 0);
         });
       } else {
         // If no sub-trades, use the row's own values
-        totalPnl += row.pnl || 0;
-        totalCommission += row.commission || 0;
-        totalQuantity += row.quantity || 0;
+        totalPnl += Number(row.pnl || 0);
+        totalCommission += Number(row.commission || 0);
+        totalQuantity += Number(row.quantity || 0);
       }
     });
 
@@ -871,12 +871,12 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           />
         ),
         cell: ({ row }) => {
-          const timeInPosition = row.original.timeInPosition || 0;
+          const timeInPosition = Number(row.original.timeInPosition || 0);
           return <div>{parsePositionTime(timeInPosition)}</div>;
         },
         sortingFn: (rowA, rowB, columnId) => {
-          const a = rowA.original.timeInPosition || 0;
-          const b = rowB.original.timeInPosition || 0;
+          const a = Number(rowA.original.timeInPosition || 0);
+          const b = Number(rowB.original.timeInPosition || 0);
           return a - b;
         },
         size: 120,
@@ -900,7 +900,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
 
           return (
             <EditableTimeCell
-              value={trade.entryDate}
+              value={new Date(trade.entryDate).toISOString()}
               tradeIds={tradeIds}
               fieldType="entryDate"
               onUpdate={updateTrades}
@@ -927,7 +927,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
 
           return (
             <EditableTimeCell
-              value={trade.closeDate}
+              value={new Date(trade.closeDate).toISOString()}
               tradeIds={tradeIds}
               fieldType="closeDate"
               onUpdate={updateTrades}
@@ -946,7 +946,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           />
         ),
         cell: ({ row }) => {
-          const pnl = row.original.pnl;
+          const pnl = Number(row.original.pnl);
           return (
             <div className="text-right font-medium">
               <span

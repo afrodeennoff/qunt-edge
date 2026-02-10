@@ -115,7 +115,7 @@ export function DailySummaryModal() {
                 daily.total += (data.tradeNumber || 0)
                 if (data.trades) {
                     data.trades.forEach(t => {
-                        if ((t.pnl || 0) > 0) daily.wins++
+                        if (Number(t.pnl || 0) > 0) daily.wins++
                     })
                 }
             }

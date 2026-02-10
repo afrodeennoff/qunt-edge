@@ -41,6 +41,10 @@ const localeMap: { [key: string]: Locale } = {
   fr: fr
 }
 
+const toDecimal = (value: number | string | null | undefined) => Number(value ?? 0)
+const toNumber = (value: unknown) => (value == null ? 0 : Number(value))
+const toInputValue = (value: unknown) => (value == null ? '' : Number(value))
+
 export function AccountConfigurator({ 
   account, 
   pendingChanges,
@@ -63,10 +67,11 @@ export function AccountConfigurator({
   const [searchQuery, setSearchQuery] = useState("")
   const accountSizeInputRef = useRef<HTMLInputElement>(null)
 
-  const effectiveConsistency =
+  const effectiveConsistency = toNumber(
     pendingChanges?.consistencyPercentage ??
     account.consistencyPercentage ??
     100
+  )
 
   const isConsistencyEnabled = effectiveConsistency !== 100
 
@@ -82,29 +87,29 @@ export function AccountConfigurator({
     const newChanges: Partial<Account> = {
       // Basic account info
       propfirm: firm.name,
-      startingBalance: accountSize.balance,
-      profitTarget: accountSize.target,
-      drawdownThreshold: accountSize.drawdown,
-      consistencyPercentage: typeof accountSize.consistency === 'number' ? accountSize.consistency : 30,
+      startingBalance: toDecimal(accountSize.balance),
+      profitTarget: toDecimal(accountSize.target),
+      drawdownThreshold: toDecimal(accountSize.drawdown),
+      consistencyPercentage: toDecimal(typeof accountSize.consistency === 'number' ? accountSize.consistency : 30),
       trailingDrawdown: accountSize.trailing === 'EOD' || accountSize.trailing === 'Intraday',
-      trailingStopProfit: accountSize.trailing === 'EOD' || accountSize.trailing === 'Intraday' ? accountSize.target : 0,
+      trailingStopProfit: toDecimal(accountSize.trailing === 'EOD' || accountSize.trailing === 'Intraday' ? accountSize.target : 0),
       
       // Account size details
       accountSize: sizeKey,
       accountSizeName: accountSize.name,
-      price: accountSize.price,
-      priceWithPromo: accountSize.priceWithPromo,
+      price: toDecimal(accountSize.price ?? 0),
+      priceWithPromo: toDecimal(accountSize.priceWithPromo ?? 0),
       evaluation: accountSize.evaluation,
       minDays: typeof accountSize.minDays === 'number' ? accountSize.minDays : 0,
-      dailyLoss: accountSize.dailyLoss ?? 0,
+      dailyLoss: toDecimal(accountSize.dailyLoss ?? 0),
       rulesDailyLoss: accountSize.rulesDailyLoss ?? 'No',
       trailing: accountSize.trailing ?? 'Static',
       tradingNewsAllowed: accountSize.tradingNewsAllowed ?? false,
-      activationFees: accountSize.activationFees ?? 0,
+      activationFees: toDecimal(accountSize.activationFees ?? 0),
       isRecursively: accountSize.isRecursively ?? 'No',
-      balanceRequired: accountSize.balanceRequired ?? 0,
+      balanceRequired: toDecimal(accountSize.balanceRequired ?? 0),
       minTradingDaysForPayout: accountSize.minTradingDaysForPayout ?? 0,
-      minPnlToCountAsDay: accountSize.minPnlToCountAsDay ?? 0
+      minPnlToCountAsDay: toDecimal(accountSize.minPnlToCountAsDay ?? 0)
     }
 
     setPendingChanges(newChanges)
@@ -160,11 +165,11 @@ export function AccountConfigurator({
 
   const isSaveDisabled = !pendingChanges || 
     Object.keys(pendingChanges).length === 0 || 
-    (pendingChanges?.startingBalance !== undefined && pendingChanges?.startingBalance <= 0) ||
-    (pendingChanges?.profitTarget !== undefined && pendingChanges?.profitTarget <= 0) ||
-    (pendingChanges?.drawdownThreshold !== undefined && pendingChanges?.drawdownThreshold <= 0) ||
-    (typeof pendingChanges?.consistencyPercentage === 'number' && pendingChanges.consistencyPercentage < 0) ||
-    (pendingChanges?.trailingDrawdown && typeof pendingChanges?.trailingStopProfit === 'number' && pendingChanges.trailingStopProfit <= 0) ||
+    (pendingChanges?.startingBalance !== undefined && toNumber(pendingChanges.startingBalance) <= 0) ||
+    (pendingChanges?.profitTarget !== undefined && toNumber(pendingChanges.profitTarget) <= 0) ||
+    (pendingChanges?.drawdownThreshold !== undefined && toNumber(pendingChanges.drawdownThreshold) <= 0) ||
+    (pendingChanges?.consistencyPercentage !== undefined && toNumber(pendingChanges.consistencyPercentage) < 0) ||
+    (pendingChanges?.trailingDrawdown && pendingChanges?.trailingStopProfit !== undefined && toNumber(pendingChanges.trailingStopProfit) <= 0) ||
     isSaving
 
   // Filter prop firms and account sizes based on search query
@@ -312,29 +317,29 @@ export function AccountConfigurator({
                 propfirm: "",
                 accountSize: "",
                 accountSizeName: "",
-                startingBalance: 0,
-                profitTarget: 0,
-                drawdownThreshold: 0,
-                buffer: 0,
-                consistencyPercentage: 30,
+                startingBalance: toDecimal(0),
+                profitTarget: toDecimal(0),
+                drawdownThreshold: toDecimal(0),
+                buffer: toDecimal(0),
+                consistencyPercentage: toDecimal(30),
                 trailingDrawdown: false,
-                trailingStopProfit: 0,
-                price: 0,
-                priceWithPromo: 0,
+                trailingStopProfit: toDecimal(0),
+                price: toDecimal(0),
+                priceWithPromo: toDecimal(0),
                 evaluation: false,
                 minDays: 0,
-                dailyLoss: 0,
+                dailyLoss: toDecimal(0),
                 rulesDailyLoss: "No",
                 trailing: "Static",
                 tradingNewsAllowed: false,
-                activationFees: 0,
+                activationFees: toDecimal(0),
                 isRecursively: "No",
-                balanceRequired: 0,
+                balanceRequired: toDecimal(0),
                 minTradingDaysForPayout: 0,
-                minPayout: 0,
+                minPayout: toDecimal(0),
                 maxPayout: "",
                 maxFundedAccounts: 0,
-                minPnlToCountAsDay: 0
+                minPnlToCountAsDay: toDecimal(0)
               }
               setPendingChanges(clearedChanges)
             }}
@@ -365,10 +370,10 @@ export function AccountConfigurator({
                     ref={accountSizeInputRef}
                     type="text"
                     inputMode="numeric"
-                    value={pendingChanges?.startingBalance ?? account.startingBalance ?? ''}
+                    value={toInputValue(pendingChanges?.startingBalance ?? account.startingBalance)}
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^0-9]/g, '')
-                      handleInputChange('startingBalance', value === '' ? 0 : parseFloat(value) || 0)
+                      handleInputChange('startingBalance', toDecimal(value === '' ? 0 : parseFloat(value) || 0))
                     }}
                     onFocus={(e) => {
                       // Set cursor to the start of the input
@@ -403,7 +408,7 @@ export function AccountConfigurator({
                               key={size}
                               value={size.toString()}
                               onSelect={() => {
-                                handleInputChange('startingBalance', size)
+                                handleInputChange('startingBalance', toDecimal(size))
                                 setAccountSizeOpen(false)
                                 // Refocus the input after selection
                                 setTimeout(() => {
@@ -426,11 +431,11 @@ export function AccountConfigurator({
                 <Label>{t('propFirm.target')}</Label>
                 <Input
                   type="number"
-                  value={pendingChanges?.profitTarget ?? account.profitTarget ?? ''}
+                  value={toInputValue(pendingChanges?.profitTarget ?? account.profitTarget)}
                   onChange={(e) =>
                     handleInputChange(
                       'profitTarget',
-                      e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                      toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)
                     )
                   }
                 />
@@ -553,8 +558,8 @@ export function AccountConfigurator({
                   <Label className="text-sm text-muted-foreground">{t('propFirm.configurator.fields.drawdown')}</Label>
                   <Input
                     type="number"
-                    value={pendingChanges?.drawdownThreshold ?? account.drawdownThreshold ?? ''}
-                    onChange={(e) => handleInputChange('drawdownThreshold', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                    value={toInputValue(pendingChanges?.drawdownThreshold ?? account.drawdownThreshold)}
+                    onChange={(e) => handleInputChange('drawdownThreshold', toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0))}
                   />
                 </div>
 
@@ -590,8 +595,8 @@ export function AccountConfigurator({
                     <p className="text-xs text-muted-foreground">{t('propFirm.configurator.tooltips.trailingStopProfit')}</p>
                     <Input
                       type="number"
-                      value={pendingChanges?.trailingStopProfit ?? account.trailingStopProfit ?? ''}
-                      onChange={(e) => handleInputChange('trailingStopProfit', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                      value={toInputValue(pendingChanges?.trailingStopProfit ?? account.trailingStopProfit)}
+                      onChange={(e) => handleInputChange('trailingStopProfit', toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0))}
                       placeholder={t('propFirm.configurator.placeholders.enterAmountToLockDrawdown')}
                     />
                   </div>
@@ -635,8 +640,8 @@ export function AccountConfigurator({
                     <Input
                       type="number"
                       step="0.01"
-                      value={pendingChanges?.buffer ?? account.buffer ?? ''}
-                      onChange={(e) => handleInputChange('buffer', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                      value={toInputValue(pendingChanges?.buffer ?? account.buffer)}
+                      onChange={(e) => handleInputChange('buffer', toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0))}
                       placeholder="0.00"
                     />
 
@@ -676,8 +681,8 @@ export function AccountConfigurator({
                   <Label className="text-sm text-muted-foreground">{t('propFirm.configurator.fields.dailyLoss')}</Label>
                   <Input
                     type="number"
-                    value={pendingChanges?.dailyLoss ?? account.dailyLoss ?? ''}
-                    onChange={(e) => handleInputChange('dailyLoss', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                    value={toInputValue(pendingChanges?.dailyLoss ?? account.dailyLoss)}
+                    onChange={(e) => handleInputChange('dailyLoss', toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0))}
                   />
                 </div>
 
@@ -702,8 +707,8 @@ export function AccountConfigurator({
                   <Input
                     type="number"
                     step="0.01"
-                    value={pendingChanges?.minPnlToCountAsDay ?? account.minPnlToCountAsDay ?? ''}
-                    onChange={(e) => handleInputChange('minPnlToCountAsDay', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                    value={toInputValue(pendingChanges?.minPnlToCountAsDay ?? account.minPnlToCountAsDay)}
+                    onChange={(e) => handleInputChange('minPnlToCountAsDay', toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0))}
                     placeholder="0.00"
                   />
                 </div>
@@ -742,15 +747,12 @@ export function AccountConfigurator({
                     checked={isConsistencyEnabled}
                     onCheckedChange={(checked) => {
                       if (!checked) {
-                        handleInputChange('consistencyPercentage', 100)
+                        handleInputChange('consistencyPercentage', toDecimal(100))
                         return
                       }
 
-                      const newValue =
-                        effectiveConsistency === 100 || effectiveConsistency == null
-                          ? 30
-                          : effectiveConsistency
-                      handleInputChange('consistencyPercentage', newValue)
+                      const newValue = effectiveConsistency === 100 ? 30 : effectiveConsistency
+                      handleInputChange('consistencyPercentage', toDecimal(newValue))
                     }}
                   />
                   <Label htmlFor="consistencyEnabled" className="cursor-pointer text-xs text-muted-foreground">
@@ -768,7 +770,7 @@ export function AccountConfigurator({
                     onChange={(e) =>
                       handleInputChange(
                         'consistencyPercentage',
-                        e.target.value === '' ? 30 : parseFloat(e.target.value) || 30
+                        toDecimal(e.target.value === '' ? 30 : parseFloat(e.target.value) || 30)
                       )
                     }
                   />
@@ -789,8 +791,8 @@ export function AccountConfigurator({
                   <Label className="text-sm text-muted-foreground">{t('propFirm.configurator.fields.price')}</Label>
                   <Input
                     type="number"
-                    value={pendingChanges?.price ?? account.price ?? ''}
-                    onChange={(e) => handleInputChange('price', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                    value={toInputValue(pendingChanges?.price ?? account.price)}
+                    onChange={(e) => handleInputChange('price', toDecimal(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0))}
                     placeholder={t('propFirm.configurator.placeholders.enterPrice')}
                   />
                 </div>

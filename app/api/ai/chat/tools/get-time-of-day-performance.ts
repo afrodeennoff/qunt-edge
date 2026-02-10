@@ -1,5 +1,5 @@
 import { getTradesAction } from "@/server/database";
-import { Trade } from "@/prisma/generated/prisma";
+import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { formatInTimeZone } from "date-fns-tz";
@@ -44,11 +44,11 @@ interface TimeAnalysis {
   recommendations: string[];
 }
 
-function calculateTimeMetrics(trades: Trade[], timezone: string = 'UTC'): TimePerformance | null {
+function calculateTimeMetrics(trades: AnalyticsTrade[], timezone: string = 'UTC'): TimePerformance | null {
   if (!trades || trades.length === 0) return null;
   
   const totalTrades = trades.length;
-  const netPnL = trades.reduce((sum, t) => sum + t.pnl - t.commission, 0);
+  const netPnL = trades.reduce((sum, trade) => sum + tradeNetPnl(trade), 0);
   const wins = trades.filter(t => t.pnl > 0);
   const losses = trades.filter(t => t.pnl < 0);
   
@@ -64,10 +64,10 @@ function calculateTimeMetrics(trades: Trade[], timezone: string = 'UTC'): TimePe
     if (!groups[date]) groups[date] = [];
     groups[date].push(trade);
     return groups;
-  }, {} as Record<string, Trade[]>);
+  }, {} as Record<string, AnalyticsTrade[]>);
   
   const profitableDays = Object.values(dailyGroups).filter(dayTrades => 
-    dayTrades.reduce((sum, t) => sum + t.pnl - t.commission, 0) > 0
+    dayTrades.reduce((sum, trade) => sum + tradeNetPnl(trade), 0) > 0
   ).length;
   
   const consistency = Object.keys(dailyGroups).length > 0 ? (profitableDays / Object.keys(dailyGroups).length) * 100 : 0;
@@ -85,7 +85,7 @@ function calculateTimeMetrics(trades: Trade[], timezone: string = 'UTC'): TimePe
   };
 }
 
-function analyzeTimeOfDay(trades: Trade[], timezone: string = 'UTC'): TimeAnalysis {
+function analyzeTimeOfDay(trades: AnalyticsTrade[], timezone: string = 'UTC'): TimeAnalysis {
   if (!trades || trades.length === 0) {
     return {
       hourlyPerformance: [],
@@ -116,7 +116,7 @@ function analyzeTimeOfDay(trades: Trade[], timezone: string = 'UTC'): TimeAnalys
     if (!groups[hour]) groups[hour] = [];
     groups[hour].push(trade);
     return groups;
-  }, {} as Record<number, Trade[]>);
+  }, {} as Record<number, AnalyticsTrade[]>);
   
   // Calculate hourly performance
   const hourlyPerformance = Array.from({ length: 24 }, (_, hour) => {
@@ -132,7 +132,7 @@ function analyzeTimeOfDay(trades: Trade[], timezone: string = 'UTC'): TimeAnalys
     if (!groups[dayOfWeek]) groups[dayOfWeek] = [];
     groups[dayOfWeek].push(trade);
     return groups;
-  }, {} as Record<number, Trade[]>);
+  }, {} as Record<number, AnalyticsTrade[]>);
   
   // Calculate day of week performance
   const dayOfWeekPerformance = dayNames.map((dayName, index) => {
@@ -260,12 +260,12 @@ export const getTimeOfDayPerformance = tool({
     console.log(`[getTimeOfDayPerformance] startDate: ${startDate}, endDate: ${endDate}, timezone: ${timezone}`);
 
     const paginatedTrades = await getTradesAction();
-    let trades = paginatedTrades.trades;
+    let trades = normalizeTrades(paginatedTrades.trades);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
       trades = trades.filter(trade => {
-        const tradeDate = new Date(trade.entryDate);
+        const tradeDate = trade.entryDate;
         const start = startDate ? new Date(startDate) : new Date('1970-01-01');
         const end = endDate ? new Date(endDate) : new Date('2100-01-01');
         return tradeDate >= start && tradeDate <= end;

@@ -380,9 +380,9 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
     for (const teamMember of teamWithMembers.members) {
       for (const account of teamMember.user.accounts) {
         for (const trade of account.trades) {
-          totalPnl += trade.pnl
+          totalPnl += Number(trade.pnl)
           totalTrades++
-          if (trade.pnl > 0) winningTrades++
+          if (Number(trade.pnl) > 0) winningTrades++
           // Simplified RR calculation based on risk taken vs reward
           // This assumes a standard risk per trade if not available, can be improved
         }
@@ -486,7 +486,7 @@ export async function getTeamOverviewData(teamId: string, userId: string) {
     team.members.forEach(member => {
       let memberHasRecentActivity = false
       member.user.accounts.forEach(account => {
-        totalBalance += account.startingBalance + (account.balanceRequired || 0) // Basic balance calc
+        totalBalance += Number(account.startingBalance) + Number(account.balanceRequired || 0) // Basic balance calc
 
         // Check for recent activity
         const hasRecentTrades = account.trades.some(t => t.createdAt > lastWeek)

@@ -44,6 +44,67 @@ type AnalyticsData = {
   chartData: TeamChartPoint[]
 }
 
+function toNumber(value: unknown): number {
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    'toNumber' in value &&
+    typeof (value as { toNumber?: unknown }).toNumber === 'function'
+  ) {
+    return ((value as { toNumber: () => number }).toNumber?.() ?? 0)
+  }
+  return 0
+}
+
+function normalizeAnalyticsData(raw: unknown): AnalyticsData {
+  const data = (raw as {
+    analytics?: {
+      winRate?: unknown
+      totalTrades?: unknown
+      profitFactor?: unknown
+      totalPnl?: unknown
+    }
+    membersPerformance?: Array<{
+      userId: string
+      email: string
+      totalPnL: unknown
+      winRate: unknown
+      totalTrades: unknown
+    }>
+    chartData?: Array<{
+      date: string
+      dailyPnL: unknown
+      cumulativePnL: unknown
+    }>
+  }) ?? {}
+
+  return {
+    analytics: {
+      winRate: toNumber(data.analytics?.winRate),
+      totalTrades: toNumber(data.analytics?.totalTrades),
+      profitFactor: toNumber(data.analytics?.profitFactor),
+      totalPnL: toNumber(data.analytics?.totalPnl),
+    },
+    membersPerformance: (data.membersPerformance ?? []).map((member) => ({
+      userId: member.userId,
+      email: member.email,
+      totalPnL: toNumber(member.totalPnL),
+      winRate: toNumber(member.winRate),
+      totalTrades: toNumber(member.totalTrades),
+    })),
+    chartData: (data.chartData ?? []).map((point) => ({
+      date: point.date,
+      dailyPnL: toNumber(point.dailyPnL),
+      cumulativePnL: toNumber(point.cumulativePnL),
+    })),
+  }
+}
+
 function formatCurrency(value: number): string {
   return `${value >= 0 ? '+' : '-'}$${Math.abs(value).toLocaleString(undefined, {
     minimumFractionDigits: 0,
@@ -96,7 +157,7 @@ export default function TeamAnalyticsPage() {
       try {
         const result = await getTeamAnalyticsDataAction(slug, user.id)
         if (result.success && result.data) {
-          setData(result.data as AnalyticsData)
+          setData(normalizeAnalyticsData(result.data))
         }
       } catch (error) {
         console.error('Failed to fetch team analytics:', error)

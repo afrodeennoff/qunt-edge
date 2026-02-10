@@ -59,7 +59,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
     // Calculate P&L for each account
     const accountPnL = dayData.trades.reduce((acc, trade) => {
       const accountNumber = trade.accountNumber || 'Unknown'
-      const totalPnL = trade.pnl - (trade.commission || 0)
+      const totalPnL = Number(trade.pnl) - Number(trade.commission || 0)
       acc[accountNumber] = (acc[accountNumber] || 0) + totalPnL
       return acc
     }, {} as Record<string, number>);
@@ -81,7 +81,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
       .map((trade, index) => {
         const runningBalance = dayData.trades
           .slice(0, index + 1)
-          .reduce((sum, t) => sum + (t.pnl - (t.commission || 0)), 0);
+          .reduce((sum, t) => sum + (Number(t.pnl) - Number(t.commission || 0)), 0);
         return {
           time: new Date(trade.entryDate).toLocaleTimeString(locale),
           date: new Date(trade.entryDate).toLocaleDateString(locale, { 
@@ -90,7 +90,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
             day: 'numeric',
           }),
           balance: runningBalance,
-          pnl: trade.pnl - (trade.commission || 0),
+          pnl: Number(trade.pnl) - Number(trade.commission || 0),
           tradeNumber: index + 1,
         }
       });

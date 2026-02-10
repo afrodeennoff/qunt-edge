@@ -3,7 +3,7 @@
 import { getDatabaseUserId } from './auth'
 import { prisma } from '@/lib/prisma'
 import { formatInTimeZone } from 'date-fns-tz'
-import { parseISO, eachDayOfInterval, startOfDay, endOfDay, isValid } from 'date-fns'
+import { eachDayOfInterval, startOfDay, endOfDay, isValid } from 'date-fns'
 import { Payout as PrismaPayout } from '@/prisma/generated/prisma'
 
 // Types matching the component
@@ -168,13 +168,13 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       }
 
       // PnL range filter
-      if ((params.pnlRange.min !== undefined && trade.pnl < params.pnlRange.min) ||
-        (params.pnlRange.max !== undefined && trade.pnl > params.pnlRange.max)) {
+      if ((params.pnlRange.min !== undefined && Number(trade.pnl) < params.pnlRange.min) ||
+        (params.pnlRange.max !== undefined && Number(trade.pnl) > params.pnlRange.max)) {
         return false
       }
 
       // Time range filter
-      if (params.timeRange.range && getTimeRangeKey(trade.timeInPosition) !== params.timeRange.range) {
+      if (params.timeRange.range && getTimeRangeKey(Number(trade.timeInPosition)) !== params.timeRange.range) {
         return false
       }
 
@@ -202,7 +202,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       }
 
       return true
-    }).sort((a, b) => parseISO(a.entryDate).getTime() - parseISO(b.entryDate).getTime())
+    }).sort((a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime())
 
     console.log('Filtered trades count:', filteredTrades.length)
 
@@ -263,8 +263,8 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     const startDate = dates.reduce((min, date) => date < min ? date : min)
     const endDate = dates.reduce((max, date) => date > max ? date : max)
 
-    const start = parseISO(startDate)
-    const end = parseISO(endDate)
+    const start = new Date(startDate)
+    const end = new Date(endDate)
     end.setDate(end.getDate() + 1)
 
     const allDates = eachDayOfInterval({ start, end })
@@ -292,7 +292,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     finalFilteredTrades.forEach(trade => {
       allEvents.push({
         date: new Date(trade.entryDate),
-        amount: trade.pnl - (trade.commission || 0),
+        amount: Number(trade.pnl) - Number(trade.commission || 0),
         isPayout: false,
         isReset: false,
         accountNumber: trade.accountNumber
@@ -308,7 +308,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       account.payouts?.forEach((payout: PrismaPayout) => {
         allEvents.push({
           date: new Date(payout.date),
-          amount: ['PENDING', 'VALIDATED', 'PAID'].includes(payout.status) ? -payout.amount : 0,
+          amount: ['PENDING', 'VALIDATED', 'PAID'].includes(payout.status) ? -Number(payout.amount) : 0,
           isPayout: true,
           isReset: false,
           payoutStatus: payout.status,
@@ -339,7 +339,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     limitedAccountNumbers.forEach(acc => {
       const account = accountMap.get(acc)
       accountEquities[acc] = 0
-      accountStartingBalances[acc] = account?.startingBalance || 0
+      accountStartingBalances[acc] = account?.startingBalance ? Number(account.startingBalance) : 0
       accountFirstActivity[acc] = null
     })
 

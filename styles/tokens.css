@@ -6,6 +6,24 @@
 
 @layer base {
   :root {
+    /* ===== GLOBAL BRAND COLORS ===== */
+    --brand-primary: 163 98% 49%;
+    --brand-primary-strong: 163 90% 42%;
+    --brand-secondary: 188 86% 58%;
+    --brand-warm: 42 83% 55%;
+    --brand-ink: 230 40% 5%;
+    --brand-soft-ink: 230 18% 16%;
+
+    /* ===== MARKETING SURFACE TOKENS ===== */
+    --mk-bg-0: 230 40% 4%;
+    --mk-bg-1: 230 36% 5%;
+    --mk-bg-2: 231 34% 7%;
+    --mk-surface: 231 30% 8%;
+    --mk-surface-muted: 231 26% 10%;
+    --mk-border: 229 3% 52%;
+    --mk-text: 220 7% 81%;
+    --mk-text-muted: 230 4% 53%;
+
     /* ===== BACKGROUND HIERARCHY (7 levels) ===== */
     /* Semantic background tokens from darkest to lightest */
     --bg-base: 240 10% 3.9%;
@@ -134,6 +152,15 @@
     --bg-overlay: 240 10% 11%;
     --bg-modal: 240 10% 13%;
     --bg-highlight: 240 10% 15%;
+
+    --mk-bg-0: 230 40% 4%;
+    --mk-bg-1: 230 36% 5%;
+    --mk-bg-2: 231 34% 7%;
+    --mk-surface: 231 30% 8%;
+    --mk-surface-muted: 231 26% 10%;
+    --mk-border: 229 3% 52%;
+    --mk-text: 220 7% 81%;
+    --mk-text-muted: 230 4% 53%;
   }
 }
 

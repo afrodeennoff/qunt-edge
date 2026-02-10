@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Trade } from "@/prisma/generated/prisma";
+import type { ImportTradeDraft as Trade } from "@/lib/trade-types";
 import { useI18n } from "@/locales/client";
 import { useTradesStore } from "@/store/trades-store";
 import { useUserStore } from "@/store/user-store";
@@ -230,7 +230,7 @@ export default function AtasProcessor({
     existingTrades.forEach((trade) => {
       if (trade.accountNumber && trade.instrument && trade.commission && trade.quantity) {
         const key = `${trade.accountNumber}:${trade.instrument}`;
-        commissions[key] = trade.commission / trade.quantity;
+        commissions[key] = Number(trade.commission) / Number(trade.quantity);
       }
     });
     return commissions;
@@ -400,15 +400,17 @@ export default function AtasProcessor({
 
       // Generate trade hash for deduplication
       item.id = generateTradeHash(item);
+      const itemEntryDateIso = item.entryDate ? new Date(item.entryDate).toISOString() : null
+      const itemCloseDateIso = item.closeDate ? new Date(item.closeDate).toISOString() : null
 
       // Check if trade already exists
       const existingTrade = existingTrades.find(
         (trade) =>
           trade.accountNumber === item.accountNumber &&
           trade.instrument === item.instrument &&
-          trade.entryDate === item.entryDate &&
-          trade.closeDate === item.closeDate &&
-          trade.quantity === item.quantity
+          new Date(trade.entryDate).toISOString() === itemEntryDateIso &&
+          new Date(trade.closeDate).toISOString() === itemCloseDateIso &&
+          Number(trade.quantity) === Number(item.quantity)
       );
 
       if (!existingTrade) {
@@ -462,7 +464,7 @@ export default function AtasProcessor({
         
         return {
           ...trade,
-          commission: commissionPerContract * trade.quantity,
+          commission: commissionPerContract * Number(trade.quantity ?? 0),
         };
       }
       return trade;
@@ -494,7 +496,7 @@ export default function AtasProcessor({
           const commissionKey = `${trade.accountNumber}:${trade.instrument}`;
           if (missingCommissions[commissionKey] !== undefined) {
             const commissionPerContract = missingCommissions[commissionKey];
-            const expectedCommission = commissionPerContract * trade.quantity;
+            const expectedCommission = commissionPerContract * Number(trade.quantity ?? 0);
             // Only update if the commission is different
             if (trade.commission !== expectedCommission) {
               return {
@@ -724,7 +726,7 @@ export default function AtasProcessor({
               <TradeTableReview
                 tradesParam={filteredTrades.map((trade) =>
                   createTradeWithDefaults(trade)
-                )}
+                ) as any}
                 config={{
                   style: {
                     height: "100%",

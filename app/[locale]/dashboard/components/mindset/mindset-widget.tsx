@@ -119,8 +119,8 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
       const tradesForDay = trades.filter(trade => {
         const entryDate = trade.entryDate
         const closeDate = trade.closeDate
-        const entryMatches = entryDate && (entryDate === dateKey || entryDate.startsWith(dateKey))
-        const closeMatches = closeDate && (closeDate === dateKey || closeDate.startsWith(dateKey))
+        const entryMatches = entryDate && format(new Date(entryDate), 'yyyy-MM-dd') === dateKey
+        const closeMatches = closeDate && format(new Date(closeDate), 'yyyy-MM-dd') === dateKey
         return entryMatches || closeMatches
       })
       

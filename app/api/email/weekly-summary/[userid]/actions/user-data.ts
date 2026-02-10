@@ -80,7 +80,12 @@ export async function getUserData(userId: string): Promise<UserData> {
       firstName: newsletter.firstName,
       isActive: newsletter.isActive
     },
-    trades: last14DaysTrades
+    trades: last14DaysTrades.map((trade) => ({
+      id: trade.id,
+      pnl: toMoneyNumber(trade.pnl),
+      commission: toMoneyNumber(trade.commission),
+      entryDate: new Date(trade.entryDate).toISOString(),
+    }))
   }
 }
 

@@ -896,3 +896,93 @@
     text-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
   }
 }
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -16px, 0) scale(1.03);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@layer utilities {
+  .marketing-shell {
+    position: relative;
+    background:
+      radial-gradient(
+        1200px 640px at 12% -12%,
+        hsl(var(--brand-primary) / 0.12),
+        transparent 65%
+      ),
+      radial-gradient(
+        1000px 620px at 90% -8%,
+        hsl(var(--brand-secondary) / 0.14),
+        transparent 62%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--mk-bg-0)) 0%,
+        hsl(var(--mk-bg-1)) 48%,
+        hsl(var(--mk-bg-2)) 100%
+      );
+    color: hsl(var(--mk-text));
+  }
+
+  .marketing-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--mk-border) / 0.14) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--mk-border) / 0.14) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at 50% 10%, black 28%, transparent 86%);
+  }
+
+  .marketing-glass {
+    border: 1px solid hsl(var(--mk-border) / 0.26);
+    background: hsl(var(--mk-surface) / 0.62);
+    backdrop-filter: blur(14px);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--mk-text) / 0.04),
+      0 28px 54px -36px hsl(var(--brand-ink) / 0.6);
+  }
+
+  .marketing-panel {
+    border: 1px solid hsl(var(--mk-border) / 0.24);
+    background: linear-gradient(
+      150deg,
+      hsl(var(--mk-surface) / 0.92) 0%,
+      hsl(var(--mk-surface-muted) / 0.85) 55%,
+      hsl(var(--mk-bg-1) / 0.9) 100%
+    );
+    box-shadow: 0 24px 50px -36px hsl(var(--brand-ink) / 0.65);
+  }
+
+  .marketing-badge {
+    border: 1px solid hsl(var(--mk-border) / 0.24);
+    background: hsl(var(--mk-surface) / 0.66);
+    color: hsl(var(--mk-text-muted));
+    backdrop-filter: blur(10px);
+  }
+
+  .marketing-orb {
+    animation: drift 10s ease-in-out infinite;
+    filter: blur(70px);
+  }
+
+  .marketing-pulse {
+    animation: pulse-soft 2.3s ease-in-out infinite;
+  }
+}

@@ -1,4 +1,4 @@
-import { Trade as PrismaTrade } from "@/prisma/generated/prisma";
+import { Prisma, Trade as PrismaTrade } from "@/prisma/generated/prisma";
 
 const INSTRUMENTS = ["ES", "NQ", "CL", "GC", "YM"] as const;
 const SIDES = ["long", "short"] as const;
@@ -46,17 +46,17 @@ export function generateMockTrades(userId: string, count = 60): PrismaTrade[] {
       accountNumber,
       userId,
       instrument,
-      side,
-      quantity,
-      entryPrice,
-      closePrice,
-      pnl,
-      commission,
+      side: side === "long" ? "Long" : "Short",
+      quantity: new Prisma.Decimal(quantity),
+      entryPrice: new Prisma.Decimal(entryPrice),
+      closePrice: new Prisma.Decimal(closePrice),
+      pnl: new Prisma.Decimal(pnl),
+      commission: new Prisma.Decimal(commission),
       entryId: `E-${seed}`,
       closeId: `C-${seed}`,
-      entryDate: entryDateObj.toISOString(),
-      closeDate: closeDateObj.toISOString(),
-      timeInPosition: holdMinutes * 60,
+      entryDate: entryDateObj,
+      closeDate: closeDateObj,
+      timeInPosition: new Prisma.Decimal(holdMinutes * 60),
       comment: seed % 5 === 0 ? "Mock trade note for UI preview" : null,
       tags: seed % 4 === 0 ? ["A+", "breakout"] : [],
       groupId: "",

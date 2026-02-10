@@ -103,11 +103,11 @@ export default function PnLBySideChart({
       (trade) => trade.side?.toLowerCase() === "short",
     );
 
-    const longPnL = longTrades.reduce((sum, trade) => sum + trade.pnl, 0);
-    const shortPnL = shortTrades.reduce((sum, trade) => sum + trade.pnl, 0);
+    const longPnL = longTrades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
+    const shortPnL = shortTrades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
 
-    const longWins = longTrades.filter((trade) => trade.pnl > 0).length;
-    const shortWins = shortTrades.filter((trade) => trade.pnl > 0).length;
+    const longWins = longTrades.filter((trade) => Number(trade.pnl) > 0).length;
+    const shortWins = shortTrades.filter((trade) => Number(trade.pnl) > 0).length;
 
     return [
       {

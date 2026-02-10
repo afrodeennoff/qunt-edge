@@ -215,7 +215,17 @@ export function calculateTradingDays(trades: Trade[], minPnlToCountAsDay?: numbe
   };
 }
 
-export function generateTradeHash(trade: Partial<Trade>): string {
+export function generateTradeHash(trade: {
+  quantity?: unknown
+  entryDate?: unknown
+  closeDate?: unknown
+  timeInPosition?: unknown
+  accountNumber?: unknown
+  instrument?: unknown
+  userId?: unknown
+  entryId?: unknown
+  closeId?: unknown
+}): string {
   // Handle undefined values by converting them to empty strings or default values
   const hashString = `${trade.userId || ''}-${trade.accountNumber || ''}-${trade.instrument || ''}-${trade.entryDate || ''}-${trade.closeDate || ''}-${trade.quantity || 0}-${trade.entryId || ''}-${trade.closeId || ''}-${trade.timeInPosition || 0}`
   return hashString

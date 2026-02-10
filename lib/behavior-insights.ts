@@ -60,7 +60,7 @@ function toPercent(part: number, total: number): number {
   return round((part / total) * 100)
 }
 
-function parseDateSafe(raw: string): Date | null {
+function parseDateSafe(raw: string | Date): Date | null {
   if (!raw) return null
   const date = new Date(raw)
   if (Number.isNaN(date.getTime())) return null
@@ -122,7 +122,7 @@ export function computeBehaviorInsights(
       return {
         ...trade,
         parsedEntryDate: parsedDate,
-        netPnL: trade.pnl - (trade.commission || 0),
+        netPnL: Number(trade.pnl) - Number(trade.commission || 0),
         isImpulsive,
         isHighVolatility,
       } satisfies TradeWithParsedDate
@@ -170,7 +170,7 @@ export function computeBehaviorInsights(
     const sameDay = getDateKey(current.parsedEntryDate) === getDateKey(previous.parsedEntryDate)
     if (!sameDay) continue
 
-    const quantityJump = current.quantity >= previous.quantity * 1.25
+    const quantityJump = Number(current.quantity) >= Number(previous.quantity) * 1.25
     if (previous.netPnL < 0 && quantityJump) {
       lossChasingEvents += 1
     }
