@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest'
 import { AutoSaveService, OfflineQueueManager } from '../auto-save-service'
 import { DashboardLayout } from '@/prisma/generated/prisma'
 
@@ -6,6 +6,22 @@ describe('AutoSaveService', () => {
     let mockSaveFunction: ReturnType<typeof vi.fn>
     let service: AutoSaveService
     let mockLayout: DashboardLayout
+
+    beforeAll(() => {
+        // Mock browser globals for Node environment
+        if (typeof window === 'undefined') {
+            vi.stubGlobal('window', {
+                dispatchEvent: vi.fn(),
+                addEventListener: vi.fn(),
+                removeEventListener: vi.fn(),
+            })
+        }
+        if (typeof navigator === 'undefined') {
+            vi.stubGlobal('navigator', {
+                onLine: true,
+            })
+        }
+    })
 
     beforeEach(() => {
         mockSaveFunction = vi.fn()
