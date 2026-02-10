@@ -2,7 +2,6 @@ import type { Trade } from "@/prisma/generated/prisma"
 import Decimal from "decimal.js"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format } from "date-fns"
 import { formatInTimeZone } from 'date-fns-tz'
 import { StatisticsProps } from "@/app/[locale]/dashboard/types/statistics"
 import type { Account } from "@/context/data-provider"
@@ -229,4 +228,21 @@ export function generateTradeHash(trade: {
   // Handle undefined values by converting them to empty strings or default values
   const hashString = `${trade.userId || ''}-${trade.accountNumber || ''}-${trade.instrument || ''}-${trade.entryDate || ''}-${trade.closeDate || ''}-${trade.quantity || 0}-${trade.entryId || ''}-${trade.closeId || ''}-${trade.timeInPosition || 0}`
   return hashString
+}
+
+// Helper function to determine text color based on background color
+export function getContrastColor(hexColor: string): string {
+  // Remove the hash if it exists
+  const color = hexColor.replace('#', '')
+
+  // Convert hex to RGB
+  const r = parseInt(color.slice(0, 2), 16)
+  const g = parseInt(color.slice(2, 4), 16)
+  const b = parseInt(color.slice(4, 6), 16)
+
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+
+  // Return black or white based on luminance
+  return luminance > 0.5 ? '#000000' : '#FFFFFF'
 }

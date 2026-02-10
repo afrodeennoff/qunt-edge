@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, getContrastColor } from '@/lib/utils'
 import { useI18n } from '@/locales/client'
 import {
   Tooltip,
@@ -362,19 +362,3 @@ export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelector
   )
 }
 
-// Helper function to determine text color based on background color
-function getContrastColor(hexColor: string): string {
-  // Remove the hash if it exists
-  const color = hexColor.replace('#', '')
-  
-  // Convert hex to RGB
-  const r = parseInt(color.substring(0, 2), 16)
-  const g = parseInt(color.substring(2, 4), 16)
-  const b = parseInt(color.substring(4, 6), 16)
-  
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  
-  // Return black or white based on luminance
-  return luminance > 0.5 ? '#000000' : '#FFFFFF'
-}
