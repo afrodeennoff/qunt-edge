@@ -553,6 +553,50 @@ export async function verifyOtp(email: string, token: string, type: 'email' | 's
   }
 }
 
+/**
+ * Checks if the current authenticated user has administrative privileges.
+ * Verification is based on:
+ * 1. Matching ADMIN_USER_ID or ALLOWED_ADMIN_USER_ID environment variables.
+ * 2. Having an email address from a domain listed in ADMIN_EMAIL_DOMAINS.
+ *
+ * @returns {Promise<boolean>} True if the user is an admin, false otherwise.
+ */
+export async function isAdmin(): Promise<boolean> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    // Check ID against ADMIN_USER_ID
+    if (process.env.ADMIN_USER_ID && user.id === process.env.ADMIN_USER_ID) {
+      return true
+    }
+
+    // Check ID against ALLOWED_ADMIN_USER_ID (legacy/alternate config)
+    if (process.env.ALLOWED_ADMIN_USER_ID && user.id === process.env.ALLOWED_ADMIN_USER_ID) {
+      return true
+    }
+
+    // Check email domain against ADMIN_EMAIL_DOMAINS
+    if (user.email && process.env.ADMIN_EMAIL_DOMAINS) {
+      const adminDomains = process.env.ADMIN_EMAIL_DOMAINS.split(',')
+        .map(d => d.trim().toLowerCase())
+        .filter(d => d !== '')
+
+      const userEmail = user.email.toLowerCase()
+      if (adminDomains.some(domain => userEmail.endsWith(domain.startsWith('@') ? domain : `@${domain}`))) {
+        return true
+      }
+    }
+
+    return false
+  } catch (error) {
+    console.error('[Auth] Error checking admin status:', error)
+    return false
+  }
+}
+
 // Optimized function that uses middleware data when available
 export async function getUserId(): Promise<string> {
   // First try to get user ID from middleware headers

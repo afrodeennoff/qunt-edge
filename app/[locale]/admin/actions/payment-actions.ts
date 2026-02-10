@@ -1,16 +1,12 @@
 'use server'
 
-import { createClient } from '@/server/auth'
+import { isAdmin } from '@/server/auth'
 import { paymentService } from '@/server/payment-service'
 import { subscriptionManager } from '@/server/subscription-manager'
 import { revalidatePath } from 'next/cache'
 
 export async function getTransactionsAction(options?: { limit?: number; offset?: number; status?: string }) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // TODO: Add proper admin check here
-    if (!user) {
+    if (!await isAdmin()) {
         throw new Error('Unauthorized')
     }
 
@@ -48,10 +44,7 @@ export async function getTransactionsAction(options?: { limit?: number; offset?:
 }
 
 export async function refundTransactionAction(transactionId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    if (!await isAdmin()) {
         throw new Error('Unauthorized')
     }
 
@@ -68,10 +61,7 @@ export async function refundTransactionAction(transactionId: string) {
 }
 
 export async function getSubscriptionsAction() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    if (!await isAdmin()) {
         throw new Error('Unauthorized')
     }
 
@@ -98,10 +88,7 @@ export async function getSubscriptionsAction() {
 }
 
 export async function cancelSubscriptionAction(userId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    if (!await isAdmin()) {
         throw new Error('Unauthorized')
     }
 
