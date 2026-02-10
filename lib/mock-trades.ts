@@ -1,4 +1,4 @@
-import { Prisma, Trade as PrismaTrade } from "@/prisma/generated/prisma";
+import { Trade } from "@/lib/data-types";
 
 const INSTRUMENTS = ["ES", "NQ", "CL", "GC", "YM"] as const;
 const SIDES = ["long", "short"] as const;
@@ -10,7 +10,7 @@ function valueFromSeed(seed: number, min: number, max: number): number {
   return min + normalized * (max - min);
 }
 
-export function generateMockTrades(userId: string, count = 60): PrismaTrade[] {
+export function generateMockTrades(userId: string, count = 60): Trade[] {
   const now = Date.now();
   const dayMs = 24 * 60 * 60 * 1000;
 
@@ -32,7 +32,7 @@ export function generateMockTrades(userId: string, count = 60): PrismaTrade[] {
       INSTRUMENTS[Math.floor(valueFromSeed(seed + 600, 0, INSTRUMENTS.length))] ?? "ES";
     const accountNumber =
       ACCOUNT_NUMBERS[
-        Math.floor(valueFromSeed(seed + 700, 0, ACCOUNT_NUMBERS.length))
+      Math.floor(valueFromSeed(seed + 700, 0, ACCOUNT_NUMBERS.length))
       ] ?? "SIM-1001";
 
     const baseMove = valueFromSeed(seed + 800, -250, 450);
@@ -47,16 +47,16 @@ export function generateMockTrades(userId: string, count = 60): PrismaTrade[] {
       userId,
       instrument,
       side: side === "long" ? "Long" : "Short",
-      quantity: new Prisma.Decimal(quantity),
-      entryPrice: new Prisma.Decimal(entryPrice),
-      closePrice: new Prisma.Decimal(closePrice),
-      pnl: new Prisma.Decimal(pnl),
-      commission: new Prisma.Decimal(commission),
+      quantity: quantity,
+      entryPrice: entryPrice,
+      closePrice: closePrice,
+      pnl: pnl,
+      commission: commission,
       entryId: `E-${seed}`,
       closeId: `C-${seed}`,
       entryDate: entryDateObj,
       closeDate: closeDateObj,
-      timeInPosition: new Prisma.Decimal(holdMinutes * 60),
+      timeInPosition: holdMinutes * 60,
       comment: seed % 5 === 0 ? "Mock trade note for UI preview" : null,
       tags: seed % 4 === 0 ? ["A+", "breakout"] : [],
       groupId: "",

@@ -65,6 +65,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
   const user = useUserStore(state => state.supabaseUser)
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
+  const resetUser = useUserStore(state => state.resetUser)
 
   const languages: { value: Locale; label: string }[] = useMemo(() => ([
     { value: 'en', label: 'English' },
@@ -275,9 +276,9 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
           </DropdownMenuSub>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => {
-              localStorage.removeItem('qunt_edge_user_data')
-              signOut()
+            onClick={async () => {
+              resetUser()
+              await signOut()
             }}
             className="flex items-center"
           >

@@ -12,14 +12,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useUserStore } from '../../../../store/user-store'
 import { useTheme } from '@/context/theme-provider'
-import { 
-  User, 
-  Settings, 
-  Bell, 
-  Shield, 
-  Globe, 
-  Moon, 
-  Sun, 
+import {
+  User,
+  Settings,
+  Bell,
+  Shield,
+  Globe,
+  Moon,
+  Sun,
   Laptop,
   Clock,
   CreditCard,
@@ -83,7 +83,8 @@ export default function SettingsPage() {
   const user = useUserStore(state => state.supabaseUser)
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
-  
+  const resetUser = useUserStore(state => state.resetUser)
+
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [pushNotifications, setPushNotifications] = useState(false)
   const [tradingAlerts, setTradingAlerts] = useState(true)
@@ -92,7 +93,7 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  
+
   // Team state
   const [userTeams, setUserTeams] = useState<{
     ownedTeams: any[]
@@ -285,8 +286,8 @@ export default function SettingsPage() {
                   <DropdownMenuContent>
                     <DropdownMenuRadioGroup value={currentLocale}>
                       {languages.map((lang) => (
-                        <DropdownMenuRadioItem 
-                          key={lang.value} 
+                        <DropdownMenuRadioItem
+                          key={lang.value}
                           value={lang.value}
                           onClick={() => changeLocale(lang.value)}
                         >
@@ -432,7 +433,7 @@ export default function SettingsPage() {
                       <Badge variant="secondary">Owner</Badge>
                     </div>
                   ))}
-                  
+
                   {/* Joined Teams */}
                   {userTeams.joinedTeams.map((team) => (
                     <div key={team.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -626,12 +627,12 @@ export default function SettingsPage() {
                 </Button>
               </Link>
               <Separator />
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 className="w-full justify-start"
-                onClick={() => {
-                  localStorage.removeItem('qunt_edge_user_data')
-                  signOut()
+                onClick={async () => {
+                  resetUser()
+                  await signOut()
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />

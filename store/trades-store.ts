@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
 import { StoreApi, UseBoundStore } from 'zustand'
 
 type WithSelectors<S> = S extends { getState: () => infer T }
@@ -20,10 +20,10 @@ const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
 
 interface TradesState {
   // Trades data
-  trades: PrismaTrade[]
-  setTrades: (trades: PrismaTrade[]) => void
+  trades: Trade[]
+  setTrades: (trades: Trade[]) => void
 }
 export const useTradesStore = createSelectors(create<TradesState>()((set) => ({
   trades: [],
-  setTrades: (trades: PrismaTrade[]) => set({ trades }),
+  setTrades: (trades: Trade[]) => set({ trades }),
 }))) as UseBoundStore<StoreApi<TradesState>>

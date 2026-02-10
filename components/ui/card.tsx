@@ -56,7 +56,11 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           </>
         )}
 
-        <div className="relative z-10">
+        <div className={cn(
+          "relative z-10",
+          className?.includes("flex-col") && "flex flex-col h-full",
+          className?.includes("h-full") && "h-full"
+        )}>
           {children}
         </div>
       </article>

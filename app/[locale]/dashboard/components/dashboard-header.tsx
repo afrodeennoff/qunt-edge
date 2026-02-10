@@ -12,6 +12,7 @@ import ImportButton from './import/import-button';
 import { DailySummaryModal } from './daily-summary-modal';
 import { ShareButton } from './share-button';
 import { GlobalSyncButton } from './global-sync-button';
+import { useI18n } from '@/locales/client';
 import { useData } from '@/context/data-provider';
 import { ActiveFilterTags } from './filters/active-filter-tags';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -32,6 +33,7 @@ export function DashboardHeader() {
         autoSaveStatus,
         flushPendingSaves
     } = useDashboard();
+    const t = useI18n();
     const { isPlusUser } = useData();
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'widgets';
@@ -122,7 +124,7 @@ export function DashboardHeader() {
                                     )}
                                 </motion.div>
                                 <span className="text-[10px] font-bold uppercase tracking-widest">
-                                    {isCustomizing ? 'FINISH' : 'CUSTOMIZE'}
+                                    {isCustomizing ? t('widgets.done') : t('widgets.edit')}
                                 </span>
                             </button>
 

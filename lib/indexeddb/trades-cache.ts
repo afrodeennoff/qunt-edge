@@ -1,13 +1,21 @@
-import { Trade as PrismaTrade } from "@/prisma/generated/prisma"
+import { Account as PrismaAccount, Group as PrismaGroup, Tag, FinancialEvent, Mood, Subscription, User, TickDetails } from "@/prisma/generated/prisma"
+import { Trade, Account, Group } from "@/lib/data-types"
 
 const DB_NAME = "qunt-edge-cache"
-const DB_VERSION = 1
-const STORE_NAME = "trades"
-const KEY_PREFIX = "trades:"
+const DB_VERSION = 2 // Incremented version to add new stores
+const STORES = {
+  TRADES: "trades",
+  ACCOUNTS: "accounts",
+  GROUPS: "groups",
+  USER_DATA: "user_data",
+  METRICS: "metrics"
+} as const
 
-type CachedTrades = {
+const KEY_PREFIX = "cache:"
+
+type CacheEntry<T> = {
   updatedAt: number
-  trades: PrismaTrade[]
+  data: T
 }
 
 const isBrowser = typeof window !== "undefined" && typeof indexedDB !== "undefined"
@@ -18,11 +26,13 @@ async function openDb(): Promise<IDBDatabase | null> {
   return await new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const db = request.result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME)
-      }
+      Object.values(STORES).forEach(storeName => {
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName)
+        }
+      })
     }
 
     request.onsuccess = () => resolve(request.result)
@@ -30,47 +40,98 @@ async function openDb(): Promise<IDBDatabase | null> {
   })
 }
 
-export async function getTradesCache(userId: string): Promise<PrismaTrade[] | null> {
+// Generic Storage
+async function getCache<T>(storeName: string, key: string): Promise<T | null> {
   const db = await openDb()
   if (!db) return null
 
   return await new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly")
-    const store = tx.objectStore(STORE_NAME)
-    const request = store.get(`${KEY_PREFIX}${userId}`)
+    try {
+      const tx = db.transaction(storeName, "readonly")
+      const store = tx.objectStore(storeName)
+      const request = store.get(`${KEY_PREFIX}${key}`)
 
-    request.onsuccess = () => {
-      const value = request.result as CachedTrades | undefined
-      resolve(value?.trades ?? null)
+      request.onsuccess = () => {
+        const value = request.result as CacheEntry<T> | undefined
+        resolve(value?.data ?? null)
+      }
+      request.onerror = () => reject(request.error)
+    } catch (e) {
+      resolve(null)
     }
-    request.onerror = () => reject(request.error)
   })
 }
 
-export async function setTradesCache(userId: string, trades: PrismaTrade[]): Promise<void> {
+async function setCache<T>(storeName: string, key: string, data: T): Promise<void> {
   const db = await openDb()
   if (!db) return
 
   await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite")
-    const store = tx.objectStore(STORE_NAME)
-    store.put({ updatedAt: Date.now(), trades } satisfies CachedTrades, `${KEY_PREFIX}${userId}`)
+    try {
+      const tx = db.transaction(storeName, "readwrite")
+      const store = tx.objectStore(storeName)
+      store.put({ updatedAt: Date.now(), data } satisfies CacheEntry<T>, `${KEY_PREFIX}${key}`)
 
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    } catch (e) {
+      reject(e)
+    }
   })
 }
 
-export async function clearTradesCache(userId: string): Promise<void> {
+async function clearStore(storeName: string, key: string): Promise<void> {
   const db = await openDb()
   if (!db) return
 
   await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite")
-    const store = tx.objectStore(STORE_NAME)
-    store.delete(`${KEY_PREFIX}${userId}`)
+    try {
+      const tx = db.transaction(storeName, "readwrite")
+      const store = tx.objectStore(storeName)
+      store.delete(`${KEY_PREFIX}${key}`)
 
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    } catch (e) {
+      reject(e)
+    }
   })
+}
+
+// Trades
+export const getTradesCache = (userId: string) => getCache<Trade[]>(STORES.TRADES, userId)
+export const setTradesCache = (userId: string, trades: Trade[]) => setCache(STORES.TRADES, userId, trades)
+export const clearTradesCache = (userId: string) => clearStore(STORES.TRADES, userId)
+
+// Accounts
+export const getAccountsCache = (userId: string) => getCache<any[]>(STORES.ACCOUNTS, userId)
+export const setAccountsCache = (userId: string, accounts: any[]) => setCache(STORES.ACCOUNTS, userId, accounts)
+
+// Groups
+export const getGroupsCache = (userId: string) => getCache<any[]>(STORES.GROUPS, userId)
+export const setGroupsCache = (userId: string, groups: any[]) => setCache(STORES.GROUPS, userId, groups)
+
+// All User Data (Full Object)
+export interface FullUserDataCache {
+  userData: User | null;
+  subscription: Subscription | null;
+  tickDetails: TickDetails[];
+  tags: Tag[];
+  accounts: Account[];
+  groups: Group[];
+  financialEvents: FinancialEvent[];
+  moodHistory: Mood[];
+}
+
+export const getUserDataCache = (userId: string) => getCache<FullUserDataCache>(STORES.USER_DATA, userId)
+export const setUserDataCache = (userId: string, data: FullUserDataCache) => setCache(STORES.USER_DATA, userId, data)
+
+export async function clearAllCache(userId: string): Promise<void> {
+  await Promise.all([
+    clearTradesCache(userId),
+    clearStore(STORES.ACCOUNTS, userId),
+    clearStore(STORES.GROUPS, userId),
+    clearStore(STORES.USER_DATA, userId),
+    clearStore(STORES.METRICS, userId),
+  ])
 }

@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Minus, Maximize2, GripVertical } from 'lucide-react'
+import { Minus, Maximize2, GripVertical, Pencil, Settings } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { useData } from '@/context/data-provider'
@@ -24,6 +24,7 @@ import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { Prisma, DashboardLayout } from "@/prisma/generated/prisma"
 import { useDashboard } from '../dashboard-context'
+import { Toolbar } from './toolbar'
 
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
@@ -92,7 +93,7 @@ const getWidgetGrid = (type: WidgetType, size: WidgetSize, isSmallScreen = false
 // Create layouts for different breakpoints
 const generateResponsiveLayout = (widgets: Widget[]) => {
   const widgetArray = Array.isArray(widgets) ? widgets : []
-  
+
   const layouts = {
     lg: widgetArray.map(widget => ({
       ...widget,
@@ -140,7 +141,7 @@ function DeprecatedWidget({ onRemove }: { onRemove: () => void }) {
   )
 }
 
-function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, currentType }: { 
+function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, currentType }: {
   children: React.ReactNode
   onRemove: () => void
   onChangeSize: (size: WidgetSize) => void
@@ -178,12 +179,12 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
   }
 
   return (
-    <div 
+    <div
       ref={widgetRef}
       className="relative h-full min-h-0 w-full rounded-lg bg-black group isolate overflow-hidden"
       onTouchStart={handleTouchStart}
     >
-      <div className={cn("h-full min-h-0 w-full", 
+      <div className={cn("h-full min-h-0 w-full",
         isCustomizing && "blur-[2px]"
       )}>
         {children}
@@ -363,16 +364,26 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
 }
 
 export default function WidgetCanvas() {
-  const { isMobile, dashboardLayout:layouts, setDashboardLayout:setLayouts } = useUserStore(state => state)
-  const  user = useUserStore(state => state.user)
+  const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
+  const user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useData()
-  const { isCustomizing, setIsCustomizing } = useDashboard()
+  const {
+    isCustomizing,
+    setIsCustomizing,
+    toggleCustomizing,
+    addWidget: contextAddWidget,
+    removeWidget: contextRemoveWidget,
+    changeWidgetSize: contextChangeWidgetSize,
+    removeAllWidgets: contextRemoveAllWidgets,
+    restoreDefaultLayout: contextRestoreDefaultLayout,
+    layouts: contextLayouts
+  } = useDashboard()
   const [isUserAction, setIsUserAction] = useState(false)
   const t = useI18n()
 
   // Add this state to track if the layout change is from user interaction
   const activeLayout = useMemo(() => isMobile ? 'mobile' : 'desktop', [isMobile])
-  
+
   // Move all memoized values up, out of conditional rendering paths
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), [])
 
@@ -440,10 +451,10 @@ export default function WidgetCanvas() {
         mobile: updatedLayouts.mobile,
         updatedAt: new Date()
       });
-      
+
       // Always save to database when layout changes
       saveDashboardLayout(toPrismaLayout(updatedLayouts));
-      
+
       // Reset user action flag
       if (isUserAction) {
         setIsUserAction(false);
@@ -458,14 +469,14 @@ export default function WidgetCanvas() {
   // Define addWidget with all dependencies
   const addWidget = useCallback(async (type: WidgetType, size: WidgetSize = 'medium') => {
     if (!user?.id) {
-      console.error('Error adding widget missing user data:', { user})
+      console.error('Error adding widget missing user data:', { user })
       return
     }
     if (!layouts) {
       console.error('Error adding widget missing layouts:', { layouts })
       return
     }
-    
+
     const currentLayout = layouts[activeLayout]
 
     // Prevent adding duplicate widget types
@@ -480,12 +491,12 @@ export default function WidgetCanvas() {
     const effectiveSize = size
 
     const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
-    
+
     // Initialize variables for finding the best position
     let bestX = 0
     let bestY = 0
     let lowestY = 0
-    
+
     // Find the lowest Y coordinate in the current layout
     currentLayout.forEach(widget => {
       const widgetBottom = widget.y + widget.h
@@ -493,12 +504,12 @@ export default function WidgetCanvas() {
         lowestY = widgetBottom
       }
     })
-    
+
     // First, try to find gaps in existing rows
     for (let y = 0; y <= lowestY; y++) {
       // Create an array representing occupied spaces at this Y level
       const rowOccupancy = new Array(12).fill(false)
-      
+
       // Mark occupied spaces
       currentLayout.forEach(widget => {
         if (y >= widget.y && y < widget.y + widget.h) {
@@ -507,7 +518,7 @@ export default function WidgetCanvas() {
           }
         }
       })
-      
+
       // Look for a gap large enough for the new widget
       for (let x = 0; x <= 12 - grid.w; x++) {
         let hasSpace = true
@@ -517,21 +528,21 @@ export default function WidgetCanvas() {
             break
           }
         }
-        
+
         if (hasSpace) {
           // Check if there's enough vertical space
           let hasVerticalSpace = true
           for (let wy = 0; wy < grid.h; wy++) {
             currentLayout.forEach(widget => {
-              if (widget.x < x + grid.w && 
-                  widget.x + widget.w > x && 
-                  widget.y <= y + wy && 
-                  widget.y + widget.h > y + wy) {
+              if (widget.x < x + grid.w &&
+                widget.x + widget.w > x &&
+                widget.y <= y + wy &&
+                widget.y + widget.h > y + wy) {
                 hasVerticalSpace = false
               }
             })
           }
-          
+
           if (hasVerticalSpace) {
             bestX = x
             bestY = y
@@ -547,13 +558,13 @@ export default function WidgetCanvas() {
             }
 
             const updatedWidgets = [...currentLayout, newWidget]
-            
+
             const newLayouts = {
               ...layouts,
               [activeLayout]: updatedWidgets,
               updatedAt: new Date()
             }
-            
+
             setLayouts(newLayouts)
             toast.success(t('widgets.widgetAdded'), {
               description: t('widgets.widgetAddedDescription'),
@@ -564,7 +575,7 @@ export default function WidgetCanvas() {
         }
       }
     }
-    
+
     // If no suitable gap was found, add to the bottom
     const newWidget: Widget = {
       i: `widget${Date.now()}`,
@@ -577,15 +588,15 @@ export default function WidgetCanvas() {
     }
 
     const updatedWidgets = [...currentLayout, newWidget]
-    
+
     const newLayouts = {
       ...layouts,
       [activeLayout]: updatedWidgets,
       updatedAt: new Date()
     }
-    
+
     setLayouts(newLayouts)
-    
+
     toast.success(t('widgets.widgetAdded'), {
       description: t('widgets.widgetAddedDescription'),
     })
@@ -609,7 +620,7 @@ export default function WidgetCanvas() {
   // Define changeWidgetType with all dependencies
   const changeWidgetType = useCallback(async (i: string, newType: WidgetType) => {
     if (!user?.id || !layouts) return
-    const updatedWidgets = layouts[activeLayout].map(widget => 
+    const updatedWidgets = layouts[activeLayout].map(widget =>
       widget.i === i ? { ...widget, type: newType } : widget
     )
     const newLayouts = {
@@ -624,19 +635,19 @@ export default function WidgetCanvas() {
   // Define changeWidgetSize with all dependencies
   const changeWidgetSize = useCallback(async (i: string, newSize: WidgetSize) => {
     if (!user?.id || !layouts) return
-    
+
     // Find the widget
     const widget = layouts[activeLayout].find(w => w.i === i)
     if (!widget) return
-    
+
     // Prevent charts from being set to tiny size
     let effectiveSize = newSize
     if (widget.type.includes('Chart') && newSize === 'tiny') {
       effectiveSize = 'medium'
     }
-    
+
     const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
-    const updatedWidgets = layouts[activeLayout].map(widget => 
+    const updatedWidgets = layouts[activeLayout].map(widget =>
       widget.i === i ? { ...widget, size: effectiveSize, ...grid } : widget
     )
     const newLayouts = {
@@ -651,14 +662,14 @@ export default function WidgetCanvas() {
   // Define removeAllWidgets with all dependencies
   const removeAllWidgets = useCallback(async () => {
     if (!user?.id || !layouts) return
-    
+
     const newLayouts = {
       ...layouts,
       desktop: [],
       mobile: [],
       updatedAt: new Date()
     }
-    
+
     setLayouts(newLayouts)
     await saveDashboardLayout(toPrismaLayout(newLayouts))
   }, [user?.id, layouts, setLayouts, saveDashboardLayout]);
@@ -684,7 +695,7 @@ export default function WidgetCanvas() {
     // Ensure widget.type is a valid WidgetType
     if (!Object.keys(WIDGET_REGISTRY).includes(widget.type)) {
       return (
-          <DeprecatedWidget onRemove={() => removeWidget(widget.i)} />
+        <DeprecatedWidget onRemove={() => removeWidget(widget.i)} />
       )
     }
 
@@ -740,9 +751,9 @@ export default function WidgetCanvas() {
           >
             {currentLayout.map((widget) => {
               return (
-                <div 
-                  key={widget.i} 
-                  className="h-full min-h-0" 
+                <div
+                  key={widget.i}
+                  className="h-full min-h-0"
                   data-customizing={isCustomizing}
                 >
                   <WidgetWrapper
@@ -760,6 +771,14 @@ export default function WidgetCanvas() {
           </ResponsiveGridLayout>
         </div>
       )}
+      <Toolbar
+        onAddWidget={contextAddWidget}
+        isCustomizing={isCustomizing}
+        onEditToggle={toggleCustomizing}
+        currentLayout={layouts || { desktop: [], mobile: [] }}
+        onRemoveAll={contextRemoveAllWidgets}
+        onRestoreDefaults={contextRestoreDefaultLayout}
+      />
     </div>
   )
 }

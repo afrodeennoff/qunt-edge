@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { User, Subscription, Tag, DashboardLayout } from "@/prisma/generated/prisma";
 import { Prisma } from "@/prisma/generated/prisma";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { Group, Account } from "@/context/data-provider";
+import { Group, Account } from "@/lib/data-types";
 import { Widget } from "@/app/[locale]/dashboard/types/dashboard";
 
 // Re-export Widget types for use in other modules
@@ -195,6 +195,7 @@ export const useUserStore = create<UserStore>()(
       resetUser: () =>
         set({
           user: null,
+          supabaseUser: null,
           subscription: null,
           tags: [],
           accounts: [],

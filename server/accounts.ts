@@ -1,9 +1,10 @@
 'use server'
 
 import { getDatabaseUserId } from '@/server/auth'
-import { Trade, Payout, Prisma } from '@/prisma/generated/prisma'
+import { Trade, Payout, Prisma, Group as PrismaGroup, Account as PrismaAccount } from '@/prisma/generated/prisma'
 import { computeMetricsForAccounts } from '@/lib/account-metrics'
-import { Account } from '@/context/data-provider'
+import { Account, Trade as NormalizedTrade, TradeInput } from '@/lib/data-types'
+import { decimalToNumber } from '@/lib/trade-types'
 import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
@@ -629,14 +630,22 @@ export async function calculateAccountMetricsAction(
       },
       userId: userId
     },
-    select: {
-      accountNumber: true,
-      entryDate: true,
-      pnl: true,
-      commission: true,
-    },
   });
 
+  // Normalize trades for metrics calculation
+  const normalizedTrades: NormalizedTrade[] = trades.map(trade => ({
+    ...trade,
+    entryPrice: decimalToNumber(trade.entryPrice),
+    closePrice: decimalToNumber(trade.closePrice, null),
+    pnl: decimalToNumber(trade.pnl),
+    commission: decimalToNumber(trade.commission, null),
+    quantity: decimalToNumber(trade.quantity),
+    timeInPosition: decimalToNumber(trade.timeInPosition, null),
+    entryDate: trade.entryDate,
+    closeDate: trade.closeDate,
+    tags: Array.isArray(trade.tags) ? trade.tags : [],
+  })) as NormalizedTrade[];
+
   // Delegate to shared utility so both server and client compute identically
-  return computeMetricsForAccounts(accounts, trades as Trade[])
+  return computeMetricsForAccounts(accounts, normalizedTrades)
 }

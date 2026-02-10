@@ -87,26 +87,20 @@ export async function createShared(data: SharedParams): Promise<string> {
   }
 }
 
-export async function getShared(slug: string): Promise<{params: SharedParams, trades: Trade[], groups: GroupWithAccounts[]} | null> {
-  try {
-    const result = await prisma.$transaction(async (tx) => {
-      const shared = await tx.shared.findUnique({
+import { unstable_cache } from 'next/cache'
+
+export async function getShared(slug: string): Promise<{ params: SharedParams, trades: Trade[], groups: GroupWithAccounts[] } | null> {
+  if (!slug) return null
+
+  // Define the cached fetcher
+  const getCachedShared = unstable_cache(
+    async (slug: string) => {
+      console.log(`[Cache MISS] Fetching shared data for slug: ${slug}`)
+      const shared = await prisma.shared.findUnique({
         where: { slug },
       })
 
-      if (!shared) {
-        return null
-      }
-
-      // Update view count
-      await tx.shared.update({
-        where: { slug },
-        data: {
-          viewCount: {
-            increment: 1,
-          },
-        },
-      })
+      if (!shared) return null
 
       // Parse the date range
       const dateRange = shared.dateRange as unknown as DateRange
@@ -118,7 +112,7 @@ export async function getShared(slug: string): Promise<{params: SharedParams, tr
 
       // Parallel fetch of trades, tick details, and groups
       const [trades, tickDetails, groups] = await Promise.all([
-        tx.trade.findMany({
+        prisma.trade.findMany({
           where: {
             userId: shared.userId,
             ...(shared.accountNumbers.length > 0 && {
@@ -135,8 +129,8 @@ export async function getShared(slug: string): Promise<{params: SharedParams, tr
             entryDate: 'desc',
           },
         }),
-        tx.tickDetails.findMany(),
-        tx.group.findMany({
+        prisma.tickDetails.findMany(),
+        prisma.group.findMany({
           where: {
             userId: shared.userId,
           },
@@ -163,9 +157,27 @@ export async function getShared(slug: string): Promise<{params: SharedParams, tr
           tickDetails,
         },
         trades,
-        groups,
+        groups: groups as GroupWithAccounts[],
       }
-    })
+    },
+    [`shared-view-${slug}`],
+    {
+      tags: [`shared-view-${slug}`],
+      revalidate: 3600 // Cache for 1 hour
+    }
+  )
+
+  try {
+    const result = await getCachedShared(slug)
+
+    if (result) {
+      // Background update of view count to not block response
+      // We don't await this to keep the response fast
+      prisma.shared.update({
+        where: { slug },
+        data: { viewCount: { increment: 1 } }
+      }).catch(err => console.error('[getShared] Failed to update view count:', err))
+    }
 
     return result
   } catch (error) {

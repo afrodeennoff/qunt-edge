@@ -118,36 +118,50 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   }
 
   // Cache only lightweight, stable core data. Heavy/volatile data is fetched outside cache.
+  // TIER 1: Global Stable Data (Tick details)
+  const getGlobalTickDetails = unstable_cache(
+    async () => prisma.tickDetails.findMany(),
+    ['global-tick-details'],
+    { revalidate: 86400, tags: ['global-tick-details'] }
+  )
+
+  // TIER 2: Global Localized Data (Financial events)
+  const getGlobalFinancialEvents = unstable_cache(
+    async (lang: string) => prisma.financialEvent.findMany({ where: { lang } }),
+    [`global-financial-events-${locale}`],
+    { revalidate: 3600, tags: [`global-financial-events-${locale}`] }
+  )
+
+  // TIER 3: User Core Data (Subscription, User profile)
   const getCachedCoreUserData = unstable_cache(
     async () => {
       const start = performance.now();
       console.log(`[Cache MISS] Fetching core user data for user ${userId}`)
 
-      // Cache only lightweight, stable data
-      const [userData, subscription, tickDetails] = await Promise.all([
+      const [userData, subscription] = await Promise.all([
         prisma.user.findUnique({
           where: { auth_user_id: authUserId }
         }),
         prisma.subscription.findUnique({
           where: { userId: userId }
-        }),
-        prisma.tickDetails.findMany()
+        })
       ])
 
       console.log(`[getUserData] Core data fetch completed in ${(performance.now() - start).toFixed(2)}ms`)
-      return { userData, subscription, tickDetails }
+      return { userData, subscription }
     },
-    [`user-data-${userId}-${locale}`],
+    [`user-data-core-${userId}`],
     {
-      tags: [`user-data-${userId}-${locale}`, `user-data-${userId}`],
-      revalidate: 86400 // 24 hours in seconds
+      tags: [`user-data-${userId}`, `user-data-core-${userId}`],
+      revalidate: 3600 // 1 hour
     }
   )
 
-  const core = await getCachedCoreUserData()
-
-  // Fetch large/volatile data in parallel (not cached) to avoid transaction timeouts
-  const [accounts, groups, tags, financialEvents, moodHistory] = await Promise.all([
+  // Fetch all in parallel
+  const [core, tickDetails, financialEvents, accounts, groups, tags, moodHistory] = await Promise.all([
+    getCachedCoreUserData(),
+    getGlobalTickDetails(),
+    getGlobalFinancialEvents(locale),
     prisma.account.findMany({
       where: { userId: userId },
       include: {
@@ -162,9 +176,6 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
     prisma.tag.findMany({
       where: { userId: userId }
     }),
-    prisma.financialEvent.findMany({
-      where: { lang: locale }
-    }),
     prisma.mood.findMany({
       where: { userId: userId }
     })
@@ -173,7 +184,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   return {
     userData: core.userData,
     subscription: core.subscription,
-    tickDetails: core.tickDetails,
+    tickDetails,
     tags,
     accounts,
     groups,

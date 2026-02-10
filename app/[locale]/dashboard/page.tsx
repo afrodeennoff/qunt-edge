@@ -28,7 +28,10 @@ export default function Home() {
       <Tabs value={activeTab} className="w-full h-full relative z-10">
 
 
-        <TabsContent value="table" className="mt-0 h-[calc(100vh-112px)] rounded-3xl border border-border/60 bg-card/75 p-3 shadow-sm backdrop-blur-sm sm:p-4">
+        <TabsContent
+          value="table"
+          className="mt-0 h-[calc(100vh-140px)] sm:h-[calc(100vh-148px)] lg:h-[calc(100vh-160px)] rounded-3xl border border-border/60 bg-card/75 p-2 sm:p-3 shadow-sm backdrop-blur-sm"
+        >
           <div className="h-full w-full overflow-hidden rounded-2xl border border-border/70 bg-background/70">
             <TradeTableReview />
           </div>

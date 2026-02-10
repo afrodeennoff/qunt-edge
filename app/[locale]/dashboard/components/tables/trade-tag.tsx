@@ -19,7 +19,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Tag, Trade } from '@/prisma/generated/prisma'
+import { Tag } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
 import { useUserStore } from '@/store/user-store'
 import { createTagAction } from '@/server/tags'
 
@@ -57,9 +58,11 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
           description: '',
           color: '#CBD5E1'
         })
-        setTags([...tags, newTag.tag])
+        if (newTag?.tag) {
+          setTags([...tags, newTag.tag])
+        }
       }
-      
+
       setInputValue('')
       setIsOpen(false)
     } catch (error) {
@@ -77,7 +80,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
       }
       // Update all trades in the list
       await updateTrades(tradeIds, update)
-      
+
       // Update tag filter if the removed tag was selected
       if (tagFilter.tags.includes(tagToRemove)) {
         setTagFilter(prev => ({
@@ -97,10 +100,10 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
         {trade.tags.map((tag, index) => {
           const metadata = tags.find(t => t.name.toLowerCase() === tag.toLowerCase())
           return (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="rounded-md px-2 py-1 text-xs flex items-center gap-1 break-words whitespace-normal h-auto max-w-[150px]"
-              style={{ 
+              style={{
                 backgroundColor: metadata?.color || '#CBD5E1',
                 color: metadata?.color ? getContrastColor(metadata.color) : 'inherit'
               }}
@@ -120,14 +123,14 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
           )
         })}
       </div>
-      <Popover 
-        open={isOpen} 
+      <Popover
+        open={isOpen}
         onOpenChange={setIsOpen}
       >
         <PopoverTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="h-6 w-6 p-0"
             disabled={isUpdating}
           >
@@ -136,7 +139,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
         </PopoverTrigger>
         <PopoverContent className="p-0" side="right" align="start">
           <Command shouldFilter={false}>
-            <CommandInput 
+            <CommandInput
               placeholder={t('trade-table.searchTags')}
               value={inputValue}
               onValueChange={setInputValue}
@@ -179,7 +182,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
                         }}
                       >
                         <div className="flex items-center gap-2">
-                          <div 
+                          <div
                             className="w-3 h-3 rounded-full shrink-0"
                             style={{ backgroundColor: tag.color || '#CBD5E1' }}
                           />
@@ -212,15 +215,15 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
 function getContrastColor(hexColor: string): string {
   // Remove the hash if it exists
   const color = hexColor.replace('#', '')
-  
+
   // Convert hex to RGB
   const r = parseInt(color.substr(0, 2), 16)
   const g = parseInt(color.substr(2, 2), 16)
   const b = parseInt(color.substr(4, 2), 16)
-  
+
   // Calculate luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  
+
   // Return black or white based on luminance
   return luminance > 0.5 ? '#000000' : '#FFFFFF'
-} 
+}

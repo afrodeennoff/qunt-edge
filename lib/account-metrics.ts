@@ -1,7 +1,7 @@
 // Shared, environment-agnostic account metrics utilities
 // These functions can be used on both server and client for consistent results.
-import { Trade as PrismaTrade, Prisma } from '@/prisma/generated/prisma'
-import type { Account } from '@/context/data-provider'
+import { Prisma } from '@/prisma/generated/prisma'
+import type { Account, Trade } from '@/lib/data-types'
 import Decimal from 'decimal.js'
 
 export type AccountMetrics = {
@@ -53,8 +53,8 @@ function toDate(d: string | Date | null | undefined): Date | null {
 
 export function computeAccountMetrics(
   account: Account,
-  allTrades: PrismaTrade[]
-): { balanceToDate: number; metrics: NonNullable<Account['metrics']>; dailyMetrics: NonNullable<Account['dailyMetrics']>; trades: PrismaTrade[]; aboveBuffer: number } {
+  allTrades: Trade[]
+): { balanceToDate: number; metrics: NonNullable<Account['metrics']>; dailyMetrics: NonNullable<Account['dailyMetrics']>; trades: Trade[]; aboveBuffer: number } {
   const resetDate = toDate(account.resetDate)
   const relevantTrades = allTrades.filter(t => {
     if (t.accountNumber !== account.number) return false
@@ -79,7 +79,7 @@ export function computeAccountMetrics(
       .sort((a, b) => a.date.getTime() - b.date.getTime())
 
     type Event =
-      | { kind: 'trade'; date: Date; pnl: number; trade: PrismaTrade }
+      | { kind: 'trade'; date: Date; pnl: number; trade: Trade }
       | { kind: 'payout'; date: Date; amount: number }
 
     const tradeEvents: Event[] = sortedTrades.map(tr => ({
@@ -97,7 +97,7 @@ export function computeAccountMetrics(
       (a, b) => a.date.getTime() - b.date.getTime()
     )
 
-    const out: PrismaTrade[] = []
+    const out: Trade[] = []
     let accProfit = new Prisma.Decimal(0) // accumulated profit since last baseline
     const threshold = new Prisma.Decimal(account.buffer || 0)
 
@@ -176,7 +176,7 @@ export function computeAccountMetrics(
   const remainingToTarget = pt.gt(0) ? Decimal.max(0, pt.minus(currentProfit)).toNumber() : 0
 
   // Trading days metrics
-  const dailyTrades: { [date: string]: PrismaTrade[] } = {}
+  const dailyTrades: { [date: string]: Trade[] } = {}
   for (const trade of filteredTrades) {
     const key = toDate(trade.entryDate)!.toISOString().split('T')[0]
     if (!dailyTrades[key]) dailyTrades[key] = []
@@ -253,7 +253,7 @@ export function computeAccountMetrics(
 
 export function computeMetricsForAccounts(
   accounts: Account[],
-  trades: PrismaTrade[]
+  trades: Trade[]
 ): Account[] {
   return accounts.map(acc => {
     const computed = computeAccountMetrics(acc, trades)

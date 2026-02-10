@@ -147,9 +147,12 @@ export function DashboardSidebar() {
     'Australia/Sydney',
   ]
 
-  const handleLogout = () => {
-    localStorage.removeItem('qunt_edge_user_data')
-    window.location.href = '/authentication'
+  const resetUser = useUserStore(state => state.resetUser)
+
+  const handleLogout = async () => {
+    resetUser()
+    const { signOut } = await import("@/server/auth")
+    await signOut()
   }
 
   return (

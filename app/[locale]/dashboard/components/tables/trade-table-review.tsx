@@ -27,7 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Trade } from "@/prisma/generated/prisma";
+import { Trade } from "@/lib/data-types";
 import {
   Popover,
   PopoverContent,
@@ -734,9 +734,9 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                   </PopoverContent>
                 </Popover>
               </div>
-              {trade.trades.length > 0 && (
+              {(trade.trades?.length ?? 0) > 0 && (
                 <span className="text-xs text-muted-foreground">
-                  ({trade.trades.length})
+                  ({trade.trades?.length})
                 </span>
               )}
             </div>
@@ -779,8 +779,8 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
 
           return (
@@ -894,13 +894,13 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
 
           return (
             <EditableTimeCell
-              value={new Date(trade.entryDate).toISOString()}
+              value={trade.entryDate ? new Date(trade.entryDate).toISOString() : new Date().toISOString()}
               tradeIds={tradeIds}
               fieldType="entryDate"
               onUpdate={updateTrades}
@@ -921,13 +921,13 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
 
           return (
             <EditableTimeCell
-              value={new Date(trade.closeDate).toISOString()}
+              value={trade.closeDate ? new Date(trade.closeDate).toISOString() : new Date().toISOString()}
               tradeIds={tradeIds}
               fieldType="closeDate"
               onUpdate={updateTrades}
@@ -973,7 +973,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           const commission = row.original.commission;
           return (
             <div className="text-right font-medium">
-              ${commission.toFixed(2)}
+              ${(commission ?? 0).toFixed(2)}
             </div>
           );
         },
@@ -1063,8 +1063,8 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
           return (
             <div className="flex gap-2">
@@ -1081,8 +1081,8 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
           return (
             <div className="min-w-[200px]">
@@ -1104,8 +1104,8 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
           return (
             <div className="min-w-[200px]">
@@ -1134,8 +1134,8 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         cell: ({ row }) => {
           const trade = row.original;
           const tradeIds =
-            trade.trades.length > 0
-              ? trade.trades.map((t) => t.id)
+            (trade.trades?.length ?? 0) > 0
+              ? trade.trades!.map((t) => t.id)
               : [trade.id];
           return (
             <div className="min-w-[200px]">

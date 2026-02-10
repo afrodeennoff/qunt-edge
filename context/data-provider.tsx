@@ -16,6 +16,10 @@ import {
   Subscription as PrismaSubscription,
   Tag,
   Prisma,
+  User as PrismaUser,
+  FinancialEvent,
+  Mood,
+  TickDetails,
 } from "@/prisma/generated/prisma";
 import { SharedParams } from "@/server/shared";
 import {
@@ -49,18 +53,14 @@ import {
   renameGroupAction,
 } from "@/server/groups";
 import { createClient } from "@/lib/supabase";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 import { signOut, getUserId, updateUserLanguage } from "@/server/auth";
 import { DashboardLayoutWithWidgets, useUserStore } from "@/store/user-store";
 import { useTickDetailsStore } from "@/store/tick-details-store";
 import { useFinancialEventsStore } from "@/store/financial-events-store";
 import { useTradesStore } from "@/store/trades-store";
-import { getTradesCache, setTradesCache } from "@/lib/indexeddb/trades-cache";
-import { generateMockTrades } from "@/lib/mock-trades";
-import { endOfDay, isValid, set, startOfDay } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
-import { calculateStatistics, formatCalendarData } from "@/lib/utils";
-import { useParams } from "next/navigation";
+import { getTradesCache, setTradesCache, getUserDataCache, setUserDataCache } from "@/lib/indexeddb/trades-cache"
 import { deleteTagAction } from "@/server/tags";
 import { useRouter } from "next/navigation";
 import { useCurrentLocale } from "@/locales/client";
@@ -71,173 +71,35 @@ import { defaultLayouts } from "@/lib/default-layouts";
 import Decimal from "decimal.js";
 import { decimalToNumber } from "@/lib/trade-types";
 
-// Types from trades-data.tsx
-type StatisticsProps = {
-  cumulativeFees: number;
-  cumulativePnl: number;
-  winningStreak: number;
-  winRate: number;
-  nbTrades: number;
-  nbBe: number;
-  nbWin: number;
-  nbLoss: number;
-  totalPositionTime: number;
-  averagePositionTime: string;
-  profitFactor: number;
-  grossLosses: number;
-  grossWin: number;
-  totalPayouts: number;
-  nbPayouts: number;
-};
+import {
+  generateMockTrades
+} from "@/lib/mock-trades";
+import { isValid, startOfDay, endOfDay } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+import { calculateStatistics, formatCalendarData, cn, groupBy, calculateTradingDays } from "@/lib/utils";
+import { useParams } from "next/navigation";
 
-type CalendarData = {
-  [date: string]: {
-    pnl: number;
-    tradeNumber: number;
-    longNumber: number;
-    shortNumber: number;
-    trades: PrismaTrade[];
-  };
-};
-
-interface DateRange {
-  from?: Date;
-  to?: Date;
-}
-
-interface TickRange {
-  min: number | undefined;
-  max: number | undefined;
-}
-
-interface PnlRange {
-  min: number | undefined;
-  max: number | undefined;
-}
-
-// Add new interface for time range
-interface TimeRange {
-  range: string | null;
-}
-
-// Add new interface for tick filter
-interface TickFilter {
-  value: string | null;
-}
-
-// Update WeekdayFilter interface to use array of numbers
-interface WeekdayFilter {
-  days: number[];
-}
-
-// Add new interface for hour filter
-interface HourFilter {
-  hour: number | null;
-}
-
-// Add tag filter interface
-interface TagFilter {
-  tags: string[];
-}
-
-export interface Group extends PrismaGroup {
-  accounts: Account[];
-}
-
-type AccountDecimalFields =
-  | "startingBalance"
-  | "balanceRequired"
-  | "drawdownThreshold"
-  | "dailyLoss"
-  | "profitTarget"
-  | "buffer"
-  | "trailingStopProfit"
-  | "minPayout"
-  | "profitSharing"
-  | "payoutBonus"
-  | "consistencyPercentage"
-  | "minPnlToCountAsDay"
-  | "activationFees"
-  | "price"
-  | "priceWithPromo"
-  | "promoPercentage";
-
-type AccountPayout = Omit<PrismaPayout, "amount"> & {
-  amount: number;
-};
-
-type AccountBase = Omit<PrismaAccount, AccountDecimalFields | "group"> & {
-  startingBalance: number;
-  balanceRequired: number | null;
-  drawdownThreshold: number;
-  dailyLoss: number;
-  profitTarget: number;
-  buffer: number;
-  trailingStopProfit: number | null;
-  minPayout: number | null;
-  profitSharing: number | null;
-  payoutBonus: number | null;
-  consistencyPercentage: number | null;
-  minPnlToCountAsDay: number | null;
-  activationFees: number | null;
-  price: number | null;
-  priceWithPromo: number | null;
-  promoPercentage: number | null;
-};
-
-// Client account model keeps decimal-like DB fields normalized to numbers.
-export interface Account extends AccountBase {
-  payouts?: AccountPayout[];
-  balanceToDate?: number;
-  group?: PrismaGroup | null;
-  aboveBuffer?: number;
-  // Filtered trades used for metrics/charts (not to be sent to server actions)
-  trades?: PrismaTrade[];
-
-  // Computed metrics
-  metrics?: {
-    // Balance and progress
-    currentBalance: number;
-    remainingToTarget: number;
-    progress: number;
-    isConfigured: boolean;
-
-    // Drawdown metrics
-    drawdownProgress: number;
-    remainingLoss: number;
-    highestBalance: number;
-    drawdownLevel: number;
-
-    // Consistency metrics
-    totalProfit: number;
-    maxAllowedDailyProfit: number | null;
-    highestProfitDay: number;
-    isConsistent: boolean;
-    hasProfitableData: boolean;
-    dailyPnL: { [key: string]: number };
-    totalProfitableDays: number;
-
-    // Trading days metrics
-    totalTradingDays: number;
-    validTradingDays: number;
-  };
-
-  // Daily metrics for account table
-  dailyMetrics?: Array<{
-    date: Date;
-    pnl: number;
-    totalBalance: number;
-    percentageOfTarget: number;
-    isConsistent: boolean;
-    payout?: {
-      id: string;
-      amount: number;
-      date: Date;
-      status: string;
-    };
-  }>;
-}
-
+import {
+  StatisticsProps,
+  CalendarData,
+  DateRange,
+  TickRange,
+  PnlRange,
+  TimeRange,
+  TickFilter,
+  WeekdayFilter,
+  HourFilter,
+  TagFilter,
+  Group,
+  AccountDecimalFields,
+  AccountPayout,
+  AccountBase,
+  Account,
+  AccountInput,
+  GroupInput,
+  Trade,
+  TradeInput,
+} from "@/lib/data-types";
 
 // Combined Context Type
 interface DataContextType {
@@ -256,7 +118,7 @@ interface DataContextType {
   setSharedParams: React.Dispatch<React.SetStateAction<SharedParams | null>>;
 
   // Formatted trades and filters
-  formattedTrades: PrismaTrade[];
+  formattedTrades: Trade[];
   instruments: string[];
   setInstruments: React.Dispatch<React.SetStateAction<string[]>>;
   accountNumbers: string[];
@@ -287,7 +149,7 @@ interface DataContextType {
   // Trades
   updateTrades: (
     tradeIds: string[],
-    update: Partial<PrismaTrade>
+    update: Partial<Trade>
   ) => Promise<void>;
   deleteTrades: (tradeIds: string[]) => Promise<void>;
   groupTrades: (tradeIds: string[]) => Promise<void>;
@@ -311,35 +173,31 @@ interface DataContextType {
   ) => Promise<void>;
 
   // Payouts
-  savePayout: (payout: PrismaPayout) => Promise<void>;
+  savePayout: (payout: PrismaPayout | AccountPayout) => Promise<void>;
   deletePayout: (payoutId: string) => Promise<void>;
 
   // Dashboard layout
   saveDashboardLayout: (layout: PrismaDashboardLayout) => Promise<void>;
 }
 
-function normalizeTradeForClient(trade: PrismaTrade | SerializedTrade): PrismaTrade {
-  if ('entryDate' in trade && typeof trade.entryDate === 'string') {
-    return {
-      ...(trade as any),
-      entryPrice: new Prisma.Decimal((trade as SerializedTrade).entryPrice),
-      closePrice: new Prisma.Decimal((trade as SerializedTrade).closePrice),
-      pnl: new Prisma.Decimal((trade as SerializedTrade).pnl),
-      commission: new Prisma.Decimal((trade as SerializedTrade).commission),
-      quantity: new Prisma.Decimal((trade as SerializedTrade).quantity),
-      timeInPosition: new Prisma.Decimal((trade as SerializedTrade).timeInPosition),
-      entryDate: new Date((trade as SerializedTrade).entryDate),
-      closeDate: (trade as SerializedTrade).closeDate ? new Date((trade as SerializedTrade).closeDate!) : null,
-      tags: Array.isArray(trade.tags) ? trade.tags : [],
-    } as PrismaTrade;
-  }
+function normalizeTradeForClient(trade: TradeInput | SerializedTrade): Trade {
+  const raw = trade as any;
   return {
-    ...trade,
-    tags: Array.isArray(trade.tags) ? trade.tags : [],
-  } as PrismaTrade;
+    ...raw,
+    entryPrice: decimalToNumber(raw.entryPrice),
+    closePrice: decimalToNumber(raw.closePrice, null),
+    pnl: decimalToNumber(raw.pnl),
+    commission: decimalToNumber(raw.commission, null),
+    quantity: decimalToNumber(raw.quantity),
+    timeInPosition: decimalToNumber(raw.timeInPosition, null),
+    entryDate: raw.entryDate instanceof Date ? raw.entryDate : new Date(raw.entryDate),
+    closeDate: raw.closeDate ? (raw.closeDate instanceof Date ? raw.closeDate : new Date(raw.closeDate)) : null,
+    tags: Array.isArray(raw.tags) ? raw.tags : [],
+    trades: Array.isArray(raw.trades) ? raw.trades.map(normalizeTradeForClient) : [],
+  } as Trade;
 }
 
-function normalizeTradesForClient(trades: (PrismaTrade | SerializedTrade)[]): PrismaTrade[] {
+function normalizeTradesForClient(trades: (TradeInput | SerializedTrade)[]): Trade[] {
   return trades.map(normalizeTradeForClient);
 }
 
@@ -350,20 +208,6 @@ function normalizePayoutForClient(
     ...payout,
     amount: decimalToNumber(payout.amount),
   }
-}
-
-type AccountInput = (Account | PrismaAccount) & {
-  payouts?: (PrismaPayout | AccountPayout)[]
-  dailyMetrics?: Account["dailyMetrics"]
-  metrics?: Account["metrics"]
-  balanceToDate?: number
-  aboveBuffer?: number
-  trades?: PrismaTrade[]
-  group?: PrismaGroup | null
-}
-
-type GroupInput = (Group | PrismaGroup) & {
-  accounts: AccountInput[]
 }
 
 function normalizeAccountForClient(account: AccountInput): Account {
@@ -429,9 +273,9 @@ function normalizeAccountForClient(account: AccountInput): Account {
       percentageOfTarget: decimalToNumber(metric.percentageOfTarget),
       payout: metric.payout
         ? {
-            ...metric.payout,
-            amount: decimalToNumber(metric.payout.amount),
-          }
+          ...metric.payout,
+          amount: decimalToNumber(metric.payout.amount),
+        }
         : undefined,
     })),
   } as Account
@@ -551,8 +395,8 @@ export const DataProvider: React.FC<{
   const [isFirstConnection, setIsFirstConnection] = useState(false);
 
   const fetchAllTrades = useCallback(
-    async (userId: string | null = null, force: boolean = false): Promise<PrismaTrade[]> => {
-      const allTrades: PrismaTrade[] = [];
+    async (userId: string | null = null, force: boolean = false): Promise<Trade[]> => {
+      const allTrades: Trade[] = [];
       let page = 1;
       let hasMore = true;
       const pageSize = 500;
@@ -566,12 +410,6 @@ export const DataProvider: React.FC<{
         allTrades.push(...pageTrades);
         hasMore = Boolean(response?.metadata?.hasMore) && pageTrades.length > 0;
         page += 1;
-
-        // Guard against a bad pagination loop.
-        if (page > 200) {
-          console.warn("[DataProvider] Stopped trade pagination after 200 pages");
-          break;
-        }
       }
 
       return allTrades;
@@ -636,8 +474,8 @@ export const DataProvider: React.FC<{
       }
 
       if (adminView) {
-        const allTrades = await fetchAllTrades(adminView.userId as string, false);
-        setTrades(normalizeTradesForClient(allTrades as (PrismaTrade | SerializedTrade)[]));
+        const adminTrades = await fetchAllTrades(adminView.userId as string, false);
+        setTrades(adminTrades);
         // RESET ALL OTHER STATES
         setUser(null);
         setSubscription(null);
@@ -688,38 +526,53 @@ export const DataProvider: React.FC<{
       }
 
       // Step 2: Fetch trades (with caching server side)
-      // I think we could make basic computations server side to offload inital stats computations
-      // Dev: prefer local IndexedDB to avoid hitting remote DB on reloads
       const userId = await getUserId();
-      if (
-        process.env.NODE_ENV === "development" &&
-        userId &&
-        !params?.isSharedView // avoid caching shared/public views
-      ) {
+      if (userId && !isSharedView) {
+        // Try local cache first
         const cachedTrades = await getTradesCache(userId);
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-          setTrades(normalizeTradesForClient(cachedTrades as PrismaTrade[]));
+          console.log("[DataProvider] Using local IndexedDB cache for trades");
+          setTrades(cachedTrades as Trade[]);
+
+          // Refresh in background if not in dev or if we want freshest data
+          fetchAllTrades(userId, false).then(freshTrades => {
+            if (freshTrades && freshTrades.length > 0) {
+              setTrades(freshTrades);
+              setTradesCache(userId, freshTrades).catch(console.error);
+            }
+          }).catch(console.error);
         } else {
           const safeTrades = await fetchAllTrades(userId, false);
-          const tradesToUse =
-            safeTrades.length > 0 ? safeTrades : generateMockTrades(userId);
-          setTrades(normalizeTradesForClient(tradesToUse));
-          setTradesCache(userId, tradesToUse).catch((err) =>
-            console.error("[DataProvider] Failed to cache trades in IndexedDB (loadData)", err),
-          );
+          const tradesToUse = safeTrades.length > 0 ? safeTrades : (process.env.NODE_ENV === "development" ? generateMockTrades(userId) : []);
+          setTrades(tradesToUse);
+          if (tradesToUse.length > 0) {
+            setTradesCache(userId, tradesToUse).catch(console.error);
+          }
         }
       } else {
-        const userId = await getUserId();
         const safeTrades = await fetchAllTrades(null, false);
-        const tradesToUse =
-          process.env.NODE_ENV === "development" && userId && safeTrades.length === 0
-            ? generateMockTrades(userId)
-            : safeTrades;
-        setTrades(normalizeTradesForClient(tradesToUse));
+        setTrades(safeTrades);
       }
 
       // Step 3: Fetch user data
-      // TODO: Check what we could cache client side
+      // Check local cache for user data
+      if (userId && !isSharedView) {
+        const cachedUserData = await getUserDataCache(userId);
+        if (cachedUserData) {
+          console.log("[DataProvider] Using local IndexedDB cache for user data");
+          // Apply cached data immediately
+          const normalizedAccounts = normalizeAccountsForClient(cachedUserData.accounts);
+          setAccounts(normalizedAccounts);
+          setUser(cachedUserData.userData);
+          setSubscription(cachedUserData.subscription as PrismaSubscription | null);
+          setTags(cachedUserData.tags);
+          setGroups(normalizeGroupsForClient(cachedUserData.groups));
+          setMoods(cachedUserData.moodHistory);
+          setEvents(cachedUserData.financialEvents);
+          setTickDetails(cachedUserData.tickDetails);
+        }
+      }
+
       const data = await getUserData();
 
       if (!data) {
@@ -745,6 +598,20 @@ export const DataProvider: React.FC<{
       setEvents(data.financialEvents);
       setTickDetails(data.tickDetails);
       setIsFirstConnection(data.userData?.isFirstConnection || false);
+
+      // Save to local cache in background
+      if (userId && !isSharedView) {
+        setUserDataCache(userId, {
+          userData: data.userData,
+          subscription: data.subscription as PrismaSubscription | null,
+          tickDetails: data.tickDetails,
+          tags: data.tags,
+          accounts: normalizeAccountsForClient((data.accounts || []) as AccountInput[]),
+          groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
+          financialEvents: data.financialEvents,
+          moodHistory: data.moodHistory
+        }).catch(console.error);
+      }
     } catch (error) {
       console.error("Error loading data:", error);
       // Optionally handle specific error cases here
@@ -839,7 +706,7 @@ export const DataProvider: React.FC<{
         if (process.env.NODE_ENV === "development" && !force) {
           const cachedTrades = await getTradesCache(userId);
           if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-            setTrades(normalizeTradesForClient(cachedTrades as PrismaTrade[]));
+            setTrades(cachedTrades);
             if (withLoading) setIsLoading(false);
             return;
           }
@@ -850,7 +717,7 @@ export const DataProvider: React.FC<{
           process.env.NODE_ENV === "development" && safeTrades.length === 0
             ? generateMockTrades(userId)
             : safeTrades;
-        setTrades(normalizeTradesForClient(tradesToUse));
+        setTrades(tradesToUse);
 
         if (process.env.NODE_ENV === "development") {
           // Best-effort cache write; do not block UI on failure
@@ -1158,13 +1025,13 @@ export const DataProvider: React.FC<{
 
     // Calculate gross profits and gross losses including commissions
     const grossProfits = formattedTrades.reduce((sum, trade) => {
-      const totalPnL = new Decimal(trade.pnl).toNumber() - new Decimal(trade.commission).toNumber();
+      const totalPnL = (trade.pnl || 0) - (trade.commission || 0);
       return totalPnL > 0 ? sum + totalPnL : sum;
     }, 0);
 
     const grossLosses = Math.abs(
       formattedTrades.reduce((sum, trade) => {
-        const totalPnL = new Decimal(trade.pnl).toNumber() - new Decimal(trade.commission).toNumber();
+        const totalPnL = (trade.pnl || 0) - (trade.commission || 0);
         return totalPnL < 0 ? sum + totalPnL : sum;
       }, 0)
     );
@@ -1307,7 +1174,7 @@ export const DataProvider: React.FC<{
                 // If this is the new target group, add the account only if it's not already there
                 if (group.id === newGroupId) {
                   const accountExists = group.accounts.some(
-                    (acc) =>
+                    (acc: Account) =>
                       acc.id === accountWithMetrics.id ||
                       acc.number === accountWithMetrics.number
                   );
@@ -1322,7 +1189,7 @@ export const DataProvider: React.FC<{
                 return {
                   ...group,
                   accounts: group.accounts.filter(
-                    (acc) =>
+                    (acc: Account) =>
                       acc.id !== accountWithMetrics.id &&
                       acc.number !== accountWithMetrics.number
                   ),
@@ -1343,7 +1210,7 @@ export const DataProvider: React.FC<{
                 const updatedGroups = currentGroups.map((group) => ({
                   ...group,
                   accounts: group.accounts.filter(
-                    (acc) =>
+                    (acc: Account) =>
                       acc.id !== accountWithMetrics.id &&
                       acc.number !== accountWithMetrics.number
                   ),
@@ -1366,7 +1233,7 @@ export const DataProvider: React.FC<{
                 const updatedGroups = currentGroups.map((group) => ({
                   ...group,
                   accounts: group.accounts.filter(
-                    (acc) =>
+                    (acc: Account) =>
                       acc.id !== accountWithMetrics.id &&
                       acc.number !== accountWithMetrics.number
                   ),
@@ -1389,7 +1256,7 @@ export const DataProvider: React.FC<{
               const updatedGroups = currentGroups.map((group) => ({
                 ...group,
                 accounts: group.accounts.filter(
-                  (acc) =>
+                  (acc: Account) =>
                     acc.id !== accountWithMetrics.id &&
                     acc.number !== accountWithMetrics.number
                 ),
@@ -1403,7 +1270,7 @@ export const DataProvider: React.FC<{
               currentGroups.map((group) => ({
                 ...group,
                 accounts: group.accounts.filter(
-                  (acc) =>
+                  (acc: Account) =>
                     acc.id !== accountWithMetrics.id &&
                     acc.number !== accountWithMetrics.number
                 ),
@@ -1425,7 +1292,8 @@ export const DataProvider: React.FC<{
       if (!supabaseUser?.id) return;
       try {
         const newGroup = await saveGroupAction(name);
-        const normalizedNewGroup = normalizeGroupsForClient([newGroup as GroupInput])[0];
+        // Explicitly include accounts in the input if needed, though group action returns them.
+        const normalizedNewGroup = normalizeGroupsForClient([newGroup as GroupInput])[0] as Group;
         setGroups([...groups, normalizedNewGroup]);
         return normalizedNewGroup;
       } catch (error) {
@@ -1473,7 +1341,7 @@ export const DataProvider: React.FC<{
         throw error;
       }
     },
-    [accounts, setAccounts]
+    [accounts, setAccounts, groups, setGroups]
   );
 
   // Add moveAccountToGroup function
@@ -1554,7 +1422,7 @@ export const DataProvider: React.FC<{
         throw error;
       }
     },
-    [setAccounts, setGroups]
+    [setAccounts, setGroups, saveGroup]
   );
 
   const moveAccountsToGroup = useCallback(
@@ -1614,13 +1482,13 @@ export const DataProvider: React.FC<{
   );
 
   // Add savePayout function
-  const savePayout = useCallback(
-    async (payout: PrismaPayout) => {
+  const savePayoutFallback = useCallback(
+    async (payout: PrismaPayout | AccountPayout) => {
       if (!supabaseUser?.id || isSharedView) return;
 
       try {
         // Add to database
-        const newPayout = await savePayoutAction(payout);
+        const newPayout = await savePayoutAction(payout as any);
         const normalizedPayout = normalizePayoutForClient(newPayout);
 
         // Update the account with the new/updated payout
@@ -1702,7 +1570,7 @@ export const DataProvider: React.FC<{
 
       try {
         // Find the account that has this payout
-        const affectedAccount = accounts.find((account) =>
+        const affectedAccount = accounts.find((account: Account) =>
           account.payouts?.some((p) => p.id === payoutId)
         );
 
@@ -1757,8 +1625,8 @@ export const DataProvider: React.FC<{
     [supabaseUser?.id, setIsFirstConnection]
   );
 
-  const updateTrades = useCallback(
-    async (tradeIds: string[], update: Partial<PrismaTrade>) => {
+  const updateTradesFallback = useCallback(
+    async (tradeIds: string[], update: Partial<NormalizedTrade>) => {
       if (!supabaseUser?.id) return;
       const updatedTrades = trades.map((trade) =>
         tradeIds.includes(trade.id)

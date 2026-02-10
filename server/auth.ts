@@ -109,7 +109,7 @@ export async function signInWithDiscord(next: string | null = null, locale?: str
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: `${websiteURL}api/auth/callback/${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
+      redirectTo: `${websiteURL}api/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
     },
   })
   if (data.url) {
@@ -129,7 +129,7 @@ export async function signInWithGoogle(next: string | null = null, locale?: stri
       queryParams: {
         prompt: 'select_account',
       },
-      redirectTo: `${websiteURL}api/auth/callback/${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
+      redirectTo: `${websiteURL}api/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
     },
   })
   if (data.url) {
@@ -153,7 +153,7 @@ export async function signInWithEmail(email: string, next: string | null = null,
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
-        emailRedirectTo: `${websiteURL}api/auth/callback/${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
+        emailRedirectTo: `${websiteURL}api/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
       },
     })
     if (error) {
@@ -193,7 +193,7 @@ export async function signInWithPasswordAction(
           email,
           password,
           options: {
-            emailRedirectTo: `${websiteURL}api/auth/callback/${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
+            emailRedirectTo: `${websiteURL}api/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
           },
         })
 
@@ -321,7 +321,7 @@ export async function signUpWithPasswordAction(
       email,
       password,
       options: {
-        emailRedirectTo: `${websiteURL}api/auth/callback/${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
+        emailRedirectTo: `${websiteURL}api/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
       },
     })
     if (error) {

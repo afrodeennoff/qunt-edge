@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { Tag } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
 import { Label } from '@/components/ui/label'
 import { Trash2, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -39,11 +41,11 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
     try {
       // Update local state immediately
       const newComment = localComment || null
-      
+
       // Update all trades in the list
       await updateTrades(tradeIds, { comment: newComment })
 
-      
+
       setShowSuccess(true)
       setTimeout(() => {
         setShowSuccess(false)
@@ -63,10 +65,10 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
     try {
       // Update local state immediately
       setLocalComment('')
-      
+
       // Update all trades in the list
       await updateTrades(tradeIds, { comment: null })
-      
+
       setShowSuccess(true)
       setTimeout(() => {
         setShowSuccess(false)
@@ -85,8 +87,8 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className={cn(
                 "h-8 w-full justify-start px-2 gap-2 truncate",
                 !localComment && "text-muted-foreground font-normal"

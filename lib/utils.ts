@@ -1,11 +1,10 @@
-import type { Trade } from "@/prisma/generated/prisma"
+import type { Trade } from "@/lib/data-types"
 import Decimal from "decimal.js"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns"
 import { formatInTimeZone } from 'date-fns-tz'
-import { StatisticsProps } from "@/app/[locale]/dashboard/types/statistics"
-import type { Account } from "@/context/data-provider"
+import { StatisticsProps, Account } from "@/lib/data-types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -153,7 +152,7 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
 
     const isLong = trade.side
       ? (trade.side.toLowerCase() === 'long' || trade.side.toLowerCase() === 'buy' || trade.side.toLowerCase() === 'b')
-      : (trade.entryDate.getTime() < trade.closeDate.getTime())
+      : (trade.entryDate.getTime() < (trade.closeDate?.getTime() ?? 0))
 
     acc[date].longNumber += isLong ? 1 : 0
     acc[date].shortNumber += isLong ? 0 : 1

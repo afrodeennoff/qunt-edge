@@ -104,7 +104,7 @@ async function updateSession(request: NextRequest) {
   return { response, user, error }
 }
 
-export default async function proxy(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
 
   // More specific static asset exclusions - must be first!
@@ -165,14 +165,14 @@ export default async function proxy(req: NextRequest) {
     response.headers.set(
       "Content-Security-Policy",
       `frame-ancestors ${allowedOrigins}; ` +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
-        "style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data: blob:; " +
-        "connect-src 'self' https://vercel.live; " +
-        "font-src 'self' data:; " +
-        "object-src 'none'; " +
-        "base-uri 'self'; " +
-        "form-action 'self';",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: blob:; " +
+      "connect-src 'self' https://vercel.live; " +
+      "font-src 'self' data:; " +
+      "object-src 'none'; " +
+      "base-uri 'self'; " +
+      "form-action 'self';",
     )
 
     return response

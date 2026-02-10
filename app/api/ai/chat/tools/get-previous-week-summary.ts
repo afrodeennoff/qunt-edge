@@ -2,7 +2,7 @@ import { groupBy } from "@/lib/utils";
 import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalization";
 import { getTradesAction } from "@/server/database";
 import { tool } from "ai";
-import { z } from 'zod/v3';
+import { z } from 'zod';
 import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
 
 interface TradeSummary {
