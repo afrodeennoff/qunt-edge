@@ -259,6 +259,11 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
+            // Mock navigator if not defined
+            if (typeof navigator === 'undefined') {
+                global.navigator = { onLine: true } as any
+            }
+
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
                 value: false,
