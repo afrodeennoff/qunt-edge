@@ -41,74 +41,71 @@ export default function Footer() {
   ].filter((item) => item.href)
 
   return (
-    <footer aria-labelledby="footer-heading" className="relative mt-20 border-t border-border/60 bg-background">
+    <footer aria-labelledby="footer-heading" className="relative mt-20 px-4 pb-12 sm:px-6 sm:pb-16">
       <h2 id="footer-heading" className="sr-only">{t('footer.heading')}</h2>
 
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute left-1/2 top-0 h-px w-[min(92%,1000px)] -translate-x-1/2 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-        <div className="absolute left-1/2 top-0 h-60 w-[min(80vw,700px)] -translate-x-1/2 rounded-full bg-primary/10 blur-[100px]" />
-      </div>
-
-      <div className="container-fluid relative py-10 sm:py-14">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="rounded-3xl border border-border/60 bg-card/70 p-6 sm:p-8 lg:p-10"
-        >
-          <div className="grid gap-8 lg:grid-cols-[1.25fr_1.75fr] lg:gap-12">
-            <div className="space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/10">
-                  <Logo className="h-5 w-5 fill-foreground" />
-                </div>
-                <div className="flex flex-col leading-none">
-                  <span className="text-base font-black tracking-tight">Qunt Edge</span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Trading Intelligence</span>
-                </div>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+        className="mx-auto w-full max-w-[1240px] rounded-[30px] border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface)/0.74)] p-6 shadow-[0_28px_60px_-40px_hsl(var(--brand-ink)/0.8)] sm:p-8 lg:p-10"
+      >
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_1.8fr]">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.33)] bg-[hsl(var(--mk-surface-muted)/0.84)]">
+                <Logo className="h-5 w-5 fill-[hsl(var(--mk-text))]" />
               </div>
-
-              <p className="max-w-md text-sm leading-relaxed text-muted-foreground">{t('footer.description')}</p>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <Link href="/authentication" className="rounded-xl border border-border/70 px-4 py-2 text-[11px] font-semibold transition-colors hover:bg-muted/70">
-                  Sign In
-                </Link>
-                <Link href="/support" className="rounded-xl bg-primary px-4 py-2 text-[11px] font-semibold text-primary-foreground transition-opacity hover:opacity-90">
-                  Contact Support
-                </Link>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {socialLinks.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={item.name}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary"
-                  >
-                    <item.icon className="h-4 w-4" />
-                  </a>
-                ))}
+              <div className="leading-none">
+                <div className="text-base font-semibold tracking-tight [font-family:var(--font-poppins)]">Qunt Edge</div>
+                <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Trading Intelligence</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10">
-              <FooterColumn title="Product" links={PRODUCT_LINKS} />
-              <FooterColumn title="Support" links={SUPPORT_LINKS} />
-              <FooterColumn title="Legal" links={LEGAL_LINKS} />
+            <p className="max-w-md text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">{t('footer.description')}</p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/authentication" className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
+                Sign In
+              </Link>
+              <Link href="/support" className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
+                Contact Support
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {socialLinks.map((item, idx) => (
+                <motion.a
+                  key={item.name}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={item.name}
+                  initial={{ opacity: 0, y: 8 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 + idx * 0.05, duration: 0.4 }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] text-[hsl(var(--mk-text-muted))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)] hover:text-[hsl(var(--brand-primary))]"
+                >
+                  <item.icon className="h-4 w-4" />
+                </motion.a>
+              ))}
             </div>
           </div>
 
-          <div className="mt-9 border-t border-border/60 pt-5">
-            <p className="text-xs text-muted-foreground">{t('footer.copyright', { year: new Date().getFullYear() })}</p>
-            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/90">{t('disclaimer.risk.content')}</p>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <FooterColumn title="Product" links={PRODUCT_LINKS} />
+            <FooterColumn title="Support" links={SUPPORT_LINKS} />
+            <FooterColumn title="Legal" links={LEGAL_LINKS} />
           </div>
-        </motion.div>
-      </div>
+        </div>
+
+        <div className="mt-8 border-t border-[hsl(var(--mk-border)/0.28)] pt-5 text-[hsl(var(--mk-text-muted))]">
+          <p className="text-xs">{t('footer.copyright', { year: new Date().getFullYear() })}</p>
+          <p className="mt-2 text-[11px] leading-relaxed">{t('disclaimer.risk.content')}</p>
+        </div>
+      </motion.div>
     </footer>
   )
 }
@@ -116,14 +113,20 @@ export default function Footer() {
 function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div>
-      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{title}</h3>
+      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">{title}</h3>
       <ul className="mt-3 space-y-2.5">
-        {links.map((item) => (
-          <li key={item.name}>
-            <Link href={item.href} className="text-sm text-foreground/85 transition-colors hover:text-primary">
+        {links.map((item, idx) => (
+          <motion.li
+            key={item.name}
+            initial={{ opacity: 0, y: 6 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: idx * 0.04, duration: 0.35 }}
+          >
+            <Link href={item.href} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
               {item.name}
             </Link>
-          </li>
+          </motion.li>
         ))}
       </ul>
     </div>

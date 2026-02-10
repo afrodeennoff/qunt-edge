@@ -79,14 +79,14 @@ export default function Navbar() {
                 size="sm"
                 onClick={toggleCustomizing}
                 className={cn(
-                  "h-9 w-9 px-0 sm:w-auto sm:px-4 gap-2 rounded-xl transition-all duration-500",
+                  "h-9 w-auto px-3 sm:px-4 gap-2 rounded-xl transition-all duration-500",
                   isCustomizing
                     ? "bg-accent-teal text-white shadow-[0_0_20px_rgba(45,212,191,0.4)]"
                     : "text-fg-muted"
                 )}
               >
                 <Pencil className={cn("w-3.5 h-3.5", isCustomizing && "animate-pulse")} />
-                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+                <span className="inline text-[10px] font-black uppercase tracking-widest">
                   {isCustomizing ? "Lock Grid" : "Edit Layout"}
                 </span>
               </Button>
@@ -110,7 +110,7 @@ export default function Navbar() {
                 </div>
               )}
 
-              <AddWidgetSheet onAddWidget={addWidget} isCustomizing={isCustomizing} />
+              <AddWidgetSheet onAddWidget={addWidget} isCustomizing={isCustomizing} showLabelOnMobile />
 
               <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
 

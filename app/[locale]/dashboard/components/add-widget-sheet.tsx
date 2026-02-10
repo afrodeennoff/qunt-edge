@@ -11,11 +11,11 @@ import { cn } from '@/lib/utils'
 import { WidgetType, WidgetSize } from '../types/dashboard'
 import { getWidgetsByCategory, WIDGET_REGISTRY, getWidgetPreview } from '../config/widget-registry'
 import { useData } from '@/context/data-provider'
-import { toast } from "sonner"
 
 interface AddWidgetSheetProps {
   onAddWidget: (type: WidgetType, size?: WidgetSize) => void
   isCustomizing: boolean
+  showLabelOnMobile?: boolean
 }
 
 interface PreviewCardProps {
@@ -28,7 +28,6 @@ interface LazyWidgetPreviewProps {
   config: any
   index: number
   isLoaded: boolean
-  onAdd: () => void
   onVisible: () => void
   onWidgetLoaded: (index: number) => void
 }
@@ -37,7 +36,6 @@ const LazyWidgetPreview: React.FC<LazyWidgetPreviewProps> = ({
   config,
   index,
   isLoaded,
-  onAdd,
   onVisible,
   onWidgetLoaded
 }) => {
@@ -122,7 +120,7 @@ const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
 PreviewCard.displayName = "PreviewCard"
 
 export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>(
-  ({ onAddWidget, isCustomizing }, ref) => {
+  ({ onAddWidget, isCustomizing, showLabelOnMobile = false }, ref) => {
     const t = useI18n()
     const { isMobile } = useData()
     const [isOpen, setIsOpen] = React.useState(false)
@@ -158,13 +156,13 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
       })
     }, [])
 
-    // Reset loading state when sheet opens/closes
-    useEffect(() => {
-      if (!isOpen) {
+    const handleOpenChange = (open: boolean) => {
+      setIsOpen(open)
+      if (!open) {
         setLoadedItems(new Set())
         setLoadingStarted(false)
       }
-    }, [isOpen])
+    }
 
     const renderWidgetsByCategory = (category: 'charts' | 'statistics' | 'tables' | 'other') => {
       const widgets = getWidgetsByCategory(category)
@@ -185,7 +183,6 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
                     config={config}
                     index={index}
                     isLoaded={loadedItems.has(index)}
-                    onAdd={() => handleAddWidget(config.type)}
                     onVisible={() => {
                       if (loadedItems.size === 0) {
                         startLoading()
@@ -204,18 +201,20 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
     }
 
     return (
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
           <Button
             ref={ref}
             variant="ghost"
+            disabled={!isCustomizing}
             className={cn(
               "h-10 rounded-full flex items-center justify-center transition-transform active:scale-95",
-              isMobile ? "w-10 p-0" : "min-w-[120px] gap-3 px-4"
+              !isCustomizing && "opacity-60",
+              isMobile && !showLabelOnMobile ? "w-10 p-0" : "min-w-[120px] gap-3 px-4"
             )}
           >
             <Plus className="h-4 w-4 shrink-0" />
-            {!isMobile && (
+            {(!isMobile || showLabelOnMobile) && (
               <span className="text-sm font-medium">
                 {t('widgets.addWidget')}
               </span>

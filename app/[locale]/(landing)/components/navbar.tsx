@@ -3,23 +3,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Moon, Sun, Laptop } from 'lucide-react'
+import { Menu } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
-import { LanguageSelector } from '@/components/ui/language-selector'
 import { Logo } from '@/components/logo'
-import { useTheme } from '@/context/theme-provider'
-import { useI18n } from '@/locales/client'
 import { cn } from '@/lib/utils'
 
-type NavLink = {
-  title: string
-  href: string
-}
+type NavLink = { title: string; href: string }
 
-const MAIN_LINKS: NavLink[] = [
+const LINKS: NavLink[] = [
   { title: 'Features', href: '/#features' },
   { title: 'Pricing', href: '/pricing' },
   { title: 'Prop Firms', href: '/propfirms' },
@@ -27,26 +20,13 @@ const MAIN_LINKS: NavLink[] = [
   { title: 'Support', href: '/support' },
 ]
 
-const EXTRA_LINKS: NavLink[] = [
-  { title: 'Community', href: '/community' },
-  { title: 'Roadmap', href: '/updates' },
-  { title: 'About', href: '/about' },
-  { title: 'FAQ', href: '/faq' },
-  { title: 'Privacy', href: '/privacy' },
-  { title: 'Terms', href: '/terms' },
-  { title: 'Disclaimers', href: '/disclaimers' },
-]
-
 export default function Navbar() {
-  const { theme, setTheme } = useTheme()
   const pathname = usePathname()
-  const t = useI18n() as (key: string) => string
-
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 14)
+    const onScroll = () => setScrolled(window.scrollY > 12)
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
@@ -60,133 +40,85 @@ export default function Navbar() {
     return pathname === normalized || pathname.endsWith(normalized)
   }
 
-  const themeIcon = () => {
-    if (theme === 'light') return <Sun className="h-4 w-4" />
-    if (theme === 'dark') return <Moon className="h-4 w-4" />
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return <Moon className="h-4 w-4" />
-    }
-    return <Laptop className="h-4 w-4" />
-  }
-
-  const NavItem = ({ link, mobile = false }: { link: NavLink; mobile?: boolean }) => (
-    <Link
-      href={link.href}
-      onClick={() => setMobileOpen(false)}
-      className={cn(
-        mobile
-          ? 'block rounded-xl px-3 py-2.5 text-sm font-semibold tracking-tight'
-          : 'rounded-full px-3 py-2 text-[11px] font-semibold tracking-[0.08em] uppercase',
-        'transition-all duration-200',
-        isActive(link.href)
-          ? 'bg-primary/12 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border)/0.75)]'
-          : 'text-muted-foreground hover:bg-background/70 hover:text-foreground'
-      )}
-    >
-      {link.title}
-    </Link>
-  )
-
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      <div className="container-fluid pt-3 sm:pt-4">
-        <div
+      <motion.div
+        initial={{ opacity: 0, y: -18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        className="mx-auto w-full max-w-[1240px] px-4 pt-4 sm:px-6"
+      >
+        <motion.div
           className={cn(
-            'marketing-glass mx-auto flex h-16 items-center rounded-[1.25rem] px-3 transition-all duration-300 sm:h-[68px] sm:px-4',
-            scrolled ? 'translate-y-0 shadow-[0_20px_42px_-32px_hsl(var(--brand-ink)/0.52)]' : 'translate-y-0'
+            'flex h-[62px] items-center rounded-full border px-3 sm:h-[66px] sm:px-4',
+            'border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface)/0.62)] backdrop-blur-xl',
+            scrolled ? 'shadow-[0_24px_44px_-30px_hsl(var(--brand-ink)/0.85)]' : ''
           )}
+          whileHover={{ y: -1 }}
+          transition={{ duration: 0.2 }}
         >
-          <Link href="/" className="flex items-center gap-2.5 rounded-xl px-1.5 py-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/80 bg-background/70 shadow-[0_8px_16px_-12px_hsl(var(--brand-ink)/0.45)]">
-              <Logo className="h-4.5 w-4.5 fill-foreground" />
+          <Link href="/" className="flex items-center gap-2 rounded-full px-2 py-1.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface-muted)/0.85)]">
+              <Logo className="h-4.5 w-4.5 fill-[hsl(var(--mk-text))]" />
             </div>
-            <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-sm tracking-tight [font-family:var(--font-poppins)] font-semibold">Qunt Edge</span>
-              <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Execution Intel</span>
-            </div>
+            <span className="hidden text-sm font-semibold tracking-tight [font-family:var(--font-poppins)] sm:inline-flex">Qunt Edge</span>
           </Link>
 
-          <nav className="mx-auto hidden items-center gap-1 xl:flex">
-            {MAIN_LINKS.map((link) => (
-              <NavItem key={link.href} link={link} />
+          <nav className="mx-auto hidden items-center gap-1 lg:flex">
+            {LINKS.map((link) => (
+              <motion.div key={link.href} whileHover={{ y: -1 }} transition={{ duration: 0.2 }}>
+                <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] transition-all',
+                  isActive(link.href)
+                    ? 'bg-[hsl(var(--brand-primary)/0.12)] text-[hsl(var(--mk-text))]'
+                    : 'text-[hsl(var(--mk-text-muted))] hover:text-[hsl(var(--mk-text))]'
+                )}
+              >
+                {link.title}
+                </Link>
+              </motion.div>
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2 xl:ml-0">
-            <LanguageSelector triggerClassName="h-9 w-9 rounded-full hover:bg-background/80" />
-
-            <Popover modal>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className="hidden h-9 w-9 rounded-full px-0 hover:bg-background/80 sm:inline-flex">
-                  {themeIcon()}
-                  <span className="sr-only">{t('landing.navbar.toggleTheme')}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[190px] p-1.5" align="end">
-                <Command>
-                  <CommandList>
-                    <CommandGroup>
-                      <CommandItem onSelect={() => setTheme('light')}>{t('landing.navbar.lightMode')}</CommandItem>
-                      <CommandItem onSelect={() => setTheme('dark')}>{t('landing.navbar.darkMode')}</CommandItem>
-                      <CommandItem onSelect={() => setTheme('system')}>{t('landing.navbar.systemTheme')}</CommandItem>
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-
-            <Button asChild className="hidden h-9 rounded-full px-4 text-[11px] font-bold tracking-[0.08em] uppercase md:inline-flex">
-              <Link href="/authentication">{t('landing.navbar.signIn')}</Link>
+          <div className="ml-auto flex items-center gap-2">
+            <Button asChild className="hidden h-10 rounded-full bg-[hsl(var(--brand-primary))] px-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] md:inline-flex">
+              <Link href="/authentication">Start Free Audit</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" className="h-9 w-9 rounded-full px-0 xl:hidden hover:bg-background/80">
+                <Button variant="ghost" className="h-10 w-10 rounded-full text-[hsl(var(--mk-text))] lg:hidden">
                   <Menu className="h-4.5 w-4.5" />
-                  <span className="sr-only">{t('landing.navbar.openMenu')}</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[320px] border-l border-border/70 p-0">
-                <div className="flex h-full flex-col bg-background">
-                  <div className="flex items-center gap-3 border-b border-border/70 px-5 py-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/80 bg-background/70">
-                      <Logo className="h-4.5 w-4.5 fill-foreground" />
-                    </div>
-                    <div className="flex flex-col leading-none">
-                      <span className="text-sm tracking-tight [font-family:var(--font-poppins)] font-semibold">Qunt Edge</span>
-                      <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Navigation</span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto px-4 py-5">
-                    <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Main</p>
-                    <div className="mt-2 space-y-1">
-                      {MAIN_LINKS.map((link) => (
-                        <NavItem key={link.href} link={link} mobile />
-                      ))}
-                    </div>
-
-                    <p className="mt-6 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">More</p>
-                    <div className="mt-2 space-y-1">
-                      {EXTRA_LINKS.map((link) => (
-                        <NavItem key={link.href} link={link} mobile />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border/70 p-4">
-                    <Button asChild className="h-10 w-full rounded-xl text-[11px] font-bold tracking-[0.08em] uppercase">
-                      <Link href="/authentication" onClick={() => setMobileOpen(false)}>
-                        {t('landing.navbar.signIn')}
+              <SheetContent side="right" className="w-[320px] border-l border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-bg-1))] p-0">
+                <div className="flex h-full flex-col p-6">
+                  <div className="space-y-2">
+                    {LINKS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-xl px-3 py-2 text-sm text-[hsl(var(--mk-text))]"
+                      >
+                        {link.title}
                       </Link>
-                    </Button>
+                    ))}
                   </div>
+                  <Button asChild className="mt-auto h-11 rounded-full bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">
+                    <Link href="/authentication" onClick={() => setMobileOpen(false)}>
+                      Start Free Audit
+                    </Link>
+                  </Button>
                 </div>
               </SheetContent>
             </Sheet>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </header>
   )
 }
