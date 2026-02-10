@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+  --color-black: #000;
+  --color-white: #fff;
+
+  --color-app: var(--color-app-bg);
+  --color-panel: var(--color-panel-bg);
+  --color-card: var(--color-card-bg);
+  --color-canvas: var(--color-canvas-bg);
+
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-medium: var(--color-border-medium);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
+  --color-warning: var(--color-warning);
+  --color-info: var(--color-info);
+
+  --color-brand-blue: var(--color-brand-blue);
+  --color-brand-gray: var(--color-brand-gray);
+  --color-brand-purple: var(--color-brand-purple);
+
+  --font-mono: var(--font-mono);
+  --font-sans: var(--font-sans);
+
+  --radius-md: var(--radius-md);
+
+  --spacing-xs: var(--spacing-xs);
+  --spacing-sm: var(--spacing-sm);
+  --spacing-md: var(--spacing-md);
+  --spacing-lg: var(--spacing-lg);
+  --spacing-xl: var(--spacing-xl);
+}
