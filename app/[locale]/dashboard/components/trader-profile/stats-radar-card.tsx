@@ -8,16 +8,17 @@ import {
   RadarChart,
   ResponsiveContainer,
 } from "recharts"
+import type { TraderStats } from "../../types/trader-profile"
 
-const radarData = [
-  { metric: "Trades", value: 82 },
-  { metric: "Risk Reward", value: 69 },
-  { metric: "Drawdown", value: 51 },
-  { metric: "Win Rate", value: 77 },
-  { metric: "Avg Return", value: 74 },
-]
+export function StatsRadarCard({ stats }: { stats: TraderStats }) {
+  const radarData = [
+    { metric: "Trades", value: Math.min(100, stats.totalTrades) },
+    { metric: "Risk Reward", value: Math.min(100, stats.serialTraderScore) },
+    { metric: "Drawdown", value: Math.max(0, 100 - Math.min(100, stats.avgLoss)) },
+    { metric: "Win Rate", value: Math.min(100, stats.winRate) },
+    { metric: "Avg Return", value: Math.min(100, stats.avgReturn) },
+  ]
 
-export function StatsRadarCard() {
   return (
     <Card className="border border-border/70 bg-[hsl(var(--qe-panel))]/95 p-4">
       <div className="mb-3 flex items-center justify-between">

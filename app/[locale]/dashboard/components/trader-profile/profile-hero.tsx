@@ -15,7 +15,9 @@ export function ProfileHero({ profile }: { profile: TraderProfile }) {
             {profile.name}
             <Bolt className="size-5" />
           </p>
-          <p className="mt-1 text-ui-body text-muted-foreground">{profile.subscribers} subscribers</p>
+          <p className="mt-1 text-ui-body text-muted-foreground">
+            {profile.linkedAccounts} linked accounts • {profile.totalTrades} trades
+          </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-md border border-border/70 bg-background/60 px-2 py-1 text-ui-micro font-semibold text-foreground">
               <BadgeCheck className="size-3.5" /> {profile.tier}

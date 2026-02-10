@@ -1,6 +1,7 @@
 export interface TraderProfile {
   name: string
-  subscribers: number
+  linkedAccounts: number
+  totalTrades: number
   tier: string
   style: string
   avatar: string
@@ -12,7 +13,7 @@ export interface TradeItem {
   date: string
   risk: string
   ratio: number
-  pnlPct: number
+  pnl: number
   status: "OPEN" | "CLOSED"
 }
 

@@ -320,6 +320,23 @@
     letter-spacing: 0.02em;
   }
 
+  /* Flat surface guardrails */
+  .surface-flat-0 {
+    background-color: hsl(var(--qe-surface-0));
+  }
+
+  .surface-flat-1 {
+    background-color: hsl(var(--qe-surface-1));
+  }
+
+  .surface-flat-2 {
+    background-color: hsl(var(--qe-surface-2));
+  }
+
+  .surface-panel {
+    background-color: hsl(var(--qe-panel));
+  }
+
   /* Card utility classes */
   .card-shadow-sm {
     box-shadow: var(--card-shadow-sm);

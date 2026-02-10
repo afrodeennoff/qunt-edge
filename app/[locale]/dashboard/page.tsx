@@ -30,14 +30,14 @@ export default function Home() {
 
         <TabsContent
           value="table"
-          className="mt-0 h-[calc(100vh-140px)] sm:h-[calc(100vh-148px)] lg:h-[calc(100vh-160px)] rounded-3xl border border-border/60 bg-card/75 p-2 sm:p-3 shadow-sm backdrop-blur-sm"
+          className="mt-0 h-[calc(100vh-140px)] sm:h-[calc(100vh-148px)] lg:h-[calc(100vh-160px)] p-2 sm:p-3"
         >
           <div className="h-full w-full overflow-hidden rounded-2xl border border-border/70 bg-background/70">
             <TradeTableReview />
           </div>
         </TabsContent>
 
-        <TabsContent value="accounts" className="mt-0 rounded-3xl border border-border/60 bg-card/75 p-3 shadow-sm backdrop-blur-sm sm:p-4">
+        <TabsContent value="accounts" className="mt-0 p-3 sm:p-4">
           <div className="rounded-2xl border border-border/70 bg-background/70 p-3 sm:p-4">
             <AccountsOverview size="large" />
           </div>
@@ -47,7 +47,7 @@ export default function Home() {
           <ChartTheFuturePanel />
         </TabsContent>
 
-        <TabsContent value="widgets" className="mt-0 rounded-3xl border border-border/60 bg-card/75 p-3 shadow-sm backdrop-blur-sm sm:p-4">
+        <TabsContent value="widgets" className="mt-0 p-3 sm:p-4">
           <div className="rounded-2xl border border-border/70 bg-background/70 p-3 sm:p-4">
             <WidgetCanvas />
           </div>

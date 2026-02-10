@@ -196,7 +196,7 @@ const SIDEBAR_STYLE_CLASSES: Record<
     rail: "after:bg-border/70 after:transition-colors after:duration-200 hover:bg-accent/20 hover:after:bg-primary/35",
     header: "border-b border-border/60 px-2.5 py-2.5",
     brandCard: "flex h-12 items-center gap-2.5 overflow-hidden rounded-xl border border-border/60 bg-background px-2.5",
-    brandIcon: "flex size-8.5 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-gradient-to-br from-primary/20 to-primary/5 text-primary",
+    brandIcon: "flex size-8.5 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary",
     workspaceLabel: "truncate text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80",
     userCard:
       "mx-0.5 flex items-center gap-3 rounded-xl border border-border/60 bg-background p-2.5 transition-colors duration-200 hover:border-border",
@@ -244,7 +244,7 @@ const SIDEBAR_STYLE_CLASSES: Record<
     itemIconInactive:
       "text-zinc-500 group-hover/item:text-zinc-300",
     itemButtonActive:
-      "bg-gradient-to-r from-teal-500/10 to-transparent text-white",
+      "bg-teal-500/10 text-white",
     itemButtonInactive: "hover:bg-white/5 hover:text-zinc-200 text-zinc-500",
     selectTrigger:
       "h-9 rounded-lg border-white/10 bg-zinc-900/50 text-[12px] font-medium hover:border-white/20 hover:text-white focus:ring-teal-500/50 transition-colors",

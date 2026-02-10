@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import type { TradeItem } from "../../types/trader-profile"
 
 export function TradeCard({ trade, showMenu = false }: { trade: TradeItem; showMenu?: boolean }) {
-  const positive = trade.pnlPct >= 0
+  const positive = trade.pnl >= 0
 
   return (
     <article className="rounded-2xl border border-border/70 bg-[hsl(var(--qe-panel))]/95 p-4">
@@ -11,7 +11,10 @@ export function TradeCard({ trade, showMenu = false }: { trade: TradeItem; showM
         <div>
           <p className="text-[34px] font-semibold leading-none text-foreground">{trade.symbol}</p>
           <p className="mt-2 text-ui-body text-muted-foreground">
-            {trade.date} <span className={cn("ml-2 font-medium", positive ? "text-[hsl(var(--chart-win))]" : "text-[hsl(var(--chart-loss))]")}>{positive ? `+${trade.pnlPct}%` : `${trade.pnlPct}%`}</span>
+            {trade.date}{" "}
+            <span className={cn("ml-2 font-medium", positive ? "text-[hsl(var(--chart-win))]" : "text-[hsl(var(--chart-loss))]")}>
+              {positive ? `+$${Math.abs(trade.pnl).toFixed(2)}` : `-$${Math.abs(trade.pnl).toFixed(2)}`}
+            </span>
           </p>
           <p className="mt-2 text-ui-body text-muted-foreground">Risk: {trade.risk} &nbsp; Risk/Reward: {trade.ratio}</p>
         </div>

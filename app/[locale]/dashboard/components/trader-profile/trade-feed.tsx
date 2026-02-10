@@ -16,9 +16,15 @@ export function TradeFeed({ trades }: { trades: TradeItem[] }) {
         </div>
       </div>
 
-      {trades.map((trade, index) => (
-        <TradeCard key={trade.id} trade={trade} showMenu={index === 2} />
-      ))}
+      {trades.length > 0 ? (
+        trades.map((trade, index) => (
+          <TradeCard key={trade.id} trade={trade} showMenu={index === 2} />
+        ))
+      ) : (
+        <div className="rounded-2xl border border-border/70 bg-[hsl(var(--qe-panel))]/95 p-6 text-ui-body text-muted-foreground">
+          No trade data found for this user yet.
+        </div>
+      )}
     </div>
   )
 }
