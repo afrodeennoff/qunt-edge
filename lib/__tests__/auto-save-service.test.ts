@@ -346,7 +346,7 @@ describe('AutoSaveService', () => {
             const onlineHandlerCall = addEventListenerSpy.mock.calls.find(call => call[0] === 'online')
 
             if (onlineHandlerCall && typeof onlineHandlerCall[1] === 'function') {
-                onlineHandlerCall[1]()
+                onlineHandlerCall[1](new Event('online'))
             } else {
                 // Fallback for environments where event listeners might behave differently
                 // or if the spy didn't catch the call (unlikely if setup correctly)
