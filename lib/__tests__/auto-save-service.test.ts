@@ -259,6 +259,11 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
+            // Ensure navigator exists in environment
+            if (typeof navigator === 'undefined') {
+                vi.stubGlobal('navigator', { onLine: true })
+            }
+
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
                 value: false,

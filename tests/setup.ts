@@ -15,13 +15,9 @@ if (typeof (globalThis as { window?: unknown }).window === 'undefined') {
     configurable: true,
   })
 } else {
-  Object.defineProperty(globalThis, 'navigator', {
-    value: {
-      onLine: true,
-      userAgent: 'node',
-    },
-    writable: true,
-    configurable: true,
+  vi.stubGlobal('navigator', {
+    onLine: true,
+    userAgent: 'node',
   })
 }
 
