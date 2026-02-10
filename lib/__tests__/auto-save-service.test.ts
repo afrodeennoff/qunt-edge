@@ -259,9 +259,11 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: false,
+            // Mock navigator.onLine
+            const originalNavigator = global.navigator
+            Object.defineProperty(global, 'navigator', {
+                value: { onLine: false },
+                writable: true
             })
 
             const onOffline = vi.fn()
@@ -277,10 +279,20 @@ describe('AutoSaveService', () => {
             const queued = await queue.getAll()
             expect(queued.length).toBeGreaterThan(0)
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: true,
-            })
+            // Restore navigator
+            if (originalNavigator) {
+                Object.defineProperty(global, 'navigator', {
+                    value: originalNavigator,
+                    writable: true
+                })
+            } else {
+                // If it didn't exist (node env), we can leave it or set it back to undefined
+                // but setting it to { onLine: true } is often safer for other tests
+                Object.defineProperty(global, 'navigator', {
+                    value: { onLine: true },
+                    writable: true
+                })
+            }
         })
 
         it('should process offline queue when connection restored', async () => {
