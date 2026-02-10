@@ -326,6 +326,10 @@ describe('AutoSaveService', () => {
 
         it('should process offline queue when connection restored', async () => {
             mockSaveFunction.mockResolvedValue({ success: true })
+
+            // Ensure we can spy on the listener, regardless of environment
+            const addEventListenerSpy = vi.spyOn(window, 'addEventListener')
+
             service = new AutoSaveService(mockSaveFunction, {
                 debounceMs: 10,
                 enableOfflineSupport: true,
@@ -338,14 +342,14 @@ describe('AutoSaveService', () => {
                 priority: 'normal',
             })
 
-            // Manually trigger online handler logic via window mock
-            const addEventListenerMock = window.addEventListener as unknown as ReturnType<typeof vi.fn>
-            const onlineHandlerCall = addEventListenerMock.mock.calls.find(call => call[0] === 'online')
+            // Attempt to find the handler from the spy
+            const onlineHandlerCall = addEventListenerSpy.mock.calls.find(call => call[0] === 'online')
 
             if (onlineHandlerCall && typeof onlineHandlerCall[1] === 'function') {
                 onlineHandlerCall[1]()
             } else {
-                // Fallback
+                // Fallback for environments where event listeners might behave differently
+                // or if the spy didn't catch the call (unlikely if setup correctly)
                 const onlineEvent = new Event('online')
                 window.dispatchEvent(onlineEvent)
             }
