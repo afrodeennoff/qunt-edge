@@ -46,8 +46,8 @@ jobs:
             schemas.forEach(schema => {
               try {
                 const data = JSON.parse(fs.readFileSync(schema, 'utf8'));
-                if (!data.\\$schema) {
-                  console.error('Missing \\$schema in ' + schema);
+                if (!data['$schema']) {
+                  console.error('Missing $schema in ' + schema);
                   process.exit(1);
                 }
                 console.log('✓ ' + schema);
@@ -252,6 +252,8 @@ jobs:
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     needs: [validate-schemas, check-policy-compliance, run-monte-carlo-simulation, check-test-coverage, validate-widget-integration]
     if: failure()
     steps:

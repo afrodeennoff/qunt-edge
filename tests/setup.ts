@@ -46,7 +46,14 @@ if (typeof (globalThis as { localStorage?: unknown }).localStorage === 'undefine
   })
 }
 
-if (typeof navigator !== 'undefined') {
+// Polyfill navigator if it doesn't exist
+if (typeof navigator === 'undefined') {
+  vi.stubGlobal('navigator', {
+    onLine: true,
+    userAgent: 'node',
+  })
+} else {
+  // If it exists but we need to control onLine
   Object.defineProperty(navigator, 'onLine', {
     value: true,
     writable: true,
