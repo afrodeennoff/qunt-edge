@@ -16,7 +16,7 @@ const toIsoDateKey = (value: Date | string): string =>
   new Date(value).toISOString().slice(0, 10)
 
 export async function getUserStats() {
-  let allUsers: any[] = []
+  let allUsers: User[] = []
   let page = 1
   const perPage = 1000
   let hasMore = true
@@ -167,21 +167,11 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
 
   // First, get all unique user IDs that have trades, with pagination
   console.log('Fetching users with trades from database...')
-  const usersWithTrades = await prisma.trade.groupBy({
-    by: ['userId'],
-    _count: {
-      id: true
-    },
-    orderBy: {
-      userId: 'asc'
-    },
-    skip: (page - 1) * limit,
-    take: limit
-  })
+  const userIds = await fetchPaginatedUserIdsWithTrades(page, limit)
 
-  console.log(`Found ${usersWithTrades.length} users with trades for page ${page}`)
+  console.log(`Found ${userIds.length} users with trades for page ${page}`)
 
-  if (usersWithTrades.length === 0) {
+  if (userIds.length === 0) {
     return {
       users: [],
       totalUsers: 0,
@@ -189,48 +179,15 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
     }
   }
 
-  // Get the user IDs for this page
-  const userIds = usersWithTrades.map(user => user.userId)
-
   // Get user data from Supabase for these specific users
   console.log('Fetching user data from Supabase...')
-  const userPromises = userIds.map(userId => 
-    supabase.auth.admin.getUserById(userId)
-  )
-  
-  const userResults = await Promise.all(userPromises)
-  const users = userResults
-    .map(result => result.data?.user)
-    .filter(user => user !== null) as User[]
+  const users = await fetchSupabaseUsers(userIds)
 
   console.log(`Retrieved ${users.length} users from Supabase`)
 
   // Get all trades for these users
   console.log('Fetching trades for users...')
-  const trades = await prisma.trade.findMany({
-    where: {
-      userId: {
-        in: userIds
-      }
-    },
-    select: {
-      id: true,
-      userId: true,
-      pnl: true,
-      createdAt: true,
-      entryDate: true,
-      closeDate: true,
-      instrument: true,
-      side: true,
-      entryPrice: true,
-      closePrice: true,
-      quantity: true,
-      commission: true
-    },
-    orderBy: {
-      createdAt: 'asc'
-    }
-  })
+  const trades = await fetchTradesForUsers(userIds)
 
   console.log(`Found ${trades.length} trades for users`)
 
@@ -244,70 +201,18 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
   }, {} as Record<string, typeof trades>)
 
   // Calculate equity curve for each user
-  const userEquityData = users.map((user) => {
-    const userTrades = userTradesMap[user.id] || []
-    
-    // Sort trades by creation date
-    const sortedTrades = userTrades.sort((a, b) => 
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    )
-
-    // Calculate cumulative PnL and equity curve
-    let cumulativePnL = 0
-    const equityCurve = sortedTrades.map((trade, index) => {
-      const netPnl = netTradePnl(trade)
-      cumulativePnL += netPnl
-      return {
-        date: trade.createdAt.toISOString().slice(0, 10),
-        pnl: netPnl,
-        cumulativePnL,
-        tradeNumber: index + 1
-      }
-    })
-
-    // Calculate statistics with commissions included
-    const totalPnL = userTrades.reduce((sum, trade) => sum + netTradePnl(trade), 0)
-    const winningTrades = userTrades.filter(trade => netTradePnl(trade) > 0)
-    const losingTrades = userTrades.filter(trade => netTradePnl(trade) < 0)
-    const winRate = userTrades.length > 0 ? (winningTrades.length / userTrades.length) * 100 : 0
-    const averageWin = winningTrades.length > 0 ? winningTrades.reduce((sum, trade) => sum + netTradePnl(trade), 0) / winningTrades.length : 0
-    const averageLoss = losingTrades.length > 0 ? losingTrades.reduce((sum, trade) => sum + netTradePnl(trade), 0) / losingTrades.length : 0
-    const maxDrawdown = calculateMaxDrawdown(equityCurve)
-    const profitFactor = Math.abs(averageLoss) > 0 ? Math.abs(averageWin) / Math.abs(averageLoss) : 0
-
-    return {
-      userId: user.id,
-      email: user.email || 'Unknown',
-      createdAt: user.created_at || '',
-      trades: userTrades,
-      equityCurve,
-      statistics: {
-        totalTrades: userTrades.length,
-        totalPnL,
-        winRate,
-        averageWin,
-        averageLoss,
-        maxDrawdown,
-        profitFactor,
-        winningTrades: winningTrades.length,
-        losingTrades: losingTrades.length
-      }
-    }
-  }).filter(user => user.email !== 'Unknown' && user.email !== '')
+  const userEquityData = users.map((user) =>
+    calculateUserStats(user, userTradesMap[user.id] || [])
+  ).filter(user => user.email !== 'Unknown' && user.email !== '')
 
   // Get total count of users with trades for pagination
-  const totalUsersWithTrades = await prisma.trade.groupBy({
-    by: ['userId'],
-    _count: {
-      id: true
-    }
-  })
+  const totalUsers = await fetchTotalUsersWithTradesCount()
 
   console.log(`Returning ${userEquityData.length} users with equity data for page ${page}`)
   return {
     users: userEquityData,
-    totalUsers: totalUsersWithTrades.length,
-    hasMore: (page * limit) < totalUsersWithTrades.length
+    totalUsers: totalUsers,
+    hasMore: (page * limit) < totalUsers
   }
 }
 
@@ -679,4 +584,120 @@ export async function exportTeamTradesAction(teamId: string): Promise<string> {
   
   console.log(`Generated CSV with ${csvRows.length} rows`)
   return csv
+}
+
+// Helpers
+
+async function fetchPaginatedUserIdsWithTrades(page: number, limit: number) {
+  const usersWithTrades = await prisma.trade.groupBy({
+    by: ['userId'],
+    _count: {
+      id: true
+    },
+    orderBy: {
+      userId: 'asc'
+    },
+    skip: (page - 1) * limit,
+    take: limit
+  })
+  return usersWithTrades.map(user => user.userId)
+}
+
+async function fetchSupabaseUsers(userIds: string[]): Promise<User[]> {
+  const userPromises = userIds.map(userId =>
+    supabase.auth.admin.getUserById(userId)
+  )
+
+  const userResults = await Promise.all(userPromises)
+  return userResults
+    .map(result => result.data?.user)
+    .filter(user => user !== null) as User[]
+}
+
+async function fetchTradesForUsers(userIds: string[]) {
+  return prisma.trade.findMany({
+    where: {
+      userId: {
+        in: userIds
+      }
+    },
+    select: {
+      id: true,
+      userId: true,
+      pnl: true,
+      createdAt: true,
+      entryDate: true,
+      closeDate: true,
+      instrument: true,
+      side: true,
+      entryPrice: true,
+      closePrice: true,
+      quantity: true,
+      commission: true
+    },
+    orderBy: {
+      createdAt: 'asc'
+    }
+  })
+}
+
+type Trade = Awaited<ReturnType<typeof fetchTradesForUsers>>[number]
+
+function calculateUserStats(user: User, userTrades: Trade[]) {
+    // Sort trades by creation date
+    const sortedTrades = userTrades.sort((a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+
+    // Calculate cumulative PnL and equity curve
+    let cumulativePnL = 0
+    const equityCurve = sortedTrades.map((trade, index) => {
+      const netPnl = netTradePnl(trade)
+      cumulativePnL += netPnl
+      return {
+        date: trade.createdAt.toISOString().slice(0, 10),
+        pnl: netPnl,
+        cumulativePnL,
+        tradeNumber: index + 1
+      }
+    })
+
+    // Calculate statistics with commissions included
+    const totalPnL = userTrades.reduce((sum, trade) => sum + netTradePnl(trade), 0)
+    const winningTrades = userTrades.filter(trade => netTradePnl(trade) > 0)
+    const losingTrades = userTrades.filter(trade => netTradePnl(trade) < 0)
+    const winRate = userTrades.length > 0 ? (winningTrades.length / userTrades.length) * 100 : 0
+    const averageWin = winningTrades.length > 0 ? winningTrades.reduce((sum, trade) => sum + netTradePnl(trade), 0) / winningTrades.length : 0
+    const averageLoss = losingTrades.length > 0 ? losingTrades.reduce((sum, trade) => sum + netTradePnl(trade), 0) / losingTrades.length : 0
+    const maxDrawdown = calculateMaxDrawdown(equityCurve)
+    const profitFactor = Math.abs(averageLoss) > 0 ? Math.abs(averageWin) / Math.abs(averageLoss) : 0
+
+    return {
+      userId: user.id,
+      email: user.email || 'Unknown',
+      createdAt: user.created_at || '',
+      trades: userTrades,
+      equityCurve,
+      statistics: {
+        totalTrades: userTrades.length,
+        totalPnL,
+        winRate,
+        averageWin,
+        averageLoss,
+        maxDrawdown,
+        profitFactor,
+        winningTrades: winningTrades.length,
+        losingTrades: losingTrades.length
+      }
+    }
+}
+
+async function fetchTotalUsersWithTradesCount() {
+  const totalUsersWithTrades = await prisma.trade.groupBy({
+    by: ['userId'],
+    _count: {
+      id: true
+    }
+  })
+  return totalUsersWithTrades.length
 }
