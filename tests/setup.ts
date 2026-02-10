@@ -14,7 +14,9 @@ if (typeof (globalThis as { window?: unknown }).window === 'undefined') {
     writable: true,
     configurable: true,
   })
-} else {
+}
+
+if (typeof (globalThis as { navigator?: unknown }).navigator === 'undefined') {
   Object.defineProperty(globalThis, 'navigator', {
     value: {
       onLine: true,
