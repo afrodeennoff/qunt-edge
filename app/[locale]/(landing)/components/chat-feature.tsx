@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { User, Bot, Target, AlertTriangle, CheckCircle } from "lucide-react"
 import { useI18n } from "@/locales/client"
 
@@ -31,7 +31,7 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const CONVERSATION_LOOP = [
+  const CONVERSATION_LOOP = useMemo(() => [
     {
       user: t('landing.features.chat-feature.conversation.analyze'),
       assistant: t('landing.features.chat-feature.responses.analyze'),
@@ -102,7 +102,7 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
         insight: t('landing.features.chat-feature.analysis.positionSizing.insight'),
       },
     },
-  ]
+  ], [t])
 
   const addMessage = useCallback(
     (message: Message) => {
@@ -119,6 +119,7 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
   )
 
   const simulateStreaming = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (text: string, analysis?: any) => {
       const messageId = Date.now().toString()
 
@@ -195,7 +196,7 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
     await new Promise((resolve) => setTimeout(resolve, 3000))
     setCurrentIndex((prev) => prev + 1)
     setIsLoopRunning(false)
-  }, [currentIndex, isLoopRunning, addMessage, simulateStreaming, fadeOutAllMessages])
+  }, [currentIndex, isLoopRunning, addMessage, simulateStreaming, fadeOutAllMessages, CONVERSATION_LOOP])
 
   useEffect(() => {
     // Clear any existing timeout
@@ -214,7 +215,7 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [currentIndex, isLoopRunning])
+  }, [currentIndex, isLoopRunning, runConversationLoop])
 
   // Cleanup on unmount
   useEffect(() => {

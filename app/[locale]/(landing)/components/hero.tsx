@@ -3,11 +3,7 @@ import React, { useRef } from 'react';
 import { motion, Variants, useScroll, useTransform } from 'framer-motion';
 import Link from "next/link";
 
-interface HeroProps {
-  onStart?: () => void;
-}
-
-export default function Hero({ onStart }: HeroProps) {
+export default function Hero() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
