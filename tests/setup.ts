@@ -14,6 +14,15 @@ if (typeof (globalThis as { window?: unknown }).window === 'undefined') {
     writable: true,
     configurable: true,
   })
+} else {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: {
+      onLine: true,
+      userAgent: 'node',
+    },
+    writable: true,
+    configurable: true,
+  })
 }
 
 const localStorageStore = new Map<string, string>()
