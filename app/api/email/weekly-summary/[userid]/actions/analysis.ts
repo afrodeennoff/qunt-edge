@@ -1,7 +1,7 @@
 'use server'
 
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamObject } from "ai"
+import { generateObject } from "ai"
 import { z } from 'zod/v3';
 
 const customOpenai = createOpenAI({
@@ -60,7 +60,7 @@ export async function generateTradingAnalysis(
     const weekNumbers = Object.keys(tradesByWeek).map(Number).sort((a, b) => b - a)
     const lastTwoWeeks = weekNumbers.slice(0, 2).map(weekNum => tradesByWeek[weekNum])
 
-    const { partialObjectStream } = streamObject({
+    const { object } = await generateObject({
       model: customOpenai("gpt-4.1-nano-2025-04-14"),
       schema: analysisSchema,
       prompt: language === 'fr'
@@ -143,16 +143,10 @@ Write an analysis that helps the trader improve:`,
       temperature: 0.7,
     })
 
-    const content = { intro: "", tips: "" }
-    for await (const partialObject of partialObjectStream) {
-      if (partialObject.intro) content.intro = partialObject.intro
-      if (partialObject.tips) content.tips = partialObject.tips
-    }
-
-    if (content.intro && content.tips) {
+    if (object.intro && object.tips) {
       return {
-        resultAnalysisIntro: content.intro,
-        tipsForNextWeek: content.tips
+        resultAnalysisIntro: object.intro,
+        tipsForNextWeek: object.tips
       }
     }
 
