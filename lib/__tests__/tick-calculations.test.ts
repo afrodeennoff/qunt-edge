@@ -3,7 +3,7 @@ import {
   calculateTicksAndPoints,
   calculateTicksAndPointsForTrades,
   calculateTicksAndPointsForGroupedTrade,
-} from '../lib/tick-calculations';
+} from '../tick-calculations';
 
 // Mocks
 const mockTickDetails: any = {
