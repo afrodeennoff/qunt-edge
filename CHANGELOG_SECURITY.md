@@ -1,5 +1,12 @@
 # Security & Performance Changelog
 
+## [0.3.2] - 2026-02-05
+
+### 🔒 Security Enhancements
+
+#### High Priority
+- **ADDED**: Global security headers (HSTS, X-Frame-Options, X-Content-Type-Options, etc.) to `next.config.ts`.
+
 ## [0.3.1] - 2026-02-01
 
 ### 🔒 Security Fixes
