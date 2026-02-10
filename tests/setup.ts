@@ -46,10 +46,23 @@ if (typeof (globalThis as { localStorage?: unknown }).localStorage === 'undefine
   })
 }
 
-if (typeof navigator !== 'undefined') {
-  Object.defineProperty(navigator, 'onLine', {
-    value: true,
+if (typeof (globalThis as { navigator?: unknown }).navigator === 'undefined') {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: {
+      onLine: true,
+    },
     writable: true,
     configurable: true,
   })
+} else {
+  // If it already exists, ensure onLine is configurable/writable for tests
+  try {
+    Object.defineProperty(navigator, 'onLine', {
+      value: true,
+      writable: true,
+      configurable: true,
+    })
+  } catch (e) {
+    // Ignore if property is non-configurable (e.g. in some browser envs)
+  }
 }
