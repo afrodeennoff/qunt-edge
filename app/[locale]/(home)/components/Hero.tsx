@@ -1,10 +1,9 @@
-"use client"
+'use client'
 
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Terminal, BarChart2, Activity, ArrowUpRight } from 'lucide-react'
-import { Button } from "@/components/ui/button"
+import { ArrowRight, Sparkles } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -21,124 +20,76 @@ export default function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])
 
   return (
-    <section ref={ref} className="relative min-h-screen flex flex-col justify-center overflow-hidden px-4 pb-18 pt-34 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8 bg-background selection:bg-accent selection:text-white">
-
-      {/* Background Grid */}
-      <motion.div style={{ opacity }} className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1C1F26_1px,transparent_1px),linear-gradient(to_bottom,#1C1F26_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20" />
-        <div className="absolute left-1/2 top-[-20%] h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px]" />
+    <section ref={ref} className="relative overflow-hidden px-4 pb-18 pt-34 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8">
+      <motion.div style={{ opacity }} className="pointer-events-none absolute inset-0">
+        <div className="marketing-grid absolute inset-0 opacity-60" />
+        <div className="absolute left-1/2 top-[-180px] h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[hsl(var(--brand-primary)/0.15)] blur-[90px]" />
       </motion.div>
 
-      <div className="relative z-10 mx-auto max-w-7xl w-full grid lg:grid-cols-2 gap-12 items-center">
-
-        {/* Left Column: Text */}
-        <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.1 } } }} className="text-center lg:text-left">
-          <motion.div variants={fadeUp} className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-3 py-1 text-xs font-mono text-muted-foreground backdrop-blur-md">
-            <span className="flex h-2 w-2 rounded-full bg-success animate-pulse" />
-            V2.0 SYSTEM ONLINE
+      <div className="relative z-10 mx-auto max-w-6xl">
+        <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.1 } } }}>
+          <motion.div variants={fadeUp} className="mb-7 flex justify-center">
+            <div className="marketing-badge inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-medium">
+              <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-primary))]" />
+              Institutional Intelligence Layer
+            </div>
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
-            className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]"
+            className="mx-auto max-w-5xl text-center text-[clamp(2.4rem,8vw,5.6rem)] font-semibold leading-[0.92] tracking-tight [font-family:var(--font-poppins)]"
           >
-            Execution <br />
-            <span className="text-accent">Intelligence.</span>
+            Stop auditing the money.
+            <span className="block bg-gradient-to-r from-[hsl(var(--brand-primary))] to-[hsl(var(--brand-secondary))] bg-clip-text text-transparent">
+              Audit the execution.
+            </span>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 font-light">
-            The professional terminal for discretionary traders. Unify your journals, analytics, and execution data in one production-grade interface.
+          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-2xl text-center text-[15px] leading-relaxed text-[hsl(var(--mk-text-muted))] sm:text-[17px]">
+            Qunt Edge is the clinical intelligence layer for professional discretionary traders. Track, journal, and improve
+            consistency with one unified workflow.
           </motion.p>
 
-          <motion.div variants={fadeUp} className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <Link href="/authentication?next=dashboard/terminal">
-              <Button size="lg" className="h-12 px-8 rounded-full text-base font-medium">
-                Launch Terminal <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+          <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/authentication?next=dashboard"
+              className="inline-flex h-12 min-w-[220px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
+            >
+              Start Free Audit
             </Link>
-            <Link href="/dashboard/journal">
-              <Button variant="outline" size="lg" className="h-12 px-8 rounded-full text-base font-medium border-border bg-transparent hover:bg-card">
-                View Demo Journal
-              </Button>
+            <Link
+              href="/updates"
+              className="inline-flex h-12 min-w-[220px] items-center justify-center gap-2 rounded-full border border-[hsl(var(--mk-border)/0.4)] bg-[hsl(var(--mk-surface)/0.7)] px-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text))] transition-all duration-300 hover:border-[hsl(var(--brand-primary)/0.55)]"
+            >
+              View Documentation
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-12 flex items-center justify-center lg:justify-start gap-8 text-sm text-muted-foreground font-mono">
-            <div className="flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-accent" />
-              <span>API Ready</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-success" />
-              <span>Real-time</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BarChart2 className="h-4 w-4 text-primary" />
-              <span>Institutional</span>
+          <motion.div variants={fadeUp} className="mt-12 rounded-3xl border border-[hsl(var(--mk-border)/0.34)] bg-[hsl(var(--mk-surface)/0.72)] p-4 shadow-[0_26px_60px_-36px_hsl(var(--brand-ink)/0.7)] sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.7)] p-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Win Rate</p>
+                <p className="mt-2 text-2xl font-semibold">67.4%</p>
+              </div>
+              <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.7)] p-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Behavior Score</p>
+                <p className="mt-2 text-2xl font-semibold">8.9 / 10</p>
+              </div>
+              <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.7)] p-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Risk Compliance</p>
+                <p className="mt-2 text-2xl font-semibold text-[hsl(var(--brand-primary))]">Stable</p>
+              </div>
             </div>
           </motion.div>
+
+          <motion.div variants={fadeUp} className="mt-11 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] font-medium tracking-[0.16em] text-[hsl(var(--mk-text-muted))]">
+            <span>TRADOVATE</span>
+            <span>RITHMIC</span>
+            <span>IBKR</span>
+            <span>CQG</span>
+          </motion.div>
         </motion.div>
-
-        {/* Right Column: Visuals (Mock UI) */}
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="relative hidden lg:block"
-        >
-            <div className="relative rounded-xl border border-border bg-card/80 backdrop-blur-xl shadow-2xl overflow-hidden aspect-[4/3] transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                {/* Mock Header */}
-                <div className="h-10 border-b border-border bg-card flex items-center px-4 gap-2">
-                    <div className="h-3 w-3 rounded-full bg-destructive/50" />
-                    <div className="h-3 w-3 rounded-full bg-yellow-500/50" />
-                    <div className="h-3 w-3 rounded-full bg-success/50" />
-                    <div className="ml-4 h-4 w-32 rounded-full bg-border/50" />
-                </div>
-                {/* Mock Chart Area */}
-                <div className="p-6 h-full flex flex-col gap-4">
-                    <div className="flex justify-between items-end">
-                        <div>
-                            <div className="text-sm font-mono text-muted-foreground">ES_FUT</div>
-                            <div className="text-3xl font-bold font-mono">4,124.50</div>
-                        </div>
-                        <div className="text-success flex items-center gap-1 font-mono">
-                            <ArrowUpRight className="h-4 w-4" /> +0.45%
-                        </div>
-                    </div>
-                    {/* Abstract Chart Lines */}
-                    <div className="flex-1 w-full bg-gradient-to-t from-accent/5 to-transparent rounded-lg border border-border/30 relative overflow-hidden">
-                        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-                            <path d="M0,100 Q100,50 200,80 T400,20" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-                            <path d="M0,100 Q100,50 200,80 T400,20 V150 H0 Z" fill="url(#grad)" opacity="0.2" />
-                            <defs>
-                                <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="hsl(var(--accent))" />
-                                    <stop offset="100%" stopColor="transparent" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-                    {/* Mock Widgets Row */}
-                    <div className="grid grid-cols-3 gap-4 h-24">
-                        <div className="rounded-lg bg-secondary/20 border border-border/50" />
-                        <div className="rounded-lg bg-secondary/20 border border-border/50" />
-                        <div className="rounded-lg bg-secondary/20 border border-border/50" />
-                    </div>
-                </div>
-            </div>
-
-            {/* Floating Badge */}
-            <div className="absolute -bottom-6 -left-6 bg-card border border-border rounded-lg p-4 shadow-xl flex items-center gap-4 animate-float">
-                <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
-                    <Activity className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider">Win Rate</div>
-                    <div className="text-xl font-bold font-mono">68.4%</div>
-                </div>
-            </div>
-        </motion.div>
-
       </div>
     </section>
   )

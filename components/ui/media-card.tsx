@@ -60,7 +60,9 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
     return (
     <Card
       ref={ref}
-      className={cn("overflow-hidden group", currentSize.padding, className, onClick && "hover:shadow-md cursor-pointer transition-all")}
+      hover={!!onClick}
+      clickable={!!onClick}
+      className={cn("overflow-hidden group", currentSize.padding, className)}
       onClick={onClick}
       aria-label={title}
       {...props}

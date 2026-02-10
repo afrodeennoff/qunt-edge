@@ -15,9 +15,6 @@ import {
   Sparkles,
   TrendingUp,
   Shield,
-  Terminal,
-  Book,
-  User
 } from "lucide-react"
 import React, { useState, useEffect } from "react"
 import { useData } from "@/context/data-provider"
@@ -25,7 +22,6 @@ import { useUserStore } from "@/store/user-store"
 import ReferralButton from "@/components/referral-button"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 import { checkAdminStatus } from "@/app/[locale]/dashboard/settings/actions"
-import { useRouter } from "next/navigation"
 
 export function DashboardSidebar() {
   const { refreshAllData } = useData()
@@ -33,7 +29,6 @@ export function DashboardSidebar() {
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
   const [isAdmin, setIsAdmin] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     async function check() {
@@ -44,27 +39,6 @@ export function DashboardSidebar() {
   }, [])
 
   const navItems: UnifiedSidebarItem[] = [
-    // V2: New Pages
-    {
-      href: "/dashboard/terminal",
-      icon: <Terminal className="size-4.5" />,
-      label: "Terminal",
-      group: "Overview"
-    },
-    {
-      href: "/dashboard/journal",
-      icon: <Book className="size-4.5" />,
-      label: "Trading Journal",
-      group: "Overview"
-    },
-    {
-      href: "/dashboard/profile",
-      icon: <User className="size-4.5" />,
-      label: "Trader Profile",
-      group: "Overview"
-    },
-
-    // Existing Pages
     {
       href: "/dashboard?tab=widgets",
       icon: <LayoutDashboard className="size-4.5" />,
@@ -135,9 +109,6 @@ export function DashboardSidebar() {
       group: "System"
     },
     {
-      // action: () => refreshAllData({ force: true }),
-      // Using action here might require fixing UnifiedSidebar types if it expects href
-      // Assuming UnifiedSidebar handles action
       icon: <RefreshCw className="size-4.5" />,
       label: "Sync",
       action: () => refreshAllData({ force: true }),

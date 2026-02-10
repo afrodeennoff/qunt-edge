@@ -41,8 +41,8 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
   const iconSize = size === 'tiny' ? 'h-4 w-4' : 'h-5 w-5'
 
   return (
-      <Card className="h-full flex flex-col">
-        <CardContent className={cn("flex-1 flex flex-col justify-center space-y-4 p-6")}>
+    <Card size={cardSize} variant="default" hover className="h-full flex flex-col">
+      <CardContent className={cn("flex-1 flex flex-col justify-center space-y-4")}>
         {/* Main P&L Display */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
