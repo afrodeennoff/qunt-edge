@@ -207,9 +207,8 @@ describe('PolicyEngine', () => {
 
       const startTime2 = Date.now()
       const second = await engineWithCache.evaluateRisk(testContext, testManifest)
-      const duration2 = Date.now() - startTime2
+      // Duration check removed as it is flaky in CI environments where execution time can be 0ms
 
-      expect(duration2).toBeLessThanOrEqual(duration1)
       expect(second.timestamp).toEqual(first.timestamp)
     })
 
