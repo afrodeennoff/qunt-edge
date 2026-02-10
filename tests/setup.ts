@@ -52,4 +52,12 @@ if (typeof navigator !== 'undefined') {
     writable: true,
     configurable: true,
   })
+} else {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: {
+      onLine: true,
+    },
+    writable: true,
+    configurable: true,
+  })
 }
