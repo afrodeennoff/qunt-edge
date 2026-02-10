@@ -213,7 +213,7 @@ jobs:
           
       - name: Generate compliance report
         run: |
-          node .github/scripts/generate-compliance-report.js
+          node .github/scripts/generate-compliance-report.cjs
           
       - name: Upload compliance report
         uses: actions/upload-artifact@v4
