@@ -26,38 +26,34 @@ export default function TradePerformanceCard({ size = 'medium' }: TradePerforman
   const lossRate = Number((nbLoss / nbTrades * 100).toFixed(2))
   const beRate = Number((nbBe / nbTrades * 100).toFixed(2))
 
-    return (
-      <Card className="h-full">
-        <div className="flex items-center justify-center h-full gap-1.5">
-          <div className="flex items-center gap-1">
-            <TrendingUp className="h-3 w-3 text-green-500" />
-            <span className="font-medium text-sm">{winRate}%</span>
-          </div>
-          <span className="text-muted-foreground">/</span>
-          <div className="flex items-center gap-1">
-            <Minus className="h-3 w-3 text-yellow-500" />
-            <span className="font-medium text-sm">{beRate}%</span>
-          </div>
-          <span className="text-muted-foreground">/</span>
-          <div className="flex items-center gap-1">
-            <TrendingDown className="h-3 w-3 text-red-500" />
-            <span className="font-medium text-sm">{lossRate}%</span>
-          </div>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent 
-                side="bottom" 
-                sideOffset={5} 
-                className="max-w-[300px]"
-              >
-                {t('widgets.tradePerformance.tooltip')}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </Card>
-    )
-  }
+  return (
+    <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
+      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-accent-teal/10 rounded-md border border-accent-teal/20">
+        <TrendingUp className="h-3 w-3 text-accent-teal" />
+        <span className="font-black text-[11px] tabular-nums text-accent-teal">{winRate}%</span>
+      </div>
+      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
+        <Minus className="h-3 w-3 text-fg-muted" />
+        <span className="font-black text-[11px] tabular-nums text-fg-muted">{beRate}%</span>
+      </div>
+      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-rose-500/10 rounded-md border border-rose-500/20">
+        <TrendingDown className="h-3 w-3 text-rose-500" />
+        <span className="font-black text-[11px] tabular-nums text-rose-500">{lossRate}%</span>
+      </div>
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="h-3 w-3 text-fg-muted cursor-help" />
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            sideOffset={5}
+            className="max-w-[300px]"
+          >
+            {t('widgets.tradePerformance.tooltip')}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  )
+}

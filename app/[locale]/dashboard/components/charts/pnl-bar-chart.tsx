@@ -65,8 +65,8 @@ const formatCurrency = (value: number) => {
   return `${value < 0 ? "-" : ""}$${absValue.toFixed(0)}`;
 };
 
-const positiveColor = "hsl(var(--chart-2))"; // Green color
-const negativeColor = "hsl(var(--chart-loss))"; // Orangish color
+const positiveColor = "rgb(var(--accent-teal-rgb))";
+const negativeColor = "rgb(var(--rose-500-rgb))";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   const t = useI18n();
@@ -78,23 +78,27 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     const data = payload[0].payload;
     const date = new Date(data.date + "T00:00:00Z");
     return (
-      <div className="bg-background p-2 border rounded shadow-xs">
-        <p className="font-semibold">
+      <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+        <p className="font-bold text-fg-primary text-xs mb-1">
           {formatInTimeZone(date, timezone, "MMM d, yyyy", {
             locale: dateLocale,
           })}
         </p>
         <p
-          className={`font-bold ${data.pnl >= 0 ? "text-green-600" : "text-red-600"}`}
+          className={cn("font-black text-sm tabular-nums", data.pnl >= 0 ? "text-accent-teal" : "text-rose-500")}
         >
           {t("pnl.tooltip.pnl")}: {formatCurrency(data.pnl)}
         </p>
-        <p>
-          {t("pnl.tooltip.longTrades")}: {data.longNumber}
-        </p>
-        <p>
-          {t("pnl.tooltip.shortTrades")}: {data.shortNumber}
-        </p>
+        <div className="grid grid-cols-2 gap-x-4 mt-2 pt-2 border-t border-white/5">
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">{t("pnl.tooltip.longTrades")}</span>
+            <span className="text-xs font-bold text-fg-primary">{data.longNumber}</span>
+          </div>
+          <div className="flex flex-col text-right">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">{t("pnl.tooltip.shortTrades")}</span>
+            <span className="text-xs font-bold text-fg-primary">{data.shortNumber}</span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -126,72 +130,54 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
     (entry) => (entry.shortNumber || 0) + (entry.longNumber || 0) > 0,
   );
 
-  const maxPnL = Math.max(...chartData.map((d) => d.pnl));
-  const minPnL = Math.min(...chartData.map((d) => d.pnl));
-
-  const getChartHeight = () => {
-    switch (size) {
-      case "small":
-        return "h-[140px]";
-      case "medium":
-        return "h-[200px]";
-      case "large":
-        return "h-[240px]";
-      default:
-        return "h-[200px]";
-    }
-  };
-
   const getChartMargins = () => {
     switch (size) {
       case "small":
-        return { left: 10, right: 4, top: 4, bottom: 20 };
+        return { left: 0, right: 0, top: 4, bottom: 0 };
       case "medium":
-        return { left: 10, right: 8, top: 8, bottom: 24 };
       case "large":
-        return { left: 10, right: 12, top: 12, bottom: 28 };
       default:
-        return { left: 10, right: 8, top: 8, bottom: 24 };
+        return { left: 0, right: 0, top: 8, bottom: 0 };
     }
   };
 
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b shrink-0",
-          size === "small" ? "p-2" : "p-3 sm:p-4",
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center",
         )}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <CardTitle
+          <div className="flex items-center gap-2">
+            <span
               className={cn(
-                "line-clamp-1",
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
               {t("pnl.title")}
-            </CardTitle>
+            </span>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-muted-foreground hover:text-foreground transition-colors cursor-help",
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t("pnl.description")}</p>
+                  <p className="text-xs">{t("pnl.description")}</p>
                 </TooltipContent>
               </UITooltip>
             </TooltipProvider>
           </div>
         </div>
-      </CardHeader>
-      <CardContent
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-4",
@@ -201,68 +187,70 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={getChartMargins()}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                className="text-border dark:opacity-[0.12] opacity-[0.2]"
-              />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                height={size === "small" ? 20 : 24}
-                tickMargin={size === "small" ? 4 : 8}
-                tick={{
-                  fontSize: size === "small" ? 9 : 11,
-                  fill: "currentColor",
-                }}
-                minTickGap={size === "small" ? 30 : 50}
-                tickFormatter={(value) => {
-                  const date = new Date(value + "T00:00:00Z");
-                  return formatInTimeZone(date, timezone, "MMM d", {
-                    locale: dateLocale,
-                  });
-                }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={60}
-                tickMargin={4}
-                tick={{
-                  fontSize: size === "small" ? 9 : 11,
-                  fill: "currentColor",
-                }}
-                tickFormatter={formatCurrency}
-              />
-              <Tooltip
-                content={<CustomTooltip />}
-                wrapperStyle={{
-                  fontSize: size === "small" ? "10px" : "12px",
-                  zIndex: 1000,
-                }}
-              />
-              <Bar
-                dataKey="pnl"
-                radius={[3, 3, 0, 0]}
-                maxBarSize={size === "small" ? 25 : 40}
-                className="transition-all duration-300 ease-in-out"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.pnl >= 0 ? positiveColor : negativeColor}
-                  />
-                ))}
-              </Bar>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="text-border dark:opacity-[0.1] opacity-[0.2]"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  height={size === "small" ? 20 : 24}
+                  tickMargin={size === "small" ? 4 : 8}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  minTickGap={size === "small" ? 30 : 50}
+                  tickFormatter={(value) => {
+                    const date = new Date(value + "T00:00:00Z");
+                    return formatInTimeZone(date, timezone, "MMM d", {
+                      locale: dateLocale,
+                    });
+                  }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={60}
+                  tickMargin={4}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar
+                  dataKey="pnl"
+                  radius={[2, 2, 2, 2]}
+                  maxBarSize={size === "small" ? 25 : 40}
+                  className="transition-all duration-300 ease-in-out"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.pnl >= 0 ? positiveColor : negativeColor}
+                      fillOpacity={0.8}
+                      stroke={entry.pnl >= 0 ? positiveColor : negativeColor}
+                      strokeWidth={1}
+                      className="hover:opacity-100"
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-              No data for current filters
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

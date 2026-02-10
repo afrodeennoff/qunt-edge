@@ -83,19 +83,19 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-secondary text-xs">Sharpe</span>
-                                <span className={cn("text-xs font-bold tabular-nums px-1.5 py-0.5 rounded-md", sharpeRatio > 1 ? "text-accent-teal bg-accent-teal/10" : "text-rose-500 bg-rose-500/10")}>
+                                <span className={cn("text-xs font-black tabular-nums px-1.5 py-0.5 rounded-md", sharpeRatio > 1 ? "text-accent-teal bg-accent-teal/10" : "text-rose-500 bg-rose-500/10")}>
                                     {sharpeRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-secondary text-xs">Sortino</span>
-                                <span className={cn("text-xs font-bold tabular-nums px-1.5 py-0.5 rounded-md", sortinoRatio > 1.5 ? "text-accent-teal bg-accent-teal/10" : "text-rose-500 bg-rose-500/10")}>
+                                <span className={cn("text-xs font-black tabular-nums px-1.5 py-0.5 rounded-md", sortinoRatio > 1.5 ? "text-accent-teal bg-accent-teal/10" : "text-rose-500 bg-rose-500/10")}>
                                     {sortinoRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-secondary text-xs">Calmar</span>
-                                <span className={cn("text-xs font-bold tabular-nums px-1.5 py-0.5 rounded-md", calmarRatio > 1 ? "text-accent-teal bg-accent-teal/10" : "text-rose-500 bg-rose-500/10")}>
+                                <span className={cn("text-xs font-black tabular-nums px-1.5 py-0.5 rounded-md", calmarRatio > 1 ? "text-accent-teal bg-accent-teal/10" : "text-rose-500 bg-rose-500/10")}>
                                     {calmarRatio.toFixed(2)}
                                 </span>
                             </div>
@@ -111,19 +111,19 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-secondary text-xs text-balance">Kelly Half</span>
-                                <span className={cn("text-xs font-bold tabular-nums", kellyHalf > 0 ? "text-accent-teal" : "text-rose-500")}>
+                                <span className={cn("text-xs font-black tabular-nums", kellyHalf > 0 ? "text-accent-teal" : "text-rose-500")}>
                                     {(kellyHalf * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-secondary text-xs">Optimal</span>
-                                <span className={cn("text-xs font-bold tabular-nums", kellyFull > 0 ? "text-accent-teal" : "text-rose-500")}>
+                                <span className={cn("text-xs font-black tabular-nums", kellyFull > 0 ? "text-accent-teal" : "text-rose-500")}>
                                     {(kellyFull * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-secondary text-xs">Conservative</span>
-                                <span className={cn("text-xs font-bold tabular-nums", kellyHalf > 0 ? "text-accent-teal" : "text-rose-500")}>
+                                <span className={cn("text-xs font-black tabular-nums", kellyHalf > 0 ? "text-accent-teal" : "text-rose-500")}>
                                     {((kellyHalf / 2) * 100).toFixed(1)}%
                                 </span>
                             </div>

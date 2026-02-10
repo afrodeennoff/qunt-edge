@@ -59,13 +59,15 @@ interface TradeImageEditorProps {
 export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   const t = useI18n();
   const user = useUserStore((state) => state.user);
-  const { updateTrades } = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
+  const [localImages, setLocalImages] = useState<{ imageBase64: string | null; imageBase64Second: string | null } | null>(null);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const { getTradeImages, updateTrades } = useData();
 
   // Use hash-based upload hook
   const uploadProps = useHashUpload({
@@ -76,11 +78,40 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
     maxFiles: MAX_IMAGES,
   });
 
-  // Use new images array if available, otherwise fall back to legacy fields
+  // Determine if we have images (either URLs or legacy base64 fields)
+  const hasImages = (trade.images && trade.images.length > 0) || trade.imageBase64 || trade.imageBase64Second;
+
+  // Source images from local state (fetched on demand) or from the trade object itself
+  const resolvedImageBase64 = localImages?.imageBase64 || trade.imageBase64;
+  const resolvedImageBase64Second = localImages?.imageBase64Second || trade.imageBase64Second;
+
   const imageArray =
     trade.images && trade.images.length > 0
       ? trade.images
-      : [trade.imageBase64, trade.imageBase64Second].filter(Boolean);
+      : [resolvedImageBase64, resolvedImageBase64Second].filter(Boolean);
+
+  const handleOpenGallery = useCallback(async () => {
+    setIsOpen(true);
+    // If we only have legacy fields and haven't loaded them yet, fetch them
+    if (
+      !trade.images?.length &&
+      (trade.imageBase64 || trade.imageBase64Second) &&
+      !localImages &&
+      !isLoadingImages
+    ) {
+      setIsLoadingImages(true);
+      try {
+        const images = await getTradeImages(trade.id);
+        if (images) {
+          setLocalImages(images);
+        }
+      } catch (error) {
+        console.error("Failed to load images:", error);
+      } finally {
+        setIsLoadingImages(false);
+      }
+    }
+  }, [trade.id, trade.images, trade.imageBase64, trade.imageBase64Second, localImages, isLoadingImages, getTradeImages]);
 
   const uploadCallback = useCallback(async () => {
     if (uploadProps.isSuccess && uploadProps.uploadedUrls.length > 0) {
@@ -245,21 +276,29 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
         {imageArray.length > 0 ? (
           <div className="relative group">
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={handleOpenGallery}
               className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               aria-label="View image"
             >
-              <Image
-                src={imageArray[0]}
-                alt="Trade image"
-                className="object-cover w-full h-full"
-                width={40}
-                height={40}
-              />
-              {imageArray.length > 1 && (
-                <span className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1 rounded">
-                  {imageArray.length}
-                </span>
+              {isLoadingImages ? (
+                <div className="flex items-center justify-center w-full h-full bg-muted animate-pulse">
+                  <ZoomIn className="h-4 w-4 text-muted-foreground animate-bounce" />
+                </div>
+              ) : (
+                <>
+                  <Image
+                    src={imageArray[0] || "/icon.png"}
+                    alt="Trade image"
+                    className="object-cover w-full h-full"
+                    width={40}
+                    height={40}
+                  />
+                  {imageArray.length > 1 && (
+                    <span className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1 rounded">
+                      {imageArray.length}
+                    </span>
+                  )}
+                </>
               )}
             </button>
 

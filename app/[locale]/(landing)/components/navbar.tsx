@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
+import { useCurrentLocale } from '@/locales/client'
 
 type NavLink = { title: string; href: string }
 
@@ -22,6 +23,7 @@ const LINKS: NavLink[] = [
 
 export default function Navbar() {
   const pathname = usePathname()
+  const locale = useCurrentLocale()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -57,7 +59,7 @@ export default function Navbar() {
           whileHover={{ y: -1 }}
           transition={{ duration: 0.2 }}
         >
-          <Link href="/" className="flex items-center gap-2 rounded-full px-2 py-1.5">
+          <Link href={`/${locale}`} className="flex items-center gap-2 rounded-full px-2 py-1.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface-muted)/0.85)]">
               <Logo className="h-4.5 w-4.5 fill-[hsl(var(--mk-text))]" />
             </div>
@@ -68,16 +70,16 @@ export default function Navbar() {
             {LINKS.map((link) => (
               <motion.div key={link.href} whileHover={{ y: -1 }} transition={{ duration: 0.2 }}>
                 <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] transition-all',
-                  isActive(link.href)
-                    ? 'bg-[hsl(var(--brand-primary)/0.12)] text-[hsl(var(--mk-text))]'
-                    : 'text-[hsl(var(--mk-text-muted))] hover:text-[hsl(var(--mk-text))]'
-                )}
-              >
-                {link.title}
+                  key={link.href}
+                  href={`/${locale}${link.href}`}
+                  className={cn(
+                    'rounded-full px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] transition-all',
+                    isActive(link.href)
+                      ? 'bg-[hsl(var(--brand-primary)/0.12)] text-[hsl(var(--mk-text))]'
+                      : 'text-[hsl(var(--mk-text-muted))] hover:text-[hsl(var(--mk-text))]'
+                  )}
+                >
+                  {link.title}
                 </Link>
               </motion.div>
             ))}
@@ -85,7 +87,7 @@ export default function Navbar() {
 
           <div className="ml-auto flex items-center gap-2">
             <Button asChild className="hidden h-10 rounded-full bg-[hsl(var(--brand-primary))] px-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] md:inline-flex">
-              <Link href="/authentication">Start Free Audit</Link>
+              <Link href={`/${locale}/authentication`}>Start Free Audit</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -100,7 +102,7 @@ export default function Navbar() {
                     {LINKS.map((link) => (
                       <Link
                         key={link.href}
-                        href={link.href}
+                        href={`/${locale}${link.href}`}
                         onClick={() => setMobileOpen(false)}
                         className="block rounded-xl px-3 py-2 text-sm text-[hsl(var(--mk-text))]"
                       >
@@ -109,7 +111,7 @@ export default function Navbar() {
                     ))}
                   </div>
                   <Button asChild className="mt-auto h-11 rounded-full bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">
-                    <Link href="/authentication" onClick={() => setMobileOpen(false)}>
+                    <Link href={`/${locale}/authentication`} onClick={() => setMobileOpen(false)}>
                       Start Free Audit
                     </Link>
                   </Button>

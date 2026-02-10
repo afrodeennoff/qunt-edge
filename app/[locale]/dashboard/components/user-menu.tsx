@@ -137,7 +137,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
             {user?.email}
           </div>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard">
+            <Link href={`/${currentLocale}/dashboard`}>
               <div className="flex items-center w-full">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 <span>{t('landing.navbar.dashboard')}</span>
@@ -146,7 +146,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/settings">
+            <Link href={`/${currentLocale}/dashboard/settings`}>
               <div className="flex items-center w-full">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>{t('dashboard.settings')}</span>
@@ -155,7 +155,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/billing">
+            <Link href={`/${currentLocale}/dashboard/billing`}>
               <div className="flex items-center w-full">
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>{t('dashboard.billing')}</span>
@@ -163,7 +163,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
               </div>
             </Link>
           </DropdownMenuItem>
-          <Link href="/dashboard/data">
+          <Link href={`/${currentLocale}/dashboard/data`}>
             <DropdownMenuItem className="flex items-center">
               <Database className="mr-2 h-4 w-4" />
               <span>{t('dashboard.data')}</span>
@@ -176,7 +176,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
             <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/teams/dashboard">
+            <Link href={`/${currentLocale}/teams/dashboard`}>
               <div className="flex items-center w-full">
                 <Building2 className="mr-2 h-4 w-4" />
                 <span>{t('dashboard.teams')}</span>
@@ -184,7 +184,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <Link href="/support">
+          <Link href={`/${currentLocale}/support`}>
             <DropdownMenuItem className="flex items-center">
               <LifeBuoy className="mr-2 h-4 w-4" />
               <span>{t('dashboard.support')}</span>

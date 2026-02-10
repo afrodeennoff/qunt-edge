@@ -224,7 +224,7 @@ function NotFoundContent() {
     if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back()
     } else {
-      router.push('/')
+      router.push(`/${locale}`)
     }
   }
 
@@ -299,7 +299,7 @@ function NotFoundContent() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
           <Button asChild variant="default" className="flex-1">
-            <Link href="/">
+            <Link href={`/${locale}`}>
               <Home className="w-4 h-4 mr-2" />
               Retour à l&apos;accueil
             </Link>
@@ -340,7 +340,7 @@ function NotFoundContent() {
       {/* Action buttons */}
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
         <Button asChild variant="default" className="flex-1">
-          <Link href="/">
+          <Link href={`/${locale}`}>
             <Home className="w-4 h-4 mr-2" />
             {t.goHome}
           </Link>

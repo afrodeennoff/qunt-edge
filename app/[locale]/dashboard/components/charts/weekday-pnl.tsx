@@ -129,33 +129,34 @@ export default function WeekdayPNLChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="rounded-lg border bg-background p-2 shadow-xs">
-          <div className="grid gap-2">
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t("weekdayPnl.tooltip.day")}
-              </span>
-              <span className="font-bold text-muted-foreground">
-                {translateWeekdayPnL(t, data.day)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t("weekdayPnl.tooltip.averagePnl")}
-              </span>
-              <span className="font-bold">{formatCurrency(data.pnl)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t("weekdayPnl.tooltip.trades")}
-              </span>
-              <span className="font-bold text-muted-foreground">
-                {data.tradeCount}{" "}
-                {data.tradeCount !== 1
-                  ? t("weekdayPnl.tooltip.trades_plural")
-                  : t("weekdayPnl.tooltip.trade")}
-              </span>
-            </div>
+        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("weekdayPnl.tooltip.day")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {translateWeekdayPnL(t, data.day)}
+            </span>
+          </div>
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("weekdayPnl.tooltip.averagePnl")}
+            </span>
+            <span className={cn(
+              "font-black text-sm",
+              data.pnl >= 0 ? "text-accent-teal" : "text-rose-500"
+            )}>{formatCurrency(data.pnl)}</span>
+          </div>
+          <div className="flex flex-col pt-2 border-t border-white/5">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("weekdayPnl.tooltip.trades")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.tradeCount}{" "}
+              {data.tradeCount !== 1
+                ? t("weekdayPnl.tooltip.trades_plural")
+                : t("weekdayPnl.tooltip.trade")}
+            </span>
           </div>
         </div>
       );
@@ -164,35 +165,35 @@ export default function WeekdayPNLChart({
   };
 
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
-          size === "small" ? "p-2 h-10" : "p-3 sm:p-4 h-14",
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center",
         )}
       >
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-1.5">
-            <CardTitle
+          <div className="flex items-center gap-2">
+            <span
               className={cn(
-                "line-clamp-1",
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
               {t("weekdayPnl.title")}
-            </CardTitle>
+            </span>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-muted-foreground hover:text-foreground transition-colors cursor-help",
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t("weekdayPnl.description")}</p>
+                  <p className="text-xs">{t("weekdayPnl.description")}</p>
                 </TooltipContent>
               </UITooltip>
             </TooltipProvider>
@@ -201,15 +202,15 @@ export default function WeekdayPNLChart({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2 lg:px-3"
+              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
               onClick={() => setWeekdayFilter({ days: [] })}
             >
               {t("weekdayPnl.clearFilter")}
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-4",
@@ -219,77 +220,82 @@ export default function WeekdayPNLChart({
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-              data={weekdayData}
-              margin={
-                size === "small"
-                  ? { left: 0, right: 4, top: 4, bottom: 20 }
-                  : { left: 0, right: 8, top: 8, bottom: 24 }
-              }
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                className="text-border dark:opacity-[0.12] opacity-[0.2]"
-              />
-              <XAxis
-                dataKey="day"
-                tickLine={false}
-                axisLine={false}
-                height={size === "small" ? 20 : 24}
-                tickMargin={size === "small" ? 4 : 8}
-                tick={{
-                  fontSize: size === "small" ? 9 : 11,
-                  fill: "currentColor",
-                }}
-                tickFormatter={(value) => {
-                  const dayName = translateWeekdayPnL(t, value);
-                  return size === "small" ? dayName.slice(0, 3) : dayName;
-                }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={45}
-                tickMargin={4}
-                tick={{
-                  fontSize: 8,
-                  fill: "currentColor",
-                }}
-                tickFormatter={formatCurrency}
-              />
-              <Tooltip
-                content={<CustomTooltip />}
-                wrapperStyle={{
-                  fontSize: size === "small" ? "10px" : "12px",
-                  zIndex: 1000,
-                }}
-              />
-              <Bar
-                dataKey="pnl"
-                radius={[3, 3, 0, 0]}
-                maxBarSize={size === "small" ? 25 : 40}
-                className="transition-all duration-300 ease-in-out"
-                opacity={weekdayFilter.days && weekdayFilter.days.length > 0 ? 0.3 : 1}
+                data={weekdayData}
+                margin={
+                  size === "small"
+                    ? { left: 0, right: 0, top: 4, bottom: 0 }
+                    : { left: 0, right: 0, top: 8, bottom: 0 }
+                }
               >
-                {weekdayData.map((entry) => (
-                  <Cell
-                    key={`cell-${entry.day}`}
-                    fill={getColor(entry.pnl)}
-                    className={cn(
-                      "transition-all duration-300 ease-in-out",
-                      weekdayFilter.days && weekdayFilter.days.includes(entry.day) && "ring-2 ring-primary ring-offset-2"
-                    )}
-                  />
-                ))}
-              </Bar>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="text-border dark:opacity-[0.1] opacity-[0.2]"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="day"
+                  tickLine={false}
+                  axisLine={false}
+                  height={size === "small" ? 20 : 24}
+                  tickMargin={size === "small" ? 4 : 8}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  tickFormatter={(value) => {
+                    const dayName = translateWeekdayPnL(t, value);
+                    return size === "small" ? dayName.slice(0, 3) : dayName;
+                  }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={45}
+                  tickMargin={4}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar
+                  dataKey="pnl"
+                  radius={[2, 2, 2, 2]}
+                  maxBarSize={size === "small" ? 25 : 40}
+                  className="transition-all duration-300 ease-in-out"
+                >
+                  {weekdayData.map((entry) => (
+                    <Cell
+                      key={`cell-${entry.day}`}
+                      fill={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      fillOpacity={
+                        weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
+                          ? 0.3
+                          : 0.8
+                      }
+                      stroke={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      strokeOpacity={
+                        weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
+                          ? 0.3
+                          : 1
+                      }
+                      className="hover:opacity-100"
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-              No data for current filters
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

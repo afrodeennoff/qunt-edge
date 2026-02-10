@@ -24,8 +24,6 @@ import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { Prisma, DashboardLayout } from "@/prisma/generated/prisma"
 import { useDashboard } from '../dashboard-context'
-import { Toolbar } from './toolbar'
-
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
   return {
@@ -763,7 +761,17 @@ export default function WidgetCanvas() {
                     size={widget.size}
                     currentType={widget.type}
                   >
-                    {renderWidget(widget)}
+                    <div className={cn(
+                      "h-full w-full rounded-xl border transition-all duration-500 group/widget overflow-hidden relative",
+                      isCustomizing
+                        ? "border-accent-teal/50 shadow-[0_0_30px_rgba(var(--accent-teal-rgb),0.2)] bg-background/60"
+                        : "border-white/[0.03] bg-background/40 backdrop-blur-md hover:border-accent-teal/30 hover:shadow-[0_0_20px_rgba(var(--accent-teal-rgb),0.1)]"
+                    )}>
+                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                      <div className="relative h-full w-full">
+                        {renderWidget(widget)}
+                      </div>
+                    </div>
                   </WidgetWrapper>
                 </div>
               )
@@ -771,14 +779,6 @@ export default function WidgetCanvas() {
           </ResponsiveGridLayout>
         </div>
       )}
-      <Toolbar
-        onAddWidget={contextAddWidget}
-        isCustomizing={isCustomizing}
-        onEditToggle={toggleCustomizing}
-        currentLayout={layouts || { desktop: [], mobile: [] }}
-        onRemoveAll={contextRemoveAllWidgets}
-        onRestoreDefaults={contextRestoreDefaultLayout}
-      />
     </div>
   )
 }

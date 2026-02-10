@@ -2,8 +2,10 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useCurrentLocale } from '@/locales/client'
 
 export default function CTA() {
+  const locale = useCurrentLocale()
   return (
     <section className="relative px-4 pb-28 pt-20 sm:px-6 sm:pb-32 sm:pt-28 lg:px-8">
       <motion.div
@@ -23,7 +25,7 @@ export default function CTA() {
         </p>
         <div className="mt-8">
           <Link
-            href="/authentication?next=dashboard"
+            href={`/${locale}/authentication?next=dashboard`}
             className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
           >
             Access Dashboard

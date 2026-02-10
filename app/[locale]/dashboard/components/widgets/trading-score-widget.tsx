@@ -39,51 +39,57 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
     const colorClass = getScoreColor(score)
 
     return (
-        <Card className="h-full flex flex-col">
-            <CardHeader className="py-3 px-4 flex-none border-b">
+        <div className="h-full flex flex-col bg-transparent">
+            <div className="py-3 px-4 flex-none border-b border-white/5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <CardTitle className="text-base">{t('widgets.tradingScore.title')}</CardTitle>
+                        <span className="text-sm font-bold tracking-tight text-fg-primary">{t('widgets.tradingScore.title')}</span>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
-                                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <Info className="h-3.5 w-3.5 text-fg-muted" />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>{t('widgets.tradingScore.tooltip')}</p>
+                                    <p className="text-xs">{t('widgets.tradingScore.tooltip')}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     </div>
-                    <Trophy className={cn("h-4 w-4", colorClass)} />
+                    <Trophy className={cn("h-4 w-4", colorClass === "text-green-500" ? "text-accent-teal" : colorClass === "text-red-500" ? "text-rose-500" : colorClass)} />
                 </div>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col items-center justify-center p-4">
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
                 <div className="relative flex items-center justify-center">
-                    {/* Simple circular display or just big number */}
-                    <div className="text-5xl font-bold tracking-tighter tabular-nums mb-2">
-                        <span className={colorClass}>{score}</span>
-                        <span className="text-lg text-muted-foreground ml-1">/ 100</span>
+                    <div className="text-5xl font-black tracking-tighter tabular-nums mb-1 drop-shadow-2xl">
+                        <span className={cn(colorClass === "text-green-500" ? "text-accent-teal" : colorClass === "text-red-500" ? "text-rose-500" : colorClass)}>
+                            {score}
+                        </span>
+                        <span className="text-lg text-fg-muted ml-1">/ 100</span>
                     </div>
                 </div>
-                <div className={cn("text-xl font-semibold uppercase tracking-widest", colorClass)}>
+                <div className={cn(
+                    "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest",
+                    colorClass === "text-green-500" ? "bg-accent-teal/10 text-accent-teal border border-accent-teal/20" :
+                        colorClass === "text-red-500" ? "bg-rose-500/10 text-rose-500 border border-rose-500/20" :
+                            "bg-muted/10 text-muted-foreground border border-muted/20"
+                )}>
                     {label}
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-2 w-full text-center text-xs">
-                    <div className="flex flex-col p-2 bg-muted/40 rounded">
-                        <span className="text-muted-foreground font-medium">Win Rate</span>
-                        <span className="font-mono mt-1">{metrics.winRate.toFixed(1)}%</span>
+                <div className="mt-6 grid grid-cols-3 gap-2 w-full text-center">
+                    <div className="flex flex-col p-2 bg-white/5 rounded-lg border border-white/5">
+                        <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Win Rate</span>
+                        <span className="font-black text-[13px] tabular-nums mt-0.5 text-fg-primary">{metrics.winRate.toFixed(1)}%</span>
                     </div>
-                    <div className="flex flex-col p-2 bg-muted/40 rounded">
-                        <span className="text-muted-foreground font-medium">P. Factor</span>
-                        <span className="font-mono mt-1">{metrics.profitFactor.toFixed(2)}</span>
+                    <div className="flex flex-col p-2 bg-white/5 rounded-lg border border-white/5">
+                        <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">P. Factor</span>
+                        <span className="font-black text-[13px] tabular-nums mt-0.5 text-fg-primary">{metrics.profitFactor.toFixed(2)}</span>
                     </div>
-                    <div className="flex flex-col p-2 bg-muted/40 rounded">
-                        <span className="text-muted-foreground font-medium">Trades</span>
-                        <span className="font-mono mt-1">{metrics.totalTrades}</span>
+                    <div className="flex flex-col p-2 bg-white/5 rounded-lg border border-white/5">
+                        <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Trades</span>
+                        <span className="font-black text-[13px] tabular-nums mt-0.5 text-fg-primary">{metrics.totalTrades}</span>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

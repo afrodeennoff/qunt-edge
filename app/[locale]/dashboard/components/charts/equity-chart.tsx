@@ -491,14 +491,14 @@ const AccountsLegend = React.memo(
               .slice(0, 20)
               .map(
                 ({
-                    accountNumber,
-                    equity,
-                    color,
-                    hasPayout,
-                    hasReset,
-                    payoutStatus,
-                    payoutAmount,
-                  }) => (
+                  accountNumber,
+                  equity,
+                  color,
+                  hasPayout,
+                  hasReset,
+                  payoutStatus,
+                  payoutAmount,
+                }) => (
                   <div
                     key={accountNumber}
                     className="flex items-center gap-1.5 shrink-0"
@@ -763,9 +763,9 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           dateRange:
             dateRange && dateRange.from && dateRange.to
               ? {
-                  from: dateRange.from.toISOString(),
-                  to: dateRange.to.toISOString(),
-                }
+                from: dateRange.from.toISOString(),
+                to: dateRange.to.toISOString(),
+              }
               : undefined,
           pnlRange,
           tickRange,
@@ -890,35 +890,35 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [isSharedView, showIndividual, chartData]);
 
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b shrink-0 h-14",
-          size === "small" ? "p-2" : "p-3 sm:p-4"
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
         )}
       >
         <div className="flex items-center justify-between h-full">
-          <div className="flex items-center gap-1.5">
-            <CardTitle
+          <div className="flex items-center gap-2">
+            <span
               className={cn(
-                "line-clamp-1",
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base"
               )}
             >
               {t("equity.title")}
-            </CardTitle>
+            </span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-muted-foreground hover:text-foreground transition-colors cursor-help",
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
                     )}
                   />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t("equity.description")}</p>
+                  <p className="text-xs">{t("equity.description")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -929,16 +929,16 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                 id="view-mode"
                 checked={showIndividual}
                 onCheckedChange={setShowIndividualConfig}
-                className="shrink-0"
+                className="shrink-0 scale-75"
               />
-              <Label htmlFor="view-mode" className="text-sm">
+              <Label htmlFor="view-mode" className="text-xs text-fg-secondary cursor-pointer">
                 {t("equity.toggle.individual")}
               </Label>
             </div>
           )}
         </div>
-      </CardHeader>
-      <CardContent
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-4"
@@ -948,7 +948,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           <div className="flex-1 min-h-0">
             {isLoading ? (
               <div className="w-full h-full flex items-center justify-center">
-                <div className="text-muted-foreground text-sm">
+                <div className="text-fg-muted text-sm animate-pulse">
                   {t("equity.loading")}
                 </div>
               </div>
@@ -959,14 +959,15 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                     data={chartData}
                     margin={
                       size === "small"
-                        ? { left: 10, right: 4, top: 4, bottom: 20 }
-                        : { left: 10, right: 8, top: 8, bottom: 24 }
+                        ? { left: 0, right: 0, top: 4, bottom: 0 }
+                        : { left: 0, right: 0, top: 10, bottom: 0 }
                     }
                     onMouseLeave={() => setHoveredData(null)}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      className="text-border dark:opacity-[0.12] opacity-[0.2]"
+                      className="text-border dark:opacity-[0.1] opacity-[0.2]"
+                      vertical={false}
                     />
                     <XAxis
                       dataKey="date"
@@ -974,9 +975,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                       axisLine={false}
                       height={size === "small" ? 20 : 24}
                       tickMargin={size === "small" ? 4 : 8}
+                      minTickGap={30}
                       tick={{
-                        fontSize: size === "small" ? 9 : 11,
-                        fill: "currentColor",
+                        fontSize: size === "small" ? 9 : 10,
+                        fill: "var(--fg-muted)",
                       }}
                       tickFormatter={(value) =>
                         format(new Date(value), "MMM d", { locale: dateLocale })
@@ -989,10 +991,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                       width={60}
                       tickMargin={4}
                       tick={{
-                        fontSize: size === "small" ? 9 : 11,
-                        fill: "currentColor",
+                        fontSize: size === "small" ? 9 : 10,
+                        fill: "var(--fg-muted)",
                       }}
-                      tickFormatter={formatCurrency}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
                     />
                     <ReferenceLine
                       y={0}
@@ -1024,8 +1026,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                 </ResponsiveContainer>
               </ChartContainer>
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                No data for current filters
+              <div className="w-full h-full flex items-center justify-center text-fg-muted text-xs">
+                No data available
               </div>
             )}
           </div>
@@ -1046,7 +1048,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
               />
             )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
+

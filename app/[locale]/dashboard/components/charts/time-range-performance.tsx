@@ -50,18 +50,6 @@ function getTimeRangeLabel(range: string): string {
   return labels[range] || range
 }
 
-function getColorByWinRate(winRate: number): string {
-  if (winRate === 0) return "hsl(var(--muted-foreground))"
-  return winRate >= 50 ? "hsl(var(--chart-win))" : "hsl(var(--chart-loss))"
-}
-
-const chartConfig = {
-  avgPnl: {
-    label: "Average PnL",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig
-
 export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRangePerformanceChartProps) {
   const { formattedTrades: trades, timeRange, setTimeRange } = useData()
   const t = useI18n()
@@ -118,6 +106,11 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     }
   }, [activeRange, timeRange.range, setTimeRange])
 
+  function getColorByWinRate(winRate: number): string {
+    if (winRate === 0) return "rgba(255,255,255,0.2)"
+    return winRate >= 50 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"
+  }
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     React.useEffect(() => {
       if (active && payload && payload.length) {
@@ -130,46 +123,47 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
-        <div className="rounded-lg border bg-background p-2 shadow-xs">
-          <div className="grid gap-2">
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t('timeRangePerformance.tooltip.timeRange')}
-              </span>
-              <span className={cn(
-                "font-bold",
-                timeRange.range === data.range ? "text-primary" : "text-muted-foreground"
-              )}>
-                {getTimeRangeLabel(label)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t('timeRangePerformance.tooltip.avgPnl')}
-              </span>
-              <span className="font-bold">
-                {data.avgPnl.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t('timeRangePerformance.tooltip.winRate')}
-              </span>
-              <span className="font-bold" style={{ color: data.color }}>
-                {data.winRate.toFixed(1)}%
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t('timeRangePerformance.tooltip.trades.one', { count: data.trades })}
-              </span>
-              <span className="font-bold text-muted-foreground">
-                {data.trades === 1 
-                  ? t('timeRangePerformance.tooltip.trades.one', { count: data.trades })
-                  : t('timeRangePerformance.tooltip.trades.other', { count: data.trades })
-                }
-              </span>
-            </div>
+        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t('timeRangePerformance.tooltip.timeRange')}
+            </span>
+            <span className={cn(
+              "font-bold text-fg-primary text-xs",
+              timeRange.range === data.range ? "text-accent-teal" : ""
+            )}>
+              {getTimeRangeLabel(label)}
+            </span>
+          </div>
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t('timeRangePerformance.tooltip.avgPnl')}
+            </span>
+            <span className={cn(
+              "font-black text-sm",
+              data.avgPnl >= 0 ? "text-accent-teal" : "text-rose-500"
+            )}>
+              {data.avgPnl.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex flex-col pt-2 border-t border-white/5">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t('timeRangePerformance.tooltip.winRate')}
+            </span>
+            <span className={cn(
+              "font-bold text-fg-primary text-xs",
+              data.winRate >= 50 ? "text-accent-teal" : "text-rose-500"
+            )}>
+              {data.winRate.toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex flex-col pt-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              Trades
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.trades}
+            </span>
           </div>
         </div>
       )
@@ -178,33 +172,35 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
   }
 
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader 
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
-          size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
         )}
       >
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-1.5">
-            <CardTitle 
+          <div className="flex items-center gap-2">
+            <span
               className={cn(
-                "line-clamp-1",
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === 'small' ? "text-sm" : "text-base"
               )}
             >
               {t('timeRangePerformance.title')}
-            </CardTitle>
+            </span>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger asChild>
-                  <Info className={cn(
-                    "text-muted-foreground hover:text-foreground transition-colors cursor-help",
-                    size === 'small' ? "h-3.5 w-3.5" : "h-4 w-4"
-                  )} />
+                  <Info
+                    className={cn(
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      size === 'small' ? "h-3.5 w-3.5" : "h-4 w-4"
+                    )}
+                  />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t('timeRangePerformance.description')}</p>
+                  <p className="text-xs">{t('timeRangePerformance.description')}</p>
                 </TooltipContent>
               </UITooltip>
             </TooltipProvider>
@@ -213,107 +209,107 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2 lg:px-3"
+              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
               onClick={() => setTimeRange({ range: null })}
             >
               {t('timeRangePerformance.clearFilter')}
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent 
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-1" : "p-2 sm:p-4"
         )}
       >
-        <div 
-          className="w-full h-full cursor-pointer" 
+        <div
+          className="w-full h-full cursor-pointer"
           onClick={handleClick}
         >
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-              data={chartData}
-              margin={
-                size === 'small'
-                  ? { left: 0, right: 4, top: 4, bottom: 20 }
-                  : { left: 0, right: 8, top: 8, bottom: 24 }
-              }
-            >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                className="text-border dark:opacity-[0.12] opacity-[0.2]"
-              />
-              <XAxis
-                dataKey="range"
-                tickLine={false}
-                axisLine={false}
-                height={size === 'small' ? 20 : 24}
-                tickMargin={size === 'small' ? 4 : 8}
-                tick={(props) => {
-                  const { x, y, payload } = props;
-                  return (
-                    <g transform={`translate(${x},${y})`}>
-                      <text
-                        x={0}
-                        y={0}
-                        dy={size === 'small' ? 8 : 4}
-                        textAnchor={size === 'small' ? 'end' : 'middle'}
-                        fill="currentColor"
-                        fontSize={size === 'small' ? 9 : 11}
-                        transform={size === 'small' ? 'rotate(-45)' : 'rotate(0)'}
-                      >
-                        {getTimeRangeLabel(payload.value)}
-                      </text>
-                    </g>
-                  );
-                }}
-                interval="preserveStartEnd"
-                allowDataOverflow={true}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={45}
-                tickMargin={4}
-                tick={{ 
-                  fontSize: size === 'small' ? 9 : 11,
-                  fill: 'currentColor'
-                }}
-              />
-              <Tooltip 
-                content={<CustomTooltip />}
-                wrapperStyle={{ 
-                  fontSize: size === 'small' ? '10px' : '12px',
-                  zIndex: 1000
-                }} 
-              />
-              <Bar
-                dataKey="avgPnl"
-                fill={chartConfig.avgPnl.color}
-                radius={[3, 3, 0, 0]}
-                maxBarSize={size === 'small' ? 25 : 40}
-                className="transition-all duration-300 ease-in-out"
-                opacity={timeRange.range ? 0.3 : 1}
+                data={chartData}
+                margin={
+                  size === 'small'
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
               >
-                {chartData.map((entry) => (
-                  <Cell
-                    key={`cell-${entry.range}`}
-                    fill={entry.color}
-                    opacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : 1)}
-                  />
-                ))}
-              </Bar>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="text-border dark:opacity-[0.1] opacity-[0.2]"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="range"
+                  tickLine={false}
+                  axisLine={false}
+                  height={size === 'small' ? 20 : 24}
+                  tickMargin={size === 'small' ? 4 : 8}
+                  tick={(props) => {
+                    const { x, y, payload } = props;
+                    const label = getTimeRangeLabel(payload.value);
+                    return (
+                      <g transform={`translate(${x},${y})`}>
+                        <text
+                          x={0}
+                          y={0}
+                          dy={size === 'small' ? 8 : 10}
+                          textAnchor="middle"
+                          fill="var(--fg-muted)"
+                          fontSize={size === 'small' ? 9 : 10}
+                          transform={size === 'small' ? 'rotate(0)' : 'rotate(0)'} // Removed rotation for cleaner look if space permits, or adjust
+                        >
+                          {label}
+                        </text>
+                      </g>
+                    );
+                  }}
+                  interval={0}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={45}
+                  tickMargin={4}
+                  tick={{
+                    fontSize: size === 'small' ? 9 : 10,
+                    fill: 'var(--fg-muted)'
+                  }}
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar
+                  dataKey="avgPnl"
+                  radius={[2, 2, 2, 2]}
+                  maxBarSize={size === 'small' ? 25 : 40}
+                  className="transition-all duration-300 ease-in-out"
+                >
+                  {chartData.map((entry) => (
+                    <Cell
+                      key={`cell-${entry.range}`}
+                      fill={entry.avgPnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : 0.8)}
+                      stroke={entry.avgPnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      strokeOpacity={timeRange.range === entry.range ? 1 : 0.5}
+                      className="hover:opacity-100"
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-              No data for current filters
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
-} 
+}
+

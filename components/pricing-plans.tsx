@@ -155,25 +155,25 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   // Function to check if current plan matches lookup key
   const isCurrentPlan = (lookupKey: string) => {
     if (!currentSubscription) return false
-    
+
     // Extract plan details from lookup key (e.g., "plus_yearly_eur")
     const parts = lookupKey.split('_')
     const planType = parts[0] // "plus"
     const interval = parts[1] // "yearly", "monthly", etc.
-    
+
     // Lifetime plans are never "current" since they're one-time purchases
     // and can't be compared to recurring subscriptions
     if (interval === 'lifetime') return false
-    
+
     // Map intervals to match subscription data
     const intervalMap: Record<string, string> = {
       'yearly': 'year',
-      'monthly': 'month', 
+      'monthly': 'month',
       'quarterly': 'quarter'
     }
-    
+
     return (
-      planType.toLowerCase() === 'plus' && 
+      planType.toLowerCase() === 'plus' &&
       currentSubscription.plan.name.toLowerCase().includes('plus') &&
       intervalMap[interval] === currentSubscription.plan.interval
     )
@@ -187,10 +187,10 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   // Function to check if user should be blocked from subscribing to recurring plans
   const isBlockedFromRecurring = (lookupKey: string) => {
     if (!hasLifetimeSubscription()) return false
-    
+
     const parts = lookupKey.split('_')
     const interval = parts[1] // "yearly", "monthly", etc.
-    
+
     // Block recurring plans if user has lifetime
     return ['yearly', 'monthly', 'quarterly'].includes(interval)
   }
@@ -198,10 +198,10 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   // Function to check if user should be blocked from purchasing lifetime again
   const isBlockedFromLifetime = (lookupKey: string) => {
     if (!hasLifetimeSubscription()) return false
-    
+
     const parts = lookupKey.split('_')
     const interval = parts[1] // "yearly", "monthly", etc.
-    
+
     // Block lifetime plans if user already has lifetime
     return interval === 'lifetime'
   }
@@ -213,13 +213,13 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
       const form = document.createElement('form')
       form.method = 'POST'
       form.action = '/api/whop/checkout'
-      
+
       const input = document.createElement('input')
       input.type = 'hidden'
       input.name = 'lookup_key'
       input.value = lookupKey
       form.appendChild(input)
-      
+
       // Add referral code if present
       if (referralCode) {
         const referralInput = document.createElement('input')
@@ -228,7 +228,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
         referralInput.value = referralCode
         form.appendChild(referralInput)
       }
-      
+
       document.body.appendChild(form)
       form.submit()
       return
@@ -271,16 +271,16 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   // Function to execute the actual plan switch
   const executePlanSwitch = async (lookupKey: string) => {
     setIsLoading(true)
-    
+
     try {
       const { switchSubscriptionPlan } = await import('@/server/billing')
       const result = await switchSubscriptionPlan(lookupKey)
-      
+
       if (result.success) {
         toast.success(t('billing.planSwitched'), {
           description: t('billing.planSwitchedDescription'),
         })
-        
+
         // Refresh the page to update subscription data
         window.location.reload()
       } else if ('requiresCheckout' in result && result.requiresCheckout) {
@@ -288,14 +288,14 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
         const form = document.createElement('form')
         form.method = 'POST'
         form.action = '/api/whop/checkout'
-        
+
         const finalLookupKey = result.lookupKey || lookupKey
         const input = document.createElement('input')
         input.type = 'hidden'
         input.name = 'lookup_key'
         input.value = finalLookupKey
         form.appendChild(input)
-        
+
         // Add referral code if present
         if (referralCode) {
           const referralInput = document.createElement('input')
@@ -304,7 +304,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
           referralInput.value = referralCode
           form.appendChild(referralInput)
         }
-        
+
         document.body.appendChild(form)
         form.submit()
       } else {
@@ -407,13 +407,13 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
               </Button>
             ) : (
               <Button asChild className="">
-                <Link href="/authentication">{t('pricing.startBasic')}</Link>
+                <Link href={`/${useCurrentLocale()}/authentication`}>{t('pricing.startBasic')}</Link>
               </Button>
             )}
-            
+
             <p className="text-xs text-center text-muted-foreground">
               {t('terms.pricing.freePlanDisclaimer')}
-              <Link href="/terms" className="text-primary hover:underline">
+              <Link href={`/${useCurrentLocale()}/terms`} className="text-primary hover:underline">
                 {t('terms.pricing.termsOfService')}
               </Link>
             </p>
@@ -586,7 +586,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                 </li>
               ))}
             </ul>
-            
+
             {/* Lifetime disclaimers */}
             {billingPeriod === 'lifetime' && (
               <div className="mt-4 pt-3 border-t border-border">
@@ -608,9 +608,9 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
               const isBlockedRecurring = isBlockedFromRecurring(lookupKey)
               const isBlockedLifetime = isBlockedFromLifetime(lookupKey)
               const isBlocked = isBlockedRecurring || isBlockedLifetime
-              
+
               return (
-                <Button 
+                <Button
                   onClick={() => handlePlanSwitch(lookupKey)}
                   disabled={isLoading || isCurrent || isBlocked}
                   variant={isCurrent || isBlocked ? "outline" : "default"}
@@ -618,20 +618,20 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                 >
                   {isLoading ? (
                     billingPeriod === 'lifetime' ? t('billing.lifetimeUpgrade') : t('billing.switching')
-                  ) : 
-                   isCurrent ? t('billing.currentPlan') : 
-                   isBlockedLifetime ? t('billing.lifetimeOwned') :
-                   isBlockedRecurring ? t('billing.lifetimeActive') :
-                   currentSubscription ? (
-                     billingPeriod === 'lifetime' ? t('pricing.upgradeToLifetime') || 'Upgrade to Lifetime' : t('billing.changePlan')
-                   ) : t('pricing.trialPeriod')}
+                  ) :
+                    isCurrent ? t('billing.currentPlan') :
+                      isBlockedLifetime ? t('billing.lifetimeOwned') :
+                        isBlockedRecurring ? t('billing.lifetimeActive') :
+                          currentSubscription ? (
+                            billingPeriod === 'lifetime' ? t('pricing.upgradeToLifetime') || 'Upgrade to Lifetime' : t('billing.changePlan')
+                          ) : t('pricing.trialPeriod')}
                 </Button>
               )
             })()}
-            
+
             <p className="text-xs text-center text-muted-foreground">
               {t('terms.pricing.disclaimer')}
-              <Link href="/terms" className="text-primary hover:underline">
+              <Link href={`/${useCurrentLocale()}/terms`} className="text-primary hover:underline">
                 {t('terms.pricing.termsOfService')}
               </Link>
             </p>
@@ -647,7 +647,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
         <FreePlan plan={plans.basic} isModal={isModal} onClose={onClose} />
         <PlusPlan plan={plans.plus} billingPeriod={billingPeriod} setBillingPeriod={setBillingPeriod} currency={currency} symbol={symbol} />
       </div>
-      
+
       {/* Lifetime Confirmation Dialog */}
       <Dialog open={showLifetimeConfirm} onOpenChange={setShowLifetimeConfirm}>
         <DialogContent>
@@ -673,7 +673,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                 </div>
               </div>
             </div>
-            
+
             {currentSubscription && (
               <div className="bg-muted rounded-lg p-4">
                 <h4 className="font-medium mb-2">{t('pricing.lifetimeUpgrade.currentSubscription')}</h4>

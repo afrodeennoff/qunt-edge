@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '@/store/user-store';
-import { useI18n } from "@/locales/client";
+import { useI18n, useCurrentLocale } from "@/locales/client";
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Menu, X, ArrowRight } from 'lucide-react';
@@ -18,6 +18,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const user = useUserStore(state => state.supabaseUser);
     const t = useI18n();
+    const locale = useCurrentLocale();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -35,13 +36,13 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
     }, [mobileMenuOpen]);
 
     const links = [
-        { name: t('footer.product.features'), href: '/#features' },
-        { name: t('footer.product.pricing'), href: '/pricing' },
-        { name: t('landing.navbar.propFirms'), href: '/propfirms' },
-        { name: t('footer.product.teams'), href: '/teams' },
-        { name: t('footer.product.support'), href: '/support' },
-        { name: t('footer.company.about'), href: '/about' },
-        { name: 'FAQ', href: '/faq' },
+        { name: t('footer.product.features'), href: `/${locale}/#features` },
+        { name: t('footer.product.pricing'), href: `/${locale}/pricing` },
+        { name: t('landing.navbar.propFirms'), href: `/${locale}/propfirms` },
+        { name: t('footer.product.teams'), href: `/${locale}/teams` },
+        { name: t('footer.product.support'), href: `/${locale}/support` },
+        { name: t('footer.company.about'), href: `/${locale}/about` },
+        { name: 'FAQ', href: `/${locale}/faq` },
     ];
 
     return (
@@ -58,7 +59,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                 )}
             >
                 <div className="container-fluid flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 group z-50" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href={`/${locale}`} className="flex items-center gap-2 group z-50" onClick={() => setMobileMenuOpen(false)}>
                         <div className="relative w-8 h-8 flex items-center justify-center">
                             <div className="absolute inset-0 bg-teal-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
                             <svg width="24" height="24" viewBox="0 0 32 32" fill="none" className="text-white relative z-10 transition-transform duration-500 group-hover:rotate-180">
@@ -104,7 +105,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                 </>
                             ) : (
                                 <Link
-                                    href="/dashboard"
+                                    href={`/${locale}/dashboard`}
                                     className="bg-teal-500 hover:bg-teal-400 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(45,212,191,0.3)]"
                                 >
                                     {t('landing.navbar.dashboard')}
@@ -195,7 +196,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                         </>
                                     ) : (
                                         <Link
-                                            href="/dashboard"
+                                            href={`/${locale}/dashboard`}
                                             onClick={() => setMobileMenuOpen(false)}
                                             className="block w-full bg-teal-500 text-black py-3.5 rounded-lg text-sm font-bold uppercase tracking-widest text-center shadow-lg shadow-teal-500/20 active:scale-95 transition-transform"
                                         >

@@ -81,29 +81,30 @@ export default function CommissionsPnLChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="rounded-lg border bg-background p-2 shadow-xs">
-          <div className="grid gap-2">
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t("commissions.tooltip.type")}
-              </span>
-              <span className="font-bold text-muted-foreground">
-                {data.name}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t("commissions.tooltip.amount")}
-              </span>
-              <span className="font-bold">{formatCurrency(data.raw)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                {t("commissions.tooltip.percentage")}
-              </span>
-              <span className="font-bold text-muted-foreground">
-                {data.value.toFixed(2)}%</span>
-            </div>
+        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("commissions.tooltip.type")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.name}
+            </span>
+          </div>
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("commissions.tooltip.amount")}
+            </span>
+            <span className={cn(
+              "font-bold text-sm",
+              data.raw >= 0 ? "text-accent-teal" : "text-rose-500"
+            )}>{formatCurrency(data.raw)}</span>
+          </div>
+          <div className="flex flex-col pt-2 border-t border-white/5">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("commissions.tooltip.percentage")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.value.toFixed(2)}%</span>
           </div>
         </div>
       );
@@ -113,27 +114,27 @@ export default function CommissionsPnLChart({
 
 
   const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span className="text-xs text-muted-foreground">{value}</span>;
+    return <span className="text-[10px] font-medium text-fg-muted uppercase tracking-wider">{value}</span>;
   };
 
 
   // Pie radii for consistency with trade-distribution
-  const getInnerRadius = () => (size === 'small' ? '60%' : '65%');
-  const getOuterRadius = () => (size === 'small' ? '80%' : '85%');
+  const getInnerRadius = () => (size === 'small' ? 40 : 60);
+  const getOuterRadius = () => (size === 'small' ? 60 : 80);
 
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
-          size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
         )}
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
-                "line-clamp-1",
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === 'small' ? "text-sm" : "text-base"
               )}
             >
@@ -143,19 +144,19 @@ export default function CommissionsPnLChart({
               <UITooltip>
                 <TooltipTrigger asChild>
                   <Info className={cn(
-                    "text-muted-foreground hover:text-foreground transition-colors cursor-help",
+                    "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
                     size === 'small' ? "h-3.5 w-3.5" : "h-4 w-4"
                   )} />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t("commissions.tooltip.description")}</p>
+                  <p className="text-xs">{t("commissions.tooltip.description")}</p>
                 </TooltipContent>
               </UITooltip>
             </TooltipProvider>
           </div>
         </div>
-      </CardHeader>
-      <CardContent
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-1" : "p-2 sm:p-4"
@@ -165,84 +166,51 @@ export default function CommissionsPnLChart({
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="45%"
-                innerRadius={getInnerRadius()}
-                outerRadius={getOuterRadius()}
-                paddingAngle={2}
-                dataKey="value"
-                nameKey="name"
-                startAngle={90}
-                endAngle={-270}
-                stroke="hsl(var(--background))"
-                strokeWidth={1}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    className="transition-all duration-300 ease-in-out hover:opacity-80 dark:brightness-90"
-                  />
-                ))}
-                {/* Centered percentage labels */}
-                <Label
-                  position="center"
-                  content={(props: any) => {
-                    if (!props.viewBox) return null;
-                    const viewBox = props.viewBox;
-                    if (!viewBox.cx || !viewBox.cy) return null;
-                    const cx = viewBox.cx;
-                    const cy = viewBox.cy;
-                    const labelRadius = Math.min(cx, cy) * (size === 'small' ? 0.95 : 1.1);
-                    return chartData.map((entry, index) => {
-                      const angle = -90 + (360 * (entry.value / 100) / 2) + (360 * chartData.slice(0, index).reduce((acc, curr) => acc + curr.value, 0) / 100);
-                      const x = cx + labelRadius * Math.cos((angle * Math.PI) / 180);
-                      const y = cy + labelRadius * Math.sin((angle * Math.PI) / 180);
-                      return (
-                        <text
-                          key={index}
-                          x={x}
-                          y={y}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          className="fill-muted-foreground font-medium translate-y-2"
-                          style={{ fontSize: size === 'small' ? '10px' : '12px' }}
-                        >
-                          {entry.value > 5 ? `${Math.round(entry.value)}%` : ''}
-                        </text>
-                      );
-                    });
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={getInnerRadius()}
+                  outerRadius={getOuterRadius()}
+                  paddingAngle={2}
+                  dataKey="value"
+                  nameKey="name"
+                  startAngle={90}
+                  endAngle={-270}
+                  stroke="rgba(0,0,0,0)"
+                  strokeWidth={1}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.name === t("commissions.legend.netPnl") ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      className="transition-all duration-300 ease-in-out hover:opacity-100 opacity-80"
+                    />
+                  ))}
+                </Pie>
+                <Legend
+                  verticalAlign="bottom"
+                  align="center"
+                  iconSize={8}
+                  iconType="circle"
+                  formatter={renderColorfulLegendText}
+                  wrapperStyle={{
+                    paddingTop: size === 'small' ? 0 : 16
                   }}
                 />
-              </Pie>
-              <Legend
-                verticalAlign="bottom"
-                align="center"
-                iconSize={8}
-                iconType="circle"
-                formatter={renderColorfulLegendText}
-                wrapperStyle={{
-                  paddingTop: size === 'small' ? 0 : 16
-                }}
-              />
-              <Tooltip
-                content={<CustomTooltip />}
-                wrapperStyle={{
-                  fontSize: size === 'small' ? '10px' : '12px',
-                  zIndex: 1000
-                }}
-              />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-              No data for current filters
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

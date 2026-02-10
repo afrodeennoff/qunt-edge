@@ -19,12 +19,14 @@ import {
 import React, { useState, useEffect } from "react"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
+import { useCurrentLocale } from "@/locales/client"
 import ReferralButton from "@/components/referral-button"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 import { checkAdminStatus } from "@/app/[locale]/dashboard/settings/actions"
 
 export function DashboardSidebar() {
   const { refreshAllData } = useData()
+  const locale = useCurrentLocale()
   const user = useUserStore(state => state.supabaseUser)
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
@@ -40,69 +42,69 @@ export function DashboardSidebar() {
 
   const navItems: UnifiedSidebarItem[] = [
     {
-      href: "/dashboard?tab=widgets",
+      href: `/${locale}/dashboard?tab=widgets`,
       icon: <LayoutDashboard className="size-4.5" />,
       label: "Dashboard",
       i18nKey: "landing.navbar.dashboard",
       group: "Overview"
     },
     {
-      href: "/dashboard?tab=table",
+      href: `/${locale}/dashboard?tab=table`,
       icon: <TrendingUp className="size-4.5" />,
       label: "Trades",
       i18nKey: "dashboard.trades",
       group: "Trading"
     },
     {
-      href: "/dashboard?tab=chart",
+      href: `/${locale}/dashboard?tab=chart`,
       icon: <Sparkles className="size-4.5" />,
       label: "Chart the Future",
       group: "Trading"
     },
     {
-      href: "/dashboard?tab=accounts",
+      href: `/${locale}/dashboard?tab=accounts`,
       icon: <Activity className="size-4.5" />,
       label: "Accounts",
       i18nKey: "dashboard.accounts",
       group: "Trading"
     },
     {
-      href: "/dashboard/strategies",
+      href: `/${locale}/dashboard/strategies`,
       icon: <BookOpen className="size-4.5" />,
       label: "Trade Desk",
       i18nKey: "dashboard.strategies",
       group: "Trading"
     },
     {
-      href: "/dashboard/reports",
+      href: `/${locale}/dashboard/reports`,
       icon: <BarChart3 className="size-4.5" />,
       label: "Reports",
       i18nKey: "dashboard.reports",
       group: "Analytics"
     },
     {
-      href: "/dashboard/behavior",
+      href: `/${locale}/dashboard/behavior`,
       icon: <Brain className="size-4.5" />,
       label: "Behavior",
       i18nKey: "dashboard.behavior",
       group: "Analytics"
     },
     {
-      href: "/teams/dashboard",
+      href: `/${locale}/teams/dashboard`,
       icon: <Building2 className="size-4.5" />,
       label: "Team",
       i18nKey: "dashboard.teams",
       group: "Community"
     },
     {
-      href: "/propfirms",
+      href: `/${locale}/propfirms`,
       icon: <Globe className="size-4.5" />,
       label: "Prop Firms",
       i18nKey: "footer.product.propfirms",
       group: "Community"
     },
     {
-      href: "/dashboard/data",
+      href: `/${locale}/dashboard/data`,
       icon: <Database className="size-4.5" />,
       label: "Data",
       i18nKey: "dashboard.data",
@@ -115,21 +117,21 @@ export function DashboardSidebar() {
       group: "System"
     },
     {
-      href: "/dashboard/billing",
+      href: `/${locale}/dashboard/billing`,
       icon: <CreditCard className="size-4.5" />,
       label: "Billing",
       i18nKey: "dashboard.billing",
       group: "System"
     },
     {
-      href: "/dashboard/settings",
+      href: `/${locale}/dashboard/settings`,
       icon: <Settings className="size-4.5" />,
       label: "Settings",
       i18nKey: "dashboard.settings",
       group: "System"
     },
     ...(isAdmin ? [{
-      href: "/admin",
+      href: `/${locale}/admin`,
       icon: <Shield className="size-4.5" />,
       label: "Admin",
       group: "System"

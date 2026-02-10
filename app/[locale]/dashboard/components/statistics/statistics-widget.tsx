@@ -39,7 +39,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value)
-    
+
     // Always use $ symbol with proper spacing for French
     if (locale === 'fr') {
       return `${formatted} $`
@@ -72,9 +72,9 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
     return dataContext.calendarData
   }, [dayData, dataContext.calendarData])
 
-  const { 
-    nbWin, nbLoss, nbBe, nbTrades, 
-    averagePositionTime, 
+  const {
+    nbWin, nbLoss, nbBe, nbTrades,
+    averagePositionTime,
     cumulativePnl, cumulativeFees,
     winningStreak,
     grossLosses,
@@ -113,8 +113,8 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
       return dayData.pnl > 0 ? dayData.pnl : 0
     }
     const winningDays = chartData.filter(day => day.pnl > 0)
-    return winningDays.length > 0 
-      ? winningDays.reduce((sum, day) => sum + day.pnl, 0) / winningDays.length 
+    return winningDays.length > 0
+      ? winningDays.reduce((sum, day) => sum + day.pnl, 0) / winningDays.length
       : 0
   }, [dayData, chartData])
 
@@ -124,7 +124,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
       return dayData.pnl < 0 ? Math.abs(dayData.pnl) : 0
     }
     const losingDays = chartData.filter(day => day.pnl < 0)
-    return losingDays.length > 0 
+    return losingDays.length > 0
       ? Math.abs(losingDays.reduce((sum, day) => sum + day.pnl, 0) / losingDays.length)
       : 0
   }, [dayData, chartData])
@@ -171,26 +171,26 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
   }, [])
 
   return (
-    <Card className="h-full flex flex-col" ref={cardRef}>
-      <CardHeader 
+    <Card className="h-full flex flex-col border-none bg-transparent" ref={cardRef}>
+      <CardHeader
         className={cn(
-          "flex-none border-b",
-          size === 'tiny' 
+          "flex-none border-b border-white/5",
+          size === 'tiny'
             ? "py-1 px-2"
             : (size === 'small' || size === 'small-long')
-              ? "py-2 px-3" 
+              ? "py-2 px-3"
               : "py-3 px-4"
         )}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle 
+            <CardTitle
               className={cn(
                 "line-clamp-1",
                 size === 'tiny'
                   ? "text-xs"
-                  : (size === 'small' || size === 'small-long') 
-                    ? "text-sm" 
+                  : (size === 'small' || size === 'small-long')
+                    ? "text-sm"
                     : "text-base"
               )}
             >
@@ -217,41 +217,41 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
             "flex flex-col border-r border-b",
             size === 'tiny' ? "p-1.5" : "p-3"
           )}>
-            <h3 className="text-xs font-medium mb-1.5">{t('statistics.profitLoss.title')}</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-fg-muted">{t('statistics.profitLoss.title')}</h3>
             <div className="flex-1 flex flex-col justify-center gap-0.5">
               {/* Profits */}
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">{t('statistics.profitLoss.profits')}</span>
                 <span className="text-xs font-medium text font-mono">{formatCurrency(grossWin)}</span>
               </div>
-              
+
               {/* Losses */}
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">- {t('statistics.profitLoss.losses')}</span>
-                <span className="text-xs font-medium text-red-500 font-mono">{formatCurrency(grossLosses)}</span>
+                <span className="text-xs font-medium text-rose-500 font-mono">{formatCurrency(grossLosses)}</span>
               </div>
-              
+
               {/* Fees */}
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">- {t('statistics.profitLoss.fees')}</span>
-                <span className="text-xs font-medium text-red-500 font-mono">{formatCurrency(cumulativeFees)}</span>
+                <span className="text-xs font-medium text-rose-500 font-mono">{formatCurrency(cumulativeFees)}</span>
               </div>
-              
+
               {/* Payouts */}
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">- {t('statistics.profitLoss.payouts')} ({nbPayouts})</span>
-                <span className="text-xs font-medium text-red-500 font-mono">{formatCurrency(totalPayouts)}</span>
+                <span className="text-xs font-medium text-rose-500 font-mono">{formatCurrency(totalPayouts)}</span>
               </div>
-              
+
               {/* Divider */}
-              <div className="border-t border-dashed my-1"></div>
-              
+              <div className="border-t border-white/5 border-dashed my-1"></div>
+
               {/* Net Result */}
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs font-medium">{t('statistics.profitLoss.net')}</span>
                 <span className={cn(
                   "text-sm font-bold font-mono",
-                  netPnlWithPayouts > 0 ? "text-green-500" : "text-red-500"
+                  netPnlWithPayouts > 0 ? "text-accent-teal" : "text-rose-500"
                 )}>
                   {formatCurrency(netPnlWithPayouts)}
                 </span>
@@ -264,7 +264,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
             "flex flex-col border-b",
             size === 'tiny' ? "p-1.5" : "p-3"
           )}>
-            <h3 className="text-xs font-medium mb-1.5">{t('statistics.performance.title')}</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-fg-muted">{t('statistics.performance.title')}</h3>
             <div className="flex-1 flex flex-col justify-center gap-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">{t('statistics.performance.winRate')}</span>
@@ -284,7 +284,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <span className="text-sm font-medium text-green-500 font-mono">{formatCurrency(avgWinPerDay)}</span>
+                <span className="text-sm font-medium text-accent-teal font-mono">{formatCurrency(avgWinPerDay)}</span>
               </div>
               {size !== 'tiny' && (
                 <div className="flex justify-between items-center">
@@ -301,7 +301,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <span className="text-sm font-medium text-red-500 font-mono">-{formatCurrency(avgLossPerDay)}</span>
+                  <span className="text-sm font-medium text-rose-500 font-mono">-{formatCurrency(avgLossPerDay)}</span>
                 </div>
               )}
             </div>
@@ -312,7 +312,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
             "flex flex-col border-r",
             size === 'tiny' ? "p-1.5" : "p-3"
           )}>
-            <h3 className="text-xs font-medium mb-1.5">{t('statistics.activity.title')}</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-fg-muted">{t('statistics.activity.title')}</h3>
             <div className="flex-1 flex flex-col justify-center gap-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">{t('statistics.activity.totalTrades')}</span>
@@ -320,7 +320,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">{t('statistics.activity.winningTrades')}</span>
-                <span className="text-sm font-medium text-green-500">{nbWin}</span>
+                <span className="text-sm font-medium text-accent-teal">{nbWin}</span>
               </div>
               {size !== 'tiny' && (
                 <div className="flex justify-between items-center">
@@ -336,14 +336,14 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
             "flex flex-col",
             size === 'tiny' ? "p-1.5" : "p-3"
           )}>
-            <h3 className="text-xs font-medium mb-1.5">{t('statistics.distribution.title')}</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-fg-muted">{t('statistics.distribution.title')}</h3>
             <div className="flex-1 flex flex-col justify-center gap-1.5">
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-xs">{t('statistics.distribution.long')}</span>
                   <span className="text-sm font-medium">{longRate}%</span>
                 </div>
-                <Progress value={longRate} className="h-1" />
+                <Progress value={longRate} className="h-1 bg-white/5" indicatorClassName="bg-accent-teal" />
               </div>
               {size !== 'tiny' ? (
                 <>
@@ -352,7 +352,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
                       <span className="text-muted-foreground text-xs">{t('statistics.distribution.short')}</span>
                       <span className="text-sm font-medium">{shortRate}%</span>
                     </div>
-                    <Progress value={shortRate} className="h-1" />
+                    <Progress value={shortRate} className="h-1 bg-white/5" indicatorClassName="bg-rose-500" />
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground text-xs">{t('statistics.distribution.winningStreak')}</span>

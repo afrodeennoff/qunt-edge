@@ -29,11 +29,11 @@ export function SubscriptionBadge({ className }: { className?: string }) {
   const isActive = subscription?.status === 'active'
   const isPastDue = subscription?.status === 'past_due'
   const isCanceled = subscription?.cancel_at_period_end || subscription?.status === 'canceled'
-  
+
   // Compute dates
   const nextBillingDate = subscription?.current_period_end ? new Date(subscription.current_period_end * 1000) : null
   const trialEndDate = subscription?.trial_end ? new Date(subscription.trial_end * 1000) : null
-  
+
   // Compute days remaining
   const trialDays = (() => {
     if (!subscription?.trial_end) return null
@@ -43,7 +43,7 @@ export function SubscriptionBadge({ className }: { className?: string }) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays > 0 ? diffDays : 0
   })()
-  
+
   const subscriptionDays = (() => {
     if (!subscription?.cancel_at_period_end || !subscription?.current_period_end) return null
     const today = new Date()
@@ -130,7 +130,7 @@ export function SubscriptionBadge({ className }: { className?: string }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Link href="/dashboard/billing">
+          <Link href={`/${locale}/dashboard/billing`}>
             <Badge
               variant="secondary"
               className={cn(

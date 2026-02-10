@@ -27,9 +27,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         tabIndex={clickable ? 0 : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
         className={cn(
-          "relative overflow-hidden rounded-xl group",
+          "relative overflow-hidden rounded-xl group transition-all duration-300",
           {
-            "bg-black border border-white/[0.08] shadow-2xl": variant === "default" || variant === "glass",
+            "bg-background/5 border border-white/5 backdrop-blur-sm": variant === "default" || variant === "glass",
             "bg-card text-card-foreground border border-border shadow-sm": variant === "elevated",
             "border-2 border-border bg-transparent shadow-none": variant === "outlined",
             "border-0 bg-transparent shadow-none": variant === "flat",

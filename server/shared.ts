@@ -129,6 +129,26 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
           orderBy: {
             entryDate: 'desc',
           },
+          select: {
+            id: true,
+            accountNumber: true,
+            instrument: true,
+            side: true,
+            quantity: true,
+            entryPrice: true,
+            closePrice: true,
+            pnl: true,
+            commission: true,
+            entryDate: true,
+            closeDate: true,
+            timeInPosition: true,
+            comment: true,
+            tags: true,
+            groupId: true,
+            userId: true,
+            videoUrl: true,
+            createdAt: true,
+          }
         }),
         prisma.tickDetails.findMany(),
         prisma.group.findMany({
@@ -181,7 +201,7 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
 
     return {
       ...result,
-      trades: normalizeTradesForClient(result.trades)
+      trades: normalizeTradesForClient(result.trades as any)
     }
   } catch (error) {
     console.error('[getShared] Error:', error)

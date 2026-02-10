@@ -111,7 +111,7 @@ function validateLayouts(layouts: DashboardLayout): boolean {
   return validateArray(layouts.desktop) && validateArray(layouts.mobile)
 }
 
-function serializeTrade(trade: PrismaTrade): SerializedTrade {
+function serializeTrade(trade: any): SerializedTrade {
   return {
     ...trade,
     entryPrice: trade.entryPrice?.toString() || "0",
@@ -364,6 +364,26 @@ export async function getTradesAction(
           orderBy: { entryDate: 'desc' },
           skip: (p - 1) * ps,
           take: ps,
+          select: {
+            id: true,
+            accountNumber: true,
+            instrument: true,
+            side: true,
+            quantity: true,
+            entryPrice: true,
+            closePrice: true,
+            pnl: true,
+            commission: true,
+            entryDate: true,
+            closeDate: true,
+            timeInPosition: true,
+            comment: true,
+            tags: true,
+            groupId: true,
+            userId: true,
+            videoUrl: true,
+            createdAt: true,
+          }
         }),
         prisma.trade.count({ where })
       ])
@@ -392,6 +412,28 @@ export async function getTradesAction(
   } catch (error) {
     logger.error('getTradesAction failed', { error })
     throw error
+  }
+}
+
+export async function getTradeImagesAction(tradeId: string): Promise<{
+  imageBase64: string | null;
+  imageBase64Second: string | null;
+} | null> {
+  const userId = await resolveWritableUserId(await getUserId())
+  if (!userId) return null
+
+  try {
+    const trade = await prisma.trade.findUnique({
+      where: { id: tradeId, userId },
+      select: {
+        imageBase64: true,
+        imageBase64Second: true,
+      }
+    })
+    return trade
+  } catch (error) {
+    logger.error('[getTradeImagesAction] Error', { error, tradeId })
+    return null
   }
 }
 

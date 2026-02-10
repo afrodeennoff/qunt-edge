@@ -19,7 +19,7 @@ interface LongShortPerformanceCardProps {
 
 export default function LongShortPerformanceCard({ size = 'medium' }: LongShortPerformanceCardProps) {
   const { calendarData } = useData()
-  const  t  = useI18n()
+  const t = useI18n()
 
   // Calculate long/short data
   const chartData = Object.entries(calendarData).map(([date, values]) => ({
@@ -35,33 +35,30 @@ export default function LongShortPerformanceCard({ size = 'medium' }: LongShortP
   const longRate = Number((longNumber / totalTrades * 100).toFixed(2))
   const shortRate = Number((shortNumber / totalTrades * 100).toFixed(2))
 
-    return (
-      <Card className="h-full">
-        <div className="flex items-center justify-center h-full gap-1.5">
-          <div className="flex items-center gap-1">
-            <ArrowUpFromLine className="h-3 w-3 text-green-500" />
-            <span className="font-medium text-sm">{longRate}%</span>
-          </div>
-          <span className="text-muted-foreground">/</span>
-          <div className="flex items-center gap-1">
-            <ArrowDownFromLine className="h-3 w-3 text-red-500" />
-            <span className="font-medium text-sm">{shortRate}%</span>
-          </div>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent 
-                side="bottom" 
-                sideOffset={5} 
-                className="max-w-[300px]"
-              >
-                {t('widgets.longShortPerformance.tooltip')}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </Card>
-    )
-  }
+  return (
+    <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
+      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-accent-teal/10 rounded-md border border-accent-teal/20">
+        <ArrowUpFromLine className="h-3 w-3 text-accent-teal" />
+        <span className="font-black text-[11px] tabular-nums text-accent-teal">{longNumber} ({longRate}%)</span>
+      </div>
+      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-rose-500/10 rounded-md border border-rose-500/20">
+        <ArrowDownFromLine className="h-3 w-3 text-rose-500" />
+        <span className="font-black text-[11px] tabular-nums text-rose-500">{shortNumber} ({shortRate}%)</span>
+      </div>
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="h-3 w-3 text-fg-muted cursor-help" />
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            sideOffset={5}
+            className="max-w-[300px]"
+          >
+            {t('widgets.longShortPerformance.tooltip')}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  )
+}

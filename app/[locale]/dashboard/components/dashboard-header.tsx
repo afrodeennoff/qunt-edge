@@ -19,9 +19,22 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
     CloudUpload,
     CheckCircle2,
-    Sparkles
+    Sparkles,
+    Trash2,
+    RotateCcw
 } from 'lucide-react';
 import Link from 'next/link';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export function DashboardHeader() {
     const pathname = usePathname();
@@ -31,7 +44,9 @@ export function DashboardHeader() {
         addWidget,
         layouts,
         autoSaveStatus,
-        flushPendingSaves
+        flushPendingSaves,
+        removeAllWidgets,
+        restoreDefaultLayout
     } = useDashboard();
     const t = useI18n();
     const { isPlusUser } = useData();
@@ -140,6 +155,59 @@ export function DashboardHeader() {
                                         onAddWidget={addWidget}
                                         isCustomizing={isCustomizing}
                                     />
+
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <button
+                                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                                title={t('widgets.restoreDefaults')}
+                                            >
+                                                <RotateCcw className="h-4 w-4" />
+                                            </button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>{t('widgets.restoreDefaultsConfirmTitle')}</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    {t('widgets.restoreDefaultsConfirmDescription')}
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                                                <AlertDialogAction onClick={restoreDefaultLayout}>
+                                                    {t('widgets.confirmRestoreDefaults')}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <button
+                                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                                title={t('widgets.deleteAll')}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>{t('widgets.deleteAllConfirmTitle')}</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    {t('widgets.deleteAllConfirmDescription')}
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={removeAllWidgets}
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                >
+                                                    {t('widgets.confirmDeleteAll')}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
 
                                     {autoSaveStatus.hasPending ? (
                                         <button

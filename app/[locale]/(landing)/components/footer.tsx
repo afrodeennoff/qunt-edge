@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Github, MessageCircle, Youtube } from 'lucide-react'
 import { Logo } from '@/components/logo'
-import { useI18n } from '@/locales/client'
+import { useI18n, useCurrentLocale } from '@/locales/client'
 
 type FooterLink = { name: string; href: string }
 type SocialLink = FooterLink & { icon: ComponentType<{ className?: string }> }
@@ -33,6 +33,7 @@ const LEGAL_LINKS: FooterLink[] = [
 
 export default function Footer() {
   const t = useI18n()
+  const locale = useCurrentLocale()
 
   const socialLinks: SocialLink[] = [
     { name: 'GitHub', href: 'https://github.com/afrodeennoff/lassttry-edge-', icon: Github },
@@ -66,10 +67,10 @@ export default function Footer() {
             <p className="max-w-md text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">{t('footer.description')}</p>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Link href="/authentication" className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
+              <Link href={`/${locale}/authentication`} className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
                 Sign In
               </Link>
-              <Link href="/support" className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
+              <Link href={`/${locale}/support`} className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
                 Contact Support
               </Link>
             </div>
@@ -111,6 +112,7 @@ export default function Footer() {
 }
 
 function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
+  const locale = useCurrentLocale()
   return (
     <div>
       <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">{title}</h3>
@@ -123,7 +125,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
             viewport={{ once: true }}
             transition={{ delay: idx * 0.04, duration: 0.35 }}
           >
-            <Link href={item.href} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
+            <Link href={`/${locale}${item.href}`} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
               {item.name}
             </Link>
           </motion.li>

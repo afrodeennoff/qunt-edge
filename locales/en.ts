@@ -855,6 +855,7 @@ export default {
   "contracts.tooltip.hour": "h",
   "contracts.tooltip.totalContracts": "Total Contracts",
   "contracts.tooltip.numberOfTrades": "Number of Trades",
+  "contracts.tooltip.time": "Time",
   "contracts.axis.contracts": "Contracts",
   equity: {
     title: "Equity",

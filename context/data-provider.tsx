@@ -30,6 +30,7 @@ import {
 } from "@/server/user-data";
 import {
   getTradesAction,
+  getTradeImagesAction,
   groupTradesAction,
   ungroupTradesAction,
   updateTradesAction,
@@ -160,6 +161,10 @@ interface DataContextType {
   deleteTrades: (tradeIds: string[]) => Promise<void>;
   groupTrades: (tradeIds: string[]) => Promise<void>;
   ungroupTrades: (tradeIds: string[]) => Promise<void>;
+  getTradeImages: (tradeId: string) => Promise<{
+    imageBase64: string | null;
+    imageBase64Second: string | null;
+  } | null>;
 
   // Accounts
   deleteAccount: (account: Account) => Promise<void>;
@@ -1621,6 +1626,19 @@ export const DataProvider: React.FC<{
     [supabaseUser?.id, trades, setTrades, refreshAllData]
   );
 
+  const getTradeImages = useCallback(
+    async (tradeId: string) => {
+      if (!supabaseUser?.id) return null;
+      try {
+        return await getTradeImagesAction(tradeId);
+      } catch (error) {
+        console.error("Error fetching trade images:", error);
+        return null;
+      }
+    },
+    [supabaseUser?.id]
+  );
+
   const saveDashboardLayout = useCallback(
     async (layout: PrismaDashboardLayout) => {
       if (!supabaseUser?.id) return;
@@ -1714,6 +1732,7 @@ export const DataProvider: React.FC<{
 
     // Dashboard layout
     saveDashboardLayout,
+    getTradeImages,
   };
 
   return (

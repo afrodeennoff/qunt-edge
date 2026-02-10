@@ -35,92 +35,100 @@ interface TooltipProps {
   }>;
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps) => {
-  const t = useI18n()
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="rounded-lg border bg-background p-2 shadow-xs">
-        <div className="grid gap-2">
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
-              {t('tradeDistribution.tooltip.type')}
-            </span>
-            <span className="font-bold text-muted-foreground">
-              {data.name}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
-              {t('tradeDistribution.tooltip.percentage')}
-            </span>
-            <span className="font-bold">
-              {data.value.toFixed(2)}%
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
   const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
   const t = useI18n()
   const hasData = nbTrades > 0
 
   const chartData = React.useMemo(() => {
+
+    // Safety check for nbTrades
+    if (!nbTrades) return []
+
     const winRate = Number((nbWin / nbTrades * 100).toFixed(2))
     const lossRate = Number((nbLoss / nbTrades * 100).toFixed(2))
-    const beRate = Number((nbBe / nbTrades * 100).toFixed(2))
+    // Explicitly handle float precision issues
+    const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'hsl(var(--chart-win))', count: nbWin },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'hsl(var(--muted-foreground))', count: nbBe },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'hsl(var(--chart-loss))', count: nbLoss }
+      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'rgb(var(--accent-teal-rgb))', count: nbWin },
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'rgba(255,255,255,0.2)', count: nbBe },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'rgb(var(--rose-500-rgb))', count: nbLoss }
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
   const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span className="text-xs text-muted-foreground">{value}</span>;
+    return <span className="text-[10px] uppercase font-bold tracking-wider text-fg-muted">{value}</span>;
   }
 
+  const CustomTooltip = ({ active, payload }: TooltipProps) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+          <div className="flex flex-col mb-1">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t('tradeDistribution.tooltip.type')}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.name}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t('tradeDistribution.tooltip.percentage')}
+            </span>
+            <span className={cn(
+              "font-black text-sm tabular-nums",
+              data.name.includes("Win") ? "text-accent-teal" :
+                data.name.includes("Loss") ? "text-rose-500" : "text-fg-secondary"
+            )}>
+              {data.value.toFixed(2)}%
+            </span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader 
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
-          size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
         )}
       >
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-1.5">
-            <CardTitle 
+          <div className="flex items-center gap-2">
+            <span
               className={cn(
-                "line-clamp-1",
-                size === 'small' ? "text-sm" : "text-base"
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                size === "small" ? "text-sm" : "text-base"
               )}
             >
               {t('tradeDistribution.title')}
-            </CardTitle>
+            </span>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger asChild>
-                  <Info className={cn(
-                    "text-muted-foreground hover:text-foreground transition-colors cursor-help",
-                    size === 'small' ? "h-3.5 w-3.5" : "h-4 w-4"
-                  )} />
+                  <Info
+                    className={cn(
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
+                    )}
+                  />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t('tradeDistribution.description')}</p>
+                  <p className="text-xs">{t('tradeDistribution.description')}</p>
                 </TooltipContent>
               </UITooltip>
             </TooltipProvider>
           </div>
         </div>
-      </CardHeader>
-      <CardContent 
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-1" : "p-2 sm:p-4"
@@ -133,80 +141,71 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 <Pie
                   data={chartData}
                   cx="50%"
-                  cy="45%"
-                  innerRadius={size === 'small' ? "60%" : "65%"}
-                  outerRadius={size === 'small' ? "80%" : "85%"}
-                  paddingAngle={2}
+                  cy="50%"
+                  innerRadius={size === 'small' ? "55%" : "60%"}
+                  outerRadius={size === 'small' ? "75%" : "80%"}
+                  paddingAngle={3}
                   dataKey="value"
                   startAngle={90}
                   endAngle={-270}
-                  stroke="hsl(var(--background))"
-                  strokeWidth={1}
+                  stroke="none"
                 >
                   {chartData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
+                    <Cell
+                      key={`cell-${index}`}
                       fill={entry.color}
-                      className="transition-all duration-300 ease-in-out hover:opacity-80 dark:brightness-90"
+                      className="transition-all duration-300 ease-in-out hover:opacity-100 opacity-90 stroke-background stroke-2"
                     />
                   ))}
                   <Label
                     position="center"
-                    content={(props: Props) => {
-                      if (!props.viewBox) return null;
-                      const viewBox = props.viewBox as PolarViewBox;
-                      if (!viewBox.cx || !viewBox.cy) return null;
-                      const cx = viewBox.cx;
-                      const cy = viewBox.cy;
-                      const labelRadius = Math.min(cx, cy) * (size === 'small' ? 0.95 : 1.1);
+                    content={({ viewBox }: any) => {
+                      if (!viewBox || !viewBox.cx || !viewBox.cy) return null;
+                      const { cx, cy } = viewBox;
+                      const centerText = Math.round(chartData[0].value) + "%"; // Win rate in center
 
-                      return chartData.map((entry, index) => {
-                        const angle = -90 + (360 * (entry.value / 100) / 2) + (360 * chartData.slice(0, index).reduce((acc, curr) => acc + curr.value, 0) / 100);
-                        const x = cx + labelRadius * Math.cos((angle * Math.PI) / 180);
-                        const y = cy + labelRadius * Math.sin((angle * Math.PI) / 180);
-                        return (
-                          <text
-                            key={index}
-                            x={x}
-                            y={y}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            className="fill-muted-foreground font-medium translate-y-2"
-                            style={{ fontSize: size === 'small' ? '10px' : '12px' }}
-                          >
-                            {entry.value > 5 ? `${Math.round(entry.value)}%` : ''}
-                          </text>
-                        );
-                      });
+                      return (
+                        <text
+                          x={cx}
+                          y={cy}
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          className="fill-fg-primary font-black text-xl drop-shadow-lg"
+                        >
+                          {/* Optional: Show Win Rate in center? Or just leave clean? */}
+                          {/* <tspan x={cx} dy="-0.5em" className="text-xs uppercase fill-fg-muted font-bold tracking-wider">Win Rate</tspan> */}
+                          {/* <tspan x={cx} dy="1.2em" className="fill-accent-teal">{centerText}</tspan> */}
+                        </text>
+                      );
                     }}
                   />
                 </Pie>
-                <Legend 
+                <Legend
                   verticalAlign="bottom"
                   align="center"
                   iconSize={8}
                   iconType="circle"
                   formatter={renderColorfulLegendText}
                   wrapperStyle={{
-                    paddingTop: size === 'small' ? 0 : 16
+                    paddingTop: size === 'small' ? 0 : 12,
+                    paddingBottom: size === 'small' ? 0 : 4
                   }}
+                  layout="horizontal"
                 />
-                <Tooltip 
+                <Tooltip
                   content={<CustomTooltip />}
-                  wrapperStyle={{ 
-                    fontSize: size === 'small' ? '10px' : '12px',
-                    zIndex: 1000
-                  }} 
+                  cursor={{ fill: 'transparent' }}
                 />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-              No data for current filters
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
-} 
+}
+

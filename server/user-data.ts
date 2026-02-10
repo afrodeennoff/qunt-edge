@@ -158,39 +158,59 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
     }
   )
 
+  // TIER 4: User Supplemental Data (Accounts, Groups, Tags) - Cached because these don't change every second
+  const getCachedSupplementalData = unstable_cache(
+    async () => {
+      const start = performance.now();
+      console.log(`[Cache MISS] Fetching supplemental user data for user ${userId}`)
+
+      const [accounts, groups, tags, moodHistory] = await Promise.all([
+        prisma.account.findMany({
+          where: { userId: userId },
+          include: {
+            payouts: true,
+            group: true
+          }
+        }),
+        prisma.group.findMany({
+          where: { userId: userId },
+          include: { accounts: true }
+        }),
+        prisma.tag.findMany({
+          where: { userId: userId }
+        }),
+        prisma.mood.findMany({
+          where: { userId: userId }
+        })
+      ])
+
+      console.log(`[getUserData] Supplemental data fetch completed in ${(performance.now() - start).toFixed(2)}ms`)
+      return { accounts, groups, tags, moodHistory }
+    },
+    [`user-data-supplemental-${userId}`],
+    {
+      tags: [`user-data-${userId}`, `user-data-supplemental-${userId}`],
+      revalidate: 300 // 5 minutes cache for accounts/groups
+    }
+  )
+
   // Fetch all in parallel
-  const [core, tickDetails, financialEvents, accounts, groups, tags, moodHistory] = await Promise.all([
+  const [core, tickDetails, financialEvents, supplemental] = await Promise.all([
     getCachedCoreUserData(),
     getGlobalTickDetails(),
     getGlobalFinancialEvents(locale),
-    prisma.account.findMany({
-      where: { userId: userId },
-      include: {
-        payouts: true,
-        group: true
-      }
-    }),
-    prisma.group.findMany({
-      where: { userId: userId },
-      include: { accounts: true }
-    }),
-    prisma.tag.findMany({
-      where: { userId: userId }
-    }),
-    prisma.mood.findMany({
-      where: { userId: userId }
-    })
+    getCachedSupplementalData()
   ])
 
   return {
     userData: core.userData,
     subscription: core.subscription,
     tickDetails,
-    tags,
-    accounts,
-    groups,
+    tags: supplemental.tags,
+    accounts: supplemental.accounts,
+    groups: supplemental.groups,
     financialEvents,
-    moodHistory
+    moodHistory: supplemental.moodHistory
   }
 }
 

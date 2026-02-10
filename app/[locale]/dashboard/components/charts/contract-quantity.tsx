@@ -9,6 +9,7 @@ import {
   YAxis,
   Tooltip,
   Cell,
+  ResponsiveContainer,
 } from "recharts";
 import {
   Card,
@@ -23,6 +24,14 @@ import { Trade } from "@/lib/data-types";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { useI18n } from "@/locales/client";
 import { formatInTimeZone } from "date-fns-tz";
+import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ContractQuantityChartProps {
   size?: WidgetSize;
@@ -80,14 +89,31 @@ export default function ContractQuantityChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background p-2 border rounded shadow-xs">
-          <p className="font-semibold">{`${label}${t("contracts.tooltip.hour")} - ${(label + 1) % 24}${t("contracts.tooltip.hour")}`}</p>
-          <p className="font-bold">
-            {t("contracts.tooltip.totalContracts")}: {data.totalQuantity}
-          </p>
-          <p>
-            {t("contracts.tooltip.numberOfTrades")}: {data.tradeCount}
-          </p>
+        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("contracts.tooltip.time")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {`${label}:00 - ${(label + 1) % 24}:00`}
+            </span>
+          </div>
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("contracts.tooltip.totalContracts")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.totalQuantity}
+            </span>
+          </div>
+          <div className="flex flex-col pt-2 border-t border-white/5">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("contracts.tooltip.numberOfTrades")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.tradeCount}
+            </span>
+          </div>
         </div>
       );
     }
@@ -95,69 +121,119 @@ export default function ContractQuantityChart({
   };
 
   return (
-    <Card data-chart-surface="modern">
-      <CardHeader className="sm:min-h-[120px] flex flex-col items-stretch space-y-0 border-b p-6">
-        <CardTitle>{t("contracts.title")}</CardTitle>
-        <CardDescription>{t("contracts.description")}</CardDescription>
-      </CardHeader>
-      <CardContent className="px-2 sm:p-6">
-        {hasData ? (
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[350px] w-full"
-          >
-            <BarChart
-              data={chartData}
-              margin={{
-                left: 12,
-                right: 12,
-                top: 12,
-                bottom: 12,
-              }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                className="text-border dark:opacity-[0.12] opacity-[0.2]"
-              />
-              <XAxis
-                dataKey="hour"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={(value: number) =>
-                  `${value}${t("contracts.tooltip.hour")}`
-                }
-                ticks={[0, 3, 6, 9, 12, 15, 18, 21]}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={(value: number) => value.toFixed(0)}
-                label={{
-                  value: t("contracts.axis.contracts"),
-                  angle: -90,
-                  position: "insideLeft",
-                }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="totalQuantity"
-                radius={[4, 4, 0, 0]}
-                className="transition-all duration-300 ease-in-out"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={getColor(entry.tradeCount)} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        ) : (
-          <div className="h-[350px] w-full flex items-center justify-center text-sm text-muted-foreground">
-            No data for current filters
-          </div>
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
+        className={cn(
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center",
         )}
-      </CardContent>
-    </Card>
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <CardTitle
+              className={cn(
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                size === "small" ? "text-sm" : "text-base",
+              )}
+            >
+              {t("contracts.title")}
+            </CardTitle>
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <Info
+                    className={cn(
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
+                    )}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p className="text-xs">{t("contracts.description")}</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+      <div
+        className={cn(
+          "flex-1 min-h-0",
+          size === "small" ? "p-1" : "p-2 sm:p-4",
+        )}
+      >
+        <div className={cn("w-full h-full")}>
+          {hasData ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={
+                  size === "small"
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="text-border dark:opacity-[0.1] opacity-[0.2]"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="hour"
+                  tickLine={false}
+                  axisLine={false}
+                  height={size === "small" ? 20 : 24}
+                  tickMargin={size === "small" ? 4 : 8}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  tickFormatter={(value: number) => `${value}h`}
+                  ticks={
+                    size === "small"
+                      ? [0, 6, 12, 18]
+                      : [0, 3, 6, 9, 12, 15, 18, 21]
+                  }
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={30}
+                  tickMargin={4}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  tickFormatter={(value: number) => value.toFixed(0)}
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar
+                  dataKey="totalQuantity"
+                  radius={[2, 2, 2, 2]}
+                  maxBarSize={size === "small" ? 25 : 40}
+                  className="transition-all duration-300 ease-in-out"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill="rgb(var(--accent-teal-rgb))"
+                      opacity={0.8}
+                      className="hover:opacity-100"
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

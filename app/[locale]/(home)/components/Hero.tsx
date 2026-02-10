@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, Sparkles } from 'lucide-react'
+import { useCurrentLocale } from '@/locales/client'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -15,6 +16,7 @@ const fadeUp = {
 }
 
 export default function Hero() {
+  const locale = useCurrentLocale()
   const ref = useRef<HTMLElement | null>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const opacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])
@@ -52,13 +54,13 @@ export default function Hero() {
 
           <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/authentication?next=dashboard"
+              href={`/${locale}/authentication?next=dashboard`}
               className="inline-flex h-12 min-w-[220px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
             >
               Start Free Audit
             </Link>
             <Link
-              href="/updates"
+              href={`/${locale}/updates`}
               className="inline-flex h-12 min-w-[220px] items-center justify-center gap-2 rounded-full border border-[hsl(var(--mk-border)/0.4)] bg-[hsl(var(--mk-surface)/0.7)] px-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text))] transition-all duration-300 hover:border-[hsl(var(--brand-primary)/0.55)]"
             >
               View Documentation

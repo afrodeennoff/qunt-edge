@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { UserAuthForm } from "../components/user-auth-form"
 import { Logo } from "@/components/logo"
-import { useI18n } from '@/locales/client'
+import { useI18n, useCurrentLocale } from '@/locales/client'
 import { motion } from 'framer-motion'
 
 export default function AuthenticationPage() {
   const t = useI18n()
+  const locale = useCurrentLocale()
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-[#050505] selection:bg-teal-500/30 selection:text-teal-200 overflow-hidden font-sans">
@@ -27,7 +28,7 @@ export default function AuthenticationPage() {
           className="flex flex-col items-center"
         >
           {/* Brand Header */}
-          <Link href="/" className="mb-8 group flex flex-col items-center">
+          <Link href={`/${locale}`} className="mb-8 group flex flex-col items-center">
             <div className="relative mb-6 transform group-hover:scale-105 transition-transform duration-500">
               <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative bg-[#0A0A0A] border border-white/10 p-3 rounded-2xl shadow-2xl">
@@ -69,11 +70,11 @@ export default function AuthenticationPage() {
 
                 <p className="text-[10px] leading-relaxed text-zinc-500">
                   {t('authentication.termsAndPrivacy.prefix')}{" "}
-                  <Link href="/terms" className="text-zinc-400 hover:text-white transition-colors underline decoration-zinc-700 underline-offset-2">
+                  <Link href={`/${locale}/terms`} className="text-zinc-400 hover:text-white transition-colors underline decoration-zinc-700 underline-offset-2">
                     {t('authentication.termsAndPrivacy.terms')}
                   </Link>{" "}
                   {t('authentication.termsAndPrivacy.and')}{" "}
-                  <Link href="/privacy" className="text-zinc-400 hover:text-white transition-colors underline decoration-zinc-700 underline-offset-2">
+                  <Link href={`/${locale}/privacy`} className="text-zinc-400 hover:text-white transition-colors underline decoration-zinc-700 underline-offset-2">
                     {t('authentication.termsAndPrivacy.privacy')}
                   </Link>
                 </p>

@@ -41,53 +41,6 @@ const chartConfig = {
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  const t = useI18n();
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="rounded-lg border bg-background p-2 shadow-xs">
-        <div className="grid gap-2">
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
-              {t("pnlBySide.tooltip.side")}
-            </span>
-            <span className="font-bold text-muted-foreground">{data.side}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
-              {data.isAverage ? t("pnlBySide.tooltip.averageTotal") : "Total"}{" "}
-              P/L
-            </span>
-            <span className="font-bold">{formatCurrency(data.pnl)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
-              {t("pnlBySide.tooltip.winRate")}
-            </span>
-            <span className="font-bold text-muted-foreground">
-              {((data.winCount / data.tradeCount) * 100).toFixed(1)}%
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
-              {t("pnlBySide.tooltip.trades")}
-            </span>
-            <span className="font-bold text-muted-foreground">
-              {data.tradeCount} {t("pnlBySide.tooltip.trades")} ({data.winCount}{" "}
-              {data.winCount === 1
-                ? t("pnlBySide.tooltip.wins")
-                : t("pnlBySide.tooltip.wins_plural")}
-              )
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
 export default function PnLBySideChart({
   size = "medium",
 }: PnLBySideChartProps) {
@@ -140,43 +93,83 @@ export default function PnLBySideChart({
   const hasData = chartData.some((d) => d.tradeCount > 0);
   const absMax = Math.max(Math.abs(maxPnL), Math.abs(minPnL));
 
-  const getColor = (value: number) => {
-    const ratio = Math.abs(value / absMax);
-    const baseColorVar = value >= 0 ? "--chart-win" : "--chart-4";
-    const intensity = Math.max(0.2, ratio);
-    return `hsl(var(${baseColorVar}) / ${intensity})`;
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("pnlBySide.tooltip.side")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">{data.side}</span>
+          </div>
+          <div className="flex flex-col mb-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {data.isAverage ? t("pnlBySide.tooltip.averageTotal") : "Total"}{" "}
+              P/L
+            </span>
+            <span className={cn(
+              "font-black text-sm",
+              data.pnl >= 0 ? "text-accent-teal" : "text-rose-500"
+            )}>{formatCurrency(data.pnl)}</span>
+          </div>
+          <div className="flex flex-col pt-2 border-t border-white/5">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("pnlBySide.tooltip.winRate")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {((data.winCount / data.tradeCount) * 100).toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex flex-col pt-2">
+            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+              {t("pnlBySide.tooltip.trades")}
+            </span>
+            <span className="font-bold text-fg-primary text-xs">
+              {data.tradeCount} {t("pnlBySide.tooltip.trades")} ({data.winCount}{" "}
+              {data.winCount === 1
+                ? t("pnlBySide.tooltip.wins")
+                : t("pnlBySide.tooltip.wins_plural")}
+              )
+            </span>
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
-    <Card data-chart-surface="modern" className="h-full flex flex-col">
-      <CardHeader
+    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+      <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b shrink-0",
-          size === "small" ? "p-2" : "p-3 sm:p-4",
+          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center",
         )}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <CardTitle
+          <div className="flex items-center gap-2">
+            <span
               className={cn(
-                "line-clamp-1",
+                "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
               {t("pnlBySide.title")}
-            </CardTitle>
+            </span>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-muted-foreground hover:text-foreground transition-colors cursor-help",
+                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{t("pnlBySide.description")}</p>
+                  <p className="text-xs">{t("pnlBySide.description")}</p>
                 </TooltipContent>
               </UITooltip>
             </TooltipProvider>
@@ -184,8 +177,7 @@ export default function PnLBySideChart({
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "text-muted-foreground",
-                size === "small" ? "text-xs" : "text-sm",
+                "text-[10px] uppercase font-bold tracking-wider text-fg-muted",
               )}
             >
               {t("pnlBySide.toggle.showAverage")}
@@ -193,12 +185,12 @@ export default function PnLBySideChart({
             <Switch
               checked={showAverage}
               onCheckedChange={setShowAverage}
-              className="data-[state=checked]:bg-primary"
+              className="data-[state=checked]:bg-accent-teal"
             />
           </div>
         </div>
-      </CardHeader>
-      <CardContent
+      </div>
+      <div
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-4",
@@ -208,67 +200,72 @@ export default function PnLBySideChart({
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-              data={chartData}
-              margin={
-                size === "small"
-                  ? { left: 10, right: 4, top: 4, bottom: 20 }
-                  : { left: 10, right: 8, top: 8, bottom: 24 }
-              }
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                className="text-border dark:opacity-[0.12] opacity-[0.2]"
-              />
-              <XAxis
-                dataKey="side"
-                tickLine={false}
-                axisLine={false}
-                height={size === "small" ? 20 : 24}
-                tickMargin={size === "small" ? 4 : 8}
-                tick={{
-                  fontSize: size === "small" ? 9 : 11,
-                  fill: "currentColor",
-                }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={60}
-                tickMargin={4}
-                tick={{
-                  fontSize: size === "small" ? 9 : 11,
-                  fill: "currentColor",
-                }}
-                tickFormatter={formatCurrency}
-                domain={[Math.min(minPnL * 1.1, 0), Math.max(maxPnL * 1.1, 0)]}
-              />
-              <ReferenceLine y={0} stroke="hsl(var(--border))" />
-              <Tooltip
-                content={<CustomTooltip />}
-                wrapperStyle={{
-                  fontSize: size === "small" ? "10px" : "12px",
-                  zIndex: 1000,
-                }}
-              />
-              <Bar
-                dataKey="pnl"
-                radius={[3, 3, 0, 0]}
-                maxBarSize={size === "small" ? 25 : 40}
-                className="transition-all duration-300 ease-in-out"
+                data={chartData}
+                margin={
+                  size === "small"
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
               >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={getColor(entry.pnl)} />
-                ))}
-              </Bar>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="text-border dark:opacity-[0.1] opacity-[0.2]"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="side"
+                  tickLine={false}
+                  axisLine={false}
+                  height={size === "small" ? 20 : 24}
+                  tickMargin={size === "small" ? 4 : 8}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={60}
+                  tickMargin={4}
+                  tick={{
+                    fontSize: size === "small" ? 9 : 10,
+                    fill: "var(--fg-muted)",
+                  }}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                  domain={[Math.min(minPnL * 1.1, 0), Math.max(maxPnL * 1.1, 0)]}
+                />
+                <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar
+                  dataKey="pnl"
+                  radius={[2, 2, 2, 2]}
+                  maxBarSize={size === "small" ? 25 : 40}
+                  className="transition-all duration-300 ease-in-out"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      stroke={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      strokeOpacity={1}
+                      fillOpacity={0.8}
+                      className="hover:opacity-100"
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
-              No data for current filters
+            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+              No data available
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
