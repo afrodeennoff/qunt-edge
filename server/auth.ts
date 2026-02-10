@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { headers } from "next/headers"
 import { User } from '@supabase/supabase-js'
+import { logger } from '@/lib/logger'
 
 export async function getWebsiteURL() {
   let url =
@@ -31,7 +32,7 @@ function handleAuthError(error: any): never {
     error?.originalError?.message?.includes('Unexpected token') ||
     error?.originalError?.message?.includes('is not valid JSON')
   ) {
-    console.error('[Auth] Supabase API returned non-JSON response:', {
+    logger.error('[Auth] Supabase API returned non-JSON response:', {
       error: error.message,
       originalError: error.originalError?.message,
     })
@@ -252,7 +253,7 @@ export async function signInWithPasswordAction(
             await ensureUserInDatabase(signUpData.user, locale)
           } catch (e) {
             // Non-fatal; still proceed
-            console.error('[signInWithPasswordAction] ensureUserInDatabase failed:', e)
+            logger.error('[signInWithPasswordAction] ensureUserInDatabase failed:', e)
           }
           return { success: true, next }
         }
@@ -294,7 +295,7 @@ export async function signInWithPasswordAction(
       }
     } catch (e) {
       // Non-fatal; still proceed
-      console.error('[signInWithPasswordAction] ensureUserInDatabase failed:', e)
+      logger.error('[signInWithPasswordAction] ensureUserInDatabase failed:', e)
     }
 
     // Optionally handle redirect on the client; return success and let client route
@@ -334,7 +335,7 @@ export async function signUpWithPasswordAction(
         await ensureUserInDatabase(data.user, locale)
       } catch (e) {
         // Non-fatal; still proceed
-        console.error('[signUpWithPasswordAction] ensureUserInDatabase failed:', e)
+        logger.error('[signUpWithPasswordAction] ensureUserInDatabase failed:', e)
       }
     }
 
@@ -416,7 +417,7 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
       const shouldUpdateLanguage = !!locale && locale !== existingUserByAuthId.language;
 
       if (shouldUpdateEmail || shouldUpdateLanguage) {
-        console.log('[ensureUserInDatabase] Updating existing user record');
+        logger.info('[ensureUserInDatabase] Updating existing user record');
         try {
           const updatedUser = await prisma.user.update({
             where: {
@@ -427,14 +428,14 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
               language: shouldUpdateLanguage ? (locale as string) : existingUserByAuthId.language
             },
           });
-          console.log('[ensureUserInDatabase] SUCCESS: User updated successfully');
+          logger.info('[ensureUserInDatabase] SUCCESS: User updated successfully');
           return updatedUser;
         } catch (updateError) {
-          console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
+          logger.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
           throw new Error('Failed to update user');
         }
       }
-      console.log('[ensureUserInDatabase] SUCCESS: Existing user found, no update needed');
+      logger.info('[ensureUserInDatabase] SUCCESS: Existing user found, no update needed');
       return existingUserByAuthId;
     }
 
@@ -445,7 +446,7 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
       });
 
       if (existingUserByEmail && existingUserByEmail.auth_user_id !== user.id) {
-        console.log('[ensureUserInDatabase] ERROR: Account conflict - email already associated with different auth method', {
+        logger.error('[ensureUserInDatabase] ERROR: Account conflict - email already associated with different auth method', {
           userEmail: user.email,
           existingAuthId: existingUserByEmail.auth_user_id,
           currentAuthId: user.id
@@ -456,7 +457,7 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
     }
 
     // Create new user if no existing user found
-    console.log('[ensureUserInDatabase] Creating new user');
+    logger.info('[ensureUserInDatabase] Creating new user');
     try {
       const newUser = await prisma.user.create({
         data: {
@@ -466,15 +467,15 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
           language: locale || 'en'
         },
       });
-      console.log('[ensureUserInDatabase] SUCCESS: New user created successfully');
+      logger.info('[ensureUserInDatabase] SUCCESS: New user created successfully');
 
       // Create default dashboard layout for new user
       try {
         const { createDefaultDashboardLayout } = await import('@/server/database');
         await createDefaultDashboardLayout(user.id);
-        console.log('[ensureUserInDatabase] SUCCESS: Default dashboard layout created');
+        logger.info('[ensureUserInDatabase] SUCCESS: Default dashboard layout created');
       } catch (layoutError) {
-        console.error('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
+        logger.warn('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
         // Don't throw here - user creation succeeded, layout can be created later
       }
 
@@ -482,11 +483,11 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
     } catch (createError) {
       if (createError instanceof Error &&
         createError.message.includes('Unique constraint failed')) {
-        console.log('[ensureUserInDatabase] ERROR: Unique constraint failed when creating user', createError);
+        logger.error('[ensureUserInDatabase] ERROR: Unique constraint failed when creating user', createError);
         await signOut();
         throw new Error('Database integrity error: Duplicate user records found');
       }
-      console.error('[ensureUserInDatabase] ERROR: Failed to create user:', createError);
+      logger.error('[ensureUserInDatabase] ERROR: Failed to create user:', createError);
       await signOut();
       throw new Error('Failed to create user account');
     }
@@ -499,31 +500,31 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
       throw error;
     }
 
-    console.error('[ensureUserInDatabase] ERROR: Unexpected error in main catch block:', error);
+    logger.error('[ensureUserInDatabase] ERROR: Unexpected error in main catch block:', error);
 
     // Handle Prisma validation errors
     if (error instanceof Error) {
       if (error.message.includes('Argument `where` of type UserWhereUniqueInput needs')) {
-        console.log('[ensureUserInDatabase] ERROR: Invalid user identification provided');
+        logger.error('[ensureUserInDatabase] ERROR: Invalid user identification provided');
         await signOut();
         throw new Error('Invalid user identification provided');
       }
 
       if (error.message.includes('Unique constraint failed')) {
-        console.log('[ensureUserInDatabase] ERROR: Database integrity error - duplicate user records');
+        logger.error('[ensureUserInDatabase] ERROR: Database integrity error - duplicate user records');
         await signOut();
         throw new Error('Database integrity error: Duplicate user records found');
       }
 
       if (error.message.includes('Account conflict')) {
-        console.log('[ensureUserInDatabase] ERROR: Re-throwing account conflict error');
+        logger.error('[ensureUserInDatabase] ERROR: Re-throwing account conflict error');
         // Error already handled above
         throw error;
       }
     }
 
     // For any other unexpected errors, log out the user
-    console.log('[ensureUserInDatabase] ERROR: Critical database error - signing out user');
+    logger.error('[ensureUserInDatabase] ERROR: Critical database error - signing out user');
     await signOut();
     throw new Error('Critical database error occurred. Please try logging in again.');
   }
@@ -560,13 +561,13 @@ export async function getUserId(): Promise<string> {
   const userIdFromMiddleware = headersList.get("x-user-id")
 
   if (userIdFromMiddleware) {
-    console.log("[Auth] Using user ID from middleware")
+    logger.info("[Auth] Using user ID from middleware")
     return userIdFromMiddleware
   }
 
   // Fallback to Supabase call (for API routes or edge cases)
   try {
-    console.log("[Auth] Fallback to Supabase call")
+    logger.info("[Auth] Fallback to Supabase call")
     const supabase = await createClient()
     const {
       data: { user },
@@ -635,13 +636,13 @@ export async function getDatabaseUserId(): Promise<string> {
 export async function getUserEmail(): Promise<string> {
   const headersList = await headers()
   const userEmail = headersList.get("x-user-email")
-  console.log("[Auth] getUserEmail FROM HEADERS", userEmail)
+  logger.info("[Auth] getUserEmail FROM HEADERS", userEmail)
   return userEmail || ""
 }
 
 // Lightweight updater for user language without full ensure logic
 export async function updateUserLanguage(locale: string): Promise<{ updated: boolean }> {
-  console.log("[Auth] updateUserLanguage", locale)
+  logger.info("[Auth] updateUserLanguage", locale)
   const allowedLocales = new Set(['en', 'fr'])
   if (!allowedLocales.has(locale)) {
     return { updated: false }

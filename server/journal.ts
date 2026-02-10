@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getDatabaseUserId } from './auth';
 import { Mood } from '@/prisma/generated/prisma';
+import { logger } from '@/lib/logger'
 
 export type Conversation = {
   role: 'user' | 'assistant' | 'system';
@@ -21,7 +22,7 @@ export async function saveMindset(
   date?: string
 ) {
   try {
-    console.log('saveMindset', date)
+    logger.info('saveMindset', date)
     const userId = await getDatabaseUserId()
 
     // Convert date string to Date at midday UTC
@@ -85,7 +86,7 @@ export async function saveMindset(
     revalidatePath('/')
     return newMood
   } catch (error) {
-    console.error('Error saving mindset:', error)
+    logger.error('Error saving mindset:', error)
     throw error
   }
 }
@@ -145,7 +146,7 @@ export async function saveMood(
     revalidatePath('/')
     return newMood
   } catch (error) {
-    console.error('Error saving mood:', error)
+    logger.error('Error saving mood:', error)
     throw error
   }
 }
@@ -174,7 +175,7 @@ export async function getMoodForDay(date: string) {
       conversation: mood.conversation ? JSON.parse(mood.conversation as string) : null,
     } : null
   } catch (error) {
-    console.error('Error getting mood:', error)
+    logger.error('Error getting mood:', error)
     throw error
   }
 }
@@ -200,7 +201,7 @@ export async function getMoodHistory(fromDate?: Date, toDate?: Date): Promise<Mo
       conversation: mood.conversation ? JSON.parse(mood.conversation as string) : null,
     }))
   } catch (error) {
-    console.error('Error getting mood history:', error)
+    logger.error('Error getting mood history:', error)
     throw error
   }
 }
@@ -232,7 +233,7 @@ export async function deleteMindset(date: string) {
       revalidatePath('/[locale]/(dashboard)', 'page')
     }
   } catch (error) {
-    console.error('Error deleting mood:', error)
+    logger.error('Error deleting mood:', error)
     throw error
   }
 }
@@ -242,7 +243,7 @@ export async function saveJournal(
   date?: string
 ) {
   try {
-    console.log('saveJournal', date)
+    logger.info('saveJournal', date)
     const userId = await getDatabaseUserId()
 
     // Convert date string to Date at midday UTC
@@ -293,7 +294,7 @@ export async function saveJournal(
     revalidatePath('/')
     return newMood
   } catch (error) {
-    console.error('Error saving journal:', error)
+    logger.error('Error saving journal:', error)
     throw error
   }
 } 

@@ -83,10 +83,10 @@ export function DailySummaryModal() {
         const startMonth = startOfMonth(today)
         const end = endOfDay(today)
 
-        let daily = { pnl: 0, wins: 0, total: 0 }
-        let weekly = { pnl: 0 }
-        let monthly = { pnl: 0 }
-        let total = { pnl: 0 }
+        const daily = { pnl: 0, wins: 0, total: 0 }
+        const weekly = { pnl: 0 }
+        const monthly = { pnl: 0 }
+        const total = { pnl: 0 }
 
         const last7Days = Array.from({ length: 7 }, (_, i) => {
             const d = new Date()

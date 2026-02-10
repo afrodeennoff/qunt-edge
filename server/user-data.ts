@@ -7,6 +7,7 @@ import { getCurrentLocale } from '@/locales/server'
 import { prisma } from '@/lib/prisma'
 import { getDatabaseUserId, getUserId } from './auth'
 import { revalidateTag, unstable_cache } from 'next/cache'
+import { logger } from '@/lib/logger'
 
 export type SharedDataResponse = {
   trades: Trade[]
@@ -69,7 +70,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   // If forceRefresh is true, bypass cache and fetch directly
   if (forceRefresh) {
     const start = performance.now();
-    console.log(`[getUserData] Force refresh - bypassing cache for user ${userId}`)
+    logger.info(`[getUserData] Force refresh - bypassing cache for user ${userId}`)
     revalidateTag(`user-data-${userId}`, { expire: 0 })
 
     // Fetch data in parallel without transaction to avoid timeouts
@@ -103,7 +104,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
       })
     ])
 
-    console.log(`[getUserData] Force refresh completed in ${(performance.now() - start).toFixed(2)}ms`)
+    logger.info(`[getUserData] Force refresh completed in ${(performance.now() - start).toFixed(2)}ms`)
 
     return {
       userData,
@@ -121,7 +122,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   const getCachedCoreUserData = unstable_cache(
     async () => {
       const start = performance.now();
-      console.log(`[Cache MISS] Fetching core user data for user ${userId}`)
+      logger.info(`[Cache MISS] Fetching core user data for user ${userId}`)
 
       // Cache only lightweight, stable data
       const [userData, subscription, tickDetails] = await Promise.all([
@@ -134,7 +135,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
         prisma.tickDetails.findMany()
       ])
 
-      console.log(`[getUserData] Core data fetch completed in ${(performance.now() - start).toFixed(2)}ms`)
+      logger.info(`[getUserData] Core data fetch completed in ${(performance.now() - start).toFixed(2)}ms`)
       return { userData, subscription, tickDetails }
     },
     [`user-data-${userId}-${locale}`],
@@ -183,7 +184,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
 }
 
 export async function getDashboardLayout(userId: string): Promise<DashboardLayout | null> {
-  console.log('getDashboardLayout')
+  logger.info('getDashboardLayout')
   try {
     const layout = await prisma.dashboardLayout.findUnique({
       where: {
@@ -199,7 +200,7 @@ export async function getDashboardLayout(userId: string): Promise<DashboardLayou
         try {
           return JSON.parse(val)
         } catch (e) {
-          console.error('Failed to parse dashboard JSON', e)
+          logger.error('Failed to parse dashboard JSON', e)
           return []
         }
       }
@@ -212,7 +213,7 @@ export async function getDashboardLayout(userId: string): Promise<DashboardLayou
       mobile: parseIfNeeded(layout.mobile)
     }
   } catch (error) {
-    console.error('Error fetching dashboard layout:', error)
+    logger.error('Error fetching dashboard layout:', error)
     return null
   }
 }
