@@ -675,3 +675,27 @@ Escalate to a human reviewer when:
 - Provide user feedback during long operations
 - Test with >1000 trade imports
 
+---
+
+## 🔄 Agent Update (2026-02-11)
+
+### UI Unification Directive (Active)
+- Keep a single visual surface per widget/panel (avoid outer+inner duplicate card shells).
+- Prefer flat tokenized surfaces over gradients for dashboard and team UIs.
+- Use shared spacing rhythm utilities for consistency:
+  - `page-shell`
+  - `page-stack`
+  - `section-stack`
+  - `surface-frame`
+  - `surface-panel-md`
+  - `tooltip-surface`
+
+### Current Typography + Theme Direction
+- Global typography remains `IBM Plex Mono` for app data-heavy views.
+- Use semantic token-driven colors (`--background`, `--card`, `--border`, `--foreground`, chart semantics) instead of hardcoded values.
+- Keep tooltip/widget/section spacing balanced via global utility classes before adding custom one-off paddings.
+
+### Implementation Guardrails
+- Do not remove structural layout wrappers unless they are visually duplicate shells.
+- Do not mix gradient + flat surface styles in the same dashboard region.
+- Prefer shared utility classes over repeated long Tailwind class strings when patterns are reused 3+ times.

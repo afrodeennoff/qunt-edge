@@ -42,7 +42,7 @@ export default function Hero() {
             className="mx-auto max-w-5xl text-center text-[clamp(2.4rem,8vw,5.6rem)] font-semibold leading-[0.92] tracking-tight [font-family:var(--font-poppins)]"
           >
             Stop auditing the money.
-            <span className="block bg-gradient-to-r from-[hsl(var(--brand-primary))] to-[hsl(var(--brand-secondary))] bg-clip-text text-transparent">
+            <span className="block text-[hsl(var(--brand-primary))]">
               Audit the execution.
             </span>
           </motion.h1>

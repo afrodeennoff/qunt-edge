@@ -76,15 +76,15 @@ export default function TraderProfilePage() {
   }, [accounts?.length, statistics.nbTrades, statistics.profitFactor, statistics.winRate, supabaseUser?.email, supabaseUser?.user_metadata?.avatar_url, supabaseUser?.user_metadata?.full_name, supabaseUser?.user_metadata?.name, user?.email])
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-72px)] p-3 sm:p-4 lg:p-6">
-      <div className="p-3 sm:p-4 lg:p-5">
+    <div className="page-shell">
+      <div className="section-stack p-3 sm:p-4 lg:p-5">
         <DashboardTopNav title="Trader Profile" />
 
         <div className="grid gap-4 xl:grid-cols-[1.7fr_1fr]">
           <section className="space-y-4">
             <ProfileHero profile={profile} />
             {isLoading ? (
-              <div className="rounded-2xl border border-border/70 bg-[hsl(var(--qe-panel))]/95 p-6 text-ui-body text-muted-foreground">
+              <div className="surface-frame text-ui-body text-muted-foreground">
                 Loading user trades...
               </div>
             ) : null}

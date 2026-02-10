@@ -11,8 +11,8 @@ export default function TeamMembersPage() {
   const slug = params.slug
 
   return (
-    <section className="space-y-6">
-      <header className="rounded-2xl border border-border/70 bg-card/70 p-5 sm:p-6">
+    <section className="page-stack">
+      <header className="surface-frame">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -31,7 +31,7 @@ export default function TeamMembersPage() {
         </div>
       </header>
 
-      <Card className="border-border/70 bg-card/70">
+      <Card className="border-border/70 bg-card/75">
         <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center sm:py-24">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/25 bg-primary/10">
             <ShieldPlus className="h-7 w-7 text-primary" />

@@ -123,7 +123,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+        <div className="tooltip-surface">
           <div className="flex flex-col mb-2">
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t('timeRangePerformance.tooltip.timeRange')}

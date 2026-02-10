@@ -44,7 +44,7 @@ export default function Hero({ onStart }: HeroProps) {
   return (
     <section ref={ref} className="relative pt-24 sm:pt-32 md:pt-40 lg:pt-48 pb-16 sm:pb-24 md:pb-32 px-4 sm:px-6 overflow-hidden min-h-screen flex flex-col justify-center items-center text-center">
       <motion.div style={{ opacity }} className="absolute inset-0 pointer-events-none">
-         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+         <div className="absolute inset-0 bg-white/[0.03] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl sm:max-w-6xl md:max-w-7xl h-[300px] sm:h-[400px] md:h-[600px] bg-teal-500/10 blur-[100px] sm:blur-[120px] md:blur-[140px] rounded-full"></div>
       </motion.div>
 
@@ -66,7 +66,7 @@ export default function Hero({ onStart }: HeroProps) {
           variants={item}
           className="text-fluid-5xl sm:text-fluid-6xl md:text-fluid-7xl lg:text-fluid-8xl font-bold tracking-tighter mb-6 sm:mb-8 leading-[0.9] sm:leading-[0.85] text-white"
         >
-          Qunt <span className="text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-teal-700">Edge.</span>
+          Qunt <span className="text-teal-400">Edge.</span>
         </motion.h1>
 
         <motion.p
@@ -110,8 +110,8 @@ export default function Hero({ onStart }: HeroProps) {
         </motion.div>
       </motion.div>
 
-      <div className="absolute top-0 left-4 sm:left-8 md:left-12 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none"></div>
-      <div className="absolute top-0 right-4 sm:right-8 md:right-12 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent pointer-events-none"></div>
+      <div className="absolute top-0 left-4 sm:left-8 md:left-12 w-[1px] h-full bg-white/5 pointer-events-none"></div>
+      <div className="absolute top-0 right-4 sm:right-8 md:right-12 w-[1px] h-full bg-white/5 pointer-events-none"></div>
     </section>
   );
 }

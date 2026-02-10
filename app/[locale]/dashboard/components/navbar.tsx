@@ -126,7 +126,7 @@ export default function Navbar() {
 
                 {!isPlusUser() && (
                   <Link href="/dashboard/billing">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-gradient-to-br from-amber-400/20 via-orange-500/10 to-transparent border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
+                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
                       <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                       <span>Elite</span>
                     </Button>

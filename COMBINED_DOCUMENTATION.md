@@ -131,6 +131,33 @@ Choose a theme via the `theme` query parameter. Example:
 - Nothing renders: ensure the iframe `src` is reachable and no adblocker is interfering.
 - No data after posting: check that the message `type` matches one of the supported values and that you target the correct iframe/origin.
 
+---
+
+## Latest 20 Git Commits (Updated 2026-02-11)
+
+| Hash | Date | Author | Message |
+|---|---|---|---|
+| `0f37944` | 2026-02-11 | Timon | Remove duplicate outer containers |
+| `390edd0` | 2026-02-11 | Timon | Fix build blockers for Vercel TypeScript compilation |
+| `dce0bc9` | 2026-02-11 | Timon | Implement chart future blueprint |
+| `03b82b3` | 2026-02-10 | Timon | Add project structure documentation |
+| `a27b406` | 2026-02-10 | Timon | chore: create combined documentation and update multiple components |
+| `a5454a7` | 2026-02-10 | Timon | Refactor: Centralize data normalization and fix type mismatches across the dashboard |
+| `146a0a6` | 2026-02-10 | Timon | Refactor: Normalize trade and account data types across the application. Centralized types in lib/data-types.ts, updated DataProvider for consistent normalization, and ensured server-side actions handle standard JS numbers. |
+| `78d30f2` | 2026-02-10 | Timon | Fix TypeScript decimal errors |
+| `1d6979a` | 2026-02-10 | Timon | Implement enterprise hardening sweep |
+| `2b5cda3` | 2026-02-10 | Timon | fix: resolve build errors in free-users-table.tsx by correctly handling Date objects |
+| `0f0ecf7` | 2026-02-10 | Timon | feat: redesign dashboard customization UI and fix trade serialization for open trades |
+| `620c6b0` | 2026-02-10 | Timon | Merge branch 'main' of https://github.com/afrodeennoff/final-qunt-edge into main |
+| `630181f` | 2026-02-10 | Timon | feat: initial commit from local codebase |
+| `f3c385c` | 2026-02-10 | Timon | Remove widget hover effects and set black widget surfaces |
+| `dde6403` | 2026-02-10 | Timon | Fix dashboard edit button |
+| `4b1561e` | 2026-02-10 | Timon | fix(dashboard): make navbar edit toggle reliable on dashboard root |
+| `6caa114` | 2026-02-10 | Timon | Add explicit no-data states to remaining dashboard chart cards |
+| `ad2bf84` | 2026-02-10 | Timon | Show explicit empty states for dashboard chart widgets |
+| `c32011a` | 2026-02-10 | Timon | Strengthen chart visual surfaces and readability |
+| `9ec1fcd` | 2026-02-10 | Timon | Redesign charts with modern unified surface across app |
+
 
 # === ./app/api/ai/support/README.md ===
 # Qunt Edge Support Assistant - Refined System
@@ -12765,7 +12792,6 @@ Escalate to a human reviewer when:
 - Handle large datasets with chunking/pagination
 - Provide user feedback during long operations
 - Test with >1000 trade imports
-
 
 
 

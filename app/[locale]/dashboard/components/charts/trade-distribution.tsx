@@ -65,7 +65,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+        <div className="tooltip-surface">
           <div className="flex flex-col mb-1">
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t('tradeDistribution.tooltip.type')}

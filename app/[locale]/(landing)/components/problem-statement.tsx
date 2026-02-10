@@ -19,7 +19,7 @@ export default function ProblemStatement() {
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 tracking-tighter leading-[0.95] text-white">
             PnL is a <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-teal-200">Lagging Indicator.</span>
+            <span className="text-teal-400">Lagging Indicator.</span>
           </h2>
           <div className="space-y-6 sm:space-y-8 text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg font-light">
             <p>
@@ -62,7 +62,7 @@ export default function ProblemStatement() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group relative p-1 rounded-xl bg-gradient-to-b from-white/5 to-transparent hover:from-teal-500/20 transition-all duration-500"
+              className="group relative p-1 rounded-xl bg-white/5 hover:bg-teal-500/10 transition-all duration-500"
             >
               <div className="bg-[#080808] p-5 sm:p-6 md:p-8 rounded-lg h-full border border-white/5 relative overflow-hidden group-hover:border-teal-500/20 transition-colors">
                   <div className="absolute top-3 sm:top-4 right-3 sm:right-4 text-[8px] sm:text-[9px] font-mono text-zinc-700 group-hover:text-red-400 transition-colors">

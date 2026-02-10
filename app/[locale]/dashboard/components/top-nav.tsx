@@ -8,7 +8,7 @@ interface DashboardTopNavProps {
 
 export function DashboardTopNav({ title = "Numora" }: DashboardTopNavProps) {
   return (
-    <header className="mb-4 rounded-2xl border border-border/70 bg-card/70 px-4 py-3 backdrop-blur-sm">
+    <header className="surface-panel-md mb-1 px-4 py-3">
       <div className="flex flex-wrap items-center gap-3">
         <p className="text-ui-title font-semibold text-foreground">{title}</p>
 

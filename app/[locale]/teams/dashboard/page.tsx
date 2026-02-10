@@ -6,8 +6,8 @@ import { TeamManagement } from "../components/team-management"
 
 export default function DashboardPage() {
   return (
-    <section className="space-y-6 p-4 sm:p-6">
-      <header className="rounded-2xl border border-border/70 bg-background/70 p-5 sm:p-6">
+    <section className="page-stack p-4 sm:p-6">
+      <header className="surface-frame">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Teams</p>
         <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Choose a Team Workspace</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -15,7 +15,7 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      <Card className="border-border/70 bg-background/70">
+      <Card className="border-border/70 bg-card/75">
         <CardHeader>
           <CardTitle className="inline-flex items-center gap-2 text-lg">
             <Building2 className="h-5 w-5 text-primary" />
@@ -35,7 +35,7 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      <div className="rounded-2xl border border-border/70 bg-background/70 p-2 sm:p-3">
+      <div className="surface-panel-md p-2 sm:p-3">
         <TeamManagement />
       </div>
     </section>

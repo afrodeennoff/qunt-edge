@@ -48,7 +48,7 @@ export default function AuthenticationPage() {
 
           {/* Auth Card */}
           <div className="w-full relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-b from-teal-500/20 to-purple-500/20 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000" />
+            <div className="absolute -inset-0.5 bg-teal-500/20 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000" />
 
             <div className="relative bg-[#0A0A0A]/90 backdrop-blur-xl border border-white/10 rounded-xl p-8 shadow-2xl">
               <div className="mb-6 text-center">

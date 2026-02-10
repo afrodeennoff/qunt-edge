@@ -43,7 +43,7 @@ export default function HowItWorks() {
                whileInView={{ width: '100%' }}
                viewport={{ once: true }}
                transition={{ duration: 1.5, ease: "easeInOut" }}
-               className="h-full bg-gradient-to-r from-zinc-900 via-teal-500 to-zinc-900"
+               className="h-full bg-teal-500/60"
              />
           </div>
 
