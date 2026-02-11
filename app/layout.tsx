@@ -4,13 +4,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
-import { IBM_Plex_Mono } from "next/font/google";
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
-  weight: ["400", "500", "600", "700"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -116,7 +109,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`bg-background ${ibmPlexMono.variable}`}
+      className="bg-background"
       translate="no"
       suppressHydrationWarning
       style={{ ["--theme-intensity" as string]: "100%" }}

@@ -252,7 +252,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   }
 
   :root {

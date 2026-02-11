@@ -45,9 +45,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         </CardContent>
       </Card>
 
-      <div className="rounded-2xl border border-border/70 bg-background/70 p-2 sm:p-3">
-        <TeamManagement />
-      </div>
+      <TeamManagement />
     </section>
   )
 }

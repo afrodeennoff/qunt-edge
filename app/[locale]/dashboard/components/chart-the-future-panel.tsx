@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bot, Send, Sparkles } from "lucide-react";
+import { Bot, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { TopNav } from "./top-nav";
 
 type ChatMessage = {
   id: string;
@@ -103,21 +105,11 @@ function ChartPanel() {
           ))}
         </select>
 
-        <div className="inline-flex rounded-md border border-white/10 bg-black/25 p-0.5">
-          {TIMEFRAMES.map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setInterval(item.value)}
-              className={cn(
-                "rounded px-2 py-1 text-[11px] font-semibold transition-colors",
-                interval === item.value ? "bg-cyan-400/20 text-cyan-200" : "text-slate-400 hover:text-slate-200",
-              )}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          options={TIMEFRAMES.map((item) => ({ label: item.label, value: item.value }))}
+          value={interval}
+          onChange={(next) => setInterval(next as TimeframeValue)}
+        />
       </header>
 
       <div className="h-[420px] w-full sm:h-[500px]">
@@ -203,12 +195,7 @@ function AssistantPanel() {
 export function ChartTheFuturePanel() {
   return (
     <div className="rounded-2xl border border-white/10 bg-[hsl(var(--qe-surface-0))] p-3 text-slate-100 sm:p-4">
-      <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-200">Chart the Future</h2>
-        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-300/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-200">
-          <Sparkles className="size-3" /> AI
-        </span>
-      </div>
+      <TopNav title="Chart the Future" />
 
       <div className="grid gap-3 xl:grid-cols-[1.9fr_1fr]">
         <ChartPanel />
