@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "next dev",
     "check:branding": "node scripts/check-branding.mjs",
-    "prebuild": "npm run check:branding && ts-node scripts/generate-routes.ts",
+    "check:widget-controls": "node scripts/check-widget-controls.mjs",
+    "prebuild": "npm run check:branding && npm run check:widget-controls && ts-node scripts/generate-routes.ts",
     "db:sync": "node scripts/sync-stack.mjs",
     "build": "NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321} NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-dummy-anon-key} next build",
     "bundle:check": "npm run build",

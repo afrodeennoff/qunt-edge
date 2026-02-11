@@ -197,7 +197,14 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
               <p className="text-sm font-medium">{t('widgets.dragToMove')}</p>
             </div>
           </div>
-          <div className="absolute top-2 right-2 flex gap-2 opacity-100 z-10">
+          <div
+            className={cn(
+              "absolute top-2 right-2 z-10 flex gap-2 transition-opacity duration-150",
+              isMobile
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+            )}
+          >
             <Popover open={isSizePopoverOpen} onOpenChange={setIsSizePopoverOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -728,7 +735,7 @@ export default function WidgetCanvas() {
 
   return (
     <div className={cn(
-      "relative mt-6 w-full min-h-screen",
+      "relative mt-1 w-full min-h-screen",
     )}>
       {layouts && (
         <div className="relative">
