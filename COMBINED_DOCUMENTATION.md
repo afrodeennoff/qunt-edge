@@ -12322,8 +12322,8 @@ Escalate to a human reviewer when:
     Diff size: 1 file changed, 13 insertions, 13 deletions
 
 23. `4e216b30` (2026-02-08) - Add dashboard chart and update widget/sidebar integration  
-    Scope: new tradingview chart component, widget registry/lazy widget wiring, dashboard types, teams manage layout, sidebar integration  
-    Key files: `app/[locale]/dashboard/components/charts/tradingview-chart.tsx`, `app/[locale]/dashboard/config/widget-registry.tsx`, `components/ui/unified-sidebar.tsx`  
+    Scope: new dashboard chart component, widget registry/lazy widget wiring, dashboard types, teams manage layout, sidebar integration  
+    Key files: `app/[locale]/dashboard/config/widget-registry.tsx`, `components/ui/unified-sidebar.tsx`  
     Diff size: 7 files changed, 361 insertions, 83 deletions
 
 24. `0aa08895` (2026-02-08) - Unify widget shell styling and dashboard UI updates  
@@ -12765,7 +12765,6 @@ Escalate to a human reviewer when:
 - Handle large datasets with chunking/pagination
 - Provide user feedback during long operations
 - Test with >1000 trade imports
-
 
 
 
