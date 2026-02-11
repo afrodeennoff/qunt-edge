@@ -23,7 +23,6 @@ const loadingShell = (
 )
 
 const widgetLoaders: Record<WidgetType, () => Promise<{ default: React.ComponentType<WidgetComponentProps> }>> = {
-  tradingViewChart: () => import("../components/charts/tradingview-chart"),
   weekdayPnlChart: () => import("../components/charts/weekday-pnl"),
   pnlChart: () => import("../components/charts/pnl-bar-chart"),
   timeOfDayChart: () => import("../components/charts/pnl-time-bar-chart"),

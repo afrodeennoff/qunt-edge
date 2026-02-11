@@ -273,6 +273,8 @@ export async function sendEmailsToUsers(
   subject?: string
 ) {
   try {
+    const supabase = getSupabaseAdminClient()
+
     if (!process.env.RESEND_API_KEY) {
       throw new Error("RESEND_API_KEY is not configured")
     }
@@ -413,4 +415,3 @@ function getDefaultSubject(template: EmailTemplate, language: string): string {
   const locale = language === "fr" ? "fr" : "en"
   return subjects[template][locale]
 }
-

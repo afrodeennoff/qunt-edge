@@ -182,9 +182,12 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
       className="relative h-full min-h-0 w-full group isolate overflow-hidden"
       onTouchStart={handleTouchStart}
     >
-      <div className={cn("h-full min-h-0 w-full",
+      <div
+        data-widget-shell="true"
+        className={cn("h-full min-h-0 w-full",
         isCustomizing && "blur-[2px]"
-      )}>
+      )}
+      >
         {children}
       </div>
       {isCustomizing && (

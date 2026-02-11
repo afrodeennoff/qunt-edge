@@ -328,6 +328,7 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
 }
 
 export async function getIndividualUserEquityData(userId: string) {
+  const supabase = getSupabaseAdminClient()
   console.log(`Starting getIndividualUserEquityData for user ${userId}`)
 
   // Get user from Supabase auth
@@ -411,6 +412,7 @@ export async function getIndividualUserEquityData(userId: string) {
 }
 
 export async function getTeamEquityData(teamId: string, page: number = 1, limit: number = 100) {
+  const supabase = getSupabaseAdminClient()
   console.log(`Starting getTeamEquityData for team ${teamId}`)
 
   // First, get the team to find trader IDs
@@ -574,6 +576,7 @@ function calculateMaxDrawdown(equityCurve: { cumulativePnL: number }[]): number 
 }
 
 export async function exportTeamTradesAction(teamId: string): Promise<string> {
+  const supabase = getSupabaseAdminClient()
   console.log(`Starting exportTeamTradesAction for team ${teamId}`)
 
   // Get the team to find trader IDs
