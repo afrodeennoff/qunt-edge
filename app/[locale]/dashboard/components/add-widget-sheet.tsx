@@ -101,7 +101,7 @@ const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
       <div 
         ref={ref}
         className={cn(
-          "cursor-pointer rounded-md relative group m-1 w-full overflow-hidden px-2",
+          "cursor-pointer rounded-2xl relative group m-1 w-full overflow-hidden border border-border/60 bg-card/60 px-2 shadow-[0_16px_34px_-28px_hsl(var(--background)/0.85)] backdrop-blur-md",
           "active:scale-[0.98] transition-all duration-150 ease-in-out",
           className
         )}

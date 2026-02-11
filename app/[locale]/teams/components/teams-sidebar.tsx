@@ -10,44 +10,55 @@ export function TeamsSidebar() {
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
   const pathname = usePathname()
-  const match = pathname.match(/^\/teams\/dashboard\/([^/]+)(?:\/|$)/)
-  const slug = pathname.includes("/teams/dashboard/trader/") ? undefined : match?.[1]
+  const segments = pathname.split('/').filter(Boolean)
+  const teamsIndex = segments.indexOf('teams')
+  const hasLocalePrefix = teamsIndex === 1
+  const localePrefix = hasLocalePrefix ? `/${segments[0]}` : ''
+  const teamsRoot = `${localePrefix}/teams`
+  const dashboardRoot = `${teamsRoot}/dashboard`
+  const slug =
+    teamsIndex !== -1 &&
+    segments[teamsIndex + 1] === 'dashboard' &&
+    segments[teamsIndex + 2] &&
+    segments[teamsIndex + 2] !== 'trader'
+      ? segments[teamsIndex + 2]
+      : undefined
 
   const navItems: UnifiedSidebarItem[] = [
     {
-      href: slug ? `/teams/dashboard/${slug}` : "/teams/dashboard",
+      href: slug ? `${dashboardRoot}/${slug}` : dashboardRoot,
       icon: <LayoutDashboard className="size-4.5" />,
       label: "Overview",
       group: "Team Overview"
     },
     {
-      href: slug ? `/teams/dashboard/${slug}/analytics` : "/teams/dashboard",
+      href: slug ? `${dashboardRoot}/${slug}/analytics` : dashboardRoot,
       icon: <BarChart3 className="size-4.5" />,
       label: "Analytics",
       group: "Team Overview",
       disabled: !slug
     },
     {
-      href: slug ? `/teams/dashboard/${slug}/traders` : "/teams/dashboard",
+      href: slug ? `${dashboardRoot}/${slug}/traders` : dashboardRoot,
       icon: <TrendingUp className="size-4.5" />,
       label: "Traders",
       group: "Team Overview",
       disabled: !slug
     },
     {
-      href: slug ? `/teams/dashboard/${slug}/members` : "/teams/manage",
+      href: slug ? `${dashboardRoot}/${slug}/members` : `${teamsRoot}/manage`,
       icon: <Users className="size-4.5" />,
       label: "Members & Roles",
       group: "Management"
     },
     {
-      href: "/propfirms",
+      href: `${localePrefix}/propfirms`,
       icon: <Globe className="size-4.5" />,
       label: "Prop Firms",
       group: "Resources"
     },
     {
-      href: "/dashboard",
+      href: `${localePrefix}/dashboard`,
       icon: <ArrowLeft className="size-4.5" />,
       label: "Main Dashboard",
       group: "System"

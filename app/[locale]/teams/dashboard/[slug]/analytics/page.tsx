@@ -155,7 +155,7 @@ export default function TeamAnalyticsPage() {
 
       setLoading(true)
       try {
-        const result = await getTeamAnalyticsDataAction(slug, user.id)
+        const result = await getTeamAnalyticsDataAction(slug)
         if (result.success && result.data) {
           setData(normalizeAnalyticsData(result.data))
         }

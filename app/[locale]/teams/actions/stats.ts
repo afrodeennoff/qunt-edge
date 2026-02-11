@@ -1,13 +1,66 @@
 'use server'
 
-import { createClient, User } from '@supabase/supabase-js'
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+import { createClient as createSupabaseClient, User } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
+import { createClient as createServerClient } from '@/server/auth'
+
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Missing Supabase admin configuration. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.'
+    )
+  }
+
+  return createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+}
+
+const supabase = getSupabaseAdminClient()
+
+
+async function getAuthorizedTeam(teamId: string) {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.id) {
+    return { team: null, userId: null, authorized: false }
+  }
+
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+    select: {
+      id: true,
+      userId: true,
+      traderIds: true,
+      managers: {
+        select: {
+          managerId: true,
+        },
+      },
+    },
+  })
+
+  if (!team) {
+    return { team: null, userId: user.id, authorized: false }
+  }
+
+  const authorized =
+    team.userId === user.id ||
+    team.traderIds.includes(user.id) ||
+    team.managers.some((manager) => manager.managerId === user.id)
+
+  return { team, userId: user.id, authorized }
+}
 
 const toNumber = (value: unknown): number => Number(value ?? 0)
 const netTradePnl = (trade: { pnl: unknown; commission?: unknown }) =>
@@ -39,7 +92,7 @@ export async function getUserStats() {
       page++
     }
   }
-  
+
   // Group users by day of creation
   const dailyUsers = allUsers.reduce((acc, user) => {
     const day = user.created_at.slice(0, 10) // YYYY-MM-DD format
@@ -93,9 +146,9 @@ export async function getTradeStats() {
     totalTrades: trades.length,
     dailyData
   }
-} 
+}
 
-export async function getFreeUsers(){
+export async function getFreeUsers() {
   console.log('Starting getFreeUsers function')
 
   // Get all trades with their user IDs
@@ -194,10 +247,10 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
 
   // Get user data from Supabase for these specific users
   console.log('Fetching user data from Supabase...')
-  const userPromises = userIds.map(userId => 
+  const userPromises = userIds.map(userId =>
     supabase.auth.admin.getUserById(userId)
   )
-  
+
   const userResults = await Promise.all(userPromises)
   const users = userResults
     .map(result => result.data?.user)
@@ -246,9 +299,9 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
   // Calculate equity curve for each user
   const userEquityData = users.map((user) => {
     const userTrades = userTradesMap[user.id] || []
-    
+
     // Sort trades by creation date
-    const sortedTrades = userTrades.sort((a, b) => 
+    const sortedTrades = userTrades.sort((a, b) =>
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     )
 
@@ -316,7 +369,7 @@ export async function getIndividualUserEquityData(userId: string) {
 
   // Get user from Supabase auth
   const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId)
-  
+
   if (userError || !userData.user) {
     console.error('Error fetching user:', userError)
     return null
@@ -347,7 +400,7 @@ export async function getIndividualUserEquityData(userId: string) {
   })
 
   // Sort trades by creation date
-  const sortedTrades = trades.sort((a, b) => 
+  const sortedTrades = trades.sort((a, b) =>
     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   )
 
@@ -397,14 +450,10 @@ export async function getIndividualUserEquityData(userId: string) {
 export async function getTeamEquityData(teamId: string, page: number = 1, limit: number = 100) {
   console.log(`Starting getTeamEquityData for team ${teamId}`)
 
-  // First, get the team to find trader IDs
-  const team = await prisma.team.findUnique({
-    where: { id: teamId },
-    select: { traderIds: true }
-  })
+  const { team, authorized } = await getAuthorizedTeam(teamId)
 
-  if (!team) {
-    console.error(`Team ${teamId} not found`)
+  if (!authorized || !team) {
+    console.error(`Unauthorized team equity access attempt for team ${teamId}`)
     return {
       users: [],
       totalUsers: 0,
@@ -412,7 +461,7 @@ export async function getTeamEquityData(teamId: string, page: number = 1, limit:
     }
   }
 
-  console.log(`Found team with ${team.traderIds.length} traders`)
+  console.log(`Authorized team with ${team.traderIds.length} traders`)
 
   if (team.traderIds.length === 0) {
     return {
@@ -431,10 +480,10 @@ export async function getTeamEquityData(teamId: string, page: number = 1, limit:
 
   // Get user data from Supabase for these specific traders
   console.log('Fetching user data from Supabase...')
-  const userPromises = paginatedTraderIds.map(userId => 
+  const userPromises = paginatedTraderIds.map(userId =>
     supabase.auth.admin.getUserById(userId)
   )
-  
+
   const userResults = await Promise.all(userPromises)
   const users = userResults
     .map(result => result.data?.user)
@@ -483,9 +532,9 @@ export async function getTeamEquityData(teamId: string, page: number = 1, limit:
   // Calculate equity curve for each user
   const userEquityData = users.map((user) => {
     const userTrades = userTradesMap[user.id] || []
-    
+
     // Sort trades by entry date
-    const sortedTrades = userTrades.sort((a, b) => 
+    const sortedTrades = userTrades.sort((a, b) =>
       new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
     )
 
@@ -560,14 +609,14 @@ function calculateMaxDrawdown(equityCurve: { cumulativePnL: number }[]): number 
 export async function exportTeamTradesAction(teamId: string): Promise<string> {
   console.log(`Starting exportTeamTradesAction for team ${teamId}`)
 
-  // Get the team to find trader IDs
-  const team = await prisma.team.findUnique({
-    where: { id: teamId },
-    select: { traderIds: true }
-  })
+  const { team, authorized } = await getAuthorizedTeam(teamId)
 
   if (!team) {
     throw new Error(`Team ${teamId} not found`)
+  }
+
+  if (!authorized) {
+    throw new Error('Unauthorized')
   }
 
   console.log(`Found team with ${team.traderIds.length} traders`)
@@ -578,10 +627,10 @@ export async function exportTeamTradesAction(teamId: string): Promise<string> {
 
   // Get user data from Supabase for all traders
   console.log('Fetching user data from Supabase...')
-  const userPromises = team.traderIds.map(userId => 
+  const userPromises = team.traderIds.map(userId =>
     supabase.auth.admin.getUserById(userId)
   )
-  
+
   const userResults = await Promise.all(userPromises)
   const users = userResults
     .map(result => result.data?.user)
@@ -676,7 +725,7 @@ export async function exportTeamTradesAction(teamId: string): Promise<string> {
   })
 
   const csv = [csvHeaders.join(','), ...csvRows].join('\n')
-  
+
   console.log(`Generated CSV with ${csvRows.length} rows`)
   return csv
 }

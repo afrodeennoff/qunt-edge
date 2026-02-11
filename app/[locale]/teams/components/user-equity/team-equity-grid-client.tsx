@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { getTeamEquityData, exportTeamTradesAction } from '../../actions/stats'
-import { Suspense } from 'react'
 import { Card } from '@/components/ui/card'
 import { UserEquityChart } from './user-equity-chart'
 import { ExternalLink, Download } from 'lucide-react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -52,6 +52,8 @@ interface Filters {
 
 export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
   const t = useI18n()
+  const params = useParams<{ locale?: string }>()
+  const localePrefix = params?.locale ? `/${params.locale}` : ''
   const [users, setUsers] = useState<UserEquityData[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -355,7 +357,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                       {user.statistics.totalPnL >= 0 ? '+' : ''}{user.statistics.totalPnL.toFixed(2)}
                     </div>
                     <Link 
-                      href={`/teams/dashboard/trader/${user.userId}`}
+                      href={`${localePrefix}/teams/dashboard/trader/${user.userId}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1 hover:bg-gray-100 rounded transition-colors"

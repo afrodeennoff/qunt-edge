@@ -2,13 +2,17 @@
 
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { ShieldPlus, UserPlus, Users } from "lucide-react"
+import { ArrowRight, Settings, Users } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { TeamManagement } from "../../../components/team-management"
 
 export default function TeamMembersPage() {
-  const params = useParams<{ slug: string }>()
+  const params = useParams<{ slug: string; locale?: string }>()
   const slug = params.slug
+  const localePrefix = params.locale ? `/${params.locale}` : ''
+  const teamManageHref = `${localePrefix}/teams/manage`
+  const analyticsHref = `${localePrefix}/teams/dashboard/${slug}/analytics`
 
   return (
     <section className="space-y-6">
@@ -24,25 +28,26 @@ export default function TeamMembersPage() {
               Manage invitations, responsibilities, and permission boundaries across the team.
             </p>
           </div>
-          <Button className="h-10 rounded-xl text-[11px] font-black uppercase tracking-[0.15em]">
-            <UserPlus className="h-4 w-4" />
-            Invite Member
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" className="h-10 rounded-xl border-border/70 text-[11px] font-black uppercase tracking-[0.15em]">
+              <Link href={analyticsHref}>
+                Team Analytics
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild className="h-10 rounded-xl text-[11px] font-black uppercase tracking-[0.15em]">
+              <Link href={teamManageHref}>
+                <Settings className="h-4 w-4" />
+                Manage Team
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <Card className="border-border/70 bg-card/70">
-        <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center sm:py-24">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/25 bg-primary/10">
-            <ShieldPlus className="h-7 w-7 text-primary" />
-          </div>
-          <h2 className="text-lg font-black tracking-tight sm:text-xl">Role Matrix Expansion In Progress</h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Advanced role mapping for `/{slug}` is being finalized. You can still manage core team settings and invitations from the dashboard controls.
-          </p>
-          <Button asChild variant="outline" className="rounded-xl border-border/70">
-            <Link href="/teams/manage">Open Team Management</Link>
-          </Button>
+      <Card className="border-border/70 bg-card/75">
+        <CardContent className="p-2 sm:p-3">
+          <TeamManagement />
         </CardContent>
       </Card>
     </section>
