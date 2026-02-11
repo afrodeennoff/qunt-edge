@@ -4,17 +4,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
-import { Geist, Poppins } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
 
-const geist = Geist({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-geist",
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  variable: "--font-poppins",
-  weight: ["400", "600", "700"],
+  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -121,7 +116,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`bg-background ${geist.variable} ${poppins.variable}`}
+      className={`bg-background ${ibmPlexMono.variable}`}
       translate="no"
       suppressHydrationWarning
       style={{ ["--theme-intensity" as string]: "100%" }}

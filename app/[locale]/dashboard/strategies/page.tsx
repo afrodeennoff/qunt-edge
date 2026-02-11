@@ -9,11 +9,9 @@ export default function DashboardStrategiesPage() {
   }, [])
 
   return (
-    <div className="mt-0 h-[calc(100vh-112px)] p-3 sm:p-4 lg:p-6">
-      <div className="h-full w-full overflow-hidden rounded-3xl border border-border/60 bg-card/75 p-3 shadow-sm backdrop-blur-sm sm:p-4">
-        <div className="h-full w-full overflow-hidden rounded-2xl border border-border/70 bg-background/70">
+    <div className="mt-0 h-[calc(100vh-112px)] px-3 pb-4 pt-0 sm:px-4 sm:pb-4 sm:pt-0 lg:px-6 lg:pb-6 lg:pt-0">
+      <div className="h-full w-full overflow-hidden p-3 sm:p-4">
         <TradeTableReview />
-        </div>
       </div>
     </div>
   )

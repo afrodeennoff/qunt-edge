@@ -179,12 +179,13 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
   return (
     <div
       ref={widgetRef}
-      className="relative h-full min-h-0 w-full rounded-lg bg-black group isolate overflow-hidden"
+      className="relative h-full min-h-0 w-full group isolate overflow-hidden"
       onTouchStart={handleTouchStart}
     >
-      <div className={cn("h-full min-h-0 w-full",
-        isCustomizing && "blur-[2px]"
-      )}>
+      <div
+        data-widget-shell="true"
+        className={cn("h-full min-h-0 w-full", isCustomizing && "blur-[2px]")}
+      >
         {children}
       </div>
       {isCustomizing && (
@@ -728,7 +729,7 @@ export default function WidgetCanvas() {
 
   return (
     <div className={cn(
-      "relative mt-6 w-full min-h-screen",
+      "relative mt-0 w-full min-h-screen",
     )}>
       {layouts && (
         <div className="relative">

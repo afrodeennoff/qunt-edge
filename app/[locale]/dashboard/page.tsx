@@ -24,33 +24,27 @@ export default function Home() {
   const activeTab = searchParams.get("tab") || "widgets";
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-72px)] p-3 sm:p-4 lg:p-6">
+    <div className="relative w-full min-h-[calc(100vh-72px)] px-3 pb-4 pt-0 sm:px-4 sm:pb-4 sm:pt-0 lg:px-6 lg:pb-6 lg:pt-0">
       <Tabs value={activeTab} className="w-full h-full relative z-10">
 
 
         <TabsContent
           value="table"
-          className="mt-0 h-[calc(100vh-140px)] sm:h-[calc(100vh-148px)] lg:h-[calc(100vh-160px)] rounded-3xl border border-border/60 bg-card/75 p-2 sm:p-3 shadow-sm backdrop-blur-sm"
+          className="mt-0 h-[calc(100vh-140px)] sm:h-[calc(100vh-148px)] lg:h-[calc(100vh-160px)] p-2 sm:p-3"
         >
-          <div className="h-full w-full overflow-hidden rounded-2xl border border-border/70 bg-background/70">
-            <TradeTableReview />
-          </div>
+          <TradeTableReview />
         </TabsContent>
 
-        <TabsContent value="accounts" className="mt-0 rounded-3xl border border-border/60 bg-card/75 p-3 shadow-sm backdrop-blur-sm sm:p-4">
-          <div className="rounded-2xl border border-border/70 bg-background/70 p-3 sm:p-4">
-            <AccountsOverview size="large" />
-          </div>
+        <TabsContent value="accounts" className="mt-0 p-3 sm:p-4">
+          <AccountsOverview size="large" />
         </TabsContent>
 
         <TabsContent value="chart" className="mt-0">
           <ChartTheFuturePanel />
         </TabsContent>
 
-        <TabsContent value="widgets" className="mt-0 rounded-3xl border border-border/60 bg-card/75 p-3 shadow-sm backdrop-blur-sm sm:p-4">
-          <div className="rounded-2xl border border-border/70 bg-background/70 p-3 sm:p-4">
-            <WidgetCanvas />
-          </div>
+        <TabsContent value="widgets" className="mt-0 px-3 pb-4 pt-0 sm:px-4 sm:pb-4 sm:pt-0">
+          <WidgetCanvas />
         </TabsContent>
       </Tabs>
     </div>

@@ -69,6 +69,12 @@ export function DashboardSidebar() {
       group: "Trading"
     },
     {
+      href: `/${locale}/dashboard/trader-profile`,
+      icon: <Brain className="size-4.5" />,
+      label: "Trader Profile",
+      group: "Trading"
+    },
+    {
       href: `/${locale}/dashboard/strategies`,
       icon: <BookOpen className="size-4.5" />,
       label: "Trade Desk",

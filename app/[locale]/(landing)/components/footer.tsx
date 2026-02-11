@@ -67,10 +67,10 @@ export default function Footer() {
             <p className="max-w-md text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">{t('footer.description')}</p>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Link href={`/${locale}/authentication`} className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
+              <Link href={`/${locale}/authentication`} prefetch={false} className="rounded-full border border-[hsl(var(--mk-border)/0.35)] px-4 py-2 text-[11px] font-medium text-[hsl(var(--mk-text))] transition-all hover:border-[hsl(var(--brand-primary)/0.5)]">
                 Sign In
               </Link>
-              <Link href={`/${locale}/support`} className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
+              <Link href={`/${locale}/support`} prefetch={false} className="rounded-full bg-[hsl(var(--brand-primary))] px-4 py-2 text-[11px] font-medium text-[hsl(var(--brand-ink))] transition-all hover:bg-[hsl(var(--brand-primary-strong))]">
                 Contact Support
               </Link>
             </div>
@@ -125,7 +125,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
             viewport={{ once: true }}
             transition={{ delay: idx * 0.04, duration: 0.35 }}
           >
-            <Link href={`/${locale}${item.href}`} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
+            <Link href={`/${locale}${item.href}`} prefetch={false} className="text-sm text-[hsl(var(--mk-text))] transition-colors hover:text-[hsl(var(--brand-primary))]">
               {item.name}
             </Link>
           </motion.li>

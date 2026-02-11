@@ -6,7 +6,6 @@ import PNLChart from '../components/charts/pnl-bar-chart'
 import TimeOfDayTradeChart from '../components/charts/pnl-time-bar-chart'
 import TimeInPositionChart from '../components/charts/time-in-position'
 import TimeRangePerformanceChart from '../components/charts/time-range-performance'
-import TradingViewChart from '../components/charts/tradingview-chart'
 import WeekdayPNLChart from '../components/charts/weekday-pnl'
 import PnLBySideChart from '../components/charts/pnl-by-side'
 import PnLPerContractChart from '../components/charts/pnl-per-contract'
@@ -349,15 +348,6 @@ function CreateChatPreview() {
 }
 
 export const WIDGET_REGISTRY: Record<WidgetType, WidgetConfig> = {
-  tradingViewChart: {
-    type: 'tradingViewChart',
-    defaultSize: 'large',
-    allowedSizes: ['small-long', 'medium', 'large', 'extra-large'],
-    category: 'charts',
-    previewHeight: 300,
-    getComponent: ({ size }) => <TradingViewChart size={size} />,
-    getPreview: () => <TradingViewChart size="small-long" />
-  },
   weekdayPnlChart: {
     type: 'weekdayPnlChart',
     defaultSize: 'medium',

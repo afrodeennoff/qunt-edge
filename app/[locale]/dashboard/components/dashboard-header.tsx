@@ -66,6 +66,7 @@ export function DashboardHeader() {
         if (pathname.includes('strategies')) return 'Trade Desk';
         if (pathname.includes('reports')) return 'Analytics';
         if (pathname.includes('behavior')) return 'Behavior';
+        if (pathname.includes('trader-profile')) return 'Trader Profile';
         if (pathname.includes('calendar')) return 'Calendar';
         if (pathname.includes('data')) return 'Data';
         if (pathname.includes('settings')) return 'Settings';
@@ -77,7 +78,7 @@ export function DashboardHeader() {
     const currentLayout = layouts || { desktop: [], mobile: [] };
 
     return (
-        <header className="sticky top-0 z-50 overflow-hidden border-b border-border/70 bg-background/95 backdrop-blur-md">
+        <header className="sticky top-0 z-50 overflow-hidden bg-background/95 backdrop-blur-md" data-dashboard-header="true">
             <div className="min-h-[64px] flex flex-wrap items-center justify-between gap-2 px-3 md:px-8">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">

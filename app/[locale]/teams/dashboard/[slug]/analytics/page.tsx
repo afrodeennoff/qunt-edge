@@ -15,7 +15,6 @@ import { BarChart3, Target, TrendingUp, Zap } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { getTeamAnalyticsDataAction } from '../../../actions/analytics'
-import { useUserStore } from '@/store/user-store'
 
 type TeamMemberPerformance = {
   userId: string
@@ -142,14 +141,13 @@ function CustomTooltip({
 export default function TeamAnalyticsPage() {
   const params = useParams<{ slug: string }>()
   const slug = params.slug
-  const { user } = useUserStore()
 
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
-      if (!slug || !user?.id) {
+      if (!slug) {
         return
       }
 
@@ -167,7 +165,7 @@ export default function TeamAnalyticsPage() {
     }
 
     fetchData()
-  }, [slug, user?.id])
+  }, [slug])
 
   const summary = useMemo(() => {
     return {

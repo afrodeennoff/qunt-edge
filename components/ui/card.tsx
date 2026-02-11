@@ -29,7 +29,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           "relative overflow-hidden rounded-xl group transition-all duration-300",
           {
-            "bg-background/5 border border-white/5 backdrop-blur-sm": variant === "default" || variant === "glass",
+            "bg-card border border-border": variant === "default" || variant === "glass",
             "bg-card text-card-foreground border border-border shadow-sm": variant === "elevated",
             "border-2 border-border bg-transparent shadow-none": variant === "outlined",
             "border-0 bg-transparent shadow-none": variant === "flat",
@@ -51,8 +51,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       >
         {hover && (
           <>
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/30 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-            <div className="absolute -inset-px bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute top-0 left-0 h-[1px] w-full bg-border/80 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </>
         )}
 
