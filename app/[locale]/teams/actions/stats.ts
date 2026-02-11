@@ -25,7 +25,6 @@ function getSupabaseAdminClient() {
 
 const supabase = getSupabaseAdminClient()
 
-
 async function getAuthorizedTeam(teamId: string) {
   const supabase = await createServerClient()
   const {
