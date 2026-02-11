@@ -1,21 +1,32 @@
 'use server'
 
 import { createClient, User } from '@supabase/supabase-js'
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '', {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
 import { prisma } from '@/lib/prisma'
 import { normalizeTradesForClient } from '@/lib/data-types'
 import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
 import { Subscription } from '@/prisma/generated/prisma'
 
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Missing Supabase admin configuration. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.'
+    )
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+}
+
 export async function getUserStats() {
+  const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1
   const perPage = 1000
@@ -67,6 +78,7 @@ export async function getUserStats() {
 }
 
 export async function getFreeUsers() {
+  const supabase = getSupabaseAdminClient()
   console.log('Starting getFreeUsers function')
 
   // Get all trades with their user IDs

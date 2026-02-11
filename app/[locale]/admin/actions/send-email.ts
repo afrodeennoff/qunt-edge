@@ -6,19 +6,24 @@ import { prisma } from "@/lib/prisma"
 import { createClient, type User } from "@supabase/supabase-js"
 import { render } from "@react-email/render"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
 
-const supabase = createClient(
-  supabaseUrl || '',
-  supabaseServiceKey || '',
-  {
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      "Missing Supabase admin configuration. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+    )
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-)
+  })
+}
 
 export type EmailTemplate =
   | "black-friday"
@@ -211,6 +216,7 @@ interface UserListItem {
 
 export async function getUsersList(): Promise<UserListItem[]> {
   try {
+    const supabase = getSupabaseAdminClient()
     let allUsers: User[] = []
     let page = 1
     const perPage = 1000
@@ -407,5 +413,4 @@ function getDefaultSubject(template: EmailTemplate, language: string): string {
   const locale = language === "fr" ? "fr" : "en"
   return subjects[template][locale]
 }
-
 

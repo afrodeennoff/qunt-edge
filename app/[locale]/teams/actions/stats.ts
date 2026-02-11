@@ -1,13 +1,26 @@
 'use server'
 
 import { createClient, User } from '@supabase/supabase-js'
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
 import { prisma } from '@/lib/prisma'
+
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Missing Supabase admin configuration. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.'
+    )
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+}
 
 const toNumber = (value: unknown): number => Number(value ?? 0)
 const netTradePnl = (trade: { pnl: unknown; commission?: unknown }) =>
@@ -16,6 +29,7 @@ const toIsoDateKey = (value: Date | string): string =>
   new Date(value).toISOString().slice(0, 10)
 
 export async function getUserStats() {
+  const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1
   const perPage = 1000
@@ -96,6 +110,7 @@ export async function getTradeStats() {
 } 
 
 export async function getFreeUsers(){
+  const supabase = getSupabaseAdminClient()
   console.log('Starting getFreeUsers function')
 
   // Get all trades with their user IDs
@@ -163,6 +178,7 @@ export async function getFreeUsers(){
 }
 
 export async function getUserEquityData(page: number = 1, limit: number = 10) {
+  const supabase = getSupabaseAdminClient()
   console.log('Starting getUserEquityData function')
 
   // First, get all unique user IDs that have trades, with pagination
