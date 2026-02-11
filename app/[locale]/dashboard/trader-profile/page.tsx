@@ -1,13 +1,13 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { DashboardTopNav } from "../components/top-nav"
 import { ProfileHero } from "../components/trader-profile/profile-hero"
 import { TradeFeed } from "../components/trader-profile/trade-feed"
 import { StatsRadarCard } from "../components/trader-profile/stats-radar-card"
 import { StatsMetricStack } from "../components/trader-profile/stats-metric-stack"
 import { StatsProgressCard } from "../components/trader-profile/stats-progress-card"
-import type { TraderProfile, TradeItem, TraderStats } from "../types/trader-profile"
+import type { TraderBenchmark, TraderProfile, TradeItem, TraderStats } from "../types/trader-profile"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 
@@ -15,6 +15,8 @@ export default function TraderProfilePage() {
   const { formattedTrades, accounts, statistics, isLoading } = useData()
   const user = useUserStore((state) => state.user)
   const supabaseUser = useUserStore((state) => state.supabaseUser)
+  const [benchmark, setBenchmark] = useState<TraderBenchmark | null>(null)
+  const [isBenchmarkLoading, setIsBenchmarkLoading] = useState(true)
 
   const trades = useMemo<TradeItem[]>(() => {
     return (formattedTrades || []).slice(0, 20).map((trade) => {
@@ -37,24 +39,76 @@ export default function TraderProfilePage() {
     const losses = pnlValues.filter((value) => value < 0)
     const avgWin = wins.length ? wins.reduce((a, b) => a + b, 0) / wins.length : 0
     const avgLossAbs = losses.length ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0
+    const riskReward = avgLossAbs > 0 ? avgWin / avgLossAbs : 0
     const breakEvenRate =
       statistics.nbTrades > 0 ? (statistics.nbBe / statistics.nbTrades) * 100 : 0
     const serialTraderScore = Math.min(
       100,
       Math.round((statistics.winRate || 0) * 0.6 + (statistics.profitFactor || 0) * 12),
     )
+    const sortedTrades = [...(formattedTrades || [])].sort(
+      (a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime(),
+    )
+    let runningPnl = 0
+    let peakPnl = 0
+    let maxDrawdown = 0
+    for (const trade of sortedTrades) {
+      const netPnl = Number(trade.pnl || 0) - Number(trade.commission || 0)
+      runningPnl += netPnl
+      peakPnl = Math.max(peakPnl, runningPnl)
+      maxDrawdown = Math.max(maxDrawdown, peakPnl - runningPnl)
+    }
 
     return {
       avgWin: Number(avgWin.toFixed(2)),
       avgLoss: Number(avgLossAbs.toFixed(2)),
-      avgReturn: Number((statistics.cumulativePnl || 0).toFixed(2)),
+      avgReturn:
+        statistics.nbTrades > 0
+          ? Number(((statistics.cumulativePnl || 0) / statistics.nbTrades).toFixed(2))
+          : 0,
       winRate: Number((statistics.winRate || 0).toFixed(2)),
+      riskReward: Number(riskReward.toFixed(2)),
+      drawdown: Number(maxDrawdown.toFixed(2)),
       totalTrades: statistics.nbTrades || 0,
       breakEvenRate: Number(breakEvenRate.toFixed(2)),
       sumGain: Number((statistics.cumulativePnl || 0).toFixed(2)),
       serialTraderScore,
     }
   }, [formattedTrades, statistics])
+
+  useEffect(() => {
+    let active = true
+    const loadBenchmark = async () => {
+      setIsBenchmarkLoading(true)
+      try {
+        const response = await fetch("/api/trader-profile/benchmark", {
+          method: "GET",
+          credentials: "include",
+        })
+        if (!response.ok) {
+          throw new Error(`Benchmark request failed: ${response.status}`)
+        }
+        const payload = (await response.json()) as { benchmark?: TraderBenchmark }
+        if (active) {
+          setBenchmark(payload.benchmark ?? null)
+        }
+      } catch (error) {
+        console.error("[TraderProfile] failed to load benchmark", error)
+        if (active) {
+          setBenchmark(null)
+        }
+      } finally {
+        if (active) {
+          setIsBenchmarkLoading(false)
+        }
+      }
+    }
+
+    loadBenchmark()
+    return () => {
+      active = false
+    }
+  }, [])
 
   const profile = useMemo<TraderProfile>(() => {
     const name =
@@ -78,7 +132,12 @@ export default function TraderProfilePage() {
   return (
     <div className="page-shell">
       <div className="section-stack p-3 sm:p-4 lg:p-5">
-        <DashboardTopNav title="Trader Profile" />
+        <DashboardTopNav
+          title="Trader Profile"
+          showTitle={false}
+          showNavLinks={false}
+          showUserProfile={false}
+        />
 
         <div className="grid gap-4 xl:grid-cols-[1.7fr_1fr]">
           <section className="space-y-4">
@@ -92,7 +151,7 @@ export default function TraderProfilePage() {
           </section>
 
           <aside className="space-y-4">
-            <StatsRadarCard stats={stats} />
+            <StatsRadarCard stats={stats} benchmark={benchmark} isBenchmarkLoading={isBenchmarkLoading} />
             <StatsMetricStack stats={stats} />
             <StatsProgressCard stats={stats} />
           </aside>

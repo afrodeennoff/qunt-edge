@@ -77,7 +77,7 @@ export function DashboardHeader() {
     const currentLayout = layouts || { desktop: [], mobile: [] };
 
     return (
-        <header className="sticky top-0 z-50 overflow-hidden border-b border-border/70 bg-background/95 backdrop-blur-md">
+        <header className="sticky top-0 z-50 overflow-hidden bg-background/95 backdrop-blur-md" data-dashboard-header="true">
             <div className="min-h-[64px] flex flex-wrap items-center justify-between gap-2 px-3 md:px-8">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">

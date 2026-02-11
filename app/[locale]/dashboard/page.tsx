@@ -48,7 +48,7 @@ export default function Home() {
         </TabsContent>
 
         <TabsContent value="widgets" className="mt-0 p-3 sm:p-4">
-          <div className="surface-panel-md">
+          <div className="h-full w-full">
             <WidgetCanvas />
           </div>
         </TabsContent>

@@ -22,8 +22,18 @@ export interface TraderStats {
   avgLoss: number
   avgReturn: number
   winRate: number
+  riskReward: number
+  drawdown: number
   totalTrades: number
   breakEvenRate: number
   sumGain: number
   serialTraderScore: number
+}
+
+export interface TraderBenchmark {
+  riskReward: number
+  drawdown: number
+  winRate: number
+  avgReturn: number
+  sampleSize: number
 }

@@ -179,7 +179,7 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
   return (
     <div
       ref={widgetRef}
-      className="relative h-full min-h-0 w-full rounded-lg bg-black group isolate overflow-hidden"
+      className="relative h-full min-h-0 w-full group isolate overflow-hidden"
       onTouchStart={handleTouchStart}
     >
       <div className={cn("h-full min-h-0 w-full",
@@ -762,13 +762,10 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl border transition-all duration-500 group/widget overflow-hidden relative",
-                      isCustomizing
-                        ? "border-accent-teal/50 shadow-[0_0_30px_rgba(var(--accent-teal-rgb),0.2)] bg-background/60"
-                        : "border-white/[0.03] bg-background/40 backdrop-blur-md hover:border-accent-teal/30 hover:shadow-[0_0_20px_rgba(var(--accent-teal-rgb),0.1)]"
+                      "h-full w-full relative",
+                      isCustomizing && "ring-1 ring-accent-teal/45"
                     )}>
-                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
-                      <div className="relative h-full w-full">
+                      <div className="relative h-full w-full overflow-hidden">
                         {renderWidget(widget)}
                       </div>
                     </div>
