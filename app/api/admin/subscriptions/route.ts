@@ -1,27 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/server/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { securityManager } from '@/server/payment-security'
+import { validateAdmin } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const adminDomains = process.env.ADMIN_EMAIL_DOMAINS?.split(',') || []
-    const isAdmin = adminDomains.some((domain) =>
-      user.email?.toLowerCase().endsWith(domain.toLowerCase())
-    )
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const adminCheck = await validateAdmin()
+    if (adminCheck.error) {
+      return adminCheck.error
     }
 
     const { searchParams } = new URL(req.url)
@@ -108,23 +95,11 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const adminCheck = await validateAdmin()
+    if (adminCheck.error) {
+      return adminCheck.error
     }
-
-    const adminDomains = process.env.ADMIN_EMAIL_DOMAINS?.split(',') || []
-    const isAdmin = adminDomains.some((domain) =>
-      user.email?.toLowerCase().endsWith(domain.toLowerCase())
-    )
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const { user } = adminCheck
 
     const body = await req.json()
     const { subscriptionId, action, ...data } = body
