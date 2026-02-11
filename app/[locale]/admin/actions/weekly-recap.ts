@@ -6,15 +6,24 @@ import { createClient } from '@supabase/supabase-js'
 import { generateTradingAnalysis } from "@/app/api/email/weekly-summary/[userid]/actions/analysis"
 import { getUserData, computeTradingStats } from "@/app/api/email/weekly-summary/[userid]/actions/user-data"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
 
-const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '', {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      'Missing Supabase admin configuration. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.'
+    )
   }
-})
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+}
 
 export interface WeeklyRecapContent {
   firstName: string
@@ -137,6 +146,7 @@ export async function loadInitialContent(email?: string, userId?: string) {
 }
 
 export async function listUsers() {
+  const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1
   const perPage = 1000

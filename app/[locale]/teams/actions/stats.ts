@@ -23,8 +23,6 @@ function getSupabaseAdminClient() {
   })
 }
 
-const supabase = getSupabaseAdminClient()
-
 async function getAuthorizedTeam(teamId: string) {
   const supabase = await createServerClient()
   const {
@@ -68,6 +66,7 @@ const toIsoDateKey = (value: Date | string): string =>
   new Date(value).toISOString().slice(0, 10)
 
 export async function getUserStats() {
+  const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1
   const perPage = 1000
@@ -148,6 +147,7 @@ export async function getTradeStats() {
 }
 
 export async function getFreeUsers() {
+  const supabase = getSupabaseAdminClient()
   console.log('Starting getFreeUsers function')
 
   // Get all trades with their user IDs
@@ -215,6 +215,7 @@ export async function getFreeUsers() {
 }
 
 export async function getUserEquityData(page: number = 1, limit: number = 10) {
+  const supabase = getSupabaseAdminClient()
   console.log('Starting getUserEquityData function')
 
   // First, get all unique user IDs that have trades, with pagination
@@ -364,6 +365,7 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
 }
 
 export async function getIndividualUserEquityData(userId: string) {
+  const supabase = getSupabaseAdminClient()
   console.log(`Starting getIndividualUserEquityData for user ${userId}`)
 
   // Get user from Supabase auth
@@ -447,6 +449,7 @@ export async function getIndividualUserEquityData(userId: string) {
 }
 
 export async function getTeamEquityData(teamId: string, page: number = 1, limit: number = 100) {
+  const supabase = getSupabaseAdminClient()
   console.log(`Starting getTeamEquityData for team ${teamId}`)
 
   const { team, authorized } = await getAuthorizedTeam(teamId)
@@ -606,6 +609,7 @@ function calculateMaxDrawdown(equityCurve: { cumulativePnL: number }[]): number 
 }
 
 export async function exportTeamTradesAction(teamId: string): Promise<string> {
+  const supabase = getSupabaseAdminClient()
   console.log(`Starting exportTeamTradesAction for team ${teamId}`)
 
   const { team, authorized } = await getAuthorizedTeam(teamId)
