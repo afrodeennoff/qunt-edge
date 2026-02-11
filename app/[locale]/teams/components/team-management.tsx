@@ -97,6 +97,11 @@ export function TeamManagement({
 
   const pathname = usePathname()
   const router = useRouter()
+  const segments = pathname.split('/').filter(Boolean)
+  const teamsIndex = segments.indexOf('teams')
+  const localePrefix = teamsIndex === 1 ? `/${segments[0]}` : ''
+  const teamsRoot = `${localePrefix}/teams`
+  const dashboardRoot = `${teamsRoot}/dashboard`
   const [firstTeamId, setFirstTeamId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -131,9 +136,9 @@ export function TeamManagement({
     loadInitialData()
     // If we found a team, redirect to it
     if (firstTeamId) {
-      router.replace(`/teams/dashboard/${firstTeamId}`)
+      router.replace(`${dashboardRoot}/${firstTeamId}`)
     }
-  }, [firstTeamId, pathname, router])
+  }, [dashboardRoot, firstTeamId, pathname, router])
   const t = useI18n()
 
   // State
@@ -667,7 +672,7 @@ export function TeamManagement({
   return (
     <div className="mx-auto py-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 rounded-2xl border border-border/70 bg-card/60 p-5 sm:p-6">
         <h1 className="text-3xl font-bold tracking-tight">{t('teams.management.component.title')}</h1>
         <p className="text-muted-foreground mt-2">{t('teams.management.component.description')}</p>
       </div>
@@ -758,7 +763,7 @@ export function TeamManagement({
                       size="sm"
                       className="flex-1 text-xs"
                     >
-                      <Link href={`/teams/dashboard/${team.id}`} className="flex items-center">
+                      <Link href={`${dashboardRoot}/${team.id}`} className="flex items-center">
                         <Eye className="h-3 w-3 mr-1" />
                         {t('teams.dashboard.view')}
                       </Link>

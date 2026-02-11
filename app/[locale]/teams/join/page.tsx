@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useI18n } from "@/locales/client"
+import { useParams } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,7 +34,10 @@ interface TeamInvitation {
 
 export default function TeamJoinPage() {
   const t = useI18n()
+  const params = useParams<{ locale?: string }>()
   const searchParams = useSearchParams()
+  const localePrefix = params?.locale ? `/${params.locale}` : ''
+  const dashboardRoot = `${localePrefix}/teams/dashboard`
 
   // State
   const [invitation, setInvitation] = useState<TeamInvitation | null>(null)
@@ -84,7 +88,7 @@ export default function TeamJoinPage() {
         toast.success(t('teams.join.success'))
         // Redirect to team dashboard after successful join
         setTimeout(() => {
-          window.location.href = `/teams/dashboard/${invitation.teamId}`
+          window.location.href = `${dashboardRoot}/${invitation.teamId}`
         }, 1500)
       } else {
         toast.error(result.error || t('teams.join.error'))
@@ -159,7 +163,7 @@ export default function TeamJoinPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Link href="/teams/dashboard">
+              <Link href={dashboardRoot}>
                 <Button variant="outline" className="w-full">
                   {t('teams.join.goToManage')}
                 </Button>
@@ -184,7 +188,7 @@ export default function TeamJoinPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Link href="/teams/dashboard">
+              <Link href={dashboardRoot}>
                 <Button
                   variant="outline"
                   className="w-full"
@@ -317,7 +321,7 @@ export default function TeamJoinPage() {
                       }
                     </span>
                   </div>
-                  <Link href="/teams/dashboard">
+                  <Link href={dashboardRoot}>
                     <Button
                       variant="outline"
                       className="w-full"

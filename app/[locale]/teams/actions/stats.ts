@@ -1,7 +1,8 @@
 'use server'
 
-import { createClient, User } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient, User } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
+import { createClient as createServerClient } from '@/server/auth'
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -14,12 +15,48 @@ function getSupabaseAdminClient() {
     )
   }
 
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createSupabaseClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
   })
+}
+
+async function getAuthorizedTeam(teamId: string) {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.id) {
+    return { team: null, userId: null, authorized: false }
+  }
+
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+    select: {
+      id: true,
+      userId: true,
+      traderIds: true,
+      managers: {
+        select: {
+          managerId: true,
+        },
+      },
+    },
+  })
+
+  if (!team) {
+    return { team: null, userId: user.id, authorized: false }
+  }
+
+  const authorized =
+    team.userId === user.id ||
+    team.traderIds.includes(user.id) ||
+    team.managers.some((manager) => manager.managerId === user.id)
+
+  return { team, userId: user.id, authorized }
 }
 
 const toNumber = (value: unknown): number => Number(value ?? 0)
@@ -415,14 +452,10 @@ export async function getTeamEquityData(teamId: string, page: number = 1, limit:
   const supabase = getSupabaseAdminClient()
   console.log(`Starting getTeamEquityData for team ${teamId}`)
 
-  // First, get the team to find trader IDs
-  const team = await prisma.team.findUnique({
-    where: { id: teamId },
-    select: { traderIds: true }
-  })
+  const { team, authorized } = await getAuthorizedTeam(teamId)
 
-  if (!team) {
-    console.error(`Team ${teamId} not found`)
+  if (!authorized || !team) {
+    console.error(`Unauthorized team equity access attempt for team ${teamId}`)
     return {
       users: [],
       totalUsers: 0,
@@ -430,7 +463,7 @@ export async function getTeamEquityData(teamId: string, page: number = 1, limit:
     }
   }
 
-  console.log(`Found team with ${team.traderIds.length} traders`)
+  console.log(`Authorized team with ${team.traderIds.length} traders`)
 
   if (team.traderIds.length === 0) {
     return {
@@ -579,14 +612,14 @@ export async function exportTeamTradesAction(teamId: string): Promise<string> {
   const supabase = getSupabaseAdminClient()
   console.log(`Starting exportTeamTradesAction for team ${teamId}`)
 
-  // Get the team to find trader IDs
-  const team = await prisma.team.findUnique({
-    where: { id: teamId },
-    select: { traderIds: true }
-  })
+  const { team, authorized } = await getAuthorizedTeam(teamId)
 
   if (!team) {
     throw new Error(`Team ${teamId} not found`)
+  }
+
+  if (!authorized) {
+    throw new Error('Unauthorized')
   }
 
   console.log(`Found team with ${team.traderIds.length} traders`)
