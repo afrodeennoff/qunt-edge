@@ -47,7 +47,7 @@ export default function Home() {
           <ChartTheFuturePanel />
         </TabsContent>
 
-        <TabsContent value="widgets" className="mt-0 px-3 pb-4 pt-1 sm:px-4 sm:pb-4 sm:pt-1">
+        <TabsContent value="widgets" className="mt-0 px-3 pb-4 pt-0 sm:px-4 sm:pb-4 sm:pt-0">
           <div className="h-full w-full">
             <WidgetCanvas />
           </div>

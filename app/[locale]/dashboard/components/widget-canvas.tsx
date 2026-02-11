@@ -735,7 +735,7 @@ export default function WidgetCanvas() {
 
   return (
     <div className={cn(
-      "relative mt-1 w-full min-h-screen",
+      "relative mt-0 w-full min-h-screen",
     )}>
       {layouts && (
         <div className="relative">
