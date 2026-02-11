@@ -130,7 +130,7 @@ export default function TraderProfilePage() {
   }, [accounts?.length, statistics.nbTrades, statistics.profitFactor, statistics.winRate, supabaseUser?.email, supabaseUser?.user_metadata?.avatar_url, supabaseUser?.user_metadata?.full_name, supabaseUser?.user_metadata?.name, user?.email])
 
   return (
-    <div className="page-shell">
+    <div className="dashboard-shell">
       <div className="section-stack p-3 sm:p-4 lg:p-5">
         <DashboardTopNav
           title="Trader Profile"

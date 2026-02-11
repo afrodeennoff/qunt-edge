@@ -11,7 +11,7 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="page-shell flex">
+    <div className="dashboard-shell flex">
       <div className="page-stack flex-1 p-4 sm:p-6">
         <Tabs defaultValue="accounts" className="w-full section-stack">
           <TabsList className="h-auto rounded-2xl border border-border/70 bg-card/75 p-1">
@@ -19,10 +19,10 @@ export default function DashboardPage() {
             <TabsTrigger value="trades">Trades</TabsTrigger>
             {/* <TabsTrigger value="propfirm">Prop Firm</TabsTrigger> */}
           </TabsList>
-          <TabsContent value="accounts" className="surface-panel-md mt-0">
+          <TabsContent value="accounts" className="mt-0">
             <DataManagementCard />
           </TabsContent>
-          <TabsContent value="trades" className="surface-panel-md mt-0 h-[calc(100vh-var(--navbar-height)-var(--tabs-height)-16px)]">
+          <TabsContent value="trades" className="mt-0 h-[calc(100vh-var(--navbar-height)-var(--tabs-height)-16px)]">
             <TradeTableReview />
           </TabsContent>
         </Tabs>

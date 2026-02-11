@@ -354,6 +354,10 @@
     @apply relative w-full min-h-[calc(100vh-72px)] p-3 sm:p-4 lg:p-6;
   }
 
+  .dashboard-shell {
+    @apply page-shell pt-0 sm:pt-0 lg:pt-0;
+  }
+
   .page-stack {
     @apply flex w-full flex-col gap-4 sm:gap-5 lg:gap-6;
   }

@@ -24,7 +24,7 @@ export default function Home() {
   const activeTab = searchParams.get("tab") || "widgets";
 
   return (
-    <div className="page-shell">
+    <div className="dashboard-shell">
       <Tabs value={activeTab} className="w-full h-full relative z-10">
 
 
@@ -32,15 +32,11 @@ export default function Home() {
           value="table"
           className="mt-0 h-[calc(100vh-140px)] sm:h-[calc(100vh-148px)] lg:h-[calc(100vh-160px)] p-2 sm:p-3"
         >
-          <div className="h-full w-full overflow-hidden rounded-2xl border border-border/70 bg-card/75">
-            <TradeTableReview />
-          </div>
+          <TradeTableReview />
         </TabsContent>
 
         <TabsContent value="accounts" className="mt-0 p-3 sm:p-4">
-          <div className="surface-panel-md">
-            <AccountsOverview size="large" />
-          </div>
+          <AccountsOverview size="large" />
         </TabsContent>
 
         <TabsContent value="chart" className="mt-0">
