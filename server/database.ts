@@ -489,17 +489,36 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
     } = update
 
     if (Object.keys(standardUpdates).length > 0) {
-      const data: Prisma.TradeUpdateInput = { ...standardUpdates }
+      // Cast to any to avoid initial type check on spread, we will sanitize it
+      const data: any = { ...standardUpdates }
       if (standardUpdates.entryPrice !== undefined) data.entryPrice = new Prisma.Decimal(standardUpdates.entryPrice)
-      if (standardUpdates.closePrice !== undefined) data.closePrice = standardUpdates.closePrice !== null ? new Prisma.Decimal(standardUpdates.closePrice) : null
+
+      // Only update decimal fields if they are not null, as DB requires non-nullable decimals
+      if (standardUpdates.closePrice !== undefined && standardUpdates.closePrice !== null) {
+        data.closePrice = new Prisma.Decimal(standardUpdates.closePrice)
+      } else if (standardUpdates.closePrice === null) {
+        delete data.closePrice // Don't update if null
+      }
+
       if (standardUpdates.pnl !== undefined) data.pnl = new Prisma.Decimal(standardUpdates.pnl)
-      if (standardUpdates.commission !== undefined) data.commission = standardUpdates.commission !== null ? new Prisma.Decimal(standardUpdates.commission) : null
+
+      if (standardUpdates.commission !== undefined && standardUpdates.commission !== null) {
+        data.commission = new Prisma.Decimal(standardUpdates.commission)
+      } else if (standardUpdates.commission === null) {
+        delete data.commission
+      }
+
       if (standardUpdates.quantity !== undefined) data.quantity = new Prisma.Decimal(standardUpdates.quantity)
-      if (standardUpdates.timeInPosition !== undefined) data.timeInPosition = standardUpdates.timeInPosition !== null ? new Prisma.Decimal(standardUpdates.timeInPosition) : null
+
+      if (standardUpdates.timeInPosition !== undefined && standardUpdates.timeInPosition !== null) {
+        data.timeInPosition = new Prisma.Decimal(standardUpdates.timeInPosition)
+      } else if (standardUpdates.timeInPosition === null) {
+        delete data.timeInPosition
+      }
 
       await prisma.trade.updateMany({
         where: { id: { in: tradesIds }, userId },
-        data,
+        data: data as Prisma.TradeUpdateInput,
       })
     }
 
