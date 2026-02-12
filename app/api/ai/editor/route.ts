@@ -1,47 +1,18 @@
-import { streamText, convertToModelMessages, stepCountIs } from "ai";
+import { streamText, stepCountIs } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod/v3";
-import { createOpenAI } from "@ai-sdk/openai";
-
-const customOpenai = createOpenAI({
-  baseURL: "https://api.z.ai/api/paas/v4",
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 import { getCurrentDayData } from "./tools/get-current-day-data";
 import { ActionSchema } from "./schema";
 import { getDayData } from "./tools/get-trading-summary";
+import { getAiLanguageModel } from "@/lib/ai/client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 
 export const maxDuration = 90;
 
 type EditorAction = z.infer<typeof ActionSchema>;
 
-// Model selection based on action type
-const getModelForAction = (action: EditorAction) => {
-  switch (action) {
-    case "explain":
-      // Access latest news with up to date data
-      return customOpenai("gpt-4o"); // Perplexity doesn't support custom base URL in the same way, using GPT-4o for quality
-    case "improve":
-      // Fast, cost-effective model for simple edits
-      return customOpenai("gpt-4o-mini");
-    case "suggest_question":
-      // More capable model for question generation
-      return customOpenai("gpt-4o");
-    case "trades_summary":
-      // More capable model for summarizing trades
-      return customOpenai("gpt-4o-mini");
-    default:
-      return customOpenai("gpt-4o-mini");
-  }
-};
-
-// System prompts based on action type
-const getSystemPrompt = (
-  action: EditorAction,
-  locale: string,
-  date: string,
-) => {
+const getSystemPrompt = (action: EditorAction, locale: string, date: string) => {
   const baseContext = `You are an expert trading journal assistant embedded inside a rich text editor.
 
 CONTEXT: The user is writing in their trading journal focusing on futures trading. They may be reflecting on their trades, emotions, market conditions, or overall performance.
@@ -55,7 +26,6 @@ Keep formatting simple and suitable for insertion into a paragraph.`;
       return `${baseContext}
 
 TASK: Explain the provided text in simple, clear terms.
-- Search latest news if user wants an explanation about an event or market condition / concept
 - Use 2-4 concise sentences
 - Clarify what's already written without adding new claims
 - Make it understandable for traders at any level
@@ -75,10 +45,10 @@ TASK: Identify concrete improvements to the provided text.
       return `${baseContext}
 
 TASK: Generate insightful questions that help the trader reflect deeper on their journal entry.
-- Always based your question based on current day trading data
-- Create a single thought-provoking questions
+- Always base your question on current day trading data
+- Create a single thought-provoking question
 - Question should encourage self-reflection and learning
-- Focus on: decision-making process, emotional state, risk management, market analysis
+- Focus on decision-making process, emotional state, risk management, market analysis
 - Question should be specific to the content provided
 - Make questions actionable and relevant to improving trading performance`;
 
@@ -86,38 +56,25 @@ TASK: Generate insightful questions that help the trader reflect deeper on their
       return `${baseContext}
 
 TASK: ONLY BASED ON TOOL RESULT for date ${date}: Summarize the trader's trading activities for the current day.
-- Include key metrics such as profit/loss, win/loss ratio, average trade size
-`;
+- Include key metrics such as profit/loss, win/loss ratio, average trade size`;
 
     default:
       return baseContext;
   }
 };
 
-const getTools = (action: EditorAction) => {
-  switch (action) {
-    case "suggest_question":
-      return { getCurrentDayData };
-    case "trades_summary":
-      return { getDayData };
-  }
-};
-
 export async function POST(req: NextRequest) {
-  console.log("POST request received");
+  const policy = getAiPolicy("editor");
+  const startedAt = Date.now();
+
   try {
     const body = await req.json();
     const { prompt, locale = "en", action = "explain", date } = body;
 
-    // Validate action
     const validatedAction = ActionSchema.parse(action);
-
-    // Select model and system prompt based on action
-    const model = getModelForAction(validatedAction);
     const systemPrompt = getSystemPrompt(validatedAction, locale, date);
-    // Dynamically build tools based on criteria
+
     const tools: Record<string, any> = {};
-    
     if (validatedAction === "suggest_question") {
       tools.getCurrentDayData = getCurrentDayData;
     }
@@ -125,21 +82,54 @@ export async function POST(req: NextRequest) {
       tools.getDayData = getDayData;
     }
 
-    // Stream the response
+    let toolCallsCount = 0;
+
     const result = streamText({
-      model,
+      model: getAiLanguageModel("editor"),
       prompt,
       system: systemPrompt,
-      temperature: validatedAction === "suggest_question" ? 0.7 : 0.3,
+      temperature:
+        validatedAction === "suggest_question"
+          ? Math.max(policy.temperature, 0.6)
+          : policy.temperature,
       tools,
-      stopWhen: stepCountIs(5),
+      stopWhen: stepCountIs(policy.maxSteps),
+      onStepFinish: (step) => {
+        toolCallsCount += step.toolCalls?.length ?? 0;
+      },
+      onFinish: (finalResult) => {
+        void logAiRequest({
+          route: "/api/ai/editor",
+          feature: "editor",
+          model: policy.model,
+          provider: policy.provider,
+          usage: extractUsage(finalResult.usage),
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          finishReason: finalResult.finishReason ?? null,
+          success: true,
+          sampleRate: policy.logSampleRate,
+        });
+      },
+      onError: ({ error }) => {
+        void logAiRequest({
+          route: "/api/ai/editor",
+          feature: "editor",
+          model: policy.model,
+          provider: policy.provider,
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          success: false,
+          errorCategory: categorizeAiError(error),
+          errorCode: (error as any)?.code ?? null,
+          sampleRate: 1,
+        });
+      },
     });
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
-    // Handle validation errors
     if (error instanceof z.ZodError) {
-      console.error("Validation error in editor AI route:", error.errors);
       return new Response(
         JSON.stringify({
           error: "Invalid request parameters",
@@ -152,16 +142,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Handle rate limit errors
-    if (
-      (error as any)?.statusCode === 429 ||
-      (error as any)?.type === "rate_limit_exceeded"
-    ) {
+    if ((error as any)?.statusCode === 429 || (error as any)?.type === "rate_limit_exceeded") {
       return new Response(
         JSON.stringify({
           error: "Rate limit exceeded",
-          message:
-            "AI service is temporarily busy. Please try again in a moment.",
+          message: "AI service is temporarily busy. Please try again in a moment.",
           type: "rate_limit_exceeded",
           retryAfter: 60,
         }),
@@ -175,13 +160,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Handle service unavailability
     if ((error as any)?.statusCode >= 400 && (error as any)?.statusCode < 500) {
       return new Response(
         JSON.stringify({
           error: "Service temporarily unavailable",
-          message:
-            "AI service is temporarily unavailable. Please try again later.",
+          message: "AI service is temporarily unavailable. Please try again later.",
           type: "service_unavailable",
         }),
         {
@@ -193,7 +176,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Handle generic errors
+    void logAiRequest({
+      route: "/api/ai/editor",
+      feature: "editor",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: (error as any)?.code ?? null,
+      sampleRate: 1,
+    });
+
     console.error("Error in editor AI route:", error);
     return new Response(
       JSON.stringify({

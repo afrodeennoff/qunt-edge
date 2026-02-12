@@ -53,4 +53,11 @@ export const mappingSchema = z.object({
     .string()
     .nullable()
     .describe("The commission charged for the trade"),
+  quality: z
+    .object({
+      score: z.number().min(0).max(100),
+      warnings: z.array(z.string()),
+      usedFallback: z.boolean(),
+    })
+    .optional(),
 });

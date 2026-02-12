@@ -1,99 +1,345 @@
-import { openai } from "@ai-sdk/openai";
-import { Output, streamObject, streamText } from "ai";
+import { generateObject } from "ai";
 import { NextRequest } from "next/server";
+import { z } from "zod/v3";
 import { mappingSchema } from "./schema";
+import { getAiLanguageModel } from "@/lib/ai/client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 
-// Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { fieldColumns, firstRows } =
-      typeof body === "string" ? JSON.parse(body) : body;
+const MappingOnlySchema = mappingSchema.omit({ quality: true });
+type MappingOnly = z.infer<typeof MappingOnlySchema>;
 
-    if (!fieldColumns || !firstRows) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
+type MappingQuality = {
+  score: number;
+  warnings: string[];
+  usedFallback: boolean;
+};
 
-    const result = streamText({
-      model: "openai/gpt-5-mini",
-      output: Output.object({schema:mappingSchema}),
-      onFinish: (result) => {
-        console.log("=== AI RESPONSE ===");
-        console.log(
-          "AI Mapping Result:",
-          JSON.stringify(result.text, null, 2),
-        );
-      },
-      onError: (error) => {
-        console.error("=== AI ERROR ===");
-        console.error("AI Mapping Error:", error);
-      },
-      prompt:
-        `You are a trading data expert. Analyze the CSV columns and their data patterns to map them to the correct database fields. ` +
-        `Look at BOTH the column names AND the actual data values to make intelligent mappings.\n\n` +
-        `Available database fields:\n` +
-        `- accountNumber: Account identifier (numbers, letters, or alphanumeric)\n` +
-        `- instrument: Trading symbol/ticker (e.g., EURNZD, BTCUSD, ES, etc.)\n` +
-        `- entryId: Unique buy transaction ID (usually numeric or alphanumeric)\n` +
-        `- closeId: Unique sell transaction ID (usually numeric or alphanumeric)\n` +
-        `- quantity: Number of units traded (decimal numbers)\n` +
-        `- entryPrice: Buy/entry price (decimal numbers)\n` +
-        `- closePrice: Sell/exit price (decimal numbers)\n` +
-        `- entryDate: Entry/buy date (date/time strings like "2025-09-12 09:41:09")\n` +
-        `- closeDate: Exit/sell date (date/time strings like "2025-09-18 02:12:02")\n` +
-        `- pnl: Profit/loss amount (decimal numbers, can be negative)\n` +
-        `- timeInPosition: Duration in seconds (numeric values)\n` +
-        `- side: Trade direction ("buy", "sell", "long", "short")\n` +
-        `- commission: Trading fees (decimal numbers)\n\n` +
-        `CRITICAL: Analyze column CONTEXT and ORDER, not just names:\n` +
-        `- Column order matters: entryDate → entryPrice → closeDate → closePrice is typical\n` +
-        `- If you see duplicate column names (like "Prix"), use POSITION to distinguish:\n` +
-        `  * First "Prix" after entryDate = entryPrice\n` +
-        `  * Second "Prix" after closeDate = closePrice\n` +
-        `- Look for logical sequences: Date → Price → Date → Price\n` +
-        `- Analyze data patterns:\n` +
-        `  * Date columns: timestamps like "2025-09-12 09:41:09"\n` +
-        `  * Price columns: decimal numbers\n` +
-        `  * ID columns: unique identifiers (often numeric)\n` +
-        `  * Quantity columns: trade sizes (decimal numbers)\n` +
-        `  * PnL columns: profit/loss amounts (can be negative)\n\n` +
-        `IMPORTANT: For duplicate column names, you MUST include the column position (1-based index) in your response.\n` +
-        `Format: "ColumnName_Position" (e.g., "Prix_1", "Prix_2")\n\n` +
-        `Map each column by providing the matching column name with position for each database field. Use column position and context to resolve duplicates. If unsure or no match exists, use null for the field.\n\n` +
-        `Column order and context:\n` +
-        fieldColumns
-          .map((col: string, index: number) => `${index + 1}. ${col}`)
-          .join("\n") +
-        "\n\n" +
-        `Sample data (first few rows):\n` +
-        firstRows
-          .map(
-            (row: Record<string, string>, index: number) =>
-              `Row ${index + 1}: ${Object.entries(row)
-                .map(([col, val]) => `${col}: "${val}"`)
-                .join(", ")}`,
-          )
-          .join("\n"),
-    });
+const REQUIRED_FIELDS: Array<keyof MappingOnly> = [
+  "instrument",
+  "quantity",
+  "entryPrice",
+  "closePrice",
+  "entryDate",
+  "closeDate",
+  "pnl",
+];
 
-    return result.toTextStreamResponse();
-  } catch (error) {
-    console.error("Error in mappings route:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to generate mappings" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-  }
+const NUMERIC_FIELDS: Array<keyof MappingOnly> = [
+  "quantity",
+  "entryPrice",
+  "closePrice",
+  "pnl",
+  "timeInPosition",
+  "commission",
+];
+
+const DATE_FIELDS: Array<keyof MappingOnly> = ["entryDate", "closeDate"];
+
+function normalizeHeader(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
+function parseMappedSource(raw: string | null | undefined): { source: string; index?: number } | null {
+  if (!raw) return null;
+  const match = raw.match(/^(.+)_([0-9]+)$/);
+  if (!match) return { source: raw };
+  const source = match[1];
+  const index = Number(match[2]);
+  if (!Number.isFinite(index)) return { source: raw };
+  return { source, index: index - 1 };
+}
+
+function resolveSourceValue(
+  row: Record<string, string>,
+  source: { source: string; index?: number } | null,
+  headers: string[],
+): string | null {
+  if (!source) return null;
+  if (typeof source.index === "number") {
+    const headerAtIndex = headers[source.index];
+    if (!headerAtIndex || headerAtIndex !== source.source) return null;
+    return row[headerAtIndex] ?? null;
+  }
+  return row[source.source] ?? null;
+}
+
+function parseNumberSafe(value: string | null): number | null {
+  if (!value) return null;
+  const cleaned = value.replace(/[,$\s]/g, "");
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseDateSafe(value: string | null): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function validateMapping(
+  mapping: MappingOnly,
+  headers: string[],
+  firstRows: Array<Record<string, string>>,
+): MappingQuality {
+  const warnings: string[] = [];
+  let score = 100;
+
+  const usedSources = new Map<string, Array<keyof MappingOnly>>();
+
+  for (const [field, mappedHeader] of Object.entries(mapping) as Array<[keyof MappingOnly, string | null]>) {
+    if (!mappedHeader) continue;
+    const source = parseMappedSource(mappedHeader);
+    if (!source) continue;
+
+    const key = typeof source.index === "number" ? `${source.source}_${source.index}` : source.source;
+    const current = usedSources.get(key) ?? [];
+    current.push(field);
+    usedSources.set(key, current);
+
+    if (source.index !== undefined) {
+      const expectedHeader = headers[source.index];
+      if (expectedHeader !== source.source) {
+        warnings.push(`Field ${field} points to invalid positional header ${mappedHeader}.`);
+        score -= 10;
+      }
+    } else if (!headers.includes(source.source)) {
+      warnings.push(`Field ${field} mapped to unknown header ${source.source}.`);
+      score -= 8;
+    }
+  }
+
+  for (const [source, fields] of usedSources.entries()) {
+    if (fields.length > 1) {
+      warnings.push(`Header ${source} was mapped to multiple fields: ${fields.join(", ")}.`);
+      score -= 6;
+    }
+  }
+
+  for (const field of REQUIRED_FIELDS) {
+    if (!mapping[field]) {
+      warnings.push(`Missing required mapping for ${field}.`);
+      score -= 8;
+    }
+  }
+
+  const sampleRows = firstRows.slice(0, 5);
+
+  for (const field of NUMERIC_FIELDS) {
+    const mapped = mapping[field];
+    if (!mapped) continue;
+    const source = parseMappedSource(mapped);
+    const validCount = sampleRows.filter((row) => parseNumberSafe(resolveSourceValue(row, source, headers)) !== null).length;
+    if (sampleRows.length > 0 && validCount === 0) {
+      warnings.push(`Field ${field} appears non-numeric in sampled rows.`);
+      score -= 6;
+    }
+  }
+
+  for (const field of DATE_FIELDS) {
+    const mapped = mapping[field];
+    if (!mapped) continue;
+    const source = parseMappedSource(mapped);
+    const validCount = sampleRows.filter((row) => parseDateSafe(resolveSourceValue(row, source, headers)) !== null).length;
+    if (sampleRows.length > 0 && validCount === 0) {
+      warnings.push(`Field ${field} appears non-date in sampled rows.`);
+      score -= 6;
+    }
+  }
+
+  const entryField = mapping.entryDate ? parseMappedSource(mapping.entryDate) : null;
+  const closeField = mapping.closeDate ? parseMappedSource(mapping.closeDate) : null;
+  if (entryField && closeField) {
+    let orderingViolations = 0;
+    for (const row of sampleRows) {
+      const entryDate = parseDateSafe(resolveSourceValue(row, entryField, headers));
+      const closeDate = parseDateSafe(resolveSourceValue(row, closeField, headers));
+      if (entryDate && closeDate && closeDate < entryDate) {
+        orderingViolations += 1;
+      }
+    }
+    if (orderingViolations > 0) {
+      warnings.push("Detected closeDate earlier than entryDate in sample rows.");
+      score -= 6;
+    }
+  }
+
+  return {
+    score: Math.max(0, score),
+    warnings,
+    usedFallback: false,
+  };
+}
+
+const fallbackAliases: Record<keyof MappingOnly, string[]> = {
+  accountNumber: ["account", "accountnumber", "accountid"],
+  instrument: ["symbol", "ticker", "instrument", "market"],
+  entryId: ["entryid", "buyid", "openid"],
+  closeId: ["closeid", "sellid", "exitid"],
+  quantity: ["qty", "quantity", "size", "volume"],
+  entryPrice: ["entryprice", "openprice", "buyprice"],
+  closePrice: ["closeprice", "exitprice", "sellprice"],
+  entryDate: ["entrydate", "opendate", "buydate", "entrytime"],
+  closeDate: ["closedate", "exitdate", "selldate", "exittime"],
+  pnl: ["pnl", "profit", "netpnl", "grosspnl"],
+  timeInPosition: ["timeinposition", "duration", "holdtime"],
+  side: ["side", "direction", "position"],
+  commission: ["commission", "fee", "fees"],
+};
+
+function buildDeterministicFallback(headers: string[]): MappingOnly {
+  const mapped = {} as MappingOnly;
+  const normalized = headers.map((header) => ({
+    header,
+    normalized: normalizeHeader(header),
+  }));
+
+  const usedHeaders = new Set<string>();
+
+  (Object.keys(fallbackAliases) as Array<keyof MappingOnly>).forEach((field) => {
+    const aliases = fallbackAliases[field];
+    const match = normalized.find((item) => {
+      if (usedHeaders.has(item.header)) return false;
+      return aliases.some((alias) => item.normalized.includes(alias));
+    });
+
+    mapped[field] = match ? match.header : null;
+    if (match) usedHeaders.add(match.header);
+  });
+
+  return mapped;
+}
+
+function buildPrompt(fieldColumns: string[], firstRows: Array<Record<string, string>>, extraRules?: string): string {
+  return (
+    `You are a trading data expert. Analyze CSV columns and map them to database fields. ` +
+    `Use BOTH column names and actual sample values.\n\n` +
+    `Database fields:\n` +
+    `- accountNumber\n- instrument\n- entryId\n- closeId\n- quantity\n- entryPrice\n- closePrice\n- entryDate\n- closeDate\n- pnl\n- timeInPosition\n- side\n- commission\n\n` +
+    `Rules:\n` +
+    `- If duplicate column names exist, include positional suffix: ColumnName_1, ColumnName_2\n` +
+    `- Preserve exact header text in outputs\n` +
+    `- Use null when uncertain\n` +
+    `- Prefer date -> price -> date -> price context for entry/close fields\n` +
+    `${extraRules ? `- ${extraRules}\n` : ""}\n` +
+    `Column order:\n` +
+    fieldColumns.map((col, index) => `${index + 1}. ${col}`).join("\n") +
+    "\n\n" +
+    `Sample rows:\n` +
+    firstRows
+      .map(
+        (row, index) =>
+          `Row ${index + 1}: ${Object.entries(row)
+            .map(([col, val]) => `${col}: "${val}"`)
+            .join(", ")}`,
+      )
+      .join("\n")
+  );
+}
+
+async function requestMapping(prompt: string, temperature: number): Promise<{ object: MappingOnly; usage: any }> {
+  const result = await generateObject({
+    model: getAiLanguageModel("mappings"),
+    schema: MappingOnlySchema,
+    temperature,
+    prompt,
+  });
+
+  return {
+    object: result.object,
+    usage: result.usage,
+  };
+}
+
+export async function POST(req: NextRequest) {
+  const policy = getAiPolicy("mappings");
+  const startedAt = Date.now();
+
+  try {
+    const body = await req.json();
+    const { fieldColumns, firstRows } = typeof body === "string" ? JSON.parse(body) : body;
+
+    if (!Array.isArray(fieldColumns) || !Array.isArray(firstRows)) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const firstPrompt = buildPrompt(fieldColumns, firstRows);
+    const firstPass = await requestMapping(firstPrompt, policy.temperature);
+    let mapping = firstPass.object;
+
+    let quality = validateMapping(mapping, fieldColumns, firstRows);
+    let usage = firstPass.usage;
+
+    if (quality.score < 75 || quality.warnings.length > 0) {
+      const repairPrompt = buildPrompt(
+        fieldColumns,
+        firstRows,
+        `Repair these issues from your previous mapping attempt: ${quality.warnings.join(" | ")}`,
+      );
+
+      const repaired = await requestMapping(repairPrompt, policy.temperature);
+      mapping = repaired.object;
+      quality = validateMapping(mapping, fieldColumns, firstRows);
+      usage = repaired.usage ?? usage;
+    }
+
+    if (quality.score < 65) {
+      mapping = buildDeterministicFallback(fieldColumns);
+      quality = {
+        ...validateMapping(mapping, fieldColumns, firstRows),
+        usedFallback: true,
+        warnings: [
+          ...quality.warnings,
+          "AI mapping confidence was low. Deterministic fallback mapping was applied.",
+        ],
+      };
+    }
+
+    const responsePayload = {
+      ...mapping,
+      quality,
+    };
+
+    void logAiRequest({
+      route: "/api/ai/mappings",
+      feature: "mappings",
+      model: policy.model,
+      provider: policy.provider,
+      usage: extractUsage(usage),
+      latencyMs: Date.now() - startedAt,
+      toolCallsCount: 0,
+      success: true,
+      finishReason: "completed",
+      sampleRate: policy.logSampleRate,
+    });
+
+    return new Response(JSON.stringify(responsePayload), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error in mappings route:", error);
+
+    void logAiRequest({
+      route: "/api/ai/mappings",
+      feature: "mappings",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: (error as any)?.code ?? null,
+      sampleRate: 1,
+    });
+
+    return new Response(JSON.stringify({ error: "Failed to generate mappings" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}

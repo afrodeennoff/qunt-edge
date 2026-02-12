@@ -49,7 +49,15 @@ export function DashboardHeader() {
         restoreDefaultLayout
     } = useDashboard();
     const t = useI18n();
-    const { isPlusUser } = useData();
+    const {
+        isPlusUser,
+        accountNumbers,
+        instruments,
+        dateRange,
+        pnlRange,
+        tagFilter,
+        weekdayFilter,
+    } = useData();
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'widgets';
     const normalizedPathname = pathname.replace(/\/+$/, '') || '/';
@@ -90,6 +98,13 @@ export function DashboardHeader() {
                         : 'Customize your layout and monitor your most important metrics.'
         )
         : 'Focus mode for analysis, execution, and daily workflow.';
+    const hasActiveFilters =
+        (accountNumbers?.length || 0) > 0 ||
+        (instruments?.length || 0) > 0 ||
+        Boolean(dateRange && (dateRange.from || dateRange.to)) ||
+        Boolean(pnlRange && (pnlRange.min !== undefined || pnlRange.max !== undefined)) ||
+        (tagFilter?.tags?.length || 0) > 0 ||
+        Boolean(weekdayFilter?.days && weekdayFilter.days.length > 0);
 
     return (
         <header className="sticky top-0 z-50 overflow-hidden border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl" data-dashboard-header="true">
@@ -262,15 +277,18 @@ export function DashboardHeader() {
 
             {/* Sub-Navigation: Filters (Preserved Mapping) */}
             <AnimatePresence>
-                <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    className="relative px-4 pb-3 pt-1 sm:px-8"
-                >
-                    <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
-                        <ActiveFilterTags showAccountNumbers={true} />
-                    </div>
-                </motion.div>
+                {hasActiveFilters && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="relative px-4 pb-3 pt-1 sm:px-8"
+                    >
+                        <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                            <ActiveFilterTags showAccountNumbers={true} />
+                        </div>
+                    </motion.div>
+                )}
             </AnimatePresence>
         </header>
     );

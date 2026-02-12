@@ -54,6 +54,7 @@ model User {
   subscriptionEvents    SubscriptionEvent[]    @relation("UserSubscriptionEvents")
   paymentMethods        PaymentMethod[]        @relation("UserPaymentMethods")
   usageMetrics          UsageMetric[]          @relation("UserUsageMetrics")
+  aiRequestLogs         AiRequestLog[]         @relation("UserAiRequestLogs")
 
   @@index([email])
   @@schema("public")
@@ -1094,6 +1095,36 @@ model ProcessedWebhook {
   @@unique([webhookId, type])
   @@index([processedAt])
   @@index([type])
+  @@schema("public")
+}
+
+model AiRequestLog {
+  id       String  @id @default(uuid())
+  userId   String?
+  route    String
+  feature  String
+  model    String
+  provider String
+
+  promptTokens     Int?
+  completionTokens Int?
+  totalTokens      Int?
+
+  latencyMs      Int
+  toolCallsCount Int      @default(0)
+  finishReason   String?
+
+  success       Boolean
+  errorCategory String?
+  errorCode     String?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation("UserAiRequestLogs", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([feature, createdAt])
+  @@index([userId, createdAt])
   @@schema("public")
 }
 

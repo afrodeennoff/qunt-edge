@@ -4,7 +4,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { XIcon, AlertTriangleIcon, InfoIcon, RefreshCwIcon, SparklesIcon } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { experimental_useObject as useObject } from '@ai-sdk/react'
 import { ImportType } from './import-type-selection'
 import { mappingSchema } from '@/app/api/ai/mappings/schema'
 import { cn } from '@/lib/utils'
@@ -57,74 +56,77 @@ const getColumnDisplayName = (header: string, index: number, headers: string[]) 
 };
 
 export default function ColumnMapping({ headers, csvData, mappings, setMappings, error, importType }: ColumnMappingProps) {
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { object, submit, isLoading } = useObject({
-    api: '/api/ai/mappings',
-    schema: mappingSchema,
-    onError(error) {
-      console.error('Error generating AI mappings:', error);
-    },
-    onFinish({ object }) {
-      console.log('=== AI MAPPING DEBUG ===');
-      console.log('AI Response Object:', object);
-      console.log('Headers:', headers);
-      
-      setMappings(prev => {
-        const newMappings = { ...prev };
-        // For each destination column in the object
-        if (object) {
-          Object.entries(object).forEach(([destinationColumn, headerValue]) => {
-            if (typeof headerValue !== "string" || headerValue.length === 0) {
-              return;
-            }
-            console.log(`Processing: ${destinationColumn} -> ${headerValue}`);
+  const applyAIMappings = useCallback((object: MappingObject) => {
+    setMappings(prev => {
+      const newMappings = { ...prev };
+      if (object) {
+        Object.entries(object).forEach(([destinationColumn, headerValue]) => {
+          if (destinationColumn === "quality") return;
+          if (typeof headerValue !== "string" || headerValue.length === 0) {
+            return;
+          }
 
-            // Check if the header value includes position information (e.g., "Prix_1", "Prix_2")
-            const positionMatch = headerValue.match(/^(.+)_(\d+)$/);
-            
-            if (positionMatch) {
-              // Handle position-based mapping
-              const [, headerName, positionStr] = positionMatch;
-              const position = parseInt(positionStr, 10) - 1; // Convert to 0-based index
-              
-              console.log(`Position-based mapping: ${headerName} at position ${position + 1}`);
-              
-              // Find the header at the specific position
-              if (position >= 0 && position < headers.length && headers[position] === headerName) {
-                const uniqueId = createUniqueColumnId(headerName, position);
-                console.log(`Mapped to unique ID: ${uniqueId}`);
-                // Remove any existing mapping for this unique column first
-                if (newMappings[uniqueId]) {
-                  delete newMappings[uniqueId];
-                }
-                newMappings[uniqueId] = destinationColumn;
-              } else {
-                console.log(`Position ${position + 1} not found or header mismatch`);
+          const positionMatch = headerValue.match(/^(.+)_(\d+)$/);
+
+          if (positionMatch) {
+            const [, headerName, positionStr] = positionMatch;
+            const position = parseInt(positionStr, 10) - 1;
+
+            if (position >= 0 && position < headers.length && headers[position] === headerName) {
+              const uniqueId = createUniqueColumnId(headerName, position);
+              if (newMappings[uniqueId]) {
+                delete newMappings[uniqueId];
               }
-            } else {
-              // Handle regular mapping (fallback for backward compatibility)
-              console.log(`Regular mapping for: ${headerValue}`);
-              const headerIndex = headers.findIndex(h => h === headerValue);
-              if (headerIndex !== -1 && !Object.values(newMappings).includes(destinationColumn)) {
-                const uniqueId = createUniqueColumnId(headerValue, headerIndex);
-                console.log(`Mapped to unique ID: ${uniqueId}`);
-                // Remove any existing mapping for this unique column first
-                if (newMappings[uniqueId]) {
-                  delete newMappings[uniqueId];
-                }
-                newMappings[uniqueId] = destinationColumn;
-              } else {
-                console.log(`Header ${headerValue} not found or already mapped`);
-              }
+              newMappings[uniqueId] = destinationColumn;
             }
-          });
-        }
-        console.log('Final mappings:', newMappings);
-        return newMappings;
+          } else {
+            const headerIndex = headers.findIndex(h => h === headerValue);
+            if (headerIndex !== -1 && !Object.values(newMappings).includes(destinationColumn)) {
+              const uniqueId = createUniqueColumnId(headerValue, headerIndex);
+              if (newMappings[uniqueId]) {
+                delete newMappings[uniqueId];
+              }
+              newMappings[uniqueId] = destinationColumn;
+            }
+          }
+        });
+      }
+      return newMappings;
+    });
+  }, [headers, setMappings])
+
+  const requestAIMapping = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const sampleData = csvData.slice(1, 6).map(row => {
+        const rowObj: Record<string, string> = {};
+        headers.forEach((header, index) => {
+          rowObj[header] = row[index] || '';
+        });
+        return rowObj;
       });
 
+      const response = await fetch('/api/ai/mappings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fieldColumns: headers, firstRows: sampleData }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`AI mapping request failed (${response.status})`)
+      }
+
+      const payload = await response.json()
+      const parsed = mappingSchema.parse(payload)
+      applyAIMappings(parsed as MappingObject)
+    } catch (requestError) {
+      console.error('Error generating AI mappings:', requestError)
+    } finally {
+      setIsLoading(false)
     }
-  });
+  }, [applyAIMappings, csvData, headers])
 
   const handleMapping = (uniqueId: string, value: string) => {
     setMappings(prev => {
@@ -188,17 +190,7 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  // Convert CSV data to array of objects for AI analysis
-                  const sampleData = csvData.slice(1, 6).map(row => {
-                    const rowObj: Record<string, string> = {};
-                    headers.forEach((header, index) => {
-                      rowObj[header] = row[index] || '';
-                    });
-                    return rowObj;
-                  });
-                  submit({ fieldColumns: headers, firstRows: sampleData });
-                }}
+                onClick={requestAIMapping}
                 className="flex items-center gap-2 bg-white/50 dark:bg-yellow-900/30 hover:bg-white/80 dark:hover:bg-yellow-900/50 text-yellow-700 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700 transition-colors"
               >
                 <RefreshCwIcon className={cn("h-4 w-4", isLoading && "animate-spin")} />

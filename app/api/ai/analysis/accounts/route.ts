@@ -1,10 +1,11 @@
 import { convertToModelMessages, streamText, UIMessage, stepCountIs } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod/v3";
-
-// Analysis Tools
 import { generateAnalysisComponent } from "./generate-analysis-component";
 import { getAccountPerformance } from "./get-account-performance";
+import { getAiLanguageModel } from "@/lib/ai/client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 
 export const maxDuration = 300;
 
@@ -14,8 +15,6 @@ const analysisSchema = z.object({
   timezone: z.string().default("UTC"),
   currentTime: z.string().default(new Date().toISOString()),
 });
-
-// Remove the schema as we're using streamText with tools instead
 
 function getLanguageInstructions(locale: string) {
   if (locale === "fr") {
@@ -49,9 +48,9 @@ ${getLanguageInstructions(locale)}
 
 You are analyzing performance across different trading accounts. Your primary task is to:
 
-1. **Get Account Data**: First, call getAccountPerformance to get comprehensive account statistics and comparisons
-2. **Generate Analysis Components**: Then, call generateAnalysisComponent with the account data to create structured analysis components
-3. **Provide Insights**: Based on the generated components and data, provide detailed analysis and recommendations
+1. Get Account Data: First, call getAccountPerformance to get comprehensive account statistics and comparisons
+2. Generate Analysis Components: Then, call generateAnalysisComponent with the account data to create structured analysis components
+3. Provide Insights: Based on the generated components and data, provide detailed analysis and recommendations
 
 ### ANALYSIS PROCESS
 1. First, call getAccountPerformance to get account performance data
@@ -59,11 +58,11 @@ You are analyzing performance across different trading accounts. Your primary ta
 3. Provide detailed insights and recommendations based on the generated components
 
 ### FOCUS AREAS
-- **Account Comparison**: Performance ranking and metrics comparison
-- **Risk Distribution**: How risk is managed across different accounts
-- **Trading Patterns**: Different strategies or behaviors per account
-- **Capital Allocation**: Effectiveness of capital distribution
-- **Account Management**: Overall portfolio management effectiveness
+- Account Comparison: Performance ranking and metrics comparison
+- Risk Distribution: How risk is managed across different accounts
+- Trading Patterns: Different strategies or behaviors per account
+- Capital Allocation: Effectiveness of capital distribution
+- Account Management: Overall portfolio management effectiveness
 
 ### RESPONSE FORMAT
 - Start by calling getAccountPerformance to get the data
@@ -74,6 +73,9 @@ You are analyzing performance across different trading accounts. Your primary ta
 }
 
 export async function POST(req: NextRequest) {
+  const policy = getAiPolicy("analysis");
+  const startedAt = Date.now();
+
   try {
     const {
       messages,
@@ -89,26 +91,18 @@ export async function POST(req: NextRequest) {
       timezone: string;
     } = await req.json();
 
-    // Add debugging to see what locale is being received
-    console.log("Account Analysis API received:", {
-      username,
-      locale,
-      timezone,
-      currentTime,
-    });
-
-    // Validate the request
     const validatedData = analysisSchema.parse({
       username,
       locale,
       timezone,
       currentTime,
     });
-    console.log("Validated data:", validatedData);
     const modelMessages = await convertToModelMessages(messages);
 
+    let toolCallsCount = 0;
+
     const result = streamText({
-      model: "openai/gpt-4o-mini",
+      model: getAiLanguageModel("analysis"),
       system: getAccountAnalysisPrompt(
         validatedData.locale,
         validatedData.username,
@@ -120,9 +114,38 @@ export async function POST(req: NextRequest) {
         generateAnalysisComponent,
       },
       messages: modelMessages,
-      stopWhen: stepCountIs(10),
+      temperature: policy.temperature,
+      stopWhen: stepCountIs(policy.maxSteps),
       onStepFinish: (step) => {
-        console.log("Step finished:", step.usage);
+        toolCallsCount += step.toolCalls?.length ?? 0;
+      },
+      onFinish: (finalResult) => {
+        void logAiRequest({
+          route: "/api/ai/analysis/accounts",
+          feature: "analysis",
+          model: policy.model,
+          provider: policy.provider,
+          usage: extractUsage(finalResult.usage),
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          finishReason: finalResult.finishReason ?? null,
+          success: true,
+          sampleRate: policy.logSampleRate,
+        });
+      },
+      onError: ({ error }) => {
+        void logAiRequest({
+          route: "/api/ai/analysis/accounts",
+          feature: "analysis",
+          model: policy.model,
+          provider: policy.provider,
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          success: false,
+          errorCategory: categorizeAiError(error),
+          errorCode: (error as any)?.code ?? null,
+          sampleRate: 1,
+        });
       },
     });
 
@@ -134,6 +157,19 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    void logAiRequest({
+      route: "/api/ai/analysis/accounts",
+      feature: "analysis",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: (error as any)?.code ?? null,
+      sampleRate: 1,
+    });
+
     console.error("Error in account analysis route:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process account analysis" }),

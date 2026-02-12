@@ -184,7 +184,6 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
               accountsCount: stats?.accountsCount ?? 0,
             }))}
             chartTitle={t('landing.propfirms.chart.title')}
-            accountsLabel={t('landing.propfirms.chart.accounts')}
             registeredAccountsLabel={t('landing.propfirms.registeredAccounts')}
           />
         </div>

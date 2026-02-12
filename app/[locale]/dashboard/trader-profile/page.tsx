@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, CircleDot } from "lucide-react"
 import { TopNav } from "../components/top-nav"
 import {
   PolarAngleAxis,
@@ -195,6 +195,12 @@ export default function TraderProfilePage() {
     ]
   }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.totalTrades, metrics.winRate])
 
+  const recentTrades = useMemo(() => {
+    return [...(formattedTrades || [])]
+      .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
+      .slice(0, 6)
+  }, [formattedTrades])
+
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-6">
       <div className="pointer-events-none absolute inset-0 opacity-70">
@@ -204,126 +210,171 @@ export default function TraderProfilePage() {
 
       <TopNav title="Trader Profile" />
 
-      <div className="relative mx-auto mt-4 w-full max-w-[430px] space-y-2.5">
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <div className="flex items-center justify-between text-sm text-fg-muted">
-            <span className="inline-flex items-center gap-1">
-              Compare with: average user
-              <ChevronDown className="h-3.5 w-3.5" />
-            </span>
-            <span className="text-[11px]">{isBenchmarkLoading ? "Loading..." : "Live"}</span>
-          </div>
-          <div className="mt-2.5 rounded-xl border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="hsl(var(--border) / 0.45)" />
-                  <PolarAngleAxis
-                    dataKey="metric"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }}
-                  />
-                  <Radar dataKey="trader" stroke="hsl(var(--foreground) / 0.85)" fill="hsl(var(--foreground) / 0.2)" fillOpacity={1} />
-                </RadarChart>
-              </ResponsiveContainer>
+      <div className="relative mt-4 grid gap-3 xl:grid-cols-[1.35fr_1fr]">
+        <section className="space-y-3">
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-fg-muted">Trader profile</p>
+            <p className="mt-2 text-3xl font-semibold text-fg-primary">{profileName}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
+                <p className="mt-1 text-lg font-semibold text-fg-primary">{metrics.totalTrades}</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Current Streak</p>
+                <p className="mt-1 text-lg font-semibold text-fg-primary">
+                  {metrics.winningStreak > 0 ? `${metrics.winningStreak} wins` : "No winning streak"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Net PnL</p>
+                <p className="mt-1 text-lg font-semibold text-fg-primary">{formatSigned(metrics.netPnl)}</p>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Win</p>
-              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgWin)}%</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Loss</p>
-              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}%</p>
-            </div>
-          </div>
-          <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Return</p>
-            <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(Math.abs(metrics.avgReturn))}%</p>
-          </div>
-          <div className="mt-3 h-2 rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-white/30" style={{ width: `${Math.min(100, Math.max(8, metrics.consistencyRate))}%` }} />
-          </div>
-        </Card>
-
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
-          <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
-          <div className="mt-3 h-2 rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-white/40" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
-          </div>
-        </Card>
-
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
-              <p className="mt-1 text-4xl font-semibold text-fg-primary">{metrics.totalTrades}</p>
-            </div>
-            <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-fg-muted">
-              {metrics.totalTrades >= 80 ? "Serial Trader" : "Building"}
-            </span>
-          </div>
-          <div className="mt-3 h-2 rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(6, metrics.totalTrades))}%` }} />
-          </div>
-        </Card>
-
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Break Even Rate</p>
-              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.breakEvenRate)}%</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Sum Gain</p>
-              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.sumGain)}%</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <p className="text-[10px] uppercase tracking-wider text-fg-muted">Current Streak</p>
-          <p className="mt-1 text-3xl font-semibold text-fg-primary">
-            {metrics.winningStreak > 0 ? `${metrics.winningStreak} wins` : "No winning streak"}
-          </p>
-        </Card>
-
-        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-          <p className="text-[10px] uppercase tracking-wider text-fg-muted">Execution Quality</p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Win</p>
-              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgWin)}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Loss</p>
-              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
-              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatSigned(metrics.expectancy)}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Risk Reward</p>
+              <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.riskReward)}</p>
+            </Card>
+            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Max Drawdown</p>
+              <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.drawdown)}</p>
+            </Card>
+            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
-              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
-            </div>
+              <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
+            </Card>
+            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
+              <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatSigned(metrics.expectancy)}</p>
+            </Card>
           </div>
-        </Card>
 
-        <button
-          type="button"
-          className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-white/15 bg-[hsl(var(--qe-surface-1))] px-4 py-3 text-sm font-medium text-fg-primary transition-colors hover:bg-white/5"
-        >
-          Show All Stats
-          <ChevronDown className="h-4 w-4" />
-        </button>
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-fg-primary">Trade Feed</p>
+              <p className="text-xs text-fg-muted">Last {recentTrades.length} trades</p>
+            </div>
+            {isLoading ? <p className="mb-2 text-xs text-fg-muted">Loading trades...</p> : null}
+            <div className="space-y-2">
+              {recentTrades.length === 0 ? (
+                <p className="text-sm text-fg-muted">No trades available yet.</p>
+              ) : (
+                recentTrades.map((trade) => {
+                  const pnl = Number(trade.pnl || 0)
+                  return (
+                    <div
+                      key={trade.id}
+                      className="flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2.5"
+                    >
+                      <div className="flex items-center gap-2">
+                        <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`} />
+                        <div>
+                          <p className="text-sm font-semibold text-fg-primary">{trade.instrument || "N/A"}</p>
+                          <p className="text-[11px] text-fg-muted">{new Date(trade.entryDate).toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <p className={`text-sm font-semibold ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                        {formatSigned(pnl)}
+                      </p>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </Card>
+        </section>
 
-        {isLoading ? <p className="text-xs text-fg-muted">Loading trades...</p> : null}
-        <p className="text-center text-xs text-fg-muted">{profileName}</p>
+        <aside className="mx-auto w-full max-w-[430px] space-y-2.5 xl:max-w-none">
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="flex items-center justify-between text-sm text-fg-muted">
+              <span className="inline-flex items-center gap-1">
+                Compare with: average user
+                <ChevronDown className="h-3.5 w-3.5" />
+              </span>
+              <span className="text-[11px]">{isBenchmarkLoading ? "Loading..." : "Live"}</span>
+            </div>
+            <div className="mt-2.5 rounded-xl border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="hsl(var(--border) / 0.45)" />
+                    <PolarAngleAxis
+                      dataKey="metric"
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }}
+                    />
+                    <Radar dataKey="trader" stroke="hsl(var(--foreground) / 0.85)" fill="hsl(var(--foreground) / 0.2)" fillOpacity={1} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Win</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgWin)}%</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Loss</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}%</p>
+              </div>
+            </div>
+            <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Return</p>
+              <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(Math.abs(metrics.avgReturn))}%</p>
+            </div>
+            <div className="mt-3 h-2 rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-white/30" style={{ width: `${Math.min(100, Math.max(8, metrics.consistencyRate))}%` }} />
+            </div>
+          </Card>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
+            <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
+            <div className="mt-3 h-2 rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-white/40" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
+            </div>
+          </Card>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Break Even Rate</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.breakEvenRate)}%</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Sum Gain</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.sumGain)}%</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Execution Quality</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Win</p>
+                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgWin)}</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Loss</p>
+                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
+                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatSigned(metrics.expectancy)}</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
+                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
+              </div>
+            </div>
+          </Card>
+        </aside>
       </div>
     </div>
   )

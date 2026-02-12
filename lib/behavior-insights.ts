@@ -12,6 +12,8 @@ export interface BehaviorInsights {
     averageEmotion: number
     stressScore: number
     emotionalRiskPercent: number
+    confidenceScore: number
+    confidenceBand: "low" | "medium" | "high"
     disciplineStreakDays: number
     overtradingDays: number
     lossChasingEvents: number
@@ -28,12 +30,22 @@ export interface BehaviorInsights {
     emotionalMaster: boolean
     controlStreak: boolean
   }
+  drivers: Array<{
+    key: "impulsiveRate" | "overtradeDayRate" | "lossChasingRate" | "lowMoodRate"
+    contribution: number
+    explanation: string
+  }>
   prompts: {
     mindful: string
     postTradeReview: string
     riskGuard: string
   }
   recommendations: string[]
+  recommendationsDetailed: Array<{
+    text: string
+    priority: "low" | "medium" | "high"
+    basedOn: string[]
+  }>
 }
 
 type TradeWithParsedDate = Trade & {
@@ -53,6 +65,12 @@ function clamp(value: number, min: number, max: number): number {
 function round(value: number, precision = 2): number {
   const factor = 10 ** precision
   return Math.round(value * factor) / factor
+}
+
+function confidenceBandFromScore(score: number): "low" | "medium" | "high" {
+  if (score >= 75) return "high"
+  if (score >= 45) return "medium"
+  return "low"
 }
 
 function toPercent(part: number, total: number): number {
@@ -198,6 +216,47 @@ export function computeBehaviorInsights(
     clamp(impulsiveRate * 0.6 + lossChasingRate * 0.25 + overtradeDayRate * 0.15, 0, 100),
   )
 
+  const tradingDays = dailyStats.size
+  const sampleAdequacy = clamp(
+    toPercent(Math.min(tradeCount, 40), 40) * 0.55 +
+      toPercent(Math.min(moodEntries, 20), 20) * 0.3 +
+      toPercent(Math.min(tradingDays, 20), 20) * 0.15,
+    0,
+    100,
+  )
+
+  const confidencePenalty =
+    (tradeCount < 8 ? 18 : 0) +
+    (moodEntries < 5 ? 12 : 0) +
+    (tradingDays < 5 ? 8 : 0) +
+    (moodEntries === 0 ? 15 : 0)
+
+  const confidenceScore = round(clamp(sampleAdequacy - confidencePenalty, 0, 100))
+  const confidenceBand = confidenceBandFromScore(confidenceScore)
+
+  const drivers: BehaviorInsights["drivers"] = [
+    {
+      key: "impulsiveRate" as const,
+      contribution: round(impulsiveRate * 0.42),
+      explanation: "Emotion-tagged trades are increasing stress pressure.",
+    },
+    {
+      key: "overtradeDayRate" as const,
+      contribution: round(overtradeDayRate * 0.23),
+      explanation: "High trade-frequency days are raising behavioral drift.",
+    },
+    {
+      key: "lossChasingRate" as const,
+      contribution: round(lossChasingRate * 0.2),
+      explanation: "Post-loss size escalation indicates chasing behavior.",
+    },
+    {
+      key: "lowMoodRate" as const,
+      contribution: round(lowMoodRate * 0.15),
+      explanation: "Low emotion check-ins are linked to weaker execution quality.",
+    },
+  ].sort((a, b) => b.contribution - a.contribution)
+
   const sortedDays = Array.from(dailyStats.keys()).sort()
   let disciplineStreakDays = 0
   for (let i = sortedDays.length - 1; i >= 0; i -= 1) {
@@ -210,33 +269,65 @@ export function computeBehaviorInsights(
     disciplineStreakDays += 1
   }
 
-  const tradingDays = dailyStats.size
   const winRate = toPercent(winCount, Math.max(tradeCount, 1))
   const checkInRate = toPercent(moodEntries, Math.max(tradingDays, 1))
   const reflectionCompletionRate = checkInRate
   const riskAlignmentScore = round(clamp(100 - emotionalRiskPercent, 0, 100))
 
   const recommendations: string[] = []
+  const recommendationsDetailed: BehaviorInsights["recommendationsDetailed"] = []
   if (overtradingDays > 0) {
-    recommendations.push(
-      `Overtrading detected on ${overtradingDays} day(s). Set a daily max of ${Math.max(4, overtradeThreshold - 2)} trades.`,
-    )
+    const text = `Overtrading detected on ${overtradingDays} day(s). Set a daily max of ${Math.max(4, overtradeThreshold - 2)} trades.`
+    recommendations.push(text)
+    recommendationsDetailed.push({
+      text,
+      priority: overtradingDays >= 3 ? "high" : "medium",
+      basedOn: ["overtradingDays", "overtradeThreshold"],
+    })
   }
   if (lossChasingEvents > 0) {
-    recommendations.push(
-      `Detected ${lossChasingEvents} potential loss-chasing event(s). Add a cooldown after losing trades.`,
-    )
+    const text = `Detected ${lossChasingEvents} potential loss-chasing event(s). Add a cooldown after losing trades.`
+    recommendations.push(text)
+    recommendationsDetailed.push({
+      text,
+      priority: lossChasingEvents >= 2 ? "high" : "medium",
+      basedOn: ["lossChasingEvents", "quantityJump"],
+    })
   }
   if (impulsiveTradeCount > 0) {
-    recommendations.push(
-      `${impulsiveTradeCount} trade(s) were tagged/commented as emotional. Run a post-trade review prompt for these sessions.`,
-    )
+    const text = `${impulsiveTradeCount} trade(s) were tagged/commented as emotional. Run a post-trade review prompt for these sessions.`
+    recommendations.push(text)
+    recommendationsDetailed.push({
+      text,
+      priority: impulsiveTradeCount >= 5 ? "high" : "medium",
+      basedOn: ["impulsiveTradeCount", "trade comments/tags"],
+    })
   }
   if (stressScore >= 60) {
-    recommendations.push("Stress score is elevated. Enable pre-trade breathing prompts during volatile windows.")
+    const text = "Stress score is elevated. Enable pre-trade breathing prompts during volatile windows."
+    recommendations.push(text)
+    recommendationsDetailed.push({
+      text,
+      priority: "high",
+      basedOn: ["stressScore"],
+    })
   }
   if (recommendations.length === 0) {
-    recommendations.push("Behavior profile is stable. Continue consistency and review strategy weekly.")
+    const text = "Behavior profile is stable. Continue consistency and review strategy weekly."
+    recommendations.push(text)
+    recommendationsDetailed.push({
+      text,
+      priority: "low",
+      basedOn: ["stable profile"],
+    })
+  }
+
+  if (confidenceBand === "low") {
+    recommendationsDetailed.push({
+      text: "Signal confidence is low due to sparse behavior inputs. Add daily mood check-ins for stronger recommendations.",
+      priority: "medium",
+      basedOn: ["confidenceScore", "moodEntries"],
+    })
   }
 
   return {
@@ -251,6 +342,8 @@ export function computeBehaviorInsights(
       averageEmotion: round(averageEmotion),
       stressScore,
       emotionalRiskPercent,
+      confidenceScore,
+      confidenceBand,
       disciplineStreakDays,
       overtradingDays,
       lossChasingEvents,
@@ -267,11 +360,13 @@ export function computeBehaviorInsights(
       emotionalMaster: emotionalRiskPercent <= 10 && lossChasingEvents === 0,
       controlStreak: disciplineStreakDays >= 7,
     },
+    drivers,
     prompts: {
       mindful: buildMindfulPrompt(stressScore, emotionalRiskPercent),
       postTradeReview: buildPostTradePrompt(lossChasingEvents),
       riskGuard: buildRiskGuard(overtradingDays, impulsiveTradeCount),
     },
     recommendations,
+    recommendationsDetailed,
   }
 }

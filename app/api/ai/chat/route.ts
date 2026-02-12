@@ -1,6 +1,6 @@
 import { streamText, stepCountIs, convertToModelMessages } from "ai";
 import { NextRequest } from "next/server";
-import { z } from 'zod/v3';
+import { z } from "zod/v3";
 import { getFinancialNews } from "./tools/get-financial-news";
 import { getJournalEntries } from "./tools/get-journal-entries";
 import { getMostTradedInstruments } from "./tools/get-most-traded-instruments";
@@ -14,33 +14,150 @@ import { getPreviousConversation } from "./tools/get-previous-conversation";
 import { generateEquityChart } from "./tools/generate-equity-chart";
 import { startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { buildSystemPrompt } from "./prompts";
+import { getAiLanguageModel } from "@/lib/ai/client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 
 export const maxDuration = 60;
 
-export async function POST(req: NextRequest) {
-  try {
-      const { messages, username, locale, timezone } = await req.json();
-      console.log('[Chat Route] Received messages:', JSON.stringify(messages, null, 2));
-      
-      // Check if messages is valid
-      if (!messages || !Array.isArray(messages) || messages.length === 0) {
-        console.error('[Chat Route] Invalid messages array:', messages);
-        return new Response(JSON.stringify({ error: "No messages provided" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
+
+function extractLastUserText(messages: any[]): string {
+  const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
+  if (!lastUserMessage) return "";
+
+  if (typeof lastUserMessage.content === "string") {
+    return lastUserMessage.content;
+  }
+
+  if (Array.isArray(lastUserMessage.parts)) {
+    return lastUserMessage.parts
+      .filter((part: any) => part?.type === "text" && typeof part?.text === "string")
+      .map((part: any) => part.text)
+      .join(" ");
+  }
+
+  if (typeof lastUserMessage.text === "string") {
+    return lastUserMessage.text;
+  }
+
+  return "";
+}
+
+function classifyIntent(text: string): ChatIntent {
+  const value = text.toLowerCase();
+
+  if (/(news|cpi|fomc|nfp|calendar|macro|event)/.test(value)) {
+    return "news_context";
+  }
+
+  if (/(win rate|pnl|drawdown|equity|trade|trades|performance|metric|stats|analy[sz]e|summary|compare)/.test(value)) {
+    return "analytics_data";
+  }
+
+  if (/(emotion|mindset|psychology|stress|discipline|coach|confidence|fear|fomo|revenge)/.test(value)) {
+    return "coaching";
+  }
+
+  return "general";
+}
+
+function getToolingPolicy(intent: ChatIntent) {
+  if (intent === "analytics_data") {
+    return {
+      requiresTool: true,
+      allowedToolNames: [
+        "getMostTradedInstruments",
+        "getLastTradesData",
+        "getTradesDetails",
+        "getTradesSummary",
+        "getCurrentWeekSummary",
+        "getPreviousWeekSummary",
+        "getWeekSummaryForDate",
+        "generateEquityChart",
+        "getPerformanceTrends",
+        "getOverallPerformanceMetrics",
+        "getInstrumentPerformance",
+        "getTimeOfDayPerformance",
+      ],
+    };
+  }
+
+  if (intent === "news_context") {
+    return {
+      requiresTool: true,
+      allowedToolNames: ["getFinancialNews"],
+    };
+  }
+
+  return {
+    requiresTool: false,
+    allowedToolNames: null as string[] | null,
+  };
+}
+
+function withToolGuards(tools: Record<string, any>, maxCallsPerTool = 2) {
+  const callCount = new Map<string, number>();
+  const seenArgs = new Set<string>();
+
+  return Object.fromEntries(
+    Object.entries(tools).map(([name, definition]) => {
+      if (!definition || typeof definition.execute !== "function") {
+        return [name, definition];
       }
-    // Calculate current week and previous week boundaries in user's timezone
+
+      return [
+        name,
+        {
+          ...definition,
+          execute: async (args: unknown, context: unknown) => {
+            const currentCount = (callCount.get(name) ?? 0) + 1;
+            if (currentCount > maxCallsPerTool) {
+              throw new Error(`Tool call limit reached for ${name}`);
+            }
+
+            const signature = `${name}:${JSON.stringify(args ?? {})}`;
+            if (seenArgs.has(signature)) {
+              throw new Error(`Duplicate tool call blocked for ${name}`);
+            }
+
+            callCount.set(name, currentCount);
+            seenArgs.add(signature);
+
+            return definition.execute(args, context);
+          },
+        },
+      ];
+    }),
+  );
+}
+
+export async function POST(req: NextRequest) {
+  const policy = getAiPolicy("chat");
+  const startedAt = Date.now();
+
+  try {
+    const { messages, username, locale, timezone } = await req.json();
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "No messages provided" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const now = new Date();
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 }); // Monday start
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
     const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
     const previousWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
     const previousWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
 
-    // Determine if this is the first message in the conversation
-    // A conversation starts with a user message, so if there's only one user message, it's the first
-    const userMessages = messages.filter((msg: any) => msg.role === 'user');
+    const userMessages = messages.filter((msg: any) => msg.role === "user");
     const isFirstMessage = userMessages.length === 1;
+
+    const latestText = extractLastUserText(messages);
+    const intent = classifyIntent(latestText);
+    const toolPolicy = getToolingPolicy(intent);
 
     const convertedMessages = await convertToModelMessages(messages);
     const systemPrompt = buildSystemPrompt({
@@ -54,60 +171,83 @@ export async function POST(req: NextRequest) {
       isFirstMessage,
     });
 
-    const result = streamText({
-      model: 'openai/gpt-5-mini',
-      messages: convertedMessages,
-      system: systemPrompt,
+    const intentPrompt =
+      toolPolicy.requiresTool
+        ? `\n\nINTENT CLASSIFICATION: ${intent}\nRULE: You must call at least one relevant tool before giving the final response.`
+        : `\n\nINTENT CLASSIFICATION: ${intent}\nRULE: Use tools only when they improve factual accuracy.`;
 
-      stopWhen: stepCountIs(10),
-      
-      onStepFinish: (step) => {
-        console.log('[Chat Route] Step finished:', JSON.stringify({
-          finishReason: step.finishReason,
-          hasText: !!step.text,
-          textLength: step.text?.length,
-          toolCalls: step.toolCalls?.map(tc => tc.toolName),
-          hasToolResults: !!step.toolResults?.length
-        }, null, 2));
-      },
-
-      tools: {
-        // server-side tool with execute function
-        getJournalEntries,
-        getPreviousConversation,
-        getMostTradedInstruments,
-        getLastTradesData,
-        getTradesDetails,
-        getTradesSummary,
-        getCurrentWeekSummary,
-        getPreviousWeekSummary,
-        getWeekSummaryForDate,
-        getFinancialNews,
-        generateEquityChart,
-        // client-side tool that is automatically executed on the client
-        // askForConfirmation,
-        // askForLocation,
-      },
-      
-      onError: ({ error }) => {
-        console.error('[Chat Route] Stream error:', error);
-      },
-      
-      onFinish: (result) => {
-        console.log('[Chat Route] Stream finished:', JSON.stringify({
-          finishReason: result.finishReason,
-          hasText: !!result.text,
-          textLength: result.text?.length,
-          stepsCount: result.steps?.length,
-          usage: result.usage
-        }, null, 2));
-      }
+    const availableTools = withToolGuards({
+      getJournalEntries,
+      getPreviousConversation,
+      getMostTradedInstruments,
+      getLastTradesData,
+      getTradesDetails,
+      getTradesSummary,
+      getCurrentWeekSummary,
+      getPreviousWeekSummary,
+      getWeekSummaryForDate,
+      getFinancialNews,
+      generateEquityChart,
     });
+
+    const scopedTools =
+      toolPolicy.allowedToolNames === null
+        ? availableTools
+        : Object.fromEntries(
+            Object.entries(availableTools).filter(([toolName]) =>
+              toolPolicy.allowedToolNames?.includes(toolName),
+            ),
+          );
+
+    let toolCallsCount = 0;
+
+    const result = streamText({
+      model: getAiLanguageModel("chat"),
+      messages: convertedMessages,
+      system: `${systemPrompt}${intentPrompt}`,
+      temperature: policy.temperature,
+      stopWhen: stepCountIs(policy.maxSteps),
+      tools: scopedTools,
+      toolChoice: toolPolicy.requiresTool ? "required" : "auto",
+      onStepFinish: (step) => {
+        const stepToolCalls = step.toolCalls?.length ?? 0;
+        toolCallsCount += stepToolCalls;
+      },
+      onError: ({ error }) => {
+        void logAiRequest({
+          route: "/api/ai/chat",
+          feature: "chat",
+          model: policy.model,
+          provider: policy.provider,
+          latencyMs: Date.now() - startedAt,
+          success: false,
+          errorCategory: categorizeAiError(error),
+          errorCode: (error as any)?.code ?? null,
+          toolCallsCount,
+          sampleRate: 1,
+        });
+      },
+      onFinish: (finalResult) => {
+        void logAiRequest({
+          route: "/api/ai/chat",
+          feature: "chat",
+          model: policy.model,
+          provider: policy.provider,
+          usage: extractUsage(finalResult.usage),
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          finishReason: finalResult.finishReason ?? null,
+          success: true,
+          sampleRate: policy.logSampleRate,
+        });
+      },
+    });
+
     return result.toUIMessageStreamResponse({
       onError: (error) => {
-        console.error('[Chat Route] UI Stream error:', error);
-        return 'An error occurred during the chat response';
-      }
+        console.error("[Chat Route] UI Stream error:", error);
+        return "An error occurred during the chat response";
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -116,10 +256,23 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    void logAiRequest({
+      route: "/api/ai/chat",
+      feature: "chat",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: (error as any)?.code ?? null,
+      sampleRate: 1,
+    });
+
     console.error("Error in chat route:", error);
     return new Response(JSON.stringify({ error: "Failed to process chat" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }
-} 
+}
