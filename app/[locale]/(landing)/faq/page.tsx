@@ -47,7 +47,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="border-white/5 mb-4 px-4 rounded-2xl bg-zinc-900/30">
-                            <AccordionTrigger className="text-left text-white hover:text-teal-400 hover:no-underline font-semibold py-6">
+                            <AccordionTrigger className="text-left text-white hover:text-white hover:no-underline font-semibold py-6">
                                 {faq.question}
                             </AccordionTrigger>
                             <AccordionContent className="text-zinc-400 leading-relaxed pb-6 pt-2">
@@ -58,12 +58,12 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 </Accordion>
             </div>
 
-            <div className="mt-24 p-8 rounded-3xl bg-teal-500/5 border border-teal-500/10 text-center">
+            <div className="mt-24 p-8 rounded-3xl bg-white/5 border border-white/10 text-center">
                 <h2 className="text-xl font-bold text-white mb-2">Still have questions?</h2>
                 <p className="text-zinc-400 mb-6 font-light">We're here to help you elevate your trading execution.</p>
                 <a
                     href="/support"
-                    className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-teal-500 text-black text-xs font-bold uppercase tracking-widest hover:bg-teal-400 transition-all hover:scale-105"
+                    className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white transition-all hover:scale-105"
                 >
                     Contact Support
                 </a>

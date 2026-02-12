@@ -10,7 +10,7 @@ import crypto from 'crypto'
 interface WebhookEvent {
   id: string
   type: string
-  data: any
+  data: unknown
   created_at?: number
 }
 
@@ -26,6 +26,15 @@ export class WebhookService {
   private static instance: WebhookService
   private processingQueue: Map<string, Promise<WebhookProcessingResult>>
   private retryAttempts: Map<string, number>
+  private stats = {
+    totalEvents: 0,
+    successfulEvents: 0,
+    failedEvents: 0,
+    duplicateEvents: 0,
+    retryCount: 0,
+    eventsByType: new Map<string, number>(),
+  }
+  private readonly maxRetryAttempts = 3
 
   static getInstance(): WebhookService {
     if (!WebhookService.instance) {
@@ -60,9 +69,16 @@ export class WebhookService {
   }
 
   async processWebhook(event: WebhookEvent): Promise<WebhookProcessingResult> {
+    this.stats.totalEvents += 1
+    this.stats.eventsByType.set(
+      event.type,
+      (this.stats.eventsByType.get(event.type) ?? 0) + 1
+    )
+
     const queueKey = `${event.id}:${event.type}`
 
     if (this.processingQueue.has(queueKey)) {
+      this.stats.duplicateEvents += 1
       logger.info('[WebhookService] Event already being processed', { eventId: event.id, eventType: event.type })
       return {
         success: true,
@@ -89,6 +105,7 @@ export class WebhookService {
     try {
       lockAcquired = await this.acquireWebhookLock(prisma, event)
       if (!lockAcquired) {
+        this.stats.duplicateEvents += 1
         logger.info('[WebhookService] Duplicate webhook skipped', {
           eventType: event.type,
           eventId: event.id,
@@ -106,7 +123,7 @@ export class WebhookService {
         eventId: event.id,
       })
 
-      const result = await this.handleEventByType(event, prisma)
+      const result = await this.processEventWithRetry(event, prisma)
 
       await this.logWebhookEvent({
         eventId: event.id,
@@ -114,15 +131,24 @@ export class WebhookService {
         success: result.success,
         processed: result.processed,
         error: result.error,
+        retries: this.getAttemptCount(result.error),
       })
 
       if (result.success) {
+        this.stats.successfulEvents += 1
         await this.finalizeWebhookLock(prisma, event, result)
       } else {
+        this.stats.failedEvents += 1
+        logger.error('[WebhookService] Event reached terminal failure', {
+          eventId: event.id,
+          eventType: event.type,
+          error: result.error,
+        })
         await this.releaseWebhookLock(prisma, event)
       }
       return result
     } catch (error) {
+      this.stats.failedEvents += 1
       logger.error('[WebhookService] Event processing failed', {
         eventType: event.type,
         eventId: event.id,
@@ -139,6 +165,7 @@ export class WebhookService {
         success: false,
         processed: false,
         error: error instanceof Error ? error.message : 'Unknown error',
+        retries: 0,
       })
 
       return {
@@ -148,6 +175,84 @@ export class WebhookService {
         error: error instanceof Error ? error.message : 'Unknown error',
       }
     }
+  }
+
+  private async processEventWithRetry(
+    event: WebhookEvent,
+    prisma: PrismaClient
+  ): Promise<WebhookProcessingResult> {
+    let attempt = 0
+    let lastResult: WebhookProcessingResult = {
+      success: false,
+      eventType: event.type,
+      processed: false,
+      error: 'Unknown error',
+    }
+
+    while (attempt < this.maxRetryAttempts) {
+      attempt += 1
+      lastResult = await this.handleEventByType(event, prisma)
+
+      if (lastResult.success || !this.isRetryableEvent(event.type, lastResult.error)) {
+        return lastResult
+      }
+
+      if (attempt < this.maxRetryAttempts) {
+        this.stats.retryCount += 1
+        const delayMs = this.getBackoffMs(attempt)
+        logger.warn('[WebhookService] Retrying webhook event', {
+          eventId: event.id,
+          eventType: event.type,
+          attempt,
+          delayMs,
+          reason: lastResult.error,
+        })
+        await this.sleep(delayMs)
+      }
+    }
+
+    return lastResult
+  }
+
+  private isRetryableEvent(eventType: string, error?: string): boolean {
+    if (!error) return false
+
+    const retryableEventTypes = new Set([
+      'membership.activated',
+      'membership.updated',
+      'membership.deactivated',
+      'payment.succeeded',
+      'payment.failed',
+      'invoice.created',
+      'invoice.paid',
+      'invoice.payment_failed',
+    ])
+
+    if (!retryableEventTypes.has(eventType)) {
+      return false
+    }
+
+    const normalized = error.toLowerCase()
+    return (
+      normalized.includes('timeout') ||
+      normalized.includes('network') ||
+      normalized.includes('temporar') ||
+      normalized.includes('connection') ||
+      normalized.includes('fetch')
+    )
+  }
+
+  private getBackoffMs(attempt: number): number {
+    return Math.min(500 * 2 ** (attempt - 1), 5_000)
+  }
+
+  private async sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  private getAttemptCount(error?: string): number {
+    if (!error) return 0
+    return this.stats.retryCount
   }
 
   private async acquireWebhookLock(prisma: PrismaClient, event: WebhookEvent): Promise<boolean> {
@@ -735,6 +840,7 @@ export class WebhookService {
     success: boolean
     processed: boolean
     error?: string
+    retries?: number
   }): Promise<void> {
     try {
       logger.info('[WebhookService] Webhook event logged', data)
@@ -753,6 +859,8 @@ export class WebhookService {
       totalEvents: number
       successfulEvents: number
       failedEvents: number
+      duplicateEvents: number
+      retryCount: number
       eventsByType: Record<string, number>
     }
     error?: string
@@ -761,10 +869,12 @@ export class WebhookService {
       return {
         success: true,
         stats: {
-          totalEvents: 0,
-          successfulEvents: 0,
-          failedEvents: 0,
-          eventsByType: {},
+          totalEvents: this.stats.totalEvents,
+          successfulEvents: this.stats.successfulEvents,
+          failedEvents: this.stats.failedEvents,
+          duplicateEvents: this.stats.duplicateEvents,
+          retryCount: this.stats.retryCount,
+          eventsByType: Object.fromEntries(this.stats.eventsByType),
         },
       }
     } catch (error) {

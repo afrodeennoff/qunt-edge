@@ -421,7 +421,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 <Button
                                     disabled={isLoading || countdown > 0 || authMethod === 'discord' || authMethod === 'google'}
                                     type="submit"
-                                    className="h-11 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 font-semibold text-[#072024] shadow-[0_10px_25px_-12px_rgba(34,211,238,0.9)] hover:from-cyan-300 hover:to-emerald-300"
+                                    className="h-11 rounded-xl bg-gradient-to-r from-white to-zinc-200 font-semibold text-black shadow-sm hover:from-zinc-100 hover:to-zinc-300"
                                 >
                                     {isLoading && authMethod === 'email' && (
                                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -495,7 +495,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 />
                                 <Button
                                     type="submit"
-                                    className="h-11 w-full rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 font-semibold text-[#072024] hover:from-cyan-300 hover:to-emerald-300"
+                                    className="h-11 w-full rounded-xl bg-gradient-to-r from-white to-zinc-200 font-semibold text-black hover:from-zinc-100 hover:to-zinc-300"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? (
@@ -558,7 +558,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             <Button
                                 disabled={isLoading}
                                 type="submit"
-                                className="h-11 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 font-semibold text-[#072024] shadow-[0_10px_25px_-12px_rgba(34,211,238,0.9)] hover:from-cyan-300 hover:to-emerald-300"
+                                className="h-11 rounded-xl bg-gradient-to-r from-white to-zinc-200 font-semibold text-black shadow-sm hover:from-zinc-100 hover:to-zinc-300"
                             >
                                 {isLoading && authMethod === 'email' && (
                                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

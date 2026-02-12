@@ -34,13 +34,13 @@ const SESSIONS: Session[] = [
     name: "London Session",
     startHour: 8,
     endHour: 16,
-    color: "bg-blue-500/20 border-blue-500"
+    color: "bg-white/10 border-white/40"
   },
   {
     name: "New York Session",
     startHour: 13,
     endHour: 21,
-    color: "bg-green-500/20 border-green-500"
+    color: "bg-white/10 border-white/40"
   }
 ]
 
@@ -552,7 +552,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
           className={cn(
             "border-l-4 rounded-r-md p-2 cursor-pointer transition-colors hover:opacity-90",
             trade.totalPnL > 0 
-              ? "bg-green-100 border-green-300 text-green-800 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400"
+              ? "bg-white/10 border-white/25 text-white dark:bg-white/5 dark:border-white/20 dark:text-white"
               : "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400"
           )}
         >
@@ -586,7 +586,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
             <DollarSign className="h-4 w-4" />
             <span className={cn(
               "font-medium",
-              trade.totalPnL > 0 ? "text-green-500" : "text-red-500"
+              trade.totalPnL > 0 ? "text-white" : "text-red-500"
             )}>
               {trade.totalPnL.toFixed(2)}
             </span>
@@ -612,7 +612,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
                   </TableCell>
                   <TableCell className={cn(
                     "text-right",
-                    t.pnl > 0 ? "text-green-500" : "text-red-500"
+                    t.pnl > 0 ? "text-white" : "text-red-500"
                   )}>
                     {t.pnl.toFixed(2)}
                   </TableCell>
@@ -621,7 +621,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
                   </TableCell>
                   <TableCell className={cn(
                     "text-right font-medium",
-                    (t.pnl - t.commission) > 0 ? "text-green-500" : "text-red-500"
+                    (t.pnl - t.commission) > 0 ? "text-white" : "text-red-500"
                   )}>
                     {(t.pnl - t.commission).toFixed(2)}
                   </TableCell>

@@ -130,7 +130,7 @@ export default function BillingManagement() {
                 </span>
                 <span className="text-muted-foreground">•</span>
                 {subscription?.status === 'active' ? (
-                  <span className="text-green-500 dark:text-green-400 inline-flex items-center gap-1">
+                  <span className="text-white dark:text-white inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     {t('billing.status.active')}
                   </span>
@@ -187,7 +187,7 @@ export default function BillingManagement() {
                   <div>
                     {subscription?.plan?.interval === 'lifetime' ? (
                       <div className="space-y-1">
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        <div className="text-2xl font-bold text-white dark:text-white">
                           {t('pricing.lifetimeAccess')}
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -208,7 +208,7 @@ export default function BillingManagement() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                          <Badge variant="secondary" className="bg-white/10 text-white dark:bg-white/10 dark:text-white">
                             {subscription.promotion.percent_off
                               ? `${subscription.promotion.percent_off}% OFF`
                               : subscription.promotion.amount_off 
@@ -516,7 +516,7 @@ export default function BillingManagement() {
                     </div>
                     <div className="flex items-center gap-2">
                       {invoice.status === 'paid' && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                        <Badge variant="secondary" className="bg-white/10 text-white dark:bg-white/10 dark:text-white">
                           {t('billing.paymentStatus.succeeded')}
                         </Badge>
                       )}

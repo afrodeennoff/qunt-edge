@@ -116,7 +116,7 @@ export default function TeamPage() {
             <div className="mx-auto max-w-2xl lg:mx-0 lg:shrink-0 lg:pt-4">
               <div className="mt-8 sm:mt-12 lg:mt-8">
                 <a href="#" className="inline-flex space-x-6">
-                  <span className="rounded-full bg-[#2E9987]/10 dark:bg-[hsl(var(--chart-1))]/10 px-3 py-1 text-sm/6 font-semibold text-[#2E9987] dark:text-[hsl(var(--chart-1))] ring-1 ring-[#2E9987]/10 dark:ring-[hsl(var(--chart-1))]/10 ring-inset">
+                  <span className="rounded-full bg-white text-black/10 dark:bg-[hsl(var(--chart-1))]/10 px-3 py-1 text-sm/6 font-semibold text-[#2E9987] dark:text-[hsl(var(--chart-1))] ring-1 ring-[#2E9987]/10 dark:ring-[hsl(var(--chart-1))]/10 ring-inset">
                     {t('teams.badge')}
                   </span>
                   <span className="inline-flex items-center space-x-2 text-sm/6 font-medium text-gray-600 dark:text-gray-400">
@@ -132,11 +132,11 @@ export default function TeamPage() {
                 {t('teams.hero.description')}
               </p>
               <div className="mt-8 flex items-center gap-x-6">
-                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-[#2E9987] hover:bg-[#267a6d] dark:bg-[hsl(var(--chart-1))] dark:hover:bg-[hsl(var(--chart-1)/0.9)] shadow-[0_0_0_6px_rgba(50,169,151,0.1),0_0_0_2px_rgba(50,169,151,0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_0_0_6px_rgba(50,169,151,0.2),0_0_0_2px_rgba(50,169,151,0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] dark:shadow-[0_0_0_6px_hsl(var(--chart-1)/0.1),0_0_0_2px_hsl(var(--chart-1)/0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_0_6px_hsl(var(--chart-1)/0.2),0_0_0_2px_hsl(var(--chart-1)/0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] rounded-xl transition-all duration-200">
+                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-white text-black hover:bg-zinc-200 dark:bg-[hsl(var(--chart-1))] dark:hover:bg-[hsl(var(--chart-1)/0.9)] shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200">
                   <span className="font-medium text-sm text-white">{t('teams.cta')}</span>
                 </Link>
                 <button
-                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-[0_0_0_6px_rgba(107,114,128,0.1),0_0_0_2px_rgba(107,114,128,0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_0_0_6px_rgba(107,114,128,0.2),0_0_0_2px_rgba(107,114,128,0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] dark:shadow-[0_0_0_6px_rgba(156,163,175,0.1),0_0_0_2px_rgba(156,163,175,0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_0_6px_rgba(156,163,175,0.2),0_0_0_2px_rgba(156,163,175,0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] rounded-xl transition-all duration-200"
+                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200"
                   data-cal-namespace="qunt-edge-team"
                   data-cal-link="hugo-demenez/qunt-edge-team"
                   data-cal-config='{"layout":"month_view"}'
@@ -197,7 +197,7 @@ export default function TeamPage() {
               {features.map((feature, index) => (
                 <Card key={index} className="border-2 hover:border-[#2E9987] dark:hover:border-[hsl(var(--chart-1))] transition-colors duration-200">
                   <CardHeader>
-                    <div className="w-12 h-12 bg-[#2E9987] dark:bg-[hsl(var(--chart-1))] rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 bg-white text-black dark:bg-[hsl(var(--chart-1))] rounded-lg flex items-center justify-center mb-4">
                       <feature.icon className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl">{feature.title}</CardTitle>
@@ -228,7 +228,7 @@ export default function TeamPage() {
               {useCases.map((useCase, index) => (
                 <Card key={index} className="border-2 hover:border-[#2E9987] dark:hover:border-[hsl(var(--chart-1))] transition-colors duration-200">
                   <CardHeader>
-                    <div className="w-12 h-12 bg-[#2E9987] dark:bg-[hsl(var(--chart-1))] rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 bg-white text-black dark:bg-[hsl(var(--chart-1))] rounded-lg flex items-center justify-center mb-4">
                       <useCase.icon className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl">{useCase.title}</CardTitle>
@@ -255,11 +255,11 @@ export default function TeamPage() {
                 {t('teams.cta.createAccount.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-[#2E9987] hover:bg-[#267a6d] dark:bg-[hsl(var(--chart-1))] dark:hover:bg-[hsl(var(--chart-1)/0.9)] shadow-[0_0_0_6px_rgba(50,169,151,0.1),0_0_0_2px_rgba(50,169,151,0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_0_0_6px_rgba(50,169,151,0.2),0_0_0_2px_rgba(50,169,151,0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] dark:shadow-[0_0_0_6px_hsl(var(--chart-1)/0.1),0_0_0_2px_hsl(var(--chart-1)/0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_0_6px_hsl(var(--chart-1)/0.2),0_0_0_2px_hsl(var(--chart-1)/0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] rounded-xl transition-all duration-200">
+                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-white text-black hover:bg-zinc-200 dark:bg-[hsl(var(--chart-1))] dark:hover:bg-[hsl(var(--chart-1)/0.9)] shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200">
                   <span className="font-medium text-sm text-white">{t('teams.cta.createAccount.button')}</span>
                 </Link>
                 <button
-                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-[0_0_0_6px_rgba(107,114,128,0.1),0_0_0_2px_rgba(107,114,128,0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_0_0_6px_rgba(107,114,128,0.2),0_0_0_2px_rgba(107,114,128,0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] dark:shadow-[0_0_0_6px_rgba(156,163,175,0.1),0_0_0_2px_rgba(156,163,175,0.25),0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_0_6px_rgba(156,163,175,0.2),0_0_0_2px_rgba(156,163,175,0.35),0_2px_4px_rgba(0,0,0,0.2),0_2px_3px_-1px_rgba(0,0,0,0.2)] rounded-xl transition-all duration-200"
+                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200"
                   data-cal-namespace="qunt-edge-team"
                   data-cal-link="hugo-demenez/qunt-edge-team"
                   data-cal-config='{"layout":"month_view"}'

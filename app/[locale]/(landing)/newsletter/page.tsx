@@ -24,18 +24,18 @@ export default async function NewsletterPage(
       <div className="container max-w-6xl w-full px-4 sm:px-6 py-6 sm:py-8 md:py-12">
         <div className="mx-auto max-w-2xl space-y-6 sm:space-y-8">
           {isUnsubscribed && (
-            <Card className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/50">
+            <Card className="border-white/20 dark:border-white/20 bg-white/10 dark:bg-white/10">
               <CardHeader className="space-y-3 sm:space-y-4">
                 <div className="flex items-center space-x-2.5">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-white dark:text-white shrink-0" />
                   <CardTitle className="text-lg sm:text-xl">{t("unsubscribed.title")}</CardTitle>
                 </div>
-                <CardDescription className="text-green-700 dark:text-green-300 text-sm sm:text-base">
+                <CardDescription className="text-white dark:text-white text-sm sm:text-base">
                   {t("unsubscribed.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm sm:text-base text-green-600 dark:text-green-400 break-all">
+                <p className="text-sm sm:text-base text-white dark:text-white break-all">
                   {email && `${t("unsubscribed.email")}: ${email}`}
                 </p>
               </CardContent>

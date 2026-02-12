@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
@@ -16,6 +17,26 @@ interface AccountCardProps {
 
 export function AccountCard({ account, onClick, size = 'large' }: AccountCardProps) {
   const t = useI18n()
+  const [daysUntilNextPayment, setDaysUntilNextPayment] = useState<number | null>(null)
+
+  useEffect(() => {
+    const nextPaymentDate = account.nextPaymentDate
+    if (!nextPaymentDate) {
+      setDaysUntilNextPayment(null)
+      return
+    }
+
+    const updateDaysUntilNextPayment = () => {
+      const remainingDays = Math.floor(
+        (new Date(nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      )
+      setDaysUntilNextPayment(remainingDays)
+    }
+
+    updateDaysUntilNextPayment()
+    const intervalId = setInterval(updateDaysUntilNextPayment, 60 * 60 * 1000)
+    return () => clearInterval(intervalId)
+  }, [account.nextPaymentDate])
 
   // Extract metrics from account (computed server-side)
   const metrics = account.metrics
@@ -52,13 +73,13 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                 <div className="flex w-full justify-between min-w-0">
                   <span className="truncate text-white font-bold">{account.propfirm || t('propFirm.card.unnamedAccount')}</span>
                   {
-                    account.nextPaymentDate && (
+                    account.nextPaymentDate && daysUntilNextPayment !== null && (
                       <div className={cn(
                         "self-center ml-2 shrink-0 font-terminal",
                         size === 'small' || size === 'small-long' ? "text-[10px]" : "text-[10px]",
-                        Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) < 5 ? 'text-white blink' : 'text-white/40'
+                        daysUntilNextPayment < 5 ? 'text-white blink' : 'text-white/40'
                       )}>
-                        {Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
+                        {daysUntilNextPayment}
                         {t('propFirm.card.daysBeforeNextPayment')}
                       </div>
                     )
@@ -114,11 +135,11 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                 )}
                 indicatorClassName={cn(
                   "transition-all duration-500 bg-white",
-                  progress <= 20 ? "opacity-20 shadow-[0_0_8px_rgba(255,255,255,0.2)]" :
-                    progress <= 40 ? "opacity-40 shadow-[0_0_10px_rgba(255,255,255,0.3)]" :
-                      progress <= 60 ? "opacity-60 shadow-[0_0_12px_rgba(255,255,255,0.4)]" :
-                        progress <= 80 ? "opacity-85 shadow-[0_0_15px_rgba(255,255,255,0.5)]" :
-                          "opacity-100 shadow-[0_0_20px_rgba(255,255,255,0.7)]"
+                  progress <= 20 ? "opacity-20 shadow-none" :
+                    progress <= 40 ? "opacity-40 shadow-none" :
+                      progress <= 60 ? "opacity-60 shadow-none" :
+                        progress <= 80 ? "opacity-85 shadow-none" :
+                          "opacity-100 shadow-none"
                 )}
               />
             </div>

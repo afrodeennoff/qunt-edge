@@ -98,7 +98,7 @@ export function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
       switch (moodType) {
         case 'bad': return 'text-red-500'
         case 'okay': return 'text-yellow-500'
-        case 'great': return 'text-green-500'
+        case 'great': return 'text-white'
       }
     }
     return ''
@@ -153,7 +153,7 @@ export function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-6 w-6 p-0 hover:text-green-500 ${getMoodButtonStyle('great')}`}
+                  className={`h-6 w-6 p-0 hover:text-white ${getMoodButtonStyle('great')}`}
                   onClick={() => handleMoodSelect('great')}
                   disabled={isLoading !== null}
                 >

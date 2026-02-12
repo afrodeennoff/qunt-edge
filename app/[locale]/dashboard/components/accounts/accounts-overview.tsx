@@ -1411,7 +1411,7 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
                   const groupColors = [
                     'border-blue-200/50 bg-blue-50/30 dark:border-blue-800/30 dark:bg-blue-950/20',
                     'border-purple-200/50 bg-purple-50/30 dark:border-purple-800/30 dark:bg-purple-950/20',
-                    'border-green-200/50 bg-green-50/30 dark:border-green-800/30 dark:bg-green-950/20',
+                    'border-white/20 bg-white/10 dark:border-white/15 dark:bg-white/5',
                     'border-orange-200/50 bg-orange-50/30 dark:border-orange-800/30 dark:bg-orange-950/20',
                     'border-pink-200/50 bg-pink-50/30 dark:border-pink-800/30 dark:bg-pink-950/20',
                     'border-cyan-200/50 bg-cyan-50/30 dark:border-cyan-800/30 dark:bg-cyan-950/20',

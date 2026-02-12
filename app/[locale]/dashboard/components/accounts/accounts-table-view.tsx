@@ -635,7 +635,7 @@ export function AccountsTableView({
             <div className="flex items-center justify-center">
               {isFunded ? (
                 <>
-                  <CheckCircle className="h-4 w-4 text-success text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-success text-white" />
                   <span className="sr-only">{t("accounts.table.fundedYes")}</span>
                 </>
               ) : (

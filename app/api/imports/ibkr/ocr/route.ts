@@ -1,108 +1,147 @@
 import PDFParser from 'pdf2json'
+import { logger } from '@/lib/logger'
+import type { ErrorResponse } from '@/server/authz'
 
-export const maxDuration = 60 // Allow up to 60 seconds for AI processing
+export const maxDuration = 60
 
-// Simple PDF to text extraction function using pdf2json
+const MAX_PDF_BYTES = 10 * 1024 * 1024
+
+type Attachment = {
+  type?: string
+  content?: ArrayBuffer | string
+}
+
+type OCRRequestBody = {
+  attachments?: Attachment[]
+}
+
+type ParsedRun = { T: string }
+type ParsedText = { R: ParsedRun[] }
+type ParsedPage = { Texts: ParsedText[] }
+type ParsedPDFData = { Pages: ParsedPage[] }
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+function errorResponse(
+  requestId: string,
+  status: number,
+  error: string,
+  code: string
+): Response {
+  const payload: ErrorResponse = { error, code, requestId }
+  return jsonResponse(payload, status)
+}
+
+function normalizeAttachment(body: OCRRequestBody): Attachment | null {
+  const first = body.attachments?.[0]
+  return first ?? null
+}
+
+function decodePdfBuffer(attachment: Attachment): Buffer {
+  if (attachment.content instanceof ArrayBuffer) {
+    return Buffer.from(attachment.content)
+  }
+
+  if (typeof attachment.content === 'string') {
+    return Buffer.from(attachment.content, 'base64')
+  }
+
+  throw new Error('Invalid file content format')
+}
+
 async function extractTextFromPdf(pdfBuffer: Buffer): Promise<string> {
-  return new Promise((resolve, reject) => {
-    try {
-      // Use pdf2json for more reliable PDF processing
-      const pdfParser = new PDFParser()
+  return new Promise((resolve) => {
+    const pdfParser = new PDFParser()
+    let extractedText = ''
 
-      let extractedText = ''
+    pdfParser.on('pdfParser_dataError', (errData: unknown) => {
+      const message = errData instanceof Error ? errData.message : 'PDF parsing failed'
+      resolve(`PDF processing failed: ${message}`)
+    })
 
-      // Set up event handlers
-      pdfParser.on('pdfParser_dataError', (errData: any) => {
-        console.error('PDF parsing error:', errData)
-        const errorMessage = errData instanceof Error ? errData.message : 'PDF parsing failed'
-        resolve(`PDF processing failed: ${errorMessage}. Please ensure the PDF file is valid and not password protected.`)
-      })
-
-      pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-        try {
-          // Extract text from all pages
-          pdfData.Pages.forEach((page: any) => {
-            page.Texts.forEach((text: any) => {
-              text.R.forEach((run: any) => {
-                extractedText += decodeURIComponent(run.T) + ' '
-              })
+    pdfParser.on('pdfParser_dataReady', (pdfData: unknown) => {
+      try {
+        const parsedData = pdfData as ParsedPDFData
+        parsedData.Pages.forEach((page) => {
+          page.Texts.forEach((text) => {
+            text.R.forEach((run) => {
+              extractedText += `${decodeURIComponent(run.T)} `
             })
-            extractedText += '\n' // Add newline after each page
           })
+          extractedText += '\n'
+        })
+        resolve(extractedText.trim())
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        resolve(`PDF processing failed: ${message}`)
+      }
+    })
 
-          resolve(extractedText.trim())
-        } catch (processingError) {
-          console.error('Error processing PDF data:', processingError)
-          const errorMessage = processingError instanceof Error ? processingError.message : 'Unknown error'
-          resolve(`PDF processing failed: ${errorMessage}. Please ensure the PDF file is valid and not password protected.`)
-        }
-      })
-
-      // Parse the PDF buffer
-      pdfParser.parseBuffer(pdfBuffer)
-
-    } catch (error) {
-      console.error('Error setting up PDF parser:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      resolve(`PDF processing failed: ${errorMessage}. Please ensure the PDF file is valid and not password protected.`)
-    }
+    pdfParser.parseBuffer(pdfBuffer)
   })
 }
 
 export async function POST(request: Request) {
+  const requestId = crypto.randomUUID()
+
   try {
-    const json = await request.json()
-    const attachment = json.attachments?.[0]
+    const json = (await request.json()) as OCRRequestBody
+    const attachment = normalizeAttachment(json)
 
     if (!attachment) {
-      return new Response(JSON.stringify({ error: 'No file provided' }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return errorResponse(requestId, 400, 'No file provided', 'IMPORT_FILE_MISSING')
     }
 
     if (attachment.type !== 'application/pdf') {
-      return new Response(JSON.stringify({ error: 'Invalid file type. Only PDF files are allowed.' }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return errorResponse(requestId, 400, 'Invalid file type. Only PDF files are allowed.', 'IMPORT_FILE_TYPE_INVALID')
     }
 
-    // Read the PDF file as buffer
-    let pdfBuffer: Buffer;
+    let pdfBuffer: Buffer
     try {
-      if (attachment.content instanceof ArrayBuffer) {
-        pdfBuffer = Buffer.from(attachment.content);
-      } else if (typeof attachment.content === 'string') {
-        // Handle base64 encoded content
-        pdfBuffer = Buffer.from(attachment.content, 'base64');
-      } else {
-        return new Response(JSON.stringify({ error: 'Invalid file content format' }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+      pdfBuffer = decodePdfBuffer(attachment)
     } catch (error) {
-      console.error('Error processing file content:', error);
-      return new Response(JSON.stringify({ error: 'Failed to process file content' }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      logger.warn('[IBKR OCR] Invalid file payload', {
+        requestId,
+        error: error instanceof Error ? error.message : 'Unknown payload error',
+      })
+      return errorResponse(requestId, 400, 'Invalid file content format', 'IMPORT_FILE_CONTENT_INVALID')
     }
 
-    // Extract text from PDF
-    const extractedText = await extractTextFromPdf(pdfBuffer)
-    console.log(extractedText.slice(0, 100))
+    if (pdfBuffer.length === 0) {
+      return errorResponse(requestId, 400, 'PDF file is empty', 'IMPORT_FILE_EMPTY')
+    }
 
-    return new Response(JSON.stringify({ text: extractedText }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    if (pdfBuffer.length > MAX_PDF_BYTES) {
+      return errorResponse(
+        requestId,
+        413,
+        `PDF exceeds ${MAX_PDF_BYTES / (1024 * 1024)}MB size limit`,
+        'IMPORT_FILE_TOO_LARGE'
+      )
+    }
+
+    const extractedText = await extractTextFromPdf(pdfBuffer)
+
+    if (!extractedText || extractedText.startsWith('PDF processing failed:')) {
+      return errorResponse(
+        requestId,
+        422,
+        extractedText || 'PDF parsing produced no text',
+        'IMPORT_PDF_PARSE_FAILED'
+      )
+    }
+
+    return jsonResponse({ text: extractedText, requestId }, 200)
   } catch (error) {
-    console.error('Error processing request:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Failed to process request' }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    logger.error('[IBKR OCR] Request processing failed', {
+      requestId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
+    return errorResponse(requestId, 500, 'Failed to process request', 'IMPORT_OCR_INTERNAL_ERROR')
   }
-} 
+}

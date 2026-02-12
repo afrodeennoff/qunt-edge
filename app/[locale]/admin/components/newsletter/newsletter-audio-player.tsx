@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useMemo } from 'react'
 import { Play, Pause, Volume2, VolumeX, Download } from 'lucide-react'
 
 interface AudioPlayerProps {
@@ -17,20 +17,20 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
   const [isMuted, setIsMuted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
-  // Create audio URL from buffer
+  const audioUrl = useMemo(() => {
+    if (!audioBuffer) return null
+    const blob = new Blob([audioBuffer], { type: 'audio/wav' })
+    return URL.createObjectURL(blob)
+  }, [audioBuffer])
+
   useEffect(() => {
-    if (audioBuffer) {
-      const blob = new Blob([audioBuffer], { type: 'audio/wav' })
-      const url = URL.createObjectURL(blob)
-      setAudioUrl(url)
-      
-      return () => {
-        URL.revokeObjectURL(url)
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl)
       }
     }
-  }, [audioBuffer])
+  }, [audioUrl])
 
   // Initialize audio element
   useEffect(() => {
@@ -217,7 +217,7 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
           {/* Download button */}
           <button
             onClick={handleDownload}
-            className="p-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-full transition-colors"
+            className="p-2 bg-white/10 hover:bg-white/10 dark:bg-white/10 dark:hover:bg-white/10 text-white rounded-full transition-colors"
             title="Download audio file"
           >
             <Download className="w-4 h-4" />

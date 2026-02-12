@@ -46,8 +46,8 @@ export function Timeline({ onSelectDate, selectedDate, moodHistory, className, o
     if (value < 20) return 'bg-red-500'
     if (value < 40) return 'bg-orange-500'
     if (value < 60) return 'bg-yellow-500'
-    if (value < 80) return 'bg-green-500'
-    return 'bg-emerald-500'
+    if (value < 80) return 'bg-white/80'
+    return 'bg-white'
   }
 
   const handleDeleteClick = (e: React.MouseEvent, date: Date) => {

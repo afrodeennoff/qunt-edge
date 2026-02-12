@@ -1,28 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/server/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { securityManager } from '@/server/payment-security'
+import { assertAdminAccess, toErrorResponse, logAdminMutation } from '@/server/authz'
+import type { Prisma } from '@/prisma/generated/prisma'
 
 export async function GET(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const adminDomains = process.env.ADMIN_EMAIL_DOMAINS?.split(',') || []
-    const isAdmin = adminDomains.some((domain) =>
-      user.email?.toLowerCase().endsWith(domain.toLowerCase())
-    )
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    await assertAdminAccess(requestId)
 
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -31,7 +16,7 @@ export async function GET(req: NextRequest) {
     const plan = searchParams.get('plan')
     const search = searchParams.get('search')
 
-    const where: any = {}
+    const where: Prisma.SubscriptionWhereInput = {}
 
     if (status) {
       where.status = status.toUpperCase()
@@ -96,35 +81,18 @@ export async function GET(req: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+      requestId,
     })
   } catch (error) {
     logger.error('[Admin Subscriptions] Failed to fetch subscriptions', { error })
-    return NextResponse.json(
-      { error: 'Failed to fetch subscriptions' },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }
 
 export async function PATCH(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const adminDomains = process.env.ADMIN_EMAIL_DOMAINS?.split(',') || []
-    const isAdmin = adminDomains.some((domain) =>
-      user.email?.toLowerCase().endsWith(domain.toLowerCase())
-    )
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const admin = await assertAdminAccess(requestId)
 
     const body = await req.json()
     const { subscriptionId, action, ...data } = body
@@ -213,18 +181,19 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
-    logger.info('[Admin Subscriptions] Subscription updated', {
-      subscriptionId,
-      action,
-      adminEmail: user.email,
+    logAdminMutation({
+      action: `subscription-${action}`,
+      actor: admin,
+      target: subscriptionId,
+      details: {
+        plan: data.plan,
+        endDate: data.endDate,
+      },
     })
 
-    return NextResponse.json({ subscription: updatedSubscription })
+    return NextResponse.json({ subscription: updatedSubscription, requestId })
   } catch (error) {
     logger.error('[Admin Subscriptions] Failed to update subscription', { error })
-    return NextResponse.json(
-      { error: 'Failed to update subscription' },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }

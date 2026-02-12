@@ -35,11 +35,11 @@
     --bg-highlight: 240 10% 15%;
 
     /* ===== PRIMARY ACCENT (Teal-500: #2dd4bf) ===== */
-    --accent-teal: 0 0% 100%;
-    --accent-teal-hover: 0 0% 90%;
-    --accent-teal-active: 0 0% 80%;
-    --accent-teal-subtle: 0 0% 100%;
-    --accent-teal-glow: 0 0% 100%;
+    --accent-neutral: 0 0% 100%;
+    --accent-neutral-hover: 0 0% 90%;
+    --accent-neutral-active: 0 0% 80%;
+    --accent-neutral-subtle: 0 0% 100%;
+    --accent-neutral-glow: 0 0% 100%;
 
     /* ===== NEUTRAL PALETTE (Zinc scale) ===== */
     --neutral-50: 240 5% 96%;
@@ -65,10 +65,10 @@
     --border-default: 240 4% 20%;
     --border-subtle: 240 4% 15%;
     --border-strong: 240 4% 25%;
-    --border-focus: var(--accent-teal);
+    --border-focus: var(--accent-neutral);
     --border-error: 0 62% 50%;
     --border-warning: 35 85% 55%;
-    --border-success: var(--accent-teal);
+    --border-success: var(--accent-neutral);
 
     /* ===== GLASSMORPHISM TOKENS ===== */
     --glass-bg: var(--bg-elevated) / 0.6;
@@ -81,9 +81,9 @@
 
     /* ===== INTERACTIVE STATES ===== */
     --hover-overlay: 255 255 255 / 0.05;
-    --hover-accent: var(--accent-teal) / 0.1;
+    --hover-accent: var(--accent-neutral) / 0.1;
     --active-overlay: 255 255 255 / 0.1;
-    --focus-ring: var(--accent-teal) / 0.5;
+    --focus-ring: var(--accent-neutral) / 0.5;
     --focus-ring-offset: 0 0 0 2px var(--bg-base);
 
     /* ===== SEMANTIC COLORS ===== */
@@ -91,8 +91,8 @@
     --color-error-bg: 0 0% 40% / 0.1;
     --color-warning: 0 0% 60%;
     --color-warning-bg: 0 0% 60% / 0.1;
-    --color-success: var(--accent-teal);
-    --color-success-bg: var(--accent-teal) / 0.1;
+    --color-success: var(--accent-neutral);
+    --color-success-bg: var(--accent-neutral) / 0.1;
     --color-info: 0 0% 80%;
     --color-info-bg: 0 0% 80% / 0.1;
 
@@ -197,24 +197,24 @@
   }
 
   /* Primary accent tokens */
-  .bg-accent-teal {
-    background-color: hsl(var(--accent-teal));
+  .bg-accent-neutral {
+    background-color: hsl(var(--accent-neutral));
   }
 
-  .bg-accent-teal-hover {
-    background-color: hsl(var(--accent-teal-hover));
+  .bg-accent-neutral-hover {
+    background-color: hsl(var(--accent-neutral-hover));
   }
 
-  .bg-accent-teal-subtle {
-    background-color: hsl(var(--accent-teal) / 0.1);
+  .bg-accent-neutral-subtle {
+    background-color: hsl(var(--accent-neutral) / 0.1);
   }
 
-  .text-accent-teal {
-    color: hsl(var(--accent-teal));
+  .text-accent-neutral {
+    color: hsl(var(--accent-neutral));
   }
 
-  .border-accent-teal {
-    border-color: hsl(var(--accent-teal));
+  .border-accent-neutral {
+    border-color: hsl(var(--accent-neutral));
   }
 
   /* Foreground tokens */
@@ -267,7 +267,7 @@
   }
 
   /* Focus state tokens */
-  .focus-ring-teal:focus-visible {
+  .focus-ring-neutral:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px var(--focus-ring-offset),
       0 0 0 4px hsl(var(--focus-ring));

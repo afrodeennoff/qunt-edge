@@ -352,7 +352,7 @@ export default function TraderStatsEmail({
   const isPositivePerformance = overallPnL > 0;
 
   // Helper function to determine PnL color
-  const getPnLColor = (pnl: number) => pnl >= 0 ? 'text-green-600' : 'text-red-600';
+  const getPnLColor = (pnl: number) => pnl >= 0 ? 'text-white' : 'text-red-600';
 
   // Helper function to format PnL with sign
   const formatPnLWithSign = (pnl: number) => {
@@ -530,7 +530,7 @@ export default function TraderStatsEmail({
                     <table className="w-full">
                       <tr>
                         <td className="w-1/2 text-center">
-                          <Text className="text-2xl font-bold text-green-600 mb-2">
+                          <Text className="text-2xl font-bold text-white mb-2">
                             {winLossStats.wins}
                           </Text>
                           <Text className="text-sm text-gray-600">{t.wins}</Text>

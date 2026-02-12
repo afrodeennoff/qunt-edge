@@ -33,12 +33,9 @@ export default function TradezellaProcessor({ headers, csvData, setProcessedTrad
 
   const processTrades = useCallback(() => {
     const newTrades: Trade[] = [];
-    //TODO: Ask user for account number using account selection component
-    const accountNumber = 'default-account';
 
     csvData.forEach(row => {
       const item: Partial<Trade> = {};
-      const quantity = 0;
       let entryTime = '';
       let closeTime = '';
       headers.forEach((header, index) => {
@@ -72,6 +69,10 @@ export default function TradezellaProcessor({ headers, csvData, setProcessedTrad
       // If item contains undefined values then skip the row
       if (Object.values(item).some(value => value === undefined)) {
         return
+      }
+
+      if (!item.accountNumber) {
+        item.accountNumber = 'unknown-account'
       }
 
 
@@ -136,7 +137,7 @@ export default function TradezellaProcessor({ headers, csvData, setProcessedTrad
       <div className="flex justify-between">
         <div>
           <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-          <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
             {totalPnL.toFixed(2)}
           </p>
         </div>

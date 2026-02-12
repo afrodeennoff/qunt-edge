@@ -42,10 +42,10 @@ export default function Hero({ onStart }: HeroProps) {
   };
 
   return (
-    <section ref={ref} className="relative pt-24 sm:pt-32 md:pt-40 lg:pt-48 pb-16 sm:pb-24 md:pb-32 px-4 sm:px-6 overflow-hidden min-h-screen flex flex-col justify-center items-center text-center">
+    <section ref={ref} className="relative pt-20 sm:pt-24 pb-20 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen flex flex-col justify-center items-center text-center">
       <motion.div style={{ opacity }} className="absolute inset-0 pointer-events-none">
          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl sm:max-w-6xl md:max-w-7xl h-[300px] sm:h-[400px] md:h-[600px] bg-teal-500/10 blur-[100px] sm:blur-[120px] md:blur-[140px] rounded-full"></div>
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl sm:max-w-6xl md:max-w-7xl h-[300px] sm:h-[400px] md:h-[600px] bg-white/10 blur-[100px] sm:blur-[120px] md:blur-[140px] rounded-full"></div>
       </motion.div>
 
       <motion.div
@@ -53,11 +53,11 @@ export default function Hero({ onStart }: HeroProps) {
         initial="hidden"
         animate="show"
         style={{ scale }}
-        className="max-w-7xl mx-auto relative z-10 px-4"
+        className="max-w-7xl mx-auto relative z-10 w-full"
       >
         <motion.div variants={item} className="mb-6 sm:mb-8">
            <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 bg-zinc-900/50 border border-white/5 rounded-full backdrop-blur-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse shadow-[0_0_8px_#2dd4bf]"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-none"></span>
               <span className="text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-bold text-zinc-400">Institutional Intelligence Layer</span>
            </div>
         </motion.div>
@@ -66,7 +66,7 @@ export default function Hero({ onStart }: HeroProps) {
           variants={item}
           className="text-fluid-5xl sm:text-fluid-6xl md:text-fluid-7xl lg:text-fluid-8xl font-bold tracking-tighter mb-6 sm:mb-8 leading-[0.9] sm:leading-[0.85] text-white"
         >
-          Qunt <span className="text-transparent bg-clip-text bg-gradient-to-b from-teal-400 to-teal-700">Edge.</span>
+          Qunt <span className="text-transparent bg-clip-text bg-gradient-to-b from-white/80 to-white/40">Edge.</span>
         </motion.h1>
 
         <motion.p
@@ -83,7 +83,7 @@ export default function Hero({ onStart }: HeroProps) {
         >
           <Link
             href="/dashboard"
-            className="touch-target group relative w-full sm:w-auto min-w-[200px] bg-white text-black px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] transition-all hover:bg-teal-400 hover:shadow-[0_0_40px_-10px_rgba(45,212,191,0.6)] text-center"
+            className="touch-target group relative inline-flex h-12 w-full sm:w-auto min-w-[220px] items-center justify-center rounded-full bg-white px-8 text-center text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-black transition-all hover:bg-white hover:shadow-none"
           >
             Apply for Access
           </Link>
@@ -99,7 +99,7 @@ export default function Hero({ onStart }: HeroProps) {
 
         <motion.div
           variants={item}
-          className="mt-16 sm:mt-24 md:mt-32 pt-8 sm:pt-12 border-t border-white/5 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700 px-4"
+          className="mt-16 sm:mt-20 pt-8 sm:pt-10 border-t border-white/5 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700 px-4"
         >
            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12 lg:gap-20">
               <span className="text-sm sm:text-base md:text-xl font-black tracking-tighter text-white/50">TRADOVATE</span>

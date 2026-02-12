@@ -98,7 +98,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                     </button>
                                     <button
                                         onClick={onAccessPortal}
-                                        className="bg-white hover:bg-zinc-200 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_-5px_rgba(255,255,255,0.4)]"
+                                        className="bg-white hover:bg-zinc-200 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 border border-white/20 shadow-none"
                                     >
                                         {t('landing.cta')}
                                     </button>
@@ -106,7 +106,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                             ) : (
                                 <Link
                                     href={`/${locale}/dashboard`}
-                                    className="bg-white hover:bg-zinc-200 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
+                                    className="bg-white hover:bg-zinc-200 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 border border-white/20 shadow-none"
                                 >
                                     {t('landing.navbar.dashboard')}
                                 </Link>

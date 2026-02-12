@@ -15,7 +15,7 @@ export default function AuthenticationPage() {
     <main className="relative min-h-screen overflow-hidden bg-[#050b14] text-zinc-100 selection:bg-cyan-400/30">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-0 h-[36rem] w-[36rem] rounded-full bg-cyan-500/15 blur-3xl" />
-        <div className="absolute -right-24 bottom-0 h-[34rem] w-[34rem] rounded-full bg-emerald-500/15 blur-3xl" />
+        <div className="absolute -right-24 bottom-0 h-[34rem] w-[34rem] rounded-full bg-white/15 blur-3xl" />
         <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:26px_26px]" />
       </div>
 
@@ -53,7 +53,7 @@ export default function AuthenticationPage() {
 
             <div className="mt-10 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <ShieldCheck className="mb-3 h-5 w-5 text-emerald-300" />
+                <ShieldCheck className="mb-3 h-5 w-5 text-white" />
                 <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Security</p>
                 <p className="mt-1 text-sm text-zinc-100">Protected sessions and encrypted auth flow.</p>
               </div>

@@ -101,13 +101,13 @@ const COLOR_MAPS = {
   ],
   lime: ["bg-lime-100", "bg-lime-200", "bg-lime-300", "bg-lime-400", "bg-lime-500", "bg-lime-600", "bg-lime-700"],
   green: [
-    "bg-green-100",
-    "bg-green-200",
-    "bg-green-300",
-    "bg-green-400",
-    "bg-green-500",
-    "bg-green-600",
-    "bg-green-700",
+    "bg-white/10",
+    "bg-white/10",
+    "bg-white/10",
+    "bg-white/10",
+    "bg-white/10",
+    "bg-white/10",
+    "bg-white/10",
   ],
 } as const
 

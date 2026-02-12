@@ -1,34 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/server/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { assertAdminAccess, toErrorResponse } from '@/server/authz'
 
 export async function GET(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const adminDomains = process.env.ADMIN_EMAIL_DOMAINS?.split(',') || []
-    const isAdmin = adminDomains.some((domain) =>
-      user.email?.toLowerCase().endsWith(domain.toLowerCase())
-    )
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    await assertAdminAccess(requestId)
 
     const { searchParams } = new URL(req.url)
     const reportType = searchParams.get('type') || 'overview'
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
 
-    const dateFilter: any = {}
+    const dateFilter: { gte?: Date; lte?: Date } = {}
     if (startDate) {
       dateFilter.gte = new Date(startDate)
     }
@@ -48,14 +33,14 @@ export async function GET(req: NextRequest) {
       case 'transactions':
         return await generateTransactionReport(dateFilter)
       default:
-        return NextResponse.json({ error: 'Invalid report type' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Invalid report type', code: 'INVALID_REPORT_TYPE', requestId },
+          { status: 400 }
+        )
     }
   } catch (error) {
     logger.error('[Admin Reports] Failed to generate report', { error })
-    return NextResponse.json(
-      { error: 'Failed to generate report' },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }
 

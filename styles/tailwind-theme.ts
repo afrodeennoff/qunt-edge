@@ -28,11 +28,11 @@ const config: Config = {
           disabled: 'hsl(var(--fg-disabled))',
         },
         accent: {
-          teal: 'hsl(var(--accent-teal))',
-          'teal-hover': 'hsl(var(--accent-teal-hover))',
-          'teal-active': 'hsl(var(--accent-teal-active))',
-          'teal-subtle': 'hsl(var(--accent-teal-subtle))',
-          'teal-glow': 'hsl(var(--accent-teal-glow))',
+          neutral: 'hsl(var(--accent-neutral))',
+          'neutral-hover': 'hsl(var(--accent-neutral-hover))',
+          'neutral-active': 'hsl(var(--accent-neutral-active))',
+          'neutral-subtle': 'hsl(var(--accent-neutral-subtle))',
+          'neutral-glow': 'hsl(var(--accent-neutral-glow))',
         },
         neutral: {
           50: 'hsl(var(--neutral-50))',

@@ -144,14 +144,14 @@ export default function DashboardBehaviorPage() {
 
   return (
     <div className="w-full space-y-6 p-3 sm:p-4 lg:p-6">
-      <Card className="rounded-3xl border border-border/60 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-sky-500/10 shadow-sm backdrop-blur-sm">
+      <Card className="rounded-3xl border border-border/60 bg-gradient-to-r from-white/10 via-white/10 to-white/5 shadow-sm backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-emerald-500" />
+                <Brain className="h-5 w-5 text-white" />
                 <CardTitle className="text-xl md:text-2xl">Behavior AI Hub</CardTitle>
-                <Badge variant="secondary" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-300">
+                <Badge variant="secondary" className="border-white/20 text-white dark:text-white">
                   <Sparkles className="mr-1 h-3.5 w-3.5" />
                   AI
                 </Badge>
@@ -343,7 +343,7 @@ export default function DashboardBehaviorPage() {
                   <div key={module.badge} className="rounded-xl border border-border/70 bg-background/60 p-3">
                     <p className="text-sm font-medium flex items-center gap-2">
                       {module.achieved ? (
-                        <CircleCheck className="h-4 w-4 text-emerald-400" />
+                        <CircleCheck className="h-4 w-4 text-white" />
                       ) : (
                         <CircleX className="h-4 w-4 text-muted-foreground" />
                       )}
@@ -363,7 +363,7 @@ export default function DashboardBehaviorPage() {
           {recommendationList.length > 0 ? (
             <section className="rounded-2xl border border-border/70 bg-card/75 p-4 md:p-6">
               <div className="mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-emerald-500" />
+                <Sparkles className="h-4 w-4 text-white" />
                 <h3 className="text-base font-semibold">AI Recommendations</h3>
               </div>
               <div className="space-y-2">

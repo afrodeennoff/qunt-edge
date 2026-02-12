@@ -172,7 +172,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
         )}
       >
         <div className="flex items-center justify-between w-full">
@@ -210,7 +210,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                       <span
                         className={cn(
                           "text-[9px] uppercase font-black tracking-widest cursor-pointer transition-all",
-                          displayMode === "ticks" ? "text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "text-white/20 hover:text-white/40"
+                          displayMode === "ticks" ? "text-white drop-shadow-none" : "text-white/20 hover:text-white/40"
                         )}
                         onClick={() => setDisplayMode("ticks")}
                       >
@@ -220,7 +220,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                       <span
                         className={cn(
                           "text-[9px] uppercase font-black tracking-widest cursor-pointer transition-all",
-                          displayMode === "points" ? "text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "text-white/20 hover:text-white/40"
+                          displayMode === "points" ? "text-white drop-shadow-none" : "text-white/20 hover:text-white/40"
                         )}
                         onClick={() => setDisplayMode("points")}
                       >
@@ -307,7 +307,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === "small" ? "p-1" : "p-2 sm:p-4"
+          size === "small" ? "p-1" : "p-2 sm:p-3"
         )}
       >
         <div className="w-full h-full flex flex-col justify-center gap-4">
@@ -325,7 +325,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
               <span
                 className={cn(
                   "font-black tracking-tighter tabular-nums",
-                  progress.current >= progress.target && progress.target > 0 ? "text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" : "text-white",
+                  progress.current >= progress.target && progress.target > 0 ? "text-white drop-shadow-none" : "text-white",
                   size === "small" ? "text-2xl" : "text-4xl"
                 )}
               >
@@ -422,7 +422,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                 <span
                   className={cn(
                     "font-black tabular-nums transition-all",
-                    isOverTarget ? "text-white text-lg scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" : "text-white/60",
+                    isOverTarget ? "text-white text-lg scale-110 drop-shadow-none" : "text-white/60",
                     size === "small" ? "text-xs" : "text-sm"
                   )}
                 >
@@ -437,7 +437,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                 )}
                 indicatorClassName={cn(
                   "transition-all duration-700",
-                  isOverTarget ? "bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]" : "bg-white/40"
+                  isOverTarget ? "bg-white shadow-none" : "bg-white/40"
                 )}
               />
             </div>

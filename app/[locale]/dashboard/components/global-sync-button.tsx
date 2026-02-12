@@ -111,7 +111,7 @@ export function GlobalSyncButton() {
                     className={cn(
                         "group relative flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-300",
                         isAnySyncing
-                            ? "bg-teal-500/10 border-teal-500/30 text-teal-400 cursor-wait"
+                            ? "bg-white/10 border-white/25 text-white cursor-wait"
                             : "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/10"
                     )}
                 >
@@ -122,7 +122,7 @@ export function GlobalSyncButton() {
                         )} />
                         {isAnySyncing && (
                             <motion.div
-                                className="absolute inset-0 bg-teal-400/20 blur-sm rounded-full"
+                                className="absolute inset-0 bg-white/10 blur-sm rounded-full"
                                 animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
                                 transition={{ duration: 2, repeat: Infinity }}
                             />
@@ -134,7 +134,7 @@ export function GlobalSyncButton() {
                             {isAnySyncing ? "Syncing" : "Sync"}
                         </span>
                         {!isAnySyncing && (rithmicAutoEnabled || tradovate.enableAutoSync) && (
-                            <span className="text-[7px] text-teal-500/70 font-bold group-hover:text-teal-400 transition-colors">
+                            <span className="text-[7px] text-white/70 font-bold group-hover:text-white transition-colors">
                                 AUTO ON
                             </span>
                         )}
@@ -142,7 +142,7 @@ export function GlobalSyncButton() {
 
                     {/* Background Glow when syncing */}
                     {isAnySyncing && (
-                        <div className="absolute inset-0 rounded-lg bg-teal-500/5 blur-md -z-10" />
+                        <div className="absolute inset-0 rounded-lg bg-white/5 blur-md -z-10" />
                     )}
                 </button>
             </DropdownMenuTrigger>
@@ -150,7 +150,7 @@ export function GlobalSyncButton() {
                 <DropdownMenuLabel className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white uppercase tracking-widest">Sync Status</span>
                     {isAnySyncing ? (
-                        <Badge variant="outline" className="bg-teal-500/10 text-teal-500 border-teal-500/20 text-[8px] animate-pulse">Syncing...</Badge>
+                        <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-[8px] animate-pulse">Syncing...</Badge>
                     ) : (
                         <Badge variant="outline" className="bg-white/5 text-zinc-500 border-white/5 text-[8px]">Standby</Badge>
                     )}
@@ -168,7 +168,7 @@ export function GlobalSyncButton() {
                         <Switch
                             checked={rithmicAutoEnabled}
                             onCheckedChange={setRithmicAutoEnabled}
-                            className="data-[state=checked]:bg-teal-500"
+                            className="data-[state=checked]:bg-white"
                         />
                     </div>
 
@@ -181,7 +181,7 @@ export function GlobalSyncButton() {
                         <Switch
                             checked={tradovate.enableAutoSync}
                             onCheckedChange={tradovate.setEnableAutoSync}
-                            className="data-[state=checked]:bg-teal-500"
+                            className="data-[state=checked]:bg-white"
                         />
                     </div>
                 </div>

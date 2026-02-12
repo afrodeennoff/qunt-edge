@@ -351,7 +351,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                   <div className="flex items-center gap-2">
                     <div className={`px-2 py-1 rounded text-xs font-medium ${
                       user.statistics.totalPnL >= 0 
-                        ? 'bg-green-100 text-green-800' 
+                        ? 'bg-white/10 text-white' 
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {user.statistics.totalPnL >= 0 ? '+' : ''}{user.statistics.totalPnL.toFixed(2)}
@@ -389,7 +389,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.avgWin')}:</span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-white">
                         {user.statistics.averageWin.toFixed(2)}
                       </span>
                     </div>
@@ -397,7 +397,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                   <div className="space-y-1">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.wins')}:</span>
-                      <span className="font-medium text-green-600">{user.statistics.winningTrades}</span>
+                      <span className="font-medium text-white">{user.statistics.winningTrades}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.losses')}:</span>

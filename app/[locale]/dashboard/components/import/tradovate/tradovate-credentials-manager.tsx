@@ -332,7 +332,7 @@ export function TradovateCredentialsManager() {
                     className={`px-2 py-1 rounded text-xs ${
                       isExpired
                         ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                        : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : "bg-white/10 text-white dark:bg-white/10 dark:text-white"
                     }`}
                   >
                     {isExpired

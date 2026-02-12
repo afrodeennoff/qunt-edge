@@ -116,7 +116,7 @@ export default function TeamJoinPage() {
       case 'pending':
         return <Badge variant="secondary">{t('teams.management.pending')}</Badge>
       case 'accepted':
-        return <Badge variant="default" className="bg-green-500">{t('teams.invitations.accepted')}</Badge>
+        return <Badge variant="default" className="bg-white/10">{t('teams.invitations.accepted')}</Badge>
       case 'expired':
         return <Badge variant="destructive">{t('teams.invitations.expired')}</Badge>
       default:
@@ -129,7 +129,7 @@ export default function TeamJoinPage() {
       case 'pending':
         return <AlertCircle className="h-5 w-5 text-yellow-500" />
       case 'accepted':
-        return <CheckCircle className="h-5 w-5 text-green-500" />
+        return <CheckCircle className="h-5 w-5 text-white" />
       case 'expired':
         return <XCircle className="h-5 w-5 text-red-500" />
       default:
@@ -272,7 +272,7 @@ export default function TeamJoinPage() {
                   <span className="text-muted-foreground">{t('teams.join.details.expiresOn')}</span>
                   <span className={cn(
                     "text-sm",
-                    isExpired ? "text-red-500" : "text-green-500"
+                    isExpired ? "text-red-500" : "text-white"
                   )}>
                     {formatDate(invitation.expiresAt)}
                   </span>

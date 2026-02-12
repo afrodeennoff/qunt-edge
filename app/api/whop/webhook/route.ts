@@ -2,37 +2,49 @@ import { NextRequest, NextResponse } from "next/server";
 import { webhookService } from "@/server/webhook-service";
 import { whop } from "@/lib/whop";
 import { logger } from "@/lib/logger";
+import type { ErrorResponse } from "@/server/authz";
 
 export async function POST(req: NextRequest) {
+    const requestId = crypto.randomUUID();
     const requestBodyText = await req.text();
     const headers = Object.fromEntries(req.headers);
 
     let event;
     try {
         event = whop.webhooks.unwrap(requestBodyText, { headers });
-    } catch (err: any) {
+    } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown signature verification error";
         logger.error('[Webhook] Signature verification failed', {
-            error: err.message,
-            stack: err.stack,
-            headers: JSON.stringify(headers)
+            requestId,
+            error: message,
+            stack: err instanceof Error ? err.stack : undefined,
         });
 
-        return NextResponse.json(
-            { message: `Webhook Error: Signature verification failed. Check logs for details.` },
-            { status: 400 }
-        );
+        const response: ErrorResponse = {
+            error: "Webhook signature verification failed",
+            code: "WEBHOOK_SIGNATURE_INVALID",
+            requestId,
+        };
+        return NextResponse.json(response, { status: 400 });
     }
 
-    logger.info('[Webhook] Event received', { eventType: event.type, eventId: event.id });
+    logger.info('[Webhook] Event received', { requestId, eventType: event.type, eventId: event.id });
 
     const result = await webhookService.processWebhook(event);
 
     if (result.success || result.alreadyProcessed) {
-        return NextResponse.json({ message: "Received" }, { status: 200 });
+        return NextResponse.json({ message: "Received", requestId }, { status: 200 });
     } else {
-        return NextResponse.json(
-            { message: result.error || "Processing failed" },
-            { status: 500 }
-        );
+        logger.error('[Webhook] Processing failed', {
+            requestId,
+            eventType: result.eventType,
+            error: result.error,
+        });
+        const response: ErrorResponse = {
+            error: result.error || "Processing failed",
+            code: "WEBHOOK_PROCESSING_FAILED",
+            requestId,
+        };
+        return NextResponse.json(response, { status: 500 });
     }
 }

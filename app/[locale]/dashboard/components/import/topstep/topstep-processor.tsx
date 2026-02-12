@@ -189,7 +189,7 @@ export default function TopstepProcessor({ headers, csvData, processedTrades, se
                                         <TableCell>
                                             {trade.closeDate ? formatInTimeZone(new Date(trade.closeDate), timezone, 'yyyy-MM-dd HH:mm:ss') : '-'}
                                         </TableCell>
-                                        <TableCell className={trade.pnl ? trade.pnl < 0 ? 'text-red-600' : 'text-green-600' : ''}>
+                                        <TableCell className={trade.pnl ? trade.pnl < 0 ? 'text-red-600' : 'text-white' : ''}>
                                             {trade.pnl?.toFixed(2)}
                                         </TableCell>
                                         <TableCell>{trade.commission?.toFixed(2)}</TableCell>
@@ -201,7 +201,7 @@ export default function TopstepProcessor({ headers, csvData, processedTrades, se
                     <div className="flex justify-between">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-                            <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
                                 {totalPnL.toFixed(2)}
                             </p>
                         </div>

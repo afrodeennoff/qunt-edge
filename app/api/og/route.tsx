@@ -118,12 +118,12 @@ export async function GET(req: NextRequest) {
   const waveHeight = height * 0.15;
   const waveY = height - waveHeight;
 
-  // Build a path along the teal wave, then down to the bottom to create a filled area
+  // Build a path along the wave, then down to the bottom to create a filled area
   const waveGradient = ctx.createLinearGradient(0, waveY, 0, height);
   waveGradient.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
   waveGradient.addColorStop(1, '#0a5a50');
 
-  // Create path for filled area beneath the teal wave
+  // Create path for filled area beneath the wave
   ctx.beginPath();
   ctx.moveTo(0, waveY);
   for (let x = 0; x <= width; x += 5) {

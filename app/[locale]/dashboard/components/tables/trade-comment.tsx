@@ -117,7 +117,7 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
                   className={cn(
                     "w-full px-3 py-2 text-sm bg-transparent border rounded min-h-[100px]",
                     "focus:outline-hidden focus:ring-2 focus:ring-primary resize-none transition-all duration-200",
-                    showSuccess && "border-green-500 ring-2 ring-green-500/20",
+                    showSuccess && "border-white/40 ring-2 ring-white/20",
                     isUpdating && "border-primary/50"
                   )}
                 />
@@ -127,7 +127,7 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
                   </div>
                 )}
                 {showSuccess && !isUpdating && (
-                  <div className="absolute right-2 top-2 text-green-500 animate-in fade-in zoom-in duration-300">
+                  <div className="absolute right-2 top-2 text-white animate-in fade-in zoom-in duration-300">
                     <svg
                       className="h-4 w-4"
                       fill="none"

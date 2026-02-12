@@ -18,7 +18,7 @@ export default function ReferralPage() {
     {
       title: t('referral.landing.requirement1Title'),
       description: t('referral.landing.requirement1Description'),
-      icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
+      icon: <CheckCircle2 className="w-5 h-5 text-white" />,
     },
     {
       title: t('referral.landing.requirement2Title'),

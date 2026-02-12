@@ -393,7 +393,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                   {index > 2 ? (
                     <X className="h-4 w-4 text-red-500 mr-2 mt-1 shrink-0" />
                   ) : (
-                    <Check className="h-4 w-4 text-green-500 mr-2 mt-1 shrink-0" />
+                    <Check className="h-4 w-4 text-white mr-2 mt-1 shrink-0" />
                   )}
                   <span className="text-sm">{feature}</span>
                 </li>
@@ -512,7 +512,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                   {t('pricing.lifetimeAccess')}
                   <Badge
                     variant="secondary"
-                    className="uppercase tracking-wide text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-amber-500/40 dark:border-emerald-500/50"
+                    className="uppercase tracking-wide text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-700 dark:bg-white/10 dark:text-white border border-amber-500/40 dark:border-white/20"
                   >
                     {t('pricing.limitedTimeOffer')}
                   </Badge>
@@ -581,7 +581,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
             <ul className="space-y-2">
               {plan.features.map((feature, index) => (
                 <li key={index} className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 mt-1 shrink-0" />
+                  <Check className="h-4 w-4 text-white mr-2 mt-1 shrink-0" />
                   <span className="text-sm">{feature}</span>
                 </li>
               ))}

@@ -297,7 +297,7 @@ export function SubscriberTable() {
                         <div className="text-sm text-gray-600">Processed</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{lastInferenceResults.summary.totalUpdated}</div>
+                        <div className="text-2xl font-bold text-white">{lastInferenceResults.summary.totalUpdated}</div>
                         <div className="text-sm text-gray-600">Updated</div>
                       </div>
                       <div className="text-center">
@@ -423,7 +423,7 @@ export function SubscriberTable() {
                     </TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        subscriber.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        subscriber.isActive ? "bg-white/10 text-white" : "bg-red-100 text-red-800"
                       }`}>
                         {subscriber.isActive ? "Active" : "Inactive"}
                       </span>

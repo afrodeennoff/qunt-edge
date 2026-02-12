@@ -211,7 +211,7 @@ export function NewsletterEditor() {
             <Button 
               type="button"
               variant="default"
-              className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white"
+              className="flex-1 bg-white/10 hover:bg-white/10 dark:bg-white/10 dark:hover:bg-white/10 text-white"
               onClick={handleSend}
               disabled={loading || generating || !content.subject}
             >

@@ -103,7 +103,7 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
               <div className={cn(
                 "text-center text-xs font-semibold px-1 py-0.5 rounded transition-colors",
                 monthlyPnl > 0 
-                  ? "text-green-700 dark:text-green-400 bg-green-50/50 dark:bg-green-950/30" 
+                  ? "text-white dark:text-white bg-white/10 dark:bg-white/5" 
                   : monthlyPnl < 0 
                     ? "text-red-600 dark:text-red-400/90 bg-red-50/50 dark:bg-red-950/30" 
                     : "text-muted-foreground bg-muted/20"
@@ -165,7 +165,7 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
                           "flex flex-col items-center justify-center border rounded p-1 min-h-12 flex-1 cursor-pointer",
                           "transition-all duration-200 hover:scale-[1.02] hover:shadow-xs",
                           pnl > 0 
-                            ? "bg-green-50/80 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-100 dark:border-green-900/50" 
+                            ? "bg-white/10 dark:bg-white/5 text-white dark:text-white border-white/20 dark:border-white/15" 
                             : pnl < 0 
                               ? "bg-red-50/60 dark:bg-red-950/30 text-red-600 dark:text-red-400/90 border-red-100/80 dark:border-red-900/40" 
                               : "bg-muted/20 dark:bg-muted/10 text-muted-foreground border-border"
@@ -188,7 +188,7 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
                           </h4>
                           <div className={cn(
                             "text-sm font-semibold",
-                            pnl > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                            pnl > 0 ? "text-white dark:text-white" : "text-red-600 dark:text-red-400"
                           )}>
                             {formatCurrency(pnl)}
                           </div>
@@ -210,7 +210,7 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
                                       </div>
                                       <div className={cn(
                                         "text-sm font-semibold",
-                                        dayPnl > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                                        dayPnl > 0 ? "text-white dark:text-white" : "text-red-600 dark:text-red-400"
                                       )}>
                                         {formatCurrency(dayPnl)}
                                       </div>
@@ -231,7 +231,7 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
                                           </div>
                                           <div className={cn(
                                             "text-sm font-semibold",
-                                            Number(trade.pnl) > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                                            Number(trade.pnl) > 0 ? "text-white dark:text-white" : "text-red-600 dark:text-red-400"
                                           )}>
                                             {formatCurrency(Number(trade.pnl))}
                                           </div>

@@ -133,7 +133,7 @@ export default function CommissionsPnLChart({
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-          size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
+          size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
         )}
       >
         <div className="flex items-center justify-between w-full">

@@ -94,7 +94,7 @@ export function DashboardHeader() {
     return (
         <header className="sticky top-0 z-50 overflow-hidden border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl" data-dashboard-header="true">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
-            <div className="relative min-h-[72px] flex flex-wrap items-center justify-between gap-3 px-3 py-2 md:px-8">
+            <div className="relative min-h-14 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground" />
@@ -115,7 +115,7 @@ export function DashboardHeader() {
                 </div>
 
                 {/* Right Side: Actions & Configuration */}
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
 
                     {/* Global Utilities Group */}
                     <div className="flex items-center gap-1 rounded-xl bg-white/[0.02] px-1 py-0.5">
@@ -151,7 +151,7 @@ export function DashboardHeader() {
                                 className={cn(
                                     "relative group flex h-8 items-center gap-2 px-3 rounded-lg transition-all duration-300",
                                     isCustomizing
-                                        ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
+                                        ? "bg-primary text-primary-foreground shadow-none"
                                         : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                                 )}
                             >

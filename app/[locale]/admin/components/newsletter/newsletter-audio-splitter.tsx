@@ -266,7 +266,7 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
                   </button>
                   <button
                     onClick={() => downloadSegment(segment)}
-                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors"
+                    className="p-2 text-white dark:text-white hover:bg-white/10 dark:hover:bg-white/10 rounded-md transition-colors"
                     title="Download"
                   >
                     <Download className="w-4 h-4" />

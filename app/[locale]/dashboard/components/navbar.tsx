@@ -48,14 +48,14 @@ export default function Navbar() {
   const currentLayout = layouts || { desktop: [], mobile: [] }
 
   return (
-    <div className="sticky top-0 z-40 w-full px-3 sm:px-6 py-3 sm:py-4 pointer-events-none">
+    <div className="sticky top-0 z-40 w-full px-4 sm:px-6 py-2.5 pointer-events-none">
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="pointer-events-auto flex flex-col glass-strong rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300"
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
+        <div className="flex items-center justify-between px-4 sm:px-6 h-14">
 
           {/* Left Side: Sidebar Toggle & Brand */}
           <div className="flex items-center gap-4">
@@ -72,7 +72,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
 
             {/* Config Group */}
-            <div className="flex items-center gap-1.5 p-1.5 bg-black/40 backdrop-blur-2xl rounded-[1.5rem] border border-white/5">
+            <div className="flex items-center gap-2 p-1.5 bg-black/40 backdrop-blur-2xl rounded-[1.5rem] border border-white/5">
               <Button
                 id="customize-mode"
                 variant="ghost"
@@ -81,7 +81,7 @@ export default function Navbar() {
                 className={cn(
                   "h-9 w-auto px-3 sm:px-4 gap-2 rounded-xl transition-all duration-500",
                   isCustomizing
-                    ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)] font-bold"
+                    ? "bg-white text-black shadow-none font-bold"
                     : "text-fg-muted"
                 )}
               >
@@ -126,7 +126,7 @@ export default function Navbar() {
 
                 {!isPlusUser() && (
                   <Link href="/dashboard/billing">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-gradient-to-br from-amber-400/20 via-orange-500/10 to-transparent border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
+                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-white/5 border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-none hover:bg-white/10">
                       <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                       <span>Elite</span>
                     </Button>

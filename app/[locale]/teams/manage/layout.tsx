@@ -6,7 +6,7 @@ import { TeamsSidebar } from "../components/teams-sidebar"
 
 export default function TeamManageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full bg-background selection:bg-accent-teal/20 selection:text-foreground">
+    <div className="flex min-h-screen w-full bg-background selection:bg-white/20 selection:text-foreground">
       <TeamsSidebar />
 
       <SidebarInset className="relative flex-1 overflow-hidden">

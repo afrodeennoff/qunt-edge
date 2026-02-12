@@ -13,7 +13,7 @@ export default function Qualification() {
             viewport={{ once: true }}
             className="p-16 bg-[#080808]"
           >
-            <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-teal-500 mb-10 mono">Ideal Candidate</h3>
+            <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-white mb-10 mono">Ideal Candidate</h3>
             <ul className="space-y-6">
               {[
                 "Discretionary traders seeking institutional structure",
@@ -22,7 +22,7 @@ export default function Qualification() {
                 "Traders tired of self-deception and PnL noise"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-4 text-zinc-200">
-                  <span className="text-teal-500 mt-1">✓</span>
+                  <span className="text-white mt-1">✓</span>
                   <span className="text-sm font-medium leading-relaxed tracking-tight">{item}</span>
                 </li>
               ))}

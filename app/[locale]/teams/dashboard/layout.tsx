@@ -5,7 +5,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // If no teams found, show the default dashboard with a message
     return (
-        <div className="flex min-h-screen w-full bg-background selection:bg-accent-teal/20 selection:text-foreground">
+        <div className="flex min-h-screen w-full bg-background selection:bg-white/20 selection:text-foreground">
             <TeamsSidebar />
 
             <SidebarInset className="flex-1 relative overflow-hidden">

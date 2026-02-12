@@ -61,7 +61,7 @@
 
 @utility react-grid-item {
   &.react-grid-placeholder {
-    @apply !bg-accent/40 !border-2 !border-dashed !border-accent !rounded-lg !opacity-100 !transition-all !duration-200 !backdrop-blur-xs !shadow-[0_0_0_1px_hsl(var(--accent)/0.4)] !origin-center;
+    @apply !bg-accent/40 !border-2 !border-dashed !border-accent !rounded-lg !opacity-100 !transition-all !duration-200 !backdrop-blur-xs !origin-center;
   }
 
   &.react-draggable-dragging {
@@ -88,7 +88,7 @@
 
 @utility react-grid-placeholder {
   &.react-grid-item {
-    @apply !bg-accent/40 !border-2 !border-dashed !border-accent !rounded-lg !opacity-100 !transition-all !duration-200 !backdrop-blur-xs !shadow-[0_0_0_1px_hsl(var(--accent)/0.4)] !origin-center;
+    @apply !bg-accent/40 !border-2 !border-dashed !border-accent !rounded-lg !opacity-100 !transition-all !duration-200 !backdrop-blur-xs !origin-center;
   }
 }
 
@@ -186,7 +186,7 @@
     --chart-tooltip-border: 0 0% 15%;
     --precision-cobalt: 0 0% 100%;
     --precision-cobalt-rgb: 255 255 255;
-    --accent-teal-rgb: 255 255 255;
+    --accent-neutral-rgb: 255 255 255;
     --rose-500-rgb: 100 100 100;
     --precision-panel: 0 0% 2%;
     --precision-panel-elevated: 0 0% 4%;
@@ -563,19 +563,6 @@
     animation: terminal-cursor-blink 1s steps(1, end) infinite;
   }
 
-  .precision-glow-sweep {
-    overflow: hidden;
-  }
-
-  .precision-glow-sweep::after {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    transform: translateX(-130%);
-    background: linear-gradient(100deg, transparent 0%, hsl(var(--precision-cobalt) / 0.14) 48%, transparent 100%);
-    animation: precision-glow-sweep 900ms ease-out 1 forwards;
-  }
 
   .no-select {
     -webkit-user-select: none;
@@ -750,7 +737,6 @@
       scroll-behavior: auto !important;
     }
 
-    .precision-glow-sweep::after,
     .terminal-cursor::after {
       animation: none !important;
     }
@@ -766,18 +752,6 @@
 
   50%,
   100% {
-    opacity: 0;
-  }
-}
-
-@keyframes precision-glow-sweep {
-  0% {
-    transform: translateX(-130%);
-    opacity: 0.8;
-  }
-
-  100% {
-    transform: translateX(130%);
     opacity: 0;
   }
 }

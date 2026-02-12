@@ -48,7 +48,7 @@ export function BotMessage({ children, status }: { children: React.ReactNode, st
       <div className="flex flex-col gap-2">
         <div className="text-pretty wrap-break-word max-w-[95%] bg-[#0D0D0D] p-5 rounded-lg border border-white/[0.03] shadow-none">
           {content}
-          {status === "streaming" ? <span className="terminal-cursor text-[#225AEB]" aria-hidden /> : null}
+          {status === "streaming" ? <span className="terminal-cursor text-white" aria-hidden /> : null}
         </div>
         {typeof children === "string" && status === "ready" && (
           <Button

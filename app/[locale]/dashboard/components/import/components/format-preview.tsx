@@ -592,7 +592,7 @@ export function FormatPreview({
             <Tooltip>
               <TooltipTrigger>
                 <div className="flex items-center gap-1">
-                  <span className={pnl >= 0 ? "text-green-600" : "text-red-600"}>
+                  <span className={pnl >= 0 ? "text-white" : "text-red-600"}>
                     ${pnl.toFixed(2)}
                   </span>
                   {isMismatch && (
@@ -731,14 +731,14 @@ export function FormatPreview({
           </div>
           {isAutoProcessing && (
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-600 font-medium">{t('import.processing.autoProcessing')}</span>
+              <div className="w-2 h-2 bg-white/10 rounded-full animate-pulse"></div>
+              <span className="text-xs text-white font-medium">{t('import.processing.autoProcessing')}</span>
             </div>
           )}
           {!isAutoProcessing && completedBatches.size === totalBatches && totalBatches > 0 && (
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-xs text-green-600 font-medium">{t('import.processing.allBatchesCompleted')}</span>
+              <div className="w-2 h-2 bg-white/10 rounded-full"></div>
+              <span className="text-xs text-white font-medium">{t('import.processing.allBatchesCompleted')}</span>
             </div>
           )}
         </div>
@@ -747,7 +747,7 @@ export function FormatPreview({
             <Button
               onClick={startProcessing}
               disabled={isProcessing}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-white/10 hover:bg-white/10 text-white"
             >
               {isProcessing ? t('import.processing.starting') : t('import.processing.startProcessing')}
             </Button>
@@ -886,7 +886,7 @@ export function FormatPreview({
                       {t('trade-table.footer.totalPnl')}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      <span className={totals.totalPnl >= 0 ? "text-green-600" : "text-red-600"}>
+                      <span className={totals.totalPnl >= 0 ? "text-white" : "text-red-600"}>
                         ${totals.totalPnl.toFixed(2)}
                       </span>
                     </TableCell>
@@ -900,7 +900,7 @@ export function FormatPreview({
                       {t('trade-table.footer.netPnl')}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      <span className={totals.netPnl >= 0 ? "text-green-600" : "text-red-600"}>
+                      <span className={totals.netPnl >= 0 ? "text-white" : "text-red-600"}>
                         ${totals.netPnl.toFixed(2)}
                       </span>
                     </TableCell>

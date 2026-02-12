@@ -229,7 +229,7 @@ export default function EnhancedInput({
           "border-input bg-background",
           confirmed && value ? "scale-[1.02] duration-300" : "",
           isValid === false ? "border-destructive" : "",
-          isValid === true ? "border-green-500" : "",
+          isValid === true ? "border-white/40" : "",
         )}
       >
         <Input
@@ -248,7 +248,7 @@ export default function EnhancedInput({
             "text-foreground",
             "placeholder:text-muted-foreground",
             isValid === false ? "text-destructive" : "",
-            isValid === true ? "text-green-500" : "",
+            isValid === true ? "text-white" : "",
           )}
         />
         <div className="absolute right-0 flex items-center pr-2">

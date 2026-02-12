@@ -783,7 +783,7 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel precision-glow-sweep liquid-panel liquid-panel-hover widget-modern-frame",
+                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel liquid-panel liquid-panel-hover widget-modern-frame",
                       !shouldReduceMotion && activeWidgetId === widget.i && "widget-breathe",
                       isCustomizing
                         ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_rgba(0,0,0,0.95)]"

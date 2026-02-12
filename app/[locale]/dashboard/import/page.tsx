@@ -213,7 +213,7 @@ export default function ImportCallbackPage() {
               <Loader2 className="h-5 w-5 animate-spin" />
             )}
             {status === "success" && (
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-white" />
             )}
             {status === "error" && <XCircle className="h-5 w-5 text-red-600" />}
             {t("tradovateSync.callback.title")}
@@ -236,7 +236,7 @@ export default function ImportCallbackPage() {
 
           {status === "success" && (
             <div className="text-center space-y-2">
-              <CheckCircle className="h-12 w-12 text-green-600 mx-auto" />
+              <CheckCircle className="h-12 w-12 text-white mx-auto" />
               <p className="text-sm text-muted-foreground">
                 {t("tradovateSync.callback.redirecting")}
               </p>

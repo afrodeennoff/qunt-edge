@@ -169,7 +169,7 @@ export default function WeekdayPNLChart({
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center",
+          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
         )}
       >
         <div className="flex items-center justify-between w-full">
@@ -213,7 +213,7 @@ export default function WeekdayPNLChart({
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === "small" ? "p-1" : "p-2 sm:p-4",
+          size === "small" ? "p-1" : "p-2 sm:p-3",
         )}
       >
         <div className="w-full h-full cursor-pointer" onClick={handleClick}>
@@ -271,13 +271,13 @@ export default function WeekdayPNLChart({
                   {weekdayData.map((entry) => (
                     <Cell
                       key={`cell-${entry.day}`}
-                      fill={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      fill={entry.pnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
                       fillOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
                           : 0.8
                       }
-                      stroke={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      stroke={entry.pnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
                       strokeOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3

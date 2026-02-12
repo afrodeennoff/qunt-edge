@@ -108,7 +108,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
 
   function getColorByWinRate(winRate: number): string {
     if (winRate === 0) return "rgba(255,255,255,0.2)"
-    return winRate >= 50 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"
+    return winRate >= 50 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -176,7 +176,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-          size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-4 h-14 justify-center"
+          size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
         )}
       >
         <div className="flex items-center justify-between w-full">
@@ -220,7 +220,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === 'small' ? "p-1" : "p-2 sm:p-4"
+          size === 'small' ? "p-1" : "p-2 sm:p-3"
         )}
       >
         <div
@@ -292,9 +292,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.range}`}
-                      fill={entry.avgPnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      fill={entry.avgPnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
                       fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : 0.8)}
-                      stroke={entry.avgPnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      stroke={entry.avgPnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
                       strokeOpacity={timeRange.range === entry.range ? 1 : 0.5}
                       className="hover:opacity-100"
                     />

@@ -1,7 +1,9 @@
 import type { NextConfig } from 'next';
 import createMDX from '@next/mdx';
+import { fileURLToPath } from 'node:url';
 
 const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/+$/, '');
+const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -108,6 +110,9 @@ const nextConfig: NextConfig = {
     '/app/api/**': [  // For App Router API routes (your auth callback)
       '**/node_modules/.prisma/client/**',
     ],
+  },
+  turbopack: {
+    root: workspaceRoot,
   },
 }
 

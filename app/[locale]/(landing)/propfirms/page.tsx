@@ -55,16 +55,16 @@ function renderPropfirmCard(
           <h3 className="text-sm font-semibold mb-3">{t('landing.propfirms.payouts.title')}</h3>
           <div className="space-y-3">
             {/* Paid - Highlighted */}
-            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30">
+            <div className="p-3 rounded-lg bg-white/10 dark:bg-white/10 border border-white/20 dark:border-white/20">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                <span className="text-sm font-medium text-white dark:text-white">
                   {t('landing.propfirms.payouts.paid.label')}
                 </span>
-                <span className="text-sm font-bold text-green-700 dark:text-green-300">
+                <span className="text-sm font-bold text-white dark:text-white">
                   {formatCurrency(paidAmount)}
                 </span>
               </div>
-              <p className="text-xs text-green-700/70 dark:text-green-300/70">
+              <p className="text-xs text-white dark:text-white">
                 {t('landing.propfirms.payouts.count', { count: paidCount })}
               </p>
             </div>

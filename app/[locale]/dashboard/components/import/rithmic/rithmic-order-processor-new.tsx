@@ -447,7 +447,7 @@ export default function RithmicOrderProcessor({ csvData, headers, processedTrade
           <div className="flex justify-between px-2 py-4">
             <div>
               <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
                 {totalPnL.toFixed(2)}
               </p>
             </div>

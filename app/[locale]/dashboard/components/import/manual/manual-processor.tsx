@@ -205,7 +205,7 @@ export default function ManualProcessor({ processedTrades, setProcessedTrades, a
                         <TableCell>{trade.closePrice || '-'}</TableCell>
                         <TableCell>{trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}</TableCell>
                         <TableCell>{trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}</TableCell>
-                        <TableCell className={trade.pnl && trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        <TableCell className={trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-red-600'}>
                           {trade.pnl?.toFixed(2)}
                         </TableCell>
                         <TableCell>
@@ -241,7 +241,7 @@ export default function ManualProcessor({ processedTrades, setProcessedTrades, a
               <div className="flex justify-between px-2 py-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">{t('import.manual.totalPnL')}</h3>
-                  <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
                     {totalPnL.toFixed(2)}
                   </p>
                 </div>

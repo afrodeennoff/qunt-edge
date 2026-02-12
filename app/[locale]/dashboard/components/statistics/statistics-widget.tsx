@@ -171,7 +171,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
   }, [])
 
   return (
-    <Card variant="matte" className="h-full flex flex-col precision-glow-sweep" ref={cardRef}>
+    <Card variant="matte" className="h-full flex flex-col" ref={cardRef}>
       <CardHeader
         className={cn(
           "flex-none border-b border-white/10",

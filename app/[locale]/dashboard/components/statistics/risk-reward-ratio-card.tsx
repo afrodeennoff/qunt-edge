@@ -77,7 +77,7 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
               <Progress
                 value={profitPercentage}
                 className="h-1 bg-white/5"
-                indicatorClassName="bg-white shadow-[0_0_10px_rgba(255,255,255,0.45)]"
+                indicatorClassName="bg-white shadow-none"
               />
             </div>
           </TooltipTrigger>

@@ -30,6 +30,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Clean Build Artifacts
+        run: npm run clean:build-artifacts
+
       - name: Typecheck
         run: npm run typecheck
 

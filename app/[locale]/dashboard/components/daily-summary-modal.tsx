@@ -415,8 +415,8 @@ export function DailySummaryModal() {
                                     className={cn(
                                         "h-full rounded-full relative transition-all duration-700 ease-out",
                                         stats.total.pnl < 0
-                                            ? "bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.2)]"
-                                            : "bg-gradient-to-r from-white/60 via-white to-white/80 shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+                                            ? "bg-white/20 shadow-none"
+                                            : "bg-gradient-to-r from-white/60 via-white to-white/80 shadow-none"
                                     )}
                                 >
                                     {/* Premium Shimmer Overlay */}
@@ -482,7 +482,7 @@ function AnalysisBadge({ icon, label, value, theme, progress }: { icon: any, lab
                         <circle cx="22" cy="22" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-white/5" />
                         <motion.circle cx="22" cy="22" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" strokeDasharray={125.6} initial={{ strokeDashoffset: 125.6 }} animate={{ strokeDashoffset: 125.6 - (125.6 * progress) / 100 }} transition={{ duration: 2.5, ease: "circOut" }} className={theme.primary} />
                     </svg>
-                    <div className={cn("relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]", theme.primary)}>{icon}</div>
+                    <div className={cn("relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-none", theme.primary)}>{icon}</div>
                 </div>
                 <div className={cn("text-xl font-black tracking-tighter tabular-nums mb-1 leading-none shadow-sm", theme.primary)}>{value}</div>
                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20">{label}</span>

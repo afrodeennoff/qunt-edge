@@ -644,7 +644,7 @@ export default function QuantowerOrderProcessor({ csvData, headers, processedTra
                     <TableCell>{trade.closePrice || '-'}</TableCell>
                     <TableCell>{trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}</TableCell>
                     <TableCell>{trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}</TableCell>
-                    <TableCell className={(trade.pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                    <TableCell className={(trade.pnl || 0) >= 0 ? 'text-white' : 'text-red-600'}>
                       {(trade.pnl || 0).toFixed(2)}
                     </TableCell>
                     <TableCell>{trade.timeInPosition ? `${Math.floor(trade.timeInPosition / 60)}m ${Math.floor(trade.timeInPosition % 60)}s` : '-'}</TableCell>
@@ -658,7 +658,7 @@ export default function QuantowerOrderProcessor({ csvData, headers, processedTra
           <div className="flex justify-between px-2 py-4">
             <div>
               <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
                 {totalPnL.toFixed(2)}
               </p>
             </div>

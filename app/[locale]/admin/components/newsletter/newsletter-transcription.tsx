@@ -237,7 +237,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
                   onClick={downloadTranscription}
                   variant="outline"
                   size="sm"
-                  className="text-green-600 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-900/20"
+                  className="text-white dark:text-white border-white/20 dark:border-white/20 hover:bg-white/10 dark:hover:bg-white/10"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger

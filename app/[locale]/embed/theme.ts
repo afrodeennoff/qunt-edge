@@ -53,7 +53,7 @@ export const THEME_PRESETS: Record<string, EmbedThemeVars> = {
   
       // chart palette
       '--chart-1': '199 89% 48%', // cyan
-      '--chart-2': '201 79% 35%', // teal/dark cyan
+      '--chart-2': '201 79% 35%', // secondary chart tone
       '--chart-3': '217 91% 60%', // blue
       '--chart-4': '187 92% 42%', // green-cyan
       '--chart-5': '231 48% 48%', // indigo

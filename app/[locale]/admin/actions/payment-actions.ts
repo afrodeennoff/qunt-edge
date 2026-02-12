@@ -1,28 +1,12 @@
 'use server'
 
-import { createClient } from '@/server/auth'
 import { paymentService } from '@/server/payment-service'
 import { subscriptionManager } from '@/server/subscription-manager'
+import { assertAdminAccess, logAdminMutation } from '@/server/authz'
 import { revalidatePath } from 'next/cache'
 
 export async function getTransactionsAction(options?: { limit?: number; offset?: number; status?: string }) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // TODO: Add proper admin check here
-    if (!user) {
-        throw new Error('Unauthorized')
-    }
-
-    // querying all transactions for admin view would typically require a different method
-    // but for now we'll simulate it or reuse the service if it supported admin listing
-    // Since paymentService.getTransactionHistory is scoped to a userId, we might need a new method in service
-    // or use direct prisma call here for admin privileges.
-
-    // For safety/speed in this demo, let's assume we want to see *all* transactions
-    // We'll need to add a method to paymentService or access prisma directly if we are admin.
-    // Let's stick to adding a method in payment-service.ts if possible, but since we can't edit it easily without "multi_replace" 
-    // and we want to keep it clean, let's do a direct prisma call here assuming we are in a trusted server action.
+    const admin = await assertAdminAccess()
 
     const { prisma } = await import('@/lib/prisma')
 
@@ -40,6 +24,12 @@ export async function getTransactionsAction(options?: { limit?: number; offset?:
             }
         })
 
+        logAdminMutation({
+            action: 'list-transactions',
+            actor: admin,
+            details: { limit: options?.limit || 50, offset: options?.offset || 0 }
+        })
+
         return { success: true, transactions }
     } catch (error) {
         console.error('Error fetching transactions:', error)
@@ -48,12 +38,7 @@ export async function getTransactionsAction(options?: { limit?: number; offset?:
 }
 
 export async function refundTransactionAction(transactionId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        throw new Error('Unauthorized')
-    }
+    const admin = await assertAdminAccess()
 
     const result = await paymentService.processRefund({
         transactionId,
@@ -61,6 +46,11 @@ export async function refundTransactionAction(transactionId: string) {
     })
 
     if (result.success) {
+        logAdminMutation({
+            action: 'refund-transaction',
+            actor: admin,
+            target: transactionId
+        })
         revalidatePath('/admin')
     }
 
@@ -68,12 +58,7 @@ export async function refundTransactionAction(transactionId: string) {
 }
 
 export async function getSubscriptionsAction() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        throw new Error('Unauthorized')
-    }
+    const admin = await assertAdminAccess()
 
     const { prisma } = await import('@/lib/prisma')
 
@@ -90,6 +75,12 @@ export async function getSubscriptionsAction() {
             }
         })
 
+        logAdminMutation({
+            action: 'list-subscriptions',
+            actor: admin,
+            details: { limit: 50 }
+        })
+
         return { success: true, subscriptions }
     } catch (error) {
         console.error('Error fetching subscriptions:', error)
@@ -98,12 +89,7 @@ export async function getSubscriptionsAction() {
 }
 
 export async function cancelSubscriptionAction(userId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        throw new Error('Unauthorized')
-    }
+    const admin = await assertAdminAccess()
 
     const result = await subscriptionManager.cancelSubscription({
         userId,
@@ -112,6 +98,11 @@ export async function cancelSubscriptionAction(userId: string) {
     })
 
     if (result.success) {
+        logAdminMutation({
+            action: 'cancel-subscription',
+            actor: admin,
+            target: userId
+        })
         revalidatePath('/admin')
     }
 

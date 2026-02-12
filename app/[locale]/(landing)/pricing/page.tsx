@@ -14,7 +14,7 @@ export default function PricingPage() {
 
   return (
     <div>
-      <main className="container mx-auto px-4 py-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
         <h1 className="text-4xl font-bold text-center mb-4">
           {t("pricing.heading")}
         </h1>
