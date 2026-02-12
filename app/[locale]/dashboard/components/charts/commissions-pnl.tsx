@@ -29,12 +29,11 @@ interface CommissionsPnLChartProps {
 function CommissionsTooltip({
   active,
   payload,
-  t,
 }: {
   active?: boolean;
   payload?: Array<{ payload: { name: string; value: number; raw: number } }>;
-  t: (key: string) => string;
 }) {
+  const t = useI18n();
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -202,7 +201,7 @@ export default function CommissionsPnLChart({
                       ))}
                     </Pie>
                     <Tooltip
-                      content={<CommissionsTooltip t={t} />}
+                      content={<CommissionsTooltip />}
                       cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                     />
                   </PieChart>
