@@ -7,10 +7,8 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Legend,
-  Label,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
@@ -26,6 +24,49 @@ import { useI18n } from "@/locales/client";
 
 interface CommissionsPnLChartProps {
   size?: WidgetSize;
+}
+
+function CommissionsTooltip({
+  active,
+  payload,
+  t,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: { name: string; value: number; raw: number } }>;
+  t: (key: string) => string;
+}) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+        <div className="flex flex-col mb-2 border-b border-white/5 pb-1">
+          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            {t("commissions.tooltip.type")}
+          </span>
+          <span className="font-black text-white text-[11px] uppercase tracking-widest">
+            {data.name}
+          </span>
+        </div>
+        <div className="flex flex-col mb-2">
+          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            {t("commissions.tooltip.amount")}
+          </span>
+          <span className={cn(
+            "font-black text-sm",
+            data.raw >= 0 ? "text-white" : "text-white/40"
+          )}>{formatCurrency(data.raw)}</span>
+        </div>
+        <div className="flex flex-col pt-2 border-t border-white/5">
+          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            {t("commissions.tooltip.percentage")}
+          </span>
+          <span className="font-black text-white/60 text-[11px]">
+            {data.value.toFixed(2)}%</span>
+        </div>
+      </div>
+    );
+  }
+  return null;
 }
 
 
@@ -77,55 +118,15 @@ export default function CommissionsPnLChart({
   const hasData = chartData.some((item) => item.value > 0);
 
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: any }> }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-          <div className="flex flex-col mb-2 border-b border-white/5 pb-1">
-            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
-              {t("commissions.tooltip.type")}
-            </span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">
-              {data.name}
-            </span>
-          </div>
-          <div className="flex flex-col mb-2">
-            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
-              {t("commissions.tooltip.amount")}
-            </span>
-            <span className={cn(
-              "font-black text-sm",
-              data.raw >= 0 ? "text-white" : "text-white/40"
-            )}>{formatCurrency(data.raw)}</span>
-          </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
-              {t("commissions.tooltip.percentage")}
-            </span>
-            <span className="font-black text-white/60 text-[11px]">
-              {data.value.toFixed(2)}%</span>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{value}</span>;
-  };
-
-
-  // Scale pie by widget size to avoid large dead space in taller cards.
+  // Keep donut visually centered and larger to avoid dead space.
   const pieLayout = React.useMemo(() => {
     if (size === "small") {
-      return { innerRadius: "48%", outerRadius: "72%", cy: "46%", legendPaddingTop: 0 };
+      return { innerRadius: "56%", outerRadius: "92%", cy: "50%" };
     }
     if (size === "large" || size === "extra-large") {
-      return { innerRadius: "60%", outerRadius: "88%", cy: "45%", legendPaddingTop: 4 };
+      return { innerRadius: "64%", outerRadius: "96%", cy: "50%" };
     }
-    return { innerRadius: "56%", outerRadius: "84%", cy: "45%", legendPaddingTop: 6 };
+    return { innerRadius: "62%", outerRadius: "95%", cy: "50%" };
   }, [size]);
 
   return (
@@ -165,53 +166,56 @@ export default function CommissionsPnLChart({
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === 'small' ? "p-1" : "p-2 sm:p-3"
+          size === 'small' ? "p-0.5" : "p-1"
         )}
       >
-        <div className="w-full h-full">
+        <div className="w-full h-full flex min-h-0 flex-col">
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy={pieLayout.cy}
-                  innerRadius={pieLayout.innerRadius}
-                  outerRadius={pieLayout.outerRadius}
-                  paddingAngle={2}
-                  dataKey="value"
-                  nameKey="name"
-                  startAngle={90}
-                  endAngle={-270}
-                  stroke="rgba(0,0,0,0)"
-                  strokeWidth={1}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
-                      fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.8 : 0.4}
-                      className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
+            <>
+              <div className="min-h-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy={pieLayout.cy}
+                      innerRadius={pieLayout.innerRadius}
+                      outerRadius={pieLayout.outerRadius}
+                      paddingAngle={2}
+                      dataKey="value"
+                      nameKey="name"
+                      startAngle={90}
+                      endAngle={-270}
+                      stroke="rgba(0,0,0,0)"
+                      strokeWidth={1}
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
+                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.88 : 0.42}
+                          className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={<CommissionsTooltip t={t} />}
+                      cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                     />
-                  ))}
-                </Pie>
-                <Legend
-                  verticalAlign="bottom"
-                  align="center"
-                  iconSize={8}
-                  iconType="circle"
-                  formatter={renderColorfulLegendText}
-                  wrapperStyle={{
-                    paddingTop: pieLayout.legendPaddingTop,
-                    paddingBottom: 0
-                  }}
-                />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex items-center justify-center gap-4 pb-1 text-[9px] font-black uppercase tracking-widest text-white/40">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                  {t("commissions.legend.netPnl")}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-white/30" />
+                  {t("commissions.legend.commissions")}
+                </span>
+              </div>
+            </>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
               No data available

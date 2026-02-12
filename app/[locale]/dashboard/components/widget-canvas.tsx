@@ -380,7 +380,6 @@ export default function WidgetCanvas() {
     layouts: contextLayouts
   } = useDashboard()
   const [isUserAction, setIsUserAction] = useState(false)
-  const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null)
   const t = useI18n()
   const shouldReduceMotion = useReducedMotion()
 
@@ -772,8 +771,6 @@ export default function WidgetCanvas() {
                       }
                   }
                   whileHover={shouldReduceMotion || isCustomizing ? undefined : { scale: 1.01 }}
-                  onHoverStart={() => setActiveWidgetId(widget.i)}
-                  onHoverEnd={() => setActiveWidgetId((current) => (current === widget.i ? null : current))}
                 >
                   <WidgetWrapper
                     onRemove={() => removeWidget(widget.i)}
@@ -783,13 +780,12 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel liquid-panel liquid-panel-hover widget-modern-frame",
-                      !shouldReduceMotion && activeWidgetId === widget.i && "widget-breathe",
+                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
                       isCustomizing
                         ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_rgba(0,0,0,0.95)]"
-                        : "bg-[hsl(var(--precision-panel)/0.88)] backdrop-blur-md hover:border-[hsl(var(--precision-cobalt)/0.5)] hover:shadow-[0_20px_38px_-30px_rgba(0,0,0,0.95)]"
+                        : "bg-black/95 hover:border-white/20"
                     )}>
-                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.06] via-white/[0.02] to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
                       <div className="relative h-full w-full">
                         {renderWidget(widget)}
                       </div>
