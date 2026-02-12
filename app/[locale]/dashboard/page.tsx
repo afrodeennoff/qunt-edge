@@ -24,28 +24,24 @@ export default function Home() {
   const activeTab = searchParams.get("tab") || "widgets";
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-72px)] px-3 pb-4 pt-2 sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3 overflow-hidden">
-      {/* Background Layers */}
-      <div className="dashboard-mesh-layer" />
-      <div className="dashboard-texture-layer" />
-
+    <div className="relative w-full min-h-[calc(100vh-72px)] px-3 pb-4 pt-2 sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3">
       <Tabs value={activeTab} className="w-full h-full relative z-10">
         <TabsContent
           value="table"
-          className="mt-0 h-[calc(100vh-150px)] sm:h-[calc(100vh-160px)] lg:h-[calc(100vh-176px)] p-2 sm:p-3 outline-hidden"
+          className="mt-0 h-[calc(100vh-150px)] sm:h-[calc(100vh-160px)] lg:h-[calc(100vh-176px)] outline-hidden"
         >
           <TradeTableReview />
         </TabsContent>
 
-        <TabsContent value="accounts" className="mt-0 p-2 sm:p-3 outline-hidden">
+        <TabsContent value="accounts" className="mt-0 outline-hidden">
           <AccountsOverview size="large" />
         </TabsContent>
 
-        <TabsContent value="chart" className="mt-0 p-2 sm:p-3 outline-hidden">
+        <TabsContent value="chart" className="mt-0 outline-hidden">
           <ChartTheFuturePanel />
         </TabsContent>
 
-        <TabsContent value="widgets" className="mt-0 px-2 pb-3 pt-0 sm:px-3 sm:pb-4 sm:pt-0 outline-hidden">
+        <TabsContent value="widgets" className="mt-0 outline-hidden">
           <WidgetCanvas />
         </TabsContent>
       </Tabs>

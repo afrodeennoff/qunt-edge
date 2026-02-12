@@ -194,7 +194,7 @@ function AssistantPanel() {
 
 export function ChartTheFuturePanel() {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[hsl(var(--qe-surface-0))] p-3 text-slate-100 sm:p-4">
+    <div className="text-slate-100">
       <TopNav title="Chart the Future" />
 
       <div className="grid gap-3 xl:grid-cols-[1.9fr_1fr]">
