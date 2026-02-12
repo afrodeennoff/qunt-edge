@@ -179,7 +179,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base"
               )}
             >
@@ -190,7 +190,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
                     )}
                   />
@@ -206,21 +206,21 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
               <TooltipProvider>
                 <UITooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1.5 p-1 rounded-md bg-white/5 border border-white/5">
+                    <div className="flex items-center gap-1.5 p-1 rounded-md bg-white/[0.03] border border-white/5">
                       <span
                         className={cn(
-                          "text-[10px] uppercase font-bold tracking-wider cursor-pointer transition-colors",
-                          displayMode === "ticks" ? "text-white" : "text-fg-muted hover:text-fg-secondary"
+                          "text-[9px] uppercase font-black tracking-widest cursor-pointer transition-all",
+                          displayMode === "ticks" ? "text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "text-white/20 hover:text-white/40"
                         )}
                         onClick={() => setDisplayMode("ticks")}
                       >
                         {t("widgets.dailyTickTarget.displayMode.ticks")}
                       </span>
-                      <div className="h-3 w-[1px] bg-white/10" />
+                      <div className="h-2.5 w-[1px] bg-white/10" />
                       <span
                         className={cn(
-                          "text-[10px] uppercase font-bold tracking-wider cursor-pointer transition-colors",
-                          displayMode === "points" ? "text-white" : "text-fg-muted hover:text-fg-secondary"
+                          "text-[9px] uppercase font-black tracking-widest cursor-pointer transition-all",
+                          displayMode === "points" ? "text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "text-white/20 hover:text-white/40"
                         )}
                         onClick={() => setDisplayMode("points")}
                       >
@@ -312,50 +312,50 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
       >
         <div className="w-full h-full flex flex-col justify-center gap-4">
           {/* Current vs Target Display */}
-          <div className="flex items-center justify-around w-full px-4 py-2 bg-white/5 rounded-lg border border-white/5">
+          <div className="flex items-center justify-around w-full px-4 py-3 bg-white/[0.03] rounded-lg border border-white/5">
             <div className="flex flex-col items-center gap-1">
               <span
                 className={cn(
-                  "text-fg-muted uppercase tracking-widest font-bold",
-                  size === "small" ? "text-[10px]" : "text-[11px]"
+                  "text-white/20 uppercase tracking-[0.2em] font-black",
+                  size === "small" ? "text-[8px]" : "text-[9px]"
                 )}
               >
                 {t("widgets.dailyTickTarget.current")}
               </span>
               <span
                 className={cn(
-                  "font-black tracking-tight tabular-nums",
-                  progress.current >= progress.target && progress.target > 0 ? "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" : "text-fg-primary",
+                  "font-black tracking-tighter tabular-nums",
+                  progress.current >= progress.target && progress.target > 0 ? "text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" : "text-white",
                   size === "small" ? "text-2xl" : "text-4xl"
                 )}
               >
                 {Math.round(convertToDisplayValue(progress.current))}
-                <span className="text-sm font-bold ml-1 text-fg-muted uppercase opacity-50">
+                <span className="text-[10px] font-black ml-1 text-white/20 uppercase tracking-widest">
                   {getDisplayUnit()}
                   {progress.current !== 1 ? "s" : ""}
                 </span>
               </span>
             </div>
 
-            <div className="h-8 w-[1px] bg-white/10" />
+            <div className="h-10 w-[1px] bg-white/10" />
 
             <div className="flex flex-col items-center gap-1">
               <span
                 className={cn(
-                  "text-fg-muted uppercase tracking-widest font-bold",
-                  size === "small" ? "text-[10px]" : "text-[11px]"
+                  "text-white/20 uppercase tracking-[0.2em] font-black",
+                  size === "small" ? "text-[8px]" : "text-[9px]"
                 )}
               >
                 {t("widgets.dailyTickTarget.target")}
               </span>
               <span
                 className={cn(
-                  "font-black tracking-tight tabular-nums text-fg-secondary",
+                  "font-black tracking-tighter tabular-nums text-white/40",
                   size === "small" ? "text-2xl" : "text-4xl"
                 )}
               >
                 {Math.round(convertToDisplayValue(progress.target))}
-                <span className="text-sm font-bold ml-1 text-fg-muted uppercase opacity-50">
+                <span className="text-[10px] font-black ml-1 text-white/10 uppercase tracking-widest">
                   {getDisplayUnit()}
                   {progress.target !== 1 ? "s" : ""}
                 </span>
@@ -390,14 +390,14 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
               <div className="flex flex-col">
                 <span
                   className={cn(
-                    "text-[10px] uppercase font-bold tracking-wider text-fg-muted",
+                    "text-[10px] uppercase font-bold tracking-wider text-white/20",
                   )}
                 >
                   {t("widgets.dailyTickTarget.negative")}
                 </span>
                 <span
                   className={cn(
-                    "font-black text-fg-muted tabular-nums",
+                    "font-black text-white/40 tabular-nums",
                     size === "small" ? "text-sm" : "text-lg"
                   )}
                 >
@@ -414,15 +414,15 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
               <div className="flex justify-between items-center">
                 <span
                   className={cn(
-                    "text-fg-muted text-[10px] uppercase font-bold tracking-wider",
+                    "text-white/20 text-[10px] uppercase font-bold tracking-wider",
                   )}
                 >
                   {t("widgets.dailyTickTarget.progress")}
                 </span>
                 <span
                   className={cn(
-                    "font-black tabular-nums",
-                    isOverTarget ? "text-white" : "text-fg-primary",
+                    "font-black tabular-nums transition-all",
+                    isOverTarget ? "text-white text-lg scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" : "text-white/60",
                     size === "small" ? "text-xs" : "text-sm"
                   )}
                 >
@@ -433,10 +433,11 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                 value={progress.percentage}
                 className={cn(
                   "h-1.5 bg-white/5",
-                  isOverTarget ? "bg-white/20" : ""
+                  isOverTarget ? "bg-white/10" : ""
                 )}
                 indicatorClassName={cn(
-                  isOverTarget ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" : "bg-fg-secondary"
+                  "transition-all duration-700",
+                  isOverTarget ? "bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]" : "bg-white/40"
                 )}
               />
             </div>
@@ -444,12 +445,12 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
 
           {/* No target set message */}
           {!isTargetSet && (
-            <div className="flex flex-col items-center gap-2 text-center py-2 opacity-50">
-              <Target className="h-6 w-6 text-fg-muted" />
+            <div className="flex flex-col items-center gap-2 text-center py-2 opacity-20">
+              <Target className="h-6 w-6 text-white" />
               <span
                 className={cn(
-                  "text-fg-muted font-medium",
-                  size === "small" ? "text-xs" : "text-sm"
+                  "text-white font-black uppercase tracking-widest",
+                  size === "small" ? "text-[10px]" : "text-xs"
                 )}
               >
                 {t("widgets.dailyTickTarget.noTargetSet")}

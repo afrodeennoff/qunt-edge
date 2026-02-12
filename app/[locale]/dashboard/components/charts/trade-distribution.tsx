@@ -51,37 +51,46 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'rgb(var(--accent-teal-rgb))', count: nbWin },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'rgba(255,255,255,0.2)', count: nbBe },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'rgb(var(--rose-500-rgb))', count: nbLoss }
+      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'white', count: nbWin },
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'rgba(255,255,255,0.1)', count: nbBe },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'rgba(255,255,255,0.3)', count: nbLoss }
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
   const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span className="text-[10px] uppercase font-bold tracking-wider text-fg-muted">{value}</span>;
+    return <span className="text-[9px] uppercase font-black tracking-widest text-white/40">{value}</span>;
   }
+
+  const pieLayout = React.useMemo(() => {
+    if (size === "small") {
+      return { innerRadius: "50%", outerRadius: "74%", cy: "46%", legendPaddingTop: 0 };
+    }
+    if (size === "large" || size === "extra-large") {
+      return { innerRadius: "60%", outerRadius: "88%", cy: "45%", legendPaddingTop: 4 };
+    }
+    return { innerRadius: "56%", outerRadius: "84%", cy: "45%", legendPaddingTop: 6 };
+  }, [size]);
 
   const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-1">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex flex-col mb-1 border-b border-white/5 pb-1">
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
               {t('tradeDistribution.tooltip.type')}
             </span>
-            <span className="font-bold text-fg-primary text-xs">
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">
               {data.name}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
               {t('tradeDistribution.tooltip.percentage')}
             </span>
             <span className={cn(
               "font-black text-sm tabular-nums",
-              data.name.includes("Win") ? "text-accent-teal" :
-                data.name.includes("Loss") ? "text-rose-500" : "text-fg-secondary"
+              data.color === 'white' ? "text-white" : "text-white/40"
             )}>
               {data.value.toFixed(2)}%
             </span>
@@ -104,7 +113,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base"
               )}
             >
@@ -115,7 +124,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
                     )}
                   />
@@ -131,7 +140,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === 'small' ? "p-1" : "p-2 sm:p-4"
+          size === 'small' ? "p-1" : "p-2 sm:p-3"
         )}
       >
         <div className="w-full h-full">
@@ -141,9 +150,9 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 <Pie
                   data={chartData}
                   cx="50%"
-                  cy="50%"
-                  innerRadius={size === 'small' ? "55%" : "60%"}
-                  outerRadius={size === 'small' ? "75%" : "80%"}
+                  cy={pieLayout.cy}
+                  innerRadius={pieLayout.innerRadius}
+                  outerRadius={pieLayout.outerRadius}
                   paddingAngle={3}
                   dataKey="value"
                   startAngle={90}
@@ -154,7 +163,8 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
-                      className="transition-all duration-300 ease-in-out hover:opacity-100 opacity-90 stroke-background stroke-2"
+                      fillOpacity={entry.color === 'white' ? 0.8 : 0.4}
+                      className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
                     />
                   ))}
                   <Label
@@ -162,7 +172,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                     content={({ viewBox }: any) => {
                       if (!viewBox || !viewBox.cx || !viewBox.cy) return null;
                       const { cx, cy } = viewBox;
-                      const centerText = Math.round(chartData[0].value) + "%"; // Win rate in center
+                      const centerText = Math.round(chartData[0].value) + "%";
 
                       return (
                         <text
@@ -170,11 +180,9 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                           y={cy}
                           textAnchor="middle"
                           dominantBaseline="central"
-                          className="fill-fg-primary font-black text-xl drop-shadow-lg"
                         >
-                          {/* Optional: Show Win Rate in center? Or just leave clean? */}
-                          {/* <tspan x={cx} dy="-0.5em" className="text-xs uppercase fill-fg-muted font-bold tracking-wider">Win Rate</tspan> */}
-                          {/* <tspan x={cx} dy="1.2em" className="fill-accent-teal">{centerText}</tspan> */}
+                          <tspan x={cx} dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
+                          <tspan x={cx} dy="1.2em" className="fill-white font-black text-lg">{centerText}</tspan>
                         </text>
                       );
                     }}
@@ -183,12 +191,12 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 <Legend
                   verticalAlign="bottom"
                   align="center"
-                  iconSize={8}
+                  iconSize={6}
                   iconType="circle"
                   formatter={renderColorfulLegendText}
                   wrapperStyle={{
-                    paddingTop: size === 'small' ? 0 : 12,
-                    paddingBottom: size === 'small' ? 0 : 4
+                    paddingTop: pieLayout.legendPaddingTop,
+                    paddingBottom: 0
                   }}
                   layout="horizontal"
                 />
@@ -208,4 +216,3 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     </div>
   )
 }
-

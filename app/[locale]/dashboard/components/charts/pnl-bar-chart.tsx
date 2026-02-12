@@ -50,7 +50,7 @@ interface TooltipProps {
 const chartConfig = {
   pnl: {
     label: "Daily P/L",
-    color: "hsl(var(--chart-loss))",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -65,8 +65,8 @@ const formatCurrency = (value: number) => {
   return `${value < 0 ? "-" : ""}$${absValue.toFixed(0)}`;
 };
 
-const positiveColor = "rgb(var(--accent-teal-rgb))";
-const negativeColor = "rgb(var(--rose-500-rgb))";
+const positiveColor = "white";
+const negativeColor = "rgba(255,255,255,0.15)";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   const t = useI18n();
@@ -78,25 +78,26 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     const data = payload[0].payload;
     const date = new Date(data.date + "T00:00:00Z");
     return (
-      <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-        <p className="font-bold text-fg-primary text-xs mb-1">
+      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+        <p className="font-black text-white/40 text-[10px] uppercase tracking-widest mb-2 border-b border-white/5 pb-1">
           {formatInTimeZone(date, timezone, "MMM d, yyyy", {
             locale: dateLocale,
           })}
         </p>
-        <p
-          className={cn("font-black text-sm tabular-nums", data.pnl >= 0 ? "text-accent-teal" : "text-rose-500")}
-        >
-          {t("pnl.tooltip.pnl")}: {formatCurrency(data.pnl)}
-        </p>
-        <div className="grid grid-cols-2 gap-x-4 mt-2 pt-2 border-t border-white/5">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnl.tooltip.pnl")}</span>
+          <span className={cn("font-black text-sm tabular-nums text-white", data.pnl < 0 && "text-white/40")}>
+            {formatCurrency(data.pnl)}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 pt-2 border-t border-white/5">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">{t("pnl.tooltip.longTrades")}</span>
-            <span className="text-xs font-bold text-fg-primary">{data.longNumber}</span>
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-wider">{t("pnl.tooltip.longTrades")}</span>
+            <span className="text-[11px] font-black text-white/60">{data.longNumber}</span>
           </div>
           <div className="flex flex-col text-right">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">{t("pnl.tooltip.shortTrades")}</span>
-            <span className="text-xs font-bold text-fg-primary">{data.shortNumber}</span>
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-wider">{t("pnl.tooltip.shortTrades")}</span>
+            <span className="text-[11px] font-black text-white/60">{data.shortNumber}</span>
           </div>
         </div>
       </div>
@@ -235,10 +236,11 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.pnl >= 0 ? positiveColor : negativeColor}
-                      fillOpacity={0.8}
-                      stroke={entry.pnl >= 0 ? positiveColor : negativeColor}
+                      fillOpacity={entry.pnl >= 0 ? 0.6 : 1}
+                      stroke="white"
+                      strokeOpacity={entry.pnl >= 0 ? 0.4 : 0.1}
                       strokeWidth={1}
-                      className="hover:opacity-100"
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

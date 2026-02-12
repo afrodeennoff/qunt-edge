@@ -34,7 +34,7 @@ interface TimeInPositionChartProps {
 const chartConfig = {
   avgTimeInPosition: {
     label: "Average Time in Position",
-    color: "hsl(var(--chart-7))",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -224,9 +224,9 @@ export default function TimeInPositionChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="rgb(var(--accent-teal-rgb))"
-                      opacity={0.8}
-                      className="hover:opacity-100"
+                      fill="white"
+                      fillOpacity={0.6}
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

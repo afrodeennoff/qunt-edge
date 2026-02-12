@@ -34,7 +34,7 @@ interface PnLBySideChartProps {
 const chartConfig = {
   pnl: {
     label: "P/L",
-    color: "hsl(var(--chart-loss))",
+    color: "white",
   },
 } satisfies ChartConfig;
 
@@ -97,42 +97,33 @@ export default function PnLBySideChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlBySide.tooltip.side")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">{data.side}</span>
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
+            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.side")}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{data.side}</span>
           </div>
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {data.isAverage ? t("pnlBySide.tooltip.averageTotal") : "Total"}{" "}
-              P/L
-            </span>
-            <span className={cn(
-              "font-black text-sm",
-              data.pnl >= 0 ? "text-white" : "text-fg-muted"
-            )}>{formatCurrency(data.pnl)}</span>
-          </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlBySide.tooltip.winRate")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {((data.winCount / data.tradeCount) * 100).toFixed(1)}%
-            </span>
-          </div>
-          <div className="flex flex-col pt-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlBySide.tooltip.trades")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.tradeCount} {t("pnlBySide.tooltip.trades")} ({data.winCount}{" "}
-              {data.winCount === 1
-                ? t("pnlBySide.tooltip.wins")
-                : t("pnlBySide.tooltip.wins_plural")}
-              )
-            </span>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">
+                {data.isAverage ? t("pnlBySide.tooltip.averageTotal") : "Total"} P/L
+              </span>
+              <span className={cn(
+                "font-black text-[13px] tabular-nums",
+                data.pnl >= 0 ? "text-white" : "text-white/40"
+              )}>{formatCurrency(data.pnl)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.winRate")}</span>
+              <span className="font-black text-white/60 text-[11px]">
+                {((data.winCount / data.tradeCount) * 100).toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.trades")}</span>
+              <span className="font-black text-white/60 text-[11px]">
+                {data.tradeCount}
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -249,11 +240,12 @@ export default function PnLBySideChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      stroke={entry.pnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      strokeOpacity={1}
-                      fillOpacity={0.8}
-                      className="hover:opacity-100"
+                      fill="white"
+                      fillOpacity={entry.pnl >= 0 ? 0.6 : 0.15}
+                      stroke="white"
+                      strokeOpacity={entry.pnl >= 0 ? 0.4 : 0.1}
+                      strokeWidth={1}
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

@@ -22,35 +22,37 @@ export default function Home() {
   }, [searchParams]);
 
   const activeTab = searchParams.get("tab") || "widgets";
-  const panelShell = "rounded-2xl border border-white/10 bg-black/25 backdrop-blur-md";
+  const panelShell = "rounded-2xl border border-white/5 bg-black/40 backdrop-blur-xl liquid-panel";
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-72px)] px-3 pb-4 pt-2 sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3">
+    <div className="relative w-full min-h-[calc(100vh-72px)] px-3 pb-4 pt-2 sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3 overflow-hidden">
+      {/* Background Layers */}
+      <div className="dashboard-mesh-layer" />
+      <div className="dashboard-texture-layer" />
+
       <Tabs value={activeTab} className="w-full h-full relative z-10">
-
-
         <TabsContent
           value="table"
-          className="mt-0 h-[calc(100vh-150px)] sm:h-[calc(100vh-160px)] lg:h-[calc(100vh-176px)] p-2 sm:p-3"
+          className="mt-0 h-[calc(100vh-150px)] sm:h-[calc(100vh-160px)] lg:h-[calc(100vh-176px)] p-2 sm:p-3 outline-hidden"
         >
-          <div className={`${panelShell} h-full p-2 sm:p-3`}>
+          <div className={`${panelShell} h-full p-2 sm:p-3 overflow-hidden`}>
             <TradeTableReview />
           </div>
         </TabsContent>
 
-        <TabsContent value="accounts" className="mt-0 p-2 sm:p-3">
+        <TabsContent value="accounts" className="mt-0 p-2 sm:p-3 outline-hidden">
           <div className={`${panelShell} p-2 sm:p-3`}>
             <AccountsOverview size="large" />
           </div>
         </TabsContent>
 
-        <TabsContent value="chart" className="mt-0 p-2 sm:p-3">
+        <TabsContent value="chart" className="mt-0 p-2 sm:p-3 outline-hidden">
           <div className={`${panelShell} p-2 sm:p-3`}>
             <ChartTheFuturePanel />
           </div>
         </TabsContent>
 
-        <TabsContent value="widgets" className="mt-0 px-2 pb-3 pt-0 sm:px-3 sm:pb-4 sm:pt-0">
+        <TabsContent value="widgets" className="mt-0 px-2 pb-3 pt-0 sm:px-3 sm:pb-4 sm:pt-0 outline-hidden">
           <WidgetCanvas />
         </TabsContent>
       </Tabs>

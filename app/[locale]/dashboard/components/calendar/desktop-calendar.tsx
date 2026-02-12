@@ -184,7 +184,7 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
           variant="outline"
           className={cn(
             "h-4 px-1.5 text-[8px] sm:text-[9px] font-medium cursor-pointer relative z-0 w-auto justify-center items-center gap-1",
-            "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/30",
+            "bg-white/5 text-white border-white/10 hover:bg-white/10 dark:bg-white/5 dark:text-white dark:border-white/10 dark:hover:bg-white/15",
             "transition-all duration-200 ease-in-out",
             "hover:scale-110 hover:shadow-md",
             "active:scale-95"
@@ -196,7 +196,7 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
         </Badge>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[320px] sm:w-[380px] md:w-[420px] max-w-[90vw] p-0 z-50 border shadow-lg bg-card"
+        className="w-[320px] sm:w-[380px] md:w-[420px] max-w-[90vw] p-0 z-50 border shadow-lg bg-black/90 backdrop-blur-xl border-white/10"
         align="start"
         side="right"
         sideOffset={8}
@@ -205,21 +205,21 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
         <div className="p-4 sm:p-6">
           {/* Header */}
           <div className="flex items-center gap-2 mb-4 sm:mb-6">
-            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900">
-              <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 rounded-lg bg-white/5">
+              <Calendar className="h-4 w-4 text-white" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">{t('propFirm.renewal.title')}</h3>
-              <p className="text-xs text-muted-foreground">{renewals.length} {renewals.length === 1 ? t('propFirm.renewal.account') : t('propFirm.renewal.accounts')}</p>
+              <h3 className="font-semibold text-sm sm:text-base text-white truncate">{t('propFirm.renewal.title')}</h3>
+              <p className="text-xs text-white/50">{renewals.length} {renewals.length === 1 ? t('propFirm.renewal.account') : t('propFirm.renewal.accounts')}</p>
             </div>
           </div>
 
           {/* Account List with max height and scrolling */}
-          <div className="space-y-2 sm:space-y-3 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+          <div className="space-y-2 sm:space-y-3 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {renewals.map((account, index) => (
               <div
                 key={account.id}
-                className="group relative p-3 sm:p-4 rounded-lg border bg-card hover:bg-muted/50 hover:border-border transition-all duration-200 hover:shadow-xs"
+                className="group relative p-3 sm:p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-200 hover:shadow-xs"
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3">
                   {/* Account Info */}
@@ -227,17 +227,17 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                       {account.propfirm ? (
                         <>
-                          <div className="font-semibold text-sm text-foreground truncate">
+                          <div className="font-semibold text-sm text-white truncate">
                             {account.propfirm}
                           </div>
-                          <div className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full inline-block w-fit">
+                          <div className="text-xs text-white/60 bg-white/5 px-2 py-0.5 rounded-full inline-block w-fit">
                             <span className="block" title={account.number}>
                               {truncateAccountNumber(account.number, 12)}
                             </span>
                           </div>
                         </>
                       ) : (
-                        <div className="font-semibold text-sm text-foreground">
+                        <div className="font-semibold text-sm text-white">
                           <span className="block" title={account.number}>
                             {truncateAccountNumber(account.number, 18)}
                           </span>
@@ -245,13 +245,13 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-muted-foreground">
-                      <div className="px-2 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md font-medium whitespace-nowrap">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-white/50">
+                      <div className="px-2 py-1 bg-white/5 text-white/80 rounded-md font-medium whitespace-nowrap border border-white/5">
                         {account.paymentFrequency?.toLowerCase()} {t('propFirm.renewal.frequency')}
                       </div>
                       {account.autoRenewal && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-accent-teal/10 text-accent-teal rounded-md whitespace-nowrap">
-                          <div className="w-1.5 h-1.5 bg-accent-teal rounded-full shrink-0"></div>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-white/10 text-white rounded-md whitespace-nowrap border border-white/10">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full shrink-0 animate-pulse"></div>
                           <span className="text-xs font-medium">{t('propFirm.renewal.notification')}</span>
                         </div>
                       )}
@@ -260,17 +260,17 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
 
                   {/* Price */}
                   <div className="text-left sm:text-right shrink-0">
-                    <div className="font-bold text-base sm:text-lg text-blue-600 dark:text-blue-400 mb-1">
+                    <div className="font-bold text-base sm:text-lg text-white mb-1">
                       {account.price != null && formatCurrency(account.price, { maximumFractionDigits: 2 })}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-white/40">
                       {account.paymentFrequency?.toLowerCase()}
                     </div>
                   </div>
                 </div>
 
                 {/* Subtle hover effect line */}
-                <div className="absolute bottom-0 left-3 right-3 sm:left-4 sm:right-4 h-0.5 bg-linear-to-r from-blue-500/0 via-blue-500/50 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                <div className="absolute bottom-0 left-3 right-3 sm:left-4 sm:right-4 h- px-bg-linear-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
               </div>
             ))}
           </div>
@@ -595,14 +595,14 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                     <div
                       className={cn(
                         "h-full flex flex-col cursor-pointer transition-all rounded-none p-1",
-                        "ring-1 ring-border hover:ring-primary hover:z-10",
+                        "ring-1 ring-border hover:ring-white hover:z-10",
                         dayData && dayData.pnl >= 0
-                          ? "bg-accent-teal/5"
+                          ? "bg-white/[0.03]"
                           : dayData && dayData.pnl < 0
-                            ? "bg-rose-500/5"
+                            ? "bg-white/[0.01]"
                             : "bg-card",
                         !isCurrentMonth && "",
-                        isToday(date) && "ring-blue-500 bg-blue-500/5 z-10",
+                        isToday(date) && "ring-white bg-white/10 z-10",
                         index === 0 && "rounded-tl-lg",
                         index === 35 && "rounded-bl-lg",
                       )}
@@ -651,13 +651,13 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         {dayData && (
                           <>
                             <div className={cn(
-                              "text-[7px] sm:text-[9px] text-accent-teal truncate text-center",
+                              "text-[7px] sm:text-[9px] text-white/60 truncate text-center",
                               !isCurrentMonth && "opacity-50"
                             )}>
                               {t('calendar.maxProfit')}: {formatCurrency(maxProfit)}
                             </div>
                             <div className={cn(
-                              "text-[7px] sm:text-[9px] text-rose-500 truncate text-center",
+                              "text-[7px] sm:text-[9px] text-white/30 truncate text-center",
                               !isCurrentMonth && "opacity-50"
                             )}>
                               {t('calendar.maxDD')}: -{formatCurrency(maxDrawdown)}

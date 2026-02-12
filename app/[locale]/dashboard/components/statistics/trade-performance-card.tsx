@@ -28,17 +28,17 @@ export default function TradePerformanceCard({ size = 'medium' }: TradePerforman
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent-teal/10 border-accent-teal/20">
-        <TrendingUp className="h-3 w-3 text-accent-teal" />
-        <span className="font-terminal font-bold text-[11px] tabular-nums text-accent-teal">{winRate}%</span>
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/10 border-white/20">
+        <TrendingUp className="h-3 w-3 text-white" />
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-white">{winRate}%</span>
       </div>
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md">
-        <Minus className="h-3 w-3 text-fg-muted" />
-        <span className="font-terminal font-bold text-[11px] tabular-nums text-fg-muted">{beRate}%</span>
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border-white/10">
+        <Minus className="h-3 w-3 text-white/50" />
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-white/50">{beRate}%</span>
       </div>
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-500/10 border-rose-500/20">
-        <TrendingDown className="h-3 w-3 text-rose-500" />
-        <span className="font-terminal font-bold text-[11px] tabular-nums text-rose-500">{lossRate}%</span>
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/[0.02] border-white/5">
+        <TrendingDown className="h-3 w-3 text-white/30" />
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-white/30">{lossRate}%</span>
       </div>
       <TooltipProvider delayDuration={100}>
         <Tooltip>

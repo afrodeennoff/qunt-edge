@@ -47,7 +47,7 @@ interface PnLPerContractDailyChartProps {
 const chartConfig = {
   pnl: {
     label: "Avg Net P/L per Contract",
-    color: "hsl(var(--chart-loss))",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -158,7 +158,7 @@ export default function PnLPerContractDailyChart({
             </span>
             <span className={cn(
               "font-bold text-sm",
-              data.averagePnl >= 0 ? "text-accent-teal" : "text-rose-500"
+              data.averagePnl >= 0 ? "text-white" : "text-white/40"
             )}>{formatCurrency(data.averagePnl)}</span>
           </div>
           <div className="flex flex-col mb-2">
@@ -411,11 +411,11 @@ export default function PnLPerContractDailyChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.averagePnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      stroke={entry.averagePnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      strokeOpacity={1}
-                      fillOpacity={0.8}
-                      className="hover:opacity-100"
+                      fill={entry.averagePnl >= 0 ? "white" : "white"}
+                      stroke={entry.averagePnl >= 0 ? "white" : "white"}
+                      strokeOpacity={entry.averagePnl >= 0 ? 0.4 : 0.2}
+                      fillOpacity={entry.averagePnl >= 0 ? 0.6 : 0.15}
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

@@ -40,7 +40,7 @@ interface ContractQuantityChartProps {
 const chartConfig = {
   totalQuantity: {
     label: "Total Number of Contracts",
-    color: "hsl(var(--chart-loss))",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -219,9 +219,9 @@ export default function ContractQuantityChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="rgb(var(--accent-teal-rgb))"
-                      opacity={0.8}
-                      className="hover:opacity-100"
+                      fill="white"
+                      fillOpacity={0.6}
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

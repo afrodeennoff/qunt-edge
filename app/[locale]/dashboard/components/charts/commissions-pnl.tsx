@@ -32,11 +32,11 @@ interface CommissionsPnLChartProps {
 const chartConfig = {
   pnl: {
     label: "Net P/L",
-    color: "hsl(var(--chart-win))",
+    color: "white",
   },
   commissions: {
     label: "Commissions",
-    color: "hsl(var(--chart-loss))",
+    color: "rgba(255,255,255,0.2)",
   },
 } satisfies ChartConfig;
 
@@ -81,29 +81,29 @@ export default function CommissionsPnLChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex flex-col mb-2 border-b border-white/5 pb-1">
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
               {t("commissions.tooltip.type")}
             </span>
-            <span className="font-bold text-fg-primary text-xs">
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">
               {data.name}
             </span>
           </div>
           <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
               {t("commissions.tooltip.amount")}
             </span>
             <span className={cn(
-              "font-bold text-sm",
-              data.raw >= 0 ? "text-accent-teal" : "text-rose-500"
+              "font-black text-sm",
+              data.raw >= 0 ? "text-white" : "text-white/40"
             )}>{formatCurrency(data.raw)}</span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
               {t("commissions.tooltip.percentage")}
             </span>
-            <span className="font-bold text-fg-primary text-xs">
+            <span className="font-black text-white/60 text-[11px]">
               {data.value.toFixed(2)}%</span>
           </div>
         </div>
@@ -112,15 +112,21 @@ export default function CommissionsPnLChart({
     return null;
   };
 
-
   const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span className="text-[10px] font-medium text-fg-muted uppercase tracking-wider">{value}</span>;
+    return <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{value}</span>;
   };
 
 
-  // Pie radii for consistency with trade-distribution
-  const getInnerRadius = () => (size === 'small' ? 40 : 60);
-  const getOuterRadius = () => (size === 'small' ? 60 : 80);
+  // Scale pie by widget size to avoid large dead space in taller cards.
+  const pieLayout = React.useMemo(() => {
+    if (size === "small") {
+      return { innerRadius: "48%", outerRadius: "72%", cy: "46%", legendPaddingTop: 0 };
+    }
+    if (size === "large" || size === "extra-large") {
+      return { innerRadius: "60%", outerRadius: "88%", cy: "45%", legendPaddingTop: 4 };
+    }
+    return { innerRadius: "56%", outerRadius: "84%", cy: "45%", legendPaddingTop: 6 };
+  }, [size]);
 
   return (
     <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
@@ -159,7 +165,7 @@ export default function CommissionsPnLChart({
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === 'small' ? "p-1" : "p-2 sm:p-4"
+          size === 'small' ? "p-1" : "p-2 sm:p-3"
         )}
       >
         <div className="w-full h-full">
@@ -169,9 +175,9 @@ export default function CommissionsPnLChart({
                 <Pie
                   data={chartData}
                   cx="50%"
-                  cy="50%"
-                  innerRadius={getInnerRadius()}
-                  outerRadius={getOuterRadius()}
+                  cy={pieLayout.cy}
+                  innerRadius={pieLayout.innerRadius}
+                  outerRadius={pieLayout.outerRadius}
                   paddingAngle={2}
                   dataKey="value"
                   nameKey="name"
@@ -183,8 +189,9 @@ export default function CommissionsPnLChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.name === t("commissions.legend.netPnl") ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      className="transition-all duration-300 ease-in-out hover:opacity-100 opacity-80"
+                      fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
+                      fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.8 : 0.4}
+                      className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
                     />
                   ))}
                 </Pie>
@@ -195,7 +202,8 @@ export default function CommissionsPnLChart({
                   iconType="circle"
                   formatter={renderColorfulLegendText}
                   wrapperStyle={{
-                    paddingTop: size === 'small' ? 0 : 16
+                    paddingTop: pieLayout.legendPaddingTop,
+                    paddingBottom: 0
                   }}
                 />
                 <Tooltip

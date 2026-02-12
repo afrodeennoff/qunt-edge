@@ -74,14 +74,14 @@ const formatCurrency = (value: number) =>
 
 function getChartColorByIndex(index: number): string {
   const paletteVars = [
-    "hsl(var(--chart-loss))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-win))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))",
-    "hsl(var(--chart-6))",
-    "hsl(var(--chart-7))",
-    "hsl(var(--chart-8))",
+    "rgba(255,255,255,0.8)",
+    "rgba(255,255,255,0.6)",
+    "rgba(255,255,255,0.4)",
+    "rgba(255,255,255,0.2)",
+    "rgba(255,255,255,0.7)",
+    "rgba(255,255,255,0.5)",
+    "rgba(255,255,255,0.3)",
+    "rgba(255,255,255,0.1)",
   ];
   return paletteVars[index % paletteVars.length];
 }
@@ -110,22 +110,22 @@ const getPayoutColors = (status: string) => {
   switch (status) {
     case "PENDING":
       return {
-        fg: "hsl(var(--muted-foreground))",
-        bg: "hsl(var(--muted-foreground) / 0.15)",
+        fg: "rgba(255,255,255,0.4)",
+        bg: "rgba(255,255,255,0.05)",
       };
     case "VALIDATED":
-      return { fg: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.15)" };
+      return { fg: "white", bg: "rgba(255,255,255,0.1)" };
     case "REFUSED":
       return {
-        fg: "hsl(var(--destructive))",
-        bg: "hsl(var(--destructive) / 0.15)",
+        fg: "rgba(255,255,255,0.2)",
+        bg: "rgba(255,255,255,0.02)",
       };
     case "PAID":
-      return { fg: "hsl(var(--success))", bg: "hsl(var(--success) / 0.15)" };
+      return { fg: "white", bg: "rgba(255,255,255,0.2)" };
     default:
       return {
-        fg: "hsl(var(--muted-foreground))",
-        bg: "hsl(var(--muted-foreground) / 0.15)",
+        fg: "rgba(255,255,255,0.4)",
+        bg: "rgba(255,255,255,0.05)",
       };
   }
 };
@@ -151,9 +151,11 @@ const renderDot = (props: any) => {
           cx={cx}
           cy={cy}
           r={5}
-          fill="hsl(var(--destructive))"
-          stroke="hsl(var(--background))"
-          strokeWidth={2}
+          fill="white"
+          fillOpacity={0.2}
+          stroke="white"
+          strokeOpacity={0.1}
+          strokeWidth={1}
         />
       );
     }
@@ -307,45 +309,45 @@ const OptimizedTooltip = React.memo(
     });
 
     return (
-      <div className="rounded-lg border bg-background p-2 shadow-xs">
+      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[160px]">
         <div className="grid gap-2">
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
+          <div className="flex justify-between items-center border-b border-white/5 pb-1">
+            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
               {t("equity.tooltip.date")}
             </span>
-            <span className="font-bold text-muted-foreground">
+            <span className="font-black text-white/60 text-[10px] uppercase tracking-widest">
               {format(new Date(data.date), "MMM d, yyyy", {
                 locale: dateLocale,
               })}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
+          <div className="flex justify-between items-center">
+            <span className="text-[8px] uppercase text-white/40 font-black tracking-widest">
               {t("equity.tooltip.totalEquity")}
             </span>
-            <span className="font-bold text-foreground">
+            <span className="font-black text-white text-sm tabular-nums">
               {formatCurrency(data.equity || 0)}
             </span>
           </div>
 
           {resetAccounts.length > 0 && (
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
+            <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
+              <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
                 {t("equity.tooltip.resets")}
               </span>
               <div className="space-y-1">
                 {resetAccounts.map((account) => (
                   <div key={account} className="flex items-center gap-2">
                     <div
-                      className="w-2 h-2 rounded-full"
+                      className="w-1.5 h-1.5 rounded-full"
                       style={{
                         backgroundColor:
                           accountColorMap.get(account) ||
                           generateAccountColor(account),
                       }}
                     />
-                    <span className="text-sm text-foreground">
-                      {t("equity.tooltip.accountReset", { account })}
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest leading-none">
+                      {account}
                     </span>
                   </div>
                 ))}
@@ -354,33 +356,40 @@ const OptimizedTooltip = React.memo(
           )}
 
           {payoutAccounts.length > 0 && (
-            <div className="flex flex-col">
-              <span className="text-[0.70rem] uppercase text-muted-foreground">
+            <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
+              <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
                 {t("equity.tooltip.payouts")}
               </span>
               <div className="space-y-1">
                 {payoutAccounts.map(({ account, amount, status }) => (
-                  <div key={account} className="flex items-center gap-2">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{
-                        backgroundColor:
-                          accountColorMap.get(account) ||
-                          generateAccountColor(account),
-                      }}
-                    />
-                    <span className="text-sm text-foreground">
-                      {account}: {formatCurrency(amount)}
-                    </span>
-                    <span
-                      className="text-xs px-1 py-0.5 rounded"
-                      style={{
-                        backgroundColor: getPayoutColors(status).bg,
-                        color: getPayoutColors(status).fg,
-                      }}
-                    >
-                      {status.toLowerCase()}
-                    </span>
+                  <div key={account} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{
+                          backgroundColor:
+                            accountColorMap.get(account) ||
+                            generateAccountColor(account),
+                        }}
+                      />
+                      <span className="text-[10px] font-black text-white/60 uppercase tracking-widest leading-none">
+                        {account}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-white tabular-nums">
+                        {formatCurrency(amount)}
+                      </span>
+                      <span
+                        className="text-[7px] px-1 py-0.5 rounded font-black uppercase tracking-widest"
+                        style={{
+                          backgroundColor: getPayoutColors(status).bg,
+                          color: getPayoutColors(status).fg,
+                        }}
+                      >
+                        {status}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

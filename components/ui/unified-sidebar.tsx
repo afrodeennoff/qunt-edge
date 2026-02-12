@@ -224,44 +224,44 @@ const SIDEBAR_STYLE_CLASSES: Record<
   glassy: {
     sidebar:
       "border-r border-[#171924] bg-[#050505] text-zinc-300",
-    rail: "after:bg-white/5 after:transition-colors after:duration-200 hover:bg-[#225AEB]/10 hover:after:bg-[#225AEB]/40",
+    rail: "after:bg-white/5 after:transition-colors after:duration-200 hover:bg-white/5 hover:after:bg-white/20",
     header: "border-b border-[#171924] px-4 py-4",
     brandCard:
       "flex h-10 items-center gap-3 overflow-hidden rounded-xl bg-transparent px-0 transition-all duration-300",
     brandIcon:
-      "flex size-10 shrink-0 items-center justify-center rounded-xl border border-[#225AEB]/20 bg-[#225AEB]/8 text-[#7ea2ff] relative overflow-hidden group",
-    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-widest text-[#5f8fff] mt-1",
+      "flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/85 relative overflow-hidden group",
+    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-widest text-zinc-500 mt-1",
     userCard:
       "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors duration-200 hover:bg-white/4",
-    avatar: "size-9 border border-white/10 ring-1 ring-transparent group-hover:ring-[#225AEB]/35 rounded-lg",
+    avatar: "size-9 border border-white/10 ring-1 ring-transparent group-hover:ring-white/20 rounded-lg",
     avatarFallback: "bg-zinc-800 text-[10px] font-bold text-zinc-300",
     content: "flex flex-col px-3 py-4 overflow-x-hidden",
     groupLabel: "text-[9px] font-bold uppercase tracking-widest text-zinc-600 px-3 mb-2 animate-in fade-in slide-in-from-left-2",
     groupLine: "h-px flex-1 bg-[#151822]",
-    itemTrack: "bg-[#225AEB] shadow-[0_0_14px_rgba(34,90,235,0.6)]",
+    itemTrack: "bg-white/70",
     itemIconActive:
-      "text-[#7ea2ff]",
+      "text-white",
     itemIconInactive:
       "text-zinc-500 group-hover/item:text-zinc-300",
     itemButtonActive:
-      "bg-gradient-to-r from-[#225AEB]/16 to-transparent text-white",
+      "bg-white/[0.06] text-white",
     itemButtonInactive: "hover:bg-white/5 hover:text-zinc-200 text-zinc-500",
     selectTrigger:
-      "h-9 rounded-lg border-[#1b2030] bg-zinc-900/50 text-[12px] font-medium hover:border-[#2b3554] hover:text-white focus:ring-[#225AEB]/55 transition-colors",
+      "h-9 rounded-lg border-[#1b2030] bg-zinc-900/50 text-[12px] font-medium hover:border-zinc-700 hover:text-white focus:ring-white/30 transition-colors",
     footer: "border-t border-[#171924] bg-[#040404] p-4",
     logout:
       "flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 ml-auto",
     collapse:
-      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#1b2030] bg-[#050505] text-zinc-500 shadow-lg transition-all duration-200 hover:border-[#225AEB]/60 hover:text-[#7ea2ff] absolute -right-3 top-8 z-50",
+      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#1b2030] bg-[#050505] text-zinc-500 shadow-lg transition-all duration-200 hover:border-white/30 hover:text-white absolute -right-3 top-8 z-50",
     edgeCollapse:
       "absolute -right-3 top-8 z-50 hidden border border-[#1b2030] bg-[#050505] shadow-lg md:flex",
   },
   matte: {
     sidebar: "border-r border-[#111111] bg-[#050505] text-[#888888]",
-    rail: "after:bg-white/[0.02] hover:bg-[#225AEB]/5 hover:after:bg-[#225AEB]/20",
+    rail: "after:bg-white/[0.02] hover:bg-white/[0.03] hover:after:bg-white/[0.18]",
     header: "border-b border-[#111111] px-4 py-5",
     brandCard: "flex h-10 items-center gap-3 bg-transparent",
-    brandIcon: "flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#225AEB]/30 bg-[#225AEB]/5 text-[#225AEB]",
+    brandIcon: "flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white/85",
     workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-[0.2em] text-[#444444]",
     userCard: "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors hover:bg-white/[0.02]",
     avatar: "size-8 border border-white/5 rounded-lg",
@@ -269,15 +269,15 @@ const SIDEBAR_STYLE_CLASSES: Record<
     content: "flex flex-col px-3 py-6",
     groupLabel: "text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-[#333333] px-3 mb-4",
     groupLine: "h-px flex-1 bg-[#111111]",
-    itemTrack: "bg-[#225AEB] shadow-[0_0_10px_rgba(34,90,235,0.4)]",
-    itemIconActive: "text-[#225AEB]",
+    itemTrack: "bg-white/70",
+    itemIconActive: "text-white",
     itemIconInactive: "text-[#444444] group-hover/item:text-[#888888]",
     itemButtonActive: "bg-white/[0.02] text-white font-mono",
     itemButtonInactive: "hover:bg-white/[0.01] hover:text-[#CCCCCC] text-[#666666] font-mono",
-    selectTrigger: "h-8 rounded-md border-[#111111] bg-[#080808] text-[11px] font-mono text-[#666666] hover:border-[#225AEB]/30",
+    selectTrigger: "h-8 rounded-md border-[#111111] bg-[#080808] text-[11px] font-mono text-[#666666] hover:border-white/30",
     footer: "border-t border-[#111111] bg-[#050505] p-4",
     logout: "flex h-8 w-8 items-center justify-center rounded-lg text-[#333333] hover:bg-rose-500/10 hover:text-rose-500 ml-auto transition-colors",
-    collapse: "flex h-6 w-6 items-center justify-center rounded-md border border-[#111111] bg-[#050505] text-[#444444] hover:border-[#225AEB]/50 hover:text-[#225AEB] absolute -right-3 top-8 z-50",
+    collapse: "flex h-6 w-6 items-center justify-center rounded-md border border-[#111111] bg-[#050505] text-[#444444] hover:border-white/30 hover:text-white absolute -right-3 top-8 z-50",
     edgeCollapse: "absolute -right-3 top-8 z-50 hidden border border-[#111111] bg-[#050505] md:flex",
   },
 }
@@ -451,7 +451,7 @@ export function UnifiedSidebar({
               transition={shouldReduceMotion ? undefined : subtleSpring}
             >
               <Logo className="size-5" />
-              <div className="absolute inset-0 bg-teal-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 opacity-0 transition-opacity"></div>
             </motion.div>
             <div className="flex min-w-0 flex-col leading-none group-data-[collapsible=icon]:hidden">
               <span className="font-bold text-white tracking-tight whitespace-nowrap leading-none text-lg">Qunt Edge</span>

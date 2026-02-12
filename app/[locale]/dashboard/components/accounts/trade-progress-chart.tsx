@@ -41,7 +41,7 @@ export function TradeProgressChart({
   className
 }: TradeProgressChartProps) {
   const t = useI18n()
-  
+
   // Prefer filtered trades from account (buffer-aware), fallback to store
   const allTrades = useTradesStore(state => state.trades)
   const trades = useMemo(() => {
@@ -52,28 +52,28 @@ export function TradeProgressChart({
   const chartConfig = {
     balance: {
       label: t('propFirm.chart.balance'),
-      color: "#2563eb",
+      color: "white",
     },
     drawdown: {
       label: t('propFirm.chart.drawdownLevel'),
-      color: "#dc2626",
+      color: "rgba(255,255,255,0.3)",
     },
     target: {
       label: t('propFirm.chart.profitTarget'),
-      color: "#16a34a",
+      color: "rgba(255,255,255,0.15)",
     },
     payout: {
       label: t('propFirm.chart.payout'),
-      color: "#9333ea",
+      color: "rgba(255,255,255,0.5)",
     }
   }
 
   // Extract account properties
-  const { 
-    startingBalance, 
-    drawdownThreshold, 
-    profitTarget, 
-    trailingDrawdown = false, 
+  const {
+    startingBalance,
+    drawdownThreshold,
+    profitTarget,
+    trailingDrawdown = false,
     trailingStopProfit,
     payouts = [],
     resetDate
@@ -106,7 +106,7 @@ export function TradeProgressChart({
   const chartData = allEvents.reduce((acc, event, index) => {
     let balance: number
     let highestBalance: number
-    
+
     if (event.isReset) {
       // Reset the balance to starting balance
       balance = startingBalance
@@ -114,17 +114,17 @@ export function TradeProgressChart({
     } else {
       const prevBalance = index > 0 ? acc[index - 1].balance : startingBalance
       balance = prevBalance + event.amount
-      
+
       // Calculate highest balance up to this point
       const previousHighest = index > 0 ? acc[index - 1].highestBalance : startingBalance
       highestBalance = event.isPayout ? previousHighest : Math.max(previousHighest, balance)
     }
-    
+
     // Calculate drawdown level based on trailing or fixed drawdown
     let drawdownLevel
     if (trailingDrawdown) {
       const profitMade = Math.max(0, highestBalance - startingBalance)
-      
+
       // If we've hit trailing stop profit, lock the drawdown to that level
       if (trailingStopProfit && profitMade >= trailingStopProfit) {
         drawdownLevel = (startingBalance + trailingStopProfit) - drawdownThreshold
@@ -154,11 +154,11 @@ export function TradeProgressChart({
 
   const getPayoutColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return '#9CA3AF'
-      case 'VALIDATED': return '#F97316'
-      case 'REFUSED': return '#DC2626'
-      case 'PAID': return '#16A34A'
-      default: return '#9CA3AF'
+      case 'PENDING': return 'rgba(255,255,255,0.4)'
+      case 'VALIDATED': return 'rgba(255,255,255,0.7)'
+      case 'REFUSED': return 'rgba(255,255,255,0.2)'
+      case 'PAID': return 'rgba(255,255,255,1)'
+      default: return 'rgba(255,255,255,0.4)'
     }
   }
 
@@ -167,7 +167,7 @@ export function TradeProgressChart({
     if (typeof cx !== 'number' || typeof cy !== 'number') {
       return <circle key={`dot-${index}-empty`} cx={cx} cy={cy} r={0} fill="none" />
     }
-    
+
     if (payload?.isReset) {
       return (
         <circle
@@ -175,13 +175,13 @@ export function TradeProgressChart({
           cx={cx}
           cy={cy}
           r={5}
-          fill="#ff6b6b"
-          stroke="white"
+          fill="white"
+          stroke="black"
           strokeWidth={2}
         />
       )
     }
-    
+
     if (payload?.isPayout) {
       return (
         <circle
@@ -190,12 +190,12 @@ export function TradeProgressChart({
           cy={cy}
           r={4}
           fill={getPayoutColor(payload.payoutStatus || '')}
-          stroke="white"
+          stroke="black"
           strokeWidth={1}
         />
       )
     }
-    
+
     return <circle key={`dot-${index}-empty`} cx={cx} cy={cy} r={0} fill="none" />
   }
 
@@ -216,65 +216,76 @@ export function TradeProgressChart({
                 bottom: 20,
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis
                 dataKey="tradeIndex"
                 tickLine={false}
-                axisLine={true}
+                axisLine={false}
                 tickMargin={8}
                 tick={false}
               />
               <YAxis
-                tickFormatter={(value) => `$${value.toLocaleString()}`}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 domain={[
                   (dataMin: number) => Math.floor(Math.min(dataMin, startingBalance - drawdownThreshold) / 1000) * 1000,
                   (dataMax: number) => Math.ceil(Math.max(dataMax, startingBalance + profitTarget) / 1000) * 1000
                 ]}
-                axisLine={true}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }}
               />
               <Tooltip
-                cursor={{ stroke: '#666', strokeWidth: 1, strokeDasharray: '3 3' }}
+                cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '3 3' }}
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload as ChartDataPoint;
                     return (
-                      <div className="bg-background/80 backdrop-blur-lg p-2 border rounded shadow-xs text-xs space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">#{data.tradeIndex}</span>
-                          <span className="text-muted-foreground">{data.date}</span>
+                      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl text-[10px] space-y-2 min-w-[140px]">
+                        <div className="flex items-center justify-between border-b border-white/5 pb-1">
+                          <span className="font-black text-white">TRADE #{data.tradeIndex}</span>
+                          <span className="text-white/40">{data.date}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-blue-600">${data.balance.toLocaleString()}</span>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-white/40 uppercase font-bold tracking-wider">Balance</span>
+                            <span className="text-white font-black">${data.balance.toLocaleString()}</span>
+                          </div>
                           {!data.isPayout && !data.isReset && (
-                            <span className={cn(
-                              "text-sm",
-                              data.pnl >= 0 ? "text-green-600" : "text-red-600"
-                            )}>
-                              {data.pnl >= 0 ? '+' : ''}{data.pnl.toLocaleString()}
-                            </span>
+                            <div className="flex justify-between items-center">
+                              <span className="text-white/40 uppercase font-bold tracking-wider">Net P/L</span>
+                              <span className={cn(
+                                "font-black",
+                                data.pnl >= 0 ? "text-white" : "text-white/30"
+                              )}>
+                                {data.pnl >= 0 ? '+' : ''}{data.pnl.toLocaleString()}
+                              </span>
+                            </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-red-600">DD: ${data.drawdownLevel.toLocaleString()}</span>
-                          <span className="text-blue-600">High: ${data.highestBalance.toLocaleString()}</span>
+                        <div className="space-y-1 pt-1 border-t border-white/5">
+                          <div className="flex justify-between items-center">
+                            <span className="text-white/20 uppercase font-bold tracking-wider">Drawdown</span>
+                            <span className="text-white/60 font-medium">${data.drawdownLevel.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-white/20 uppercase font-bold tracking-wider">ATH</span>
+                            <span className="text-white/60 font-medium">${data.highestBalance.toLocaleString()}</span>
+                          </div>
                         </div>
                         {data.isReset && (
-                          <div className="flex items-center gap-2 text-red-500">
-                            <span className="font-medium">{t('propFirm.chart.accountReset')}</span>
+                          <div className="mt-1 pt-1 border-t border-white/10 text-white font-black uppercase text-center tracking-widest animate-pulse">
+                            {t('propFirm.chart.accountReset')}
                           </div>
                         )}
                         {data.isPayout && data.payoutStatus && (
-                          <div className={cn(
-                            "flex items-center gap-2",
-                            {
-                              "text-gray-500": data.payoutStatus === 'PENDING',
-                              "text-orange-500": data.payoutStatus === 'VALIDATED',
-                              "text-red-500": data.payoutStatus === 'REFUSED',
-                              "text-green-500": data.payoutStatus === 'PAID',
-                            }
-                          )}>
-                            <span>${data.payoutAmount.toLocaleString()}</span>
-                            <span className="text-xs">({data.payoutStatus.toLowerCase()})</span>
+                          <div className="mt-1 pt-1 border-t border-white/10">
+                            <div className="flex justify-between items-center">
+                              <span className="text-white font-black uppercase tracking-wider">Payout</span>
+                              <span className="text-white font-black">${data.payoutAmount.toLocaleString()}</span>
+                            </div>
+                            <div className="text-[8px] text-white/40 uppercase text-right tracking-widest">
+                              {data.payoutStatus}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -290,14 +301,16 @@ export function TradeProgressChart({
                 stroke={chartConfig.balance.color}
                 strokeWidth={2}
                 dot={renderDot}
+                isAnimationActive={true}
+                animationDuration={1000}
               />
               <Line
                 type="monotone"
                 dataKey="drawdownLevel"
                 name={t('propFirm.chart.drawdownLevel')}
                 stroke={chartConfig.drawdown.color}
-                strokeWidth={1.5}
-                strokeDasharray="3 3"
+                strokeWidth={1}
+                strokeDasharray="4 4"
                 dot={false}
               />
               <Line
@@ -305,19 +318,20 @@ export function TradeProgressChart({
                 dataKey="target"
                 name={t('propFirm.chart.profitTarget')}
                 stroke={chartConfig.target.color}
-                strokeWidth={2}
-                strokeDasharray="5 5"
+                strokeWidth={1.5}
+                strokeDasharray="6 6"
                 dot={false}
               />
               <ReferenceLine
                 y={startingBalance}
-                stroke="#666"
-                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.1)"
+                strokeDasharray="2 2"
                 label={{
                   value: t('propFirm.chart.startingBalance'),
-                  position: "right",
-                  fill: "#666",
-                  fontSize: 12,
+                  position: "insideBottomRight",
+                  fill: "rgba(255,255,255,0.2)",
+                  fontSize: 9,
+                  fontWeight: 'bold',
                 }}
               />
             </LineChart>

@@ -19,7 +19,10 @@ type WidgetComponentProps = {
 }
 
 const loadingShell = (
-  <div className="h-full w-full animate-pulse rounded-2xl border border-white/10 bg-black" aria-hidden="true" />
+  <div
+    className="h-full w-full animate-pulse rounded-2xl border border-white/12 bg-[radial-gradient(circle_at_12%_0%,rgba(255,255,255,0.12),rgba(0,0,0,0.85)_58%)] backdrop-blur-md"
+    aria-hidden="true"
+  />
 )
 
 const widgetLoaders: Record<WidgetType, () => Promise<{ default: React.ComponentType<WidgetComponentProps> }>> = {

@@ -39,7 +39,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             "precision-panel text-card-foreground shadow-none": variant === "matte",
           },
           {
-            "transition-all duration-300 hover:-translate-y-1 hover:shadow-teal-500/5": hover,
+            "transition-all duration-300 hover:-translate-y-1 hover:shadow-white/5": hover,
             "cursor-pointer active:scale-[0.98]": clickable,
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2": clickable,
           },
@@ -57,10 +57,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           <div className="absolute top-3 right-3 z-20 flex items-center gap-2 px-2 py-0.5 rounded-full bg-black/40 border border-white/5 backdrop-blur-md">
             <div className={cn(
               "status-dot animate-pulse",
-              status === "live" && "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]",
-              status === "synced" && "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]",
+              status === "live" && "bg-white",
+              status === "synced" && "bg-zinc-300",
               status === "idle" && "bg-slate-500",
-              status === "error" && "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+              status === "error" && "bg-rose-500"
             )} />
             <span className="text-[10px] uppercase tracking-widest font-bold opacity-70 leading-none">{status}</span>
           </div>

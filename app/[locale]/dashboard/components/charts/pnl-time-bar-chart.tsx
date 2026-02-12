@@ -36,7 +36,7 @@ interface TimeOfDayTradeChartProps {
 const chartConfig = {
   avgPnl: {
     label: "Average P/L",
-    color: "hsl(var(--chart-loss))",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -181,7 +181,7 @@ export default function TimeOfDayTradeChart({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-white/50 hover:text-white hover:bg-white/10"
               onClick={() => setHourFilter({ hour: null })}
             >
               {t("pnlTime.clearFilter")}
@@ -252,23 +252,23 @@ export default function TimeOfDayTradeChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.hour}`}
-                      fill={entry.avgPnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      fill="white"
                       fillOpacity={
                         hourFilter.hour === entry.hour
                           ? 1
                           : hourFilter.hour !== null
-                            ? 0.3
-                            : 0.8
+                            ? 0.15
+                            : (entry.avgPnl >= 0 ? 0.6 : 0.2)
                       }
-                      stroke={entry.avgPnl >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      stroke="white"
                       strokeOpacity={
                         hourFilter.hour === entry.hour
-                          ? 1
+                          ? 0.8
                           : hourFilter.hour !== null
-                            ? 0.3
-                            : 1
+                            ? 0.1
+                            : (entry.avgPnl >= 0 ? 0.4 : 0.1)
                       }
-                      className="hover:opacity-100"
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

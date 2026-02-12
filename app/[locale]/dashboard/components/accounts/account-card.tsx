@@ -16,7 +16,7 @@ interface AccountCardProps {
 
 export function AccountCard({ account, onClick, size = 'large' }: AccountCardProps) {
   const t = useI18n()
-  
+
   // Extract metrics from account (computed server-side)
   const metrics = account.metrics
   const isConfigured = metrics?.isConfigured ?? false
@@ -32,7 +32,7 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
   return (
     <Card
       className={cn(
-        "flex flex-col cursor-pointer hover:border-primary/50 transition-colors shadow-xs hover:shadow-md",
+        "flex flex-col cursor-pointer transition-all duration-300 shadow-xs hover:shadow-xl liquid-panel liquid-panel-hover overflow-hidden",
         size === 'small' || size === 'small-long' ? "w-72" : "w-96"
       )}
       onClick={onClick}
@@ -50,13 +50,13 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
               )}>
 
                 <div className="flex w-full justify-between min-w-0">
-                  <span className="truncate">{account.propfirm || t('propFirm.card.unnamedAccount')}</span>
+                  <span className="truncate text-white font-bold">{account.propfirm || t('propFirm.card.unnamedAccount')}</span>
                   {
                     account.nextPaymentDate && (
                       <div className={cn(
-                        "self-center ml-2 shrink-0",
-                        size === 'small' || size === 'small-long' ? "text-xs" : "text-xs",
-                        Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) < 5 ? 'text-red-500 blink' : 'text-muted-foreground'
+                        "self-center ml-2 shrink-0 font-terminal",
+                        size === 'small' || size === 'small-long' ? "text-[10px]" : "text-[10px]",
+                        Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) < 5 ? 'text-white blink' : 'text-white/40'
                       )}>
                         {Math.floor((new Date(account.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
                         {t('propFirm.card.daysBeforeNextPayment')}
@@ -66,8 +66,8 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                 </div>
               </CardTitle>
               <p className={cn(
-                "text-muted-foreground truncate",
-                size === 'small' || size === 'small-long' ? "text-xs" : "text-xs"
+                "text-white/30 truncate font-mono",
+                size === 'small' || size === 'small-long' ? "text-[10px]" : "text-[10px]"
               )}>
                 {account.number}
               </p>
@@ -79,15 +79,15 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
         "flex-1 pt-0",
         size === 'small' || size === 'small-long' ? "p-2 space-y-1.5" : "p-3 space-y-2"
       )}>
-        <div className="flex justify-between items-baseline">
+        <div className="flex justify-between items-baseline border-b border-white/5 pb-2">
           <span className={cn(
-            "text-muted-foreground",
-            size === 'small' || size === 'small-long' ? "text-xs" : "text-sm"
+            "text-white/40 uppercase tracking-widest font-bold",
+            size === 'small' || size === 'small-long' ? "text-[9px]" : "text-[10px]"
           )}>{t('propFirm.card.balance')}</span>
           <span className={cn(
-            "font-semibold truncate ml-2",
-            size === 'small' || size === 'small-long' ? "text-sm" : "text-base"
-          )}>${currentBalance.toFixed(2)}</span>
+            "font-black truncate ml-2 text-white",
+            size === 'small' || size === 'small-long' ? "text-base" : "text-lg"
+          )}>${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         {isConfigured ? (
           <div className={cn(
@@ -102,35 +102,35 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
 
             {/* Profit Target Section */}
             <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">{t('propFirm.card.remainingToTarget')}</span>
-                <span>${remainingToTarget.toFixed(2)}</span>
+              <div className="flex justify-between text-[10px] uppercase font-bold tracking-tight">
+                <span className="text-white/40">{t('propFirm.card.remainingToTarget')}</span>
+                <span className="text-white">${remainingToTarget.toLocaleString()}</span>
               </div>
               <Progress
                 value={progress}
                 className={cn(
+                  "bg-white/5",
                   size === 'small' || size === 'small-long' ? "h-1" : "h-1.5"
                 )}
                 indicatorClassName={cn(
-                  "transition-colors duration-300",
-                  "bg-[hsl(var(--chart-6))]",
-                  progress <= 20 ? "opacity-20" :
-                    progress <= 40 ? "opacity-40" :
-                      progress <= 60 ? "opacity-60" :
-                        progress <= 80 ? "opacity-80" :
-                          "opacity-100"
+                  "transition-all duration-500 bg-white",
+                  progress <= 20 ? "opacity-20 shadow-[0_0_8px_rgba(255,255,255,0.2)]" :
+                    progress <= 40 ? "opacity-40 shadow-[0_0_10px_rgba(255,255,255,0.3)]" :
+                      progress <= 60 ? "opacity-60 shadow-[0_0_12px_rgba(255,255,255,0.4)]" :
+                        progress <= 80 ? "opacity-85 shadow-[0_0_15px_rgba(255,255,255,0.5)]" :
+                          "opacity-100 shadow-[0_0_20px_rgba(255,255,255,0.7)]"
                 )}
               />
             </div>
 
             {/* Drawdown Section */}
             <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">{t('propFirm.card.drawdown')}</span>
+              <div className="flex justify-between text-[10px] uppercase font-bold tracking-tight">
+                <span className="text-white/40">{t('propFirm.card.drawdown')}</span>
                 <span className={cn(
-                  "font-medium",
-                  remainingLoss > drawdownThreshold * 0.5 ? "text-success" :
-                    remainingLoss > drawdownThreshold * 0.2 ? "text-warning" : "text-destructive"
+                  "font-black truncate ml-2",
+                  remainingLoss > drawdownThreshold * 0.5 ? "text-white" :
+                    remainingLoss > drawdownThreshold * 0.2 ? "text-white/60" : "text-white/30"
                 )}>
                   {remainingLoss > 0
                     ? t('propFirm.card.remainingLoss', { amount: remainingLoss.toFixed(2) })
@@ -140,11 +140,11 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
               <Progress
                 value={drawdownProgress}
                 className={cn(
+                  "bg-white/5",
                   size === 'small' || size === 'small-long' ? "h-1" : "h-1.5"
                 )}
                 indicatorClassName={cn(
-                  "transition-colors duration-300",
-                  "bg-destructive",
+                  "transition-all duration-500 bg-white/40",
                   drawdownProgress <= 20 ? "opacity-20" :
                     drawdownProgress <= 40 ? "opacity-40" :
                       drawdownProgress <= 60 ? "opacity-60" :
@@ -156,38 +156,38 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
 
             {/* Consistency Section - only show for larger sizes */}
             {metrics && (size === 'large' || size === 'extra-large') && (
-              <div className="space-y-1 pt-2 border-t">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">{t('propFirm.card.consistency')}</span>
+              <div className="space-y-1 pt-2 border-t border-white/5 mt-2">
+                <div className="flex justify-between text-[10px] uppercase font-bold tracking-tight">
+                  <span className="text-white/40">{t('propFirm.card.consistency')}</span>
                   <span className={cn(
-                    "font-medium",
-                    !metrics.hasProfitableData ? "text-muted-foreground italic" :
-                      (metrics.isConsistent || consistencyPercentage === 100) ? "text-success" : "text-destructive"
+                    "font-black",
+                    !metrics.hasProfitableData ? "text-white/20 italic" :
+                      (metrics.isConsistent || consistencyPercentage === 100) ? "text-white" : "text-white/40"
                   )}>
                     {!metrics.hasProfitableData ? t('propFirm.status.unprofitable') :
                       (metrics.isConsistent || consistencyPercentage === 100) ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-[10px] font-medium text-white/30">
                   <span>{t('propFirm.card.maxAllowedDailyProfit')}</span>
-                  <span>${metrics.maxAllowedDailyProfit?.toFixed(2) || '-'}</span>
+                  <span>${metrics.maxAllowedDailyProfit?.toLocaleString() || '-'}</span>
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-[10px] font-medium text-white/30">
                   <span>{t('propFirm.card.highestDailyProfit')}</span>
-                  <span>${metrics.highestProfitDay?.toFixed(2) || '-'}</span>
+                  <span>${metrics.highestProfitDay?.toLocaleString() || '-'}</span>
                 </div>
-                
+
                 {/* Trading Days Section */}
                 {metrics && (
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{t('propFirm.card.tradingDays')}</span>
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight mt-1 pt-1 border-t border-white/[0.03]">
+                    <span className="text-white/40">{t('propFirm.card.tradingDays')}</span>
                     <span className={cn(
-                      "font-medium",
-                      metrics.validTradingDays === metrics.totalTradingDays ? "text-success" : "text-warning"
+                      "font-black",
+                      metrics.validTradingDays === metrics.totalTradingDays ? "text-white" : "text-white/60"
                     )}>
                       {metrics.validTradingDays}/{metrics.totalTradingDays}
                       {minPnlToCountAsDay > 0 && (
-                        <span className="ml-1 text-xs opacity-75">
+                        <span className="ml-1 text-[9px] opacity-40">
                           (≥${minPnlToCountAsDay})
                         </span>
                       )}
@@ -199,8 +199,8 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
           </div>
         ) : (
           <p className={cn(
-            "text-muted-foreground text-center pt-2",
-            size === 'small' || size === 'small-long' ? "text-xs" : "text-sm"
+            "text-white/20 text-center pt-2 font-medium italic",
+            size === 'small' || size === 'small-long' ? "text-[10px]" : "text-xs"
           )}>
             {t('propFirm.card.needsConfiguration')}
           </p>
