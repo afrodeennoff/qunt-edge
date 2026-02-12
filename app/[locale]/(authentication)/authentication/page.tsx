@@ -37,7 +37,7 @@ export default function AuthenticationPage() {
         <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:30px_30px]" />
       </div>
 
-      <div className="relative mx-auto grid min-h-screen w-full max-w-[1320px] grid-cols-1 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:px-8 lg:py-8">
+      <div className="relative mx-auto grid min-h-screen w-full max-w-[1680px] grid-cols-1 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,700px)] lg:gap-8 lg:px-8 lg:py-8 xl:px-10">
         <section className="rounded-[30px] border border-white/10 bg-black/35 p-6 backdrop-blur-xl sm:p-8 lg:p-10">
           <div className="flex items-center justify-between">
             <Link
