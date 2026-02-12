@@ -410,14 +410,14 @@
     font-weight: 600;
   }
 
-  /* Global spacing normalization for dashboard chart widgets */
-  [data-chart-surface="modern"]>div:first-child {
+  /* Dashboard-only spacing normalization for chart widgets */
+  [data-widget-shell="true"] [data-chart-surface="modern"]>div:first-child {
     height: 3rem !important;
     min-height: 3rem;
     padding: 0.65rem 0.85rem !important;
   }
 
-  [data-chart-surface="modern"]>div:nth-child(2) {
+  [data-widget-shell="true"] [data-chart-surface="modern"]>div:nth-child(2) {
     padding: 0.5rem 0.75rem !important;
   }
 
