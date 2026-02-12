@@ -55,6 +55,8 @@ export function DashboardHeader() {
     const normalizedPathname = pathname.replace(/\/+$/, '') || '/';
     const isDashboardRoot = /^\/(?:[a-z]{2}(?:-[A-Za-z]{2})?)?\/dashboard$/i.test(normalizedPathname);
     const isWidgetsTab = activeTab === 'widgets';
+    const localeMatch = pathname.match(/^\/([a-z]{2}(?:-[A-Za-z]{2})?)(?=\/|$)/i);
+    const billingHref = localeMatch?.[1] ? `/${localeMatch[1]}/dashboard/billing` : '/dashboard/billing';
 
     const getTitle = () => {
         if (isDashboardRoot) {
@@ -76,23 +78,47 @@ export function DashboardHeader() {
 
     const title = getTitle();
     const currentLayout = layouts || { desktop: [], mobile: [] };
+    const sectionLabel = isDashboardRoot ? "Workspace" : "Dashboard";
+    const subtitle = isDashboardRoot
+        ? (
+            activeTab === 'table'
+                ? 'Review execution details, filters, and performance by trade.'
+                : activeTab === 'accounts'
+                    ? 'Track account growth, balances, and consistency in one place.'
+                    : activeTab === 'chart'
+                        ? 'Explore scenario planning and forward-looking projections.'
+                        : 'Customize your layout and monitor your most important metrics.'
+        )
+        : 'Focus mode for analysis, execution, and daily workflow.';
 
     return (
-        <header className="sticky top-0 z-50 overflow-hidden bg-[#050505]/95 backdrop-blur-md" data-dashboard-header="true">
-            <div className="min-h-[64px] flex flex-wrap items-center justify-between gap-2 px-3 md:px-8">
+        <header className="sticky top-0 z-50 overflow-hidden border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl" data-dashboard-header="true">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(34,90,235,0.07),transparent_25%,transparent_75%,rgba(34,90,235,0.05))]" />
+            <div className="relative min-h-[72px] flex flex-wrap items-center justify-between gap-3 px-3 py-2 md:px-8">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground" />
-                    <div className="flex items-baseline gap-3">
-                        <h1 className="whitespace-nowrap text-sm font-bold uppercase tracking-wide text-foreground">{title}</h1>
+                    <div className="flex min-w-0 items-start gap-3">
+                        <div className="mt-0.5 hidden h-7 w-px bg-white/20 sm:block" />
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+                                    {sectionLabel}
+                                </span>
+                                <h1 className="truncate whitespace-nowrap text-sm font-bold uppercase tracking-[0.16em] text-foreground">
+                                    {title}
+                                </h1>
+                            </div>
+                            <p className="hidden truncate pt-1 text-xs text-muted-foreground lg:block">{subtitle}</p>
+                        </div>
                     </div>
                 </div>
 
                 {/* Right Side: Actions & Configuration */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
 
                     {/* Global Utilities Group */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 rounded-xl bg-white/[0.02] px-1 py-0.5">
                         <FilterCommandMenu variant="navbar" />
 
                         <GlobalSyncButton />
@@ -107,7 +133,7 @@ export function DashboardHeader() {
                         <ImportButton />
 
                         {!isPlusUser() && (
-                            <Link href="/dashboard/billing">
+                            <Link href={billingHref}>
                                 <button className="group flex h-8 items-center gap-2 rounded-lg border border-[#225AEB]/30 bg-[#225AEB]/10 px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-[#225AEB] transition-all hover:bg-[#225AEB]/20">
                                     <Sparkles className="h-3 w-3 animate-pulse" />
                                     <span>UPGRADE</span>
@@ -239,9 +265,11 @@ export function DashboardHeader() {
                 <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
-                    className="px-4 pb-3 -mt-1 sm:px-8"
+                    className="relative px-4 pb-3 pt-1 sm:px-8"
                 >
-                    <ActiveFilterTags showAccountNumbers={true} />
+                    <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                        <ActiveFilterTags showAccountNumbers={true} />
+                    </div>
                 </motion.div>
             </AnimatePresence>
         </header>
