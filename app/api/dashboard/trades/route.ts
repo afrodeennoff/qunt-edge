@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTradesAction } from '@/server/database'
 import { apiError } from '@/lib/api-response'
 
-export const runtime = 'nodejs'
 
 const MAX_PAGE_SIZE = 200
 

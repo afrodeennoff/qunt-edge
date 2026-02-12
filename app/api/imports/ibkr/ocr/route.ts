@@ -4,7 +4,6 @@ import { apiError } from '@/lib/api-response'
 import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
 
 export const maxDuration = 60
-export const runtime = 'nodejs'
 
 const MAX_PDF_BYTES = 10 * 1024 * 1024
 const MAX_OCR_BODY_BYTES = 12 * 1024 * 1024

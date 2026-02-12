@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 
-export const runtime = 'nodejs'
 
 async function checkDatabase(): Promise<{ ok: boolean; latencyMs: number; error?: string }> {
   const start = Date.now()

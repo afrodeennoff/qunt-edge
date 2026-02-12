@@ -21,7 +21,6 @@ import { apiError } from "@/lib/api-response";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
-export const runtime = "nodejs";
 const MAX_CHAT_BODY_BYTES = 1024 * 1024;
 const MAX_CHAT_MESSAGES = 100;
 const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-chat" });

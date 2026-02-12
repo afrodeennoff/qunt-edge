@@ -4,7 +4,6 @@ import { whop } from "@/lib/whop";
 import { logger } from "@/lib/logger";
 import type { ErrorResponse } from "@/server/authz";
 
-export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
     const requestId = crypto.randomUUID();

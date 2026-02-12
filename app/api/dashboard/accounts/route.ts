@@ -3,7 +3,6 @@ import { Prisma } from '@/prisma/generated/prisma'
 import { getAccountsAction } from '@/server/accounts'
 import { apiError } from '@/lib/api-response'
 
-export const runtime = 'nodejs'
 
 function serializeWithDecimals<T>(value: T): T {
   return JSON.parse(

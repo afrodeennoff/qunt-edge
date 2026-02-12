@@ -12,7 +12,6 @@ const customOpenai = createOpenAI({
 });
 
 export const maxDuration = 30;
-export const runtime = "nodejs";
 const MAX_FORMAT_BODY_BYTES = 512 * 1024;
 const formatTradesRateLimit = rateLimit({ limit: 20, window: 60_000, identifier: "ai-format-trades" });
 
