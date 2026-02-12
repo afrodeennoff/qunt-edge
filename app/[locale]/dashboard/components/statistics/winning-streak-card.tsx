@@ -21,9 +21,9 @@ export default function WinningStreakCard({ size = 'medium' }: WinningStreakCard
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="flex items-center gap-1.5 px-3 py-1 bg-accent-teal/10 rounded-full border border-accent-teal/20">
+      <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md bg-accent-teal/10 border-accent-teal/20">
         <Award className="h-3 w-3 text-accent-teal" />
-        <span className="font-black text-[11px] uppercase tracking-wider text-accent-teal">{winningStreak} Trade Streak</span>
+        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider text-accent-teal">{winningStreak} Trade Streak</span>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>

@@ -3,7 +3,27 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
+import { Geist, IBM_Plex_Mono, Inter } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-ibm-mono",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -13,7 +33,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: dark)", color: "#050505" },
   ],
 };
 
@@ -109,7 +129,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="bg-background"
+      className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} bg-background`}
       translate="no"
       suppressHydrationWarning
       style={{ ["--theme-intensity" as string]: "100%" }}
@@ -120,7 +140,7 @@ export default function RootLayout({
 
         {/* Mobile-First Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#040404" />
+        <meta name="theme-color" content="#050505" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -180,69 +200,8 @@ export default function RootLayout({
           href="/apple-touch-icon-precomposed.png"
         />
 
-        <style>
-          {`
-            /* Base layout */
-            html {
-              margin: 0;
-              padding: 0;
-              scrollbar-gutter: stable !important;
-              -ms-overflow-style: scrollbar !important;
-            }
-
-            /* Style the scrollbar */
-            ::-webkit-scrollbar {
-              width: 14px !important;
-              background-color: transparent !important;
-            }
-
-            ::-webkit-scrollbar-track {
-              background: hsl(var(--background)) !important;
-              border-left: 1px solid hsl(var(--border)) !important;
-            }
-
-            ::-webkit-scrollbar-thumb {
-              background: hsl(var(--muted-foreground) / 0.3) !important;
-              border-radius: 7px !important;
-              border: 3px solid hsl(var(--background)) !important;
-              min-height: 40px !important;
-            }
-
-            ::-webkit-scrollbar-thumb:hover {
-              background: hsl(var(--muted-foreground) / 0.4) !important;
-            }
-
-            /* Firefox scrollbar styles */
-            * {
-              scrollbar-width: thin !important;
-              scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent !important;
-            }
-
-            /* Prevent Radix UI Dialog from adding padding-right/margin-right to body */
-            /* Since we use scrollbar-gutter: stable, we don't need the padding/margin */
-            body[data-scroll-locked],
-            body[style*="padding-right"],
-            body[style*="margin-right"] {
-              padding-right: 0 !important;
-              margin-right: 0 !important;
-            }
-            
-            /* Also target any Radix scroll lock classes */
-            body.radix-scroll-lock,
-            body[class*="scroll-lock"] {
-              padding-right: 0 !important;
-              margin-right: 0 !important;
-            }
-            
-            /* Force margin-right to 0 when body has pointer-events: none (Radix UI scroll lock) */
-            body[style*="pointer-events: none"] {
-              margin-right: 0 !important;
-              padding-right: 0 !important;
-            }
-          `}
-        </style>
       </head>
-      <body className="font-sans [font-family:var(--font-geist)]">
+      <body className={`${ibmPlexMono.variable} ${geist.variable} font-mono antialiased`}>
         <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}

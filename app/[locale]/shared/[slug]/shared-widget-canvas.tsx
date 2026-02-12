@@ -1,11 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { WIDGET_REGISTRY, getWidgetComponent } from '@/app/[locale]/dashboard/config/widget-registry'
 import { Widget, WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { useData } from '@/context/data-provider'
 import { defaultLayouts } from '@/lib/default-layouts'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
 
 
 // Update sizeToGrid to handle responsive sizes (copy from widget-canvas.tsx)
@@ -78,7 +80,7 @@ const generateResponsiveLayout = (widgets: Widget[]) => {
 }
 
 export function SharedWidgetCanvas() {
-  const { isMobile } = useData()
+  const { isMobile, sharedParams } = useData()
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), [])
   
   // Use default layouts instead of the passed layout prop
@@ -109,22 +111,67 @@ export function SharedWidgetCanvas() {
     return getWidgetComponent(widget.type, effectiveSize)
   }
 
-  // Transform server layout items to include required grid properties
+  const autoArrangeWidgets = useCallback((widgets: Widget[]) => {
+    let cursorX = 0
+    let cursorY = 0
+    let rowHeight = 0
+
+    return widgets.map((item: Widget, index: number) => {
+      const gridSize = sizeToGrid(item.size, isMobile)
+
+      if (isMobile) {
+        return {
+          ...item,
+          i: item.i || `widget-${index}`,
+          x: 0,
+          y: index * gridSize.h,
+          w: gridSize.w,
+          h: gridSize.h,
+        }
+      }
+
+      if (cursorX + gridSize.w > 12) {
+        cursorX = 0
+        cursorY += rowHeight
+        rowHeight = 0
+      }
+
+      const arranged = {
+        ...item,
+        i: item.i || `widget-${index}`,
+        x: cursorX,
+        y: cursorY,
+        w: gridSize.w,
+        h: gridSize.h,
+      }
+
+      cursorX += gridSize.w
+      rowHeight = Math.max(rowHeight, gridSize.h)
+
+      return arranged
+    })
+  }, [isMobile])
+
+  // Transform shared layout items to include required grid properties
   const transformedLayout = useMemo(() => {
-    const layoutItems = (activeLayout === 'desktop' ? defaultLayouts.desktop : defaultLayouts.mobile) as unknown as Widget[]
-    return layoutItems.map((item: Widget, index: number) => ({
-      ...item,
-      i: item.i || `widget-${index}`,
-      // Preserve original x,y positions from default layouts
-      x: item.x,
-      y: item.y,
-      w: sizeToGrid(item.size, isMobile).w,
-      h: sizeToGrid(item.size, isMobile).h
-    }))
-  }, [activeLayout, isMobile])
+    const sharedLayout = (
+      activeLayout === 'desktop'
+        ? sharedParams?.desktop
+        : sharedParams?.mobile
+    ) as Widget[] | undefined
+
+    const fallbackLayout = (
+      activeLayout === 'desktop' ? defaultLayouts.desktop : defaultLayouts.mobile
+    ) as unknown as Widget[]
+
+    const layoutItems = (sharedLayout && sharedLayout.length > 0 ? sharedLayout : fallbackLayout)
+      .filter((item): item is Widget => Boolean(item?.type))
+
+    return autoArrangeWidgets(layoutItems)
+  }, [activeLayout, autoArrangeWidgets, sharedParams?.desktop, sharedParams?.mobile])
 
   return (
-    <div className="relative mt-6">
+    <div className="relative mt-6 w-full">
       <div id="tooltip-portal" className="fixed inset-0 pointer-events-none z-9999" />
       <ResponsiveGridLayout
         className="layout"

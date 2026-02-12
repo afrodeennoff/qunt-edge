@@ -45,7 +45,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={cn(
-            "p-1.5 rounded-lg border transition-all duration-500",
+            "precision-panel p-1.5 rounded-md transition-all duration-500",
             isPositive ? "bg-accent-teal/10 border-accent-teal/20" : "bg-rose-500/10 border-rose-500/20"
           )}>
             {isPositive ? (
@@ -54,7 +54,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
               <TrendingDown className={cn(iconSize, "text-rose-500")} />
             )}
           </div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-fg-muted">
+          <span className="font-terminal text-[10px] font-bold uppercase tracking-widest text-fg-muted">
             {t('statistics.profitLoss.net')}
           </span>
         </div>
@@ -71,7 +71,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
       </div>
 
       <div className={cn(
-        "text-center font-black tracking-tighter tabular-nums drop-shadow-2xl",
+        "text-center font-terminal font-bold tracking-tighter tabular-nums drop-shadow-2xl",
         isPositive ? "text-accent-teal" : "text-rose-500",
         valueSizeClass === 'text-2xl' ? 'text-3xl' : 'text-xl'
       )}>
@@ -81,11 +81,11 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 border-dashed">
         <div className="flex flex-col gap-0.5">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Profits</span>
-          <span className="text-[11px] font-black text-accent-teal tabular-nums">{formatCurrency(grossWin)}</span>
+          <span className="font-terminal text-[11px] font-bold text-accent-teal tabular-nums">{formatCurrency(grossWin)}</span>
         </div>
         <div className="flex flex-col gap-0.5 text-right">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Losses</span>
-          <span className="text-[11px] font-black text-rose-500 tabular-nums">{formatCurrency(grossLosses)}</span>
+          <span className="font-terminal text-[11px] font-bold text-rose-500 tabular-nums">{formatCurrency(grossLosses)}</span>
         </div>
       </div>
     </div>

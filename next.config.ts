@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 2678400, // 31 days to reduce repeated image optimization work
     remotePatterns: [
       {
-        hostname: 'fhvmtnvjiotzztimdxbi.supabase.co',
+        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '') || '',
       },
     ],
   },

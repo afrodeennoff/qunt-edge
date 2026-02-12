@@ -763,12 +763,12 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl border transition-all duration-500 group/widget overflow-hidden relative",
+                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel precision-glow-sweep",
                       isCustomizing
-                        ? "border-accent-teal/50 shadow-[0_0_30px_rgba(var(--accent-teal-rgb),0.2)] bg-background/60"
-                        : "border-white/[0.03] bg-background/40 backdrop-blur-md hover:border-accent-teal/30 hover:shadow-[0_0_20px_rgba(var(--accent-teal-rgb),0.1)]"
+                        ? "border-[hsl(var(--precision-cobalt)/0.75)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_0_26px_rgba(34,90,235,0.16)]"
+                        : "bg-[hsl(var(--precision-panel)/0.95)] backdrop-blur-md hover:border-[hsl(var(--precision-cobalt)/0.5)] hover:shadow-[0_0_18px_rgba(34,90,235,0.12)]"
                     )}>
-                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.015] to-transparent pointer-events-none" />
                       <div className="relative h-full w-full">
                         {renderWidget(widget)}
                       </div>

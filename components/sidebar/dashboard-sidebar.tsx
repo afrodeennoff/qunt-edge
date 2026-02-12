@@ -167,7 +167,7 @@ export function DashboardSidebar() {
     <UnifiedSidebar
       items={navItems}
       user={user?.user_metadata}
-      styleVariant="glassy"
+      styleVariant="matte"
       actions={
         <>
           <ReferralButton />

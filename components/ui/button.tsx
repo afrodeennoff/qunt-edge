@@ -19,6 +19,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        mono:
+          "font-mono rounded-sm border border-[hsl(var(--precision-panel-line))] bg-[hsl(var(--precision-panel))] text-foreground shadow-none hover:border-[hsl(var(--precision-cobalt)/0.7)] hover:bg-[hsl(var(--precision-panel-elevated))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--precision-cobalt)/0.8)] focus-visible:ring-offset-0 active:translate-y-px",
       },
       size: {
         default: "h-9 px-4 py-2",

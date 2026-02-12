@@ -12,6 +12,11 @@ const config = {
 			'4xl': '2560px',
 		},
 		extend: {
+			fontFamily: {
+				sans: ['var(--font-geist)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
+				mono: ['var(--font-ibm-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+				terminal: ['var(--font-ibm-mono)', 'ui-monospace', 'monospace'],
+			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
@@ -75,8 +80,24 @@ const config = {
 				'9999': '9999',
 			},
 			colors: {
+				matte: {
+					obsidian: '#050505',
+					panel: '#0b0b0d',
+					layer: '#101014',
+					line: '#1a1a21',
+				},
+				precision: {
+					cobalt: '#225AEB',
+					'highlight': '#3B78FF',
+					'line': '#2a3350',
+				},
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				'precision-blue': '#225AEB',
+				'steel-grey': '#565B66',
+				'cyber-pink': '#B62472',
+				'matte-black': '#050505',
+				'obsidian': '#0D0D0D',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'

@@ -113,9 +113,9 @@ const ResumeScrollButton = () => {
 
 // Add new message type components
 const ThinkingMessage = () => (
-  <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
+  <div className="flex items-center gap-2 text-muted-foreground text-sm py-2 font-terminal">
     <Loader2 className="h-4 w-4 animate-spin" />
-    <span>Thinking...</span>
+    <span className="terminal-cursor">Thinking...</span>
   </div>
 );
 
@@ -343,7 +343,7 @@ export default function ChatWidget({ size = "large" }: ChatWidgetProps) {
   }, [setMessages, setStoredMessages, setIsStarted]);
 
   return (
-    <Card className="h-full flex flex-col bg-background relative overflow-clip">
+    <Card className="h-full flex flex-col bg-[#050505] border-none shadow-none relative overflow-clip">
       <ChatHeader
         title="AI Assistant"
         onReset={handleReset}
@@ -426,32 +426,32 @@ export default function ChatWidget({ size = "large" }: ChatWidgetProps) {
                       <UserMessage key={message.id}>
                         {message.parts
                           ? message.parts.map((part: any, index: number) => {
-                              if (part.type === "text") {
-                                return (
-                                  <span key={`${message.id}-text-${index}`}>
-                                    {part.text}
-                                  </span>
-                                );
-                              }
-                              if (
-                                part.type === "file" &&
-                                part.mediaType?.startsWith("image/")
-                              ) {
-                                return (
-                                  <div
-                                    key={`${message.id}-image-${index}`}
-                                    className="mt-2"
-                                  >
-                                    <img
-                                      src={part.url}
-                                      alt={`attachment-${index}`}
-                                      className="rounded-lg max-w-full h-auto max-h-96"
-                                    />
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })
+                            if (part.type === "text") {
+                              return (
+                                <span key={`${message.id}-text-${index}`}>
+                                  {part.text}
+                                </span>
+                              );
+                            }
+                            if (
+                              part.type === "file" &&
+                              part.mediaType?.startsWith("image/")
+                            ) {
+                              return (
+                                <div
+                                  key={`${message.id}-image-${index}`}
+                                  className="mt-2"
+                                >
+                                  <img
+                                    src={part.url}
+                                    alt={`attachment-${index}`}
+                                    className="rounded-lg max-w-full h-auto max-h-96"
+                                  />
+                                </div>
+                              );
+                            }
+                            return null;
+                          })
                           : getMessageText(message)}
                       </UserMessage>
                     );
@@ -482,7 +482,7 @@ export default function ChatWidget({ size = "large" }: ChatWidgetProps) {
                               return (
                                 <BotMessage
                                   key={`${message.id}-image-${index}`}
-                                    status={uiStatus}
+                                  status={uiStatus}
                                 >
                                   <div className="mt-2">
                                     <img

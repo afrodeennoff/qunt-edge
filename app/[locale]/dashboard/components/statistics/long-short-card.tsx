@@ -37,13 +37,13 @@ export default function LongShortPerformanceCard({ size = 'medium' }: LongShortP
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-accent-teal/10 rounded-md border border-accent-teal/20">
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent-teal/10 border-accent-teal/20">
         <ArrowUpFromLine className="h-3 w-3 text-accent-teal" />
-        <span className="font-black text-[11px] tabular-nums text-accent-teal">{longNumber} ({longRate}%)</span>
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-accent-teal">{longNumber} ({longRate}%)</span>
       </div>
-      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-rose-500/10 rounded-md border border-rose-500/20">
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-500/10 border-rose-500/20">
         <ArrowDownFromLine className="h-3 w-3 text-rose-500" />
-        <span className="font-black text-[11px] tabular-nums text-rose-500">{shortNumber} ({shortRate}%)</span>
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-rose-500">{shortNumber} ({shortRate}%)</span>
       </div>
       <TooltipProvider delayDuration={100}>
         <Tooltip>

@@ -25,14 +25,14 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
       <div className={cn(
-        "flex items-center gap-1.5 px-3 py-1 rounded-full border",
+        "precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md",
         isProfitable
           ? "bg-accent-teal/10 border-accent-teal/20"
           : "bg-rose-500/10 border-rose-500/20"
       )}>
         <Scale className={cn("h-3 w-3", isProfitable ? "text-accent-teal" : "text-rose-500")} />
         <span className={cn(
-          "font-black text-[11px] uppercase tracking-wider",
+          "font-terminal font-bold text-[11px] uppercase tracking-wider",
           isProfitable ? "text-accent-teal" : "text-rose-500"
         )}>
           {formattedPF} PF

@@ -65,7 +65,7 @@ export interface UnifiedSidebarConfig {
   styleVariant?: UnifiedSidebarStyle
 }
 
-export type UnifiedSidebarStyle = "minimal" | "glassy"
+export type UnifiedSidebarStyle = "minimal" | "glassy" | "matte"
 
 const fastSpring = {
   type: "spring" as const,
@@ -223,38 +223,62 @@ const SIDEBAR_STYLE_CLASSES: Record<
   },
   glassy: {
     sidebar:
-      "border-r border-white/5 bg-[#030303] text-zinc-300",
-    rail: "after:bg-white/5 after:transition-colors after:duration-200 hover:bg-teal-500/10 hover:after:bg-teal-500/40",
-    header: "border-b border-white/5 px-4 py-4",
+      "border-r border-[#171924] bg-[#050505] text-zinc-300",
+    rail: "after:bg-white/5 after:transition-colors after:duration-200 hover:bg-[#225AEB]/10 hover:after:bg-[#225AEB]/40",
+    header: "border-b border-[#171924] px-4 py-4",
     brandCard:
       "flex h-10 items-center gap-3 overflow-hidden rounded-xl bg-transparent px-0 transition-all duration-300",
     brandIcon:
-      "flex size-10 shrink-0 items-center justify-center rounded-xl border border-teal-500/10 bg-teal-500/5 text-teal-400 relative overflow-hidden group",
-    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-widest text-teal-500 mt-1",
+      "flex size-10 shrink-0 items-center justify-center rounded-xl border border-[#225AEB]/20 bg-[#225AEB]/8 text-[#7ea2ff] relative overflow-hidden group",
+    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-widest text-[#5f8fff] mt-1",
     userCard:
-      "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors duration-200 hover:bg-white/5",
-    avatar: "size-9 border border-white/10 ring-1 ring-transparent group-hover:ring-teal-500/30 rounded-lg",
+      "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors duration-200 hover:bg-white/4",
+    avatar: "size-9 border border-white/10 ring-1 ring-transparent group-hover:ring-[#225AEB]/35 rounded-lg",
     avatarFallback: "bg-zinc-800 text-[10px] font-bold text-zinc-300",
     content: "flex flex-col px-3 py-4 overflow-x-hidden",
     groupLabel: "text-[9px] font-bold uppercase tracking-widest text-zinc-600 px-3 mb-2 animate-in fade-in slide-in-from-left-2",
-    groupLine: "h-px flex-1 bg-white/5",
-    itemTrack: "bg-teal-500 shadow-[0_0_10px_#2dd4bf]",
+    groupLine: "h-px flex-1 bg-[#151822]",
+    itemTrack: "bg-[#225AEB] shadow-[0_0_14px_rgba(34,90,235,0.6)]",
     itemIconActive:
-      "text-teal-400",
+      "text-[#7ea2ff]",
     itemIconInactive:
       "text-zinc-500 group-hover/item:text-zinc-300",
     itemButtonActive:
-      "bg-gradient-to-r from-teal-500/10 to-transparent text-white",
+      "bg-gradient-to-r from-[#225AEB]/16 to-transparent text-white",
     itemButtonInactive: "hover:bg-white/5 hover:text-zinc-200 text-zinc-500",
     selectTrigger:
-      "h-9 rounded-lg border-white/10 bg-zinc-900/50 text-[12px] font-medium hover:border-white/20 hover:text-white focus:ring-teal-500/50 transition-colors",
-    footer: "border-t border-white/5 bg-[#020202] p-4",
+      "h-9 rounded-lg border-[#1b2030] bg-zinc-900/50 text-[12px] font-medium hover:border-[#2b3554] hover:text-white focus:ring-[#225AEB]/55 transition-colors",
+    footer: "border-t border-[#171924] bg-[#040404] p-4",
     logout:
       "flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 ml-auto",
     collapse:
-      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#030303] text-zinc-500 shadow-lg transition-all duration-200 hover:border-teal-500/50 hover:text-teal-400 absolute -right-3 top-8 z-50",
+      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#1b2030] bg-[#050505] text-zinc-500 shadow-lg transition-all duration-200 hover:border-[#225AEB]/60 hover:text-[#7ea2ff] absolute -right-3 top-8 z-50",
     edgeCollapse:
-      "absolute -right-3 top-8 z-50 hidden border border-white/10 bg-[#030303] shadow-lg md:flex",
+      "absolute -right-3 top-8 z-50 hidden border border-[#1b2030] bg-[#050505] shadow-lg md:flex",
+  },
+  matte: {
+    sidebar: "border-r border-[#111111] bg-[#050505] text-[#888888]",
+    rail: "after:bg-white/[0.02] hover:bg-[#225AEB]/5 hover:after:bg-[#225AEB]/20",
+    header: "border-b border-[#111111] px-4 py-5",
+    brandCard: "flex h-10 items-center gap-3 bg-transparent",
+    brandIcon: "flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#225AEB]/30 bg-[#225AEB]/5 text-[#225AEB]",
+    workspaceLabel: "truncate text-[9px] font-mono uppercase tracking-[0.2em] text-[#444444]",
+    userCard: "mx-0 flex items-center gap-3 rounded-lg border border-transparent bg-transparent p-2 transition-colors hover:bg-white/[0.02]",
+    avatar: "size-8 border border-white/5 rounded-lg",
+    avatarFallback: "bg-[#111111] text-[10px] font-bold text-[#666666]",
+    content: "flex flex-col px-3 py-6",
+    groupLabel: "text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-[#333333] px-3 mb-4",
+    groupLine: "h-px flex-1 bg-[#111111]",
+    itemTrack: "bg-[#225AEB] shadow-[0_0_10px_rgba(34,90,235,0.4)]",
+    itemIconActive: "text-[#225AEB]",
+    itemIconInactive: "text-[#444444] group-hover/item:text-[#888888]",
+    itemButtonActive: "bg-white/[0.02] text-white font-mono",
+    itemButtonInactive: "hover:bg-white/[0.01] hover:text-[#CCCCCC] text-[#666666] font-mono",
+    selectTrigger: "h-8 rounded-md border-[#111111] bg-[#080808] text-[11px] font-mono text-[#666666] hover:border-[#225AEB]/30",
+    footer: "border-t border-[#111111] bg-[#050505] p-4",
+    logout: "flex h-8 w-8 items-center justify-center rounded-lg text-[#333333] hover:bg-rose-500/10 hover:text-rose-500 ml-auto transition-colors",
+    collapse: "flex h-6 w-6 items-center justify-center rounded-md border border-[#111111] bg-[#050505] text-[#444444] hover:border-[#225AEB]/50 hover:text-[#225AEB] absolute -right-3 top-8 z-50",
+    edgeCollapse: "absolute -right-3 top-8 z-50 hidden border border-[#111111] bg-[#050505] md:flex",
   },
 }
 

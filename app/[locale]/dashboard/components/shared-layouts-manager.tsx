@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { useI18n } from "@/locales/client"
+import { useCurrentLocale, useI18n } from "@/locales/client"
 import { getUserShared, deleteShared } from "@/server/shared"
 import { toast } from "sonner"
 import { format } from "date-fns"
@@ -75,6 +75,7 @@ function SkeletonCard() {
 
 export function SharedLayoutsManager({ onBack }: SharedLayoutsManagerProps) {
   const t = useI18n()
+  const locale = useCurrentLocale()
   const user = useUserStore(state => state.user)
   const [sharedLayouts, setSharedLayouts] = useState<SharedLayout[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -97,7 +98,7 @@ export function SharedLayoutsManager({ onBack }: SharedLayoutsManagerProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [user, toast, t])
+  }, [user, t])
 
   useEffect(() => {
     if (user) {
@@ -125,8 +126,10 @@ export function SharedLayoutsManager({ onBack }: SharedLayoutsManagerProps) {
     }
   }
 
+  const getSharedPath = (slug: string) => `/${locale}/shared/${slug}`
+
   const copyShareLink = async (slug: string) => {
-    const url = `${window.location.origin}/shared/${slug}`
+    const url = `${window.location.origin}${getSharedPath(slug)}`
     try {
       await navigator.clipboard.writeText(url)
       toast.success(t('share.urlCopied'))
@@ -136,7 +139,7 @@ export function SharedLayoutsManager({ onBack }: SharedLayoutsManagerProps) {
   }
 
   const visitSharedLayout = (slug: string) => {
-    window.open(`/shared/${slug}`, '_blank')
+    window.open(getSharedPath(slug), '_blank')
   }
 
   if (isLoading) {

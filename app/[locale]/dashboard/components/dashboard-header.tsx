@@ -78,7 +78,7 @@ export function DashboardHeader() {
     const currentLayout = layouts || { desktop: [], mobile: [] };
 
     return (
-        <header className="sticky top-0 z-50 overflow-hidden bg-background/95 backdrop-blur-md" data-dashboard-header="true">
+        <header className="sticky top-0 z-50 overflow-hidden bg-[#050505]/95 backdrop-blur-md" data-dashboard-header="true">
             <div className="min-h-[64px] flex flex-wrap items-center justify-between gap-2 px-3 md:px-8">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
@@ -108,8 +108,8 @@ export function DashboardHeader() {
 
                         {!isPlusUser() && (
                             <Link href="/dashboard/billing">
-                                <button className="group flex h-8 items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-4 text-[9px] font-black uppercase tracking-widest text-primary transition-all hover:border-primary/50 hover:bg-primary/20">
-                                    <Sparkles className="h-3 w-3 animate-pulse transition-transform group-hover:scale-110" />
+                                <button className="group flex h-8 items-center gap-2 rounded-lg border border-[#225AEB]/30 bg-[#225AEB]/10 px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-[#225AEB] transition-all hover:bg-[#225AEB]/20">
+                                    <Sparkles className="h-3 w-3 animate-pulse" />
                                     <span>UPGRADE</span>
                                 </button>
                             </Link>

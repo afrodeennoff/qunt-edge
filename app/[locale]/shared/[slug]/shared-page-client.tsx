@@ -8,7 +8,7 @@ import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { useI18n } from "@/locales/client"
+import { useCurrentLocale, useI18n } from "@/locales/client"
 import { Loader2, ChevronDown } from "lucide-react"
 import { useEffect, useState } from "react"
 import { SharedParams } from "@/server/shared"
@@ -25,6 +25,8 @@ interface SharedPageClientProps {
     trades: Trade[];
   }
 }
+
+type I18nFn = ReturnType<typeof useI18n>
 
 // Create a client component for the accounts selection
 function AccountsSelector({ accounts }: { accounts: string[] }) {
@@ -109,38 +111,42 @@ function AccountsSelector({ accounts }: { accounts: string[] }) {
   )
 }
 
-function TopBanner({ t }: { t: any }) {
+function TopBanner({ t }: { t: I18nFn }) {
+  const locale = useCurrentLocale()
   const languages = [
     { value: 'en', label: 'English' },
     { value: 'fr', label: 'Français' },
   ]
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b shadow-xs">
-      <div className="w-full mx-auto py-3 px-4 md:px-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-x-4">
-            <Logo className="fill-black h-6 w-6 dark:fill-white" />
-            <div className="flex flex-col">
-              <h1 className="font-semibold">Qunt Edge</h1>
-              <p className="text-sm text-muted-foreground">{t('shared.tagline')}</p>
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className="mx-auto w-full max-w-[1240px] px-4 pt-4 sm:px-6">
+        <div className="flex min-h-[66px] items-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface)/0.62)] px-3 backdrop-blur-xl sm:px-4">
+          <Link href={`/${locale}`} className="flex items-center gap-2 rounded-full px-2 py-1.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface-muted)/0.85)]">
+              <Logo className="h-4.5 w-4.5 fill-[hsl(var(--mk-text))]" />
             </div>
-          </div>
-          <div className="flex items-center gap-x-2 sm:gap-x-4 pb-2 sm:pb-0">
+            <div className="hidden sm:flex sm:flex-col">
+              <h1 className="text-sm font-semibold tracking-tight [font-family:var(--font-poppins)]">Qunt Edge</h1>
+              <p className="text-xs text-[hsl(var(--mk-text-muted))]">{t('shared.tagline')}</p>
+            </div>
+          </Link>
+
+          <div className="ml-auto flex items-center gap-2">
             <LanguageSelector languages={languages} />
-            <Link href="/authentication" className="flex-1 sm:flex-none">
-              <Button size="sm" className="bg-primary hover:bg-primary/90 w-full">
+            <Link href={`/${locale}/authentication`}>
+              <Button size="sm" className="h-10 rounded-full bg-[hsl(var(--brand-primary))] px-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] hover:bg-[hsl(var(--brand-primary)/0.9)]">
                 {t('shared.createAccount')}
               </Button>
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </header>
   )
 }
 
-export function SharedPageClient({ params, initialData }: SharedPageClientProps) {
+export function SharedPageClient({ initialData }: SharedPageClientProps) {
   const t = useI18n()
   const { isLoading, sharedParams, setSharedParams, setAccountNumbers } = useData()
 
@@ -167,7 +173,7 @@ export function SharedPageClient({ params, initialData }: SharedPageClientProps)
     return (
       <div className="flex flex-col min-h-screen">
         <TopBanner t={t} />
-        <div className="w-full mx-auto flex-1 flex items-center justify-center pt-[120px] sm:pt-[60px]">
+        <div className="w-full mx-auto flex-1 flex items-center justify-center pt-28 sm:pt-32">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{t('shared.loading')}</p>
@@ -181,7 +187,7 @@ export function SharedPageClient({ params, initialData }: SharedPageClientProps)
     return (
       <div className="flex flex-col min-h-screen">
         <TopBanner t={t} />
-        <div className="w-full mx-auto flex-1 flex items-center justify-center p-4 pt-[120px] sm:pt-[76px]">
+        <div className="w-full mx-auto flex-1 flex items-center justify-center p-4 pt-28 sm:pt-32">
           <Card className="max-w-lg w-full">
             <CardHeader>
               <CardTitle>{t('shared.notFound')}</CardTitle>
@@ -200,9 +206,9 @@ export function SharedPageClient({ params, initialData }: SharedPageClientProps)
   return (
     <div className="flex flex-col min-h-screen">
       <TopBanner t={t} />
-      <div className="w-full mx-auto px-8 flex-1 pt-[120px] sm:pt-[60px]">
+      <div className="container-fluid flex-1 pt-28 sm:pt-32">
         <main className="w-full py-6 lg:py-8">
-          <Card className="mb-6">
+          <Card className="mb-6 w-full">
             <CardHeader className="space-y-3">
               <div className="flex flex-col space-y-2">
                 <CardTitle className="text-xl sm:text-2xl">
