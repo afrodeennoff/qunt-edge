@@ -7,12 +7,12 @@
 @layer base {
   :root {
     /* ===== GLOBAL BRAND COLORS ===== */
-    --brand-primary: 163 98% 49%;
-    --brand-primary-strong: 163 90% 42%;
-    --brand-secondary: 188 86% 58%;
-    --brand-warm: 42 83% 55%;
-    --brand-ink: 230 40% 5%;
-    --brand-soft-ink: 230 18% 16%;
+    --brand-primary: 0 0% 100%;
+    --brand-primary-strong: 0 0% 90%;
+    --brand-secondary: 0 0% 80%;
+    --brand-warm: 0 0% 70%;
+    --brand-ink: 0 0% 5%;
+    --brand-soft-ink: 0 0% 16%;
 
     /* ===== MARKETING SURFACE TOKENS ===== */
     --mk-bg-0: 230 40% 4%;
@@ -35,11 +35,11 @@
     --bg-highlight: 240 10% 15%;
 
     /* ===== PRIMARY ACCENT (Teal-500: #2dd4bf) ===== */
-    --accent-teal: 173 58% 39%;
-    --accent-teal-hover: 173 58% 44%;
-    --accent-teal-active: 173 58% 34%;
-    --accent-teal-subtle: 173 58% 39%;
-    --accent-teal-glow: 173 58% 39%;
+    --accent-teal: 0 0% 100%;
+    --accent-teal-hover: 0 0% 90%;
+    --accent-teal-active: 0 0% 80%;
+    --accent-teal-subtle: 0 0% 100%;
+    --accent-teal-glow: 0 0% 100%;
 
     /* ===== NEUTRAL PALETTE (Zinc scale) ===== */
     --neutral-50: 240 5% 96%;
@@ -97,17 +97,17 @@
     --color-info-bg: 217 91% 60% / 0.1;
 
     /* ===== CHART COLORS ===== */
-    --chart-positive: var(--accent-teal);
-    --chart-negative: 0 62% 55%;
+    --chart-positive: 0 0% 100%;
+    --chart-negative: 0 0% 40%;
     --chart-neutral: 240 5% 50%;
-    --chart-1: 217 91% 60%;
-    --chart-2: var(--accent-teal);
-    --chart-3: 197 55% 60%;
-    --chart-4: 43 85% 60%;
-    --chart-5: 27 85% 60%;
-    --chart-6: 206 80% 60%;
-    --chart-7: 260 65% 65%;
-    --chart-8: 336 70% 65%;
+    --chart-1: 0 0% 100%;
+    --chart-2: 0 0% 90%;
+    --chart-3: 0 0% 80%;
+    --chart-4: 0 0% 70%;
+    --chart-5: 0 0% 60%;
+    --chart-6: 0 0% 50%;
+    --chart-7: 0 0% 40%;
+    --chart-8: 0 0% 30%;
 
     /* ===== ANIMATION TIMING ===== */
     --transition-fast: 150ms;

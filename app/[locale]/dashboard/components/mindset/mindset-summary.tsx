@@ -28,12 +28,12 @@ interface MindsetSummaryProps {
   onEdit: (section?: 'emotion' | 'journal' | 'news') => void
 }
 
-export function MindsetSummary({ 
-  date, 
-  emotionValue, 
-  selectedNews, 
+export function MindsetSummary({
+  date,
+  emotionValue,
+  selectedNews,
   journalContent,
-  onEdit 
+  onEdit
 }: MindsetSummaryProps) {
   const t = useI18n()
   const { locale } = useParams()
@@ -51,18 +51,18 @@ export function MindsetSummary({
       const matchesDate = eventDate.toDateString() === date.toDateString()
       const matchesLocale = event.lang === locale
       const matchesSelectedNews = !showOnlySelectedNews || selectedNews.includes(event.id)
-      
+
       return matchesDate && matchesLocale && matchesSelectedNews
     })
     setEvents(dateEvents)
   }, [date, financialEvents, locale, selectedNews, showOnlySelectedNews])
 
   const getEmotionLabel = (value: number) => {
-    if (value < 20) return { label: t('mindset.emotion.verySad'), color: "text-red-500" }
-    if (value < 40) return { label: t('mindset.emotion.sad'), color: "text-orange-500" }
-    if (value < 60) return { label: t('mindset.emotion.neutral'), color: "text-yellow-500" }
-    if (value < 80) return { label: t('mindset.emotion.happy'), color: "text-green-500" }
-    return { label: t('mindset.emotion.veryHappy'), color: "text-emerald-500" }
+    if (value < 20) return { label: t('mindset.emotion.verySad'), color: "text-white/30" }
+    if (value < 40) return { label: t('mindset.emotion.sad'), color: "text-white/50" }
+    if (value < 60) return { label: t('mindset.emotion.neutral'), color: "text-white/70" }
+    if (value < 80) return { label: t('mindset.emotion.happy'), color: "text-white/90" }
+    return { label: t('mindset.emotion.veryHappy'), color: "text-white" }
   }
 
   // Filter trades for the selected date
@@ -76,7 +76,7 @@ export function MindsetSummary({
   const [emotion, setEmotion] = useState<{ label: string; color: string }>(getEmotionLabel(emotionValue))
 
   useEffect(() => {
-   setEmotion(getEmotionLabel(emotionValue))
+    setEmotion(getEmotionLabel(emotionValue))
   }, [emotionValue])
 
   return (
@@ -118,7 +118,7 @@ export function MindsetSummary({
           {!journalContent ? (
             <p className="text-sm text-muted-foreground">{t('mindset.noData')}</p>
           ) : (
-            <div 
+            <div
               key={journalContent}
               className="prose prose-sm dark:prose-invert max-w-none [&_.ProseMirror]:outline-hidden [&_.ProseMirror]:relative [&_.ProseMirror]:h-full"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(journalContent) }}

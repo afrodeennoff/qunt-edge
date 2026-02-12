@@ -144,7 +144,7 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-2 mt-auto">
-            <p className={`text-xl md:text-2xl font-bold ${maxDrawdown > 0 ? 'text-rose-500' : 'text-muted-foreground'}`}>
+            <p className={`text-xl md:text-2xl font-bold ${maxDrawdown > 0 ? 'text-white/40' : 'text-muted-foreground'}`}>
               -{formatCurrency(maxDrawdown)}
             </p>
           </CardContent>
@@ -157,7 +157,7 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-2 mt-auto">
-            <p className={`text-xl md:text-2xl font-bold ${maxProfit > 0 ? 'text-accent-teal' : 'text-muted-foreground'}`}>
+            <p className={`text-xl md:text-2xl font-bold ${maxProfit > 0 ? 'text-white' : 'text-muted-foreground'}`}>
               {formatCurrency(maxProfit)}
             </p>
           </CardContent>

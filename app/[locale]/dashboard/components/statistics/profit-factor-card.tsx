@@ -27,13 +27,13 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
       <div className={cn(
         "precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md",
         isProfitable
-          ? "bg-accent-teal/10 border-accent-teal/20"
-          : "bg-rose-500/10 border-rose-500/20"
+          ? "bg-white/10 border-white/20"
+          : "bg-white/5 border-white/10"
       )}>
-        <Scale className={cn("h-3 w-3", isProfitable ? "text-accent-teal" : "text-rose-500")} />
+        <Scale className={cn("h-3 w-3", isProfitable ? "text-white" : "text-fg-muted")} />
         <span className={cn(
           "font-terminal font-bold text-[11px] uppercase tracking-wider",
-          isProfitable ? "text-accent-teal" : "text-rose-500"
+          isProfitable ? "text-white" : "text-fg-muted"
         )}>
           {formattedPF} PF
         </span>
@@ -42,7 +42,7 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
             <TooltipTrigger asChild>
               <HelpCircle className={cn(
                 "h-3 w-3 cursor-help",
-                isProfitable ? "text-accent-teal/50" : "text-rose-500/50"
+                isProfitable ? "text-white/50" : "text-fg-muted/50"
               )} />
             </TooltipTrigger>
             <TooltipContent

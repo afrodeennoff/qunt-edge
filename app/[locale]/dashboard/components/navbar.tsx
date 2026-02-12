@@ -81,7 +81,7 @@ export default function Navbar() {
                 className={cn(
                   "h-9 w-auto px-3 sm:px-4 gap-2 rounded-xl transition-all duration-500",
                   isCustomizing
-                    ? "bg-accent-teal text-white shadow-[0_0_20px_rgba(45,212,191,0.4)]"
+                    ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)] font-bold"
                     : "text-fg-muted"
                 )}
               >
@@ -96,7 +96,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={flushPendingSaves}
-                  className="hidden sm:flex h-9 px-3 gap-2 rounded-xl text-accent-teal transition-all border border-accent-teal/20"
+                  className="hidden sm:flex h-9 px-3 gap-2 rounded-xl text-white transition-all border border-white/20"
                 >
                   <CloudUpload className="w-3.5 h-3.5 animate-bounce" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Save Now</span>
@@ -104,7 +104,7 @@ export default function Navbar() {
               )}
 
               {!autoSaveStatus.hasPending && isCustomizing && (
-                <div className="hidden sm:flex items-center gap-2 px-3 text-accent-teal/60">
+                <div className="hidden sm:flex items-center gap-2 px-3 text-white/60">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
                 </div>

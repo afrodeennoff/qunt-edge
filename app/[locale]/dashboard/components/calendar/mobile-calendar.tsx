@@ -37,7 +37,7 @@ function getCalendarDayStrings(currentMonthDate: Date, timezone: string, weekSta
   // 4. Calculate the actual start date of the grid (Sunday or Monday) by subtracting days from the first day.
   // `addDays` operates on the underlying timestamp but starts from a timezone-aware Date.
   // If week starts on Monday, adjust: Monday=1, so subtract (startDayOfWeek === 0 ? 6 : startDayOfWeek - 1)
-  const daysToSubtract = weekStartsOnMonday 
+  const daysToSubtract = weekStartsOnMonday
     ? (startDayOfWeek === 0 ? 6 : startDayOfWeek - 1)
     : startDayOfWeek;
   let currentGridDate = addDays(firstDayOfMonthInTZ, -daysToSubtract);
@@ -82,23 +82,23 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
   // Define weekday headers (Monday start for French locale, Sunday start otherwise)
   const weekdayHeaders = weekStartsOnMonday
     ? [
-        { key: 'monday', label: t('calendar.weekdays.mon') },
-        { key: 'tuesday', label: t('calendar.weekdays.tue') },
-        { key: 'wednesday', label: t('calendar.weekdays.wed') },
-        { key: 'thursday', label: t('calendar.weekdays.thu') },
-        { key: 'friday', label: t('calendar.weekdays.fri') },
-        { key: 'saturday', label: t('calendar.weekdays.sat') },
-        { key: 'sunday', label: t('calendar.weekdays.sun') }
-      ]
+      { key: 'monday', label: t('calendar.weekdays.mon') },
+      { key: 'tuesday', label: t('calendar.weekdays.tue') },
+      { key: 'wednesday', label: t('calendar.weekdays.wed') },
+      { key: 'thursday', label: t('calendar.weekdays.thu') },
+      { key: 'friday', label: t('calendar.weekdays.fri') },
+      { key: 'saturday', label: t('calendar.weekdays.sat') },
+      { key: 'sunday', label: t('calendar.weekdays.sun') }
+    ]
     : [
-        { key: 'sunday', label: t('calendar.weekdays.sun') },
-        { key: 'monday', label: t('calendar.weekdays.mon') },
-        { key: 'tuesday', label: t('calendar.weekdays.tue') },
-        { key: 'wednesday', label: t('calendar.weekdays.wed') },
-        { key: 'thursday', label: t('calendar.weekdays.thu') },
-        { key: 'friday', label: t('calendar.weekdays.fri') },
-        { key: 'saturday', label: t('calendar.weekdays.sat') }
-      ]
+      { key: 'sunday', label: t('calendar.weekdays.sun') },
+      { key: 'monday', label: t('calendar.weekdays.mon') },
+      { key: 'tuesday', label: t('calendar.weekdays.tue') },
+      { key: 'wednesday', label: t('calendar.weekdays.wed') },
+      { key: 'thursday', label: t('calendar.weekdays.thu') },
+      { key: 'friday', label: t('calendar.weekdays.fri') },
+      { key: 'saturday', label: t('calendar.weekdays.sat') }
+    ]
 
   const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1))
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1))
@@ -109,7 +109,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
       // Parse the date string to compare month and year
       try {
         // Use UTC for parsing the key to avoid local shifts, then compare components
-        const date = toDate(dateString + 'T00:00:00Z') 
+        const date = toDate(dateString + 'T00:00:00Z')
         if (date.getFullYear() === currentYear && date.getMonth() === currentMonth) {
           return total + dayData.pnl
         }
@@ -119,9 +119,9 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
       return total
     }, 0)
   }
-  
+
   const monthlyTotal = calculateMonthlyTotal()
-  
+
   const getMaxPnl = () => {
     // This calculation correctly uses dateString keys which are already YYYY-MM-DD
     return Math.max(0, ...Object.entries(calendarData)
@@ -149,7 +149,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
           </CardTitle>
           <span className={cn(
             "text-sm font-semibold truncate",
-            monthlyTotal >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+            monthlyTotal >= 0 ? "text-white" : "text-white/40"
           )}>
             ${formatCurrency(monthlyTotal)}
           </span>
@@ -193,9 +193,9 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
 
             // contribution calculation uses dayData which is already correct
             const contribution = dayData && monthlyTotal !== 0
-              ? Math.abs(dayData.pnl / monthlyTotal) 
+              ? Math.abs(dayData.pnl / monthlyTotal)
               : 0
-            const strokeDasharray = contribution > 0 
+            const strokeDasharray = contribution > 0
               ? `${contribution * 100} ${100 - (contribution * 100)}`
               : "0 100"
 
@@ -228,7 +228,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                       fill="none"
                       className={cn(
                         "stroke-current transition-all",
-                        dayData.pnl >= 0 ? "stroke-green-500" : "stroke-red-500"
+                        dayData.pnl >= 0 ? "text-white" : "text-white/20"
                       )}
                       strokeWidth="2.5"
                       strokeDasharray={strokeDasharray}
@@ -239,12 +239,12 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                 <div className={cn(
                   "w-8 h-8 flex items-center justify-center rounded-full z-10",
                   // Check today using the date string and timezone
-                  isDateStringToday(dateString, timezone) && "bg-primary text-primary-foreground",
+                  isDateStringToday(dateString, timezone) && "bg-white text-black",
                   // Style based on PnL, ensuring not to override 'today' style
                   dayData && dayData.pnl !== 0 && !isDateStringToday(dateString, timezone) && (
                     dayData.pnl > 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
+                      ? "text-white"
+                      : "text-white/40"
                   )
                 )}>
                   <span className="text-lg font-semibold">

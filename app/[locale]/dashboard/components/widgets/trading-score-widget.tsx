@@ -27,35 +27,32 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
             <div className="py-3 px-4 flex-none border-b border-white/[0.03]">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold tracking-tight text-fg-primary">{t('widgets.tradingScore.title')}</span>
+                        <span className="text-sm font-semibold tracking-tight text-fg-primary">{(t as any)('widgets.tradingScore.title')}</span>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
                                     <Info className="h-3.5 w-3.5 text-fg-muted" />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p className="text-xs">{t('widgets.tradingScore.tooltip')}</p>
+                                    <p className="text-xs">{(t as any)('widgets.tradingScore.tooltip')}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     </div>
-                    <Trophy className={cn("h-4 w-4", colorClass === "text-green-500" ? "text-accent-teal" : colorClass === "text-red-500" ? "text-rose-500" : colorClass)} />
+                    <Trophy className="h-4 w-4 text-white" />
                 </div>
             </div>
             <div className="flex-1 flex flex-col items-center justify-center p-4">
                 <div className="relative flex items-center justify-center">
                     <div className="text-4xl font-semibold tracking-tight tabular-nums mb-1">
-                        <span className={cn(colorClass === "text-green-500" ? "text-accent-teal" : colorClass === "text-red-500" ? "text-rose-500" : colorClass)}>
+                        <span className={score >= 80 ? "text-white" : "text-white font-normal"}>
                             {score}
                         </span>
                         <span className="text-base text-fg-muted ml-1">/ 100</span>
                     </div>
                 </div>
                 <div className={cn(
-                    "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight",
-                    colorClass === "text-green-500" ? "bg-accent-teal/10 text-accent-teal border border-accent-teal/20" :
-                        colorClass === "text-red-500" ? "bg-rose-500/10 text-rose-500 border border-rose-500/20" :
-                            "bg-muted/10 text-muted-foreground border border-muted/20"
+                    "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight bg-white/5 text-white border border-white/10"
                 )}>
                     {normalizedLabel}
                 </div>

@@ -123,7 +123,7 @@ export default function TimeOfDayTradeChart({
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.avgPnl >= 0 ? "text-accent-teal" : "text-rose-500"
+              data.avgPnl >= 0 ? "text-white" : "text-fg-muted"
             )}>{formatCurrency(data.avgPnl)}</span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">

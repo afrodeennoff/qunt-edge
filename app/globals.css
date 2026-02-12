@@ -140,27 +140,27 @@
 
 @layer base {
   :root {
-    --background: 0 0% calc(5% + ((100 - var(--theme-intensity, 100)) * 0.02%));
-    --foreground: 220 18% 96%;
-    --card: 240 8% 6%;
-    --card-foreground: 220 18% 96%;
-    --popover: 240 8% 6%;
-    --popover-foreground: 220 18% 96%;
-    --primary: 220 82% 53%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 7% 10%;
-    --secondary-foreground: 220 18% 96%;
-    --muted: 240 6% 9%;
-    --muted-foreground: 220 8% 62%;
-    --accent: 220 64% 13%;
-    --accent-foreground: 220 18% 96%;
-    --destructive: 0 72% 54%;
-    --destructive-foreground: 0 0% 98%;
-    --success: 173 58% 39%;
-    --success-foreground: 144.9 80.4% 10%;
-    --border: 240 8% 14%;
-    --input: 240 8% 14%;
-    --ring: 220 82% 53%;
+    --background: 0 0% 1%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 2%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 0% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 0 0% 100%;
+    --success-foreground: 0 0% 0%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 0 0% 100%;
     --radius: 0.5rem;
     --sidebar-background: 240 8% 4%;
     --sidebar-foreground: 220 18% 90%;
@@ -178,14 +178,16 @@
     --chart-6: 206 80% 60%;
     --chart-7: 260 65% 65%;
     --chart-8: 336 70% 65%;
-    --chart-loss: 0 72% 56%;
-    --chart-win: 173 58% 39%;
-    --chart-grid: 226 12% 19%;
-    --chart-axis: 220 8% 54%;
-    --chart-tooltip: 240 8% 6%;
-    --chart-tooltip-border: 226 16% 22%;
-    --precision-cobalt: 222.9 82.5% 52.5%;
-    --precision-cobalt-rgb: 34 90 235;
+    --chart-loss: 0 0% 30%;
+    --chart-win: 0 0% 100%;
+    --chart-grid: 0 0% 10%;
+    --chart-axis: 0 0% 50%;
+    --chart-tooltip: 0 0% 5%;
+    --chart-tooltip-border: 0 0% 15%;
+    --precision-cobalt: 0 0% 100%;
+    --precision-cobalt-rgb: 255 255 255;
+    --accent-teal-rgb: 255 255 255;
+    --rose-500-rgb: 100 100 100;
     --precision-panel: 0 0% 4%;
     --precision-panel-elevated: 0 0% 6%;
     --precision-panel-line: 0 0% 10%;
@@ -193,27 +195,27 @@
   }
 
   .dark {
-    --background: 0 0% 2%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     --card: 0 0% 4%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 0 0% 100%;
     --popover: 0 0% 2%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 222.9 82.5% 52.5%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 98%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 222.9 82.5% 10%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 355.7 100% 97.3%;
-    --destructive-foreground: 0 0% 98%;
-    --success: 173 58% 39%;
-    --success-foreground: 144.9 80.4% 10%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 222.9 82.5% 52.5%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 0% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 0 0% 90%;
+    --success-foreground: 0 0% 0%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
     --sidebar-background: 240 8% 4%;
     --sidebar-foreground: 220 18% 90%;
     --sidebar-primary: 220 82% 53%;
@@ -230,12 +232,12 @@
     --chart-6: 206 80% 60%;
     --chart-7: 260 65% 65%;
     --chart-8: 336 70% 65%;
-    --chart-loss: 0 72% 56%;
-    --chart-win: 173 60% 55%;
-    --chart-grid: 226 12% 19%;
-    --chart-axis: 220 8% 67%;
-    --chart-tooltip: 240 8% 6%;
-    --chart-tooltip-border: 226 16% 22%;
+    --chart-win: 0 0% 100%;
+    --chart-loss: 0 0% 40%;
+    --chart-grid: 0 0% 10%;
+    --chart-axis: 0 0% 50%;
+    --chart-tooltip: 0 0% 5%;
+    --chart-tooltip-border: 0 0% 15%;
   }
 }
 
@@ -447,7 +449,7 @@
   }
 
   .status-dot-live {
-    background: hsl(173 58% 45%);
+    background: #FFFFFF;
   }
 
   .status-dot-synced {
@@ -905,7 +907,7 @@
   }
 
   .premium-glow {
-    box-shadow: 0 0 20px -5px hsl(var(--accent-teal) / 0.2);
+    box-shadow: 0 0 20px -5px rgba(255, 255, 255, 0.2);
   }
 
   .premium-glow-hover:hover {
@@ -985,7 +987,7 @@
 /* Landing Page Styles */
 @layer utilities {
   .landing-selection ::selection {
-    background-color: #2dd4bf;
+    background-color: #FFFFFF;
     color: black;
   }
 
@@ -1026,7 +1028,7 @@
   }
 
   .text-shadow-glow {
-    text-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
   }
 }
 

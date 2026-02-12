@@ -518,8 +518,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
           <div className={cn(
             "text-sm sm:text-base font-semibold truncate",
             (viewMode === 'daily' ? monthlyTotal : yearTotal) >= 0
-              ? "text-accent-teal"
-              : "text-rose-500"
+              ? "text-white font-bold"
+              : "text-white/40"
           )}>
             {formatCurrency(viewMode === 'daily' ? monthlyTotal : yearTotal)}
           </div>
@@ -628,8 +628,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           <div className={cn(
                             "text-[9px] sm:text-[11px] font-semibold truncate text-center",
                             dayData.pnl >= 0
-                              ? "text-accent-teal"
-                              : "text-rose-500",
+                              ? "text-white font-bold"
+                              : "text-white/40",
                             !isCurrentMonth && "opacity-50"
                           )}>
                             {formatCurrency(dayData.pnl)}
@@ -681,8 +681,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           <div className={cn(
                             "text-[9px] sm:text-[11px] font-semibold truncate px-0.5",
                             weeklyTotal >= 0
-                              ? "text-accent-teal"
-                              : "text-rose-500"
+                              ? "text-white font-bold"
+                              : "text-white/40"
                           )}>
                             {formatCurrency(weeklyTotal)}
                           </div>

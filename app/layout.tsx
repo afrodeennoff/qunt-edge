@@ -201,7 +201,7 @@ export default function RootLayout({
         />
 
       </head>
-      <body className={`${ibmPlexMono.variable} ${geist.variable} font-mono antialiased`}>
+      <body className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}>
         <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}

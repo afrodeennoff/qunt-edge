@@ -111,7 +111,7 @@ export default function PnLBySideChart({
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.pnl >= 0 ? "text-accent-teal" : "text-rose-500"
+              data.pnl >= 0 ? "text-white" : "text-fg-muted"
             )}>{formatCurrency(data.pnl)}</span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
@@ -185,7 +185,7 @@ export default function PnLBySideChart({
             <Switch
               checked={showAverage}
               onCheckedChange={setShowAverage}
-              className="data-[state=checked]:bg-accent-teal"
+              className="data-[state=checked]:bg-white"
             />
           </div>
         </div>

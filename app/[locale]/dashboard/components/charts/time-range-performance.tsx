@@ -130,7 +130,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-bold text-fg-primary text-xs",
-              timeRange.range === data.range ? "text-accent-teal" : ""
+              timeRange.range === data.range ? "text-white" : ""
             )}>
               {getTimeRangeLabel(label)}
             </span>
@@ -141,7 +141,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.avgPnl >= 0 ? "text-accent-teal" : "text-rose-500"
+              data.avgPnl >= 0 ? "text-white" : "text-fg-muted"
             )}>
               {data.avgPnl.toFixed(2)}
             </span>
@@ -152,7 +152,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-bold text-fg-primary text-xs",
-              data.winRate >= 50 ? "text-accent-teal" : "text-rose-500"
+              data.winRate >= 50 ? "text-white" : "text-fg-muted"
             )}>
               {data.winRate.toFixed(1)}%
             </span>
@@ -209,7 +209,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-fg-muted hover:text-white hover:bg-white/10"
               onClick={() => setTimeRange({ range: null })}
             >
               {t('timeRangePerformance.clearFilter')}

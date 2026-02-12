@@ -144,7 +144,7 @@ export default function WeekdayPNLChart({
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.pnl >= 0 ? "text-accent-teal" : "text-rose-500"
+              data.pnl >= 0 ? "text-white" : "text-fg-muted"
             )}>{formatCurrency(data.pnl)}</span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
@@ -202,7 +202,7 @@ export default function WeekdayPNLChart({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-fg-muted hover:text-white hover:bg-white/10"
               onClick={() => setWeekdayFilter({ days: [] })}
             >
               {t("weekdayPnl.clearFilter")}
