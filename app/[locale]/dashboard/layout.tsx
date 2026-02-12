@@ -32,8 +32,10 @@ export default async function DashboardLayout({
           <SidebarInset className="flex-1 relative overflow-hidden">
             {/* Global Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_0%_-20%,rgba(34,90,235,0.09),transparent_60%),radial-gradient(900px_600px_at_100%_0%,rgba(59,120,255,0.07),transparent_58%),linear-gradient(180deg,#050505_0%,#07070a_45%,#050505_100%)]" />
-              <div className="absolute inset-y-0 left-0 w-px bg-[linear-gradient(180deg,transparent,rgba(34,90,235,0.3),transparent)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_0%_-20%,rgba(255,255,255,0.07),transparent_60%),radial-gradient(900px_600px_at_100%_0%,rgba(255,255,255,0.045),transparent_58%),linear-gradient(180deg,#050505_0%,#07070a_45%,#050505_100%)]" />
+              <div className="dashboard-mesh-layer" />
+              <div className="dashboard-texture-layer" />
+              <div className="absolute inset-y-0 left-0 w-px bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.22),transparent)]" />
             </div>
 
             <div className="relative z-10 flex flex-col min-h-screen">

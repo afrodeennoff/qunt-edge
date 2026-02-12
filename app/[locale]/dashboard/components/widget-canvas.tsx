@@ -24,6 +24,7 @@ import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { Prisma, DashboardLayout } from "@/prisma/generated/prisma"
 import { useDashboard } from '../dashboard-context'
+import { motion, useReducedMotion } from 'framer-motion'
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
   return {
@@ -378,7 +379,9 @@ export default function WidgetCanvas() {
     layouts: contextLayouts
   } = useDashboard()
   const [isUserAction, setIsUserAction] = useState(false)
+  const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null)
   const t = useI18n()
+  const shouldReduceMotion = useReducedMotion()
 
   // Add this state to track if the layout change is from user interaction
   const activeLayout = useMemo(() => isMobile ? 'mobile' : 'desktop', [isMobile])
@@ -748,12 +751,28 @@ export default function WidgetCanvas() {
             containerPadding={[0, 0]}
             useCSSTransforms={true}
           >
-            {currentLayout.map((widget) => {
+            {currentLayout.map((widget, index) => {
               return (
-                <div
+                <motion.div
                   key={widget.i}
                   className="h-full min-h-0"
                   data-customizing={isCustomizing}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
+                  animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                  transition={
+                    shouldReduceMotion
+                      ? undefined
+                      : {
+                        delay: Math.min(0.035 * index, 0.42),
+                        type: "spring",
+                        stiffness: 165,
+                        damping: 21,
+                        mass: 0.88,
+                      }
+                  }
+                  whileHover={shouldReduceMotion || isCustomizing ? undefined : { scale: 1.01 }}
+                  onHoverStart={() => setActiveWidgetId(widget.i)}
+                  onHoverEnd={() => setActiveWidgetId((current) => (current === widget.i ? null : current))}
                 >
                   <WidgetWrapper
                     onRemove={() => removeWidget(widget.i)}
@@ -763,10 +782,11 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel precision-glow-sweep",
+                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel precision-glow-sweep liquid-panel liquid-panel-hover",
+                      !shouldReduceMotion && activeWidgetId === widget.i && "widget-breathe",
                       isCustomizing
                         ? "border-[hsl(var(--precision-cobalt)/0.75)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_0_26px_rgba(34,90,235,0.16)]"
-                        : "bg-[hsl(var(--precision-panel)/0.95)] backdrop-blur-md hover:border-[hsl(var(--precision-cobalt)/0.5)] hover:shadow-[0_0_18px_rgba(34,90,235,0.12)]"
+                        : "bg-[hsl(var(--precision-panel)/0.95)] backdrop-blur-md hover:border-[hsl(var(--precision-cobalt)/0.5)] hover:shadow-[0_0_18px_rgba(255,255,255,0.08)]"
                     )}>
                       <div className="absolute inset-0 bg-linear-to-b from-white/[0.015] to-transparent pointer-events-none" />
                       <div className="relative h-full w-full">
@@ -774,7 +794,7 @@ export default function WidgetCanvas() {
                       </div>
                     </div>
                   </WidgetWrapper>
-                </div>
+                </motion.div>
               )
             })}
           </ResponsiveGridLayout>
