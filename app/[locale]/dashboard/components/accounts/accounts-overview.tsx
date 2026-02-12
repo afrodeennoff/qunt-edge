@@ -739,7 +739,13 @@ function PayoutDialog({
   )
 }
 
-export function AccountsOverview({ size }: { size: WidgetSize }) {
+export function AccountsOverview({
+  size,
+  surface = "card",
+}: {
+  size: WidgetSize
+  surface?: "card" | "embedded"
+}) {
   const trades = useTradesStore(state => state.trades)
   const user = useUserStore(state => state.user)
   const isLoading = useUserStore(state => state.isLoading)
@@ -1128,7 +1134,12 @@ export function AccountsOverview({ size }: { size: WidgetSize }) {
 
 
   return (
-    <Card className="w-full h-full flex flex-col">
+    <Card
+      className={cn(
+        "w-full h-full flex flex-col",
+        surface === "embedded" && "border-transparent bg-transparent shadow-none"
+      )}
+    >
       <CardHeader
         className={cn(
           "flex flex-row items-center justify-between space-y-0 border-b shrink-0",

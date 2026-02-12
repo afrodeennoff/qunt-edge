@@ -34,7 +34,7 @@ export default function Home() {
         </TabsContent>
 
         <TabsContent value="accounts" className="mt-0 outline-hidden">
-          <AccountsOverview size="large" />
+          <AccountsOverview size="large" surface="embedded" />
         </TabsContent>
 
         <TabsContent value="chart" className="mt-0 outline-hidden">
