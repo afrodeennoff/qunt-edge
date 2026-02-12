@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { formatInTimeZone } from 'date-fns-tz'
 import { eachDayOfInterval, startOfDay, endOfDay, isValid } from 'date-fns'
 import { Payout as PrismaPayout } from '@/prisma/generated/prisma'
+import { logger } from '@/lib/logger'
 
 // Types matching the component
 interface ChartDataPoint {
@@ -56,13 +57,13 @@ interface EquityChartResult {
 }
 
 export async function getEquityChartDataAction(params: EquityChartParams): Promise<EquityChartResult> {
-  console.log('getEquityChartDataAction params:', JSON.stringify(params, null, 2))
+  logger.info('getEquityChartDataAction params:', JSON.stringify(params, null, 2))
 
   // Validate timezone and fallback to UTC if needed
   try {
     Intl.DateTimeFormat(undefined, { timeZone: params.timezone })
-  } catch (e) {
-    console.warn(`[getEquityChartDataAction] Invalid timezone '${params.timezone}', falling back to UTC`)
+  } catch {
+    logger.warn(`[getEquityChartDataAction] Invalid timezone '${params.timezone}', falling back to UTC`)
     params.timezone = 'UTC'
   }
 
@@ -118,7 +119,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
           'yyyy-MM-dd HH:mm:ssXXX'
         ))
       } catch (error) {
-        console.warn(`[getEquityChartDataAction] Date formatting failed for trade ${trade.id}, using raw date`, error);
+        logger.warn(`[getEquityChartDataAction] Date formatting failed for trade ${trade.id}, using raw date`, error);
         entryDate = new Date(trade.entryDate);
       }
 
@@ -204,7 +205,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       return true
     }).sort((a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime())
 
-    console.log('Filtered trades count:', filteredTrades.length)
+    logger.info('Filtered trades count:', filteredTrades.length)
 
     if (!filteredTrades.length) {
       return {
@@ -250,7 +251,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     })
 
     if (!finalFilteredTrades.length) {
-      console.log('Final filtered trades count:', finalFilteredTrades.length)
+      logger.info('Final filtered trades count:', finalFilteredTrades.length)
       return {
         chartData: [],
         accountNumbers: allAccountNumbers,
@@ -333,13 +334,10 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
 
     // Use arrays instead of Maps for better performance with small datasets
     const accountEquities: Record<string, number> = {}
-    const accountStartingBalances: Record<string, number> = {}
     const accountFirstActivity: Record<string, string | null> = {}
 
     limitedAccountNumbers.forEach(acc => {
-      const account = accountMap.get(acc)
       accountEquities[acc] = 0
-      accountStartingBalances[acc] = account?.startingBalance ? Number(account.startingBalance) : 0
       accountFirstActivity[acc] = null
     })
 
@@ -347,7 +345,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
 
     datesToProcess.forEach(date => {
       const dateKey = formatInTimeZone(date, params.timezone, 'yyyy-MM-dd')
-      const relevantTrades = tradesMap.get(dateKey) || []
+      // relevantTrades removed
 
       let totalEquity = 0
       const point: ChartDataPoint = {
@@ -423,7 +421,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       chartData.push(point)
     })
 
-    console.log('AccountNumber', limitedAccountNumbers)
+    logger.info('AccountNumber', limitedAccountNumbers)
     return {
       chartData,
       accountNumbers: allAccountNumbers,
@@ -431,7 +429,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     }
 
   } catch (error) {
-    console.error('[getEquityChartData] Error:', error)
+    logger.error('[getEquityChartData] Error:', error)
     throw new Error('Failed to fetch equity chart data')
   }
 }

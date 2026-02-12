@@ -111,7 +111,7 @@ export function updateLastSyncTime(id: string): void {
 export function generateCredentialId(username: string): string {
   if (!username) {
     // Fallback for edge cases (should not happen in normal flow)
-    return `cred_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `cred_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
   }
   return username
 } 

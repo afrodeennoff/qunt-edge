@@ -1,9 +1,7 @@
 'use server'
 
-import { Trade as PrismaTrade, Prisma, PrismaClient, Group, TickDetails } from '@/prisma/generated/prisma'
+import { TickDetails } from '@/prisma/generated/prisma'
 import { normalizeTradesForClient, Trade } from '@/lib/data-types'
-import { endOfDay, startOfDay } from 'date-fns'
-import { parseISO, isValid } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { GroupWithAccounts } from './groups'
@@ -18,8 +16,8 @@ export interface SharedParams {
     from: Date
     to?: Date
   }
-  desktop?: any[]
-  mobile?: any[]
+  desktop?: unknown[]
+  mobile?: unknown[]
   expiresAt?: Date
   viewCount?: number
   createdAt?: Date
@@ -58,8 +56,8 @@ export async function createShared(data: SharedParams): Promise<string> {
               from: data.dateRange.from.toISOString(),
               ...(data.dateRange.to && { to: data.dateRange.to.toISOString() })
             },
-            desktop: data.desktop || [],
-            mobile: data.mobile || [],
+            desktop: data.desktop as any[] || [],
+            mobile: data.mobile as any[] || [],
             expiresAt: data.expiresAt,
             slug,
           },
@@ -68,7 +66,7 @@ export async function createShared(data: SharedParams): Promise<string> {
         revalidatePath('/shared/[slug]', 'page')
         return slug
       } catch (error) {
-        if ((error as any)?.code === 'P2002') {
+        if ((error as { code?: string })?.code === 'P2002') {
           // P2002 is Prisma's error code for unique constraint violation
           slug = generateSlug()
           attempts++
@@ -89,6 +87,7 @@ export async function createShared(data: SharedParams): Promise<string> {
 }
 
 import { unstable_cache } from 'next/cache'
+import { logger } from '@/lib/logger'
 
 export async function getShared(slug: string): Promise<{ params: SharedParams, trades: Trade[], groups: GroupWithAccounts[] } | null> {
   if (!slug) return null
@@ -96,7 +95,7 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   // Define the cached fetcher
   const getCachedShared = unstable_cache(
     async (slug: string) => {
-      console.log(`[Cache MISS] Fetching shared data for slug: ${slug}`)
+      logger.info(`[Cache MISS] Fetching shared data for slug: ${slug}`)
       const shared = await prisma.shared.findUnique({
         where: { slug },
       })
@@ -172,8 +171,8 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
             from: fromDate,
             ...(toDate && { to: toDate })
           },
-          desktop: shared.desktop as any[],
-          mobile: shared.mobile as any[],
+          desktop: shared.desktop as unknown[],
+          mobile: shared.mobile as unknown[],
           expiresAt: shared.expiresAt || undefined,
           tickDetails,
         },
@@ -197,14 +196,14 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
     prisma.shared.update({
       where: { slug },
       data: { viewCount: { increment: 1 } }
-    }).catch(err => console.error('[getShared] Failed to update view count:', err))
+    }).catch(err => logger.error('[getShared] Failed to update view count:', err))
 
     return {
       ...result,
       trades: normalizeTradesForClient(result.trades as any)
     }
   } catch (error) {
-    console.error('[getShared] Error:', error)
+    logger.error('[getShared] Error:', error)
     return null
   }
 }

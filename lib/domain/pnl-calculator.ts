@@ -28,7 +28,7 @@ export function calculatePnL(input: PnLCalculationInput): PnLCalculationResult {
 
   const totalFees = fees.plus(commissions);
 
-  let grossPnL =
+  const grossPnL =
     input.direction === "LONG"
       ? exitPrice.minus(entryPrice).times(quantity)
       : entryPrice.minus(exitPrice).times(quantity);

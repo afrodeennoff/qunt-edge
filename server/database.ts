@@ -355,7 +355,7 @@ export async function getTradesAction(
 
   const getCachedTrades = unstable_cache(
     async (uid: string, p: number, ps: number) => {
-      console.log(`[Cache MISS] Fetching trades for user ${uid}, page ${p}`)
+      logger.info(`[Cache MISS] Fetching trades for user ${uid}, page ${p}`)
       const where: Prisma.TradeWhereInput = { userId: uid }
 
       const [trades, total] = await Promise.all([
@@ -455,7 +455,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
       })
 
       await Promise.all(trades.map(async (trade) => {
-        const data: any = {}
+    const data: Record<string, unknown> = {}
 
         if (update.entryDateOffset) {
           const d = new Date(trade.entryDate)
@@ -489,7 +489,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
     } = update
 
     if (Object.keys(standardUpdates).length > 0) {
-      const data: any = { ...standardUpdates }
+      const data: Prisma.TradeUpdateInput = { ...standardUpdates }
       if (standardUpdates.entryPrice !== undefined) data.entryPrice = new Prisma.Decimal(standardUpdates.entryPrice)
       if (standardUpdates.closePrice !== undefined) data.closePrice = standardUpdates.closePrice !== null ? new Prisma.Decimal(standardUpdates.closePrice) : null
       if (standardUpdates.pnl !== undefined) data.pnl = new Prisma.Decimal(standardUpdates.pnl)
@@ -556,7 +556,7 @@ export async function loadDashboardLayoutAction(): Promise<Layouts | null> {
 
     if (!dashboard) return null
 
-    const parse = (json: any): Widget[] => {
+    const parse = (json: Prisma.JsonValue): Widget[] => {
       if (Array.isArray(json)) return json as unknown as Widget[]
       return []
     }

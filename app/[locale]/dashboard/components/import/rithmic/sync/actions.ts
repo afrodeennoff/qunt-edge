@@ -2,9 +2,10 @@
 import { prisma } from "@/lib/prisma"
 import { getUserId } from "@/server/auth"
 import { Synchronization } from "@/prisma/generated/prisma"
+import { logger } from "@/lib/logger"
 
 export async function getRithmicSynchronizations() {
-  console.log('CHECKING RITHMIC SYNCHRONIZATIONS')
+  logger.info('CHECKING RITHMIC SYNCHRONIZATIONS')
   const userId = await getUserId()
   const synchronizations = await prisma.synchronization.findMany({
     where: { userId: userId, service: "rithmic" },
@@ -13,7 +14,7 @@ export async function getRithmicSynchronizations() {
 }
 
 export async function setRithmicSynchronization(synchronization: Partial<Synchronization>) {
-  console.log('SETTING RITHMIC SYNCHRONIZATION')
+  logger.info('SETTING RITHMIC SYNCHRONIZATION')
   const userId = await getUserId()
   await prisma.synchronization.upsert({
     where: { 
@@ -38,7 +39,7 @@ export async function setRithmicSynchronization(synchronization: Partial<Synchro
 }
 
 export async function removeRithmicSynchronization(accountId: string) {
-  console.log('REMOVING RITHMIC SYNCHRONIZATION')
+  logger.info('REMOVING RITHMIC SYNCHRONIZATION')
   const userId = await getUserId()
 
   await prisma.synchronization.deleteMany({

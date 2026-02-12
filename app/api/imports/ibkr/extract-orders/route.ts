@@ -2,6 +2,7 @@ import { orderSchema } from '../fifo-computation/schema'
 import { type FinancialInstrument } from './schema'
 import { addMoney, toMoneyNumber } from '@/lib/financial-math'
 import { normalizeToUtcTimestamp } from '@/lib/date-utils'
+import { logger } from '@/lib/logger'
 
 export const maxDuration = 60 // Allow up to 60 seconds for AI processing
 
@@ -93,7 +94,7 @@ const parseInstrumentInformation = (text: string): FinancialInstrument[] => {
   if (!instrumentInformationMatch) return [];
   
   const instrumentInformationText = instrumentInformationMatch[0];
-  console.log('instrumentInformationText', instrumentInformationText);
+  logger.info('instrumentInformationText', instrumentInformationText);
   
   // The text appears to be concatenated, so let's work with it as a single string
   // Pattern: "Financial Instrument Information Symbol Description Conid ... Code Futures SYMBOL DESC CONID ..."
@@ -142,7 +143,7 @@ const parseInstrumentInformation = (text: string): FinancialInstrument[] => {
     });
   }
   
-  console.log('instruments', instruments)
+  logger.info('instruments', instruments)
   return instruments;
 };
 
@@ -167,7 +168,7 @@ export async function POST(request: Request) {
         orderSchema.parse(order);
         return true;
       } catch (error) {
-        console.warn('Order validation failed:', error, 'Order:', order);
+        logger.warn('Order validation failed:', { error, order });
         return false;
       }
     });
@@ -180,7 +181,7 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error processing request:', error);
+    logger.error('Error processing request:', error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Failed to process request' }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

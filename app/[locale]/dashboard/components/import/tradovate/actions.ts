@@ -12,6 +12,7 @@ import { prisma } from '@/lib/prisma'
 import { formatTimestamp, formatDateToTimestamp } from '@/lib/date-utils'
 import { createTradeWithDefaults } from '@/lib/trade-factory'
 import { getUserId } from '@/server/auth'
+import { logger } from '@/lib/logger'
 
 // Helper function to format dates in the required format: 2025-06-05T08:38:40+00:00
 function formatDateForAPI(date: Date): string {
@@ -38,27 +39,6 @@ function formatDuration(seconds: number): string {
 const TRADOVATE_CLIENT_ID = process.env.TRADOVATE_CLIENT_ID
 const TRADOVATE_CLIENT_SECRET = process.env.TRADOVATE_CLIENT_SECRET
 const TRADOVATE_REDIRECT_URI = process.env.TRADOVATE_REDIRECT_URI
-
-// Debug mode configuration - enabled in development or when explicitly set
-const DEBUG_MODE = process.env.NODE_ENV === 'development' || process.env.TRADOVATE_DEBUG === 'true'
-
-// Logger utility for conditional logging
-const logger = {
-  debug: (message: string, data?: any) => {
-    if (DEBUG_MODE) {
-      console.log(`[TRADOVATE-DEBUG] ${message}`, data)
-    }
-  },
-  info: (message: string, data?: any) => {
-    console.log(`[TRADOVATE] ${message}`, data)
-  },
-  warn: (message: string, error?: any) => {
-    console.warn(`[TRADOVATE] ${message}`, error)
-  },
-  error: (message: string, error?: any) => {
-    console.error(`[TRADOVATE] ${message}`, error)
-  }
-}
 
 
 // Environment URLs - demo only
@@ -171,13 +151,13 @@ async function getContractById(accessToken: string, contractId: number): Promise
     })
 
     if (!response.ok) {
-      console.warn(`Failed to fetch contract ${contractId}:`, response.status, response.statusText)
+      logger.warn(`Failed to fetch contract ${contractId}:`, { status: response.status, statusText: response.statusText })
       return null
     }
 
     return await response.json()
   } catch (error) {
-    console.warn(`Error fetching contract ${contractId}:`, error)
+    logger.warn(`Error fetching contract ${contractId}:`, error)
     return null
   }
 }
@@ -293,21 +273,21 @@ async function getFillPairs(accessToken: string): Promise<TradovateFillPair[]> {
     })
 
     if (!response.ok) {
-      console.warn(`Failed to fetch fill pairs:`, response.status, response.statusText)
+      logger.warn(`Failed to fetch fill pairs:`, { status: response.status, statusText: response.statusText })
       return []
     }
 
     const fillPairs = await response.json()
     return Array.isArray(fillPairs) ? fillPairs : []
   } catch (error) {
-    console.warn(`Error fetching fill pairs:`, error)
+    logger.warn(`Error fetching fill pairs:`, error)
     return []
   }
 }
 
 // Helper function to fetch multiple fills by IDs in batch with fallback
 async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<any[]> {
-  console.warn('getFillsByIds')
+  logger.warn('getFillsByIds')
   try {
     if (fillIds.length === 0) return []
 
@@ -320,7 +300,7 @@ async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<an
     for (let i = 0; i < fillIds.length; i += BATCH_SIZE) {
       const batch = fillIds.slice(i, i + BATCH_SIZE)
 
-      console.warn('batch', JSON.stringify(batch))
+      logger.warn('batch', JSON.stringify(batch))
       try {
         // Use GET with comma-separated IDs as per Tradovate API docs
         const idsParam = batch.join(',')
@@ -413,7 +393,7 @@ async function getOrdersByIds(accessToken: string, orderIds: number[]): Promise<
     if (orderIds.length === 0) return []
 
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.warn('getOrdersByIds', JSON.stringify(orderIds))
+    logger.warn('getOrdersByIds', JSON.stringify(orderIds))
     const BATCH_SIZE = 5 // Limit batch size to 5 IDs at a time
 
     const orders: any[] = []
@@ -421,7 +401,7 @@ async function getOrdersByIds(accessToken: string, orderIds: number[]): Promise<
     // Process in batches of 5 IDs
     for (let i = 0; i < orderIds.length; i += BATCH_SIZE) {
       const batch = orderIds.slice(i, i + BATCH_SIZE)
-      console.warn('batch orders', JSON.stringify(batch))
+      logger.warn('batch orders', JSON.stringify(batch))
 
       try {
         // Use GET with comma-separated IDs as per Tradovate API docs
@@ -555,15 +535,15 @@ export async function getTradovateUsername(accessToken: string): Promise<string>
     throw new Error('User name not found in response')
   }
 
-  console.log('getTradovateAccountId response:', data)
+  logger.info('getTradovateAccountId response:', data)
   return user.name
 }
 
 
 export async function initiateTradovateOAuth(accountId: string = 'default'): Promise<TradovateOAuthResult> {
   try {
-    console.log('Initiating Tradovate OAuth (demo only)...')
-    console.log('Environment variables check:', {
+    logger.info('Initiating Tradovate OAuth (demo only)...')
+    logger.info('Environment variables check:', {
       hasClientId: !!TRADOVATE_CLIENT_ID,
       hasRedirectUri: !!TRADOVATE_REDIRECT_URI,
       clientId: TRADOVATE_CLIENT_ID, // This is safe to log for debugging
@@ -571,7 +551,7 @@ export async function initiateTradovateOAuth(accountId: string = 'default'): Pro
     })
 
     if (!TRADOVATE_CLIENT_ID || !TRADOVATE_REDIRECT_URI) {
-      console.error('Missing environment variables:', {
+      logger.error('Missing environment variables:', {
         TRADOVATE_CLIENT_ID: !!TRADOVATE_CLIENT_ID,
         TRADOVATE_REDIRECT_URI: !!TRADOVATE_REDIRECT_URI
       })
@@ -580,24 +560,24 @@ export async function initiateTradovateOAuth(accountId: string = 'default'): Pro
 
     // Generate state parameter for security
     const state = crypto.randomBytes(32).toString('hex')
-    console.log('Generated OAuth state:', state.substring(0, 8) + '...')
+    logger.info('Generated OAuth state:', state.substring(0, 8) + '...')
 
     // Verify user is authenticated
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('User authentication failed:', { authError, hasUser: !!user })
+      logger.error('User authentication failed:', { authError, hasUser: !!user })
       return { error: 'User not authenticated' }
     }
 
-    console.log('User authenticated:', { userId: user.id })
+    logger.info('User authenticated:', { userId: user.id })
 
     // Build OAuth URL using demo environment
     const authBaseUrl = TRADOVATE_ENVIRONMENTS.demo.auth
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.log('Using auth URL:', authBaseUrl)
-    console.log('Using API URL:', apiBaseUrl)
+    logger.info('Using auth URL:', authBaseUrl)
+    logger.info('Using API URL:', apiBaseUrl)
 
     const authUrl = new URL(`${authBaseUrl}/oauth`)
     authUrl.searchParams.append('response_type', 'code')
@@ -606,11 +586,11 @@ export async function initiateTradovateOAuth(accountId: string = 'default'): Pro
     authUrl.searchParams.append('scope', 'read write')
     authUrl.searchParams.append('state', state)
 
-    console.log('Generated OAuth URL:', authUrl.toString())
+    logger.info('Generated OAuth URL:', authUrl.toString())
 
     return { authUrl: authUrl.toString(), state }
   } catch (error) {
-    console.error('Failed to initiate Tradovate OAuth:', {
+    logger.error('Failed to initiate Tradovate OAuth:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       errorType: typeof error
@@ -633,7 +613,7 @@ export async function getPropfirmName(accessToken: string): Promise<string> {
   }
 
   const organizations = await response.json() as { id: number; name: string }[]
-  console.log('organizations', organizations)
+  logger.info('organizations', organizations)
   if (Array.isArray(organizations) && organizations.length > 0) {
     return organizations[0].name
   }
@@ -642,7 +622,7 @@ export async function getPropfirmName(accessToken: string): Promise<string> {
 
 export async function handleTradovateCallback(code: string, state: string): Promise<TradovateOAuthResult> {
   try {
-    console.log('Processing Tradovate OAuth callback (demo only):', {
+    logger.info('Processing Tradovate OAuth callback (demo only):', {
       hasCode: !!code,
       hasState: !!state,
       state: state?.substring(0, 8) + '...'
@@ -650,7 +630,7 @@ export async function handleTradovateCallback(code: string, state: string): Prom
 
     // Validate environment variables first
     if (!TRADOVATE_CLIENT_ID || !TRADOVATE_CLIENT_SECRET || !TRADOVATE_REDIRECT_URI) {
-      console.error('Missing Tradovate OAuth environment variables:', {
+      logger.error('Missing Tradovate OAuth environment variables:', {
         hasClientId: !!TRADOVATE_CLIENT_ID,
         hasClientSecret: !!TRADOVATE_CLIENT_SECRET,
         hasRedirectUri: !!TRADOVATE_REDIRECT_URI
@@ -662,13 +642,13 @@ export async function handleTradovateCallback(code: string, state: string): Prom
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('User authentication failed in callback:', { authError, hasUser: !!user })
+      logger.error('User authentication failed in callback:', { authError, hasUser: !!user })
       return { error: 'User not authenticated' }
     }
 
     // Exchange code for tokens using demo environment
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.log('Exchanging code for tokens:', { apiBaseUrl, userId: user.id })
+    logger.info('Exchanging code for tokens:', { apiBaseUrl, userId: user.id })
 
     const tokenResponse = await fetch(`${apiBaseUrl}/auth/oauthtoken`, {
       method: 'POST',
@@ -686,7 +666,7 @@ export async function handleTradovateCallback(code: string, state: string): Prom
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text()
-      console.error('Token exchange failed:', {
+      logger.error('Token exchange failed:', {
         status: tokenResponse.status,
         statusText: tokenResponse.statusText,
         errorText,
@@ -699,11 +679,11 @@ export async function handleTradovateCallback(code: string, state: string): Prom
     try {
       tokens = await tokenResponse.json()
     } catch (parseError) {
-      console.error('Failed to parse token response:', parseError)
+      logger.error('Failed to parse token response:', parseError)
       return { error: 'Invalid response format from Tradovate' }
     }
 
-    console.log('Token exchange response:', {
+    logger.info('Token exchange response:', {
       hasAccessToken: !!tokens?.access_token,
       hasRefreshToken: !!tokens?.refresh_token,
       expiresIn: tokens?.expires_in,
@@ -713,12 +693,12 @@ export async function handleTradovateCallback(code: string, state: string): Prom
 
     // Validate the token response structure
     if (!tokens || typeof tokens !== 'object') {
-      console.error('Invalid token response structure:', tokens)
+      logger.error('Invalid token response structure:', tokens)
       return { error: 'Invalid token response structure from Tradovate' }
     }
 
     if (!tokens.access_token || !tokens.refresh_token || !tokens.expires_in) {
-      console.error('Missing required token fields:', {
+      logger.error('Missing required token fields:', {
         hasAccessToken: !!tokens.access_token,
         hasRefreshToken: !!tokens.refresh_token,
         hasExpiresIn: !!tokens.expires_in,
@@ -762,7 +742,7 @@ export async function handleTradovateCallback(code: string, state: string): Prom
       expiresAt
     }
   } catch (error) {
-    console.error('Failed to handle OAuth callback:', {
+    logger.error('Failed to handle OAuth callback:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       errorType: typeof error
@@ -900,7 +880,7 @@ export async function refreshTradovateToken(refreshToken: string): Promise<Trado
 export async function testTradovateAuth(accessToken: string) {
   try {
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.log('Testing Tradovate authentication with demo user list endpoint')
+    logger.info('Testing Tradovate authentication with demo user list endpoint')
 
     const response = await fetch(`${apiBaseUrl}/v1/user/list`, {
       headers: {
@@ -909,7 +889,7 @@ export async function testTradovateAuth(accessToken: string) {
       }
     })
 
-    console.log('User list endpoint response:', {
+    logger.info('User list endpoint response:', {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok
@@ -917,15 +897,15 @@ export async function testTradovateAuth(accessToken: string) {
 
     if (response.ok) {
       const userData = await response.json()
-      console.log('User data from demo user list:', userData)
+      logger.info('User data from demo user list:', userData)
       return { success: true, userData }
     } else {
       const errorText = await response.text()
-      console.error('Demo user list endpoint failed:', { status: response.status, errorText })
+      logger.error('Demo user list endpoint failed:', { status: response.status, errorText })
       return { success: false, error: errorText }
     }
   } catch (error) {
-    console.error('Error testing auth:', error)
+    logger.error('Error testing auth:', error)
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -933,7 +913,7 @@ export async function testTradovateAuth(accessToken: string) {
 export async function getTradovateAccounts(accessToken: string): Promise<TradovateAccountsResult> {
   try {
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.log('Fetching Tradovate accounts (demo only):', {
+    logger.info('Fetching Tradovate accounts (demo only):', {
       apiBaseUrl,
       hasToken: !!accessToken,
       tokenPrefix: accessToken?.substring(0, 10) + '...'
@@ -947,7 +927,7 @@ export async function getTradovateAccounts(accessToken: string): Promise<Tradova
       }
     })
 
-    console.log('Account list response:', {
+    logger.info('Account list response:', {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok
@@ -955,22 +935,22 @@ export async function getTradovateAccounts(accessToken: string): Promise<Tradova
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Failed to fetch accounts:', { status: response.status, errorText })
+      logger.error('Failed to fetch accounts:', { status: response.status, errorText })
       return { error: `Failed to fetch accounts: ${errorText}` }
     }
 
     const accounts = await response.json()
-    console.log('Received accounts from Tradovate:', {
+    logger.info('Received accounts from Tradovate:', {
       accountCount: accounts.length,
       sampleAccount: accounts[0]
     })
 
     if (!Array.isArray(accounts) || accounts.length === 0) {
-      console.log('No accounts returned from Tradovate')
+      logger.info('No accounts returned from Tradovate')
       return { error: 'No accounts found on demo environment' }
     }
 
-    console.log('Final accounts result:', {
+    logger.info('Final accounts result:', {
       isArray: Array.isArray(accounts),
       length: accounts.length,
       accounts: accounts
@@ -978,7 +958,7 @@ export async function getTradovateAccounts(accessToken: string): Promise<Tradova
 
     return { accounts }
   } catch (error) {
-    console.error('Failed to get Tradovate accounts:', error)
+    logger.error('Failed to get Tradovate accounts:', error)
     return { error: 'Failed to get accounts' }
   }
 }
@@ -1217,7 +1197,7 @@ export async function storeTradovateToken(
 
     return { success: true }
   } catch (error) {
-    console.error('Failed to store Tradovate token:', error)
+    logger.error('Failed to store Tradovate token:', error)
     return { error: 'Failed to store token' }
   }
 }
@@ -1260,13 +1240,13 @@ export async function getTradovateToken(accountId: string = 'default') {
       accountId: syncData.accountId
     }
   } catch (error) {
-    console.error('Failed to get Tradovate token:', error)
+    logger.error('Failed to get Tradovate token:', error)
     return { error: 'Failed to get token' }
   }
 }
 
 export async function removeTradovateToken(accountId?: string) {
-  console.log('Removing Tradovate token for account:', accountId)
+  logger.info('Removing Tradovate token for account:', accountId)
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -1291,7 +1271,7 @@ export async function removeTradovateToken(accountId?: string) {
 
     return { success: true }
   } catch (error) {
-    console.error('Failed to remove Tradovate token:', error)
+    logger.error('Failed to remove Tradovate token:', error)
     return { error: 'Failed to remove token' }
   }
 }
@@ -1317,7 +1297,7 @@ export async function getTradovateSynchronizations() {
 
     return { synchronizations }
   } catch (error) {
-    console.error('TRADOVATE SYNC: Failed to get Tradovate synchronizations:', error)
+    logger.error('TRADOVATE SYNC: Failed to get Tradovate synchronizations:', error)
     return { error: 'Failed to get synchronizations' }
   }
 }
@@ -1368,7 +1348,7 @@ export async function setCustomTradovateToken(
       expiresAt: expirationDate.toISOString()
     }
   } catch (error) {
-    console.error('Failed to set custom Tradovate token:', error)
+    logger.error('Failed to set custom Tradovate token:', error)
     return { error: 'Failed to set custom token' }
   }
 }
@@ -1648,7 +1628,7 @@ export async function updateDailySyncTimeAction(
 
     return { success: true }
   } catch (error) {
-    console.error('Error updating daily sync time:', error)
+    logger.error('Error updating daily sync time:', error)
     return { success: false, error: 'Failed to update daily sync time' }
   }
 }

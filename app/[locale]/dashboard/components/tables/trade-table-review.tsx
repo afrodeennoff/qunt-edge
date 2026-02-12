@@ -407,7 +407,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
     if (selectedTrades.length < 2) return;
 
     // Generate a temporary groupId using timestamp + random number
-    const tempGroupId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const tempGroupId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     // Update local state immediately
     await updateTrades(selectedTrades, { groupId: tempGroupId });

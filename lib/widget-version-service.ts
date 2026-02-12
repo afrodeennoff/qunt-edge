@@ -40,7 +40,7 @@ class WidgetVersionService {
     
     let deviceId = localStorage.getItem('widget_version_device_id')
     if (!deviceId) {
-      deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      deviceId = `device_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
       localStorage.setItem('widget_version_device_id', deviceId)
     }
     return deviceId
