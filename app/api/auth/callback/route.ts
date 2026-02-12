@@ -21,10 +21,14 @@ export async function GET(request: Request) {
     action
   })
 
-  // Redirect to the decoded 'next' URL if it exists, otherwise to the homepage
-  let decodedNext: string | null = null;
+  // Normalize next path so values like "dashboard" become "/dashboard".
+  // Keep redirects internal by ignoring absolute URLs.
+  let normalizedNext: string | null = null
   if (next) {
-    decodedNext = decodeURIComponent(next)
+    const decodedNext = decodeURIComponent(next).trim()
+    if (decodedNext && !decodedNext.startsWith('http://') && !decodedNext.startsWith('https://')) {
+      normalizedNext = decodedNext.startsWith('/') ? decodedNext : `/${decodedNext}`
+    }
   }
   if (code) {
     try {
@@ -69,31 +73,40 @@ export async function GET(request: Request) {
         const isLocalEnv = process.env.NODE_ENV === 'development'
         if (isLocalEnv) {
           // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-          if (decodedNext) {
-            return NextResponse.redirect(new URL(decodedNext, origin))
+          if (normalizedNext) {
+            return NextResponse.redirect(new URL(normalizedNext, origin))
           }
-          return NextResponse.redirect(`${origin}${next ?? '/dashboard'}`)
+          return NextResponse.redirect(`${origin}${normalizedNext ?? '/dashboard'}`)
         } else if (forwardedHost) {
-          if (decodedNext) {
-            return NextResponse.redirect(new URL(decodedNext, `https://${forwardedHost}`))
+          if (normalizedNext) {
+            return NextResponse.redirect(new URL(normalizedNext, `https://${forwardedHost}`))
           }
-          return NextResponse.redirect(`https://${forwardedHost}${next ?? '/dashboard'}`)
+          return NextResponse.redirect(`https://${forwardedHost}${normalizedNext ?? '/dashboard'}`)
         } else {
-          if (decodedNext) {
-            return NextResponse.redirect(new URL(decodedNext, origin))
+          if (normalizedNext) {
+            return NextResponse.redirect(new URL(normalizedNext, origin))
           }
-          return NextResponse.redirect(`${origin}${next ?? '/dashboard'}`)
+          return NextResponse.redirect(`${origin}${normalizedNext ?? '/dashboard'}`)
         }
       } else {
         console.log('Auth callback error:', error)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : ''
+      const originalErrorMessage =
+        typeof error === 'object' &&
+        error !== null &&
+        'originalError' in error &&
+        typeof (error as { originalError?: { message?: string } }).originalError?.message === 'string'
+          ? (error as { originalError?: { message?: string } }).originalError?.message ?? ''
+          : ''
+
       // Handle JSON parsing errors from Supabase API
       if (
-        error?.message?.includes('Unexpected token') ||
-        error?.message?.includes('is not valid JSON') ||
-        error?.originalError?.message?.includes('Unexpected token') ||
-        error?.originalError?.message?.includes('is not valid JSON')
+        errorMessage.includes('Unexpected token') ||
+        errorMessage.includes('is not valid JSON') ||
+        originalErrorMessage.includes('Unexpected token') ||
+        originalErrorMessage.includes('is not valid JSON')
       ) {
         console.error('[Auth Callback] Supabase API returned non-JSON response:', error)
         // Redirect to auth page with error message

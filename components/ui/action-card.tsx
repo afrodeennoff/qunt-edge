@@ -20,20 +20,20 @@ export interface ActionCardProps extends CardProps {
     onClick: () => void
   }
   size?: "sm" | "md" | "lg"
-  status?: "default" | "success" | "warning" | "error"
+  tone?: "default" | "success" | "warning" | "error"
 }
 
 const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
-  ({ 
+  ({
     title,
     description,
     icon: Icon,
     primaryAction,
     secondaryAction,
     size = "md",
-    status = "default",
+    tone = "default",
     className,
-    ...props 
+    ...props
   }, ref) => {
     const sizeClasses = {
       sm: {
@@ -64,7 +64,7 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
 
     const currentSize = sizeClasses[size]
 
-    const statusColors = {
+    const toneColors = {
       default: "bg-primary/10 text-primary",
       success: "bg-green-500/10 text-green-500",
       warning: "bg-amber-500/10 text-amber-500",
@@ -83,7 +83,7 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
               <div className={cn(
                 "rounded-xl flex items-center justify-center shrink-0",
                 currentSize.icon,
-                statusColors[status]
+                toneColors[tone]
               )}>
                 <Icon className={currentSize.iconInner} />
               </div>

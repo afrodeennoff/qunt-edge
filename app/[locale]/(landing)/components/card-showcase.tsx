@@ -137,7 +137,7 @@ export function CardShowcase() {
             title="Quick Setup"
             description="Get started in minutes with our easy setup wizard."
             icon={Zap}
-            status="default"
+            tone="default"
             primaryAction={{
               label: "Start Setup",
               onClick: () => console.log("Setup clicked"),
@@ -149,7 +149,7 @@ export function CardShowcase() {
             title="Security Check"
             description="Your account security is up to date."
             icon={Shield}
-            status="success"
+            tone="success"
             primaryAction={{
               label: "View Details",
               onClick: () => console.log("Security clicked"),
@@ -161,7 +161,7 @@ export function CardShowcase() {
             title="Action Required"
             description="Please verify your email address to continue."
             icon={AlertCircle}
-            status="warning"
+            tone="warning"
             primaryAction={{
               label: "Verify Now",
               onClick: () => console.log("Verify clicked"),

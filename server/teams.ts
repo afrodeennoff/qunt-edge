@@ -374,8 +374,8 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
     let totalPnl = 0
     let totalTrades = 0
     let winningTrades = 0
-    let totalRr = 0
-    let rrCount = 0
+    const totalRr = 0
+    const rrCount = 0
 
     for (const teamMember of teamWithMembers.members) {
       for (const account of teamMember.user.accounts) {

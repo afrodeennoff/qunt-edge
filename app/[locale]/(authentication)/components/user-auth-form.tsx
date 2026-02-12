@@ -48,6 +48,14 @@ type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>
 
 type AuthMethod = 'email' | 'discord' | 'google' | null
 
+function normalizeNextPath(next: string | null): string | null {
+    if (!next) return null
+    const trimmed = next.trim()
+    if (!trimmed) return null
+    if (trimmed.startsWith('/')) return trimmed
+    return `/${trimmed}`
+}
+
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isLoading, setIsLoading] = React.useState<boolean>(false)
     const [isEmailSent, setIsEmailSent] = React.useState<boolean>(false)
@@ -68,7 +76,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     React.useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
         const subscription = urlParams.get('subscription')
-        const next = urlParams.get('next')
+        const next = normalizeNextPath(urlParams.get('next'))
         const referral = urlParams.get('referral')
         const promo_code = urlParams.get('promo_code')
         setIsSubscription(subscription === 'true')

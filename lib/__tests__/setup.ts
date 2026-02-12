@@ -8,9 +8,9 @@ let pool: pg.Pool | null = null
 let hasDatabase = false
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var prisma: PrismaClient
-  // eslint-disable-next-line no-var
+   
   var pool: pg.Pool
 }
 
@@ -20,7 +20,7 @@ beforeAll(async () => {
   if (!connectionString) {
     // Payment/integration tests are opt-in. Keep setup non-fatal when DB is absent.
     // This prevents global setup from failing suites that are intentionally skipped.
-    // eslint-disable-next-line no-console
+     
     console.warn('[tests/setup] DATABASE_URL not configured - DB-backed tests will be skipped/no-op')
     hasDatabase = false
     return
