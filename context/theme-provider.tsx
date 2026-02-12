@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, startTransition } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState, startTransition } from 'react'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -100,14 +100,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  const value = {
+  const value = useMemo(() => ({
     theme,
     effectiveTheme,
     intensity,
     setTheme,
     setIntensity,
     toggleTheme,
-  }
+  }), [theme, effectiveTheme, intensity])
 
   return (
     <ThemeContext.Provider value={value}>

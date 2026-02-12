@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 
+export const runtime = 'nodejs'
+
 async function checkDatabase(): Promise<{ ok: boolean; latencyMs: number; error?: string }> {
   const start = Date.now()
   try {
@@ -40,4 +42,3 @@ export async function GET() {
 
   return NextResponse.json(body, { status: healthy ? 200 : 503 })
 }
-

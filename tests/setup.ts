@@ -2,6 +2,8 @@ import { vi } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
 const eventTarget = new EventTarget()
 
 if (typeof (globalThis as { window?: unknown }).window === 'undefined') {
@@ -51,5 +53,22 @@ if (typeof navigator !== 'undefined') {
     value: true,
     writable: true,
     configurable: true,
+  })
+}
+
+if (typeof (globalThis as { window?: Window }).window !== 'undefined' && typeof window.matchMedia === 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('dark'),
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
   })
 }

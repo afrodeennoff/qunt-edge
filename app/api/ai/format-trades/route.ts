@@ -3,6 +3,8 @@ import { streamObject } from "ai";
 import { NextRequest } from "next/server";
 import { tradeSchema } from "./schema";
 import { z } from 'zod/v3';
+import { apiError } from "@/lib/api-response";
+import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -10,17 +12,38 @@ const customOpenai = createOpenAI({
 });
 
 export const maxDuration = 30;
+export const runtime = "nodejs";
+const MAX_FORMAT_BODY_BYTES = 512 * 1024;
+const formatTradesRateLimit = rateLimit({ limit: 20, window: 60_000, identifier: "ai-format-trades" });
 
 const requestSchema = z.object({
-  headers: z.array(z.string()),
+  headers: z.array(z.string()).max(100, "Too many headers to process"),
   rows: z.array(z.array(z.string())).max(100, "Too many rows to process")
 });
 
 export async function POST(req: NextRequest) {
   try {
+    const lengthHeader = req.headers.get("content-length");
+    const contentLength = lengthHeader ? Number(lengthHeader) : 0;
+    if (Number.isFinite(contentLength) && contentLength > MAX_FORMAT_BODY_BYTES) {
+      return apiError(
+        "PAYLOAD_TOO_LARGE",
+        `Request body exceeds ${Math.round(MAX_FORMAT_BODY_BYTES / 1024)}KB.`,
+        413,
+      );
+    }
+
+    const limit = await formatTradesRateLimit(req);
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      });
+    }
+
     const body = await req.json();
     const { headers, rows } = requestSchema.parse(body);
-console.log(headers, rows);
 
     const result = streamObject({
       model: customOpenai("gpt-4o-mini-2024-07-18"),
@@ -111,14 +134,8 @@ console.log(headers, rows);
   return result.toTextStreamResponse();
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: error.errors }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiError("VALIDATION_FAILED", "Invalid request format", 400, error.errors);
     }
-    return new Response(JSON.stringify({ error: "Invalid request format" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return apiError("BAD_REQUEST", "Invalid request format", 400);
   }
 }

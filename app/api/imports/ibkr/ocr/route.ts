@@ -1,10 +1,14 @@
 import PDFParser from 'pdf2json'
 import { logger } from '@/lib/logger'
-import type { ErrorResponse } from '@/server/authz'
+import { apiError } from '@/lib/api-response'
+import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
 
 export const maxDuration = 60
+export const runtime = 'nodejs'
 
 const MAX_PDF_BYTES = 10 * 1024 * 1024
+const MAX_OCR_BODY_BYTES = 12 * 1024 * 1024
+const ocrRateLimit = rateLimit({ limit: 15, window: 60_000, identifier: 'ibkr-ocr' })
 
 type Attachment = {
   type?: string
@@ -33,8 +37,14 @@ function errorResponse(
   error: string,
   code: string
 ): Response {
-  const payload: ErrorResponse = { error, code, requestId }
-  return jsonResponse(payload, status)
+  return jsonResponse(
+    {
+      error: { code, message: error, details: { requestId } },
+      code,
+      requestId,
+    },
+    status,
+  )
 }
 
 function normalizeAttachment(body: OCRRequestBody): Attachment | null {
@@ -90,6 +100,25 @@ export async function POST(request: Request) {
   const requestId = crypto.randomUUID()
 
   try {
+    const contentLength = Number(request.headers.get('content-length') || 0)
+    if (Number.isFinite(contentLength) && contentLength > MAX_OCR_BODY_BYTES) {
+      return apiError(
+        'PAYLOAD_TOO_LARGE',
+        `Request body exceeds ${Math.round(MAX_OCR_BODY_BYTES / (1024 * 1024))}MB.`,
+        413,
+        { requestId },
+      )
+    }
+
+    const limit = await ocrRateLimit(request)
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      })
+    }
+
     const json = (await request.json()) as OCRRequestBody
     const attachment = normalizeAttachment(json)
 

@@ -17,8 +17,14 @@ import { buildSystemPrompt } from "./prompts";
 import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
+import { apiError } from "@/lib/api-response";
+import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
+export const runtime = "nodejs";
+const MAX_CHAT_BODY_BYTES = 1024 * 1024;
+const MAX_CHAT_MESSAGES = 100;
+const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-chat" });
 
 type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
 
@@ -137,13 +143,38 @@ export async function POST(req: NextRequest) {
   const startedAt = Date.now();
 
   try {
+    const lengthHeader = req.headers.get("content-length");
+    const contentLength = lengthHeader ? Number(lengthHeader) : 0;
+
+    if (Number.isFinite(contentLength) && contentLength > MAX_CHAT_BODY_BYTES) {
+      return apiError(
+        "PAYLOAD_TOO_LARGE",
+        `Request body exceeds ${Math.round(MAX_CHAT_BODY_BYTES / 1024)}KB.`,
+        413,
+      );
+    }
+
+    const limit = await chatRateLimit(req);
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      });
+    }
+
     const { messages, username, locale, timezone } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return new Response(JSON.stringify({ error: "No messages provided" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiError("BAD_REQUEST", "No messages provided", 400);
+    }
+
+    if (messages.length > MAX_CHAT_MESSAGES) {
+      return apiError(
+        "PAYLOAD_TOO_LARGE",
+        `Too many messages. Maximum is ${MAX_CHAT_MESSAGES}.`,
+        413,
+      );
     }
 
     const now = new Date();
@@ -251,10 +282,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: error.errors }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiError("VALIDATION_FAILED", "Invalid chat request payload", 400, error.errors);
     }
 
     void logAiRequest({
@@ -270,9 +298,6 @@ export async function POST(req: NextRequest) {
     });
 
     console.error("Error in chat route:", error);
-    return new Response(JSON.stringify({ error: "Failed to process chat" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return apiError("INTERNAL_ERROR", "Failed to process chat", 500);
   }
 }
