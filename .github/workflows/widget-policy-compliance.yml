@@ -86,11 +86,11 @@ jobs:
           
       - name: Check for policy manifests
         run: |
-          node .github/scripts/check-manifests.js
+          node .github/scripts/check-manifests.cjs
           
       - name: Validate risk registers
         run: |
-          node .github/scripts/validate-risk-registers.js
+          node .github/scripts/validate-risk-registers.cjs
           
       - name: Check for policy drift
         run: |
@@ -113,7 +113,7 @@ jobs:
          
       - name: Run Monte Carlo simulation
         run: |
-          node .github/scripts/run-monte-carlo.js
+          node .github/scripts/run-monte-carlo.cjs
           
       - name: Upload simulation results
         uses: actions/upload-artifact@v4
@@ -143,7 +143,7 @@ jobs:
           
       - name: Check coverage threshold
         run: |
-          node .github/scripts/check-coverage.js --threshold=90 --path=lib/widget-policy-engine
+          node .github/scripts/check-coverage.cjs --threshold=90 --path=lib/widget-policy-engine
 
   validate-widget-integration:
     name: Validate Widget Integration
@@ -164,15 +164,15 @@ jobs:
           
       - name: Check widget imports
         run: |
-          node .github/scripts/check-widget-imports.js
+          node .github/scripts/check-widget-imports.cjs
           
       - name: Validate WithRiskEvaluation usage
         run: |
-          node .github/scripts/validate-risk-hoc-usage.js
+          node .github/scripts/validate-risk-hoc-usage.cjs
           
       - name: Check error handling
         run: |
-          node .github/scripts/check-error-handling.js
+          node .github/scripts/check-error-handling.cjs
 
   security-scan:
     name: Security Scan
@@ -213,7 +213,7 @@ jobs:
           
       - name: Generate compliance report
         run: |
-          node .github/scripts/generate-compliance-report.js
+          node .github/scripts/generate-compliance-report.cjs
           
       - name: Upload compliance report
         uses: actions/upload-artifact@v4
