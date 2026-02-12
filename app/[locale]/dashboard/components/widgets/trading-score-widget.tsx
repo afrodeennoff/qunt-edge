@@ -45,7 +45,7 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
             <div className="flex-1 flex flex-col items-center justify-center p-4">
                 <div className="relative flex items-center justify-center">
                     <div className="text-4xl font-semibold tracking-tight tabular-nums mb-1">
-                        <span className={score >= 80 ? "text-white" : "text-white font-normal"}>
+                        <span className={score >= 80 ? "metric-positive" : "metric-negative font-normal"}>
                             {score}
                         </span>
                         <span className="text-base text-white/50 ml-1">/ 100</span>

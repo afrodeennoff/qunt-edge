@@ -113,7 +113,7 @@ export default function PnLPerContractChart({
               <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContract.tooltip.averagePnl")}</span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.averagePnl >= 0 ? "text-white" : "text-white/40"
+                data.averagePnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.averagePnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -239,11 +239,14 @@ export default function PnLPerContractChart({
                     <Cell
                       key={`cell-${index}`}
                       fill="white"
-                      fillOpacity={entry.averagePnl >= 0 ? 0.6 : 0.15}
+                      fillOpacity={entry.averagePnl >= 0 ? 0.98 : 0.22}
                       stroke="white"
-                      strokeOpacity={entry.averagePnl >= 0 ? 0.4 : 0.1}
+                      strokeOpacity={entry.averagePnl >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
-                      className="hover:fill-opacity-100 transition-all duration-300"
+                      className={cn(
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.averagePnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

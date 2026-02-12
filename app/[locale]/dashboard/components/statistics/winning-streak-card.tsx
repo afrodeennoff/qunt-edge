@@ -1,7 +1,5 @@
 import { useData } from "@/context/data-provider"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Award, HelpCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
 import {
@@ -21,9 +19,9 @@ export default function WinningStreakCard({ size = 'medium' }: WinningStreakCard
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md bg-white/5 border-white/10">
-        <Award className="h-3 w-3 text-white" />
-        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider text-white">{winningStreak} Trade Streak</span>
+      <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md bg-white/10 border-white/20">
+        <Award className="h-3 w-3 metric-positive" />
+        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider metric-positive">{winningStreak} Trade Streak</span>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>

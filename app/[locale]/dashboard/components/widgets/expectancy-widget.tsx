@@ -42,7 +42,7 @@ export default function ExpectancyWidget({ size }: { size?: string }) {
                     <span className="text-[11px] font-medium tracking-tight text-white/50 mb-3">Value per trade</span>
                     <div className={cn(
                         "text-4xl font-semibold tracking-tight tabular-nums",
-                        expectancy > 0 ? "text-white" : expectancy < 0 ? "text-white/40" : "text-white/50"
+                        expectancy > 0 ? "metric-positive" : expectancy < 0 ? "metric-negative" : "text-white/50"
                     )}>
                         {expectancy > 0 ? '+' : ''}{formattedExpectancy}
                     </div>
@@ -50,9 +50,9 @@ export default function ExpectancyWidget({ size }: { size?: string }) {
                         <div className={cn(
                             "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
                             expectancy > 0
-                                ? "bg-white/10 text-white border border-white/20"
+                                ? "bg-white/10 metric-positive border border-white/20"
                                 : expectancy < 0
-                                    ? "bg-white/5 text-white/40 border border-white/10"
+                                    ? "bg-white/5 metric-negative border border-white/10"
                                     : "bg-white/5 text-white/30 border border-white/10"
                         )}>
                             {expectancy > 0 ? "Positive edge" : expectancy < 0 ? "Negative edge" : "Neutral"}

@@ -109,7 +109,7 @@ export default function PnLBySideChart({
               </span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.pnl >= 0 ? "text-white" : "text-white/40"
+                data.pnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.pnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -241,11 +241,14 @@ export default function PnLBySideChart({
                     <Cell
                       key={`cell-${index}`}
                       fill="white"
-                      fillOpacity={entry.pnl >= 0 ? 0.6 : 0.15}
+                      fillOpacity={entry.pnl >= 0 ? 0.98 : 0.22}
                       stroke="white"
-                      strokeOpacity={entry.pnl >= 0 ? 0.4 : 0.1}
+                      strokeOpacity={entry.pnl >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
-                      className="hover:fill-opacity-100 transition-all duration-300"
+                      className={cn(
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

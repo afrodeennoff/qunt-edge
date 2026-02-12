@@ -52,8 +52,8 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
 
     return [
       { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'white', count: nbWin },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'rgba(255,255,255,0.1)', count: nbBe },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'rgba(255,255,255,0.3)', count: nbLoss }
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'rgba(255,255,255,0.12)', count: nbBe },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'rgba(255,255,255,0.18)', count: nbLoss }
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
@@ -90,7 +90,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
             </span>
             <span className={cn(
               "font-black text-sm tabular-nums",
-              data.color === 'white' ? "text-white" : "text-white/40"
+              data.color === 'white' ? "metric-positive" : "metric-negative"
             )}>
               {data.value.toFixed(2)}%
             </span>
@@ -163,8 +163,11 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
-                      fillOpacity={entry.color === 'white' ? 0.8 : 0.4}
-                      className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
+                      fillOpacity={entry.color === 'white' ? 0.95 : 1}
+                      className={cn(
+                        "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                        entry.color === "white" ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                   <Label
@@ -182,7 +185,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                           dominantBaseline="central"
                         >
                           <tspan x={cx} dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
-                          <tspan x={cx} dy="1.2em" className="fill-white font-black text-lg">{centerText}</tspan>
+                          <tspan x={cx} dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{centerText}</tspan>
                         </text>
                       );
                     }}

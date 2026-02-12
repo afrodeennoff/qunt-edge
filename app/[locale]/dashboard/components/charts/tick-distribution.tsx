@@ -265,12 +265,15 @@ export default function TickDistributionChart({
                           ? 1
                           : tickFilter.value
                             ? 0.1
-                            : parseInt(entry.ticks) >= 0 ? 0.6 : 0.15
+                            : parseInt(entry.ticks) >= 0 ? 0.98 : 0.22
                       }
                       stroke="white"
-                      strokeOpacity={parseInt(entry.ticks) >= 0 ? 0.4 : 0.1}
+                      strokeOpacity={parseInt(entry.ticks) >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
-                      className="hover:fill-opacity-100 transition-all duration-300"
+                      className={cn(
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        parseInt(entry.ticks) >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

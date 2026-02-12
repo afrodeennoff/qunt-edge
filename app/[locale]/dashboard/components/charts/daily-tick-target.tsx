@@ -376,14 +376,14 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                 </span>
                 <span
                   className={cn(
-                    "font-black text-white tabular-nums",
+                    "font-black metric-positive tabular-nums",
                     size === "small" ? "text-sm" : "text-lg"
                   )}
                 >
                   +{Math.round(convertToDisplayValue(progress.positive))}
                 </span>
               </div>
-              <ArrowUp className="h-4 w-4 text-white/50" />
+              <ArrowUp className="h-4 w-4 metric-positive" />
             </div>
 
             <div className="flex items-center justify-between px-3 py-2 bg-white/5 border border-white/10 rounded-lg">
@@ -397,14 +397,14 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
                 </span>
                 <span
                   className={cn(
-                    "font-black text-white/40 tabular-nums",
+                    "font-black metric-negative tabular-nums",
                     size === "small" ? "text-sm" : "text-lg"
                   )}
                 >
                   {Math.round(convertToDisplayValue(progress.negative))}
                 </span>
               </div>
-              <ArrowDown className="h-4 w-4 text-white/10" />
+              <ArrowDown className="h-4 w-4 metric-negative" />
             </div>
           </div>
 
@@ -462,4 +462,3 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
     </div>
   )
 }
-

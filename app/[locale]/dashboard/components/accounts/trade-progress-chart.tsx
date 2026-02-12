@@ -255,7 +255,7 @@ export function TradeProgressChart({
                               <span className="text-white/40 uppercase font-bold tracking-wider">Net P/L</span>
                               <span className={cn(
                                 "font-black",
-                                data.pnl >= 0 ? "text-white" : "text-white/30"
+                                data.pnl >= 0 ? "metric-positive" : "metric-negative"
                               )}>
                                 {data.pnl >= 0 ? '+' : ''}{data.pnl.toLocaleString()}
                               </span>
@@ -273,7 +273,7 @@ export function TradeProgressChart({
                           </div>
                         </div>
                         {data.isReset && (
-                          <div className="mt-1 pt-1 border-t border-white/10 text-white font-black uppercase text-center tracking-widest animate-pulse">
+                          <div className="mt-1 pt-1 border-t border-white/10 metric-negative font-black uppercase text-center tracking-widest">
                             {t('propFirm.chart.accountReset')}
                           </div>
                         )}

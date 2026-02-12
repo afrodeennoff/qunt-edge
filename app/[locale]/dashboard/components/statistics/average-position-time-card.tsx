@@ -1,7 +1,5 @@
 import { useData } from "@/context/data-provider"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Clock } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
 import {
@@ -23,8 +21,8 @@ export default function AveragePositionTimeCard({ size = 'medium' }: AveragePosi
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
       <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md">
-        <Clock className="h-3 w-3 text-fg-muted" />
-        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider text-fg-primary">{averagePositionTime} Avg Time</span>
+        <Clock className="h-3 w-3 metric-positive" />
+        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider metric-positive">{averagePositionTime} Avg Time</span>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>

@@ -86,7 +86,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
         </p>
         <div className="flex justify-between items-center mb-2">
           <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnl.tooltip.pnl")}</span>
-          <span className={cn("font-black text-sm tabular-nums text-white", data.pnl < 0 && "text-white/40")}>
+          <span className={cn("font-black text-sm tabular-nums", data.pnl >= 0 ? "metric-positive" : "metric-negative")}>
             {formatCurrency(data.pnl)}
           </span>
         </div>
@@ -236,11 +236,14 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.pnl >= 0 ? positiveColor : negativeColor}
-                      fillOpacity={entry.pnl >= 0 ? 0.6 : 1}
+                      fillOpacity={entry.pnl >= 0 ? 0.98 : 0.24}
                       stroke="white"
-                      strokeOpacity={entry.pnl >= 0 ? 0.4 : 0.1}
+                      strokeOpacity={entry.pnl >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
-                      className="hover:fill-opacity-100 transition-all duration-300"
+                      className={cn(
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

@@ -30,10 +30,10 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
           ? "bg-white/10 border-white/20"
           : "bg-white/5 border-white/10"
       )}>
-        <Scale className={cn("h-3 w-3", isProfitable ? "text-white" : "text-fg-muted")} />
+        <Scale className={cn("h-3 w-3", isProfitable ? "metric-positive" : "metric-negative")} />
         <span className={cn(
           "font-terminal font-bold text-[11px] uppercase tracking-wider",
-          isProfitable ? "text-white" : "text-fg-muted"
+          isProfitable ? "metric-positive" : "metric-negative"
         )}>
           {formattedPF} PF
         </span>

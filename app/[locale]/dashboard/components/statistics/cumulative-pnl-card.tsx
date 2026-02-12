@@ -46,12 +46,12 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
         <div className="flex items-center gap-2">
           <div className={cn(
             "precision-panel p-1.5 rounded-md transition-all duration-500",
-            isPositive ? "bg-white/10 border-white/20" : "bg-rose-500/10 border-rose-500/20"
+            isPositive ? "bg-white/10 border-white/20" : "bg-white/5 border-white/10"
           )}>
             {isPositive ? (
-              <TrendingUp className={cn(iconSize, "text-white")} />
+              <TrendingUp className={cn(iconSize, "metric-positive")} />
             ) : (
-              <TrendingDown className={cn(iconSize, "text-rose-500")} />
+              <TrendingDown className={cn(iconSize, "metric-negative")} />
             )}
           </div>
           <span className="font-terminal text-[10px] font-bold uppercase tracking-widest text-fg-muted">
@@ -72,7 +72,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
 
       <div className={cn(
         "text-center font-terminal font-bold tracking-tighter tabular-nums drop-shadow-2xl",
-        isPositive ? "text-white" : "text-rose-500",
+        isPositive ? "metric-positive" : "metric-negative",
         valueSizeClass === 'text-2xl' ? 'text-3xl' : 'text-xl'
       )}>
         {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
@@ -85,7 +85,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
         </div>
         <div className="flex flex-col gap-0.5 text-right">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Losses</span>
-          <span className="font-terminal text-[11px] font-bold text-rose-500 tabular-nums">{formatCurrency(grossLosses)}</span>
+          <span className="font-terminal text-[11px] font-bold metric-negative tabular-nums">{formatCurrency(grossLosses)}</span>
         </div>
       </div>
     </div>

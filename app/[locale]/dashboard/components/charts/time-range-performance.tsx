@@ -108,7 +108,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
 
   function getColorByWinRate(winRate: number): string {
     if (winRate === 0) return "rgba(255,255,255,0.2)"
-    return winRate >= 50 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"
+    return "white"
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -141,7 +141,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.avgPnl >= 0 ? "text-white" : "text-fg-muted"
+              data.avgPnl >= 0 ? "metric-positive" : "metric-negative"
             )}>
               {data.avgPnl.toFixed(2)}
             </span>
@@ -152,7 +152,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-bold text-fg-primary text-xs",
-              data.winRate >= 50 ? "text-white" : "text-fg-muted"
+              data.winRate >= 50 ? "metric-positive" : "metric-negative"
             )}>
               {data.winRate.toFixed(1)}%
             </span>
@@ -292,11 +292,14 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.range}`}
-                      fill={entry.avgPnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : 0.8)}
-                      stroke={entry.avgPnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      strokeOpacity={timeRange.range === entry.range ? 1 : 0.5}
-                      className="hover:opacity-100"
+                      fill="white"
+                      fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : (entry.avgPnl >= 0 ? 0.98 : 0.22))}
+                      stroke="white"
+                      strokeOpacity={timeRange.range === entry.range ? 1 : (entry.avgPnl >= 0 ? 0.42 : 0.06)}
+                      className={cn(
+                        "hover:opacity-100",
+                        entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>
@@ -312,4 +315,3 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     </div>
   )
 }
-

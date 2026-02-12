@@ -53,7 +53,7 @@ function CommissionsTooltip({
           </span>
           <span className={cn(
             "font-black text-sm",
-            data.raw >= 0 ? "text-white" : "text-white/40"
+            data.raw >= 0 ? "metric-positive" : "metric-negative"
           )}>{formatCurrency(data.raw)}</span>
         </div>
         <div className="flex flex-col pt-2 border-t border-white/5">
@@ -193,8 +193,11 @@ export default function CommissionsPnLChart({
                         <Cell
                           key={`cell-${index}`}
                           fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
-                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.88 : 0.42}
-                          className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
+                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
+                          className={cn(
+                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                            entry.name === t("commissions.legend.netPnl") ? "chart-positive-emphasis" : "chart-negative-muted"
+                          )}
                         />
                       ))}
                     </Pie>

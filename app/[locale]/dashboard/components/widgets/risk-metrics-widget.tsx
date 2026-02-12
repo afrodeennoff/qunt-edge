@@ -106,19 +106,19 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs text-balance">Kelly Half</span>
-                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyHalf > 0 ? "text-white" : "text-white/40")}>
+                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyHalf > 0 ? "metric-positive" : "metric-negative")}>
                                     {(kellyHalf * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Optimal</span>
-                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyFull > 0 ? "text-white" : "text-white/40")}>
+                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyFull > 0 ? "metric-positive" : "metric-negative")}>
                                     {(kellyFull * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Conservative</span>
-                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyHalf > 0 ? "text-white" : "text-white/40")}>
+                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyHalf > 0 ? "metric-positive" : "metric-negative")}>
                                     {((kellyHalf / 2) * 100).toFixed(1)}%
                                 </span>
                             </div>

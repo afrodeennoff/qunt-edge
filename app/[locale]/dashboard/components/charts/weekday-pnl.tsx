@@ -144,7 +144,7 @@ export default function WeekdayPNLChart({
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.pnl >= 0 ? "text-white" : "text-fg-muted"
+              data.pnl >= 0 ? "metric-positive" : "metric-negative"
             )}>{formatCurrency(data.pnl)}</span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
@@ -271,19 +271,22 @@ export default function WeekdayPNLChart({
                   {weekdayData.map((entry) => (
                     <Cell
                       key={`cell-${entry.day}`}
-                      fill={entry.pnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      fill="white"
                       fillOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
-                          : 0.8
+                          : (entry.pnl >= 0 ? 0.98 : 0.22)
                       }
-                      stroke={entry.pnl >= 0 ? "rgb(var(--precision-cobalt-rgb))" : "rgb(var(--rose-500-rgb))"}
+                      stroke="white"
                       strokeOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
-                          : 1
+                          : (entry.pnl >= 0 ? 0.42 : 0.06)
                       }
-                      className="hover:opacity-100"
+                      className={cn(
+                        "hover:opacity-100",
+                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

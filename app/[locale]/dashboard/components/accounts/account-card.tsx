@@ -125,7 +125,7 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] uppercase font-bold tracking-tight">
                 <span className="text-white/40">{t('propFirm.card.remainingToTarget')}</span>
-                <span className="text-white">${remainingToTarget.toLocaleString()}</span>
+                <span className={remainingToTarget <= 0 ? "metric-positive" : "metric-negative"}>${remainingToTarget.toLocaleString()}</span>
               </div>
               <Progress
                 value={progress}
@@ -138,8 +138,8 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                   progress <= 20 ? "opacity-20 shadow-none" :
                     progress <= 40 ? "opacity-40 shadow-none" :
                       progress <= 60 ? "opacity-60 shadow-none" :
-                        progress <= 80 ? "opacity-85 shadow-none" :
-                          "opacity-100 shadow-none"
+                        progress <= 80 ? "opacity-85 shadow-none chart-positive-emphasis" :
+                          "opacity-100 shadow-none chart-positive-emphasis"
                 )}
               />
             </div>
@@ -150,8 +150,7 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                 <span className="text-white/40">{t('propFirm.card.drawdown')}</span>
                 <span className={cn(
                   "font-black truncate ml-2",
-                  remainingLoss > drawdownThreshold * 0.5 ? "text-white" :
-                    remainingLoss > drawdownThreshold * 0.2 ? "text-white/60" : "text-white/30"
+                  remainingLoss > drawdownThreshold * 0.5 ? "metric-positive" : "metric-negative"
                 )}>
                   {remainingLoss > 0
                     ? t('propFirm.card.remainingLoss', { amount: remainingLoss.toFixed(2) })
@@ -166,11 +165,9 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                 )}
                 indicatorClassName={cn(
                   "transition-all duration-500 bg-white/40",
-                  drawdownProgress <= 20 ? "opacity-20" :
-                    drawdownProgress <= 40 ? "opacity-40" :
-                      drawdownProgress <= 60 ? "opacity-60" :
-                        drawdownProgress <= 80 ? "opacity-80" :
-                          "opacity-100"
+                  drawdownProgress <= 40 ? "opacity-90 chart-positive-emphasis" :
+                    drawdownProgress <= 70 ? "opacity-50" :
+                      "opacity-100 chart-negative-muted"
                 )}
               />
             </div>
@@ -183,7 +180,7 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                   <span className={cn(
                     "font-black",
                     !metrics.hasProfitableData ? "text-white/20 italic" :
-                      (metrics.isConsistent || consistencyPercentage === 100) ? "text-white" : "text-white/40"
+                      (metrics.isConsistent || consistencyPercentage === 100) ? "metric-positive" : "metric-negative"
                   )}>
                     {!metrics.hasProfitableData ? t('propFirm.status.unprofitable') :
                       (metrics.isConsistent || consistencyPercentage === 100) ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
@@ -204,7 +201,7 @@ export function AccountCard({ account, onClick, size = 'large' }: AccountCardPro
                     <span className="text-white/40">{t('propFirm.card.tradingDays')}</span>
                     <span className={cn(
                       "font-black",
-                      metrics.validTradingDays === metrics.totalTradingDays ? "text-white" : "text-white/60"
+                      metrics.validTradingDays === metrics.totalTradingDays ? "metric-positive" : "metric-negative"
                     )}>
                       {metrics.validTradingDays}/{metrics.totalTradingDays}
                       {minPnlToCountAsDay > 0 && (

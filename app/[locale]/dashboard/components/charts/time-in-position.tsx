@@ -104,7 +104,7 @@ export default function TimeInPositionChart({
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t("timeInPosition.tooltip.averageDuration")}
             </span>
-            <span className="font-bold text-fg-primary text-xs">
+            <span className={cn("font-bold text-xs", data.avgTimeInPosition > 0 ? "metric-positive" : "metric-negative")}>
               {formatTime(data.avgTimeInPosition)}
             </span>
           </div>
@@ -112,7 +112,7 @@ export default function TimeInPositionChart({
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t("timeInPosition.tooltip.trades")}
             </span>
-            <span className="font-bold text-fg-primary text-xs">
+            <span className={cn("font-bold text-xs", data.tradeCount > 0 ? "metric-positive" : "metric-negative")}>
               {data.tradeCount}{" "}
               {data.tradeCount !== 1
                 ? t("timeInPosition.tooltip.trades_plural")
@@ -225,8 +225,11 @@ export default function TimeInPositionChart({
                     <Cell
                       key={`cell-${index}`}
                       fill="white"
-                      fillOpacity={0.6}
-                      className="hover:fill-opacity-100 transition-all duration-300"
+                      fillOpacity={entry.tradeCount > 0 ? 0.9 : 0.15}
+                      className={cn(
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.tradeCount > 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

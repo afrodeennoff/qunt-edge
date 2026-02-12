@@ -544,20 +544,21 @@
 
   .metric-positive {
     color: hsl(var(--chart-win));
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.32);
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.42);
   }
 
   .metric-negative {
     color: hsl(var(--chart-loss));
+    opacity: 0.58;
   }
 
   .chart-positive-emphasis {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.34));
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.46));
   }
 
   .chart-negative-muted {
-    opacity: 0.28 !important;
-    filter: saturate(0.55);
+    opacity: 0.14 !important;
+    filter: saturate(0.35) brightness(0.78);
   }
 
 

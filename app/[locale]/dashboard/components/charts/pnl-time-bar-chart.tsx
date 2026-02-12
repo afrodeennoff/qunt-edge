@@ -118,7 +118,7 @@ export default function TimeOfDayTradeChart({
               <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.averagePnl")}</span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.avgPnl >= 0 ? "text-white" : "text-white/40"
+                data.avgPnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.avgPnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -249,7 +249,7 @@ export default function TimeOfDayTradeChart({
                           ? 1
                           : hourFilter.hour !== null
                             ? 0.15
-                            : (entry.avgPnl >= 0 ? 0.6 : 0.2)
+                            : (entry.avgPnl >= 0 ? 0.98 : 0.22)
                       }
                       stroke="white"
                       strokeOpacity={
@@ -257,9 +257,12 @@ export default function TimeOfDayTradeChart({
                           ? 0.8
                           : hourFilter.hour !== null
                             ? 0.1
-                            : (entry.avgPnl >= 0 ? 0.4 : 0.1)
+                            : (entry.avgPnl >= 0 ? 0.42 : 0.06)
                       }
-                      className="hover:fill-opacity-100 transition-all duration-300"
+                      className={cn(
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
                   ))}
                 </Bar>

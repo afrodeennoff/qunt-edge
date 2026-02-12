@@ -53,8 +53,8 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
   return (
     <div className="h-full flex flex-col items-center justify-center gap-2 p-2 bg-transparent">
       <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md">
-        <Scale className="h-3 w-3 text-white" />
-        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider text-white">RR {riskRewardRatio}</span>
+        <Scale className="h-3 w-3 metric-positive" />
+        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider metric-positive">RR {riskRewardRatio}</span>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -77,14 +77,14 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
               <Progress
                 value={profitPercentage}
                 className="h-1 bg-white/5"
-                indicatorClassName="bg-white shadow-none"
+                indicatorClassName="bg-white chart-positive-emphasis"
               />
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" sideOffset={5}>
             <div className="font-terminal text-[10px] font-bold uppercase tracking-tight space-y-1">
-              <div className="text-white">Avg. Win: ${avgWin.toFixed(2)}</div>
-              <div className="text-white/40">Avg. Loss: ${avgLoss.toFixed(2)}</div>
+              <div className="metric-positive">Avg. Win: ${avgWin.toFixed(2)}</div>
+              <div className="metric-negative">Avg. Loss: ${avgLoss.toFixed(2)}</div>
             </div>
           </TooltipContent>
         </Tooltip>

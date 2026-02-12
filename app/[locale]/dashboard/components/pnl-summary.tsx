@@ -58,7 +58,7 @@ export function PnLSummary({ className }: PnLSummaryProps) {
         label: "Today's PnL",
         value: currencyFormatter.format(stats.daily.pnl),
         icon: isPositive ? TrendingUp : TrendingDown,
-        accent: isPositive ? "text-white" : "text-white/40",
+        accent: isPositive ? "metric-positive" : "metric-negative",
       },
       {
         label: "Win Rate",
@@ -95,7 +95,7 @@ export function PnLSummary({ className }: PnLSummaryProps) {
             <item.icon
               className={cn("h-4 w-4 flex-shrink-0 transition-all group-hover:scale-110", item.accent ?? "text-white/60")}
             />
-            <span className={cn("text-[16px] leading-none font-terminal", item.accent ?? "text-white")}>{item.value}</span>
+            <span className={cn("text-[16px] leading-none font-terminal", item.accent ?? "text-white/80")}>{item.value}</span>
           </div>
         </div>
       ))}

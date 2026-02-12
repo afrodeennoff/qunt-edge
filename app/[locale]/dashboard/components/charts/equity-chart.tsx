@@ -325,7 +325,10 @@ const OptimizedTooltip = React.memo(
             <span className="text-[8px] uppercase text-white/40 font-black tracking-widest">
               {t("equity.tooltip.totalEquity")}
             </span>
-            <span className="font-black text-white text-sm tabular-nums">
+            <span className={cn(
+              "font-black text-sm tabular-nums",
+              (data.equity || 0) >= 0 ? "metric-positive" : "metric-negative"
+            )}>
               {formatCurrency(data.equity || 0)}
             </span>
           </div>
@@ -346,7 +349,7 @@ const OptimizedTooltip = React.memo(
                           generateAccountColor(account),
                       }}
                     />
-                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest leading-none">
+                    <span className="text-[10px] font-black metric-negative uppercase tracking-widest leading-none">
                       {account}
                     </span>
                   </div>
@@ -372,7 +375,7 @@ const OptimizedTooltip = React.memo(
                             generateAccountColor(account),
                         }}
                       />
-                      <span className="text-[10px] font-black text-white/60 uppercase tracking-widest leading-none">
+                      <span className="text-[10px] font-black text-white/70 uppercase tracking-widest leading-none">
                         {account}
                       </span>
                     </div>
@@ -534,10 +537,7 @@ const AccountsLegend = React.memo(
                           </span>
                         )}
                         {hasReset && (
-                          <span
-                            className="text-xs leading-tight"
-                            style={{ color: "hsl(var(--destructive))" }}
-                          >
+                          <span className="text-xs leading-tight metric-negative">
                             {t("equity.legend.reset")}
                           </span>
                         )}
@@ -1061,4 +1061,3 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     </div>
   );
 }
-

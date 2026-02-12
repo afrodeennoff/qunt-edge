@@ -149,7 +149,7 @@ export function AccountTable({
         <TableCell>{format(metric.date, 'PP', { locale: dateLocale })}</TableCell>
         <TableCell className={cn(
           "text-right font-medium",
-          metric.pnl > 0 ? "text-white" : metric.pnl < 0 ? "text-destructive" : ""
+          metric.pnl > 0 ? "metric-positive" : metric.pnl < 0 ? "metric-negative" : ""
         )}>
           ${metric.pnl.toFixed(2)}
         </TableCell>
@@ -167,7 +167,7 @@ export function AccountTable({
         </TableCell>
         <TableCell className={cn(
           "text-right font-medium",
-          !isConsistent ? "text-destructive" : "text-white"
+          !isConsistent ? "metric-negative" : "metric-positive"
         )}>
           {isConsistent ? t('propFirm.status.consistent') : t('propFirm.status.inconsistent')}
         </TableCell>
@@ -182,7 +182,7 @@ export function AccountTable({
                 onClick={() => onEditPayout?.(metric.payout!)}
               >
                 <span className={cn(
-                  metric.payout.status === 'PAID' && "text-destructive font-medium"
+                  metric.payout.status === 'PAID' && "metric-negative font-medium"
                 )}>
                   -${metric.payout.amount.toFixed(2)}
                 </span>
@@ -250,7 +250,7 @@ export function AccountTable({
         <TableCell>{t('calendar.modal.total')}</TableCell>
         <TableCell className={cn(
           "text-right",
-          totalPnL > 0 ? "text-white" : totalPnL < 0 ? "text-destructive" : ""
+          totalPnL > 0 ? "metric-positive" : totalPnL < 0 ? "metric-negative" : ""
         )}>
           ${totalPnL.toFixed(2)}
         </TableCell>
@@ -268,7 +268,7 @@ export function AccountTable({
         </TableCell>
         <TableCell className={cn(
           "text-right",
-          hasInconsistentDays ? "text-destructive" : "text-white"
+          hasInconsistentDays ? "metric-negative" : "metric-positive"
         )}>
           {hasInconsistentDays ? 
             t('propFirm.consistency.inconsistent') : 
