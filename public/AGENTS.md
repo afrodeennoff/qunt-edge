@@ -242,7 +242,7 @@ When using `Status: Code-fixed (not runtime-tested)`, include all of:
 - Verify and report state with explicit checks (`git merge-base --is-ancestor <hash> main`, `git rev-parse main`, `git rev-parse origin/main`).
 - After finishing, restore the previous working branch/state (including stashed local files) unless the user asks otherwise.
 
-## Validation Commands
+## Validation and Auto-Fix
 Use npm scripts already defined in this repo:
 
 ```bash
@@ -252,7 +252,8 @@ npm run test
 npm run build
 ```
 
-Additional targeted commands:
+**AI Agent Workflow (Slash Commands):**
+- `/autofix`: Invokes the systematic diagnostic and repair loop defined in `.agent/workflows/autofix.md`. Use this to resolve build errors and linting issues.
 
 ```bash
 npm run test:payment

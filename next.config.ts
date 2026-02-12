@@ -1,10 +1,13 @@
 import type { NextConfig } from 'next';
 import createMDX from '@next/mdx';
 
+const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/+$/, '');
+
 const nextConfig: NextConfig = {
   output: "standalone",
   compress: true,
   poweredByHeader: false,
+  assetPrefix: cdnUrl || undefined,
   // cacheComponents: true, // Enable Cache Components (Next.js 16+)
   images: {
     formats: ["image/avif", "image/webp"],
@@ -57,6 +60,23 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "CDN-Cache-Control",
+            value: "public, s-maxage=31536000, stale-while-revalidate=86400",
+          },
+          {
+            key: "Vercel-CDN-Cache-Control",
+            value: "public, s-maxage=31536000, stale-while-revalidate=86400",
           },
         ],
       },

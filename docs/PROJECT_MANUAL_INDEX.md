@@ -113,6 +113,8 @@ Primary correctness areas:
 
 ## 6. Change and Commit Manuals
 For full file-level and commit-level catalogs, use:
+- AI Auto-Fix System: `docs/AI_AUTOFIX_SYSTEM.md`
+- AI Auto-Fix Quick Start: `docs/AI_AUTOFIX_QUICK_START.md`
 - Component deep map: `docs/COMPONENT_CODE_MAP.md`
 - Commit why/how/file IDs: `docs/CHANGE_CATALOG_MANUAL.md`
 

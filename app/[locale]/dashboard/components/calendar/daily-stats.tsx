@@ -25,7 +25,7 @@ const formatDuration = (seconds: number) => {
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const remainingSeconds = Math.floor(seconds % 60)
-  
+
   if (hours > 0) return `${hours}h ${minutes}m ${remainingSeconds}s`
   if (minutes > 0) return `${minutes}m ${remainingSeconds}s`
   return `${remainingSeconds}s`
@@ -112,8 +112,8 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
               {formatCurrency(totalPnL)}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">
-              {t('calendar.charts.across')} {accountCount} {accountCount > 1 
-                ? t('calendar.charts.accounts') 
+              {t('calendar.charts.across')} {accountCount} {accountCount > 1
+                ? t('calendar.charts.accounts')
                 : t('calendar.charts.account')}
             </p>
           </CardContent>
@@ -130,8 +130,8 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
               {formatDuration(avgTimeInPosition)}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">
-              {t('calendar.charts.over')} {dayData.trades.length} {dayData.trades.length > 1 
-                ? t('calendar.charts.trades') 
+              {t('calendar.charts.over')} {dayData.trades.length} {dayData.trades.length > 1
+                ? t('calendar.charts.trades')
                 : t('calendar.charts.trade')}
             </p>
           </CardContent>
@@ -144,7 +144,7 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-2 mt-auto">
-            <p className={`text-xl md:text-2xl font-bold ${maxDrawdown > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}>
+            <p className={`text-xl md:text-2xl font-bold ${maxDrawdown > 0 ? 'text-rose-500' : 'text-muted-foreground'}`}>
               -{formatCurrency(maxDrawdown)}
             </p>
           </CardContent>
@@ -157,7 +157,7 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-2 mt-auto">
-            <p className={`text-xl md:text-2xl font-bold ${maxProfit > 0 ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+            <p className={`text-xl md:text-2xl font-bold ${maxProfit > 0 ? 'text-accent-teal' : 'text-muted-foreground'}`}>
               {formatCurrency(maxProfit)}
             </p>
           </CardContent>

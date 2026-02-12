@@ -19,16 +19,16 @@ export interface StatsCardProps extends CardProps {
 }
 
 const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
-  ({ 
-    title, 
-    value, 
-    icon: Icon, 
-    trend, 
-    description, 
+  ({
+    title,
+    value,
+    icon: Icon,
+    trend,
+    description,
     size = "md",
     onClick,
     className,
-    ...props 
+    ...props
   }, ref) => {
     const sizeClasses = {
       sm: {
@@ -79,10 +79,10 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
               </h3>
             </div>
             {trend && (
-              <div 
+              <div
                 className={cn(
                   "flex items-center gap-1 shrink-0",
-                  trend.isPositive ? "text-green-500" : "text-red-500",
+                  trend.isPositive ? "text-accent-teal" : "text-rose-500",
                   currentSize.trend
                 )}
                 aria-label={`${trend.isPositive ? 'Increased' : 'Decreased'} by ${Math.abs(trend.value)}%`}
@@ -93,12 +93,12 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
               </div>
             )}
           </div>
-          
-          <div 
+
+          <div
             className={cn(
               "font-bold tracking-tight",
               currentSize.value,
-              trend?.isPositive ? "text-green-500" : trend?.isPositive === false ? "text-red-500" : "text-foreground"
+              trend?.isPositive ? "text-accent-teal" : trend?.isPositive === false ? "text-rose-500" : "text-foreground"
             )}
             aria-label={`Value: ${value}`}
           >

@@ -24,7 +24,7 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
 
     return (
         <div className="h-full flex flex-col bg-transparent">
-            <div className="py-3 px-4 flex-none border-b border-border/45">
+            <div className="py-3 px-4 flex-none border-b border-white/[0.03]">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold tracking-tight text-fg-primary">{t('widgets.tradingScore.title')}</span>

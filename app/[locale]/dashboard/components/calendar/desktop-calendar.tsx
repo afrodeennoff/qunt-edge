@@ -80,15 +80,15 @@ const truncateAccountNumber = (accountNumber: string, maxLength: number = 15): s
   if (accountNumber.length <= maxLength) {
     return accountNumber
   }
-  
+
   // Always show last 3 digits
   const lastThree = accountNumber.slice(-3)
   const remainingLength = maxLength - 3 - 1 // -1 for the ellipsis
-  
+
   if (remainingLength <= 0) {
     return `...${lastThree}`
   }
-  
+
   // Show beginning + ellipsis + last 3 digits
   const beginning = accountNumber.slice(0, remainingLength)
   return `${beginning}...${lastThree}`
@@ -172,7 +172,7 @@ function EventBadge({ events, impactLevels }: { events: FinancialEvent[], impact
 }
 
 function RenewalBadge({ renewals }: { renewals: Account[] }) {
-  
+
   const t = useI18n()
 
   if (renewals.length === 0) return null
@@ -217,8 +217,8 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
           {/* Account List with max height and scrolling */}
           <div className="space-y-2 sm:space-y-3 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
             {renewals.map((account, index) => (
-              <div 
-                key={account.id} 
+              <div
+                key={account.id}
                 className="group relative p-3 sm:p-4 rounded-lg border bg-card hover:bg-muted/50 hover:border-border transition-all duration-200 hover:shadow-xs"
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3">
@@ -244,14 +244,14 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-muted-foreground">
                       <div className="px-2 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md font-medium whitespace-nowrap">
                         {account.paymentFrequency?.toLowerCase()} {t('propFirm.renewal.frequency')}
                       </div>
                       {account.autoRenewal && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md whitespace-nowrap">
-                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></div>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-accent-teal/10 text-accent-teal rounded-md whitespace-nowrap">
+                          <div className="w-1.5 h-1.5 bg-accent-teal rounded-full shrink-0"></div>
                           <span className="text-xs font-medium">{t('propFirm.renewal.notification')}</span>
                         </div>
                       )}
@@ -391,7 +391,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   const renewalsByDate = useMemo(() => {
     const hiddenGroup = groups.find(g => g.name === HIDDEN_GROUP_NAME);
     const hiddenAccountIds = hiddenGroup ? new Set(hiddenGroup.accounts.map(a => a.id)) : new Set();
-    
+
     const map = new Map<string, Account[]>();
     accounts.forEach(account => {
       if (hiddenAccountIds.has(account.id) || !account.nextPaymentDate) return;
@@ -413,7 +413,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   // Pre-compute day calculations (maxProfit, maxDrawdown) for all days
   const dayCalculations = useMemo(() => {
     const calculations = new Map<string, { maxProfit: number; maxDrawdown: number }>();
-    
+
     Object.entries(calendarData).forEach(([dateString, dayData]) => {
       if (!dayData.trades || dayData.trades.length === 0) {
         calculations.set(dateString, { maxProfit: 0, maxDrawdown: 0 });
@@ -421,10 +421,10 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
       }
 
       // Create a copy to avoid mutating original
-      const sortedTrades = [...dayData.trades].sort((a, b) => 
+      const sortedTrades = [...dayData.trades].sort((a, b) =>
         new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
       );
-      
+
       const equity = [0];
       let cumulative = 0;
       sortedTrades.forEach(trade => {
@@ -452,7 +452,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
 
       calculations.set(dateString, { maxProfit: maxRU, maxDrawdown: maxDD });
     });
-    
+
     return calculations;
   }, [calendarData]);
 
@@ -518,8 +518,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
           <div className={cn(
             "text-sm sm:text-base font-semibold truncate",
             (viewMode === 'daily' ? monthlyTotal : yearTotal) >= 0
-              ? "text-green-600 dark:text-green-400"
-              : "text-red-600 dark:text-red-400"
+              ? "text-accent-teal"
+              : "text-rose-500"
           )}>
             {formatCurrency(viewMode === 'daily' ? monthlyTotal : yearTotal)}
           </div>
@@ -597,9 +597,9 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         "h-full flex flex-col cursor-pointer transition-all rounded-none p-1",
                         "ring-1 ring-border hover:ring-primary hover:z-10",
                         dayData && dayData.pnl >= 0
-                          ? "bg-green-50 dark:bg-green-900/20"
+                          ? "bg-accent-teal/5"
                           : dayData && dayData.pnl < 0
-                            ? "bg-red-50 dark:bg-red-900/20"
+                            ? "bg-rose-500/5"
                             : "bg-card",
                         !isCurrentMonth && "",
                         isToday(date) && "ring-blue-500 bg-blue-500/5 z-10",
@@ -628,8 +628,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           <div className={cn(
                             "text-[9px] sm:text-[11px] font-semibold truncate text-center",
                             dayData.pnl >= 0
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-red-600 dark:text-red-400",
+                              ? "text-accent-teal"
+                              : "text-rose-500",
                             !isCurrentMonth && "opacity-50"
                           )}>
                             {formatCurrency(dayData.pnl)}
@@ -651,13 +651,13 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         {dayData && (
                           <>
                             <div className={cn(
-                              "text-[7px] sm:text-[9px] text-green-600 dark:text-green-400 truncate text-center",
+                              "text-[7px] sm:text-[9px] text-accent-teal truncate text-center",
                               !isCurrentMonth && "opacity-50"
                             )}>
                               {t('calendar.maxProfit')}: {formatCurrency(maxProfit)}
                             </div>
                             <div className={cn(
-                              "text-[7px] sm:text-[9px] text-red-600 dark:text-red-400 truncate text-center",
+                              "text-[7px] sm:text-[9px] text-rose-500 truncate text-center",
                               !isCurrentMonth && "opacity-50"
                             )}>
                               {t('calendar.maxDD')}: -{formatCurrency(maxDrawdown)}
@@ -681,8 +681,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           <div className={cn(
                             "text-[9px] sm:text-[11px] font-semibold truncate px-0.5",
                             weeklyTotal >= 0
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-red-600 dark:text-red-400"
+                              ? "text-accent-teal"
+                              : "text-rose-500"
                           )}>
                             {formatCurrency(weeklyTotal)}
                           </div>

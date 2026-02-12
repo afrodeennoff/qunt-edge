@@ -950,7 +950,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           return (
             <div className="text-right font-medium">
               <span
-                className={cn(pnl >= 0 ? "text-green-600" : "text-red-600")}
+                className={cn(pnl >= 0 ? "text-accent-teal" : "text-rose-500")}
               >
                 {pnl.toFixed(2)}
               </span>

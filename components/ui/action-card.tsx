@@ -65,10 +65,10 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
     const currentSize = sizeClasses[size]
 
     const toneColors = {
-      default: "bg-primary/10 text-primary",
-      success: "bg-green-500/10 text-green-500",
+      default: "bg-precision-cobalt/10 text-precision-cobalt",
+      success: "bg-accent-teal/10 text-accent-teal",
       warning: "bg-amber-500/10 text-amber-500",
-      error: "bg-red-500/10 text-red-500"
+      error: "bg-rose-500/10 text-rose-500"
     }
 
     return (
