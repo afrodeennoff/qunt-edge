@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Card } from "@/components/ui/card"
+import { StatTile } from "@/components/ui/stat-tile"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
-import { Sparkles, TrendingUp, TrendingDown, ShieldAlert, Crosshair } from "lucide-react"
+import { Sparkles } from "lucide-react"
+import { TopNav } from "../components/top-nav"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -164,10 +166,10 @@ export default function TraderProfilePage() {
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] p-3 sm:p-4 lg:p-6">
+      <TopNav title="Trader Profile" />
       <div className="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
         <section className="space-y-4">
-          <Card className="relative overflow-hidden border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-5">
-            <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-sky-500/20 blur-3xl" />
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-5">
             <p className="text-[11px] uppercase tracking-[0.16em] text-fg-muted">Trader Profile</p>
             <h2 className="mt-2 text-3xl font-black tracking-tight text-fg-primary">{profileName}</h2>
             <p className="mt-2 text-sm text-fg-muted">
@@ -208,8 +210,7 @@ export default function TraderProfilePage() {
         </section>
 
         <aside className="space-y-4">
-          <Card className="relative overflow-hidden border border-white/10 bg-slate-950/70 p-4">
-            <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-cyan-500/15 blur-3xl" />
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.14em] text-fg-muted">Compare with: average user</p>
@@ -244,25 +245,14 @@ export default function TraderProfilePage() {
           </Card>
 
           <div className="grid grid-cols-2 gap-3">
-            <Card className="border border-white/10 bg-black/25 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">Risk Reward</p>
-              <p className="mt-1 flex items-center gap-1 text-2xl font-black text-fg-primary"><Crosshair className="h-4 w-4 text-cyan-300" />{formatValue(metrics.riskReward)}</p>
-            </Card>
-            <Card className="border border-white/10 bg-black/25 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">Drawdown</p>
-              <p className="mt-1 flex items-center gap-1 text-2xl font-black text-rose-400"><ShieldAlert className="h-4 w-4" />{formatValue(metrics.drawdown)}</p>
-            </Card>
-            <Card className="border border-white/10 bg-black/25 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">Win Rate</p>
-              <p className="mt-1 flex items-center gap-1 text-2xl font-black text-emerald-400"><TrendingUp className="h-4 w-4" />{formatValue(metrics.winRate)}%</p>
-            </Card>
-            <Card className="border border-white/10 bg-black/25 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">Avg Return</p>
-              <p className={`mt-1 flex items-center gap-1 text-2xl font-black ${metrics.avgReturn >= 0 ? "text-accent-teal" : "text-rose-500"}`}>
-                {metrics.avgReturn >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                {formatValue(metrics.avgReturn)}
-              </p>
-            </Card>
+            <StatTile label="Risk Reward" value={formatValue(metrics.riskReward)} tone="default" />
+            <StatTile label="Drawdown" value={formatValue(metrics.drawdown)} tone="negative" />
+            <StatTile label="Win Rate" value={`${formatValue(metrics.winRate)}%`} tone="positive" />
+            <StatTile
+              label="Avg Return"
+              value={formatValue(metrics.avgReturn)}
+              tone={metrics.avgReturn >= 0 ? "positive" : "negative"}
+            />
           </div>
 
           <Card className="border border-white/10 bg-black/25 p-3">

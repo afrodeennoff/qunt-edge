@@ -37,7 +37,7 @@ export default function Footer() {
 
   const socialLinks: SocialLink[] = [
     { name: 'GitHub', href: 'https://github.com/afrodeennoff/lassttry-edge-', icon: Github },
-    { name: 'YouTube', href: 'https://www.youtube.com/@hugodemenez', icon: Youtube },
+    { name: 'YouTube', href: 'https://www.youtube.com/@TIMON', icon: Youtube },
     { name: 'Discord', href: process.env.NEXT_PUBLIC_DISCORD_INVITATION || '', icon: MessageCircle },
   ].filter((item) => item.href)
 
@@ -59,7 +59,7 @@ export default function Footer() {
                 <Logo className="h-5 w-5 fill-[hsl(var(--mk-text))]" />
               </div>
               <div className="leading-none">
-                <div className="text-base font-semibold tracking-tight [font-family:var(--font-poppins)]">Qunt Edge</div>
+                <div className="text-base font-semibold tracking-tight">Qunt Edge</div>
                 <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Trading Intelligence</div>
               </div>
             </div>
