@@ -54,11 +54,11 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
     <div className="h-full flex flex-col items-center justify-center gap-2 p-2 bg-transparent">
       <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md">
         <Scale className="h-3 w-3 text-white" />
-        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider text-fg-primary">RR {riskRewardRatio}</span>
+        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider text-white">RR {riskRewardRatio}</span>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <HelpCircle className="h-3 w-3 text-fg-muted cursor-help" />
+              <HelpCircle className="h-3 w-3 text-white/40 cursor-help" />
             </TooltipTrigger>
             <TooltipContent
               side="bottom"
@@ -84,7 +84,7 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
           <TooltipContent side="top" sideOffset={5}>
             <div className="font-terminal text-[10px] font-bold uppercase tracking-tight space-y-1">
               <div className="text-white">Avg. Win: ${avgWin.toFixed(2)}</div>
-              <div className="text-fg-muted">Avg. Loss: ${avgLoss.toFixed(2)}</div>
+              <div className="text-white/40">Avg. Loss: ${avgLoss.toFixed(2)}</div>
             </div>
           </TooltipContent>
         </Tooltip>

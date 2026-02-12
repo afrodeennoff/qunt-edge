@@ -825,7 +825,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return {
         equity: {
           label: "Total Equity",
-          color: "hsl(var(--chart-loss))",
+          color: "white",
         },
       } as ChartConfig;
     }
@@ -858,8 +858,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           strokeWidth={2}
           dot={renderDot}
           isAnimationActive={false}
-          activeDot={{ r: 3, style: { fill: "hsl(var(--chart-2))" } }}
-          stroke="hsl(var(--chart-2))"
+          activeDot={{ r: 3, style: { fill: "white" } }}
+          stroke="white"
           connectNulls={false}
         />
       );
@@ -910,7 +910,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base"
               )}
             >
@@ -921,7 +921,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
                     )}
                   />
@@ -1007,9 +1007,9 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                     />
                     <ReferenceLine
                       y={0}
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="white"
                       strokeDasharray="3 3"
-                      strokeOpacity={0.5}
+                      strokeOpacity={0.1}
                     />
                     <ChartTooltip
                       content={({

@@ -93,7 +93,7 @@ export function DashboardHeader() {
 
     return (
         <header className="sticky top-0 z-50 overflow-hidden border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl" data-dashboard-header="true">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(34,90,235,0.07),transparent_25%,transparent_75%,rgba(34,90,235,0.05))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
             <div className="relative min-h-[72px] flex flex-wrap items-center justify-between gap-3 px-3 py-2 md:px-8">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
@@ -134,7 +134,7 @@ export function DashboardHeader() {
 
                         {!isPlusUser() && (
                             <Link href={billingHref}>
-                                <button className="group flex h-8 items-center gap-2 rounded-lg border border-[#225AEB]/30 bg-[#225AEB]/10 px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-[#225AEB] transition-all hover:bg-[#225AEB]/20">
+                                <button className="group flex h-8 items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-white/10 hover:border-white/40">
                                     <Sparkles className="h-3 w-3 animate-pulse" />
                                     <span>UPGRADE</span>
                                 </button>
@@ -211,7 +211,7 @@ export function DashboardHeader() {
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <button
-                                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
                                                 title={t('widgets.deleteAll')}
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -228,7 +228,7 @@ export function DashboardHeader() {
                                                 <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                                                 <AlertDialogAction
                                                     onClick={removeAllWidgets}
-                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                    className="bg-white/10 text-white hover:bg-white/20 border border-white/10"
                                                 >
                                                     {t('widgets.confirmDeleteAll')}
                                                 </AlertDialogAction>
@@ -240,14 +240,14 @@ export function DashboardHeader() {
                                         <button
                                             type="button"
                                             onClick={flushPendingSaves}
-                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 transition-colors animate-pulse"
+                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors animate-pulse"
                                             title="Save Changes"
                                         >
                                             <CloudUpload className="w-4 h-4" />
                                         </button>
                                     ) : (
-                                        <div className="flex h-8 w-8 items-center justify-center text-primary/70" title="All changes saved">
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                        <div className="flex h-8 w-8 items-center justify-center text-white/70" title="All changes saved">
+                                            <CheckCircle2 className="w-4 h-4 text-white" />
                                         </div>
                                     )}
                                 </motion.div>

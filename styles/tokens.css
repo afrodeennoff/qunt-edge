@@ -15,14 +15,14 @@
     --brand-soft-ink: 0 0% 16%;
 
     /* ===== MARKETING SURFACE TOKENS ===== */
-    --mk-bg-0: 230 40% 4%;
-    --mk-bg-1: 230 36% 5%;
-    --mk-bg-2: 231 34% 7%;
-    --mk-surface: 231 30% 8%;
-    --mk-surface-muted: 231 26% 10%;
-    --mk-border: 229 3% 52%;
-    --mk-text: 220 7% 81%;
-    --mk-text-muted: 230 4% 53%;
+    --mk-bg-0: 0 0% 2%;
+    --mk-bg-1: 0 0% 3%;
+    --mk-bg-2: 0 0% 4%;
+    --mk-surface: 0 0% 5%;
+    --mk-surface-muted: 0 0% 8%;
+    --mk-border: 0 0% 20%;
+    --mk-text: 0 0% 90%;
+    --mk-text-muted: 0 0% 50%;
 
     /* ===== BACKGROUND HIERARCHY (7 levels) ===== */
     /* Semantic background tokens from darkest to lightest */
@@ -87,14 +87,14 @@
     --focus-ring-offset: 0 0 0 2px var(--bg-base);
 
     /* ===== SEMANTIC COLORS ===== */
-    --color-error: 0 62% 50%;
-    --color-error-bg: 0 62% 50% / 0.1;
-    --color-warning: 35 85% 55%;
-    --color-warning-bg: 35 85% 55% / 0.1;
+    --color-error: 0 0% 40%;
+    --color-error-bg: 0 0% 40% / 0.1;
+    --color-warning: 0 0% 60%;
+    --color-warning-bg: 0 0% 60% / 0.1;
     --color-success: var(--accent-teal);
     --color-success-bg: var(--accent-teal) / 0.1;
-    --color-info: 217 91% 60%;
-    --color-info-bg: 217 91% 60% / 0.1;
+    --color-info: 0 0% 80%;
+    --color-info-bg: 0 0% 80% / 0.1;
 
     /* ===== CHART COLORS ===== */
     --chart-positive: 0 0% 100%;
@@ -153,14 +153,14 @@
     --bg-modal: 240 10% 13%;
     --bg-highlight: 240 10% 15%;
 
-    --mk-bg-0: 230 40% 4%;
-    --mk-bg-1: 230 36% 5%;
-    --mk-bg-2: 231 34% 7%;
-    --mk-surface: 231 30% 8%;
-    --mk-surface-muted: 231 26% 10%;
-    --mk-border: 229 3% 52%;
-    --mk-text: 220 7% 81%;
-    --mk-text-muted: 230 4% 53%;
+    --mk-bg-0: 0 0% 2%;
+    --mk-bg-1: 0 0% 3%;
+    --mk-bg-2: 0 0% 4%;
+    --mk-surface: 0 0% 5%;
+    --mk-surface-muted: 0 0% 8%;
+    --mk-border: 0 0% 20%;
+    --mk-text: 0 0% 90%;
+    --mk-text-muted: 0 0% 50%;
   }
 }
 

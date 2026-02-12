@@ -47,7 +47,7 @@ interface TooltipProps {
 const chartConfig = {
   count: {
     label: "Count",
-    color: "hsl(var(--chart-7))",
+    color: "white",
   },
 } satisfies ChartConfig;
 
@@ -117,27 +117,15 @@ export default function TickDistributionChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("tickDistribution.tooltip.ticks")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.ticks}{" "}
-              {parseInt(data.ticks) !== 1
-                ? t("tickDistribution.tooltip.ticks_plural")
-                : t("tickDistribution.tooltip.tick")}
-            </span>
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
+            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("tickDistribution.tooltip.ticks")}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{data.ticks}</span>
           </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("tickDistribution.tooltip.trades")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.count}{" "}
-              {data.count !== 1
-                ? t("tickDistribution.tooltip.trades_plural")
-                : t("tickDistribution.tooltip.trade")}
+          <div className="flex justify-between items-center pt-1.5">
+            <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("tickDistribution.tooltip.trades")}</span>
+            <span className="font-black text-white text-[11px] tabular-nums">
+              {data.count}
             </span>
           </div>
         </div>
@@ -158,7 +146,7 @@ export default function TickDistributionChart({
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -169,7 +157,7 @@ export default function TickDistributionChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
@@ -184,7 +172,7 @@ export default function TickDistributionChart({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+              className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-white/40 hover:text-white hover:bg-white/5"
               onClick={() => setTickFilter({ value: null })}
             >
               {t("tickDistribution.clearFilter")}
@@ -271,15 +259,18 @@ export default function TickDistributionChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.ticks}`}
-                      fill={parseInt(entry.ticks) >= 0 ? "rgb(var(--accent-teal-rgb))" : "rgb(var(--rose-500-rgb))"}
-                      opacity={
+                      fill="white"
+                      fillOpacity={
                         tickFilter.value === entry.ticks
                           ? 1
                           : tickFilter.value
-                            ? 0.3
-                            : 0.8
+                            ? 0.1
+                            : parseInt(entry.ticks) >= 0 ? 0.6 : 0.15
                       }
-                      className="hover:opacity-100"
+                      stroke="white"
+                      strokeOpacity={parseInt(entry.ticks) >= 0 ? 0.4 : 0.1}
+                      strokeWidth={1}
+                      className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}
                 </Bar>

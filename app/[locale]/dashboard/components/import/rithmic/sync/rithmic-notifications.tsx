@@ -213,16 +213,16 @@ export function RithmicSyncNotifications() {
   const progress = notifications.progress.progress
   const totalAccountsToProcess = selectedAccounts.length || processingStats.totalAccountsAvailable || 1
   const currentAccountIndex = currentAccount ? selectedAccounts.indexOf(currentAccount) + 1 : 0
-  
+
   // Calculate progress from completed accounts (previous accounts)
   const completedAccountsProgress = Math.max(0, currentAccountIndex - 1) * 100
-  
+
   // Calculate current account progress
   const currentAccountProgress = progress ? (progress.current / progress.total) * 100 : 0
-  
+
   // Total progress = completed accounts + current account progress, all divided by total accounts
-  const progressPercentage = totalAccountsToProcess > 0 
-    ? (completedAccountsProgress + currentAccountProgress) / totalAccountsToProcess 
+  const progressPercentage = totalAccountsToProcess > 0
+    ? (completedAccountsProgress + currentAccountProgress) / totalAccountsToProcess
     : 0
 
   return (
@@ -230,14 +230,14 @@ export function RithmicSyncNotifications() {
       <Alert
         key={notifications.progress.id}
         className={cn(
-          notifications.progress.type === 'success' && "border-green-500",
+          notifications.progress.type === 'success' && "border-white/20 bg-white/5",
           isCollapsed && "w-16 h-16 p-0 ml-auto"
         )}
       >
         <div className={cn("flex items-start gap-2", isCollapsed && "justify-center items-center h-full")}>
           {isCollapsed ? (
-            <div 
-              className="relative w-12 h-12 cursor-pointer" 
+            <div
+              className="relative w-12 h-12 cursor-pointer"
               onClick={() => setIsCollapsed(false)}
               title={t('notification.expand')}
             >
@@ -252,7 +252,7 @@ export function RithmicSyncNotifications() {
                   cy="24"
                 />
                 <circle
-                  className="text-primary"
+                  className="text-white"
                   strokeWidth="2"
                   strokeDasharray={125.6}
                   strokeDashoffset={Math.max(0, 125.6 - (125.6 * (progressPercentage || 0)) / 100)}
@@ -270,8 +270,8 @@ export function RithmicSyncNotifications() {
             </div>
           ) : (
             <>
-              {notifications.progress.type === 'success' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-              {notifications.progress.type === 'info' && <Info className="h-4 w-4 text-blue-500" />}
+              {notifications.progress.type === 'success' && <CheckCircle2 className="h-4 w-4 text-white" />}
+              {notifications.progress.type === 'info' && <Info className="h-4 w-4 text-white/50" />}
               <div className="space-y-1 w-full">
                 <div className="flex items-center justify-between">
                   <AlertTitle>{t('notification.title')}</AlertTitle>
@@ -291,9 +291,9 @@ export function RithmicSyncNotifications() {
                   <div>{notifications.progress.message}</div>
                   {progress && progress.total > 0 && (
                     <div className="mt-2 space-y-2">
-                      <Progress 
-                        value={progressPercentage} 
-                        className="w-full h-2" 
+                      <Progress
+                        value={progressPercentage}
+                        className="w-full h-2"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{t('notification.days')}: {progress.current} / {progress.total}</span>

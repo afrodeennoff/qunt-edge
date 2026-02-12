@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer, Legend, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart, ReferenceLine } from "recharts"
+import { cn } from "@/lib/utils"
 import {
   Card,
   CardContent,
@@ -25,11 +26,11 @@ interface ChartsProps {
 const chartConfig = {
   pnl: {
     label: "P&L Distribution",
-    color: "hsl(var(--success))",
+    color: "white",
   },
   equity: {
     label: "Equity Variation",
-    color: "hsl(var(--chart-2))",
+    color: "rgba(255,255,255,0.4)",
   },
 } satisfies ChartConfig
 
@@ -43,7 +44,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
   const isDarkMode = effectiveTheme === 'dark'
   const t = useI18n()
   const locale = useCurrentLocale()
-  
+
   // Calculate data for charts
   const { accountPnL, equityChartData, chartData, totalPnL, calculateCommonDomain } = React.useMemo(() => {
     if (!dayData?.trades?.length) {
@@ -84,9 +85,9 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
           .reduce((sum, t) => sum + (Number(t.pnl) - Number(t.commission || 0)), 0);
         return {
           time: new Date(trade.entryDate).toLocaleTimeString(locale),
-          date: new Date(trade.entryDate).toLocaleDateString(locale, { 
-            weekday: 'short', 
-            month: 'short', 
+          date: new Date(trade.entryDate).toLocaleDateString(locale, {
+            weekday: 'short',
+            month: 'short',
             day: 'numeric',
           }),
           balance: runningBalance,
@@ -109,7 +110,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
 
     const overallMin = Math.min(distributionMin, equityMin);
     const overallMax = Math.max(distributionMax, equityMax);
-    
+
     const padding = (overallMax - overallMin) * 0.1;
     const calculateCommonDomain = [
       Math.floor((overallMin - padding) / 100) * 100,
@@ -134,9 +135,14 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
   }
 
   // Generate colors based on theme
-  const colors = isDarkMode 
-    ? ['#8b5cf6', '#6366f1', '#3b82f6', '#0ea5e9', '#06b6d4', '#14b8a6']  // Dark mode colors
-    : ['#a78bfa', '#818cf8', '#60a5fa', '#38bdf8', '#22d3ee', '#2dd4bf']  // Light mode colors
+  const colors = [
+    'rgba(255,255,255,1)',
+    'rgba(255,255,255,0.8)',
+    'rgba(255,255,255,0.6)',
+    'rgba(255,255,255,0.4)',
+    'rgba(255,255,255,0.2)',
+    'rgba(255,255,255,0.1)'
+  ]
 
   const EquityTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -145,7 +151,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
         <div className="bg-background p-2 border rounded shadow-xs text-xs md:text-sm">
           <p className="font-semibold">{isWeekly ? data.date : data.time}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} className={`font-bold ${entry.dataKey === 'pnl' ? (entry.value >= 0 ? 'text-green-600' : 'text-red-600') : 'text-blue-600'}`}>
+            <p key={index} className={cn("font-bold", entry.dataKey === 'pnl' ? (entry.value >= 0 ? 'text-white' : 'text-white/40') : 'text-white/60')}>
               {entry.name}: {formatCurrency(entry.value)}
             </p>
           ))}
@@ -161,13 +167,13 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
   const DistributionTooltip = ({ active, payload }: any) => {
     if (active && payload?.[0]) {
       const data = payload[0].payload
-      const percentage = data.account !== 'total' 
+      const percentage = data.account !== 'total'
         ? ((data.value / totalPnL) * 100).toFixed(1)
         : '100'
       return (
         <div className="bg-background p-2 border rounded shadow-xs text-xs md:text-sm">
           <p className="font-semibold">{data.name}</p>
-          <p className={`font-bold ${data.value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={cn("font-bold", data.value >= 0 ? 'text-white' : 'text-white/40')}>
             {formatCurrency(data.value)}
           </p>
           {data.account !== 'total' && (
@@ -197,15 +203,15 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={equityChartData}
-                margin={{ 
-                  top: 10, 
-                  right: 8, 
-                  left: 35, 
-                  bottom: 40 
+                margin={{
+                  top: 10,
+                  right: 8,
+                  left: 35,
+                  bottom: 40
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
+                <XAxis
                   dataKey={isWeekly ? "date" : "time"}
                   angle={-45}
                   textAnchor="end"
@@ -225,7 +231,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   tick={{ fontSize: '10px' }}
                   width={50}
                 />
-                <Tooltip 
+                <Tooltip
                   content={<EquityTooltip />}
                   wrapperStyle={{ zIndex: 1000 }}
                   cursor={{ strokeWidth: 2 }}
@@ -238,7 +244,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   {equityChartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.pnl >= 0 ? 'hsl(var(--success))' : 'hsl(var(--destructive))'}
+                      fill={entry.pnl >= 0 ? 'white' : 'rgba(255,255,255,0.3)'}
                       className="transition-all duration-300 ease-in-out hover:opacity-70"
                     />
                   ))}
@@ -272,17 +278,17 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ 
-                  top: 10, 
-                  right: 16, 
-                  left: 35, 
-                  bottom: 60 
+                margin={{
+                  top: 10,
+                  right: 16,
+                  left: 35,
+                  bottom: 60
                 }}
                 barCategoryGap={4}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis 
-                  type="category" 
+                <XAxis
+                  type="category"
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
@@ -305,7 +311,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                     );
                   }}
                 />
-                <YAxis 
+                <YAxis
                   type="number"
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={calculateCommonDomain}
@@ -313,20 +319,20 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   width={50}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip 
+                <Tooltip
                   content={<DistributionTooltip />}
                   wrapperStyle={{ zIndex: 1000 }}
                   cursor={{ fillOpacity: 0.3 }}
                 />
-                <Bar 
-                  dataKey="value" 
+                <Bar
+                  dataKey="value"
                   barSize={20}
                   name={t('calendar.charts.accountPnl')}
                 >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.value >= 0 ? colors[index % colors.length] : `hsl(var(--destructive))`}
+                      fill={entry.value >= 0 ? colors[index % colors.length] : `rgba(255,255,255,0.2)`}
                       className="transition-all duration-300 ease-in-out hover:opacity-80"
                     />
                   ))}

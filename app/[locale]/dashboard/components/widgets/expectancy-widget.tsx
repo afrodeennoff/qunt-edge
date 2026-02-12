@@ -19,41 +19,41 @@ export default function ExpectancyWidget({ size }: { size?: string }) {
 
     return (
         <div className="h-full flex flex-col bg-transparent">
-            <div className="py-3 px-4 flex-none border-b border-border/45">
+            <div className="py-3 px-4 flex-none border-b border-white/10">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold tracking-tight text-fg-primary">{t('widgets.expectancy.title')}</span>
+                        <span className="text-sm font-semibold tracking-tight text-white">{(t as any)('widgets.expectancy.title')}</span>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
-                                    <Info className="h-3.5 w-3.5 text-fg-muted" />
+                                    <Info className="h-3.5 w-3.5 text-white/50" />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p className="text-xs">{t('widgets.expectancy.tooltip')}</p>
+                                    <p className="text-xs">{(t as any)('widgets.expectancy.tooltip')}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     </div>
-                    <Target className="h-4 w-4 text-fg-muted" />
+                    <Target className="h-4 w-4 text-white/50" />
                 </div>
             </div>
             <div className="flex-1 flex flex-col items-center justify-center p-4">
                 <div className="flex flex-col items-center justify-center">
-                    <span className="text-[11px] font-medium tracking-tight text-fg-muted mb-3">Value per trade</span>
+                    <span className="text-[11px] font-medium tracking-tight text-white/50 mb-3">Value per trade</span>
                     <div className={cn(
                         "text-4xl font-semibold tracking-tight tabular-nums",
-                        expectancy > 0 ? "text-accent-teal" : expectancy < 0 ? "text-rose-500" : "text-fg-muted"
+                        expectancy > 0 ? "text-white" : expectancy < 0 ? "text-white/40" : "text-white/50"
                     )}>
                         {expectancy > 0 ? '+' : ''}{formattedExpectancy}
                     </div>
                     <div className="mt-5 flex flex-col items-center gap-1">
                         <div className={cn(
-                            "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight",
+                            "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
                             expectancy > 0
-                                ? "bg-accent-teal/10 text-accent-teal border border-accent-teal/20"
+                                ? "bg-white/10 text-white border border-white/20"
                                 : expectancy < 0
-                                    ? "bg-rose-500/10 text-rose-500 border border-rose-500/20"
-                                    : "bg-muted/25 text-muted-foreground border border-border/45"
+                                    ? "bg-white/5 text-white/40 border border-white/10"
+                                    : "bg-white/5 text-white/30 border border-white/10"
                         )}>
                             {expectancy > 0 ? "Positive edge" : expectancy < 0 ? "Negative edge" : "Neutral"}
                         </div>

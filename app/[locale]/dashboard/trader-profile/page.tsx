@@ -2,19 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Card } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  CircleDot,
-  Crosshair,
-  ShieldAlert,
-  Sparkles,
-  Target,
-  Trophy,
-} from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { TopNav } from "../components/top-nav"
 import {
   PolarAngleAxis,
@@ -43,8 +33,9 @@ interface TraderMetrics {
   netPnl: number
   expectancy: number
   consistencyRate: number
-  streakDirection: number
-  streakCount: number
+  winningStreak: number
+  sumGain: number
+  breakEvenRate: number
 }
 
 function clamp(value: number, min = 0, max = 100) {
@@ -83,32 +74,17 @@ function getTradeDay(dateValue: string | Date) {
   return date.toISOString().slice(0, 10)
 }
 
-function getStreak(values: number[]) {
-  let direction = 0
+function getWinningStreak(values: number[]) {
   let count = 0
   for (let index = values.length - 1; index >= 0; index -= 1) {
     const value = values[index]
-    if (value === 0) continue
-    const currentDirection = value > 0 ? 1 : -1
-    if (direction === 0) {
-      direction = currentDirection
-      count = 1
-      continue
-    }
-    if (currentDirection === direction) {
+    if (value > 0) {
       count += 1
       continue
     }
     break
   }
-  return { direction, count }
-}
-
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return "TR"
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+  return count
 }
 
 export default function TraderProfilePage() {
@@ -159,6 +135,7 @@ export default function TraderProfilePage() {
     const netValues = sorted.map((trade) => Number(trade.pnl || 0) - Number(trade.commission || 0))
     const wins = pnlValues.filter((v) => v > 0)
     const losses = pnlValues.filter((v) => v < 0)
+    const sumGain = wins.reduce((acc, value) => acc + value, 0)
     const avgWin = wins.length > 0 ? wins.reduce((a, b) => a + b, 0) / wins.length : 0
     const avgLossAbs = losses.length > 0 ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0
     const decisiveTrades = wins.length + losses.length
@@ -186,7 +163,8 @@ export default function TraderProfilePage() {
     const activeDays = [...dayPnl.values()]
     const positiveDays = activeDays.filter((value) => value > 0).length
     const consistencyRate = activeDays.length > 0 ? (positiveDays / activeDays.length) * 100 : 0
-    const streak = getStreak(pnlValues)
+    const winningStreak = getWinningStreak(pnlValues)
+    const breakEvenRate = avgWin + avgLossAbs > 0 ? (avgLossAbs / (avgWin + avgLossAbs)) * 100 : 0
 
     return {
       riskReward: avgLossAbs > 0 ? avgWin / avgLossAbs : 0,
@@ -199,292 +177,153 @@ export default function TraderProfilePage() {
       netPnl: cumulativePnl,
       expectancy,
       consistencyRate,
-      streakDirection: streak.direction,
-      streakCount: streak.count,
+      winningStreak,
+      sumGain,
+      breakEvenRate,
     }
   }, [formattedTrades])
 
-  const compareData = useMemo(() => {
+  const radarData = useMemo(() => {
     const baseline = benchmark ?? { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0, sampleSize: 0 }
-    const traderScores = {
-      riskReward: scoreHigherBetter(metrics.riskReward, baseline.riskReward),
-      drawdown: scoreLowerBetter(metrics.drawdown, baseline.drawdown),
-      winRate: scoreHigherBetter(metrics.winRate, baseline.winRate),
-      avgReturn: scoreSigned(metrics.avgReturn, baseline.avgReturn),
-    }
-    const baselineScores = {
-      riskReward: scoreHigherBetter(baseline.riskReward, metrics.riskReward),
-      drawdown: scoreLowerBetter(baseline.drawdown, metrics.drawdown),
-      winRate: scoreHigherBetter(baseline.winRate, metrics.winRate),
-      avgReturn: scoreSigned(baseline.avgReturn, metrics.avgReturn),
-    }
-
-    const rows = [
-      { metric: "Risk Reward", trader: traderScores.riskReward, baseline: baselineScores.riskReward },
-      { metric: "Drawdown", trader: traderScores.drawdown, baseline: baselineScores.drawdown },
-      { metric: "Win Rate", trader: traderScores.winRate, baseline: baselineScores.winRate },
-      { metric: "Avg Return", trader: traderScores.avgReturn, baseline: baselineScores.avgReturn },
+    const totalTradeBaseline = Math.max(20, baseline.sampleSize)
+    return [
+      { metric: "TOTAL TRADES", trader: scoreHigherBetter(metrics.totalTrades, totalTradeBaseline) },
+      { metric: "RISK REWARD", trader: scoreHigherBetter(metrics.riskReward, baseline.riskReward) },
+      { metric: "AVG. DRAWDOWN", trader: scoreLowerBetter(metrics.drawdown, baseline.drawdown) },
+      { metric: "WIN RATE", trader: scoreHigherBetter(metrics.winRate, baseline.winRate) },
+      { metric: "AVG RETURN", trader: scoreSigned(metrics.avgReturn, baseline.avgReturn) },
     ]
-
-    const delta = rows.reduce((acc, row) => acc + (row.trader - row.baseline), 0) / rows.length
-    return { rows, delta }
-  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.winRate])
-
-  const performanceBand = useMemo(() => {
-    if (compareData.delta >= 18) return "Elite edge"
-    if (compareData.delta >= 6) return "Strong edge"
-    if (compareData.delta >= -6) return "Competitive"
-    if (compareData.delta >= -18) return "Needs tuning"
-    return "Rebuild phase"
-  }, [compareData.delta])
-
-  const metricGaps = useMemo(() => {
-    return compareData.rows.map((row) => ({
-      ...row,
-      diff: row.trader - row.baseline,
-      absDiff: Math.abs(row.trader - row.baseline),
-    }))
-  }, [compareData.rows])
-
-  const recentTrades = useMemo(() => {
-    return [...(formattedTrades || [])]
-      .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
-      .slice(0, 10)
-  }, [formattedTrades])
+  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.totalTrades, metrics.winRate])
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-6">
-      <div className="pointer-events-none absolute inset-0 opacity-80">
-        <div className="absolute -top-24 left-[-8%] h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl" />
-        <div className="absolute top-28 right-[-6%] h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute bottom-10 left-[36%] h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div className="absolute -top-24 left-[-8%] h-72 w-72 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute top-28 right-[-6%] h-80 w-80 rounded-full bg-white/[0.03] blur-3xl" />
       </div>
 
       <TopNav title="Trader Profile" />
 
-      <div className="relative grid gap-4 xl:grid-cols-[1.6fr_1fr]">
-        <section className="space-y-4">
-          <Card className="relative overflow-hidden border border-white/15 bg-[linear-gradient(130deg,rgba(8,35,41,0.95)_0%,rgba(5,12,25,0.9)_45%,rgba(6,17,28,0.95)_100%)] p-5 sm:p-6">
-            <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full border border-cyan-300/20 bg-cyan-400/10 blur-2xl" />
-            <div className="absolute bottom-0 right-0 h-20 w-40 bg-gradient-to-l from-cyan-300/10 to-transparent" />
-
-            <div className="relative">
-              <div className="inline-flex items-center gap-1 rounded-full border border-cyan-400/35 bg-cyan-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Trader fingerprint
-              </div>
-              <div className="mt-4 flex items-center gap-3">
-                <Avatar className="h-12 w-12 border border-white/25 bg-white/10">
-                  <AvatarImage src={supabaseUser?.user_metadata?.avatar_url || ""} alt={profileName} />
-                  <AvatarFallback className="bg-cyan-500/20 text-sm font-bold text-cyan-100">
-                    {getInitials(profileName)}
-                  </AvatarFallback>
-                </Avatar>
-                <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">{profileName}</h2>
-              </div>
-              <p className="mt-2 max-w-xl text-sm text-cyan-100/80">
-                Live identity from your journal. We translate your trade behavior into an edge map so you can quickly
-                spot what to double down on and what to repair.
-              </p>
-
-              <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                <div className="rounded-xl border border-white/15 bg-white/[0.04] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-cyan-100/70">Band</p>
-                  <p className="mt-1 text-sm font-bold text-white">{performanceBand}</p>
-                </div>
-                <div className="rounded-xl border border-white/15 bg-white/[0.04] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-cyan-100/70">Trades tracked</p>
-                  <p className="mt-1 text-sm font-bold text-white">{metrics.totalTrades}</p>
-                </div>
-                <div className="rounded-xl border border-white/15 bg-white/[0.04] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-cyan-100/70">Current streak</p>
-                  <p className="mt-1 text-sm font-bold text-white">
-                    {metrics.streakCount > 0
-                      ? `${metrics.streakCount} ${metrics.streakDirection > 0 ? "wins" : "losses"}`
-                      : "No streak"}
-                  </p>
-                </div>
-              </div>
-
-              {isLoading ? <p className="mt-3 text-xs text-cyan-100/70">Loading trades...</p> : null}
-            </div>
-          </Card>
-
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Card className="border border-emerald-400/25 bg-emerald-500/10 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-200/80">Net PnL</p>
-                  <p className="mt-2 text-2xl font-black text-emerald-100">{formatSigned(metrics.netPnl)}</p>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-emerald-300" />
-              </div>
-            </Card>
-
-            <Card className="border border-cyan-400/25 bg-cyan-500/10 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">Risk Reward</p>
-                  <p className="mt-2 text-2xl font-black text-white">{formatValue(metrics.riskReward)}</p>
-                </div>
-                <Target className="h-5 w-5 text-cyan-200" />
-              </div>
-            </Card>
-
-            <Card className="border border-rose-400/25 bg-rose-500/10 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-rose-100/80">Max Drawdown</p>
-                  <p className="mt-2 text-2xl font-black text-white">{formatValue(metrics.drawdown)}</p>
-                </div>
-                <ShieldAlert className="h-5 w-5 text-rose-200" />
-              </div>
-            </Card>
-
-            <Card className="border border-violet-400/25 bg-violet-500/10 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-violet-100/80">Win Rate</p>
-                  <p className="mt-2 text-2xl font-black text-white">{formatValue(metrics.winRate)}%</p>
-                </div>
-                <Trophy className="h-5 w-5 text-violet-200" />
-              </div>
-            </Card>
+      <div className="relative mx-auto mt-4 w-full max-w-[430px] space-y-2.5">
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <div className="flex items-center justify-between text-sm text-fg-muted">
+            <span className="inline-flex items-center gap-1">
+              Compare with: average user
+              <ChevronDown className="h-3.5 w-3.5" />
+            </span>
+            <span className="text-[11px]">{isBenchmarkLoading ? "Loading..." : "Live"}</span>
           </div>
-
-          <Card className="border border-white/10 bg-black/25 p-4 sm:p-5">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-bold text-fg-primary">Trade Feed</p>
-              <p className="text-xs text-fg-muted">Last {recentTrades.length} executions</p>
-            </div>
-            <div className="space-y-2.5">
-              {recentTrades.length === 0 ? (
-                <p className="text-sm text-fg-muted">No trades available yet.</p>
-              ) : (
-                recentTrades.map((trade) => {
-                  const pnl = Number(trade.pnl || 0)
-                  return (
-                    <div
-                      key={trade.id}
-                      className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`} />
-                        <div>
-                          <p className="text-sm font-semibold text-fg-primary">{trade.instrument || "N/A"}</p>
-                          <p className="text-[11px] text-fg-muted">{new Date(trade.entryDate).toLocaleString()}</p>
-                        </div>
-                      </div>
-                      <p className={`text-sm font-black ${pnl >= 0 ? "text-accent-teal" : "text-rose-500"}`}>
-                        {formatSigned(pnl)}
-                      </p>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          </Card>
-        </section>
-
-        <aside className="space-y-4">
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4 sm:p-5">
-            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.14em] text-fg-muted">Edge map vs average user</p>
-                <p className="mt-1 text-sm font-semibold text-fg-primary">
-                  {compareData.delta >= 0 ? "Above baseline" : "Below baseline"} ({formatSigned(compareData.delta, 1)} pts)
-                </p>
-                {benchmark ? (
-                  <p className="mt-1 text-[11px] text-fg-muted">Based on {benchmark.sampleSize} users with trades</p>
-                ) : null}
-              </div>
-              <div className="inline-flex items-center gap-1 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                {isBenchmarkLoading ? "Loading..." : "Benchmark"}
-              </div>
-            </div>
-
-            <div className="mb-3 flex gap-2">
-              <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200">
-                You
-              </span>
-              <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg-muted">
-                Average User
-              </span>
-            </div>
-
+          <div className="mt-2.5 rounded-xl border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={compareData.rows}>
-                  <PolarGrid stroke="hsl(var(--muted-foreground) / 0.2)" />
-                  <PolarAngleAxis dataKey="metric" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                  <Radar dataKey="baseline" stroke="hsl(var(--muted-foreground) / 0.7)" fill="hsl(var(--muted-foreground) / 0.15)" fillOpacity={1} />
-                  <Radar dataKey="trader" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2) / 0.3)" fillOpacity={1} />
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="hsl(var(--border) / 0.45)" />
+                  <PolarAngleAxis
+                    dataKey="metric"
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }}
+                  />
+                  <Radar dataKey="trader" stroke="hsl(var(--foreground) / 0.85)" fill="hsl(var(--foreground) / 0.2)" fillOpacity={1} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
-          </Card>
+          </div>
+        </Card>
 
-          <Card className="border border-white/10 bg-black/25 p-4 sm:p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-fg-primary">Where you win or lose edge</p>
-              <Crosshair className="h-4 w-4 text-fg-muted" />
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Win</p>
+              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgWin)}%</p>
             </div>
-            <div className="space-y-3">
-              {metricGaps.map((row) => {
-                const better = row.diff >= 0
-                return (
-                  <div key={row.metric}>
-                    <div className="mb-1.5 flex items-center justify-between text-xs">
-                      <span className="text-fg-muted">{row.metric}</span>
-                      <span className={better ? "font-bold text-emerald-300" : "font-bold text-rose-300"}>
-                        {better ? "+" : ""}
-                        {row.diff.toFixed(1)} pts
-                      </span>
-                    </div>
-                    <div className="h-2 rounded-full bg-white/10">
-                      <div
-                        className={`h-full rounded-full ${better ? "bg-emerald-400" : "bg-rose-400"}`}
-                        style={{ width: `${Math.max(6, Math.min(100, row.absDiff))}%` }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Loss</p>
+              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}%</p>
             </div>
-          </Card>
+          </div>
+          <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Return</p>
+            <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(Math.abs(metrics.avgReturn))}%</p>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-white/30" style={{ width: `${Math.min(100, Math.max(8, metrics.consistencyRate))}%` }} />
+          </div>
+        </Card>
 
-          <Card className="border border-white/10 bg-black/25 p-4 sm:p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-fg-primary">Execution quality</p>
-              {metrics.expectancy >= 0 ? (
-                <ArrowUpRight className="h-4 w-4 text-emerald-300" />
-              ) : (
-                <ArrowDownRight className="h-4 w-4 text-rose-300" />
-              )}
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
+          <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
+          <div className="mt-3 h-2 rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-white/40" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
+          </div>
+        </Card>
+
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
+              <p className="mt-1 text-4xl font-semibold text-fg-primary">{metrics.totalTrades}</p>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Win</p>
-                <p className="mt-1 font-bold text-emerald-400">{formatValue(metrics.avgWin)}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Loss</p>
-                <p className="mt-1 font-bold text-rose-400">{formatValue(metrics.avgLoss)}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
-                <p className={`mt-1 font-bold ${metrics.expectancy >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
-                  {formatSigned(metrics.expectancy)}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Consistency</p>
-                <p className="mt-1 font-bold text-cyan-200">{formatValue(metrics.consistencyRate)}%</p>
-              </div>
+            <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-fg-muted">
+              {metrics.totalTrades >= 80 ? "Serial Trader" : "Building"}
+            </span>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(6, metrics.totalTrades))}%` }} />
+          </div>
+        </Card>
+
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Break Even Rate</p>
+              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.breakEvenRate)}%</p>
             </div>
-          </Card>
-        </aside>
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Sum Gain</p>
+              <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.sumGain)}%</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <p className="text-[10px] uppercase tracking-wider text-fg-muted">Current Streak</p>
+          <p className="mt-1 text-3xl font-semibold text-fg-primary">
+            {metrics.winningStreak > 0 ? `${metrics.winningStreak} wins` : "No winning streak"}
+          </p>
+        </Card>
+
+        <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <p className="text-[10px] uppercase tracking-wider text-fg-muted">Execution Quality</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Win</p>
+              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgWin)}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Loss</p>
+              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
+              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatSigned(metrics.expectancy)}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
+              <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
+            </div>
+          </div>
+        </Card>
+
+        <button
+          type="button"
+          className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-white/15 bg-[hsl(var(--qe-surface-1))] px-4 py-3 text-sm font-medium text-fg-primary transition-colors hover:bg-white/5"
+        >
+          Show All Stats
+          <ChevronDown className="h-4 w-4" />
+        </button>
+
+        {isLoading ? <p className="text-xs text-fg-muted">Loading trades...</p> : null}
+        <p className="text-center text-xs text-fg-muted">{profileName}</p>
       </div>
     </div>
   )

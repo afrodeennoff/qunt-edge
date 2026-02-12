@@ -61,13 +61,13 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                 <div className="container-fluid flex items-center justify-between">
                     <Link href={`/${locale}`} className="flex items-center gap-2 group z-50" onClick={() => setMobileMenuOpen(false)}>
                         <div className="relative w-8 h-8 flex items-center justify-center">
-                            <div className="absolute inset-0 bg-teal-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                            <div className="absolute inset-0 bg-white blur-xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
                             <svg width="24" height="24" viewBox="0 0 32 32" fill="none" className="text-white relative z-10 transition-transform duration-500 group-hover:rotate-180">
                                 <path d="M16 2L2 9V23L16 30L30 23V9L16 2Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
-                                <circle cx="16" cy="16" r="4" fill="#2dd4bf" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <circle cx="16" cy="16" r="4" fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             </svg>
                         </div>
-                        <span className="text-lg font-bold tracking-tighter text-white group-hover:text-teal-400 transition-colors uppercase">
+                        <span className="text-lg font-bold tracking-tighter text-white group-hover:text-white/80 transition-colors uppercase">
                             Qunt Edge
                         </span>
                     </Link>
@@ -81,7 +81,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors relative group py-2"
                             >
                                 {link.name}
-                                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-teal-500 transition-all duration-300 group-hover:w-full"></span>
+                                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
                             </Link>
                         ))}
                     </div>
@@ -98,7 +98,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                     </button>
                                     <button
                                         onClick={onAccessPortal}
-                                        className="bg-white hover:bg-teal-400 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_-5px_rgba(45,212,191,0.4)]"
+                                        className="bg-white hover:bg-zinc-200 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_-5px_rgba(255,255,255,0.4)]"
                                     >
                                         {t('landing.cta')}
                                     </button>
@@ -106,7 +106,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                             ) : (
                                 <Link
                                     href={`/${locale}/dashboard`}
-                                    className="bg-teal-500 hover:bg-teal-400 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(45,212,191,0.3)]"
+                                    className="bg-white hover:bg-zinc-200 text-black px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
                                 >
                                     {t('landing.navbar.dashboard')}
                                 </Link>
@@ -115,7 +115,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
 
                         {/* Mobile Menu Toggle */}
                         <button
-                            className="lg:hidden w-10 h-10 flex items-center justify-center text-white hover:text-teal-400 transition-colors z-50 focus:outline-none"
+                            className="lg:hidden w-10 h-10 flex items-center justify-center text-white hover:text-white/80 transition-colors z-50 focus:outline-none"
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             aria-label="Toggle Menu"
                         >
@@ -189,7 +189,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                                     setMobileMenuOpen(false);
                                                     onAccessPortal();
                                                 }}
-                                                className="w-full bg-teal-500 text-black py-3.5 rounded-lg text-sm font-bold uppercase tracking-widest shadow-lg shadow-teal-500/20 active:scale-95 transition-transform"
+                                                className="w-full bg-white text-black py-3.5 rounded-lg text-sm font-bold uppercase tracking-widest shadow-lg shadow-white/10 active:scale-95 transition-transform"
                                             >
                                                 {t('landing.cta')}
                                             </button>
@@ -198,7 +198,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                         <Link
                                             href={`/${locale}/dashboard`}
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className="block w-full bg-teal-500 text-black py-3.5 rounded-lg text-sm font-bold uppercase tracking-widest text-center shadow-lg shadow-teal-500/20 active:scale-95 transition-transform"
+                                            className="block w-full bg-white text-black py-3.5 rounded-lg text-sm font-bold uppercase tracking-widest text-center shadow-lg shadow-white/10 active:scale-95 transition-transform"
                                         >
                                             {t('landing.navbar.dashboard')}
                                         </Link>

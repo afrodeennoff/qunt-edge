@@ -30,20 +30,20 @@ const formatCurrencyValue = (pnl: string | undefined): { pnl: number, error?: st
   }
 
   const formattedPnl = pnl.trim();
-  
+
   // Check if value is in parenthesis format (negative)
   const isNegative = formattedPnl.startsWith('(') && formattedPnl.endsWith(')');
-  
+
   // Remove parentheses and dollar signs
   let cleanedValue = formattedPnl.replace(/[()$]/g, '');
-  
+
   // Detect format: if there's both comma and period, determine which is decimal separator
   if (cleanedValue.includes(',') && cleanedValue.includes('.')) {
     // If comma comes before period, it's a thousand separator (US format: 1,234.56)
     // If period comes before comma, it's European format (1.234,56)
     const commaIndex = cleanedValue.indexOf(',');
     const periodIndex = cleanedValue.indexOf('.');
-    
+
     if (commaIndex < periodIndex) {
       // US format: remove commas (thousand separators)
       cleanedValue = cleanedValue.replace(/,/g, '');
@@ -56,7 +56,7 @@ const formatCurrencyValue = (pnl: string | undefined): { pnl: number, error?: st
     // European decimal format has 1+ digits after comma (e.g., 123,45 or 123,4567)
     // US thousand separator has exactly 3 digits between each comma (e.g., 1,234 or 1,234,567)
     const parts = cleanedValue.split(',');
-    
+
     // Check if it matches US thousand separator pattern:
     // - Multiple commas: all parts after first must be exactly 3 digits
     // - Single comma with exactly 3 digits after
@@ -68,7 +68,7 @@ const formatCurrencyValue = (pnl: string | undefined): { pnl: number, error?: st
       // Multiple commas: verify all parts except first are exactly 3 digits
       isUSFormat = parts.slice(1).every(part => part.length === 3);
     }
-    
+
     if (isUSFormat) {
       // US thousand separator format (e.g., 1,234 or 1,234,567)
       cleanedValue = cleanedValue.replace(/,/g, '');
@@ -77,13 +77,13 @@ const formatCurrencyValue = (pnl: string | undefined): { pnl: number, error?: st
       cleanedValue = cleanedValue.replace(',', '.');
     }
   }
-  
+
   const numericValue = parseFloat(cleanedValue);
-  
+
   if (isNaN(numericValue)) {
     return { pnl: 0, error: 'Unable to parse PNL value' };
   }
-  
+
   return { pnl: isNegative ? -numericValue : numericValue };
 };
 
@@ -94,7 +94,7 @@ const formatPriceValue = (price: string | undefined): { price: number, error?: s
 
   const formattedPrice = price.trim();
   const numericValue = parseFloat(formattedPrice.replace(',', '.'));
-  
+
   if (isNaN(numericValue)) {
     return { price: 0, error: 'Unable to parse price value' };
   }
@@ -107,7 +107,7 @@ const convertToValidDate = (dateString: string): Date | null => {
   // Try MM/DD/YYYY HH:MM:SS AM/PM format (US format with seconds and AM/PM)
   const usFormatWithSeconds = /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s(\d{1,2}):(\d{2}):(\d{2})\s(AM|PM)$/i;
   const matchUSWithSeconds = dateString.match(usFormatWithSeconds);
-  
+
   if (matchUSWithSeconds) {
     const [, month, day, year, hours, minutes, seconds, ampm] = matchUSWithSeconds;
     let hour24 = parseInt(hours);
@@ -130,7 +130,7 @@ const convertToValidDate = (dateString: string): Date | null => {
   // Try MM/DD/YYYY HH:MM AM/PM format (US format without seconds)
   const usFormatWithoutSeconds = /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s(\d{1,2}):(\d{2})\s(AM|PM)$/i;
   const matchUSWithoutSeconds = dateString.match(usFormatWithoutSeconds);
-  
+
   if (matchUSWithoutSeconds) {
     const [, month, day, year, hours, minutes, ampm] = matchUSWithoutSeconds;
     let hour24 = parseInt(hours);
@@ -153,7 +153,7 @@ const convertToValidDate = (dateString: string): Date | null => {
   // Try DD/MM/YYYY HH:MM:SS format (European format with seconds)
   const dateRegexWithSeconds = /^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
   const matchWithSeconds = dateString.match(dateRegexWithSeconds);
-  
+
   if (matchWithSeconds) {
     const [, day, month, year, hours, minutes, seconds] = matchWithSeconds;
     // Create date in local timezone
@@ -171,7 +171,7 @@ const convertToValidDate = (dateString: string): Date | null => {
   // Try DD/MM/YYYY HH:MM format (European format without seconds)
   const dateRegexWithoutSeconds = /^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2})$/;
   const matchWithoutSeconds = dateString.match(dateRegexWithoutSeconds);
-  
+
   if (matchWithoutSeconds) {
     const [, day, month, year, hours, minutes] = matchWithoutSeconds;
     // Create date in local timezone
@@ -225,15 +225,15 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
 
   const processTrades = useCallback(() => {
     const newTrades: Trade[] = [];
-    
+
     const normalizeHeader = (header: string): string => {
       return header.replace(/[\u2019''′`]/g, "'");
     };
 
-    const isFrenchCSV = headers.some(header => 
+    const isFrenchCSV = headers.some(header =>
       ["Numéro d'ordre", "Compte", "Stratégie", "Pos. marché.", "Qté"].includes(header)
     );
-    
+
     const mappings = isFrenchCSV ? frenchMappings : englishMappings;
 
     csvData.forEach((row, rowIndex) => {
@@ -251,13 +251,13 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
         if (mappedKey) {
           const key = mappedKey as keyof Trade;
           const cellValue = row[index]?.trim();
-          
+
           if (!cellValue) {
             return;
           }
 
           hasValidData = true;
-          
+
           switch (key) {
             case 'quantity':
               quantity = parseFloat(cellValue) || 0;
@@ -288,13 +288,13 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
             case 'side':
               item[key] = cellValue.toLowerCase();
               break;
-              case 'instrument':
-                if (typeof cellValue === 'string' && cellValue.trim() !== '') {
-                  item[key] = cellValue.split(' ')[0];
-                } else {
-                  item[key] = '';
-                }
-                break;
+            case 'instrument':
+              if (typeof cellValue === 'string' && cellValue.trim() !== '') {
+                item[key] = cellValue.split(' ')[0];
+              } else {
+                item[key] = '';
+              }
+              break;
             default:
               item[key] = cellValue as any;
           }
@@ -423,7 +423,7 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
                     <TableCell className="whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l">
                       {trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}
                     </TableCell>
-                    <TableCell className={`whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l ${trade.pnl && trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <TableCell className={`whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l ${trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-white/50'}`}>
                       {trade.pnl?.toFixed(2)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l">
@@ -452,13 +452,13 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
         <div className="flex items-center gap-6">
           <div>
             <h3 className="text-sm font-semibold mb-1">Total PnL</h3>
-            <p className={`text-lg font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-lg font-bold ${totalPnL >= 0 ? 'text-white' : 'text-white/50'}`}>
               ${totalPnL.toFixed(2)}
             </p>
           </div>
           <div>
             <h3 className="text-sm font-semibold mb-1">Total Commission</h3>
-            <p className="text-lg font-bold text-blue-600">
+            <p className="text-lg font-bold text-white/50">
               ${totalCommission.toFixed(2)}
             </p>
           </div>

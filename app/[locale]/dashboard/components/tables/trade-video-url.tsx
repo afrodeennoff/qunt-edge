@@ -45,12 +45,12 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
     if (!url) return true
     try {
       new URL(url)
-      return url.includes('youtube.com') || 
-             url.includes('youtu.be') || 
-             url.includes('tradingview.com') ||
-             url.endsWith('.mp4') ||
-             url.endsWith('.webm') ||
-             url.endsWith('.mov')
+      return url.includes('youtube.com') ||
+        url.includes('youtu.be') ||
+        url.includes('tradingview.com') ||
+        url.endsWith('.mp4') ||
+        url.endsWith('.webm') ||
+        url.endsWith('.mov')
     } catch {
       return false
     }
@@ -61,7 +61,7 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
     try {
       const urlObj = new URL(url)
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        const videoId = url.includes('youtube.com') 
+        const videoId = url.includes('youtube.com')
           ? urlObj.searchParams.get('v')
           : url.split('/').pop()
         return `https://www.youtube.com/embed/${videoId}?autoplay=1`
@@ -79,7 +79,7 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
 
   const handleSave = async () => {
     if (!isValid) return
-    
+
     setIsUpdating(true)
     try {
       await updateTrades(tradeIds, { videoUrl: draftUrl || null })
@@ -153,20 +153,20 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
                     onChange={(e) => handleUrlChange(e.target.value)}
                     className={cn(
                       "pr-8",
-                      !isValid && draftUrl && "border-destructive focus-visible:ring-destructive",
-                      showSuccess && "border-green-500 focus-visible:ring-green-500",
-                      isUpdating && "border-primary/50"
+                      !isValid && draftUrl && "border-white/20 focus-visible:ring-white/20",
+                      showSuccess && "border-white focus-visible:ring-white",
+                      isUpdating && "border-white/50"
                     )}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {isUpdating && (
                       <div className="h-4 w-4">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-r-transparent" />
                       </div>
                     )}
                     {showSuccess && !isUpdating && (
                       <svg
-                        className="h-4 w-4 text-green-500"
+                        className="h-4 w-4 text-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         stroke="currentColor"
@@ -182,7 +182,7 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
                     )}
                     {!isValid && draftUrl && !isUpdating && (
                       <svg
-                        className="h-4 w-4 text-destructive"
+                        className="h-4 w-4 text-white/30"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         stroke="currentColor"
@@ -203,13 +203,13 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
                   size="icon"
                   disabled={isUpdating || !draftUrl}
                   onClick={handleClear}
-                  className="shrink-0 text-destructive hover:text-destructive"
+                  className="shrink-0 text-white/40 hover:text-white"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
               {!isValid && draftUrl && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs font-mono uppercase tracking-widest text-white/40">
                   {t('trade-table.invalidVideoUrl')}
                 </p>
               )}

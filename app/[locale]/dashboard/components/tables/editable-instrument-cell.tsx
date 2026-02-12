@@ -14,11 +14,11 @@ interface EditableInstrumentCellProps {
   className?: string
 }
 
-export function EditableInstrumentCell({ 
-  value, 
-  tradeIds, 
+export function EditableInstrumentCell({
+  value,
+  tradeIds,
   onUpdate,
-  className 
+  className
 }: EditableInstrumentCellProps) {
   const t = useI18n()
   const [isEditing, setIsEditing] = useState(false)
@@ -47,7 +47,7 @@ export function EditableInstrumentCell({
     if (isSaving) return
 
     const trimmedValue = tempValue.trim()
-    
+
     if (trimmedValue === value) {
       handleCancel()
       return
@@ -59,7 +59,7 @@ export function EditableInstrumentCell({
     }
 
     setIsSaving(true)
-    
+
     try {
       await onUpdate(tradeIds, { instrument: trimmedValue })
       setIsEditing(false)
@@ -90,26 +90,26 @@ export function EditableInstrumentCell({
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           placeholder="Instrument"
-          className="h-7 text-xs font-medium border-blue-500 focus-visible:ring-1"
+          className="h-7 text-xs font-medium border-white/40 focus-visible:ring-1"
           disabled={isSaving}
         />
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 hover:bg-green-100"
+          className="h-7 w-7 p-0 hover:bg-white/10"
           onClick={handleSave}
           disabled={isSaving}
         >
-          <Check className="h-3 w-3 text-green-600" />
+          <Check className="h-3 w-3 text-white" />
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 hover:bg-red-100"
+          className="h-7 w-7 p-0 hover:bg-white/5"
           onClick={handleCancel}
           disabled={isSaving}
         >
-          <X className="h-3 w-3 text-red-600" />
+          <X className="h-3 w-3 text-white/40" />
         </Button>
       </div>
     )
@@ -118,7 +118,7 @@ export function EditableInstrumentCell({
   return (
     <div
       className={cn(
-        "group cursor-pointer hover:bg-accent/50 rounded px-2 py-1 transition-colors border border-transparent hover:border-accent-foreground/20 flex items-center gap-2",
+        "group cursor-pointer hover:bg-white/5 rounded px-2 py-1 transition-colors border border-transparent hover:border-white/10 flex items-center gap-2",
         className
       )}
       onClick={handleStartEdit}

@@ -27,11 +27,11 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
             <div className="py-3 px-4 flex-none border-b border-white/[0.03]">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold tracking-tight text-fg-primary">{(t as any)('widgets.tradingScore.title')}</span>
+                        <span className="text-sm font-semibold tracking-tight text-white">{(t as any)('widgets.tradingScore.title')}</span>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
-                                    <Info className="h-3.5 w-3.5 text-fg-muted" />
+                                    <Info className="h-3.5 w-3.5 text-white/50" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p className="text-xs">{(t as any)('widgets.tradingScore.tooltip')}</p>
@@ -48,7 +48,7 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                         <span className={score >= 80 ? "text-white" : "text-white font-normal"}>
                             {score}
                         </span>
-                        <span className="text-base text-fg-muted ml-1">/ 100</span>
+                        <span className="text-base text-white/50 ml-1">/ 100</span>
                     </div>
                 </div>
                 <div className={cn(
@@ -57,17 +57,17 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                     {normalizedLabel}
                 </div>
                 <div className="mt-6 grid grid-cols-3 gap-2 w-full text-center">
-                    <div className="flex flex-col p-2.5 bg-muted/30 rounded-xl border border-border/45">
-                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">Win Rate</span>
-                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-fg-primary">{metrics.winRate.toFixed(1)}%</span>
+                    <div className="flex flex-col p-2.5 bg-white/5 rounded-xl border border-white/10">
+                        <span className="text-[10px] font-medium tracking-tight text-white/50">Win Rate</span>
+                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-white">{metrics.winRate.toFixed(1)}%</span>
                     </div>
-                    <div className="flex flex-col p-2.5 bg-muted/30 rounded-xl border border-border/45">
-                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">P. Factor</span>
-                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-fg-primary">{metrics.profitFactor.toFixed(2)}</span>
+                    <div className="flex flex-col p-2.5 bg-white/5 rounded-xl border border-white/10">
+                        <span className="text-[10px] font-medium tracking-tight text-white/50">P. Factor</span>
+                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-white">{metrics.profitFactor.toFixed(2)}</span>
                     </div>
-                    <div className="flex flex-col p-2.5 bg-muted/30 rounded-xl border border-border/45">
-                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">Trades</span>
-                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-fg-primary">{metrics.totalTrades}</span>
+                    <div className="flex flex-col p-2.5 bg-white/5 rounded-xl border border-white/10">
+                        <span className="text-[10px] font-medium tracking-tight text-white/50">Trades</span>
+                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-white">{metrics.totalTrades}</span>
                     </div>
                 </div>
             </div>

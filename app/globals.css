@@ -140,8 +140,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 1%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     --card: 0 0% 3%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 2%;
@@ -154,7 +154,7 @@
     --muted-foreground: 0 0% 60%;
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 0% 40%;
+    --destructive: 0 0% 30%;
     --destructive-foreground: 0 0% 100%;
     --success: 0 0% 100%;
     --success-foreground: 0 0% 0%;
@@ -162,34 +162,34 @@
     --input: 0 0% 12%;
     --ring: 0 0% 100%;
     --radius: 0.5rem;
-    --sidebar-background: 240 8% 4%;
-    --sidebar-foreground: 220 18% 90%;
-    --sidebar-primary: 220 82% 53%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 8% 8%;
-    --sidebar-accent-foreground: 220 18% 96%;
-    --sidebar-border: 240 8% 11%;
-    --sidebar-ring: 220 82% 53%;
-    --chart-1: 220 82% 53%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 55% 60%;
-    --chart-4: 43 85% 60%;
-    --chart-5: 27 85% 60%;
-    --chart-6: 206 80% 60%;
-    --chart-7: 260 65% 65%;
-    --chart-8: 336 70% 65%;
-    --chart-loss: 0 0% 30%;
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 6%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 8%;
+    --sidebar-ring: 0 0% 100%;
+    --chart-1: 0 0% 100%;
+    --chart-2: 0 0% 80%;
+    --chart-3: 0 0% 60%;
+    --chart-4: 0 0% 40%;
+    --chart-5: 0 0% 30%;
+    --chart-6: 0 0% 20%;
+    --chart-7: 0 0% 15%;
+    --chart-8: 0 0% 10%;
+    --chart-loss: 0 0% 25%;
     --chart-win: 0 0% 100%;
-    --chart-grid: 0 0% 10%;
-    --chart-axis: 0 0% 50%;
+    --chart-grid: 0 0% 12%;
+    --chart-axis: 0 0% 45%;
     --chart-tooltip: 0 0% 5%;
     --chart-tooltip-border: 0 0% 15%;
     --precision-cobalt: 0 0% 100%;
     --precision-cobalt-rgb: 255 255 255;
     --accent-teal-rgb: 255 255 255;
     --rose-500-rgb: 100 100 100;
-    --precision-panel: 0 0% 4%;
-    --precision-panel-elevated: 0 0% 6%;
+    --precision-panel: 0 0% 2%;
+    --precision-panel-elevated: 0 0% 4%;
     --precision-panel-line: 0 0% 10%;
     --precision-panel-inner: 0 0% 100%;
   }
@@ -209,35 +209,35 @@
     --muted-foreground: 0 0% 60%;
     --accent: 0 0% 20%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 0% 30%;
+    --destructive: 0 0% 25%;
     --destructive-foreground: 0 0% 100%;
-    --success: 0 0% 90%;
+    --success: 0 0% 100%;
     --success-foreground: 0 0% 0%;
     --border: 0 0% 15%;
     --input: 0 0% 15%;
     --ring: 0 0% 100%;
-    --sidebar-background: 240 8% 4%;
-    --sidebar-foreground: 220 18% 90%;
-    --sidebar-primary: 220 82% 53%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 8% 8%;
-    --sidebar-accent-foreground: 220 18% 96%;
-    --sidebar-border: 240 8% 11%;
-    --sidebar-ring: 220 82% 53%;
-    --chart-1: 220 82% 53%;
-    --chart-2: 173 60% 55%;
-    --chart-3: 197 55% 60%;
-    --chart-4: 43 85% 60%;
-    --chart-5: 27 85% 60%;
-    --chart-6: 206 80% 60%;
-    --chart-7: 260 65% 65%;
-    --chart-8: 336 70% 65%;
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 6%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 8%;
+    --sidebar-ring: 0 0% 100%;
+    --chart-1: 0 0% 100%;
+    --chart-2: 0 0% 80%;
+    --chart-3: 0 0% 60%;
+    --chart-4: 0 0% 40%;
+    --chart-5: 0 0% 30%;
+    --chart-6: 0 0% 20%;
+    --chart-7: 0 0% 15%;
+    --chart-8: 0 0% 10%;
     --chart-win: 0 0% 100%;
-    --chart-loss: 0 0% 40%;
-    --chart-grid: 0 0% 10%;
-    --chart-axis: 0 0% 50%;
-    --chart-tooltip: 0 0% 5%;
-    --chart-tooltip-border: 0 0% 15%;
+    --chart-loss: 0 0% 35%;
+    --chart-grid: 0 0% 12%;
+    --chart-axis: 0 0% 45%;
+    --chart-tooltip: 0 0% 4%;
+    --chart-tooltip-border: 0 0% 12%;
   }
 }
 
@@ -421,13 +421,13 @@
   }
 
   /* Global spacing normalization for dashboard chart widgets */
-  [data-chart-surface="modern"] > div:first-child {
+  [data-chart-surface="modern"]>div:first-child {
     height: 3rem !important;
     min-height: 3rem;
     padding: 0.65rem 0.85rem !important;
   }
 
-  [data-chart-surface="modern"] > div:nth-child(2) {
+  [data-chart-surface="modern"]>div:nth-child(2) {
     padding: 0.5rem 0.75rem !important;
   }
 

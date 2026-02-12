@@ -47,7 +47,7 @@ interface PnLPerContractDailyChartProps {
 const chartConfig = {
   pnl: {
     label: "Avg Net P/L per Contract",
-    color: "hsl(var(--foreground))",
+    color: "white",
   },
 } satisfies ChartConfig;
 
@@ -145,47 +145,37 @@ export default function PnLPerContractDailyChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlPerContractDaily.tooltip.date")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">{data.date}</span>
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[160px]">
+          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
+            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.date")}</span>
+            <span className="font-black text-white/60 text-[10px] uppercase tracking-widest">{data.date}</span>
           </div>
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlPerContractDaily.tooltip.averagePnl")}
-            </span>
-            <span className={cn(
-              "font-bold text-sm",
-              data.averagePnl >= 0 ? "text-white" : "text-white/40"
-            )}>{formatCurrency(data.averagePnl)}</span>
-          </div>
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlPerContractDaily.tooltip.totalPnl")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {formatCurrency(data.totalPnl)}
-            </span>
-          </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlPerContractDaily.tooltip.trades")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.tradeCount} {t("pnlPerContractDaily.tooltip.trades")} (
-              {((data.winCount / data.tradeCount) * 100).toFixed(1)}%{" "}
-              {t("pnlPerContractDaily.tooltip.winRate")})
-            </span>
-          </div>
-          <div className="flex flex-col pt-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlPerContractDaily.tooltip.totalContracts")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.totalContracts} {t("pnlPerContractDaily.tooltip.contracts")}
-            </span>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.averagePnl")}</span>
+              <span className={cn(
+                "font-black text-[13px] tabular-nums",
+                data.averagePnl >= 0 ? "text-white" : "text-white/40"
+              )}>{formatCurrency(data.averagePnl)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.totalPnl")}</span>
+              <span className="font-black text-white/60 text-[10px]">
+                {formatCurrency(data.totalPnl)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.trades")}</span>
+              <span className="font-black text-white/60 text-[10px]">
+                {data.tradeCount} ({((data.winCount / data.tradeCount) * 100).toFixed(1)}% WR)
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.totalContracts")}</span>
+              <span className="font-black text-white/60 text-[10px]">
+                {data.totalContracts}
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -205,7 +195,7 @@ export default function PnLPerContractDailyChart({
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -216,7 +206,7 @@ export default function PnLPerContractDailyChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
@@ -235,17 +225,17 @@ export default function PnLPerContractDailyChart({
               <SelectTrigger
                 className={cn(
                   "w-[120px]",
-                  size === "small" ? "h-6 text-[10px]" : "h-8 text-xs",
-                  "bg-transparent border-white/10 text-fg-primary"
+                  size === "small" ? "h-6 text-[9px]" : "h-8 text-[10px]",
+                  "bg-white/[0.03] border-white/10 text-white font-black uppercase tracking-widest"
                 )}
               >
                 <SelectValue
                   placeholder={t("pnlPerContractDaily.selectInstrument")}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-background/95 backdrop-blur-md border-white/10">
+              <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
                 {availableInstruments.map((instrument) => (
-                  <SelectItem key={instrument} value={instrument} className="text-xs">
+                  <SelectItem key={instrument} value={instrument} className="text-[10px] font-black uppercase tracking-widest text-white/60 focus:text-white">
                     {instrument}
                   </SelectItem>
                 ))}
@@ -422,7 +412,7 @@ export default function PnLPerContractDailyChart({
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full text-fg-muted text-xs">
+            <div className="flex items-center justify-center h-full text-white/20 text-[10px] font-black uppercase tracking-widest">
               {config.selectedInstrument
                 ? t("pnlPerContractDaily.noData")
                 : t("pnlPerContractDaily.selectInstrument")}

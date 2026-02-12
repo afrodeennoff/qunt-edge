@@ -37,18 +37,18 @@ export default function LongShortPerformanceCard({ size = 'medium' }: LongShortP
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent-teal/10 border-accent-teal/20">
-        <ArrowUpFromLine className="h-3 w-3 text-accent-teal" />
-        <span className="font-terminal font-bold text-[11px] tabular-nums text-accent-teal">{longNumber} ({longRate}%)</span>
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/10 border border-white/20">
+        <ArrowUpFromLine className="h-3 w-3 text-white" />
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-white">{longNumber} ({longRate}%)</span>
       </div>
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-500/10 border-rose-500/20">
-        <ArrowDownFromLine className="h-3 w-3 text-rose-500" />
-        <span className="font-terminal font-bold text-[11px] tabular-nums text-rose-500">{shortNumber} ({shortRate}%)</span>
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
+        <ArrowDownFromLine className="h-3 w-3 text-white/40" />
+        <span className="font-terminal font-bold text-[11px] tabular-nums text-white/40">{shortNumber} ({shortRate}%)</span>
       </div>
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <HelpCircle className="h-3 w-3 text-fg-muted cursor-help" />
+            <HelpCircle className="h-3 w-3 text-white/40 cursor-help" />
           </TooltipTrigger>
           <TooltipContent
             side="bottom"

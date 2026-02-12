@@ -56,7 +56,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
         const newTag = await createTagAction({
           name: trimmedTag,
           description: '',
-          color: '#CBD5E1'
+          color: 'rgba(255,255,255,0.15)'
         })
         if (newTag?.tag) {
           setTags([...tags, newTag.tag])
@@ -102,10 +102,10 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
           return (
             <div
               key={index}
-              className="rounded-md px-2 py-1 text-xs flex items-center gap-1 break-words whitespace-normal h-auto max-w-[150px]"
+              className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/5 h-auto max-w-[150px] transition-all hover:border-white/20"
               style={{
-                backgroundColor: metadata?.color || '#CBD5E1',
-                color: metadata?.color ? getContrastColor(metadata.color) : 'inherit'
+                backgroundColor: metadata?.color || 'rgba(255,255,255,0.1)',
+                color: 'white'
               }}
             >
               {tag}
@@ -183,8 +183,8 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
                       >
                         <div className="flex items-center gap-2">
                           <div
-                            className="w-3 h-3 rounded-full shrink-0"
-                            style={{ backgroundColor: tag.color || '#CBD5E1' }}
+                            className="w-3 h-3 rounded-full shrink-0 border border-white/10"
+                            style={{ backgroundColor: tag.color || 'rgba(255,255,255,0.1)' }}
                           />
                           <span>{tag.name}</span>
                           {tag.description && (
@@ -202,7 +202,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
           </Command>
           {isUpdating && (
             <div className="absolute right-2 top-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
             </div>
           )}
         </PopoverContent>

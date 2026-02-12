@@ -19,12 +19,12 @@ interface EditableTimeCellProps {
   className?: string
 }
 
-export function EditableTimeCell({ 
-  value, 
-  tradeIds, 
-  fieldType, 
+export function EditableTimeCell({
+  value,
+  tradeIds,
+  fieldType,
   onUpdate,
-  className 
+  className
 }: EditableTimeCellProps) {
   const t = useI18n()
   const timezone = useUserStore(state => state.timezone)
@@ -62,7 +62,7 @@ export function EditableTimeCell({
     if (isSaving) return
 
     setIsSaving(true)
-    
+
     try {
       let newDateTime: Date
 
@@ -116,26 +116,26 @@ export function EditableTimeCell({
           onChange={(e) => setTempValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="HH:mm:ss"
-          className="h-7 text-xs font-mono border-blue-500 focus-visible:ring-1"
+          className="h-7 text-xs font-mono border-white/40 focus-visible:ring-1"
           disabled={isSaving}
         />
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 hover:bg-green-100"
+          className="h-7 w-7 p-0 hover:bg-white/10"
           onClick={handleSave}
           disabled={isSaving}
         >
-          <Check className="h-3 w-3 text-green-600" />
+          <Check className="h-3 w-3 text-white" />
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 hover:bg-red-100"
+          className="h-7 w-7 p-0 hover:bg-white/5"
           onClick={handleCancel}
           disabled={isSaving}
         >
-          <X className="h-3 w-3 text-red-600" />
+          <X className="h-3 w-3 text-white/40" />
         </Button>
       </div>
     )
@@ -146,7 +146,7 @@ export function EditableTimeCell({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            "group cursor-pointer hover:bg-accent/50 rounded px-2 py-1 transition-colors border border-transparent hover:border-accent-foreground/20",
+            "group cursor-pointer hover:bg-white/5 rounded px-2 py-1 transition-colors border border-transparent hover:border-white/10",
             className
           )}
           onClick={() => setIsPopoverOpen(true)}

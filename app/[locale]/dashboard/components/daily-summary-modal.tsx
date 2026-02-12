@@ -22,10 +22,10 @@ type Theme = {
 }
 
 const THEMES: Record<string, Theme> = {
-    vortex: { name: 'Vortex', primary: 'text-purple-400', glow: 'rgba(192,132,252,0.3)', bgAccent: 'bg-purple-600/20', pattern: 'radial-gradient(circle at 1.5px 1.5px, rgba(168,85,247,0.05) 1px, transparent 0)' },
-    emerald: { name: 'Emerald', primary: 'text-emerald-400', glow: 'rgba(52,211,153,0.3)', bgAccent: 'bg-emerald-500/20', pattern: 'linear-gradient(rgba(16,185,129,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.03) 1px, transparent 1px)' },
-    cyber: { name: 'Cyber', primary: 'text-cyan-400', glow: 'rgba(34,211,238,0.3)', bgAccent: 'bg-cyan-500/20', pattern: 'radial-gradient(rgba(6,182,212,0.05) 2px, transparent 0)' },
-    luxury: { name: 'Luxury', primary: 'text-amber-400', glow: 'rgba(251,191,36,0.3)', bgAccent: 'bg-amber-600/10', pattern: 'repeating-linear-gradient(45deg, rgba(251,191,36,0.02) 0, rgba(251,191,36,0.02) 1px, transparent 0, transparent 50%)' }
+    obsidian: { name: 'Obsidian', primary: 'text-white', glow: 'rgba(255,255,255,0.2)', bgAccent: 'bg-white/10', pattern: 'radial-gradient(circle at 1.5px 1.5px, rgba(255,255,255,0.05) 1px, transparent 0)' },
+    graphite: { name: 'Graphite', primary: 'text-white/80', glow: 'rgba(255,255,255,0.15)', bgAccent: 'bg-white/5', pattern: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)' },
+    silver: { name: 'Silver', primary: 'text-white/90', glow: 'rgba(255,255,255,0.25)', bgAccent: 'bg-white/15', pattern: 'radial-gradient(rgba(255,255,255,0.05) 2px, transparent 0)' },
+    ghost: { name: 'Ghost', primary: 'text-white/60', glow: 'rgba(255,255,255,0.1)', bgAccent: 'bg-white/5', pattern: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 0, transparent 50%)' }
 }
 
 export function DailySummaryModal() {
@@ -41,7 +41,7 @@ export function DailySummaryModal() {
         target: true
     })
     const [displayMode, setDisplayMode] = useState<'currency' | 'percent'>('currency')
-    const [currentTheme, setCurrentTheme] = useState<keyof typeof THEMES>('vortex')
+    const [currentTheme, setCurrentTheme] = useState<keyof typeof THEMES>('obsidian')
     const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'monthly' | 'total'>('daily')
     const [handle, setHandle] = useState('TRADER')
     const [isEditingHandle, setIsEditingHandle] = useState(false)
@@ -306,9 +306,9 @@ export function DailySummaryModal() {
                                     <div className={cn(
                                         "font-medium tracking-tighter flex items-baseline justify-center transition-colors duration-500 tabular-nums leading-none",
                                         baseFontSize,
-                                        isPositive ? "text-emerald-400" : "text-rose-500"
+                                        isPositive ? "text-white" : "text-white/40"
                                     )}>
-                                        <span className={cn("text-4xl md:text-5xl mr-2 font-normal opacity-100", isPositive ? "text-emerald-500/50" : "text-rose-500/50")}>{isPositive ? '+' : '-'}</span>
+                                        <span className={cn("text-4xl md:text-5xl mr-2 font-normal opacity-100", isPositive ? "text-white/50" : "text-white/20")}>{isPositive ? '+' : '-'}</span>
                                         {mainStr}
                                         <span className="text-3xl md:text-4xl opacity-50 ml-1 font-normal">.{decimalPart}{displayMode === 'percent' ? '%' : ''}</span>
                                     </div>
@@ -332,7 +332,7 @@ export function DailySummaryModal() {
                                             {blurWeekly ? <Eye className="w-3 h-3 text-white/40" /> : <EyeOff className="w-3 h-3 text-white/40" />}
                                         </div>
                                         <span className="text-[9px] text-white/60 uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Weekly</span>
-                                        <div className={cn("text-xl font-bold tracking-tight", stats.weekly.pnl >= 0 ? "text-emerald-400" : "text-rose-500")}>
+                                        <div className={cn("text-xl font-bold tracking-tight", stats.weekly.pnl >= 0 ? "text-white" : "text-white/40")}>
                                             {displayMode === 'currency' ? `$${stats.weekly.pnl.toLocaleString()}` : `${totalAccountValue > 0 ? ((stats.weekly.pnl / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
                                         </div>
                                     </motion.div>
@@ -350,7 +350,7 @@ export function DailySummaryModal() {
                                             {blurMonthly ? <Eye className="w-3 h-3 text-white/40" /> : <EyeOff className="w-3 h-3 text-white/40" />}
                                         </div>
                                         <span className="text-[9px] text-white/60 uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Monthly</span>
-                                        <div className={cn("text-xl font-bold tracking-tight", stats.monthly.pnl >= 0 ? "text-emerald-400" : "text-rose-500")}>
+                                        <div className={cn("text-xl font-bold tracking-tight", stats.monthly.pnl >= 0 ? "text-white" : "text-white/40")}>
                                             {displayMode === 'currency' ? `$${stats.monthly.pnl.toLocaleString()}` : `${totalAccountValue > 0 ? ((stats.monthly.pnl / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
                                         </div>
                                     </motion.div>
@@ -406,7 +406,7 @@ export function DailySummaryModal() {
                                         </span>
                                     )}
                                 </div>
-                                <span className={cn("text-sm font-bold", stats.total.pnl < 0 ? "text-rose-500" : "text-emerald-400")}>{Math.round(totalGoalProgress)}%</span>
+                                <span className={cn("text-sm font-bold", stats.total.pnl < 0 ? "text-white/40" : "text-white")}>{Math.round(totalGoalProgress)}%</span>
                             </div>
                             <div className="h-2.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-white/5 p-[1px] relative shadow-inner">
                                 <motion.div
@@ -415,8 +415,8 @@ export function DailySummaryModal() {
                                     className={cn(
                                         "h-full rounded-full relative transition-all duration-700 ease-out",
                                         stats.total.pnl < 0
-                                            ? "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.5)]"
-                                            : "bg-gradient-to-r from-emerald-600 via-emerald-400 to-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.5)]"
+                                            ? "bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.2)]"
+                                            : "bg-gradient-to-r from-white/60 via-white to-white/80 shadow-[0_0_12px_rgba(255,255,255,0.4)]"
                                     )}
                                 >
                                     {/* Premium Shimmer Overlay */}
@@ -442,7 +442,7 @@ export function DailySummaryModal() {
                     <button className="text-xs font-medium uppercase tracking-wider text-white hover:underline decoration-white/30 underline-offset-4" onClick={handleShare} disabled={isExporting}>
                         Share
                     </button>
-                    {(['vortex', 'emerald', 'cyber', 'luxury'] as const).map(t => (
+                    {(['obsidian', 'graphite', 'silver', 'ghost'] as const).map(t => (
                         <button
                             key={t}
                             onClick={() => setCurrentTheme(t)}
@@ -466,9 +466,9 @@ function MetricCard({ label, value, active, theme, displayMode, totalValue }: { 
         : `${isPos ? '+' : '-'}${Math.abs(value / totalValue * 100).toFixed(1)}%`
     return (
         <div className={cn("p-4 rounded-2xl border transition-all duration-700 relative overflow-hidden group", active ? "bg-white/[0.04] border-white/10 backdrop-blur-md shadow-2xl" : "opacity-10 blur-sm scale-95 shadow-none")}>
-            <div className={cn("absolute top-0 left-0 w-1 h-full opacity-40 group-hover:opacity-100 transition-opacity", isPos ? theme.primary.replace('text-', 'bg-') : "bg-red-500")} />
+            <div className={cn("absolute top-0 left-0 w-1 h-full opacity-40 group-hover:opacity-100 transition-opacity", isPos ? "bg-white" : "bg-white/20")} />
             <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/20 mb-2.5 block group-hover:text-white/40 transition-colors">{label} Recap</span>
-            <div className={cn("text-2xl font-black tracking-tighter tabular-nums", active ? (isPos ? theme.primary : "text-red-400") : "")}>{displayValue}</div>
+            <div className={cn("text-2xl font-black tracking-tighter tabular-nums", active ? (isPos ? "text-white" : "text-white/40") : "")}>{displayValue}</div>
         </div>
     )
 }

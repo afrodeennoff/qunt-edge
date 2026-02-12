@@ -136,14 +136,14 @@ function TagsColumnHeader() {
         >
           <span>{t("trade-table.tags")}</span>
           {hasActiveFilter && (
-            <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground/70" />
+            <Filter className="ml-1 h-3.5 w-3.5 text-white/40" />
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <Filter className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            <Filter className="mr-2 h-3.5 w-3.5 text-white/20" />
             {t("table.filter")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-80">
@@ -247,7 +247,7 @@ function TagsColumnHeader() {
           </>
         )}
       </DropdownMenuContent>
-    </DropdownMenu>
+    </DropdownMenu >
   );
 }
 
@@ -1445,7 +1445,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                 </tr>
               )}
             </tbody>
-            <tfoot className="sticky bottom-0 z-10 bg-muted/90 backdrop-blur-xs border-t-2 border-border">
+            <tfoot className="sticky bottom-0 z-10 bg-black/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_12px_rgba(0,0,0,0.5)]">
               <tr className="border-b transition-colors">
                 {visibleColumns.map((column, index) => {
                   const columnId = column.id || (column as any).accessorKey;

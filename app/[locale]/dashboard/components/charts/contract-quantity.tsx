@@ -40,7 +40,7 @@ interface ContractQuantityChartProps {
 const chartConfig = {
   totalQuantity: {
     label: "Total Number of Contracts",
-    color: "hsl(var(--foreground))",
+    color: "white",
   },
 } satisfies ChartConfig;
 
@@ -89,30 +89,22 @@ export default function ContractQuantityChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("contracts.tooltip.time")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {`${label}:00 - ${(label + 1) % 24}:00`}
-            </span>
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
+            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
           </div>
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("contracts.tooltip.totalContracts")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.totalQuantity}
-            </span>
-          </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("contracts.tooltip.numberOfTrades")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.tradeCount}
-            </span>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.totalContracts")}</span>
+              <span className="font-black text-white text-[11px] tabular-nums">{data.totalQuantity}</span>
+            </div>
+            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.numberOfTrades")}</span>
+              <span className="font-black text-white/60 text-[11px]">
+                {data.tradeCount}
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -132,7 +124,7 @@ export default function ContractQuantityChart({
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -143,7 +135,7 @@ export default function ContractQuantityChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
@@ -220,7 +212,10 @@ export default function ContractQuantityChart({
                     <Cell
                       key={`cell-${index}`}
                       fill="white"
-                      fillOpacity={0.6}
+                      fillOpacity={0.4}
+                      stroke="white"
+                      strokeOpacity={0.2}
+                      strokeWidth={1}
                       className="hover:fill-opacity-100 transition-all duration-300"
                     />
                   ))}

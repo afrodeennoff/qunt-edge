@@ -72,10 +72,10 @@ const parseAtasDate = (dateValue: any, timezone: string): string | undefined => 
       const utcHours = dateObj.getUTCHours();
       const utcMinutes = dateObj.getUTCMinutes();
       const utcSeconds = dateObj.getUTCSeconds();
-      
+
       // Now treat these UTC components as being in the user's timezone and convert to UTC
       const dateString = `${utcYear}-${String(utcMonth).padStart(2, "0")}-${String(utcDay).padStart(2, "0")}T${String(utcHours).padStart(2, "0")}:${String(utcMinutes).padStart(2, "0")}:${String(utcSeconds).padStart(2, "0")}`;
-      
+
       // Create a formatter for the target timezone
       const formatter = new Intl.DateTimeFormat("en-CA", {
         timeZone: timezone,
@@ -87,10 +87,10 @@ const parseAtasDate = (dateValue: any, timezone: string): string | undefined => 
         second: "2-digit",
         hour12: false,
       });
-      
+
       // Create a date assuming these components are UTC
       const tempUTC = new Date(dateString + "Z");
-      
+
       // Format the UTC date in the target timezone to see what it displays as
       // Use formatToParts to get structured components instead of parsing a string
       const parts = formatter.formatToParts(tempUTC);
@@ -100,7 +100,7 @@ const parseAtasDate = (dateValue: any, timezone: string): string | undefined => 
       const tzHour = parseInt(parts.find(p => p.type === "hour")?.value || "0");
       const tzMinute = parseInt(parts.find(p => p.type === "minute")?.value || "0");
       const tzSecond = parseInt(parts.find(p => p.type === "second")?.value || "0");
-      
+
       // Calculate the timezone offset: what we want (utcHours treated as local time) vs what UTC displays as
       // If we want 15:53:10 in Europe/Paris, and 15:53:10 UTC displays as 17:53:10 in Europe/Paris,
       // we need to subtract 2 hours from UTC to get 13:53:10 UTC, which displays as 15:53:10 in Europe/Paris
@@ -109,7 +109,7 @@ const parseAtasDate = (dateValue: any, timezone: string): string | undefined => 
       const desiredSeconds = utcHours * 3600 + utcMinutes * 60 + utcSeconds;
       const actualSeconds = tzHour * 3600 + tzMinute * 60 + tzSecond;
       const secondsDiff = desiredSeconds - actualSeconds; // This is negative: -7200 seconds
-      
+
       // Also account for day rollover
       let dayOffset = 0;
       if (tzYear !== utcYear || tzMonth !== utcMonth || tzDay !== utcDay) {
@@ -117,18 +117,18 @@ const parseAtasDate = (dateValue: any, timezone: string): string | undefined => 
         const actualDate = new Date(tzYear, tzMonth - 1, tzDay, tzHour, tzMinute, tzSecond);
         dayOffset = Math.round((desiredDate.getTime() - actualDate.getTime()) / 1000);
       }
-      
+
       const totalSecondsDiff = dayOffset + secondsDiff;
-      
+
       // Adjust: ADD the offset (which is negative) to get the correct UTC time
       // Example: 15:53:10 UTC + (-7200) = 13:53:10 UTC, which displays as 15:53:10 in Europe/Paris
       const correctUTC = new Date(tempUTC.getTime() + (totalSecondsDiff * 1000));
-      
+
       if (isNaN(correctUTC.getTime())) {
         console.error(`Invalid date created:`, correctUTC);
         return undefined;
       }
-      
+
       return correctUTC.toISOString().replace("Z", "+00:00");
     }
 
@@ -461,7 +461,7 @@ export default function AtasProcessor({
           missingCommissions[commissionKey] !== undefined
             ? missingCommissions[commissionKey]
             : existingCommissions[commissionKey] || 0;
-        
+
         return {
           ...trade,
           commission: commissionPerContract * Number(trade.quantity ?? 0),
@@ -594,9 +594,9 @@ export default function AtasProcessor({
                     }}
                   >
                     {availableAccounts.length === currentSelectedAccounts.length &&
-                    availableAccounts.every((account) =>
-                      currentSelectedAccounts.includes(account)
-                    )
+                      availableAccounts.every((account) =>
+                        currentSelectedAccounts.includes(account)
+                      )
                       ? t("shared.deselectAll")
                       : t("shared.selectAll")}
                   </Button>
@@ -613,8 +613,8 @@ export default function AtasProcessor({
                     <Card
                       key={account}
                       className={cn(
-                        "p-6 cursor-pointer hover:border-primary transition-colors relative group",
-                        isSelected ? "border-primary bg-primary/5" : ""
+                        "p-6 cursor-pointer hover:border-white/20 transition-colors relative group",
+                        isSelected ? "border-white/20 bg-white/5" : "border-white/10 bg-transparent"
                       )}
                       onClick={() => {
                         if (isSelected) {
@@ -640,7 +640,7 @@ export default function AtasProcessor({
                           </p>
                         </div>
                         {isSelected && (
-                          <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                          <CheckCircle2 className="h-5 w-5 text-white shrink-0" />
                         )}
                       </div>
                     </Card>
@@ -653,13 +653,13 @@ export default function AtasProcessor({
           {/* Commissions Section - Only show for selected accounts */}
           {selectedAccountInstrumentPairs.length > 0 && (
             <div
-              className="flex-none bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 text-blue-900 dark:text-blue-100 p-4 rounded-r"
+              className="flex-none bg-white/5 border border-white/10 text-white p-4 rounded-md"
               role="alert"
             >
               <p className="font-bold">{t("import.commission.title")}</p>
-              <p>{t("import.commission.description")}</p>
-              <p className="mt-2 text-sm">{t("import.commission.help")}</p>
-              <p className="text-sm italic">{t("import.commission.example")}</p>
+              <p className="text-white/70">{t("import.commission.description")}</p>
+              <p className="mt-2 text-sm text-white/50">{t("import.commission.help")}</p>
+              <p className="text-sm italic text-white/40">{t("import.commission.example")}</p>
               <div className="mt-4 space-y-2">
                 {selectedAccountInstrumentPairs.map((pair) => {
                   const [accountNumber, instrument] = pair.split(":");
@@ -668,7 +668,7 @@ export default function AtasProcessor({
                     missingCommissions[pair] !== undefined
                       ? missingCommissions[pair]
                       : existingCommissions[pair] || 0;
-                  
+
                   return (
                     <div
                       key={pair}
@@ -676,7 +676,7 @@ export default function AtasProcessor({
                     >
                       <label
                         htmlFor={`commission-${pair}`}
-                        className="min-w-[200px]"
+                        className="min-w-[200px] text-white/70"
                       >
                         {accountNumber} - {instrument} - {t("import.commission.perContract")}
                       </label>
@@ -688,13 +688,13 @@ export default function AtasProcessor({
                         onChange={(e) =>
                           handleCommissionChange(pair, e.target.value)
                         }
-                        className="w-24"
+                        className="w-24 bg-black/20 border-white/10 text-white"
                       />
                     </div>
                   );
                 })}
               </div>
-              <Button onClick={applyCommissions} className="mt-4">
+              <Button onClick={applyCommissions} className="mt-4 bg-white text-black hover:bg-white/90">
                 {t("import.commission.apply")}
               </Button>
             </div>
@@ -702,22 +702,22 @@ export default function AtasProcessor({
 
           {allProcessedTrades.length === 0 && (
             <div
-              className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r"
+              className="flex-none bg-white/5 border border-white/10 text-white p-4 rounded-md"
               role="alert"
             >
               <p className="font-bold">{t("import.error.duplicateTrades")}</p>
-              <p>{t("import.error.duplicateTradesDescription")}</p>
+              <p className="text-white/70">{t("import.error.duplicateTradesDescription")}</p>
             </div>
           )}
 
           {currentSelectedAccounts.length === 0 &&
             allProcessedTrades.length > 0 && (
               <div
-                className="flex-none bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r"
+                className="flex-none bg-white/5 border border-white/10 text-white p-4 rounded-md"
                 role="alert"
               >
                 <p className="font-bold">{t("import.account.selectAccount")}</p>
-                <p>{t("import.account.selectAccountToView")}</p>
+                <p className="text-white/70">{t("import.account.selectAccountToView")}</p>
               </div>
             )}
 

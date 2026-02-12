@@ -183,7 +183,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
             } catch (e) {
               console.error("Error parsing date string for display:", dateString, e);
               // Render a placeholder or skip if parsing fails
-              return <div key={dateString} className="text-red-500">Error</div>;
+              return <div key={dateString} className="text-white/40 text-[10px] uppercase font-bold">Error</div>;
             }
 
             // Determine if the date belongs to the currently displayed month

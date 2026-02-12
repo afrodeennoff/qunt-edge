@@ -36,7 +36,7 @@ interface TimeOfDayTradeChartProps {
 const chartConfig = {
   avgPnl: {
     label: "Average P/L",
-    color: "hsl(var(--foreground))",
+    color: "white",
   },
 } satisfies ChartConfig;
 
@@ -108,34 +108,25 @@ export default function TimeOfDayTradeChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlTime.tooltip.time")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {`${label}:00 - ${(label + 1) % 24}:00`}
-            </span>
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
+            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.time")}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
           </div>
-          <div className="flex flex-col mb-2">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlTime.tooltip.averagePnl")}
-            </span>
-            <span className={cn(
-              "font-black text-sm",
-              data.avgPnl >= 0 ? "text-white" : "text-fg-muted"
-            )}>{formatCurrency(data.avgPnl)}</span>
-          </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
-            <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
-              {t("pnlTime.tooltip.trades")}
-            </span>
-            <span className="font-bold text-fg-primary text-xs">
-              {data.tradeCount}{" "}
-              {data.tradeCount === 1
-                ? t("pnlTime.tooltip.trade")
-                : t("pnlTime.tooltip.trades_plural")}
-            </span>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.averagePnl")}</span>
+              <span className={cn(
+                "font-black text-[13px] tabular-nums",
+                data.avgPnl >= 0 ? "text-white" : "text-white/40"
+              )}>{formatCurrency(data.avgPnl)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.trades")}</span>
+              <span className="font-black text-white/60 text-[10px]">
+                {data.tradeCount}
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -155,7 +146,7 @@ export default function TimeOfDayTradeChart({
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-fg-primary",
+                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -166,7 +157,7 @@ export default function TimeOfDayTradeChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-fg-muted hover:text-fg-primary transition-colors cursor-help",
+                      "text-white/20 hover:text-white transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
@@ -181,7 +172,7 @@ export default function TimeOfDayTradeChart({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-white/50 hover:text-white hover:bg-white/10"
+              className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-white/40 hover:text-white hover:bg-white/5"
               onClick={() => setHourFilter({ hour: null })}
             >
               {t("pnlTime.clearFilter")}
@@ -275,7 +266,7 @@ export default function TimeOfDayTradeChart({
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
+            <div className="h-full w-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-white/20">
               No data available
             </div>
           )}
