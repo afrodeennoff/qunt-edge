@@ -360,211 +360,225 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     }
 
     return (
-        <div className={cn("grid gap-6", className)} {...props}>
+        <div className={cn("grid gap-5", className)} {...props}>
             <Tabs value={tab} onValueChange={(v) => { setTab(v as 'magic' | 'password'); setLastAuthPreference(v as 'magic' | 'password'); }}>
-                <TabsList className="flex w-full overflow-x-auto gap-1 sm:grid sm:grid-cols-2 sm:gap-0">
-                    <TabsTrigger value="magic" className="flex-1 min-w-0 text-xs sm:text-sm px-2 py-1">
+                <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-1">
+                    <TabsTrigger
+                        value="magic"
+                        className="h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-cyan-300/20 data-[state=active]:text-cyan-100 data-[state=active]:shadow-none"
+                    >
                         <span className="truncate">{t('auth.tabs.magic')}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="password" className="relative flex-1 min-w-0 text-xs sm:text-sm px-2 py-1">
+                    <TabsTrigger
+                        value="password"
+                        className="relative h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-cyan-300/20 data-[state=active]:text-cyan-100 data-[state=active]:shadow-none"
+                    >
                         <span className="truncate">{t('auth.tabs.password')}</span>
                         <Badge
                             variant="secondary"
-                            className="hidden sm:inline-flex absolute -top-1 -right-1 text-[9px] leading-3 px-1 py-0.5"
+                            className="absolute -right-1.5 -top-1.5 border border-cyan-300/25 bg-cyan-300/15 px-1 py-0 text-[8px] text-cyan-100"
                         >
                             {t('auth.new')}
                         </Badge>
                     </TabsTrigger>
-                    {/* Signup tab removed: handled by Magic Link */}
                 </TabsList>
 
-                <TabsContent value="magic">
-                <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmitEmail)} className="grid gap-2">
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="sr-only">Email</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        id="email"
-                                        placeholder={t('auth.emailPlaceholder')}
-                                        type="email"
-                                        autoCapitalize="none"
-                                        autoComplete="email"
-                                        autoCorrect="off"
-                                        disabled={isLoading || (isEmailSent || authMethod === 'discord' || authMethod === 'google')}
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    {!isEmailSent ? (
-                            <Button 
-                                disabled={isLoading || countdown > 0 || authMethod === 'discord' || authMethod === 'google'}
+                <TabsContent value="magic" className="mt-4">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmitEmail)} className="grid gap-3">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="sr-only">Email</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                id="email"
+                                                placeholder={t('auth.emailPlaceholder')}
+                                                type="email"
+                                                autoCapitalize="none"
+                                                autoComplete="email"
+                                                autoCorrect="off"
+                                                disabled={isLoading || (isEmailSent || authMethod === 'discord' || authMethod === 'google')}
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-0"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {!isEmailSent ? (
+                                <Button
+                                    disabled={isLoading || countdown > 0 || authMethod === 'discord' || authMethod === 'google'}
+                                    type="submit"
+                                    className="h-11 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 font-semibold text-[#072024] shadow-[0_10px_25px_-12px_rgba(34,211,238,0.9)] hover:from-cyan-300 hover:to-emerald-300"
+                                >
+                                    {isLoading && authMethod === 'email' && (
+                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                    )}
+                                    {t('auth.signInWithEmail')}
+                                </Button>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-11 w-full rounded-xl border-white/15 bg-white/[0.03] text-zinc-100 hover:bg-white/[0.08] hover:text-white"
+                                        onClick={openMailClient}
+                                        disabled={authMethod === 'discord' || authMethod === 'google'}
+                                    >
+                                        <Icons.envelope className="mr-2 h-4 w-4" />
+                                        {t('auth.openMailbox')}
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        variant="ghost"
+                                        className="h-10 w-full rounded-xl text-zinc-300 hover:bg-white/[0.06] hover:text-white"
+                                        disabled={countdown > 0 || authMethod === 'discord' || authMethod === 'google'}
+                                    >
+                                        {countdown > 0 ? (
+                                            `${t('auth.resendIn')} ${countdown}s`
+                                        ) : (
+                                            t('auth.resendEmail')
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
+                        </form>
+                    </Form>
+                    {showOtpInput && (
+                        <Form {...otpForm}>
+                            <form onSubmit={otpForm.handleSubmit(onSubmitOtp)} className="mt-4 space-y-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                                <FormField
+                                    control={otpForm.control}
+                                    name="otp"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel className="block text-center text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                                                {t('auth.verificationCode')}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <div className="flex justify-center">
+                                                    <InputOTP
+                                                        maxLength={6}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        className="gap-2"
+                                                    >
+                                                        <InputOTPGroup>
+                                                            <InputOTPSlot index={0} />
+                                                            <InputOTPSlot index={1} />
+                                                            <InputOTPSlot index={2} />
+                                                        </InputOTPGroup>
+                                                        <InputOTPSeparator />
+                                                        <InputOTPGroup>
+                                                            <InputOTPSlot index={3} />
+                                                            <InputOTPSlot index={4} />
+                                                            <InputOTPSlot index={5} />
+                                                        </InputOTPGroup>
+                                                    </InputOTP>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-center" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button
+                                    type="submit"
+                                    className="h-11 w-full rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 font-semibold text-[#072024] hover:from-cyan-300 hover:to-emerald-300"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : null}
+                                    {t('auth.verifyCode')}
+                                </Button>
+                            </form>
+                        </Form>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="password" className="mt-4">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmitPassword)} className="grid gap-3">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="sr-only">Email</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                id="email_password"
+                                                placeholder={t('auth.emailPlaceholder')}
+                                                type="email"
+                                                autoCapitalize="none"
+                                                autoComplete="email"
+                                                autoCorrect="off"
+                                                disabled={isLoading}
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-0"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="sr-only">Password</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                id="password_login"
+                                                placeholder={t('auth.passwordPlaceholder')}
+                                                type="password"
+                                                autoComplete="current-password"
+                                                disabled={isLoading}
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-0"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button
+                                disabled={isLoading}
                                 type="submit"
+                                className="h-11 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 font-semibold text-[#072024] shadow-[0_10px_25px_-12px_rgba(34,211,238,0.9)] hover:from-cyan-300 hover:to-emerald-300"
                             >
                                 {isLoading && authMethod === 'email' && (
                                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                {t('auth.signInWithEmail')}
+                                {t('auth.signInWithPassword')}
                             </Button>
-                        ) : (
-                            <div className="space-y-2">
-                                <Button 
-                                    type="button" 
-                                    variant="outline" 
-                                    className="w-full"
-                                    onClick={openMailClient}
-                                    disabled={authMethod === 'discord' || authMethod === 'google'}
-                                >
-                                    <Icons.envelope className="mr-2 h-4 w-4" />
-                                    {t('auth.openMailbox')}
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="ghost"
-                                    className="w-full"
-                                    disabled={countdown > 0 || authMethod === 'discord' || authMethod === 'google'}
-                                >
-                                    {countdown > 0 ? (
-                                        `${t('auth.resendIn')} ${countdown}s`
-                                    ) : (
-                                        t('auth.resendEmail')
-                                    )}
-                                </Button>
-                            </div>
-                        )}
-                </form>
-            </Form>
-            {showOtpInput && (
-                <Form {...otpForm}>
-                    <form onSubmit={otpForm.handleSubmit(onSubmitOtp)} className="space-y-4">
-                        <FormField
-                            control={otpForm.control}
-                            name="otp"
-                            render={({ field }) => (
-                                <FormItem className="space-y-2">
-                                    <FormLabel className="text-center block">{t('auth.verificationCode')}</FormLabel>
-                                    <FormControl>
-                                        <div className="flex justify-center">
-                                            <InputOTP
-                                                maxLength={6}
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                className="gap-2"
-                                            >
-                                                <InputOTPGroup>
-                                                    <InputOTPSlot index={0} />
-                                                    <InputOTPSlot index={1} />
-                                                    <InputOTPSlot index={2} />
-                                                </InputOTPGroup>
-                                                <InputOTPSeparator />
-                                                <InputOTPGroup>
-                                                    <InputOTPSlot index={3} />
-                                                    <InputOTPSlot index={4} />
-                                                    <InputOTPSlot index={5} />
-                                                </InputOTPGroup>
-                                            </InputOTP>
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage className="text-center" />
-                                </FormItem>
-                            )}
-                        />
-                        <Button 
-                            type="submit" 
-                            className="w-full"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                            ) : null}
-                            {t('auth.verifyCode')}
-                        </Button>
-                    </form>
-                </Form>
-            )}
-            {/* Hint removed: settings not accessible unauthenticated */}
+                        </form>
+                    </Form>
                 </TabsContent>
-
-                <TabsContent value="password">
-                <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmitPassword)} className="grid gap-2">
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="sr-only">Email</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        id="email_password"
-                                        placeholder={t('auth.emailPlaceholder')}
-                                        type="email"
-                                        autoCapitalize="none"
-                                        autoComplete="email"
-                                        autoCorrect="off"
-                                        disabled={isLoading}
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="sr-only">Password</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        id="password_login"
-                                        placeholder={t('auth.passwordPlaceholder')}
-                                        type="password"
-                                        autoComplete="current-password"
-                                        disabled={isLoading}
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button disabled={isLoading} type="submit">
-                        {isLoading && authMethod === 'email' && (
-                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        {t('auth.signInWithPassword')}
-                    </Button>
-                </form>
-                </Form>
-                </TabsContent>
-
-                {/* Signup content removed */}
             </Tabs>
 
-            <div className="relative">
+            <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+                    <span className="w-full border-t border-white/10" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
+                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.14em]">
+                    <span className="bg-[#0b1322] px-2 text-zinc-500">
                         {t('auth.continueWith')}
                     </span>
                 </div>
             </div>
-            <Button 
-                variant="outline" 
-                type="button" 
-                disabled={isLoading || authMethod === 'email'} 
+
+            <Button
+                variant="outline"
+                type="button"
+                disabled={isLoading || authMethod === 'email'}
                 onClick={onSubmitDiscord}
+                className="h-11 rounded-xl border-white/15 bg-[#5865f2]/10 text-zinc-100 hover:bg-[#5865f2]/20 hover:text-white"
             >
                 {isLoading && authMethod === 'discord' ? (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -573,11 +587,12 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 )}{" "}
                 {t('auth.signInWithDiscord')}
             </Button>
-            <Button 
-                variant="outline" 
-                type="button" 
-                disabled={isLoading || authMethod === 'email'} 
+            <Button
+                variant="outline"
+                type="button"
+                disabled={isLoading || authMethod === 'email'}
                 onClick={onSubmitGoogle}
+                className="h-11 rounded-xl border-white/15 bg-white/[0.03] text-zinc-100 hover:bg-white/[0.08] hover:text-white"
             >
                 {isLoading && authMethod === 'google' ? (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

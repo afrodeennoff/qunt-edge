@@ -6,6 +6,41 @@ export interface ScoreMetrics {
     returnMultiple?: number // Optional: return on risk or similar
 }
 
+export interface ScoreTradeLike {
+    pnl?: number | string | null
+    commission?: number | string | null
+}
+
+function toFiniteNumber(value: number | string | null | undefined): number {
+    const parsed = Number(value ?? 0)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+export function deriveScoreMetricsFromTrades(trades: ScoreTradeLike[] | null | undefined): ScoreMetrics {
+    if (!trades || trades.length === 0) {
+        return {
+            winRate: 0,
+            profitFactor: 0,
+            totalTrades: 0,
+        }
+    }
+
+    const netPnls = trades.map((trade) => toFiniteNumber(trade.pnl) - toFiniteNumber(trade.commission))
+    const wins = netPnls.filter((net) => net > 0)
+    const losses = netPnls.filter((net) => net <= 0)
+
+    const grossWin = wins.reduce((sum, net) => sum + net, 0)
+    const grossLoss = Math.abs(losses.reduce((sum, net) => sum + net, 0))
+    const winRate = (wins.length / trades.length) * 100
+    const profitFactor = grossLoss > 0 ? grossWin / grossLoss : grossWin > 0 ? 100 : 0
+
+    return {
+        winRate,
+        profitFactor,
+        totalTrades: trades.length,
+    }
+}
+
 /**
  * Calculates a 0-100 trading score based on key metrics.
  * Weighting:
