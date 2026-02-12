@@ -6,6 +6,8 @@ interface RateLimitStore {
 }
 
 const store = new Map<string, RateLimitStore>()
+const MAX_TRACKED_KEYS = 10_000
+const CLEANUP_INTERVAL_MS = 60_000
 
 export function rateLimit({
   limit = 100,
@@ -23,6 +25,16 @@ export function rateLimit({
     
     const key = `${identifier}:${ip}`
     const now = Date.now()
+
+    if (store.size >= MAX_TRACKED_KEYS && !store.has(key)) {
+      cleanupExpiredEntries(now)
+      if (store.size >= MAX_TRACKED_KEYS) {
+        const oldestKey = store.keys().next().value as string | undefined
+        if (oldestKey) {
+          store.delete(oldestKey)
+        }
+      }
+    }
     
     const record = store.get(key)
     
@@ -57,11 +69,16 @@ export async function createRateLimitResponse(limit: number) {
   )
 }
 
-setInterval(() => {
-  const now = Date.now()
+function cleanupExpiredEntries(now = Date.now()): void {
   for (const [key, record] of store.entries()) {
     if (now > record.resetTime) {
       store.delete(key)
     }
   }
-}, 60000)
+}
+
+const rateLimitCleanupTimer = setInterval(() => {
+  cleanupExpiredEntries()
+}, CLEANUP_INTERVAL_MS)
+
+rateLimitCleanupTimer.unref?.()

@@ -26,6 +26,7 @@ export class WebhookService {
   private static instance: WebhookService
   private processingQueue: Map<string, Promise<WebhookProcessingResult>>
   private retryAttempts: Map<string, number>
+  private readonly maxRetryAttemptEntries = 10_000
   private stats = {
     totalEvents: 0,
     successfulEvents: 0,
@@ -595,6 +596,9 @@ export class WebhookService {
           : undefined,
       })
 
+      // Reset retry state once a payment recovers successfully.
+      this.retryAttempts.delete(membershipId)
+
       logger.info('[WebhookService] Payment succeeded', {
         email: membership.user.email,
         amount,
@@ -646,6 +650,13 @@ export class WebhookService {
       }
 
       const userId = membership.metadata?.user_id || membership.user?.id
+
+      if (this.retryAttempts.size >= this.maxRetryAttemptEntries && !this.retryAttempts.has(membershipId)) {
+        const oldestKey = this.retryAttempts.keys().next().value as string | undefined
+        if (oldestKey) {
+          this.retryAttempts.delete(oldestKey)
+        }
+      }
 
       const attemptNumber = this.retryAttempts.get(membershipId) || 1
       this.retryAttempts.set(membershipId, attemptNumber + 1)

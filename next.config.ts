@@ -6,9 +6,11 @@ const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/+$/, '');
 const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: process.env.VERCEL ? undefined : "standalone",
   compress: true,
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
+  outputFileTracingRoot: workspaceRoot,
   assetPrefix: cdnUrl || undefined,
   // cacheComponents: true, // Enable Cache Components (Next.js 16+)
   images: {
@@ -24,11 +26,18 @@ const nextConfig: NextConfig = {
   experimental: {
     useCache: true,
     mdxRs: true,
+    webpackMemoryOptimizations: true,
+    preloadEntriesOnStart: false,
+    cpus: 4,
     optimizePackageImports: [
       "lucide-react",
       "date-fns",
       "recharts",
     ],
+  },
+  onDemandEntries: {
+    maxInactiveAge: 15 * 1000,
+    pagesBufferLength: 2,
   },
   async headers() {
     return [
@@ -102,17 +111,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  outputFileTracingIncludes: {
+  outputFileTracingIncludes: process.env.VERCEL ? undefined : {
     '/*': [
       '**/node_modules/@prisma/engines/libquery_engine-rhel-openssl-3.0.x.so.node',
       '**/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node',
     ],
-    '/app/api/**': [  // For App Router API routes (your auth callback)
+    '/app/api/**': [
       '**/node_modules/.prisma/client/**',
     ],
-  },
-  turbopack: {
-    root: workspaceRoot,
   },
 }
 

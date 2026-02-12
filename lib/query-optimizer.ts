@@ -6,6 +6,7 @@ export interface QueryMetrics {
 }
 
 const queryMetrics: QueryMetrics[] = []
+const MAX_QUERY_METRICS = 500
 
 export function measureQueryPerformance<T>(
   queryName: string,
@@ -22,6 +23,9 @@ export function measureQueryPerformance<T>(
       recordCount: Array.isArray(result) ? result.length : 1,
       timestamp: new Date()
     })
+    if (queryMetrics.length > MAX_QUERY_METRICS) {
+      queryMetrics.splice(0, queryMetrics.length - MAX_QUERY_METRICS)
+    }
     
     if (executionTime > 1000) {
       console.warn(`[Slow Query] ${queryName} took ${executionTime}ms`)
@@ -62,6 +66,8 @@ export async function executeOptimizedQuery<T>(
 }
 
 const queryCache = new Map<string, { data: any; expiresAt: number }>()
+const MAX_IN_MEMORY_CACHE_ENTRIES = 500
+const CACHE_SWEEP_INTERVAL_MS = 60_000
 
 const localRedisUrl = process.env.REDIS_URL
 const localRedisEnabled = Boolean(localRedisUrl)
@@ -83,6 +89,9 @@ async function getCachedResult<T>(key: string): Promise<T | null> {
 
   const cached = queryCache.get(key)
   if (cached && cached.expiresAt > Date.now()) {
+    // Promote hot keys and keep insertion order roughly LRU-like.
+    queryCache.delete(key)
+    queryCache.set(key, cached)
     return cached.data as T
   }
   if (cached) {
@@ -102,7 +111,30 @@ async function setCachedResult<T>(key: string, data: T, ttlSeconds: number): Pro
     data,
     expiresAt: Date.now() + ttlSeconds * 1000
   })
+  enforceLocalCacheBounds()
 }
+
+function enforceLocalCacheBounds(): void {
+  const now = Date.now()
+
+  for (const [key, value] of queryCache.entries()) {
+    if (value.expiresAt <= now) {
+      queryCache.delete(key)
+    }
+  }
+
+  while (queryCache.size > MAX_IN_MEMORY_CACHE_ENTRIES) {
+    const oldestKey = queryCache.keys().next().value as string | undefined
+    if (!oldestKey) break
+    queryCache.delete(oldestKey)
+  }
+}
+
+const cacheSweepTimer = setInterval(() => {
+  enforceLocalCacheBounds()
+}, CACHE_SWEEP_INTERVAL_MS)
+
+cacheSweepTimer.unref?.()
 
 async function getLocalRedisCachedResult<T>(key: string): Promise<T | null> {
   try {

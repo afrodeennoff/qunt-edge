@@ -11,6 +11,8 @@ const SALT_LENGTH = 64
 const TAG_LENGTH = 16
 const TAG_POSITION = SALT_LENGTH + IV_LENGTH
 const ENCRYPTED_POSITION = TAG_POSITION + TAG_LENGTH
+const MAX_RATE_LIMIT_ENTRIES = 20_000
+const RATE_LIMIT_CLEANUP_INTERVAL_MS = 300_000
 
 interface SecurityConfig {
   encryptionKey: string
@@ -178,6 +180,17 @@ class SecurityManager {
     resetTime: number
   }> {
     const now = Date.now()
+
+    if (this.rateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES && !this.rateLimitMap.has(identifier)) {
+      this.cleanup()
+      if (this.rateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES) {
+        const oldestKey = this.rateLimitMap.keys().next().value as string | undefined
+        if (oldestKey) {
+          this.rateLimitMap.delete(oldestKey)
+        }
+      }
+    }
+
     const record = this.rateLimitMap.get(identifier)
 
     if (!record || now > record.resetTime) {
@@ -425,9 +438,11 @@ class SecurityManager {
 
 export const securityManager = SecurityManager.getInstance()
 
-setInterval(() => {
+const securityCleanupTimer = setInterval(() => {
   securityManager.cleanup()
-}, 300000)
+}, RATE_LIMIT_CLEANUP_INTERVAL_MS)
+
+securityCleanupTimer.unref?.()
 
 export function withSecurityChecks<T extends (...args: any[]) => Promise<any>>(
   handler: T,

@@ -15,13 +15,12 @@ const I18nMiddleware = createI18nMiddleware({
 })
 
 const LOCALES = ["en", "fr", "de", "es", "it", "pt", "vi", "hi", "ja", "zh", "yo"] as const
+const LOCALE_SET = new Set<string>(LOCALES)
+const STATIC_FILE_REGEX = /\.[^/]+$/
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
-  // Supabase cookies are typically shaped like sb-<project-ref>-auth-token (often chunked).
-  // Also check for standard auth cookie name if used
-  return request.cookies
-    .getAll()
-    .some(({ name }) => name.includes("sb-") && name.includes("auth-token"))
+  const cookieHeader = request.headers.get("cookie")
+  return Boolean(cookieHeader && cookieHeader.includes("sb-") && cookieHeader.includes("auth-token"))
 }
 
 function isRootOrLocaleRootPath(pathname: string): boolean {
@@ -31,16 +30,11 @@ function isRootOrLocaleRootPath(pathname: string): boolean {
 
 function getLocale(pathname: string): string {
   const firstSegment = pathname.split('/')[1]
-  return LOCALES.includes(firstSegment as any) ? firstSegment : 'en'
+  return LOCALE_SET.has(firstSegment) ? firstSegment : 'en'
 }
 
 async function updateSession(request: NextRequest) {
-  // Create a proper NextResponse first
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  const response = NextResponse.next()
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -114,20 +108,24 @@ async function updateSession(request: NextRequest) {
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
   const locale = getLocale(pathname)
-
-  // More specific static asset exclusions - must be first!
-  if (
+  const isDashboardRoute = pathname.includes("/dashboard")
+  const isAdminRoute = pathname.includes("/admin")
+  const isAuthRoute = pathname.includes("/authentication")
+  const isEmbedRoute = pathname.includes("/embed")
+  const isStaticAsset =
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/") ||
-    pathname.includes(".") ||
-    pathname.includes("/videos/") ||
+    pathname.startsWith("/videos/") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
     pathname.includes("/opengraph-image") ||
     pathname.includes("/twitter-image") ||
-    pathname.includes("/icon")
-  ) {
+    pathname.includes("/icon") ||
+    STATIC_FILE_REGEX.test(pathname)
+
+  // More specific static asset exclusions - must be first!
+  if (isStaticAsset) {
     return NextResponse.next()
   }
 
@@ -136,7 +134,7 @@ export default async function middleware(req: NextRequest) {
   const response = I18nMiddleware(req)
 
   // Embed route check (public path, no auth/session roundtrip needed)
-  if (pathname.includes("/embed")) {
+  if (isEmbedRoute) {
     response.headers.delete("X-Frame-Options") // Allow framing
 
     // Check if request is from a local file or development environment
@@ -187,8 +185,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Check for protected routes
-  const needsSessionCheck =
-    pathname.includes("/dashboard") || pathname.includes("/admin") || pathname.includes("/authentication")
+  const needsSessionCheck = isDashboardRoute || isAdminRoute || isAuthRoute
   const hasAuthCookie = hasSupabaseAuthCookie(req)
   const shouldRunSessionCheck = needsSessionCheck && hasAuthCookie
 
@@ -216,7 +213,7 @@ export default async function middleware(req: NextRequest) {
         sameSite: cookie.sameSite as any,
       })
     })
-  } else if (!hasAuthCookie && (pathname.includes("/dashboard") || pathname.includes("/admin"))) {
+  } else if (!hasAuthCookie && (isDashboardRoute || isAdminRoute)) {
     // Fast path: protected route with no auth cookie -> redirect to auth
     // Use locale-aware path
     const authUrl = new URL(`/${locale}/authentication`, req.url)
@@ -250,12 +247,12 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Maintenance mode check
-  if (MAINTENANCE_MODE && !pathname.includes("/maintenance") && pathname.includes("/dashboard")) {
+  if (MAINTENANCE_MODE && !pathname.includes("/maintenance") && isDashboardRoute) {
     return NextResponse.redirect(new URL(`/${locale}/maintenance`, req.url))
   }
 
   // Admin route check with better error handling
-  if (pathname.includes("/admin")) {
+  if (isAdminRoute) {
     if (!user || error) {
       const authUrl = new URL(`/${locale}/authentication`, req.url)
       authUrl.searchParams.set("error", "admin_access_required")
@@ -269,7 +266,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Authentication checks with better error handling
-  if (pathname.includes("/dashboard")) {
+  if (isDashboardRoute) {
     if (!user || error) {
       const nextPath = pathname + req.nextUrl.search
       const authUrl = new URL(`/${locale}/authentication`, req.url)
@@ -285,7 +282,7 @@ export default async function middleware(req: NextRequest) {
 
       return NextResponse.redirect(authUrl)
     }
-  } else if (pathname.includes("/authentication")) {
+  } else if (isAuthRoute) {
     // Authenticated - redirect from auth to dashboard
     if (user && !error) {
       const nextParam = req.nextUrl.searchParams.get("next")

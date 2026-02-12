@@ -22,13 +22,25 @@ class PerformanceMonitor {
   private metrics: Map<string, PerformanceMetric[]> = new Map()
   private cacheHits = 0
   private cacheMisses = 0
+  private readonly maxMetricsPerName = 200
+  private readonly maxMetricNames = 250
 
   recordMetric(metric: PerformanceMetric): void {
     const key = metric.name
     if (!this.metrics.has(key)) {
+      if (this.metrics.size >= this.maxMetricNames) {
+        const oldestKey = this.metrics.keys().next().value as string | undefined
+        if (oldestKey) {
+          this.metrics.delete(oldestKey)
+        }
+      }
       this.metrics.set(key, [])
     }
-    this.metrics.get(key)!.push(metric)
+    const bucket = this.metrics.get(key)!
+    bucket.push(metric)
+    if (bucket.length > this.maxMetricsPerName) {
+      bucket.splice(0, bucket.length - this.maxMetricsPerName)
+    }
     
     if (metric.threshold && metric.value > metric.threshold) {
       console.warn(`[Performance Alert] ${metric.name} exceeded threshold: ${metric.value}${metric.unit} > ${metric.threshold}${metric.unit}`)
