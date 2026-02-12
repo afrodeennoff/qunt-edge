@@ -370,21 +370,21 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     return (
         <div className={cn("grid gap-5", className)} {...props}>
             <Tabs value={tab} onValueChange={(v) => { setTab(v as 'magic' | 'password'); setLastAuthPreference(v as 'magic' | 'password'); }}>
-                <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-1">
+                <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-1">
                     <TabsTrigger
                         value="magic"
-                        className="h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-cyan-300/20 data-[state=active]:text-cyan-100 data-[state=active]:shadow-none"
+                        className="h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
                     >
                         <span className="truncate">{t('auth.tabs.magic')}</span>
                     </TabsTrigger>
                     <TabsTrigger
                         value="password"
-                        className="relative h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-cyan-300/20 data-[state=active]:text-cyan-100 data-[state=active]:shadow-none"
+                        className="relative h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
                     >
                         <span className="truncate">{t('auth.tabs.password')}</span>
                         <Badge
                             variant="secondary"
-                            className="absolute -right-1.5 -top-1.5 border border-cyan-300/25 bg-cyan-300/15 px-1 py-0 text-[8px] text-cyan-100"
+                            className="absolute -right-1.5 -top-1.5 border border-white/20 bg-white/10 px-1 py-0 text-[8px] text-zinc-200"
                         >
                             {t('auth.new')}
                         </Badge>
@@ -409,7 +409,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                 autoComplete="email"
                                                 autoCorrect="off"
                                                 disabled={isLoading || (isEmailSent || authMethod === 'discord' || authMethod === 'google')}
-                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-0"
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-white/40 focus-visible:ring-offset-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -421,7 +421,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 <Button
                                     disabled={isLoading || countdown > 0 || authMethod === 'discord' || authMethod === 'google'}
                                     type="submit"
-                                    className="h-11 rounded-xl bg-gradient-to-r from-white to-zinc-200 font-semibold text-black shadow-sm hover:from-zinc-100 hover:to-zinc-300"
+                                    className="h-11 rounded-xl bg-white font-semibold text-black shadow-sm hover:bg-zinc-200"
                                 >
                                     {isLoading && authMethod === 'email' && (
                                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -433,7 +433,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="h-11 w-full rounded-xl border-white/15 bg-white/[0.03] text-zinc-100 hover:bg-white/[0.08] hover:text-white"
+                                        className="h-11 w-full rounded-xl border-white/15 bg-white/[0.03] text-zinc-100 hover:bg-white/[0.09] hover:text-white"
                                         onClick={openMailClient}
                                         disabled={authMethod === 'discord' || authMethod === 'google'}
                                     >
@@ -495,7 +495,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 />
                                 <Button
                                     type="submit"
-                                    className="h-11 w-full rounded-xl bg-gradient-to-r from-white to-zinc-200 font-semibold text-black hover:from-zinc-100 hover:to-zinc-300"
+                                    className="h-11 w-full rounded-xl bg-white font-semibold text-black hover:bg-zinc-200"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? (
@@ -526,7 +526,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                 autoComplete="email"
                                                 autoCorrect="off"
                                                 disabled={isLoading}
-                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-0"
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-white/40 focus-visible:ring-offset-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -547,7 +547,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                 type="password"
                                                 autoComplete="current-password"
                                                 disabled={isLoading}
-                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-0"
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-white/40 focus-visible:ring-offset-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -558,7 +558,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             <Button
                                 disabled={isLoading}
                                 type="submit"
-                                className="h-11 rounded-xl bg-gradient-to-r from-white to-zinc-200 font-semibold text-black shadow-sm hover:from-zinc-100 hover:to-zinc-300"
+                                className="h-11 rounded-xl bg-white font-semibold text-black shadow-sm hover:bg-zinc-200"
                             >
                                 {isLoading && authMethod === 'email' && (
                                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -586,7 +586,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 type="button"
                 disabled={isLoading || authMethod === 'email'}
                 onClick={onSubmitDiscord}
-                className="h-11 rounded-xl border-white/15 bg-[#5865f2]/10 text-zinc-100 hover:bg-[#5865f2]/20 hover:text-white"
+                className="h-11 rounded-xl border-white/15 bg-white/[0.03] text-zinc-100 hover:bg-white/[0.09] hover:text-white"
             >
                 {isLoading && authMethod === 'discord' ? (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

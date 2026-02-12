@@ -30,7 +30,6 @@ function formatCurrency(value: number): string {
 
 function renderPropfirmCard(
   propfirmName: string,
-  accountTemplatesCount: number,
   registeredAccountsCount: number,
   paidAmount: number,
   paidCount: number,
@@ -55,46 +54,46 @@ function renderPropfirmCard(
           <h3 className="text-sm font-semibold mb-3">{t('landing.propfirms.payouts.title')}</h3>
           <div className="space-y-3">
             {/* Paid - Highlighted */}
-            <div className="p-3 rounded-lg bg-white/10 dark:bg-white/10 border border-white/20 dark:border-white/20">
+            <div className="p-3 rounded-lg border border-white/20 bg-white/10">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white dark:text-white">
+                <span className="text-sm font-medium text-white">
                   {t('landing.propfirms.payouts.paid.label')}
                 </span>
-                <span className="text-sm font-bold text-white dark:text-white">
+                <span className="text-sm font-bold text-white">
                   {formatCurrency(paidAmount)}
                 </span>
               </div>
-              <p className="text-xs text-white dark:text-white">
+              <p className="text-xs text-white/90">
                 {t('landing.propfirms.payouts.count', { count: paidCount })}
               </p>
             </div>
 
             {/* Pending */}
-            <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900/30">
+            <div className="p-3 rounded-lg border border-white/15 bg-white/6">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                <span className="text-sm font-medium text-white/90">
                   {t('landing.propfirms.payouts.pending.label')}
                 </span>
-                <span className="text-sm font-bold text-yellow-700 dark:text-yellow-300">
+                <span className="text-sm font-bold text-white/90">
                   {formatCurrency(pendingAmount)}
                 </span>
               </div>
-              <p className="text-xs text-yellow-700/70 dark:text-yellow-300/70">
+              <p className="text-xs text-white/70">
                 {t('landing.propfirms.payouts.count', { count: pendingCount })}
               </p>
             </div>
 
             {/* Refused */}
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30">
+            <div className="p-3 rounded-lg border border-white/10 bg-white/4">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-red-900 dark:text-red-100">
+                <span className="text-sm font-medium text-white/75">
                   {t('landing.propfirms.payouts.refused.label')}
                 </span>
-                <span className="text-sm font-bold text-red-700 dark:text-red-300">
+                <span className="text-sm font-bold text-white/75">
                   {formatCurrency(refusedAmount)}
                 </span>
               </div>
-              <p className="text-xs text-red-700/70 dark:text-red-300/70">
+              <p className="text-xs text-white/60">
                 {t('landing.propfirms.payouts.count', { count: refusedCount })}
               </p>
             </div>
@@ -213,7 +212,7 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
 
         {/* Main propfirms grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedPropfirms.map(({ key, name, accountTemplatesCount, stats: dbStats }) => {
+          {sortedPropfirms.map(({ key, name, stats: dbStats }) => {
             const registeredAccountsCount = dbStats?.accountsCount ?? 0
             const payouts = dbStats?.payouts ?? {
               propfirmName: name,
@@ -227,7 +226,6 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
 
             return renderPropfirmCard(
               name,
-              accountTemplatesCount,
               registeredAccountsCount,
               payouts.paidAmount,
               payouts.paidCount,

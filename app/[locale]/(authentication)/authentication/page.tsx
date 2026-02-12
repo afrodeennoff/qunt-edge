@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowLeft, LockKeyhole, ShieldCheck, Sparkles, TrendingUp } from "lucide-react"
+import { ArrowLeft, LockKeyhole, ShieldCheck, Sparkles, Workflow, Gauge, CheckCircle2 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { UserAuthForm } from "../components/user-auth-form"
 import { useCurrentLocale, useI18n } from "@/locales/client"
@@ -11,57 +11,83 @@ export default function AuthenticationPage() {
   const t = useI18n()
   const locale = useCurrentLocale()
 
+  const valuePoints = [
+    {
+      icon: ShieldCheck,
+      title: "Secure by default",
+      description: "Protected sessions, encrypted auth flow, and trusted providers.",
+    },
+    {
+      icon: Workflow,
+      title: "Fast account access",
+      description: "Magic link and password flow with clean recovery paths.",
+    },
+    {
+      icon: Gauge,
+      title: "Built for daily use",
+      description: "Low-friction sign-in designed for active trading routines.",
+    },
+  ]
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050b14] text-zinc-100 selection:bg-cyan-400/30">
+    <main className="relative min-h-screen overflow-hidden bg-[#040404] text-zinc-100">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-0 h-[36rem] w-[36rem] rounded-full bg-cyan-500/15 blur-3xl" />
-        <div className="absolute -right-24 bottom-0 h-[34rem] w-[34rem] rounded-full bg-white/15 blur-3xl" />
-        <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:26px_26px]" />
+        <div className="absolute -left-28 top-[-8rem] h-[40rem] w-[40rem] rounded-full bg-white/[0.08] blur-3xl" />
+        <div className="absolute -right-36 bottom-[-10rem] h-[42rem] w-[42rem] rounded-full bg-white/[0.05] blur-3xl" />
+        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:30px_30px]" />
       </div>
 
-      <div className="relative mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="flex flex-col justify-between px-6 pb-8 pt-6 sm:px-10 lg:px-14 lg:py-10">
-          <div>
+      <div className="relative mx-auto grid min-h-screen w-full max-w-[1320px] grid-cols-1 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:px-8 lg:py-8">
+        <section className="rounded-[30px] border border-white/10 bg-black/35 p-6 backdrop-blur-xl sm:p-8 lg:p-10">
+          <div className="flex items-center justify-between">
             <Link
               href={`/${locale}`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold tracking-wide text-zinc-200 transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold tracking-wide text-zinc-200 transition hover:bg-white/[0.08]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to website
             </Link>
+            <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+              Secure Access
+            </span>
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: "easeOut" }}
-            className="my-12 max-w-xl"
+            className="my-10 max-w-xl lg:my-14"
           >
-            <div className="mb-7 inline-flex items-center gap-3 rounded-2xl border border-cyan-300/35 bg-cyan-300/10 px-4 py-3">
-              <Logo className="h-5 w-5 text-cyan-200" />
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">Qunt Edge</span>
+            <div className="mb-7 inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.03] px-4 py-3">
+              <Logo className="h-5 w-5 text-white" />
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-200">Qunt Edge</span>
             </div>
 
-            <h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
-              Trade with discipline.
-              <br />
-              Journal with clarity.
+            <h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Welcome back to
+              <br className="hidden sm:block" /> your trading command center.
             </h1>
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-[15px]">
               {t('authentication.description')}
             </p>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <ShieldCheck className="mb-3 h-5 w-5 text-white" />
-                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Security</p>
-                <p className="mt-1 text-sm text-zinc-100">Protected sessions and encrypted auth flow.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <TrendingUp className="mb-3 h-5 w-5 text-cyan-300" />
-                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Performance</p>
-                <p className="mt-1 text-sm text-zinc-100">Track progress across every trading session.</p>
-              </div>
+            <div className="mt-10 grid gap-3">
+              {valuePoints.map((point) => (
+                <div
+                  key={point.title}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-lg border border-white/15 bg-white/[0.05] p-2">
+                      <point.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-100">{point.title}</p>
+                      <p className="mt-1 text-xs text-zinc-400">{point.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -71,21 +97,35 @@ export default function AuthenticationPage() {
           </div>
         </section>
 
-        <section className="flex items-center px-4 pb-8 sm:px-8 lg:px-10 lg:pb-10">
+        <section className="flex items-center">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05, ease: "easeOut" }}
-            className="w-full rounded-[28px] border border-white/15 bg-[#0b1322]/90 p-5 shadow-[0_20px_80px_-35px_rgba(34,211,238,0.55)] backdrop-blur-xl sm:p-7"
+            className="w-full rounded-[30px] border border-white/15 bg-[#090909]/92 p-5 shadow-[0_24px_80px_-38px_rgba(255,255,255,0.28)] backdrop-blur-xl sm:p-7 lg:p-8"
           >
-            <div className="mb-6 flex items-start justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-400">Account Access</p>
-                <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">Welcome back</h2>
-                <p className="mt-1 text-xs text-zinc-400">{t('authentication.testimonialAuthor')}</p>
+            <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">Account Access</p>
+                <div className="rounded-xl border border-white/15 bg-white/[0.04] p-2.5">
+                  <LockKeyhole className="h-4 w-4 text-white" />
+                </div>
               </div>
-              <div className="rounded-xl border border-cyan-300/30 bg-cyan-300/10 p-2.5">
-                <LockKeyhole className="h-4 w-4 text-cyan-200" />
+              <h2 className="text-xl font-semibold tracking-tight text-white">Sign in to continue</h2>
+              <p className="mt-1 text-xs text-zinc-400">{t('authentication.testimonialAuthor')}</p>
+            </div>
+
+            <div className="mb-6 grid gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+              <div className="flex items-center gap-2 text-xs text-zinc-300">
+                <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                <span>Magic link and password sign-in</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-300">
+                <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                <span>Discord and Google authentication</span>
+              </div>
+              <div>
+                <p className="pl-[1.35rem] text-xs text-zinc-500">Protected session handling for every login method.</p>
               </div>
             </div>
 
