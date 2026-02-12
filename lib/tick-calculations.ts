@@ -8,18 +8,28 @@ export interface TickCalculation {
   tickSize: number
 }
 
+/**
+ * Helper to sort tickers by length descending (longest first)
+ * This ensures we match specific instruments before generic ones (e.g. MNQ before NQ)
+ */
+export function getSortedTickers(tickDetails: Record<string, TickDetails>): string[] {
+  return Object.keys(tickDetails).sort((a, b) => b.length - a.length)
+}
+
 export function calculateTicksAndPoints(
   trade: Trade,
-  tickDetails: Record<string, TickDetails>
+  tickDetails: Record<string, TickDetails>,
+  sortedTickers?: string[]
 ): TickCalculation {
   // Default values if no tick details found
   let tickValue = 1
   let tickSize = 0.01
 
+  // Use provided sorted tickers or sort on the fly
+  const tickers = sortedTickers || getSortedTickers(tickDetails)
+
   // Find matching ticker from tick details
-  const matchingTicker = Object.keys(tickDetails)
-    .sort((a, b) => b.length - a.length)
-    .find(ticker => trade.instrument.includes(ticker))
+  const matchingTicker = tickers.find(ticker => trade.instrument.includes(ticker))
 
   if (matchingTicker) {
     const details = tickDetails[matchingTicker]
@@ -52,8 +62,11 @@ export function calculateTicksAndPointsForTrades(
 ): Record<string, TickCalculation> {
   const calculations: Record<string, TickCalculation> = {}
   
+  // Pre-calculate sorted tickers once for all trades
+  const sortedTickers = getSortedTickers(tickDetails)
+
   trades.forEach(trade => {
-    calculations[trade.id] = calculateTicksAndPoints(trade, tickDetails)
+    calculations[trade.id] = calculateTicksAndPoints(trade, tickDetails, sortedTickers)
   })
   
   return calculations
@@ -61,15 +74,19 @@ export function calculateTicksAndPointsForTrades(
 
 export function calculateTicksAndPointsForGroupedTrade(
   groupedTrade: any,
-  tickDetails: Record<string, TickDetails>
+  tickDetails: Record<string, TickDetails>,
+  sortedTickers?: string[]
 ): TickCalculation {
+  // Pre-calculate sorted tickers if not provided
+  const tickers = sortedTickers || getSortedTickers(tickDetails)
+
   // If it's a grouped trade with multiple trades, sum them up
   if (groupedTrade.trades && groupedTrade.trades.length > 0) {
     let totalTicks = 0
     let totalPoints = 0
     
     groupedTrade.trades.forEach((trade: Trade) => {
-      const calculation = calculateTicksAndPoints(trade, tickDetails)
+      const calculation = calculateTicksAndPoints(trade, tickDetails, tickers)
       totalTicks += calculation.ticks
       totalPoints += calculation.points
     })
@@ -83,5 +100,5 @@ export function calculateTicksAndPointsForGroupedTrade(
   }
   
   // If it's a single trade, calculate normally
-  return calculateTicksAndPoints(groupedTrade, tickDetails)
+  return calculateTicksAndPoints(groupedTrade, tickDetails, tickers)
 } 

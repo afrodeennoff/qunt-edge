@@ -71,6 +71,7 @@ import { ColumnConfigDialog } from "@/components/ui/column-config-dialog";
 import {
   calculateTicksAndPointsForTrades,
   calculateTicksAndPointsForGroupedTrade,
+  getSortedTickers,
 } from "@/lib/tick-calculations";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -286,6 +287,10 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
   const tags = useUserStore((state) => state.tags);
   const timezone = useUserStore((state) => state.timezone);
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
+
+  // Memoize sorted tickers to avoid re-sorting on every render
+  const sortedTickers = useMemo(() => getSortedTickers(tickDetails), [tickDetails]);
+
   let contextTrades = formattedTrades;
 
   if (tradesParam) {
@@ -1019,6 +1024,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           const calculation = calculateTicksAndPointsForGroupedTrade(
             row,
             tickDetails,
+            sortedTickers
           );
           return showPoints ? calculation.points : calculation.ticks;
         },
@@ -1026,6 +1032,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           const calculation = calculateTicksAndPointsForGroupedTrade(
             row.original,
             tickDetails,
+            sortedTickers
           );
           const value = showPoints ? calculation.points : calculation.ticks;
           return (
