@@ -2,7 +2,19 @@
 
 This file tracks significant architectural changes, engineering insights, and critical fixes to provide context for future AI agents working on this codebase.
 
-## 🛡️ Core Infrastructure & Security
+## � Entry Structure for Future Agents
+When documenting feature updates, **YOU MUST** follow this conversational structure to ensure context is preserved:
+
+- **What changed:** A clear, high-level summary of the update (e.g., "Added a new specific widget").
+- **What I want:** The user-centric goal or desired behavior. Why are we doing this? (e.g., "Users should see risk metrics immediately").
+- **What I don't want:** The problem, regression, or anti-pattern we are avoiding. This is critical for preventing future regressions (e.g., "I don't want a full page reload").
+- **How we fixed that:** The technical implementation details, architectural decisions, and specific libraries used.
+- **Key Files:** The most critical files modified or created during this task.
+- **Verification:** Specific manual steps or observations to confirm the change (e.g., "Go to dashboard -> Click Edit -> See Widget").
+
+---
+
+## �🛡️ Core Infrastructure & Security
 - **2026-02-14: Prisma TLS Hardening.** 
   - Added explicit SSL controls (`PGSSL_ENABLE`, `PGSSL_REJECT_UNAUTHORIZED`) in `lib/prisma.ts`.
   - **Context:** Prevents "self-signed certificate in certificate chain" errors common when connecting to managed DB pools (e.g., Supabase/Neon) from serverless environments.
@@ -31,6 +43,8 @@ This file tracks significant architectural changes, engineering insights, and cr
 - **How we fixed that:** 
   - Created a dedicated Server Action (`get-smart-insights.ts`) to simulate AI analysis of trading patterns.
   - Built a modern, glassmorphic UI (`smart-insights-widget.tsx`) that dynamically renders alerts and recommendations based on confidence scores.
+- **Key Files:** `app/[locale]/dashboard/actions/get-smart-insights.ts`, `components/widgets/smart-insights-widget.tsx`
+- **Verification:** Enter dashboard edit mode -> Add "Smart Insights" -> Confirm insights load with correct risk/opportunity styling.
 
 ### 2026-02-14: Sidebar Modernization
 - **What changed:** Completely replaced the old dashboard sidebar with a new `shadcn/ui` version.
@@ -40,6 +54,8 @@ This file tracks significant architectural changes, engineering insights, and cr
   - Implemented the `sidebar-07` pattern using the `SidebarProvider` context for smooth state management.
   - Refactored navigation into logical groups (Trading, Analytics, System) and added keyboard shortcuts (`Cmd+B`).
   - Proactively updated Teams layouts to ensure the new sidebar works everywhere, not just on the main dashboard.
+- **Key Files:** `components/sidebar/dashboard-sidebar.tsx`, `app/[locale]/dashboard/layout.tsx`, `components/ui/sidebar.tsx`
+- **Verification:** Press `Cmd+B` to toggle sidebar; Resize to mobile width to verify Sheet/Hamburger menu behavior.
 
 ### 2026-02-14: Dashboard Navigation Recovery
 - **What changed:** Restored the legacy `Navbar` component to the dashboard layout.
@@ -47,22 +63,56 @@ This file tracks significant architectural changes, engineering insights, and cr
 - **What I don't want:** Losing critical functionality because the new sidebar implementation accidentally removed the header where these controls lived.
 - **How we fixed that:**
   - Re-imported and integrated the legacy `Navbar` into `app/[locale]/dashboard/layout.tsx` so it sits alongside the new sidebar, restoring full layout management capabilities.
-- **2026-02-13: Trader Profile Spacing + Avatar Refresh.**
-  - Refined `app/[locale]/dashboard/trader-profile/page.tsx` by removing the duplicate secondary top nav spacing and adding a `shadcn` `Avatar` in the profile card header.
-  - **Context:** Fixes the perceived large top gap and improves visual identity/readability for the Trader Profile screen.
-- **2026-02-13: Trader Profile Metric De-duplication.**
-  - Removed repeated right-panel cards from `app/[locale]/dashboard/trader-profile/page.tsx` (duplicate Win Rate and Execution Quality repeats).
-  - Added a labeled Consistency Rate row to keep the right panel informative without repeating stats.
-- **2026-02-13: Trader Profile Payout-Based Profit Card.**
-  - Removed the red-marked `Win Rate` and `Expectancy` quick cards from the left metrics row.
-  - Replaced the right-panel `Avg. Win / Avg. Loss` section with `Total Profit (All Accounts Payouts)`, calculated by summing `PAID` and `VALIDATED` payouts across all accounts.
-- **2026-02-13: Trader Profile Profit vs Withdraw Split.**
-  - Split the summary into two distinct metrics: `Total Profit (All Accounts)` and `Total Withdraw (All Accounts)` in `app/[locale]/dashboard/trader-profile/page.tsx`.
-  - `Total Withdraw` now counts only `PAID` withdrawals to keep it separate from profit metrics.
-- **2026-02-14: Dashboard Editor Polish.**
-  - Added back missing "Restore Defaults" and "Remove All" buttons in the widget editor navigation (`6ee3386`).
-- **2026-02-13: PnL Visual Logic.**
-  - Updated trade table PnL styling: Positive values now render in emerald for visual emphasis, while negative values maintain the muted monochrome style.
+- **Key Files:** `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`
+- **Verification:** Navigate to `/dashboard` -> Verify top header contains "Edit Layout" and "Global Sync" buttons.
+
+### 2026-02-13: Trader Profile Metrics Overhaul
+- **What changed:** Redesigned the Trader Profile metrics panel to focus on Profit/Withdrawals instead of redundant win rates.
+- **What I want:** A clear, financial summary of a trader's success (Total Profit + Total Withdrawals) that is instantly readable.
+- **What I don't want:** Confusing duplicate stats (Win Rate shown 3 times) or mixing up "unrealized" gains with actual paid-out profits.
+- **How we fixed that:**
+  - Removed the red-marked `Win Rate` and `Expectancy` cards from the quick-view row.
+  - Calculated `Total Profit` from aggregated account trading profit (`account.metrics.totalProfit`) across all accounts.
+  - Split `Total Withdraw` into its own distinct metric (counting only `PAID` status) to separate realized withdrawals from trading profit.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`
+- **Verification:** Check Trader Profile -> Ensure "Total Profit" and "Total Withdraw" are displayed distinctly in the right panel.
+
+### 2026-02-13: Trader Profile UI Polish
+- **What changed:** Refined spacing and added a `shadcn` Avatar to the profile header; removed duplicate navigation.
+- **What I want:** A clean, professional profile header that feels spacious and properly aligned.
+- **What I don't want:** Double navigation bars eating up vertical space or awkward gaps around the user avatar.
+- **How we fixed that:**
+  - Removed the duplicate secondary top nav spacing element.
+  - Implemented the standard `shadcn` `Avatar` component for consistent sizing and fallback handling.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`
+
+### 2026-02-14: Trader Profile Audit Pass
+- **What changed:** Audited Trader Profile metric logic and removed stale internal fields from the page model.
+- **What I want:** Clear metric semantics with minimal technical debt so future agents can safely iterate.
+- **What I don't want:** Silent confusion where `Total Profit` is interpreted as payouts, or extra unused fields lingering in the metrics object.
+- **How we fixed that:**
+  - Confirmed metric intent in code: `Total Profit` = trading profit across accounts, `Total Withdraw` = sum of `PAID` withdrawals.
+  - Removed unused fields (`avgWin`, `avgLoss`, `expectancy`) from the `TraderMetrics` return type/object in `trader-profile/page.tsx`.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Lint `app/[locale]/dashboard/trader-profile/page.tsx` passes and Trader Profile shows distinct Profit vs Withdraw values.
+
+### 2026-02-14: Dashboard Editor Polish
+- **What changed:** Re-added "Restore Defaults" and "Remove All" buttons to the widget editor toolbar.
+- **What I want:** Give users an easy way to reset their dashboard if they make a mess or want to start fresh.
+- **What I don't want:** Users getting stuck with a broken layout and having no "nuclear option" to fix it.
+- **How we fixed that:**
+  - Audit of the widget editor component revealed missing button handlers.
+  - Re-implemented the standard `RestoreDefaults` and `RemoveAll` actions in the editor navigation bar.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/navbar.tsx`
+
+### 2026-02-13: PnL Visual Logic
+- **What changed:** Updated the trade table PnL styling to use emerald green for profits and muted colors for losses.
+- **What I want:** A table that draws the eye to wins (positive reinforcement) while keeping losses readable but not screamingly red.
+- **What I don't want:** A "Christmas tree" effect where everything is neon, or a depressing dashboard filled with bright red negative numbers.
+- **How we fixed that:**
+  - Applied the `text-emerald-500` class conditionally only to positive PnL values.
+  - Kept negative values in the standard monochrome/muted palette to align with the new design system.
+- **Key Files:** `components/ui/data-table/columns.tsx`
 
 ## 🛠️ Build & Type Safety
 - **2026-02-14: Codebase Cleanup and Quality Pass.**
