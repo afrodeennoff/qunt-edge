@@ -6,21 +6,8 @@ import {
   RefreshCw,
   Sparkles,
   CloudUpload,
-  CheckCircle2,
-  Trash2,
-  RotateCcw
+  CheckCircle2
 } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import ImportButton from './import/import-button'
@@ -44,9 +31,7 @@ export default function Navbar() {
     addWidget,
     layouts,
     autoSaveStatus,
-    flushPendingSaves,
-    removeAllWidgets,
-    restoreDefaultLayout
+    flushPendingSaves
   } = useDashboard()
   const { refreshAllData, isPlusUser, isLoading } = useData()
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -63,17 +48,17 @@ export default function Navbar() {
   const currentLayout = layouts || { desktop: [], mobile: [] }
 
   return (
-    <div className="sticky top-0 z-40 w-full px-2 sm:px-6 py-2.5 pointer-events-none">
+    <div className="sticky top-0 z-40 w-full px-4 sm:px-6 py-2.5 pointer-events-none">
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-auto flex flex-col glass-strong rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300"
+        className="pointer-events-auto flex flex-col glass-strong rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300"
       >
-        <div className="flex items-center justify-between gap-2 px-3 sm:px-6 h-14">
+        <div className="flex items-center justify-between px-4 sm:px-6 h-14">
 
           {/* Left Side: Sidebar Toggle & Brand */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-4">
             <SidebarTrigger className="-ml-1 text-fg-muted transition-all rounded-2xl w-10 h-10" />
             <div className="h-6 w-px bg-white/10 hidden sm:block mx-1" />
           </div>
@@ -84,27 +69,24 @@ export default function Navbar() {
           </div>
 
           {/* Right Side: Actions */}
-          <div className="flex max-w-[calc(100vw-6rem)] items-center gap-2 overflow-x-auto no-scrollbar sm:max-w-none sm:gap-3">
+          <div className="flex items-center gap-3">
 
             {/* Config Group */}
-            <div className="flex shrink-0 items-center gap-1 p-1 sm:gap-2 sm:p-1.5 bg-black/40 backdrop-blur-2xl rounded-[1.2rem] sm:rounded-[1.5rem] border border-white/5">
+            <div className="flex items-center gap-2 p-1.5 bg-black/40 backdrop-blur-2xl rounded-[1.5rem] border border-white/5">
               <Button
                 id="customize-mode"
                 variant="ghost"
                 size="sm"
                 onClick={toggleCustomizing}
                 className={cn(
-                  "h-9 w-auto px-2.5 sm:px-4 gap-1.5 sm:gap-2 rounded-xl transition-all duration-500",
+                  "h-9 w-auto px-3 sm:px-4 gap-2 rounded-xl transition-all duration-500",
                   isCustomizing
                     ? "bg-white text-black shadow-none font-bold"
                     : "text-fg-muted"
                 )}
               >
                 <Pencil className={cn("w-3.5 h-3.5", isCustomizing && "animate-pulse")} />
-                <span className="inline sm:hidden text-[10px] font-black uppercase tracking-[0.14em]">
-                  {isCustomizing ? "Lock" : "Edit"}
-                </span>
-                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+                <span className="inline text-[10px] font-black uppercase tracking-widest">
                   {isCustomizing ? "Lock Grid" : "Edit Layout"}
                 </span>
               </Button>
@@ -128,70 +110,7 @@ export default function Navbar() {
                 </div>
               )}
 
-              <AddWidgetSheet onAddWidget={addWidget} isCustomizing={isCustomizing} />
-
-              {isCustomizing && (
-                <>
-                  <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-xl text-white/50 hover:text-white hover:bg-white/10"
-                        title="Restore Defaults"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Restore Default Layout?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will reset your dashboard to the default layout. All current widget positions and sizes will be lost.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={restoreDefaultLayout}>
-                          Restore Defaults
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-xl text-red-400/50 hover:text-red-400 hover:bg-red-400/10"
-                        title="Delete All Widgets"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Remove All Widgets?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to remove all widgets from your dashboard? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={removeAllWidgets}
-                          className="bg-red-500 text-white hover:bg-red-600"
-                        >
-                          Remove All
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-              )}
+              <AddWidgetSheet onAddWidget={addWidget} isCustomizing={isCustomizing} showLabelOnMobile />
 
               <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
 
@@ -199,7 +118,7 @@ export default function Navbar() {
             </div>
 
             {/* Performance & Search Group */}
-            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-2">
               <FilterCommandMenu variant="navbar" />
 
               <div className="hidden sm:flex items-center gap-2">
@@ -218,7 +137,7 @@ export default function Navbar() {
               <div className="w-px h-6 bg-white/10 mx-1 hidden sm:block" />
 
               {/* Real-time Actions */}
-              <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl sm:rounded-2xl border border-white/5 shadow-inner">
+              <div className="flex items-center gap-2 bg-black/60 p-1.5 rounded-2xl border border-white/5 shadow-inner">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -236,13 +155,15 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="md:hidden px-3 sm:px-4 pb-3">
+        <div className="md:hidden px-4 pb-3">
           <PnLSummary className="w-full" />
         </div>
 
         {/* Dynamic Filters Bar */}
         <AnimatePresence>
-          <ActiveFilterTags showAccountNumbers={true} />
+          <div className="px-8 pb-3 flex flex-wrap gap-2">
+            <ActiveFilterTags showAccountNumbers={true} />
+          </div>
         </AnimatePresence>
       </motion.nav>
     </div>
