@@ -144,6 +144,11 @@ export async function signOut() {
   redirect('/')
 }
 
+async function signOutSilently() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+}
+
 export async function signInWithEmail(email: string, next: string | null = null, locale?: string) {
   try {
     const supabase = await createClient()
@@ -396,12 +401,12 @@ export async function setPasswordAction(newPassword: string) {
  */
 export async function ensureUserInDatabase(user: User, locale?: string) {
   if (!user) {
-    await signOut();
+    await signOutSilently();
     throw new Error('User data is required');
   }
 
   if (!user.id) {
-    await signOut();
+    await signOutSilently();
     throw new Error('User ID is required');
   }
 
@@ -451,7 +456,7 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
           existingAuthId: existingUserByEmail.auth_user_id,
           currentAuthId: user.id
         });
-        await signOut();
+        await signOutSilently();
         throw new Error('Account conflict: Email already associated with different authentication method');
       }
     }
@@ -484,11 +489,11 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
       if (createError instanceof Error &&
         createError.message.includes('Unique constraint failed')) {
         console.log('[ensureUserInDatabase] ERROR: Unique constraint failed when creating user', createError);
-        await signOut();
+        await signOutSilently();
         throw new Error('Database integrity error: Duplicate user records found');
       }
       console.error('[ensureUserInDatabase] ERROR: Failed to create user:', createError);
-      await signOut();
+      await signOutSilently();
       throw new Error('Failed to create user account');
     }
   } catch (error) {
@@ -506,13 +511,13 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
     if (error instanceof Error) {
       if (error.message.includes('Argument `where` of type UserWhereUniqueInput needs')) {
         console.log('[ensureUserInDatabase] ERROR: Invalid user identification provided');
-        await signOut();
+        await signOutSilently();
         throw new Error('Invalid user identification provided');
       }
 
       if (error.message.includes('Unique constraint failed')) {
         console.log('[ensureUserInDatabase] ERROR: Database integrity error - duplicate user records');
-        await signOut();
+        await signOutSilently();
         throw new Error('Database integrity error: Duplicate user records found');
       }
 
@@ -525,7 +530,7 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
 
     // For any other unexpected errors, log out the user
     console.log('[ensureUserInDatabase] ERROR: Critical database error - signing out user');
-    await signOut();
+    await signOutSilently();
     throw new Error('Critical database error occurred. Please try logging in again.');
   }
 }

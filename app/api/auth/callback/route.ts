@@ -3,6 +3,16 @@ import { createClient, ensureUserInDatabase } from '@/server/auth'
 import { NextResponse } from 'next/server'
 // The client you created from the Server-Side Auth instructions
 
+function isNextRedirectError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'digest' in error &&
+    typeof (error as { digest?: unknown }).digest === 'string' &&
+    (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
+  )
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
@@ -65,6 +75,9 @@ export async function GET(request: Request) {
             await ensureUserInDatabase(user, locale)
           }
         } catch (e) {
+          if (isNextRedirectError(e)) {
+            throw e
+          }
           console.error('Auth callback ensureUserInDatabase error:', e)
           // Non-fatal: continue redirect
         }
@@ -92,6 +105,10 @@ export async function GET(request: Request) {
         console.log('Auth callback error:', error)
       }
     } catch (error: unknown) {
+      if (isNextRedirectError(error)) {
+        throw error
+      }
+
       const errorMessage = error instanceof Error ? error.message : ''
       const originalErrorMessage =
         typeof error === 'object' &&
