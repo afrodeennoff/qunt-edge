@@ -6,8 +6,21 @@ import {
   RefreshCw,
   Sparkles,
   CloudUpload,
-  CheckCircle2
+  CheckCircle2,
+  Trash2,
+  RotateCcw
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import ImportButton from './import/import-button'
@@ -31,7 +44,9 @@ export default function Navbar() {
     addWidget,
     layouts,
     autoSaveStatus,
-    flushPendingSaves
+    flushPendingSaves,
+    removeAllWidgets,
+    restoreDefaultLayout
   } = useDashboard()
   const { refreshAllData, isPlusUser, isLoading } = useData()
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -111,6 +126,69 @@ export default function Navbar() {
               )}
 
               <AddWidgetSheet onAddWidget={addWidget} isCustomizing={isCustomizing} showLabelOnMobile />
+
+              {isCustomizing && (
+                <>
+                  <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl text-white/50 hover:text-white hover:bg-white/10"
+                        title="Restore Defaults"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Restore Default Layout?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will reset your dashboard to the default layout. All current widget positions and sizes will be lost.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={restoreDefaultLayout}>
+                          Restore Defaults
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl text-red-400/50 hover:text-red-400 hover:bg-red-400/10"
+                        title="Delete All Widgets"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove All Widgets?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove all widgets from your dashboard? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={removeAllWidgets}
+                          className="bg-red-500 text-white hover:bg-red-600"
+                        >
+                          Remove All
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              )}
 
               <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
 
