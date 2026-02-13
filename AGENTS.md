@@ -1,0 +1,3 @@
+- 2026-02-13: Restored dashboard to legacy `Navbar` in `app/[locale]/dashboard/layout.tsx` so `Edit Layout` / `Lock Grid` controls are visible again.
+- 2026-02-13: Updated dashboard trade table PnL styling so positive values render green while negative values keep existing muted style, matching requested visual emphasis from marked screenshot.
+- 2026-02-14: Hardened Prisma runtime DB TLS config in `lib/prisma.ts` by adding explicit SSL controls (`PGSSL_ENABLE`, `PGSSL_REJECT_UNAUTHORIZED`) with production defaults to prevent self-signed certificate chain failures on serverless pool connections.

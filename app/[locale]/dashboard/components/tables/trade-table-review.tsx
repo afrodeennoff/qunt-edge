@@ -950,7 +950,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           return (
             <div className="text-right font-medium">
               <span
-                className={cn(pnl >= 0 ? "text-white font-bold" : "text-white/40")}
+                className={cn(pnl >= 0 ? "text-emerald-400 font-bold" : "text-white/40")}
               >
                 {pnl.toFixed(2)}
               </span>
@@ -1499,7 +1499,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                       >
                         <span
                           className={cn(
-                            totals.totalPnl >= 0 ? "text-white" : "text-white/40"
+                            totals.totalPnl >= 0 ? "text-emerald-400" : "text-white/40"
                           )}
                         >
                           {totals.totalPnl.toFixed(2)}

@@ -61,6 +61,37 @@ const forceIPv4ConnectionString = (connectionString: string): string => {
   }
 }
 
+const parseBooleanEnv = (value: string | undefined): boolean | undefined => {
+  if (!value) return undefined
+  const normalized = value.trim().toLowerCase()
+  if (normalized === 'true') return true
+  if (normalized === 'false') return false
+  return undefined
+}
+
+const shouldEnableSsl = (connectionString: string): boolean => {
+  const override = parseBooleanEnv(process.env.PGSSL_ENABLE)
+  if (override !== undefined) return override
+  if (!connectionString) return false
+
+  try {
+    const url = new URL(connectionString)
+    const sslMode = url.searchParams.get('sslmode')?.toLowerCase()
+    if (sslMode === 'disable') return false
+    if (sslMode) return true
+  } catch {
+    // Fall back to production default.
+  }
+
+  return isProduction
+}
+
+const shouldRejectUnauthorized = (): boolean => {
+  const override = parseBooleanEnv(process.env.PGSSL_REJECT_UNAUTHORIZED)
+  // Default to false for serverless poolers to avoid self-signed chain failures.
+  return override ?? false
+}
+
 // Runtime should prefer pooled DATABASE_URL (Supabase pooler).
 // DIRECT_URL is intended for migrations/admin operations.
 const connectionString = normalizeSupabasePoolerMode(selectRuntimeConnectionString())
@@ -78,6 +109,10 @@ const poolConfig: pg.PoolConfig = {
   connectionTimeoutMillis,
 }
 
+if (shouldEnableSsl(connectionString)) {
+  poolConfig.ssl = { rejectUnauthorized: shouldRejectUnauthorized() }
+}
+
 const pool = globalForPrisma.pool ?? new pg.Pool(poolConfig)
 
 if (isProduction) {
@@ -92,6 +127,9 @@ if (isProduction) {
     max: poolConfig.max,
     idleTimeoutMillis: poolConfig.idleTimeoutMillis,
     connectionTimeoutMillis: poolConfig.connectionTimeoutMillis,
+    ssl: Boolean(poolConfig.ssl),
+    rejectUnauthorized:
+      typeof poolConfig.ssl === 'object' ? poolConfig.ssl.rejectUnauthorized : undefined,
   })
 }
 
