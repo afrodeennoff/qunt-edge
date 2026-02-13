@@ -1,4 +1,4 @@
-## 2026-02-13 - [SSR XSS in Sanitize Function]
-**Vulnerability:** The `sanitizeHtml` function returned the raw input HTML when running in a non-browser environment (SSR) because `window` was undefined.
-**Learning:** Manual sanitization implementations often fail edge cases like SSR. Checking for `window` existence to conditionally sanitize is dangerous if the fallback is to return unsanitized content.
-**Prevention:** Use environment-agnostic libraries like `isomorphic-dompurify` for HTML sanitization instead of custom implementations. Ensure sanitization logic runs on both server and client.
+## 2026-02-13 - [Navigator/Window Access in Tests]
+**Vulnerability:** Accessing browser globals like `navigator` or `window` in Node.js test environments causes ReferenceErrors, breaking CI.
+**Learning:** Checking for `typeof navigator === 'undefined'` or `typeof window === 'undefined'` is insufficient if the code accesses properties directly without a guard.
+**Prevention:** Always mock browser globals on `global` (e.g., `global.navigator`) or use strict `typeof` checks before accessing them in isomorphic code or tests.
