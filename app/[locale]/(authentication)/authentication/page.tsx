@@ -37,9 +37,9 @@ export default function AuthenticationPage() {
         <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:30px_30px]" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-[1680px] items-center px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-[1540px] items-center justify-center px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
         <div className="w-full overflow-hidden rounded-[32px] border border-white/10 bg-black/35 shadow-[0_24px_80px_-38px_rgba(255,255,255,0.28)] backdrop-blur-xl">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(540px,700px)]">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(500px,620px)]">
         <section className="p-6 sm:p-8 lg:border-r lg:border-white/10 lg:p-10">
           <div className="flex items-center justify-between">
             <Link
@@ -99,12 +99,12 @@ export default function AuthenticationPage() {
           </div>
         </section>
 
-        <section className="flex items-center border-t border-white/10 p-6 sm:p-8 lg:border-t-0 lg:p-10">
+        <section className="flex items-center justify-center border-t border-white/10 p-6 sm:p-8 lg:border-t-0 lg:p-10">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05, ease: "easeOut" }}
-            className="w-full"
+            className="w-full max-w-[560px] mx-auto"
           >
             <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
