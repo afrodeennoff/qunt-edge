@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase";
+import { IMMUTABLE_CACHE_CONTROL } from "@/lib/supabase-storage";
 import { useCompletion } from "@ai-sdk/react";
 import { FinancialEvent } from "@/prisma/generated/prisma";
 import { z } from "zod";
@@ -209,7 +210,7 @@ export function TiptapEditor({
         const { error } = await supabase.storage
           .from("trade-images")
           .upload(filePath, file, {
-            cacheControl: "3600",
+            cacheControl: IMMUTABLE_CACHE_CONTROL,
             upsert: false, // don't overwrite; hash path should be unique
           });
 

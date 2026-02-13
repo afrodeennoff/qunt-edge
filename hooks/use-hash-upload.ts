@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, startTransition } from 'react'
 import { type FileError, type FileRejection, useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase'
+import { IMMUTABLE_CACHE_CONTROL_SECONDS } from '@/lib/supabase-storage'
 
 const supabase = createClient()
 
@@ -40,7 +41,8 @@ type UseHashUploadOptions = {
   /**
    * The number of seconds the asset is cached in the browser and in the Supabase CDN.
    *
-   * This is set in the Cache-Control: max-age=<seconds> header. Defaults to 3600 seconds.
+   * This is set in the Cache-Control: max-age=<seconds> header.
+   * Defaults to 1 year for immutable hash-named files.
    */
   cacheControl?: number
   /**
@@ -64,7 +66,7 @@ const useHashUpload = (options: UseHashUploadOptions) => {
     allowedMimeTypes = [],
     maxFileSize = Number.POSITIVE_INFINITY,
     maxFiles = 1,
-    cacheControl = 3600,
+    cacheControl = IMMUTABLE_CACHE_CONTROL_SECONDS,
     upsert = false,
   } = options
 

@@ -39,6 +39,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import { withSupabaseImageTransform } from "@/lib/supabase-storage";
 
 const supabase = createClient();
 
@@ -287,7 +288,15 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
               ) : (
                 <>
                   <Image
-                    src={imageArray[0] || "/icon.png"}
+                    src={
+                      imageArray[0]
+                        ? withSupabaseImageTransform(imageArray[0], {
+                            width: 80,
+                            height: 80,
+                            quality: 75,
+                          })
+                        : "/icon.png"
+                    }
                     alt="Trade image"
                     className="object-cover w-full h-full"
                     width={40}
@@ -467,7 +476,11 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                       onClick={() => handleThumbnailClick(index)}
                     >
                       <Image
-                        src={image}
+                        src={withSupabaseImageTransform(image, {
+                          width: 80,
+                          height: 80,
+                          quality: 75,
+                        })}
                         alt={`Thumbnail ${index + 1}`}
                         width={40}
                         height={40}
@@ -536,7 +549,11 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                 >
                   <div className="relative w-24 h-24 rounded-md overflow-hidden flex-shrink-0 border border-border">
                     <Image
-                      src={imageUrl}
+                      src={withSupabaseImageTransform(imageUrl, {
+                        width: 192,
+                        height: 192,
+                        quality: 80,
+                      })}
                       alt={`Trade image ${index + 1}`}
                       fill
                       className="object-cover"
