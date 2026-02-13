@@ -28,10 +28,7 @@ interface TraderMetrics {
   winRate: number
   avgReturn: number
   totalTrades: number
-  avgWin: number
-  avgLoss: number
   netPnl: number
-  expectancy: number
   consistencyRate: number
   winningStreak: number
   sumGain: number
@@ -158,7 +155,6 @@ export default function TraderProfilePage() {
     const totalTrades = trades.length
     const cumulativePnl = netValues.reduce((a, b) => a + b, 0)
     const avgReturn = totalTrades > 0 ? cumulativePnl / totalTrades : 0
-    const expectancy = (winRate / 100) * avgWin - ((100 - winRate) / 100) * avgLossAbs
 
     let runningNet = 0
     let peakNet = 0
@@ -187,10 +183,7 @@ export default function TraderProfilePage() {
       winRate,
       avgReturn,
       totalTrades,
-      avgWin,
-      avgLoss: avgLossAbs,
       netPnl: cumulativePnl,
-      expectancy,
       consistencyRate,
       winningStreak,
       sumGain,

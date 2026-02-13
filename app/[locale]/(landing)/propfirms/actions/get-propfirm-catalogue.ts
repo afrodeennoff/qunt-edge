@@ -24,6 +24,39 @@ export async function getPropfirmCatalogueData(timeframe: Timeframe = 'currentMo
   // 'use cache' - Removed experimental directive
   // cacheLife('weeks') - Removed experimental directive
 
+  if (process.env.NODE_ENV === 'development') {
+    return {
+      stats: [
+        {
+          propfirmName: 'Apex',
+          accountsCount: 12,
+          payouts: {
+            propfirmName: 'Apex',
+            pendingAmount: 2500,
+            pendingCount: 2,
+            refusedAmount: 0,
+            refusedCount: 0,
+            paidAmount: 15400,
+            paidCount: 8
+          }
+        },
+        {
+          propfirmName: 'Topstep',
+          accountsCount: 5,
+          payouts: {
+            propfirmName: 'Topstep',
+            pendingAmount: 0,
+            pendingCount: 0,
+            refusedAmount: 0,
+            refusedCount: 0,
+            paidAmount: 8200,
+            paidCount: 4
+          }
+        }
+      ]
+    }
+  }
+
   try {
     const { startDate, endDate } = getTimeframeDateRange(timeframe)
 

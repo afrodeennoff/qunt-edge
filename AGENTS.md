@@ -36,6 +36,16 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Engineering Log Restructure
+- **What changed:** Updated `AGENTS.md` to enforce a strict, conversational log structure.
+- **What I want:** Highly contextual documentation that explains the *why* and *how* of changes, not just the *what*.
+- **What I don't want:** Generic "Updated X" logs that leave future agents guessing about intent or trade-offs.
+- **How we fixed that:**
+  - Defined a mandatory template based on "What I want" / "What I don't want" / "How we fixed that".
+  - Refactored all previous valid entries (Smart Insights, Sidebar, etc.) to match this legacy-proof format.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Read the file header; observe the new conversational format instructions.
+
 ### 2026-02-14: Smart Insights Widget
 - **What changed:** Added a new "Smart Insights" widget to the dashboard.
 - **What I want:** Provide users with actionable, AI-driven feedback (e.g., risk warnings, opportunities) instead of just raw data charts.
