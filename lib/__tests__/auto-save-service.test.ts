@@ -312,7 +312,6 @@ describe('AutoSaveService', () => {
             } else {
                  // Simulate window event in Node environment
                  const onlineEvent = { type: 'online' };
-                 // @ts-expect-error - Accessing private listener map for testing
                  if (typeof global.window?.dispatchEvent === 'function') {
                      global.window.dispatchEvent(onlineEvent as Event);
                  }
