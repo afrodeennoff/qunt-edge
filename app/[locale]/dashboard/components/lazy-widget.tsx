@@ -68,6 +68,10 @@ const widgetLoaders: Record<WidgetType, () => Promise<{ default: React.Component
   tradingScore: () => import("../components/widgets/trading-score-widget"),
   expectancy: () => import("../components/widgets/expectancy-widget"),
   riskMetrics: () => import("../components/widgets/risk-metrics-widget"),
+  propFirmCatalogue: () => import("../components/widgets/propfirm-catalogue-widget"),
+  smartInsights: () => import("../components/widgets/smart-insights-widget").then((module) => ({
+    default: module.SmartInsightsWidget as React.ComponentType<WidgetComponentProps>,
+  })),
 }
 
 const dynamicWidgets = Object.entries(widgetLoaders).reduce((acc, [type, loader]) => {
