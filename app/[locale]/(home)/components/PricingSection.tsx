@@ -16,6 +16,7 @@ const plans = [
     subtitle: 'For traders starting process discipline',
     features: ['Manual journaling', 'Basic trade analytics', 'Weekly summary snapshot'],
     cta: 'Start Free',
+    note: 'No card required',
     popular: false,
   },
   {
@@ -30,7 +31,8 @@ const plans = [
       'Advanced dashboards',
       'Priority support',
     ],
-    cta: 'Get Pro AI',
+    cta: 'Start Pro Trial',
+    note: 'Best for active discretionary traders',
     popular: true,
   },
   {
@@ -40,6 +42,7 @@ const plans = [
     subtitle: 'For prop teams, mentors, and performance managers',
     features: ['Team analytics workspace', 'Role-based reporting', 'Coaching intervention feed', 'Shared playbooks'],
     cta: 'Talk To Sales',
+    note: 'Volume pricing for larger desks',
     popular: false,
   },
 ]
@@ -67,6 +70,7 @@ export default function PricingSection() {
           <p className="mx-auto mt-4 max-w-2xl text-sm text-[hsl(var(--mk-text-muted))] sm:text-base">
             Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
           </p>
+          <p className="mx-auto mt-2 text-xs text-[hsl(var(--mk-text-muted))]">Billed monthly. Cancel anytime.</p>
         </motion.div>
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -78,13 +82,13 @@ export default function PricingSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.06 }}
             >
-              <Card
-                variant="glass"
-                className={`h-full rounded-2xl border-[hsl(var(--mk-border)/0.35)] ${plan.popular ? 'ring-1 ring-[hsl(var(--brand-primary)/0.45)]' : ''}`}
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
-                    <CardTitle className="text-xl">{plan.name}</CardTitle>
+                <Card
+                  variant="glass"
+                  className={`h-full rounded-2xl border-[hsl(var(--mk-border)/0.35)] ${plan.popular ? 'ring-2 ring-[hsl(var(--brand-primary)/0.45)] shadow-[0_28px_60px_-36px_hsl(var(--brand-primary)/0.55)]' : ''}`}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between gap-3">
+                      <CardTitle className="text-xl">{plan.name}</CardTitle>
                     {plan.popular ? (
                       <Badge className="bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">Most Popular</Badge>
                     ) : null}
@@ -94,6 +98,7 @@ export default function PricingSection() {
                     <span className="ml-1 text-sm font-medium text-[hsl(var(--mk-text-muted))]">{plan.period}</span>
                   </p>
                   <p className="text-sm text-[hsl(var(--mk-text-muted))]">{plan.subtitle}</p>
+                  <p className="mt-1 text-xs text-[hsl(var(--mk-text-muted))]">{plan.note}</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">

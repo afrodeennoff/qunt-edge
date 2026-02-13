@@ -17,19 +17,20 @@ export default function CTA() {
       >
         <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Ready</p>
         <h2 className="mt-2 text-[clamp(1.8rem,5vw,3.4rem)] font-semibold leading-[0.98] tracking-tight [font-family:var(--font-poppins)]">
-          Keep your old trading journal context.
-          <span className="block text-[hsl(var(--brand-primary))]">Upgrade everything around it.</span>
+          Keep your current workflow.
+          <span className="block text-[hsl(var(--brand-primary))]">Upgrade the decisions behind it.</span>
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] sm:text-base">
-          Same core information, modern interface precision.
+          Join in minutes and get your first AI-backed execution audit before your next trading session.
         </p>
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-center gap-3">
           <Link
             href={`/${locale}/authentication?next=dashboard`}
             className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))]"
           >
-            Access Dashboard
+            Start My Free Audit
           </Link>
+          <p className="text-xs text-[hsl(var(--mk-text-muted))]">No credit card required</p>
         </div>
       </motion.div>
     </section>

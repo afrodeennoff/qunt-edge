@@ -39,7 +39,7 @@ export default function Hero() {
 
           <motion.h1
             variants={fadeUp}
-            className="mx-auto max-w-5xl text-center text-[clamp(2.3rem,8vw,5.5rem)] font-semibold leading-[0.92] tracking-tight [font-family:var(--font-poppins)]"
+            className="mx-auto max-w-5xl text-center text-[clamp(2.5rem,8.4vw,5.8rem)] font-semibold leading-[0.9] tracking-[-0.02em] [font-family:var(--font-poppins)]"
           >
             Grow the trader.
             <span className="block bg-gradient-to-r from-[hsl(var(--brand-primary))] to-[hsl(var(--brand-secondary))] bg-clip-text text-transparent">
@@ -47,7 +47,7 @@ export default function Hero() {
             </span>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-center text-[15px] leading-relaxed text-[hsl(var(--mk-text-muted))] sm:text-[17px]">
+          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-center text-[15px] leading-relaxed text-[hsl(var(--mk-text-muted))] sm:text-[18px]">
             Qunt Edge V2 helps you understand why performance changes, what behavior caused it, and exactly what to fix next
             using auditable AI coaching and process-first analytics.
           </motion.p>
@@ -92,6 +92,10 @@ export default function Hero() {
             <span>CQG</span>
             <span>CSV IMPORT</span>
           </motion.div>
+
+          <motion.p variants={fadeUp} className="mt-5 text-center text-xs tracking-[0.08em] text-[hsl(var(--mk-text-muted))]">
+            No credit card required. Setup in under 10 minutes.
+          </motion.p>
         </motion.div>
       </div>
     </section>
