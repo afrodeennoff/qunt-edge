@@ -124,6 +124,48 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Kept negative values in the standard monochrome/muted palette to align with the new design system.
 - **Key Files:** `components/ui/data-table/columns.tsx`
 
+### 2026-02-13: VaR Codepath Trace
+- **What changed:** Located and mapped all Value at Risk (VaR) implementation touchpoints across logic, action, UI, and tests.
+- **What I want:** Future agents (and users) should find VaR calculation and rendering code immediately without hunting through unrelated files.
+- **What I don't want:** Repeated time loss from searching broad terms and missing the core analytics file.
+- **How we fixed that:**
+  - Identified core VaR engine functions in `lib/analytics/var.ts` (`computeHistoricalVar`, `computeParametricVar`, `computeVarSummary`).
+  - Confirmed server action usage in `app/[locale]/teams/actions/user.ts` via `getTraderVarSummary`.
+  - Confirmed UI rendering in `app/[locale]/teams/components/trader-info.tsx` for Hist/Param VaR at 95%/99%.
+  - Confirmed test coverage in `tests/var.test.ts` and `tests/trader-var-action.test.ts`.
+- **Key Files:** `lib/analytics/var.ts`, `app/[locale]/teams/actions/user.ts`, `app/[locale]/teams/components/trader-info.tsx`, `tests/var.test.ts`, `tests/trader-var-action.test.ts`
+- **Verification:** Run `rg -n "Value at Risk|VaR|computeVarSummary|getTraderVarSummary" .` and verify matches in the files above.
+
+### 2026-02-13: VaR Runtime Usage Clarification
+- **What changed:** Traced where VaR is actually used in live app flow (not just defined/tested).
+- **What I want:** Make it obvious which route renders VaR to end users.
+- **What I don't want:** Confusion between helper/test references and real runtime usage.
+- **How we fixed that:**
+  - Verified `getTraderVarSummary` is called inside `TraderInfo`.
+  - Verified `TraderInfo` is rendered by the trader detail page route.
+- **Key Files:** `app/[locale]/teams/actions/user.ts`, `app/[locale]/teams/components/trader-info.tsx`, `app/[locale]/teams/dashboard/trader/[slug]/page.tsx`
+- **Verification:** Open `/teams/dashboard/trader/[slug]` and confirm the "1-Day Value at Risk" section appears.
+
+### 2026-02-14: Build Repair - Lazy Widget Registration
+- **What changed:** Manually registered `smartInsights` and `propFirmCatalogue` in `lazy-widget.tsx`.
+- **What I want:** To pass the production build type-check for the dashboard's lazy loader.
+- **What I don't want:** Build faillures because the `widgetLoaders` map is missing keys defined in the `WidgetType` union.
+- **How we fixed that:**
+  - Added dynamic imports for the missing widgets in `app/[locale]/dashboard/components/lazy-widget.tsx`.
+  - Used named export resolution for `SmartInsightsWidget` since it's not a default export.
+- **Key Files:** `app/[locale]/dashboard/components/lazy-widget.tsx`
+- **Verification:** Run `npm run build` locally to confirm the type error is resolved.
+
+### 2026-02-14: Build Repair - CSS Import
+- **What changed:** Removed `@import "tw-animate-css";` from `globals.css`.
+- **What I want:** A clean CSS build without missing dependency errors.
+- **What I don't want:** The Vercel build crashing because it can't resolve a CSS package that isn't in `package.json`.
+- **How we fixed that:**
+  - Identified the build error: `Can't resolve 'tw-animate-css'`.
+  - Removed the invalid import line as the package was not actually installed/used.
+- **Key Files:** `app/globals.css`
+- **Verification:** Run `npm run build` locally.
+
 ## 🛠️ Build & Type Safety
 - **2026-02-14: Codebase Cleanup and Quality Pass.**
   - Removed 8+ redundant root files (`COMBINED_DOCUMENTATION.md`, `IMPORT_FIX_SUMMARY.md`, etc.).
