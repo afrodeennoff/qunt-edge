@@ -22,16 +22,16 @@ interface AccountsBarChartProps {
 }
 
 const chartConfig = {
-  accounts: {
+  accountsCount: {
     label: "Accounts",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
 
-export function AccountsBarChart({ 
-  data, 
-  chartTitle, 
-  registeredAccountsLabel 
+export function AccountsBarChart({
+  data,
+  chartTitle,
+  registeredAccountsLabel
 }: AccountsBarChartProps) {
   // Sort data by accounts count descending for better visualization
   const sortedData = React.useMemo(
@@ -89,7 +89,7 @@ export function AccountsBarChart({
             />
             <Bar
               dataKey="accountsCount"
-              fill="var(--color-accounts)"
+              fill="var(--color-accountsCount)"
               radius={[4, 4, 0, 0]}
               maxBarSize={60}
             />

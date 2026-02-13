@@ -289,11 +289,11 @@ interface DraggableAccountCardProps {
   isDragDisabled?: boolean
 }
 
-function DraggableAccountCard({ 
-  account, 
-  onClick, 
+function DraggableAccountCard({
+  account,
+  onClick,
   size,
-  isDragDisabled = false 
+  isDragDisabled = false
 }: DraggableAccountCardProps) {
   const {
     attributes,
@@ -302,7 +302,7 @@ function DraggableAccountCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: account.number,
     disabled: isDragDisabled
   })
@@ -361,7 +361,7 @@ function PayoutDialog({
   const [status, setStatus] = useState<string>(existingPayout?.status ?? 'PENDING')
   const [dateInputValue, setDateInputValue] = useState<string>("")
   const t = useI18n()
-  
+
   // Combined loading state for both saving and deleting
   const isProcessing = isLoading || isDeleting
 
@@ -394,7 +394,7 @@ function PayoutDialog({
   const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setDateInputValue(value)
-    
+
     // Try to parse the date
     const parsedDate = new Date(value)
     if (!isNaN(parsedDate.getTime())) {
@@ -430,7 +430,7 @@ function PayoutDialog({
             {existingPayout ? t('propFirm.payout.editDescription') : t('propFirm.payout.addDescription')} {accountNumber}
           </SheetDescription>
         </SheetHeader>
-        
+
         <div className="flex-1 overflow-y-auto space-y-6 py-6 min-h-0">
           {/* Amount Input with Currency Symbol */}
           <div className="space-y-2">
@@ -452,7 +452,7 @@ function PayoutDialog({
           {/* Date Selection with Inline Calendar */}
           <div className="space-y-3">
             <Label>{t('propFirm.payout.date')}</Label>
-            
+
             {/* Quick Date Selection */}
             <div className="flex flex-wrap gap-2">
               <Button
@@ -552,7 +552,7 @@ function PayoutDialog({
                       <ChevronRight className="h-3 w-3" />
                     </Button>
                   </div>
-                  
+
                   {/* Year Navigation */}
                   <div className="flex items-center gap-1">
                     <Button
@@ -823,7 +823,7 @@ export function AccountsOverview({
         // Account belongs to a group
         const group = groups.find(g => g.id === activeAccount.groupId)
         if (!group) return
-        
+
         groupId = group.id
         groupAccounts = filteredAccounts.filter(account => {
           return group.accounts.some(a => a.number === account.number);
@@ -833,13 +833,13 @@ export function AccountsOverview({
         const groupedAccountNumbers = new Set(
           groups.flatMap(group => group.accounts.map(a => a.number))
         )
-        
+
         groupId = 'ungrouped'
         groupAccounts = filteredAccounts.filter(
           account => !groupedAccountNumbers.has(account.number ?? '')
         )
       }
-      
+
       const orderedAccounts = getOrderedAccounts(groupId, groupAccounts)
       const oldIndex = orderedAccounts.findIndex(account => account.number === active.id)
       const newIndex = orderedAccounts.findIndex(account => account.number === over?.id)
@@ -847,9 +847,9 @@ export function AccountsOverview({
       if (oldIndex !== -1 && newIndex !== -1) {
         const reorderedAccounts = arrayMove(orderedAccounts, oldIndex, newIndex)
         const accountNumbers = reorderedAccounts.map(acc => acc.number)
-        
+
         reorderAccounts(groupId, accountNumbers)
-        
+
         toast.success(t('propFirm.dragAndDrop.reorderSuccess'))
       }
     }
@@ -982,7 +982,7 @@ export function AccountsOverview({
 
     try {
       setIsSavingPayout(true)
-      
+
       if (selectedPayout) {
         // Update existing payout
         await savePayout({
@@ -1004,7 +1004,7 @@ export function AccountsOverview({
           accountId: selectedAccountForTable.id
         })
       }
-      
+
       // Mark for local selection update; data is already updated optimistically
       shouldUpdateSelectedAccount.current = true
 
@@ -1029,7 +1029,7 @@ export function AccountsOverview({
 
     try {
       setIsDeletingPayout(true)
-      
+
       await deletePayout(selectedPayout.id)
 
       // Mark for local selection update; data is already updated optimistically
@@ -1088,7 +1088,7 @@ export function AccountsOverview({
         drawdownThreshold: pendingChanges?.drawdownThreshold ?? selectedAccountForTable.drawdownThreshold,
         consistencyPercentage: pendingChanges?.consistencyPercentage ?? selectedAccountForTable.consistencyPercentage,
         propfirm: pendingChanges?.propfirm ?? selectedAccountForTable.propfirm,
-        resetDate: 'resetDate' in pendingChanges 
+        resetDate: 'resetDate' in pendingChanges
           ? (pendingChanges.resetDate instanceof Date ? pendingChanges.resetDate : null)
           : selectedAccountForTable.resetDate,
         shouldConsiderTradesBeforeReset: pendingChanges?.shouldConsiderTradesBeforeReset ?? selectedAccountForTable.shouldConsiderTradesBeforeReset ?? true,
@@ -1108,7 +1108,7 @@ export function AccountsOverview({
         isRecursively: pendingChanges?.isRecursively ?? selectedAccountForTable.isRecursively,
         balanceRequired: pendingChanges?.balanceRequired ?? selectedAccountForTable.balanceRequired,
         minTradingDaysForPayout: pendingChanges?.minTradingDaysForPayout ?? selectedAccountForTable.minTradingDaysForPayout,
-        groupId: 'groupId' in pendingChanges 
+        groupId: 'groupId' in pendingChanges
           ? (pendingChanges.groupId ?? null)
           : (selectedAccountForTable.groupId ?? null)
       }
@@ -1414,7 +1414,12 @@ export function AccountsOverview({
         <div
           className="flex-1 overflow-y-auto h-full"
         >
-          {view === "cards" ? (
+          {filteredAccounts.length === 0 && unconfiguredAccounts.length === 0 && !isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full py-10 text-muted-foreground">
+              <Table className="h-10 w-10 mb-4 opacity-20" />
+              <p className="text-sm">{t('modals.noTrades.description')}</p>
+            </div>
+          ) : view === "cards" ? (
             <div className="mt-4">
               <div className="space-y-6">
                 {sortedGroupEntries.map(({ group, accounts: orderedAccounts }, groupIndex) => {

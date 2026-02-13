@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Card } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { ChevronDown, CircleDot } from "lucide-react"
-import { TopNav } from "../components/top-nav"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -88,7 +88,7 @@ function getWinningStreak(values: number[]) {
 }
 
 export default function TraderProfilePage() {
-  const { formattedTrades, isLoading } = useData()
+  const { formattedTrades, isLoading, accounts } = useData()
   const user = useUserStore((state) => state.user)
   const supabaseUser = useUserStore((state) => state.supabaseUser)
   const [benchmark, setBenchmark] = useState<BenchmarkMetrics | null>(null)
@@ -125,6 +125,21 @@ export default function TraderProfilePage() {
       "Trader"
     )
   }, [supabaseUser?.email, supabaseUser?.user_metadata?.full_name, supabaseUser?.user_metadata?.name, user?.email])
+
+  const profileAvatar = useMemo(() => {
+    const avatar = supabaseUser?.user_metadata?.avatar_url
+    return typeof avatar === "string" && avatar.length > 0 ? avatar : null
+  }, [supabaseUser?.user_metadata?.avatar_url])
+
+  const profileInitials = useMemo(() => {
+    const parts = profileName
+      .split(" ")
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .slice(0, 2)
+    if (parts.length === 0) return "TR"
+    return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "TR"
+  }, [profileName])
 
   const metrics = useMemo<TraderMetrics>(() => {
     const trades = formattedTrades || []
@@ -201,20 +216,43 @@ export default function TraderProfilePage() {
       .slice(0, 6)
   }, [formattedTrades])
 
+  const totalProfitAllAccounts = useMemo(() => {
+    return (accounts || []).reduce((sum, account) => {
+      return sum + Number(account.metrics?.totalProfit || 0)
+    }, 0)
+  }, [accounts])
+
+  const totalWithdrawAllAccounts = useMemo(() => {
+    return (accounts || []).reduce((accountSum, account) => {
+      const accountWithdraw = (account.payouts || [])
+        .filter((payout) => payout.status === "PAID")
+        .reduce((withdrawSum, payout) => withdrawSum + Number(payout.amount || 0), 0)
+      return accountSum + accountWithdraw
+    }, 0)
+  }, [accounts])
+
   return (
-    <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-6">
+    <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-5">
       <div className="pointer-events-none absolute inset-0 opacity-70">
         <div className="absolute -top-24 left-[-8%] h-72 w-72 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute top-28 right-[-6%] h-80 w-80 rounded-full bg-white/[0.03] blur-3xl" />
       </div>
 
-      <TopNav title="Trader Profile" />
-
-      <div className="relative mt-4 grid gap-3 xl:grid-cols-[1.35fr_1fr]">
+      <div className="relative grid gap-3 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-3">
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-fg-muted">Trader profile</p>
-            <p className="mt-2 text-3xl font-semibold text-fg-primary">{profileName}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.14em] text-fg-muted">Trader profile</p>
+                <p className="mt-2 text-3xl font-semibold text-fg-primary">{profileName}</p>
+              </div>
+              <Avatar className="h-12 w-12 border border-white/20 bg-white/5">
+                <AvatarImage src={profileAvatar ?? undefined} alt={`${profileName} avatar`} />
+                <AvatarFallback className="bg-white/10 text-xs font-semibold text-fg-primary">
+                  {profileInitials}
+                </AvatarFallback>
+              </Avatar>
+            </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
@@ -233,7 +271,7 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
             <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Risk Reward</p>
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.riskReward)}</p>
@@ -241,14 +279,6 @@ export default function TraderProfilePage() {
             <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Max Drawdown</p>
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.drawdown)}</p>
-            </Card>
-            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
-              <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
-            </Card>
-            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
-              <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatSigned(metrics.expectancy)}</p>
             </Card>
           </div>
 
@@ -315,28 +345,24 @@ export default function TraderProfilePage() {
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Win</p>
-                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgWin)}%</p>
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Profit (All Accounts)</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatSigned(totalProfitAllAccounts)}</p>
               </div>
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Loss</p>
-                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}%</p>
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Withdraw (All Accounts)</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatSigned(totalWithdrawAllAccounts)}</p>
               </div>
             </div>
             <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Return</p>
               <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(Math.abs(metrics.avgReturn))}%</p>
             </div>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Consistency Rate</p>
+              <p className="text-sm font-semibold text-fg-primary">{formatValue(metrics.consistencyRate)}%</p>
+            </div>
             <div className="mt-3 h-2 rounded-full bg-white/10">
               <div className="h-full rounded-full bg-white/30" style={{ width: `${Math.min(100, Math.max(8, metrics.consistencyRate))}%` }} />
-            </div>
-          </Card>
-
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
-            <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
-            <div className="mt-3 h-2 rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-white/40" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
             </div>
           </Card>
 
@@ -349,28 +375,6 @@ export default function TraderProfilePage() {
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Sum Gain</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.sumGain)}%</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Execution Quality</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Win</p>
-                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgWin)}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg Loss</p>
-                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Expectancy</p>
-                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatSigned(metrics.expectancy)}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
-                <p className="mt-1 text-sm font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
               </div>
             </div>
           </Card>

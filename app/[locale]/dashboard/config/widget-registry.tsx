@@ -1,5 +1,7 @@
 import React from 'react'
 import { WidgetType, WidgetSize } from '../types/dashboard'
+import { SmartInsightsWidget } from '../components/widgets/smart-insights-widget'
+import { Brain } from 'lucide-react'
 import EquityChart from '../components/charts/equity-chart'
 import TickDistributionChart from '../components/charts/tick-distribution'
 import PNLChart from '../components/charts/pnl-bar-chart'
@@ -38,6 +40,7 @@ import ExpectancyWidget from '../components/widgets/expectancy-widget'
 import RiskMetricsWidget from '../components/widgets/risk-metrics-widget'
 import { useI18n } from '@/locales/client'
 import { translateWeekday } from '@/lib/translation-utils'
+import PropfirmCatalogueWidget from '../components/widgets/propfirm-catalogue-widget'
 // import MarketChart from '../components/market/market-chart'
 
 export interface WidgetConfig {
@@ -68,7 +71,7 @@ function createTablePreview(type: 'tradeTableReview' | 'consistencyTable') {
             {Array(type === 'tradeTableReview' ? 4 : 5).fill(0).map((_, i) => (
               <div key={i} className={cn(
                 "h-4 bg-muted-foreground/20 rounded",
-                type === 'tradeTableReview' 
+                type === 'tradeTableReview'
                   ? i === 1 ? "flex-3" : "flex-2"
                   : i < 2 ? "flex-2" : "flex-1"
               )} />
@@ -79,7 +82,7 @@ function createTablePreview(type: 'tradeTableReview' | 'consistencyTable') {
               {Array(type === 'tradeTableReview' ? 4 : 5).fill(0).map((_, i) => (
                 <div key={i} className={cn(
                   "h-3 bg-muted-foreground/10 rounded",
-                  type === 'tradeTableReview' 
+                  type === 'tradeTableReview'
                     ? i === 1 ? "flex-3" : "flex-2"
                     : i < 2 ? "flex-2" : "flex-1"
                 )} />
@@ -178,7 +181,7 @@ function createMindsetPreview() {
             </div>
           ))}
         </div>
-        
+
         {/* Content area mock */}
         <div className="flex-1 p-4 flex flex-col gap-3">
           <div className="flex flex-col gap-2">
@@ -189,12 +192,12 @@ function createMindsetPreview() {
               <div className="h-6 w-18 bg-muted rounded-full" />
             </div>
           </div>
-          
+
           <div className="flex flex-col gap-2">
             <div className="h-4 w-24 bg-muted-foreground/20 rounded" />
             <div className="h-16 w-full bg-muted rounded border" />
           </div>
-          
+
           <div className="flex flex-col gap-2">
             <div className="h-4 w-28 bg-muted-foreground/20 rounded" />
             <div className="flex items-center gap-2">
@@ -230,17 +233,17 @@ function CreateCalendarPreview() {
             <CardTitle className="text-sm font-medium">Calendar</CardTitle>
           </div>
           <div className="flex items-center gap-1.5">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               className="h-7 w-7 sm:h-8 sm:w-8"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               className="h-7 w-7 sm:h-8 sm:w-8"
               aria-label="Next month"
             >
@@ -258,13 +261,13 @@ function CreateCalendarPreview() {
             </div>
           ))}
         </div>
-        
+
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1 h-[calc(100%-40px)]">
           {/* Calendar days - just empty boxes showing the structure */}
           {Array.from({ length: 35 }, (_, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className="flex flex-col items-center justify-center p-1 rounded border border-border hover:bg-accent transition-colors cursor-pointer"
             >
               <div className="h-4 w-full bg-muted-foreground/10 rounded mb-0.5" />
@@ -291,7 +294,7 @@ function CreateChatPreview() {
           </Button>
         </div>
       </CardHeader>
-      
+
       {/* Chat area */}
       <CardContent className="flex-1 flex flex-col min-h-0 p-0 relative">
         <div className="flex-1 min-h-0 w-full overflow-y-auto">
@@ -306,7 +309,7 @@ function CreateChatPreview() {
                 <div className="h-3 w-24 bg-muted-foreground/20 rounded" />
               </div>
             </div>
-            
+
             {/* User message */}
             <div className="flex items-start gap-2 justify-end">
               <div className="bg-primary rounded-lg p-2 max-w-[80%]">
@@ -316,7 +319,7 @@ function CreateChatPreview() {
                 <div className="w-3 h-3 rounded-full bg-muted-foreground" />
               </div>
             </div>
-            
+
             {/* Bot message */}
             <div className="flex items-start gap-2">
               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -330,7 +333,7 @@ function CreateChatPreview() {
             </div>
           </div>
         </div>
-        
+
         {/* Input area */}
         <div className="border-t p-3">
           <div className="flex items-center gap-2">
@@ -347,7 +350,55 @@ function CreateChatPreview() {
   )
 }
 
+function createSmartInsightsPreview() {
+  return (
+    <Card className="h-[300px] flex flex-col relative overflow-hidden bg-black/40 border-white/5">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10" />
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+        <div className="space-y-1">
+          <div className="text-sm font-medium flex items-center gap-2">
+            <Brain className="h-4 w-4 text-blue-400" />
+            Smart Insights
+          </div>
+          <div className="text-xs text-muted-foreground">
+            AI-driven analysis & opportunities
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 p-4 space-y-3">
+        <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3">
+          <div className="h-8 w-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+            <Brain className="h-4 w-4 text-blue-500" />
+          </div>
+          <div className="space-y-2 flex-1">
+            <div className="h-4 w-24 bg-white/10 rounded" />
+            <div className="h-3 w-full bg-white/5 rounded" />
+          </div>
+        </div>
+        <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3 opacity-60">
+          <div className="h-8 w-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+            <div className="h-4 w-4 rounded-sm bg-red-500/50" />
+          </div>
+          <div className="space-y-2 flex-1">
+            <div className="h-4 w-16 bg-white/10 rounded" />
+            <div className="h-3 w-3/4 bg-white/5 rounded" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export const WIDGET_REGISTRY: Record<WidgetType, WidgetConfig> = {
+  smartInsights: {
+    type: 'smartInsights',
+    defaultSize: 'medium',
+    allowedSizes: ['small', 'medium', 'large'],
+    category: 'statistics',
+    previewHeight: 300,
+    getComponent: ({ size }) => <SmartInsightsWidget size={size} />,
+    getPreview: () => createSmartInsightsPreview()
+  },
   weekdayPnlChart: {
     type: 'weekdayPnlChart',
     defaultSize: 'medium',
@@ -554,6 +605,15 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetConfig> = {
     category: 'tables',
     previewHeight: 300,
     getComponent: ({ size }) => <AccountsOverview size={size} />,
+    getPreview: () => <AccountsOverview size="small" />
+  },
+  propFirmCatalogue: {
+    type: 'propFirmCatalogue',
+    defaultSize: 'medium',
+    allowedSizes: ['small', 'medium', 'large', 'extra-large'],
+    category: 'statistics',
+    previewHeight: 300,
+    getComponent: ({ size }) => <PropfirmCatalogueWidget />,
     getPreview: () => createPropfirmPreview()
   },
   timeRangePerformance: {

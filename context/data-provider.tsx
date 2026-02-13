@@ -445,7 +445,8 @@ export const DataProvider: React.FC<{
           const safeTrades = await fetchAllTrades(userId, false);
           console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
 
-          const tradesToUse = safeTrades.length > 0 ? safeTrades : (process.env.NODE_ENV === "development" ? generateMockTrades(userId) : []);
+          // Fallback to mock data if no real trades exist, regardless of environment (for demo purposes)
+          const tradesToUse = safeTrades.length > 0 ? safeTrades : generateMockTrades(userId);
           setTrades(tradesToUse);
           if (tradesToUse.length > 0) {
             setTradesCache(userId, tradesToUse).catch(console.error);

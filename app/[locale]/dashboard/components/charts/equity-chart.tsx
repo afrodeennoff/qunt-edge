@@ -737,8 +737,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [formattedTrades, timezone]);
 
   React.useEffect(() => {
-    if (isSharedView || isTeamView) {
-      console.log("[EquityChart] Using client-side computation (shared view)");
+    const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
+
+    if (isSharedView || isTeamView || isMock) {
+      console.log("[EquityChart] Using client-side computation (shared/team view or mock data)");
       setIsLoading(true);
       try {
         const { chartData: computedData, accountNumbers: accNumbers } =

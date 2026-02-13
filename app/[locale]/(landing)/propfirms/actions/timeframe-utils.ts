@@ -1,4 +1,4 @@
-export type Timeframe = 'currentMonth' | 'last3Months' | 'last6Months' | '2024' | '2025' | 'allTime'
+export type Timeframe = 'currentMonth' | 'last3Months' | 'last6Months' | '2024' | '2025' | '2026' | 'allTime'
 
 export interface DateRange {
   startDate: Date
@@ -8,7 +8,7 @@ export interface DateRange {
 export function getTimeframeDateRange(timeframe: Timeframe): DateRange {
   const now = new Date()
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  
+
   switch (timeframe) {
     case 'currentMonth': {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -44,6 +44,12 @@ export function getTimeframeDateRange(timeframe: Timeframe): DateRange {
       return {
         startDate: new Date(2025, 0, 1),
         endDate: new Date(2025, 11, 31, 23, 59, 59, 999),
+      }
+    }
+    case '2026': {
+      return {
+        startDate: new Date(2026, 0, 1),
+        endDate: new Date(2026, 11, 31, 23, 59, 59, 999),
       }
     }
     case 'allTime': {

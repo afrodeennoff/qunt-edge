@@ -29,6 +29,8 @@ export type WidgetType =
   | 'tradingScore'
   | 'expectancy'
   | 'riskMetrics'
+  | 'propFirmCatalogue'
+  | 'smartInsights'
 export type WidgetSize = 'tiny' | 'small' | 'small-long' | 'medium' | 'large' | 'extra-large'
 
 export interface LayoutItem {

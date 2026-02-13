@@ -223,6 +223,7 @@ export default {
                 last6Months: '6 Derniers Mois',
                 '2024': '2024',
                 '2025': '2025',
+                '2026': '2026',
                 allTime: 'Tout le temps'
             },
             payouts: {

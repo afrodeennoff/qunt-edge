@@ -136,6 +136,13 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
       const rawDate = trade.entryDate;
       if (rawDate instanceof Date && !isNaN(rawDate.getTime())) {
         date = formatInTimeZone(rawDate, 'UTC', 'yyyy-MM-dd');
+      } else if (typeof rawDate === 'string') {
+        const parsedDate = new Date(rawDate);
+        if (!isNaN(parsedDate.getTime())) {
+          date = formatInTimeZone(parsedDate, 'UTC', 'yyyy-MM-dd');
+        } else {
+          return acc;
+        }
       } else {
         return acc;
       }

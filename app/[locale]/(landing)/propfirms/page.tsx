@@ -11,7 +11,7 @@ import type { Timeframe } from './actions/timeframe-utils'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getI18n()
-  
+
   return {
     title: `${t('landing.propfirms.title')} - Qunt Edge`,
     description: t('landing.propfirms.description'),
@@ -111,7 +111,7 @@ interface PropFirmsPageProps {
 export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps) {
   const t = await getI18n()
   const resolvedSearchParams = await searchParams
-  const timeframe = (resolvedSearchParams.timeframe || '2025') as Timeframe
+  const timeframe = (resolvedSearchParams.timeframe || '2026') as Timeframe
   const sortBy = resolvedSearchParams.sort || 'accounts'
   const { stats } = await getPropfirmCatalogueData(timeframe)
 
@@ -131,7 +131,7 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
   Object.entries(propFirms).forEach(([key, firm]) => {
     const dbStats = statsMap.get(firm.name)
     const accountTemplatesCount = Object.keys(firm.accountSizes).length
-    
+
     configPropfirms.push({
       key,
       name: firm.name,
@@ -144,7 +144,7 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
   const sortedPropfirms = [...configPropfirms].sort((a, b) => {
     const aStats = a.stats
     const bStats = b.stats
-    
+
     switch (sortBy) {
       case 'paidPayout': {
         const aPaid = aStats?.payouts.paidAmount ?? 0
@@ -195,9 +195,10 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
               currentMonth: (t as any)('landing.propfirms.timeframe.currentMonth'),
               last3Months: (t as any)('landing.propfirms.timeframe.last3Months'),
               last6Months: (t as any)('landing.propfirms.timeframe.last6Months'),
-              '2024': (t as any)('landing.propfirms.timeframe.2024'),
-              '2025': (t as any)('landing.propfirms.timeframe.2025'),
-              allTime: (t as any)('landing.propfirms.timeframe.allTime'),
+              '2024': t('landing.propfirms.timeframe.2024'),
+              '2025': t('landing.propfirms.timeframe.2025'),
+              '2026': t('landing.propfirms.timeframe.2026'),
+              allTime: t('landing.propfirms.timeframe.allTime'),
             }}
           />
           <SortControls
