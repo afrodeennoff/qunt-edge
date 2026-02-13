@@ -64,7 +64,7 @@ interface RithmicSyncState {
 
 export const useRithmicSyncStore = create<RithmicSyncState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Sync settings
       syncInterval: 60, // Default to 60 minutes
       setSyncInterval: (interval) => set({ syncInterval: interval }),

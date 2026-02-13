@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> Last updated: 2026-02-12 (dashboard navbar visibility + render-safety + widget modernization + widget deprecation cleanup)
+> Last updated: 2026-02-14 (dashboard edit controls + PnL styling + Prisma TLS hardening + Home V2)
 
 ## Purpose
 This document provides operating instructions for engineering agents working on Qunt Edge.
@@ -511,9 +511,16 @@ Each row: `commit_id | date | summary | key_file_ids`.
 3. `ec22828` | `2026-02-12` | Clean dashboard UI alignment | `app/[locale]/dashboard/components/chat/chat.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/statistics/cumulative-pnl-card.tsx`
 4. `a72038b` | `2026-02-12` | Redesign trader profile and add avatar in hero | `app/[locale]/dashboard/trader-profile/page.tsx`
 5. `89905c6` | `2026-02-12` | Fix login issue on main | `server/auth.ts`
-6. `015b855` | `2026-02-12` | Finalize unified dashboard theme and trader profile components | `app/[locale]/(landing)/components/footer.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `app/globals.css`
-7. `86d02d3` | `2026-02-12` | Replace timeframe buttons with segmented control | `app/[locale]/dashboard/components/chart-the-future-panel.tsx`, `app/[locale]/dashboard/components/top-nav.tsx`, `components/ui/segmented-control.tsx`
-8. `2be2147` | `2026-02-12` | Check thread changes applied | `LAST_2_DAYS_CHANGES.txt`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/charts/tradingview-chart.tsx`
+6. `6ee3386` | `2026-02-14` | Fix missing dashboard edit options (Restore Defaults, Delete All) | `app/[locale]/dashboard/components/navbar.tsx`
+7. `d7cb475` | `2026-02-14` | Restore dashboard edit nav, refine PnL colors, and harden Prisma TLS | `app/[locale]/dashboard/layout.tsx`, `lib/prisma.ts`
+8. `f32eab0` | `2026-02-13` | Polish home V2 hierarchy, pricing copy, and CTA conversion | `app/[locale]/(home)/components/Hero.tsx`
+9. `24117e7` | `2026-02-13` | Redesign home page V2 with shadcn sections and pricing | `app/[locale]/(home)/page.tsx`
+10. `fb37e0f` | `2026-02-13` | fix auth callback redirect error handling | `app/api/auth/callback/route.ts`
+11. `e28fe1c` | `2026-02-13` | Implement Supabase storage scaling | `server/storage.ts`
+12. `f0ba180` | `2026-02-13` | Fix i18n tooltip typing in commissions chart for Vercel build | `app/[locale]/dashboard/components/charts/commissions-pnl.tsx`
+13. `015b855` | `2026-02-12` | Finalize unified dashboard theme and trader profile components | `app/[locale]/(landing)/components/footer.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `app/globals.css`
+14. `86d02d3` | `2026-02-12` | Replace timeframe buttons with segmented control | `app/[locale]/dashboard/components/chart-the-future-panel.tsx`, `app/[locale]/dashboard/components/top-nav.tsx`, `components/ui/segmented-control.tsx`
+15. `2be2147` | `2026-02-12` | Check thread changes applied | `LAST_2_DAYS_CHANGES.txt`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/charts/tradingview-chart.tsx`
 9. `b44459e` | `2026-02-12` | Avoid import-time Supabase admin client crashes | `app/[locale]/admin/actions/stats.ts`, `app/[locale]/admin/actions/weekly-recap.ts`, `app/[locale]/teams/actions/stats.ts`
 10. `9b83e0a` | `2026-02-12` | Update combined documentation | `COMBINED_DOCUMENTATION.md`
 11. `ff5eb2b` | `2026-02-12` | Summarize trader profile updates | `app/[locale]/teams/actions/stats.ts`

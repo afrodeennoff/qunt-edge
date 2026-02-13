@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList, CommandSeparator } from "@/components/ui/command"
 import { useData } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { useMediaQuery } from "@/hooks/use-media-query"
@@ -28,7 +28,7 @@ interface FilterCommandMenuProps {
 
 export function FilterCommandMenu({ className, variant = "navbar" }: FilterCommandMenuProps) {
   const t = useI18n()
-  const { isMobile, dateRange, setDateRange, setWeekdayFilter } = useData()
+  const { isMobile, setDateRange, setWeekdayFilter } = useData()
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [inputWidth, setInputWidth] = useState<number | undefined>(undefined)
@@ -259,14 +259,19 @@ export function FilterCommandMenu({ className, variant = "navbar" }: FilterComma
     <Button
       variant="outline"
       className={cn(
-        "justify-start text-left font-normal",
+        variant === "navbar"
+          ? "h-9 w-9 rounded-xl p-0 justify-center"
+          : "justify-start text-left font-normal",
         variant === "toolbar" && "h-10 rounded-full",
         className
       )}
       onClick={() => setOpen(true)}
+      title={t('filters.title')}
     >
-      <Search className="h-4 w-4 mr-2" />
-      <span className="text-muted-foreground">{t('filters.commandMenu.placeholder')}</span>
+      <Search className={cn("h-4 w-4", variant !== "navbar" && "mr-2")} />
+      {variant !== "navbar" && (
+        <span className="text-muted-foreground">{t('filters.commandMenu.placeholder')}</span>
+      )}
     </Button>
   )
 
@@ -569,4 +574,3 @@ export function FilterCommandMenu({ className, variant = "navbar" }: FilterComma
     </Popover>
   )
 }
-

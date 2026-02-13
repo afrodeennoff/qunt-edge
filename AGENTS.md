@@ -1,3 +1,42 @@
-- 2026-02-13: Restored dashboard to legacy `Navbar` in `app/[locale]/dashboard/layout.tsx` so `Edit Layout` / `Lock Grid` controls are visible again.
-- 2026-02-13: Updated dashboard trade table PnL styling so positive values render green while negative values keep existing muted style, matching requested visual emphasis from marked screenshot.
-- 2026-02-14: Hardened Prisma runtime DB TLS config in `lib/prisma.ts` by adding explicit SSL controls (`PGSSL_ENABLE`, `PGSSL_REJECT_UNAUTHORIZED`) with production defaults to prevent self-signed certificate chain failures on serverless pool connections.
+# 🤖 AI Agent Engineering Log
+
+This file tracks significant architectural changes, engineering insights, and critical fixes to provide context for future AI agents working on this codebase.
+
+## 🛡️ Core Infrastructure & Security
+- **2026-02-14: Prisma TLS Hardening.** 
+  - Added explicit SSL controls (`PGSSL_ENABLE`, `PGSSL_REJECT_UNAUTHORIZED`) in `lib/prisma.ts`.
+  - **Context:** Prevents "self-signed certificate in certificate chain" errors common when connecting to managed DB pools (e.g., Supabase/Neon) from serverless environments.
+- **2026-02-13: Supabase Storage Scaling.**
+  - Updated configuration to support production-level asset management and scaling.
+- **2026-02-13: GLM AI Client.**
+  - Implemented environment-driven AI client selection for GLM integration.
+
+## 🎨 UI/UX & Design System
+- **2026-02-14: Dashboard Navigation Recovery.**
+  - Restored legacy `Navbar` in `app/[locale]/dashboard/layout.tsx`.
+  - **Insight:** The modern sidebar refactor accidentally hid `Edit Layout` and `Lock Grid` controls; reverting to the legacy navbar ensures these tools remain accessible for layout management.
+- **2026-02-12: Monochrome & Glassmorphism Overhaul.**
+  - Shifted away from standard Tailwind colors (emerald/rose for everything) to a premium monochrome aesthetic.
+  - **Standard:** Use `white/5`, `white/10`, `white/20` for surfaces. Text uses `white/90` (primary) and `white/50` (secondary).
+  - See `MONOCHROME_UPDATE_NOTES.md` for full design tokens.
+- **2026-02-13: Home Page V2.**
+  - Full landing page redesign using `shadcn` components for better pricing clarity and conversion hierarchy.
+
+## 🚀 Recent Feature Updates
+- **2026-02-13: Dashboard Empty-State Guard.**
+  - Updated `app/[locale]/dashboard/page.tsx` to default to the `table` tab when no widgets exist in saved layout state.
+  - **Context:** The dashboard route defaults to `widgets`; users with empty widget layouts could see a blank workspace and interpret it as missing data.
+- **2026-02-14: Dashboard Editor Polish.**
+  - Added back missing "Restore Defaults" and "Remove All" buttons in the widget editor navigation (`6ee3386`).
+- **2026-02-13: PnL Visual Logic.**
+  - Updated trade table PnL styling: Positive values now render in emerald for visual emphasis, while negative values maintain the muted monochrome style.
+
+## 🛠️ Build & Type Safety
+- **2026-02-13: Vercel Build Fix.** 
+  - Resolved i18n tooltip typing issues in commissions charts that were causing production build failures.
+- **2026-02-13: Mobile Responsiveness.**
+  - Optimized navbar triggers and filter groups for mobile screens to prevent layout overflow in `app/[locale]/dashboard/components/navbar.tsx`.
+
+## 📌 Maintenance Notes for Agents
+- **i18n:** Always use the `t` function with proper casting (e.g., `t as any`) in widget components to avoid complex translation object type errors until the schema is fully unified.
+- **Tailwind:** This project uses Tailwind CSS v4 features. If you see `@config` or `@plugin` errors in the IDE, they are likely false positives from an older linter.

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { User, Subscription, Tag, DashboardLayout } from "@/prisma/generated/prisma";
-import { Prisma } from "@/prisma/generated/prisma";
+import { User, Subscription, Tag } from "@/prisma/generated/prisma";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Group, Account } from "@/lib/data-types";
 import { Widget } from "@/app/[locale]/dashboard/types/dashboard";

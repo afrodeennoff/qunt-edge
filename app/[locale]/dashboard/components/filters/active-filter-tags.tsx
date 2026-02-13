@@ -73,7 +73,6 @@ export function ActiveFilterTags({ showAccountNumbers }: { showAccountNumbers: b
     
     const container = scrollRef.current
     const badges = container.querySelectorAll('.badge')
-    const containerLeft = container.scrollLeft
     const containerWidth = container.clientWidth
 
     // Find the first badge that's partially or fully out of view
@@ -212,7 +211,7 @@ export function ActiveFilterTags({ showAccountNumbers }: { showAccountNumbers: b
       transition={{ duration: 0.2 }}
       className="border-t border-border/40 bg-background/50 overflow-hidden"
     >
-      <div className="px-10 py-2">
+      <div className="px-3 py-2 sm:px-6">
         <div className="relative flex items-center overflow-hidden">
           <div 
             ref={scrollRef}

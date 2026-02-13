@@ -38,7 +38,7 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({
   updateTag: updateTagMock,
   revalidatePath: vi.fn(),
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T) => fn,
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -80,7 +80,7 @@ describe('saveTradesAction', () => {
     const findMany = vi.fn().mockResolvedValue([])
     const createManyAccounts = vi.fn().mockResolvedValue({ count: 1 })
     const createManyTrades = vi.fn().mockResolvedValue({ count: 1 })
-    prismaMock.$transaction.mockImplementation(async (cb: any) =>
+    prismaMock.$transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) =>
       cb({
         account: { findMany, createMany: createManyAccounts },
         trade: { createMany: createManyTrades },
@@ -99,7 +99,7 @@ describe('saveTradesAction', () => {
     const findMany = vi.fn().mockResolvedValue([])
     const createManyAccounts = vi.fn().mockResolvedValue({ count: 1 })
     const createManyTrades = vi.fn().mockResolvedValue({ count: 1 })
-    prismaMock.$transaction.mockImplementation(async (cb: any) =>
+    prismaMock.$transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) =>
       cb({
         account: { findMany, createMany: createManyAccounts },
         trade: { createMany: createManyTrades },
@@ -114,7 +114,7 @@ describe('saveTradesAction', () => {
   })
 
   it('returns DUPLICATE_TRADES when createMany inserts nothing', async () => {
-    prismaMock.$transaction.mockImplementation(async (cb: any) =>
+    prismaMock.$transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) =>
       cb({
         account: { findMany: vi.fn().mockResolvedValue([]), createMany: vi.fn().mockResolvedValue({ count: 1 }) },
         trade: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },

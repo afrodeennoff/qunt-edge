@@ -30,46 +30,46 @@ const defaultConfig: EquityChartConfig = {
 
 export const useEquityChartStore = create<EquityChartStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       config: defaultConfig,
 
-      setShowIndividual: (showIndividual) => 
-        set((state) => ({ 
-          config: { ...state.config, showIndividual } 
+      setShowIndividual: (showIndividual) =>
+        set((state) => ({
+          config: { ...state.config, showIndividual }
         })),
-      
-      setShowDailyPnL: (showDailyPnL) => 
-        set((state) => ({ 
-          config: { ...state.config, showDailyPnL } 
+
+      setShowDailyPnL: (showDailyPnL) =>
+        set((state) => ({
+          config: { ...state.config, showDailyPnL }
         })),
-      
-      setMaxAccountsDisplayed: (maxAccounts) => 
-        set((state) => ({ 
-          config: { ...state.config, maxAccountsDisplayed: maxAccounts } 
+
+      setMaxAccountsDisplayed: (maxAccounts) =>
+        set((state) => ({
+          config: { ...state.config, maxAccountsDisplayed: maxAccounts }
         })),
-      
-      setSelectedAccountsToDisplay: (accounts) => 
-        set((state) => ({ 
-          config: { ...state.config, selectedAccountsToDisplay: accounts } 
+
+      setSelectedAccountsToDisplay: (accounts) =>
+        set((state) => ({
+          config: { ...state.config, selectedAccountsToDisplay: accounts }
         })),
-      
-      toggleAccountSelection: (accountNumber) => 
+
+      toggleAccountSelection: (accountNumber) =>
         set((state) => {
           const current = state.config.selectedAccountsToDisplay
           const isSelected = current.includes(accountNumber)
-          const newSelection = isSelected 
+          const newSelection = isSelected
             ? current.filter(acc => acc !== accountNumber)
             : [...current, accountNumber]
-          return { 
-            config: { ...state.config, selectedAccountsToDisplay: newSelection } 
+          return {
+            config: { ...state.config, selectedAccountsToDisplay: newSelection }
           }
         }),
-      
-      setConfig: (newConfig) => 
-        set((state) => ({ 
-          config: { ...state.config, ...newConfig } 
+
+      setConfig: (newConfig) =>
+        set((state) => ({
+          config: { ...state.config, ...newConfig }
         })),
-      
+
       resetConfig: () => set({ config: defaultConfig }),
     }),
     {

@@ -125,6 +125,7 @@ interface DataContextType {
   setSharedParams: React.Dispatch<React.SetStateAction<SharedParams | null>>;
 
   // Formatted trades and filters
+  trades: Trade[];
   formattedTrades: Trade[];
   instruments: string[];
   setInstruments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -438,7 +439,12 @@ export const DataProvider: React.FC<{
             }
           }).catch(console.error);
         } else {
+          if (!userId) return;
+          console.log("[DataProvider] Refreshing trades for userId:", userId);
+
           const safeTrades = await fetchAllTrades(userId, false);
+          console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
+
           const tradesToUse = safeTrades.length > 0 ? safeTrades : (process.env.NODE_ENV === "development" ? generateMockTrades(userId) : []);
           setTrades(tradesToUse);
           if (tradesToUse.length > 0) {
@@ -470,6 +476,11 @@ export const DataProvider: React.FC<{
       }
 
       const data = await getUserData();
+      console.log("[DataProvider] User data response:", {
+        hasData: !!data,
+        accountsCount: data?.accounts?.length || 0,
+        tagsCount: data?.tags?.length || 0
+      });
 
       if (!data) {
         await signOut();
@@ -1670,6 +1681,7 @@ export const DataProvider: React.FC<{
     setIsFirstConnection,
 
     // Formatted trades and filters
+    trades,
     formattedTrades,
     instruments,
     setInstruments,
