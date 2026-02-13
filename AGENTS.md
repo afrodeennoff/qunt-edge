@@ -32,6 +32,12 @@ This file tracks significant architectural changes, engineering insights, and cr
   - Updated trade table PnL styling: Positive values now render in emerald for visual emphasis, while negative values maintain the muted monochrome style.
 
 ## 🛠️ Build & Type Safety
+- **2026-02-14: Codebase Cleanup and Quality Pass.**
+  - Removed 8+ redundant root files (`COMBINED_DOCUMENTATION.md`, `IMPORT_FIX_SUMMARY.md`, etc.).
+  - Organized documentation by moving essential guides to `/docs`.
+  - Deleted unused UI component `context-menu.tsx`.
+  - Fixed 1300+ lint warnings primarily related to unused variables in Zustand stores.
+  - Enhanced type safety in `trades-store.ts` and test files by reducing `any` usage.
 - **2026-02-13: Vercel Build Fix.** 
   - Resolved i18n tooltip typing issues in commissions charts that were causing production build failures.
 - **2026-02-13: Mobile Responsiveness.**
@@ -40,3 +46,4 @@ This file tracks significant architectural changes, engineering insights, and cr
 ## 📌 Maintenance Notes for Agents
 - **i18n:** Always use the `t` function with proper casting (e.g., `t as any`) in widget components to avoid complex translation object type errors until the schema is fully unified.
 - **Tailwind:** This project uses Tailwind CSS v4 features. If you see `@config` or `@plugin` errors in the IDE, they are likely false positives from an older linter.
+- **Zustand stores:** When creating or updating stores, avoid unused parameters (like `get` in the create callback) and use `unknown` or specific types instead of `any` for persisted state migrations.

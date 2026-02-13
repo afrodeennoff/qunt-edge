@@ -1,4 +1,4 @@
-import { DashboardHeader } from "./components/dashboard-header";
+import Navbar from "./components/navbar";
 import { createClient } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { DashboardProvider } from "./dashboard-context";
@@ -39,7 +39,7 @@ export default async function DashboardLayout({
             </div>
 
             <div className="relative z-10 flex flex-col min-h-screen">
-              <DashboardHeader />
+              <Navbar />
               <main className="flex-1 overflow-auto">
                 {children}
               </main>
