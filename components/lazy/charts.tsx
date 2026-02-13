@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { ComponentType } from 'react'
+import { ChartSurface } from '@/components/ui/chart-surface'
 
 export const EquityChart = dynamic(
   () => import('@/app/[locale]/dashboard/components/charts/equity-chart'),
@@ -53,8 +54,6 @@ export const PnLBySide = dynamic(
 
 function ChartSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded" />
-    </div>
+    <ChartSurface state="loading" className="h-[300px]" />
   )
 }

@@ -2,7 +2,14 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription, CardProps } from "./card"
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardProps,
+} from "./card"
 import { Button } from "./button"
 import { LucideIcon } from "lucide-react"
 
@@ -41,7 +48,6 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
         iconInner: "h-4 w-4",
         title: "text-base",
         description: "text-xs",
-        padding: "p-4",
         button: "text-xs h-8 px-3"
       },
       md: {
@@ -49,7 +55,6 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
         iconInner: "h-6 w-6",
         title: "text-lg",
         description: "text-sm",
-        padding: "p-6",
         button: "text-sm h-9 px-4"
       },
       lg: {
@@ -57,7 +62,6 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
         iconInner: "h-8 w-8",
         title: "text-xl",
         description: "text-base",
-        padding: "p-8",
         button: "text-base h-10 px-6"
       }
     }
@@ -74,10 +78,10 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
     return (
       <Card
         ref={ref}
-        className={cn(currentSize.padding, className)}
+        className={className}
         {...props}
       >
-        <CardHeader className={cn(currentSize.padding, "space-y-3")}>
+        <CardHeader size={size} className="space-y-3">
           <div className="flex items-start gap-4">
             {Icon && (
               <div className={cn(
@@ -102,7 +106,7 @@ const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
         </CardHeader>
 
         {(primaryAction || secondaryAction) && (
-          <CardFooter className={cn("pt-0 gap-2", currentSize.padding)}>
+          <CardFooter size={size} className="gap-2">
             {secondaryAction && (
               <Button
                 variant="outline"

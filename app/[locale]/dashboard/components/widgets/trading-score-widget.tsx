@@ -2,11 +2,11 @@
 
 import React from "react"
 import { useData } from "@/context/data-provider"
-import { calculateTradingScore, deriveScoreMetricsFromTrades, getScoreLabel, getScoreColor } from "@/lib/score-calculator"
-import { Info, Trophy } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { calculateTradingScore, deriveScoreMetricsFromTrades, getScoreLabel } from "@/lib/score-calculator"
+import { Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
+import { WidgetShell } from "@/components/ui/widget-shell"
 
 export default function TradingScoreWidget({ size }: { size?: string }) {
     const { formattedTrades: trades } = useData()
@@ -18,30 +18,18 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
 
     const score = calculateTradingScore(metrics)
     const label = getScoreLabel(score)
-    const colorClass = getScoreColor(score)
 
     const normalizedLabel = label.toLowerCase()
+    const hasData = metrics.totalTrades > 0
 
     return (
-        <div className="h-full flex flex-col bg-transparent">
-            <div className="py-3 px-4 flex-none border-b border-white/[0.03]">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold tracking-tight text-white">{(t as any)('widgets.tradingScore.title')}</span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Info className="h-3.5 w-3.5 text-white/50" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="text-xs">{(t as any)('widgets.tradingScore.tooltip')}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                    <Trophy className="h-4 w-4 text-white" />
-                </div>
-            </div>
+        <WidgetShell
+            title={(t as any)('widgets.tradingScore.title')}
+            icon={<Trophy className="h-4 w-4" />}
+            info={<p className="text-xs">{(t as any)('widgets.tradingScore.tooltip')}</p>}
+            state={hasData ? "ready" : "empty"}
+            emptyMessage={(t as any)("widgets.emptyState") ?? "No trades yet."}
+        >
             <div className="flex-1 flex flex-col items-center justify-center p-4">
                 <div className="relative flex items-center justify-center">
                     <div className="text-4xl font-semibold tracking-tight tabular-nums mb-1">
@@ -71,6 +59,6 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </WidgetShell>
     )
 }

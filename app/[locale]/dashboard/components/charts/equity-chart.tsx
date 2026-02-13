@@ -24,6 +24,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartSurface } from "@/components/ui/chart-surface";
 
 import {
   ChartConfig,
@@ -899,7 +900,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [isSharedView, showIndividual, chartData]);
 
   return (
-    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+    <ChartSurface>
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
@@ -1058,6 +1059,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
             )}
         </div>
       </div>
-    </div>
+    </ChartSurface>
   );
 }

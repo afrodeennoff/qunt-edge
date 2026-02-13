@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
@@ -132,7 +133,7 @@ export default function PnLBySideChart({
   };
 
   return (
-    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+    <ChartSurface>
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
@@ -261,6 +262,6 @@ export default function PnLBySideChart({
           )}
         </div>
       </div>
-    </div>
+    </ChartSurface>
   );
 }

@@ -4,10 +4,10 @@ import React from "react"
 
 import { useData } from "@/context/data-provider"
 import { calculateAdvancedMetrics } from "@/lib/advanced-metrics"
-import { Info, ShieldAlert } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ShieldAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useI18n, useCurrentLocale } from "@/locales/client"
+import { WidgetShell } from "@/components/ui/widget-shell"
 
 export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' | 'small' | 'medium' | 'large' | 'small-long' | 'extra-large' }) {
     const { formattedTrades: trades } = useData()
@@ -15,6 +15,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
     const locale = useCurrentLocale()
 
     const { kellyHalf, kellyFull, sharpeRatio, sortinoRatio, calmarRatio, maxDrawdown } = React.useMemo(() => calculateAdvancedMetrics(trades as any), [trades])
+    const hasData = (trades?.length ?? 0) > 0
 
     // Format currency helper
     const formatCurrency = (value: number) => {
@@ -28,45 +29,14 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
     }
 
     return (
-        <div className="h-full flex flex-col bg-transparent">
-            <div
-                className={cn(
-                    "flex-none border-b border-white/10",
-                    size === 'tiny'
-                        ? "py-1 px-2"
-                        : (size === 'small' || size === 'small-long')
-                            ? "py-2 px-3"
-                            : "py-3 px-4"
-                )}
-            >
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span
-                            className={cn(
-                                "line-clamp-1 font-bold tracking-tight text-white",
-                                size === 'tiny'
-                                    ? "text-xs"
-                                    : (size === 'small' || size === 'small-long')
-                                        ? "text-sm"
-                                        : "text-base"
-                            )}
-                        >
-                            {(t as any)('widgets.riskMetrics.title')}
-                        </span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Info className="h-3.5 w-3.5 text-white/50" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="text-xs">{(t as any)('widgets.riskMetrics.tooltip')}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                    <ShieldAlert className="h-4 w-4 text-white/50" />
-                </div>
-            </div>
+        <WidgetShell
+            title={(t as any)('widgets.riskMetrics.title')}
+            icon={<ShieldAlert className="h-4 w-4" />}
+            info={<p className="text-xs">{(t as any)('widgets.riskMetrics.tooltip')}</p>}
+            state={hasData ? "ready" : "empty"}
+            emptyMessage={(t as any)("widgets.emptyState") ?? "No trades yet."}
+            contentClassName="p-0"
+        >
             <div className="flex-1 p-0 overflow-hidden">
                 <div className="grid h-full grid-cols-2">
                     {/* Return Risk Ratios */}
@@ -143,6 +113,6 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                     </div>
                 </div>
             </div>
-        </div>
+        </WidgetShell>
     )
 }

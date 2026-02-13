@@ -35,22 +35,19 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
         icon: "h-4 w-4",
         value: "text-lg",
         title: "text-xs",
-        trend: "text-xs",
-        padding: "p-4"
+        trend: "text-xs"
       },
       md: {
         icon: "h-5 w-5",
         value: "text-2xl",
         title: "text-sm",
-        trend: "text-sm",
-        padding: "p-6"
+        trend: "text-sm"
       },
       lg: {
         icon: "h-6 w-6",
         value: "text-3xl",
         title: "text-base",
-        trend: "text-base",
-        padding: "p-8"
+        trend: "text-base"
       }
     }
 
@@ -61,12 +58,12 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
         ref={ref}
         hover={!!onClick}
         clickable={!!onClick}
-        className={cn("group", currentSize.padding, className)}
+        className={cn("group", className)}
         onClick={onClick}
         aria-label={title}
         {...props}
       >
-        <CardContent className="space-y-3">
+        <CardContent size={size} className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {Icon && (

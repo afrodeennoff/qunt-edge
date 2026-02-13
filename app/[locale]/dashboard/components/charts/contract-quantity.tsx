@@ -18,6 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
@@ -113,7 +114,7 @@ export default function ContractQuantityChart({
   };
 
   return (
-    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+    <ChartSurface>
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
@@ -229,6 +230,6 @@ export default function ContractQuantityChart({
           )}
         </div>
       </div>
-    </div>
+    </ChartSurface>
   );
 }

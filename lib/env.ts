@@ -5,6 +5,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
+  NEXT_PUBLIC_UI_V2_ENABLED: z.string().optional(),
   CRON_SECRET: z.string().min(1).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
   AI_BASE_URL: z.string().url().optional(),

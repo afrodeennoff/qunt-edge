@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import { Geist, IBM_Plex_Mono, Inter } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
+import { getUiVariant } from "@/lib/ui-v2";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -125,11 +126,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const isProduction = process.env.NODE_ENV === "production";
+  const uiVariant = getUiVariant();
 
   return (
     <html
       lang="en"
       className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} bg-background`}
+      data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning
       style={{ ["--theme-intensity" as string]: "100%" }}
@@ -201,7 +204,10 @@ export default function RootLayout({
         />
 
       </head>
-      <body className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}>
+      <body
+        className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}
+        data-ui-variant={uiVariant}
+      >
         <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}

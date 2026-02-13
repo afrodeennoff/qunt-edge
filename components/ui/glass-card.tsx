@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 
 export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "strong" | "subtle";
@@ -11,17 +12,17 @@ export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ className, variant = "default", hover = false, size = "md", clickable = false, ...props }, ref) => {
     return (
-      <div
+      <Card
         ref={ref}
         className={cn(
-          "rounded-xl border transition-all duration-200",
+          "rounded-xl transition-all duration-200",
           {
-            "bg-glass backdrop-blur-glass shadow-glass": variant === "default",
-            "bg-glass-strong backdrop-blur-glass-strong shadow-glass": variant === "strong",
-            "bg-glass-subtle backdrop-blur-glass shadow-sm": variant === "subtle",
+            "border-border/70 bg-white/5 backdrop-blur-md shadow-sm": variant === "default",
+            "border-border bg-white/10 backdrop-blur-xl shadow-md": variant === "strong",
+            "border-border/60 bg-white/3 backdrop-blur-sm shadow-none": variant === "subtle",
           },
           {
-            "hover:bg-glass-strong hover:border-border-strong hover:shadow-lg hover:-translate-y-0.5": hover,
+            "hover:bg-white/10 hover:shadow-md hover:-translate-y-0.5": hover,
             "cursor-pointer active:scale-[0.98]": clickable,
           },
           {

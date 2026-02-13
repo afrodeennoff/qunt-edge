@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Label } from
 import type { Props } from 'recharts/types/component/Label'
 import type { PolarViewBox } from 'recharts/types/util/types'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
@@ -102,7 +103,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
   };
 
   return (
-    <div data-chart-surface="modern" className="h-full flex flex-col bg-transparent">
+    <ChartSurface>
       <div
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
@@ -216,6 +217,6 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           )}
         </div>
       </div>
-    </div>
+    </ChartSurface>
   )
 }

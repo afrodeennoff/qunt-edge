@@ -41,17 +41,14 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
       sm: {
         title: "text-sm",
         description: "text-xs",
-        padding: "p-4"
       },
       md: {
         title: "text-base",
         description: "text-sm",
-        padding: "p-6"
       },
       lg: {
         title: "text-lg",
         description: "text-base",
-        padding: "p-8"
       }
     }
 
@@ -62,7 +59,7 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
       ref={ref}
       hover={!!onClick}
       clickable={!!onClick}
-      className={cn("overflow-hidden group", currentSize.padding, className)}
+      className={cn("group overflow-hidden", className)}
       onClick={onClick}
       aria-label={title}
       {...props}
@@ -84,7 +81,7 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
         )}
       </div>
 
-        <CardHeader className={currentSize.padding}>
+        <CardHeader size={size}>
           <div className="space-y-1">
             <CardTitle className={cn(currentSize.title, "line-clamp-2")}>
               {title}
@@ -98,7 +95,7 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
         </CardHeader>
 
         {description && (
-          <CardContent className={cn("pt-0", currentSize.padding)}>
+          <CardContent size={size}>
             <p className={cn(currentSize.description, "text-muted-foreground line-clamp-3")}>
               {description}
             </p>
@@ -106,7 +103,7 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
         )}
 
         {actions && (
-          <CardFooter className={cn("pt-0", currentSize.padding)}>
+          <CardFooter size={size}>
             <div className="flex items-center gap-2 w-full">
               {actions}
             </div>

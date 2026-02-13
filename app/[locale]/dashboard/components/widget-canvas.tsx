@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Popover,
   PopoverContent,
@@ -25,6 +24,8 @@ import { defaultLayouts } from "@/lib/default-layouts"
 import { Prisma, DashboardLayout } from "@/prisma/generated/prisma"
 import { useDashboard } from '../dashboard-context'
 import { motion, useReducedMotion } from 'framer-motion'
+import { WidgetShell } from "@/components/ui/widget-shell"
+import { isUiV2Enabled } from "@/lib/ui-v2"
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
   return {
@@ -124,19 +125,17 @@ const generateResponsiveLayout = (widgets: Widget[]) => {
 function DeprecatedWidget({ onRemove }: { onRemove: () => void }) {
   const t = useI18n()
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>{t('widgets.deprecated.title')}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center space-y-4">
-        <p className="text-muted-foreground text-center">
-          {t('widgets.deprecated.description')}
-        </p>
-        <Button variant="destructive" onClick={onRemove}>
+    <WidgetShell
+      title={t('widgets.deprecated.title')}
+      description={t('widgets.deprecated.description')}
+      state="error"
+      errorMessage={t('widgets.deprecated.description')}
+      actions={(
+        <Button variant="destructive" size="sm" onClick={onRemove}>
           {t('widgets.deprecated.remove')}
         </Button>
-      </CardContent>
-    </Card>
+      )}
+    />
   )
 }
 
@@ -150,6 +149,7 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
 }) {
   const t = useI18n()
   const { isMobile } = useData()
+  const uiV2Enabled = isUiV2Enabled()
   const widgetRef = useRef<HTMLDivElement>(null)
   const [isSizePopoverOpen, setIsSizePopoverOpen] = useState(false)
 
@@ -185,7 +185,11 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
     >
       <div
         data-widget-shell="true"
-        className={cn("h-full min-h-0 w-full", isCustomizing && "blur-[2px]")}
+        className={cn(
+          "h-full min-h-0 w-full",
+          uiV2Enabled && "rounded-xl border border-border/60 bg-card/90 backdrop-blur-sm",
+          isCustomizing && "blur-[2px]"
+        )}
       >
         {children}
       </div>
