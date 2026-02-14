@@ -88,6 +88,17 @@ function formatCapitalCompact(value: number) {
   return `${sign}${abs.toFixed(0)}`
 }
 
+function formatPnlCell(value: number) {
+  if (!Number.isFinite(value)) return "0"
+  // Compact but always signed for quick scanning inside day cells.
+  if (value === 0) return "0"
+  const sign = value > 0 ? "+" : "-"
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}m`
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(abs >= 100_000 ? 0 : 1)}k`
+  return `${sign}${abs.toFixed(0)}`
+}
+
 function getTradeDay(dateValue: string | Date) {
   const date = new Date(dateValue)
   if (Number.isNaN(date.getTime())) return "Invalid date"
@@ -371,10 +382,13 @@ export default function TraderProfilePage() {
   }, [latestTradeDay, selectedCalendarDay, tradePnlByDay])
 
   useEffect(() => {
-    if (!selectedCalendarDay && latestTradeDay) {
+    // Keep the selection stable and in-range when the date filter changes.
+    const hasSelection = Boolean(selectedCalendarDay)
+    const selectionInRange = selectedCalendarDay ? isDateWithinRange(selectedCalendarDay, activeDateRange) : false
+    if ((!hasSelection || !selectionInRange) && latestTradeDay) {
       setSelectedCalendarDay(latestTradeDay)
     }
-  }, [latestTradeDay, selectedCalendarDay])
+  }, [activeDateRange, latestTradeDay, selectedCalendarDay])
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-5">
@@ -487,27 +501,83 @@ export default function TraderProfilePage() {
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-fg-primary">PnL Calendar</p>
-              <p className="text-xs text-fg-muted">{tradeCalendarDays.length} active days</p>
+              <div className="flex items-center gap-3 text-xs text-fg-muted">
+                <span>{tradeCalendarDays.length} active days</span>
+                {activeDateRange?.from ? (
+                  <span className="hidden sm:inline">
+                    {format(activeDateRange.from, "MMM d")}{" "}
+                    {activeDateRange?.to ? `- ${format(activeDateRange.to, "MMM d")}` : ""}
+                  </span>
+                ) : null}
+              </div>
             </div>
             <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2">
               <Calendar
                 mode="single"
                 selected={selectedCalendarDay ?? latestTradeDay}
                 onSelect={setSelectedCalendarDay}
-                defaultMonth={latestTradeDay}
+                defaultMonth={selectedCalendarDay ?? latestTradeDay}
                 modifiers={{
                   positive: positivePnlDays,
                   negative: negativePnlDays,
                 }}
                 modifiersClassNames={{
-                  positive: "bg-emerald-400/25 text-emerald-100 font-semibold",
-                  negative: "bg-rose-400/25 text-rose-100 font-semibold",
+                  positive: "bg-emerald-400/20 text-emerald-100",
+                  negative: "bg-rose-400/20 text-rose-100",
                 }}
                 className="w-full p-0"
+                classNames={{
+                  months: "flex flex-col gap-2",
+                  month: "space-y-2",
+                  weekday: "w-10 text-center text-[0.75rem] font-medium text-fg-muted",
+                  day: "relative h-10 w-10 overflow-hidden rounded-md p-0 text-center align-middle",
+                  day_button:
+                    "h-10 w-10 rounded-md p-0 font-normal text-fg-primary hover:bg-white/10 aria-selected:bg-white/15 aria-selected:text-fg-primary",
+                }}
+                components={{
+                  DayContent: ({ date, displayMonth }) => {
+                    if (date.getMonth() !== displayMonth.getMonth()) {
+                      return <span className="text-[11px] text-fg-muted">{format(date, "d")}</span>
+                    }
+                    const key = date.toISOString().slice(0, 10)
+                    const pnl = tradePnlByDay.get(key) ?? 0
+                    const hasTrade = tradePnlByDay.has(key)
+                    const tint =
+                      pnl > 0 ? "text-emerald-200" : pnl < 0 ? "text-rose-200" : hasTrade ? "text-fg-primary" : "text-fg-muted"
+
+                    return (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-0.5">
+                        <span className="text-[11px] leading-none">{format(date, "d")}</span>
+                        <span className={`text-[9px] font-semibold leading-none ${tint}`}>
+                          {hasTrade ? formatPnlCell(pnl) : ""}
+                        </span>
+                      </div>
+                    )
+                  },
+                }}
               />
+              <div className="mt-2 flex flex-wrap items-center gap-2 px-1 text-[11px] text-fg-muted">
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400/50" />
+                  Profit
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-rose-400/50" />
+                  Loss
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-white/20" />
+                  No trades
+                </span>
+              </div>
             </div>
             <div className="mt-2 flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2">
-              <p className="text-xs text-fg-muted">Selected Day PnL</p>
+              <div className="min-w-0">
+                <p className="text-xs text-fg-muted">Selected Day</p>
+                <p className="truncate text-xs font-semibold text-fg-primary">
+                  {selectedCalendarDay ? format(selectedCalendarDay, "EEE, MMM d") : latestTradeDay ? format(latestTradeDay, "EEE, MMM d") : "—"}
+                </p>
+              </div>
               <p className={`text-sm font-semibold ${selectedPnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
                 {formatSigned(selectedPnl)}
               </p>

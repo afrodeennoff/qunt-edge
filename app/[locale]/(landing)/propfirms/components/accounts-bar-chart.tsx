@@ -10,8 +10,10 @@ import {
   YAxis,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Button } from "@/components/ui/button"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import type { ChartConfig } from "@/components/ui/chart"
+import { cn } from "@/lib/utils"
 
 interface AccountsBarChartProps {
   data: Array<{
@@ -38,27 +40,27 @@ interface AccountsBarChartProps {
 const chartConfig = {
   paidAmount: {
     label: "Paid",
-    color: "hsl(var(--chart-4))",
+    color: "hsl(var(--chart-1) / 0.70)",
   },
   pendingAmount: {
     label: "Pending",
-    color: "hsl(var(--chart-5))",
+    color: "hsl(var(--chart-2) / 0.38)",
   },
   refusedAmount: {
     label: "Refused",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--chart-3) / 0.26)",
   },
   totalAccountValue: {
     label: "Total Account Value",
-    color: "#ef4444",
+    color: "hsl(var(--chart-1))",
   },
   accountsCount: {
     label: "Registered Accounts",
-    color: "#3b82f6",
+    color: "hsl(var(--chart-2))",
   },
   sizedAccountsCount: {
     label: "Sized Accounts",
-    color: "#facc15",
+    color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig
 
@@ -75,37 +77,140 @@ export function AccountsBarChart({
   chartTitle,
   legendLabels,
 }: AccountsBarChartProps) {
+  const [showZeroFirms, setShowZeroFirms] = React.useState(false)
+  // Minimal default: show the "shape" first (value + registered), let users add layers as needed.
+  const [showPayoutBars, setShowPayoutBars] = React.useState(false)
+  const [showAccountValue, setShowAccountValue] = React.useState(true)
+  const [showRegistered, setShowRegistered] = React.useState(true)
+  const [showSized, setShowSized] = React.useState(false)
+
   // Sort by total account value then account count to emphasize firms with the most exposure.
   const sortedData = React.useMemo(
     () => [...data].sort((a, b) => b.totalAccountValue - a.totalAccountValue || b.accountsCount - a.accountsCount),
     [data]
   )
 
+  const visibleData = React.useMemo(() => {
+    const nonZero = sortedData.filter((row) => {
+      const anyMoney = row.totalAccountValue > 0 || row.paidAmount > 0 || row.pendingAmount > 0 || row.refusedAmount > 0
+      const anyCounts = row.accountsCount > 0 || row.sizedAccountsCount > 0
+      return anyMoney || anyCounts
+    })
+
+    const base = showZeroFirms ? sortedData : nonZero
+    // Keep the chart readable; the grid below has the full list anyway.
+    return base.slice(0, 14)
+  }, [showZeroFirms, sortedData])
+
+  const hasAnyCounts = React.useMemo(
+    () => visibleData.some((d) => d.accountsCount > 0 || d.sizedAccountsCount > 0),
+    [visibleData]
+  )
+  const hasAnyMoney = React.useMemo(
+    () => visibleData.some((d) => d.totalAccountValue > 0 || d.paidAmount > 0 || d.pendingAmount > 0 || d.refusedAmount > 0),
+    [visibleData]
+  )
+
   return (
     <Card data-chart-surface="modern">
-      <CardHeader>
-        <CardTitle>{chartTitle}</CardTitle>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <CardTitle>{chartTitle}</CardTitle>
+          <p className="text-xs text-white/50">Minimal view. Add layers if you need more detail.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="mono"
+            size="sm"
+            aria-pressed={showPayoutBars}
+            onClick={() => setShowPayoutBars((v) => !v)}
+            className={cn(
+              "h-7 px-2 text-[11px] tracking-wide",
+              !showPayoutBars && "opacity-55"
+            )}
+          >
+            Payouts
+          </Button>
+          <Button
+            type="button"
+            variant="mono"
+            size="sm"
+            aria-pressed={showAccountValue}
+            onClick={() => setShowAccountValue((v) => !v)}
+            className={cn(
+              "h-7 px-2 text-[11px] tracking-wide",
+              !showAccountValue && "opacity-55"
+            )}
+          >
+            Value
+          </Button>
+          <Button
+            type="button"
+            variant="mono"
+            size="sm"
+            aria-pressed={showRegistered}
+            onClick={() => setShowRegistered((v) => !v)}
+            className={cn(
+              "h-7 px-2 text-[11px] tracking-wide",
+              !showRegistered && "opacity-55"
+            )}
+          >
+            Reg
+          </Button>
+          <Button
+            type="button"
+            variant="mono"
+            size="sm"
+            aria-pressed={showSized}
+            onClick={() => setShowSized((v) => !v)}
+            className={cn(
+              "h-7 px-2 text-[11px] tracking-wide",
+              !showSized && "opacity-55"
+            )}
+          >
+            Sized
+          </Button>
+          <Button
+            type="button"
+            variant="mono"
+            size="sm"
+            aria-pressed={showZeroFirms}
+            onClick={() => setShowZeroFirms((v) => !v)}
+            className={cn(
+              "h-7 px-2 text-[11px] tracking-wide",
+              !showZeroFirms && "opacity-55"
+            )}
+          >
+            {showZeroFirms ? "Zeros: On" : "Zeros: Off"}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[400px] w-full">
+        <ChartContainer config={chartConfig} className="h-[380px] w-full">
           <ComposedChart
-            data={sortedData}
-            margin={{ left: 0, right: 8, top: 8, bottom: 40 }}
+            data={visibleData}
+            margin={{ left: 0, right: 8, top: 10, bottom: 40 }}
           >
             <CartesianGrid
-              strokeDasharray="3 3"
+              vertical={false}
+              strokeDasharray="2 10"
+              opacity={0.32}
               className="stroke-muted"
             />
             <XAxis
               dataKey="propfirmName"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
-              angle={-45}
+              tickMargin={10}
+              angle={-35}
               textAnchor="end"
-              height={100}
+              height={86}
+              minTickGap={14}
+              interval="preserveStartEnd"
+              tickFormatter={(value: string) => (value.length > 12 ? `${value.slice(0, 12)}…` : value)}
               tick={{
-                fontSize: 12,
+                fontSize: 11,
                 fill: "currentColor",
               }}
             />
@@ -114,9 +219,20 @@ export function AccountsBarChart({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              width={72}
+              width={66}
+              hide={!hasAnyMoney}
+              allowDecimals={false}
+              domain={[
+                0,
+                (dataMax: number) => {
+                  if (!Number.isFinite(dataMax) || dataMax <= 0) return 1
+                  // Round up to a nicer boundary so the chart doesn't feel cramped.
+                  const pow = Math.pow(10, Math.max(0, String(Math.floor(dataMax)).length - 2))
+                  return Math.ceil(dataMax / pow) * pow
+                },
+              ]}
               tick={{
-                fontSize: 12,
+                fontSize: 11,
                 fill: "currentColor",
               }}
               tickFormatter={(value) => compactCurrency.format(value)}
@@ -127,9 +243,18 @@ export function AccountsBarChart({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              width={52}
+              width={44}
+              hide={!hasAnyCounts}
+              allowDecimals={false}
+              domain={[
+                0,
+                (dataMax: number) => {
+                  if (!Number.isFinite(dataMax) || dataMax <= 0) return 1
+                  return Math.max(1, Math.ceil(dataMax))
+                },
+              ]}
               tick={{
-                fontSize: 12,
+                fontSize: 11,
                 fill: "currentColor",
               }}
               tickFormatter={(value) => value.toLocaleString()}
@@ -137,6 +262,7 @@ export function AccountsBarChart({
             <ChartTooltip
               content={
                 <ChartTooltipContent
+                  labelFormatter={(label) => <span className="font-semibold text-white">{String(label)}</span>}
                   formatter={(value, name, item) => {
                     const key = String(name)
                     if (key === "totalAccountValue" || key === "paidAmount" || key === "pendingAmount" || key === "refusedAmount") {
@@ -166,59 +292,72 @@ export function AccountsBarChart({
                 />
               }
             />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              yAxisId="amounts"
-              dataKey="refusedAmount"
-              stackId="payouts"
-              fill="var(--color-refusedAmount)"
-              radius={[0, 0, 0, 0]}
-              maxBarSize={48}
-            />
-            <Bar
-              yAxisId="amounts"
-              dataKey="pendingAmount"
-              stackId="payouts"
-              fill="var(--color-pendingAmount)"
-              radius={[0, 0, 0, 0]}
-              maxBarSize={48}
-            />
-            <Bar
-              yAxisId="amounts"
-              dataKey="paidAmount"
-              stackId="payouts"
-              fill="var(--color-paidAmount)"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={48}
-            />
-            <Line
-              yAxisId="amounts"
-              type="monotone"
-              dataKey="totalAccountValue"
-              stroke="var(--color-totalAccountValue)"
-              strokeWidth={3}
-              dot={{ r: 4, strokeWidth: 0, fill: "var(--color-totalAccountValue)" }}
-              activeDot={{ r: 5 }}
-            />
-            <Line
-              yAxisId="counts"
-              type="monotone"
-              dataKey="accountsCount"
-              stroke="var(--color-accountsCount)"
-              strokeWidth={3}
-              dot={{ r: 4, strokeWidth: 0, fill: "var(--color-accountsCount)" }}
-              activeDot={{ r: 5 }}
-            />
-            <Line
-              yAxisId="counts"
-              type="monotone"
-              dataKey="sizedAccountsCount"
-              stroke="var(--color-sizedAccountsCount)"
-              strokeWidth={2.5}
-              strokeDasharray="6 4"
-              dot={{ r: 3.5, strokeWidth: 0, fill: "var(--color-sizedAccountsCount)" }}
-              activeDot={{ r: 4.5 }}
-            />
+            {showPayoutBars ? (
+              <>
+                <Bar
+                  yAxisId="amounts"
+                  dataKey="refusedAmount"
+                  stackId="payouts"
+                  fill="var(--color-refusedAmount)"
+                  radius={[0, 0, 0, 0]}
+                  maxBarSize={44}
+                />
+                <Bar
+                  yAxisId="amounts"
+                  dataKey="pendingAmount"
+                  stackId="payouts"
+                  fill="var(--color-pendingAmount)"
+                  radius={[0, 0, 0, 0]}
+                  maxBarSize={44}
+                />
+                <Bar
+                  yAxisId="amounts"
+                  dataKey="paidAmount"
+                  stackId="payouts"
+                  fill="var(--color-paidAmount)"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={44}
+                />
+              </>
+            ) : null}
+            {showAccountValue ? (
+              <Line
+                yAxisId="amounts"
+                type="monotone"
+                dataKey="totalAccountValue"
+                stroke="var(--color-totalAccountValue)"
+                strokeWidth={3}
+                strokeLinecap="round"
+                dot={false}
+                activeDot={{ r: 5 }}
+              />
+            ) : null}
+            {showRegistered ? (
+              <Line
+                yAxisId="counts"
+                type="monotone"
+                dataKey="accountsCount"
+                stroke="var(--color-accountsCount)"
+                strokeWidth={2.75}
+                strokeDasharray="10 6"
+                strokeLinecap="round"
+                dot={false}
+                activeDot={{ r: 4.5 }}
+              />
+            ) : null}
+            {showSized ? (
+              <Line
+                yAxisId="counts"
+                type="monotone"
+                dataKey="sizedAccountsCount"
+                stroke="var(--color-sizedAccountsCount)"
+                strokeWidth={2.25}
+                strokeDasharray="3 5"
+                strokeLinecap="round"
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            ) : null}
           </ComposedChart>
         </ChartContainer>
       </CardContent>

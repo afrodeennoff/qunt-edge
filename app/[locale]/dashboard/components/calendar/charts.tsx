@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer, Legend, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart, ReferenceLine } from "recharts"
+import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer, XAxis, YAxis, CartesianGrid, ComposedChart, ReferenceLine, Line } from "recharts"
 import { cn } from "@/lib/utils"
 import {
   Card,
@@ -15,13 +15,28 @@ import {
   ChartContainer,
 } from "@/components/ui/chart"
 import { CalendarEntry } from "@/app/[locale]/dashboard/types/calendar"
-import { useTheme } from "@/context/theme-provider"
 import { useI18n, useCurrentLocale } from '@/locales/client'
 
 interface ChartsProps {
   dayData: CalendarEntry | undefined;
   isWeekly?: boolean;
 }
+
+type EquityChartPoint = {
+  time: string;
+  date: string;
+  balance: number;
+  pnl: number;
+  tradeNumber: number;
+}
+
+type DistributionChartPoint = {
+  name: string;
+  value: number;
+  account: string;
+}
+
+  // Recharts tooltip payload typing can vary across versions; keep local tooltip rendering permissive.
 
 const chartConfig = {
   pnl: {
@@ -40,13 +55,11 @@ const formatCurrency = (value: number | undefined | null) => {
 }
 
 export function Charts({ dayData, isWeekly = false }: ChartsProps) {
-  const { effectiveTheme } = useTheme()
-  const isDarkMode = effectiveTheme === 'dark'
   const t = useI18n()
   const locale = useCurrentLocale()
 
   // Calculate data for charts
-  const { accountPnL, equityChartData, chartData, totalPnL, calculateCommonDomain } = React.useMemo(() => {
+  const { equityChartData, chartData, totalPnL, calculateCommonDomain } = React.useMemo(() => {
     if (!dayData?.trades?.length) {
       return {
         accountPnL: {},
@@ -118,21 +131,12 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
     ] as [number, number];
 
     return {
-      accountPnL,
       equityChartData,
       chartData,
       totalPnL,
       calculateCommonDomain
     };
-  }, [dayData?.trades, locale]);
-
-  if (!dayData?.trades?.length) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-muted-foreground">{t('calendar.charts.noTradeData')}</p>
-      </div>
-    )
-  }
+  }, [dayData, locale]);
 
   // Generate colors based on theme
   const colors = [
@@ -144,14 +148,15 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
     'rgba(255,255,255,0.1)'
   ]
 
-  const EquityTooltip = ({ active, payload, label }: any) => {
+  const renderEquityTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload
-      return (
+      const data = payload[0]?.payload as EquityChartPoint | undefined
+      if (!data) return null
+          return (
         <div className="bg-background p-2 border rounded shadow-xs text-xs md:text-sm">
           <p className="font-semibold">{isWeekly ? data.date : data.time}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} className={cn("font-bold", entry.dataKey === 'pnl' ? (entry.value >= 0 ? 'text-white' : 'text-white/40') : 'text-white/60')}>
+            <p key={index} className={cn("font-bold", entry.dataKey === 'pnl' ? (Number(entry.value ?? 0) >= 0 ? 'text-white' : 'text-white/40') : 'text-white/60')}>
               {entry.name}: {formatCurrency(entry.value)}
             </p>
           ))}
@@ -162,11 +167,12 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
       )
     }
     return null
-  }
+  }, [isWeekly, t])
 
-  const DistributionTooltip = ({ active, payload }: any) => {
+  const renderDistributionTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload?.[0]) {
-      const data = payload[0].payload
+      const data = payload[0]?.payload as DistributionChartPoint | undefined
+      if (!data) return null
       const hasValidTotal = Number.isFinite(totalPnL) && totalPnL !== 0
       const percentage = data.account !== 'total'
         ? (hasValidTotal ? ((data.value / totalPnL) * 100).toFixed(1) : "0.0")
@@ -186,6 +192,14 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
       )
     }
     return null
+  }, [t, totalPnL])
+
+  if (!dayData?.trades?.length) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-muted-foreground">{t('calendar.charts.noTradeData')}</p>
+      </div>
+    )
   }
 
   return (
@@ -233,7 +247,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   width={50}
                 />
                 <Tooltip
-                  content={<EquityTooltip />}
+                  content={renderEquityTooltip}
                   wrapperStyle={{ zIndex: 1000 }}
                   cursor={{ strokeWidth: 2 }}
                 />
@@ -321,7 +335,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
-                  content={<DistributionTooltip />}
+                  content={renderDistributionTooltip}
                   wrapperStyle={{ zIndex: 1000 }}
                   cursor={{ fillOpacity: 0.3 }}
                 />

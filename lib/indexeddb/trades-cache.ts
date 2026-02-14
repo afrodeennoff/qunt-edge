@@ -19,12 +19,16 @@ type CacheEntry<T> = {
 }
 
 const isBrowser = typeof window !== "undefined" && typeof indexedDB !== "undefined"
+const OPEN_DB_TIMEOUT_MS = 1200
 
 async function openDb(): Promise<IDBDatabase | null> {
   if (!isBrowser) return null
 
-  return await new Promise((resolve, reject) => {
+  // IndexedDB can hang or error on some mobile browsers (notably iOS Safari private mode).
+  // Cache is strictly optional: if we can't open quickly, fall back to server/network.
+  return await new Promise((resolve) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
+    const timeout = setTimeout(() => resolve(null), OPEN_DB_TIMEOUT_MS)
 
     request.onupgradeneeded = (event) => {
       const db = request.result
@@ -35,8 +39,20 @@ async function openDb(): Promise<IDBDatabase | null> {
       })
     }
 
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
+    request.onblocked = () => {
+      clearTimeout(timeout)
+      resolve(null)
+    }
+
+    request.onsuccess = () => {
+      clearTimeout(timeout)
+      resolve(request.result)
+    }
+
+    request.onerror = () => {
+      clearTimeout(timeout)
+      resolve(null)
+    }
   })
 }
 

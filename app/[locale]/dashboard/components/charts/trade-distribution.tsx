@@ -2,9 +2,6 @@
 
 import * as React from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Label } from "recharts"
-import type { Props } from 'recharts/types/component/Label'
-import type { PolarViewBox } from 'recharts/types/util/types'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
@@ -29,11 +26,13 @@ interface ChartDataPoint {
   count: number;
 }
 
+interface TooltipPayload {
+  payload: ChartDataPoint;
+}
+
 interface TooltipProps {
   active?: boolean;
-  payload?: Array<{
-    payload: ChartDataPoint;
-  }>;
+  payload?: TooltipPayload[];
 }
 
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
@@ -62,7 +61,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
-  const renderColorfulLegendText = (value: string, entry: any) => {
+  const renderColorfulLegendText = (value: string) => {
     return <span className="text-[9px] uppercase font-black tracking-widest text-white/40">{value}</span>;
   }
 
@@ -76,7 +75,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     return { innerRadius: "56%", outerRadius: "84%", cy: "45%", legendPaddingTop: 6 };
   }, [size]);
 
-  const CustomTooltip = ({ active, payload }: TooltipProps) => {
+  const renderTooltip = React.useCallback(({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -104,7 +103,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
       );
     }
     return null;
-  };
+  }, [t]);
 
   return (
     <ChartSurface>
@@ -177,7 +176,8 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                   ))}
                   <Label
                     position="center"
-                    content={({ viewBox }: any) => {
+                    content={(props) => {
+                      const viewBox = props.viewBox as { cx?: number; cy?: number } | undefined;
                       if (!viewBox || !viewBox.cx || !viewBox.cy) return null;
                       const { cx, cy } = viewBox;
                       const centerText = Math.round(chartData[0].value) + "%";
@@ -208,10 +208,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                   }}
                   layout="horizontal"
                 />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: 'transparent' }}
-                />
+                <Tooltip content={renderTooltip} cursor={{ fill: 'transparent' }} />
               </PieChart>
             </ResponsiveContainer>
           ) : (

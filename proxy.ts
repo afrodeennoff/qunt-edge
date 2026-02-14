@@ -90,17 +90,8 @@ async function updateSession(request: NextRequest) {
     }
   }
 
-  // Add user info to headers only if user exists
-  if (user && !error) {
-    response.headers.set("x-user-id", user.id)
-    response.headers.set("x-user-email", user.email || "")
-    response.headers.set("x-auth-status", "authenticated")
-  } else {
-    response.headers.set("x-auth-status", "unauthenticated")
-    if (error) {
-      response.headers.set("x-auth-error", (error as any).message || "Unknown error")
-    }
-  }
+  // Do not expose auth identity or auth error details via response headers.
+  // Downstream code must derive identity from Supabase session server-side.
 
   return { response, user, error }
 }

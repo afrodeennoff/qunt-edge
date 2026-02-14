@@ -5,6 +5,7 @@ import { tradeSchema } from "./schema";
 import { z } from 'zod/v3';
 import { apiError } from "@/lib/api-response";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -22,6 +23,15 @@ const requestSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createRouteClient(req);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user?.id) {
+      return apiError("UNAUTHORIZED", "Authentication required", 401);
+    }
+
     const lengthHeader = req.headers.get("content-length");
     const contentLength = lengthHeader ? Number(lengthHeader) : 0;
     if (Number.isFinite(contentLength) && contentLength > MAX_FORMAT_BODY_BYTES) {

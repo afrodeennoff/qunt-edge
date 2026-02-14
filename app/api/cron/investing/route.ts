@@ -83,7 +83,7 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
         if (dateMatch) {
           const dateStr = dateMatch[1].trim()
           // Parse French date format (e.g., "Mercredi 7 mai 2025")
-          const [day, date, month, year] = dateStr.split(' ')
+          const [, date, month, year] = dateStr.split(' ')
           const monthMap: { [key: string]: string } = {
             'janvier': '01', 'février': '02', 'mars': '03', 'avril': '04',
             'mai': '05', 'juin': '06', 'juillet': '07', 'août': '08',

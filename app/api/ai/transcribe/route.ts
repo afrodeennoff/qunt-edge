@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { createClient } from '@/server/auth'
 import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
+import { createRouteClient } from '@/lib/supabase/route-client'
 
 const transcribeRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: 'ai-transcribe' })
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     apiKey: process.env.OPENAI_API_KEY,
   })
   try {
-    const supabase = await createClient()
+    const supabase = createRouteClient(request)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

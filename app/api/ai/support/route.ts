@@ -2,8 +2,8 @@ import { convertToModelMessages, streamText, UIMessage } from "ai";
 import { NextRequest } from "next/server";
 import { askForEmailForm } from "./tools/ask-for-email-form";
 import { createOpenAI } from "@ai-sdk/openai";
-import { createClient } from "@/server/auth";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -16,7 +16,7 @@ const supportRateLimit = rateLimit({ limit: 12, window: 60_000, identifier: "ai-
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createRouteClient(req)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user?.id) {
       return new Response(

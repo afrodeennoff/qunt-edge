@@ -12,13 +12,11 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -39,18 +37,26 @@ import { formatInTimeZone } from "date-fns-tz";
 import { fr, enUS } from "date-fns/locale";
 import { useUserStore } from "@/store/user-store";
 import { useCurrentLocale } from "@/locales/client";
-import { Button } from "@/components/ui/button";
 
 interface PnLPerContractDailyChartProps {
   size?: WidgetSize;
 }
 
-const chartConfig = {
-  pnl: {
-    label: "Avg Net P/L per Contract",
-    color: "white",
-  },
-} satisfies ChartConfig;
+type DailyInstrumentSummary = {
+  trades: Array<{ pnl?: number | string; commission?: number | string; quantity?: number | string }>;
+  totalPnl: number;
+  totalContracts: number;
+  winCount: number;
+}
+
+type ChartDatum = {
+  date: string;
+  averagePnl: number;
+  totalPnl: number;
+  tradeCount: number;
+  winCount: number;
+  totalContracts: number;
+}
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -118,15 +124,7 @@ export default function PnLPerContractDailyChart({
 
         return acc;
       },
-      {} as Record<
-        string,
-        {
-          trades: any[];
-          totalPnl: number;
-          totalContracts: number;
-          winCount: number;
-        }
-      >,
+      {} as Record<string, DailyInstrumentSummary>,
     );
 
     // Convert to chart data format and sort by date
@@ -145,9 +143,7 @@ export default function PnLPerContractDailyChart({
 
   const maxPnL = Math.max(...chartData.map((d) => d.averagePnl));
   const minPnL = Math.min(...chartData.map((d) => d.averagePnl));
-  const absMax = Math.max(Math.abs(maxPnL), Math.abs(minPnL));
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const renderTooltip = React.useCallback(({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartDatum }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -187,7 +183,7 @@ export default function PnLPerContractDailyChart({
       );
     }
     return null;
-  };
+  }, [t]);
 
   return (
     <ChartSurface>
@@ -298,8 +294,6 @@ export default function PnLPerContractDailyChart({
                 size === "small"
                   ? { left: 0, right: 0, top: 4, bottom: 20 }
                   : { left: 0, right: 0, top: 8, bottom: 24 };
-              const yAxisWidth = 60;
-              const xAxisHeight = size === "small" ? 20 : 24;
               return (
                 <div className={cn("w-full h-full animate-pulse relative")}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -395,7 +389,7 @@ export default function PnLPerContractDailyChart({
                 />
                 <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={renderTooltip}
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                 />
                 <Bar

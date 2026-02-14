@@ -2,7 +2,6 @@
 
 import { DashboardLayout, Prisma } from '@/prisma/generated/prisma'
 import { revalidatePath, updateTag } from 'next/cache'
-import { headers } from 'next/headers'
 import { Widget, Layouts } from '@/app/[locale]/dashboard/types/dashboard'
 import { createClient, getUserId } from './auth'
 import { prisma } from '@/lib/prisma'
@@ -62,7 +61,6 @@ export async function loadDashboardLayoutAction(): Promise<Layouts | null> {
 
 export async function saveDashboardLayoutAction(layouts: DashboardLayout): Promise<SaveLayoutResult> {
   const userId = await getUserId()
-  const headersList = await headers()
 
   if (!userId) {
     return { success: false, error: 'User not authenticated' }
@@ -80,8 +78,7 @@ export async function saveDashboardLayoutAction(layouts: DashboardLayout): Promi
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const emailFromHeader = headersList.get('x-user-email') || ''
-    const resolvedEmail = user?.email || emailFromHeader
+    const resolvedEmail = user?.email || ''
 
     if (!resolvedEmail) {
       logger.error('[saveDashboardLayout] Missing user email for ensureUserInDatabase', { userId })

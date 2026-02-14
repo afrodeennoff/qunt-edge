@@ -47,6 +47,21 @@ export async function GET(request: Request) {
     }
   }
 
+  const safeLocale = (() => {
+    const raw = (locale || '').trim().toLowerCase()
+    if (!raw) return 'en'
+    // Keep permissive: app supports multiple locales.
+    if (!/^[a-z]{2}(-[a-z]{2})?$/.test(raw)) return 'en'
+    return raw
+  })()
+
+  const withLocalePrefix = (path: string) => {
+    const normalized = `/${path.replace(/^\/+/, '')}`
+    if (normalized.startsWith('/api/')) return normalized
+    if (/^\/[a-z]{2}(?:-[a-z]{2})?(?:\/|$)/i.test(normalized)) return normalized
+    return `/${safeLocale}${normalized}`
+  }
+
   const websiteURL = await getWebsiteURL()
 
   if (code) {
@@ -57,12 +72,12 @@ export async function GET(request: Request) {
       if (!error) {
         // Handle password recovery redirect
         if (type === 'recovery') {
-          return NextResponse.redirect(new URL('/dashboard/settings?passwordReset=true', websiteURL))
+          return NextResponse.redirect(new URL(withLocalePrefix('/dashboard/settings?passwordReset=true'), websiteURL))
         }
 
         // Handle identity linking redirect
         if (action === 'link') {
-          return NextResponse.redirect(new URL('/dashboard/settings?linked=true', websiteURL))
+          return NextResponse.redirect(new URL(withLocalePrefix('/dashboard/settings?linked=true'), websiteURL))
         }
 
         // Ensure DB user exists and persist locale before redirecting
@@ -80,9 +95,9 @@ export async function GET(request: Request) {
         }
 
         if (normalizedNext) {
-          return NextResponse.redirect(new URL(normalizedNext, websiteURL))
+          return NextResponse.redirect(new URL(withLocalePrefix(normalizedNext), websiteURL))
         }
-        return NextResponse.redirect(new URL('/dashboard', websiteURL))
+        return NextResponse.redirect(new URL(withLocalePrefix('/dashboard'), websiteURL))
       } else {
         console.log('Auth callback error:', error)
       }
@@ -109,12 +124,12 @@ export async function GET(request: Request) {
       ) {
         console.error('[Auth Callback] Supabase API returned non-JSON response:', error)
         // Redirect to auth page with error message
-        return NextResponse.redirect(new URL('/authentication?error=service_unavailable', websiteURL))
+        return NextResponse.redirect(new URL(withLocalePrefix('/authentication?error=service_unavailable'), websiteURL))
       }
       console.error('Auth callback unexpected error:', error)
     }
   }
 
   // return the user to the authentication page
-  return NextResponse.redirect(new URL('/authentication', websiteURL))
+  return NextResponse.redirect(new URL(withLocalePrefix('/authentication'), websiteURL))
 }

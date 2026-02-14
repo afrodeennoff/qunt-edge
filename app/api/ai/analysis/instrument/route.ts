@@ -2,6 +2,9 @@ import { streamText } from "ai";
 import { NextRequest } from "next/server";
 import { z } from 'zod/v3';
 import { createOpenAI } from "@ai-sdk/openai";
+import { apiError } from "@/lib/api-response";
+import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -17,6 +20,7 @@ import { getPreviousWeekSummary } from "../../chat/tools/get-previous-week-summa
 import { getTradesSummary } from "../../chat/tools/get-trades-summary";
 
 export const maxDuration = 30;
+const instrumentAnalysisRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "ai-analysis-instruments" });
 
 const analysisSchema = z.object({
   username: z.string().optional(),
@@ -76,14 +80,27 @@ You are analyzing performance across different trading instruments. Your primary
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createRouteClient(req);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user?.id) {
+      return apiError("UNAUTHORIZED", "Authentication required", 401);
+    }
+
+    const limit = await instrumentAnalysisRateLimit(req);
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      });
+    }
+
     const { username, locale, timezone } = await req.json();
-    
-    // Add debugging to see what locale is being received
-    console.log('Instrument Analysis API received:', { username, locale, timezone });
-    
-    // Validate the request
+
     const validatedData = analysisSchema.parse({ username, locale, timezone });
-    console.log('Validated data:', validatedData);
 
     const result = streamText({
       model: customOpenai("gpt-4o-mini"),

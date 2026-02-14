@@ -12,9 +12,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -32,12 +30,13 @@ interface PnLBySideChartProps {
   size?: WidgetSize;
 }
 
-const chartConfig = {
-  pnl: {
-    label: "P/L",
-    color: "white",
-  },
-} satisfies ChartConfig;
+type ChartDatum = {
+  side: string;
+  pnl: number;
+  tradeCount: number;
+  winCount: number;
+  isAverage: boolean;
+}
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -97,9 +96,7 @@ export default function PnLBySideChart({
   const maxPnL = Math.max(...chartData.map((d) => d.pnl));
   const minPnL = Math.min(...chartData.map((d) => d.pnl));
   const hasData = chartData.some((d) => d.tradeCount > 0);
-  const absMax = Math.max(Math.abs(maxPnL), Math.abs(minPnL));
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const renderTooltip = React.useCallback(({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartDatum }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -135,7 +132,7 @@ export default function PnLBySideChart({
       );
     }
     return null;
-  };
+  }, [t]);
 
   return (
     <ChartSurface>
@@ -234,7 +231,7 @@ export default function PnLBySideChart({
                 />
                 <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={renderTooltip}
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                 />
                 <Bar

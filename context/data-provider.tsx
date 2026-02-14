@@ -291,6 +291,24 @@ export const DataProvider: React.FC<{
   const [tagFilter, setTagFilter] = useState<TagFilter>({ tags: [] });
   const [isFirstConnection, setIsFirstConnection] = useState(false);
 
+  const withTimeout = useCallback(
+    async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`[DataProvider] Timeout after ${ms}ms: ${label}`));
+        }, ms);
+      });
+
+      try {
+        return await Promise.race([promise, timeoutPromise]);
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
+    },
+    []
+  );
+
   const fetchAllTrades = useCallback(
     async (userId: string | null = null, force: boolean = false): Promise<Trade[]> => {
       const allTrades: Trade[] = [];
@@ -299,7 +317,11 @@ export const DataProvider: React.FC<{
       const pageSize = 500;
 
       while (hasMore) {
-        const response = await getTradesAction(userId, page, pageSize, force && page === 1);
+        const response = await withTimeout(
+          getTradesAction(userId, page, pageSize, force && page === 1),
+          15000,
+          `getTradesAction(page=${page})`
+        );
         const pageTrades = Array.isArray(response?.trades)
           ? normalizeTradesForClient(response.trades as (PrismaTrade | SerializedTrade)[])
           : [];
@@ -311,7 +333,7 @@ export const DataProvider: React.FC<{
 
       return allTrades;
     },
-    []
+    [withTimeout]
   );
 
   // Load data from the server
@@ -322,7 +344,11 @@ export const DataProvider: React.FC<{
       setIsLoading(true);
 
       if (isSharedView) {
-        const sharedData = await loadSharedData(params.slug as string);
+        const sharedData = await withTimeout(
+          loadSharedData(params.slug as string),
+          15000,
+          "loadSharedData"
+        );
         if (!sharedData.error) {
           const processedSharedTrades = sharedData.trades
             .filter(trade => isValid(new Date(trade.entryDate)))
@@ -357,9 +383,16 @@ export const DataProvider: React.FC<{
             const sharedAccounts = normalizeAccountsForClient(
               (sharedData.groups?.flatMap((group) => group.accounts) || []) as AccountInput[]
             );
-            const accountsWithMetrics = await calculateAccountMetricsAction(
-              sharedAccounts
-            );
+            let accountsWithMetrics = sharedAccounts;
+            try {
+              accountsWithMetrics = await withTimeout(
+                calculateAccountMetricsAction(sharedAccounts),
+                15000,
+                "calculateAccountMetricsAction(shared)"
+              );
+            } catch (e) {
+              console.error("[DataProvider] Account metrics timed out for shared view; continuing without metrics", e);
+            }
             setGroups(normalizeGroupsForClient(sharedData.groups || []));
             setAccounts(normalizeAccountsForClient(accountsWithMetrics));
           };
@@ -371,7 +404,11 @@ export const DataProvider: React.FC<{
       }
 
       if (adminView) {
-        const adminTrades = await fetchAllTrades(adminView.userId as string, false);
+        const adminTrades = await withTimeout(
+          fetchAllTrades(adminView.userId as string, false),
+          20000,
+          "fetchAllTrades(admin)"
+        );
         setTrades(adminTrades);
         // RESET ALL OTHER STATES
         setUser(null);
@@ -397,7 +434,7 @@ export const DataProvider: React.FC<{
       // Step 1: Get Supabase user
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await withTimeout(supabase.auth.getUser(), 15000, "supabase.auth.getUser");
 
       if (!user?.id) {
         await signOut();
@@ -410,8 +447,12 @@ export const DataProvider: React.FC<{
       // CRITICAL: Get dashboard layout first
       // But check if the layout is already in the state
       if (!dashboardLayout) {
-        const userId = await getUserId();
-        const dashboardLayoutResponse = await getDashboardLayout(userId);
+        const userId = await withTimeout(getUserId(), 15000, "getUserId(for layout)");
+        const dashboardLayoutResponse = await withTimeout(
+          getDashboardLayout(userId),
+          15000,
+          "getDashboardLayout"
+        );
         if (dashboardLayoutResponse) {
           setDashboardLayout(
             dashboardLayoutResponse as unknown as DashboardLayoutWithWidgets
@@ -423,10 +464,10 @@ export const DataProvider: React.FC<{
       }
 
       // Step 2: Fetch trades (with caching server side)
-      const userId = await getUserId();
+      const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
       if (userId && !isSharedView) {
         // Try local cache first
-        const cachedTrades = await getTradesCache(userId);
+        const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           console.log("[DataProvider] Using local IndexedDB cache for trades");
           setTrades(cachedTrades as Trade[]);
@@ -442,7 +483,11 @@ export const DataProvider: React.FC<{
           if (!userId) return;
           console.log("[DataProvider] Refreshing trades for userId:", userId);
 
-          const safeTrades = await fetchAllTrades(userId, false);
+          const safeTrades = await withTimeout(
+            fetchAllTrades(userId, false),
+            20000,
+            "fetchAllTrades(user)"
+          );
           console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
 
           // Fallback to mock data if no real trades exist, regardless of environment (for demo purposes)
@@ -454,14 +499,14 @@ export const DataProvider: React.FC<{
           }
         }
       } else {
-        const safeTrades = await fetchAllTrades(null, false);
+        const safeTrades = await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
         setTrades(safeTrades);
       }
 
       // Step 3: Fetch user data
       // Check local cache for user data
       if (userId && !isSharedView) {
-        const cachedUserData = await getUserDataCache(userId);
+        const cachedUserData = await withTimeout(getUserDataCache(userId), 2000, "getUserDataCache");
         if (cachedUserData) {
           console.log("[DataProvider] Using local IndexedDB cache for user data");
           // Apply cached data immediately
@@ -477,7 +522,7 @@ export const DataProvider: React.FC<{
         }
       }
 
-      const data = await getUserData();
+      const data = await withTimeout(getUserData(), 20000, "getUserData");
       console.log("[DataProvider] User data response:", {
         hasData: !!data,
         accountsCount: data?.accounts?.length || 0,
@@ -494,9 +539,16 @@ export const DataProvider: React.FC<{
       const normalizedAccounts = normalizeAccountsForClient(
         (data.accounts || []) as AccountInput[]
       );
-      const accountsWithMetrics = await calculateAccountMetricsAction(
-        normalizedAccounts
-      );
+      let accountsWithMetrics = normalizedAccounts;
+      try {
+        accountsWithMetrics = await withTimeout(
+          calculateAccountMetricsAction(normalizedAccounts),
+          20000,
+          "calculateAccountMetricsAction"
+        );
+      } catch (e) {
+        console.error("[DataProvider] Account metrics timed out; continuing without metrics", e);
+      }
       setAccounts(normalizeAccountsForClient(accountsWithMetrics));
 
       setUser(data.userData);
@@ -537,9 +589,8 @@ export const DataProvider: React.FC<{
     params?.slug,
     timezone,
     fetchAllTrades,
-    supabaseUser,
-    isLoading,
     setIsLoading,
+    withTimeout,
   ]);
 
   // Load data on mount and when isSharedView changes

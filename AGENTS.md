@@ -36,6 +36,36 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: True Self-Heal Pass (Build OOM + Local Build Stability)
+- **What changed:** Implemented a real self-heal workflow and fixed the actual failing issue that blocked smooth runs: production build OOM during trace collection.
+- **What I want:** Commands should run reliably in local development without crashing at the end of `next build`, and one command should handle lint auto-fix + validation.
+- **What I don't want:** A fake “self-heal” that only reruns lint while build still crashes due memory pressure or aggressive local trace/worker settings.
+- **How we fixed that:**
+  - Added a reusable `self-heal` command (`npm run self-heal`) via `scripts/self-heal.mjs` that performs:
+    - `npm run lint -- --fix`
+    - `npm run lint` validation
+  - Increased Node heap for build command to reduce memory failures (`--max-old-space-size=12288`).
+  - Hardened Next.js local build memory profile in `next.config.ts`:
+    - made build workers configurable and defaulted local builds to `cpus: 1` (`NEXT_BUILD_CPUS` override supported),
+    - switched standalone output to explicit opt-in (`NEXT_STANDALONE=1`) instead of always-on for local runs,
+    - kept `outputFileTracingRoot` pinned to workspace root for deterministic tracing.
+  - Verified build now completes successfully end-to-end in this environment.
+- **Key Files:** `package.json`, `scripts/self-heal.mjs`, `next.config.ts`, `AGENTS.md`
+- **Verification:** `npm run self-heal` exits 0 (warnings only); `npm run build` now exits 0 and prints full route manifest instead of crashing with heap OOM.
+
+### 2026-02-14: Auto-Fix Self-Heal Command Added
+- **What changed:** Added a dedicated `self-heal` workflow command that runs lint auto-fixes and then immediately validates with a second lint pass.
+- **What I want:** A single command future agents and maintainers can run to apply safe ESLint auto-fixes and confirm the workspace is in a stable lint state.
+- **What I don't want:** Repeating manual two-step lint routines every time (`--fix` then verification), or assuming auto-fix completed without validation.
+- **How we fixed that:**
+  - Added `scripts/self-heal.mjs` to orchestrate:
+    - `npm run lint -- --fix`
+    - `npm run lint`
+  - Added `self-heal` script entry in `package.json` mapped to `node scripts/self-heal.mjs`.
+  - Verified execution by running `npm run self-heal` end-to-end; command exits successfully and reports remaining non-auto-fixable warnings.
+- **Key Files:** `scripts/self-heal.mjs`, `package.json`, `AGENTS.md`
+- **Verification:** Run `npm run self-heal` and confirm the command completes both phases and prints `[Self-Heal] Completed. Auto-fix pass + validation pass are done.`
+
 ### 2026-02-14: Complete Project End-to-End Audit (Code, Build, Tests, Security Signals)
 - **What changed:** Performed a full-project audit sweep across static quality gates, runtime build behavior, test suites, dependency/security checks, and high-risk server/client patterns.
 - **What I want:** A release-ready confidence snapshot that distinguishes hard blockers from operational risks and clearly documents coverage gaps caused by environment/network limits.
@@ -167,6 +197,41 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Added sorting support for `Account Value`.
 - **Key Files:** `app/[locale]/(landing)/propfirms/actions/get-propfirm-catalogue.ts`, `app/[locale]/(landing)/propfirms/actions/types.ts`, `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, `app/[locale]/(landing)/propfirms/components/sort-controls.tsx`, `app/[locale]/(landing)/propfirms/page.tsx`, `AGENTS.md`
 - **Verification:** Open `/propfirms` and confirm the chart shows stacked payout bars + red/blue/yellow lines, cards show `Total Account Value` and `Size Mix` per firm, and sort control includes `Account Value`.
+
+### 2026-02-14: Prop Firm Catalogue De-Dupe + Monochrome Polish
+- **What changed:** Removed the duplicated “Registered Accounts” blocks in each firm card and unified KPI + chart styling to a monochrome palette (no rainbow tiles/lines).
+- **What I want:** A clean, premium monochrome surface where key numbers are bold and readable without competing colors, and each metric is shown once.
+- **What I don't want:** Repeating the same “Registered” count in multiple places (header + tile + badges) or using multiple bright colors that fight the overall theme.
+- **How we fixed that:**
+  - Replaced the 2x2 colored KPI tiles with a single monochrome KPI badge strip (Paid, Account Value, Size Mix, Sized).
+  - Kept only one registered count (top-right in the card header) and removed the extra “Registered Accounts” KPI tile + the duplicate “Registered Accounts” badge row.
+  - Updated the composed chart series colors to grayscale and differentiated lines by dash patterns instead of red/blue/yellow strokes.
+- **Key Files:** `app/[locale]/(landing)/propfirms/page.tsx`, `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, `AGENTS.md`
+- **Verification:** Open `/propfirms` and confirm each card shows only one “Registered” count, KPI strip is monochrome, and chart lines/bars are grayscale with distinct dash styles.
+
+### 2026-02-14: Prop Firm Chart UX Polish (Toggles + Integer Axis)
+- **What changed:** Improved the Prop Firm Catalogue chart to be cleaner and more readable with a compact shadcn toolbar, integer-only count axis, and automatic hiding of zero-firms by default.
+- **What I want:** The chart should tell a story immediately even when most firms are zero: fewer labels, no decimal count ticks, and quick series toggles to focus.
+- **What I don't want:** A cluttered legend, unreadable flat lines across many zero firms, or count axes showing decimals like `0.75`.
+- **How we fixed that:**
+  - Added shadcn `Button` chips to toggle: Payouts, Account Value, Registered, Sized, and Hide/Include Zeros.
+  - Defaulted the plotted dataset to non-zero firms and limited to a readable top slice for the chart, while leaving the full firm grid below unchanged.
+  - Forced the counts Y-axis to `allowDecimals={false}` and rounded the domain so ticks stay integer-friendly.
+  - Removed chart dots and the bulky legend to reduce noise; tooltip now shows the firm name in a stronger label.
+- **Key Files:** `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, `AGENTS.md`
+- **Verification:** Open `/propfirms` and confirm: no decimal ticks on the right axis, legend is gone, chips toggle layers, and “Hide Zeros” meaningfully changes the plotted firms.
+
+### 2026-02-14: Prop Firm Chart Minimal Mode (Calmer Surface)
+- **What changed:** Tuned the chart UI toward a more minimal, premium surface with quieter gridlines, fewer label distractions, and calmer default layers.
+- **What I want:** A clean first impression where the chart reads instantly without feeling busy; users can layer in details only when they want them.
+- **What I don't want:** A dense, “dashboardy” look with loud gridlines, overlong axis labels, and every series enabled by default.
+- **How we fixed that:**
+  - Defaulted layers to `Value + Reg` only; payouts and sized accounts are opt-in.
+  - Reduced grid noise (horizontal grid only, lighter dash).
+  - Improved x-axis readability (slightly less rotation, truncation, preserve start/end ticks).
+  - Made the toggle chips smaller/subtler and shortened labels (`Value`, `Reg`, `Zeros: Off/On`).
+- **Key Files:** `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, `AGENTS.md`
+- **Verification:** Open `/propfirms` and confirm the chart is calmer by default (only Value + Reg), with lighter grid and fewer label distractions.
 
 ### 2026-02-14: Home Typography-Only Rewrite (Editorial Pass)
 - **What changed:** Rewrote Home page typography only, introducing a distinct display/body font pairing and re-tuning type scale, tracking, and line-height across active Home sections.
@@ -403,6 +468,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Added selected-day PnL readout under the calendar and bound calendar selection state.
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Change date preset/custom range and confirm all cards update; in calendar, click a date and verify selected-day PnL value updates with positive/negative styling.
+
+### 2026-02-14: Trader Profile PnL Calendar Redesign (Day-Cell PnL)
+- **What changed:** Redesigned the Trader Profile PnL calendar to render compact per-day PnL values inside each day cell, added a legend, and stabilized selection behavior when the date filter changes.
+- **What I want:** The calendar should visually behave like a true PnL calendar (scanable day-by-day), not just a colored grid, and it should always remain consistent with the selected date filter.
+- **What I don't want:** Losing the default shadcn calendar chevrons when customizing day rendering, or a selected date that becomes invalid/out-of-range after changing presets.
+- **How we fixed that:**
+  - Updated the shared shadcn `Calendar` wrapper to merge caller-provided `components` with the default `Chevron` renderer (instead of overwriting it).
+  - Added a custom `DayContent` renderer on Trader Profile to show a signed compact PnL label for trade days (and nothing for no-trade days) while preserving selection states.
+  - Added a small legend row (Profit/Loss/No trades) and extended the selected-day row to show the selected date label plus PnL.
+  - Added an effect guard to auto-reset selection to the latest in-range trade day when the active date filter changes.
+- **Key Files:** `components/ui/calendar.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile, switch date presets and custom ranges, and confirm: day cells show signed PnL for trade days, legend appears, and selected-day readout stays in-range after filter changes.
 
 ### 2026-02-14: Trader Profile Real-Time + Cache Isolation Hardening
 - **What changed:** Hardened benchmark data fetching to prevent stale/shared-cache behavior and improve real-time freshness.
@@ -718,3 +795,24 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Removed unsafe user auto-bootstrap fallback in `resolveWritableUserId` so unresolved identities now fail closed in `server/trades.ts`.
 - **Key Files:** `app/api/cron/investing/route.ts`, `app/api/cron/compute-trade-data/route.ts`, `app/api/email/welcome/route.ts`, `lib/api-auth.ts`, `app/api/thor/store/route.ts`, `app/api/etp/v1/store/route.ts`, `server/thor.ts`, `app/[locale]/dashboard/components/import/thor/action.ts`, `app/[locale]/dashboard/components/import/etp/action.ts`, `app/api/ai/support/route.ts`, `app/api/ai/transcribe/route.ts`, `app/api/ai/analysis/accounts/route.ts`, `app/[locale]/(authentication)/components/user-auth-form.tsx`, `server/trades.ts`, `AGENTS.md`
 - **Verification:** Ran `npx eslint` on all touched auth/security files (0 errors, warnings only); re-checked token auth paths now route through `verifySecureToken(...)` and cron/webhook endpoints now enforce secret authorization.
+
+### 2026-02-14: Auto Logout After 30m Inactivity
+- **What changed:** Reduced the inactivity auto-logout window from 1 hour to 30 minutes.
+- **What I want:** Users should be automatically signed out if they are inactive for 30 minutes to reduce session exposure on unattended devices.
+- **What I don't want:** Long-lived unattended sessions remaining active when the user walks away.
+- **How we fixed that:**
+  - Updated `TIMEOUT_DURATION` in the existing `AuthTimeout` client component from `60m` to `30m`.
+  - Kept the same activity reset events and existing sign-out flow.
+- **Key Files:** `components/auth/auth-timeout.tsx`, `components/providers/root-providers.tsx`, `AGENTS.md`
+- **Verification:** Load an authenticated page, remain inactive for 30 minutes, and confirm the app signs out; interact (mouse/keyboard/scroll/touch) within 30 minutes and confirm the timer resets.
+
+### 2026-02-14: Auth Re-Audit Closure (AI + Header Fallback Removal)
+- **What changed:** Closed the remaining re-audit auth gaps by gating AI routes behind authenticated sessions and removing leftover header-derived email fallbacks.
+- **What I want:** All AI-cost routes and subscription/layout entitlement logic should rely on verified Supabase session state, not caller-influenced headers.
+- **What I don't want:** Anonymous access to AI endpoints or any security-sensitive decisions falling back to `x-user-email` headers.
+- **How we fixed that:**
+  - Added Supabase session checks to `app/api/ai/chat/route.ts` and `app/api/ai/editor/route.ts` (editor already rate-limited; chat remains rate-limited).
+  - Updated `server/subscription.ts` to derive email strictly from `supabase.auth.getUser()`.
+  - Updated `server/layouts.ts` to stop using `x-user-email` as a fallback when ensuring user records.
+- **Key Files:** `app/api/ai/chat/route.ts`, `app/api/ai/editor/route.ts`, `server/subscription.ts`, `server/layouts.ts`, `AGENTS.md`
+- **Verification:** Ran `npx eslint` on touched files (0 errors; existing warning baseline remains).

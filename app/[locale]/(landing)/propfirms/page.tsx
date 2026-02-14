@@ -10,6 +10,9 @@ import { TimeframeControls } from './components/timeframe-controls'
 import type { Timeframe } from './actions/timeframe-utils'
 import type { PropfirmCatalogueStats } from './actions/types'
 
+// Keep the translator type intentionally light to avoid "union too complex" TS errors.
+type Translator = (key: string, params?: Record<string, unknown>) => string
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getI18n()
 
@@ -39,17 +42,10 @@ function formatCompactCurrency(value: number): string {
   }).format(value)
 }
 
-function formatCompactCount(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0,
-    notation: 'compact',
-  }).format(value)
-}
-
 function renderPropfirmCard(
   propfirmName: string,
   stat: PropfirmCatalogueStats,
-  t: any
+  t: Translator
 ) {
   const paidAmount = stat.payouts.paidAmount
   const paidCount = stat.payouts.paidCount
@@ -60,42 +56,43 @@ function renderPropfirmCard(
 
   return (
     <Card key={propfirmName} className="h-full">
-      <CardHeader className="space-y-4">
+      <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-4">
           <CardTitle className="text-2xl tracking-tight">{propfirmName}</CardTitle>
           <div className="text-right">
-            <div className="text-xs uppercase tracking-[0.22em] text-blue-400/90">
+            <div className="text-xs uppercase tracking-[0.22em] text-white/60">
               Registered
             </div>
-            <p className="text-3xl font-black text-blue-300 leading-none tabular-nums">
+            <p className="text-3xl font-black text-white leading-none tabular-nums">
               {stat.accountsCount.toLocaleString()}
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-emerald-300/30 bg-emerald-500/10 px-3 py-2">
-            <p className="text-[11px] uppercase tracking-wider text-emerald-300/90">Total Paid</p>
-            <p className="text-base font-bold text-emerald-200 tabular-nums">{formatCompactCurrency(paidAmount)}</p>
-          </div>
-          <div className="rounded-lg border border-red-400/35 bg-red-500/10 px-3 py-2">
-            <p className="text-[11px] uppercase tracking-wider text-red-300/95">Total Account Value</p>
-            <p className="text-base font-bold text-red-200 tabular-nums">{formatCompactCurrency(stat.totalAccountValue)}</p>
-          </div>
-          <div className="rounded-lg border border-blue-400/35 bg-blue-500/10 px-3 py-2">
-            <p className="text-[11px] uppercase tracking-wider text-blue-300/90">Registered Accounts</p>
-            <p className="text-base font-bold text-blue-100 tabular-nums">{formatCompactCount(stat.accountsCount)}</p>
-          </div>
-          <div className="rounded-lg border border-yellow-300/35 bg-yellow-500/10 px-3 py-2">
-            <p className="text-[11px] uppercase tracking-wider text-yellow-300/95">Size Mix</p>
-            <p className="text-sm font-semibold text-yellow-100 break-words leading-snug">{stat.sizeBreakdown}</p>
-          </div>
-        </div>
-        <div className="text-sm text-muted-foreground flex flex-wrap gap-2 mt-2">
-          <Badge variant="outline">
-            {stat.accountsCount} {t('landing.propfirms.registeredAccounts')}
+        {/* Unified (non-rainbow) KPI strip + remove duplicate "registered" blocks */}
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+            Paid:{' '}
+            <span className="ml-1 font-semibold text-white tabular-nums">
+              {formatCompactCurrency(paidAmount)}
+            </span>
           </Badge>
-          <Badge variant="outline">
-            {stat.sizedAccountsCount} Sized
+          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+            Account Value:{' '}
+            <span className="ml-1 font-semibold text-white tabular-nums">
+              {formatCompactCurrency(stat.totalAccountValue)}
+            </span>
+          </Badge>
+          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+            Size Mix:{' '}
+            <span className="ml-1 font-semibold text-white">
+              {stat.sizeBreakdown}
+            </span>
+          </Badge>
+          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+            Sized:{' '}
+            <span className="ml-1 font-semibold text-white tabular-nums">
+              {stat.sizedAccountsCount.toLocaleString()}
+            </span>
           </Badge>
         </div>
       </CardHeader>
@@ -318,7 +315,7 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
             return renderPropfirmCard(
               name,
               enrichedStats,
-              t
+              t as unknown as Translator
             )
           })}
         </div>

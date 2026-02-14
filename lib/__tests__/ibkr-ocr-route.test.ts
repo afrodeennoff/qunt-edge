@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest'
 
 import { vi } from 'vitest'
 
+vi.mock('@/lib/supabase/route-client', () => ({
+  createRouteClient: () => ({
+    auth: {
+      getUser: async () => ({
+        data: { user: { id: 'test-user', email: 'user@example.com' } },
+        error: null,
+      }),
+    },
+  }),
+}))
+
 vi.mock('pdf2json', () => ({
   default: class PDFParserMock {
     on() {}

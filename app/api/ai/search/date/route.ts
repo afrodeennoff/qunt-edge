@@ -2,8 +2,12 @@ import { openai } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
 import { NextRequest } from "next/server";
 import { z } from 'zod/v3';
+import { apiError } from "@/lib/api-response";
+import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 export const maxDuration = 30;
+const dateSearchRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-search-date" });
 
 const dateRangeSchema = z.object({
   from: z.string().nullable().describe("Start date in ISO 8601 format (YYYY-MM-DD), or null if this is a weekday filter"),
@@ -19,6 +23,24 @@ const requestSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createRouteClient(req);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user?.id) {
+      return apiError("UNAUTHORIZED", "Authentication required", 401);
+    }
+
+    const limit = await dateSearchRateLimit(req);
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      });
+    }
+
     const body = await req.json();
     const { query, locale = "en", timezone } = requestSchema.parse(body);
 

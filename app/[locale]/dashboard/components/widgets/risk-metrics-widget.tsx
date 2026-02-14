@@ -14,7 +14,11 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
     const t = useI18n()
     const locale = useCurrentLocale()
 
-    const { kellyHalf, kellyFull, sharpeRatio, sortinoRatio, calmarRatio, maxDrawdown } = React.useMemo(() => calculateAdvancedMetrics(trades as any), [trades])
+    const { kellyHalf, kellyFull, sharpeRatio, sortinoRatio, calmarRatio, maxDrawdown } = React.useMemo(
+        () => calculateAdvancedMetrics(trades),
+        [trades],
+    )
+    const translate = t as (key: string) => string
     const hasData = (trades?.length ?? 0) > 0
     const safeNumber = (value: number) => (Number.isFinite(value) ? value : 0)
     const safeKellyHalf = safeNumber(kellyHalf)
@@ -37,11 +41,11 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
 
     return (
         <WidgetShell
-            title={(t as any)('widgets.riskMetrics.title')}
+            title={translate('widgets.riskMetrics.title')}
             icon={<ShieldAlert className="h-4 w-4" />}
-            info={<p className="text-xs">{(t as any)('widgets.riskMetrics.tooltip')}</p>}
+            info={<p className="text-xs">{translate('widgets.riskMetrics.tooltip')}</p>}
             state={hasData ? "ready" : "empty"}
-            emptyMessage={(t as any)("widgets.emptyState") ?? "No trades yet."}
+            emptyMessage={translate("widgets.emptyState") ?? "No trades yet."}
             contentClassName="p-0"
         >
             <div className="flex-1 p-0 overflow-hidden">

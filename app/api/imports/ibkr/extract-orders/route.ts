@@ -2,6 +2,8 @@ import { orderSchema } from '../fifo-computation/schema'
 import { type FinancialInstrument } from './schema'
 import { addMoney, toMoneyNumber } from '@/lib/financial-math'
 import { normalizeToUtcTimestamp } from '@/lib/date-utils'
+import { apiError } from '@/lib/api-response'
+import { createRouteClient } from '@/lib/supabase/route-client'
 
 export const maxDuration = 60 // Allow up to 60 seconds for AI processing
 
@@ -93,7 +95,6 @@ const parseInstrumentInformation = (text: string): FinancialInstrument[] => {
   if (!instrumentInformationMatch) return [];
   
   const instrumentInformationText = instrumentInformationMatch[0];
-  console.log('instrumentInformationText', instrumentInformationText);
   
   // The text appears to be concatenated, so let's work with it as a single string
   // Pattern: "Financial Instrument Information Symbol Description Conid ... Code Futures SYMBOL DESC CONID ..."
@@ -142,12 +143,17 @@ const parseInstrumentInformation = (text: string): FinancialInstrument[] => {
     });
   }
   
-  console.log('instruments', instruments)
   return instruments;
 };
 
 export async function POST(request: Request) {
   try {
+    const supabase = createRouteClient(request)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user?.id) {
+      return apiError('UNAUTHORIZED', 'Authentication required', 401)
+    }
+
     const json = await request.json()
     const { text } = json
 

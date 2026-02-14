@@ -169,7 +169,7 @@ export async function GET(req: NextRequest) {
     const toDate = searchParams.get('to');
     
     // Build the query
-    const query: any = {
+    const query: Parameters<typeof prisma.trade.findMany>[0] = {
       where: {
         userId: user.id,
         accountNumber: accountNumber
@@ -180,16 +180,19 @@ export async function GET(req: NextRequest) {
       take: limit,
       skip: offset
     };
+
+    // `where` is optional in Prisma args types; keep a stable reference for type safety.
+    const where = (query.where ??= { userId: user.id, accountNumber });
     
     if (fromDate || toDate) {
-      query.where.entryDate = {};
+      where.entryDate = {};
       
       if (fromDate) {
-        query.where.entryDate.gte = new Date(fromDate);
+        where.entryDate.gte = new Date(fromDate);
       }
       
       if (toDate) {
-        query.where.entryDate.lte = new Date(toDate);
+        where.entryDate.lte = new Date(toDate);
       }
     }
     
@@ -198,7 +201,7 @@ export async function GET(req: NextRequest) {
     
     // Get total count for pagination
     const totalCount = await prisma.trade.count({
-      where: query.where
+      where
     });
     
     return NextResponse.json({ 

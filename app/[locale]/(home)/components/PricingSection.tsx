@@ -8,6 +8,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { useCurrentLocale } from '@/locales/client'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { buildWhopCheckoutUrl } from '@/lib/whop-checkout'
+import { useCurrency } from '@/hooks/use-currency'
 
 const plans = [
   {
@@ -50,6 +52,7 @@ const plans = [
 
 export default function PricingSection() {
   const locale = useCurrentLocale()
+  const { currency } = useCurrency()
 
   return (
     <section id="pricing" className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8 bg-background">
@@ -121,7 +124,20 @@ export default function PricingSection() {
                     variant={plan.popular ? 'default' : 'outline'}
                     className={cn("h-12 w-full rounded-full text-[10px] font-semibold uppercase tracking-[0.18em] [font-family:var(--home-copy)]", plan.popular && "shadow-md shadow-primary/25")}
                   >
-                    <Link href={`/${locale}/authentication?next=dashboard`}>{plan.cta}</Link>
+                    <Link
+                      href={
+                        plan.name === 'Pro AI'
+                          ? buildWhopCheckoutUrl({
+                              lookupKey: `plus_monthly_${currency.toLowerCase()}`,
+                              locale,
+                            })
+                          : plan.name === 'Desk'
+                            ? `/${locale}/support`
+                            : `/${locale}/authentication?next=dashboard`
+                      }
+                    >
+                      {plan.cta}
+                    </Link>
                   </Button>
                   <p className="text-center text-xs text-muted-foreground [font-family:var(--home-copy)]">{plan.note}</p>
                 </CardFooter>
