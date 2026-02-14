@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient, getWebsiteURL } from "@/server/auth";
+import { getWebsiteURL } from "@/server/auth";
 import { getWhop } from "@/lib/whop";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 function safeLocale(value: string | null | undefined): string {
     const raw = (value || "").trim().toLowerCase();
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
     const teamName = body.get('teamName') as string | null;
     const locale = safeLocale(body.get('locale') as string | null);
 
-    const supabase = await createClient();
+    const supabase = createRouteClient(req);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -83,7 +84,7 @@ export async function GET(req: Request) {
     const teamName = searchParams.get('teamName');
     const locale = safeLocale(searchParams.get('locale'));
 
-    const supabase = await createClient();
+    const supabase = createRouteClient(req);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

@@ -75,9 +75,10 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     return { innerRadius: "56%", outerRadius: "84%", cy: "45%", legendPaddingTop: 6 };
   }, [size]);
 
-  const renderTooltip = React.useCallback(({ active, payload }: TooltipProps) => {
+  const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload as ChartDataPoint | undefined;
+      if (!data) return null;
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
           <div className="flex flex-col mb-1 border-b border-white/5 pb-1">

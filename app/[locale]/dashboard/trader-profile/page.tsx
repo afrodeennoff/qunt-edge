@@ -17,7 +17,7 @@ import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { CalendarIcon, ChevronDown, CircleDot, Zap } from "lucide-react"
 import { endOfDay, format, startOfDay, subDays, subMonths, subYears } from "date-fns"
-import type { DateRange } from "react-day-picker"
+import type { DateRange, DayContentProps } from "react-day-picker"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -535,7 +535,7 @@ export default function TraderProfilePage() {
                     "h-10 w-10 rounded-md p-0 font-normal text-fg-primary hover:bg-white/10 aria-selected:bg-white/15 aria-selected:text-fg-primary",
                 }}
                 components={{
-                  DayContent: ({ date, displayMonth }) => {
+                  DayContent: ({ date, displayMonth }: DayContentProps) => {
                     if (date.getMonth() !== displayMonth.getMonth()) {
                       return <span className="text-[11px] text-fg-muted">{format(date, "d")}</span>
                     }
