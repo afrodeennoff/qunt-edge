@@ -76,7 +76,7 @@ import {
   generateMockTrades
 } from "@/lib/mock-trades";
 import { isValid, startOfDay, endOfDay } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { calculateStatistics, formatCalendarData, cn, groupBy, calculateTradingDays } from "@/lib/utils";
 import { useParams } from "next/navigation";
 
@@ -754,9 +754,11 @@ export const DataProvider: React.FC<{
 
     // Get hidden accounts for filtering
     const hiddenGroup = groups.find((g) => g.name === "Hidden Accounts");
-    const hiddenAccountNumbers = accounts
-      .filter((a) => a.groupId === hiddenGroup?.id)
-      .map((a) => a.number);
+    const hiddenAccountNumbers = hiddenGroup
+      ? accounts
+          .filter((a) => a.groupId === hiddenGroup.id)
+          .map((a) => a.number)
+      : [];
 
     // Apply all filters in a single pass
     return trades
@@ -776,15 +778,10 @@ export const DataProvider: React.FC<{
         const rawDate = new Date(trade.entryDate);
         if (!isValid(rawDate)) return false;
 
+        // Convert to user's timezone WITHOUT string parsing (Safari can reject "yyyy-MM-dd HH:mm:ssXXX").
         let entryDate: Date;
         try {
-          entryDate = new Date(
-            formatInTimeZone(
-              rawDate,
-              timezone,
-              "yyyy-MM-dd HH:mm:ssXXX"
-            )
-          );
+          entryDate = toZonedTime(rawDate, timezone || "UTC");
         } catch (e) {
           console.warn("[DataProvider] Date formatting failed, falling back to raw date", e);
           entryDate = rawDate;

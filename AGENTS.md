@@ -162,6 +162,16 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `lib/utils.ts`, `context/data-provider.tsx`, `app/[locale]/dashboard/components/charts/pnl-bar-chart.tsx`, `AGENTS.md`
 - **Verification:** Open `/dashboard?tab=widgets` -> ensure the Daily PnL chart renders bars and tooltips with real values; verify `calendarData` PnL values are numbers (not objects) in any debug logging.
 
+### 2026-02-15: Widget Charts “No Data” Fix (Hidden Accounts Guard + Safe Timezone Conversion)
+- **What changed:** Fixed a regression where widget charts (including white donut/pie charts) could show “No data” even when trades existed, because `formattedTrades` was being filtered down to empty.
+- **What I want:** Charts should render reliably across browsers (including Safari) and typical account setups (ungrouped accounts, grouped accounts, optional Hidden Accounts group).
+- **What I don't want:** All trades being filtered out because ungrouped accounts are accidentally treated as hidden, or because timezone conversion relies on parsing non-ISO date strings.
+- **How we fixed that:**
+  - Updated hidden-account filtering so it only applies when the `Hidden Accounts` group actually exists.
+  - Replaced timezone conversion that formatted `rawDate` into a non-ISO string (`yyyy-MM-dd HH:mm:ssXXX`) and re-parsed it with `Date(...)` (browser-dependent) with `toZonedTime(...)` from `date-fns-tz`.
+- **Key Files:** `context/data-provider.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets` and confirm the donut charts (`Commissions PnL share`, `Trade Distribution`) and other charts render with real values when trades exist; validate in Safari as well.
+
 ### 2026-02-14: Unified Master Prompt Consolidation
 - **What changed:** Consolidated a fragmented, overlapping instruction set into a single coherent master prompt template.
 - **What I want:** One copy-paste prompt that is consistent, reusable, and easy to run without conflicting directives.
