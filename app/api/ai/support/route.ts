@@ -1,6 +1,9 @@
 import { convertToModelMessages, streamText, UIMessage } from "ai";
+import { NextRequest } from "next/server";
 import { askForEmailForm } from "./tools/ask-for-email-form";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createClient } from "@/server/auth";
+import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -9,9 +12,28 @@ const customOpenai = createOpenAI({
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
+const supportRateLimit = rateLimit({ limit: 12, window: 60_000, identifier: "ai-support" });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user?.id) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized", message: "Authentication required" }),
+        { status: 401, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const limit = await supportRateLimit(req);
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      });
+    }
+
     const {
       messages,
       model,

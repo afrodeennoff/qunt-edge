@@ -2,8 +2,8 @@
 
 import { createClient } from './auth'
 import { revalidatePath } from 'next/cache'
-import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { generateSecureToken } from '@/lib/api-auth'
 
 export async function generateThorToken() {
   const supabase = await createClient()
@@ -14,18 +14,14 @@ export async function generateThorToken() {
   }
 
   try {
-    // Generate a secure random token
-    const token = crypto.randomBytes(32).toString('hex')
-    
-    // Update or create user with new token
-    await prisma.user.update({
-      where: {
-        auth_user_id: user.id
-      },
-      data: {
-        thorToken: token
-      }
+    const dbUser = await prisma.user.findUnique({
+      where: { auth_user_id: user.id },
+      select: { id: true },
     })
+    if (!dbUser?.id) {
+      return { error: 'Failed to generate token' }
+    }
+    const token = await generateSecureToken(dbUser.id, 'thor')
 
     revalidatePath('/dashboard')
     return { token }
@@ -49,11 +45,17 @@ export async function getThorToken() {
         auth_user_id: user.id
       },
       select: {
-        thorToken: true
+        thorTokenHash: true,
+        thorTokenExpiresAt: true,
       }
     })
 
-    return { token: userData?.thorToken }
+    const hasToken = Boolean(
+      userData?.thorTokenHash &&
+      userData.thorTokenExpiresAt &&
+      userData.thorTokenExpiresAt > new Date()
+    )
+    return { token: null, hasToken }
   } catch (error) {
     console.error('Failed to get Thor token:', error)
     return { error: 'Failed to get token' }

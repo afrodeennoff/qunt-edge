@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { createClient } from '@/server/auth'
+import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
+
+const transcribeRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: 'ai-transcribe' })
 
 export async function POST(request: NextRequest) {
   const openai = new OpenAI({
@@ -7,6 +11,21 @@ export async function POST(request: NextRequest) {
     apiKey: process.env.OPENAI_API_KEY,
   })
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const limit = await transcribeRateLimit(request)
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      })
+    }
+
     const formData = await request.formData()
     const audioFile = formData.get('audio') as File
 
@@ -46,4 +65,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

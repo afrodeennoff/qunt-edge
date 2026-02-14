@@ -21,6 +21,13 @@ interface InvestingEvent {
   type?: string
 }
 
+function isAuthorizedCronRequest(request: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = request.headers.get('authorization')
+  return authHeader === `Bearer ${cronSecret}`
+}
+
 function mapImpactToImportance(impact: string): 'HIGH' | 'MEDIUM' | 'LOW' {
   // Count the number of filled bull icons
   const filledBulls = (impact.match(/grayFullBullishIcon/g) || []).length
@@ -307,6 +314,10 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
 export async function GET(request: Request) {
   try {
+    if (!isAuthorizedCronRequest(request)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Get the URL and search params
     const { searchParams } = new URL(request.url)
     const lang = (searchParams.get('lang') || 'fr') as 'fr' | 'en'

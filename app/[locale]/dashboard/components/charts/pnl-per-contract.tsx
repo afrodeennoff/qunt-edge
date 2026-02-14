@@ -41,6 +41,11 @@ const chartConfig = {
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+const formatWinRate = (wins: number, total: number) => {
+  if (!Number.isFinite(wins) || !Number.isFinite(total) || total <= 0) return "0.0"
+  return ((wins / total) * 100).toFixed(1)
+}
+
 export default function PnLPerContractChart({
   size = "medium",
 }: PnLPerContractChartProps) {
@@ -126,7 +131,7 @@ export default function PnLPerContractChart({
             <div className="flex justify-between items-center">
               <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContract.tooltip.trades")}</span>
               <span className="font-black text-white/60 text-[11px]">
-                {data.tradeCount} ({((data.winCount / data.tradeCount) * 100).toFixed(1)}% WR)
+                {data.tradeCount} ({formatWinRate(data.winCount, data.tradeCount)}% WR)
               </span>
             </div>
             <div className="flex justify-between items-center">

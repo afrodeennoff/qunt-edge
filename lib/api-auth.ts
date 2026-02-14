@@ -9,11 +9,13 @@ export async function generateSecureToken(userId: string, tokenType: 'etp' | 'th
   const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MS)
   
   const field = tokenType === 'etp' ? 'etpTokenHash' : 'thorTokenHash'
+  const legacyField = tokenType === 'etp' ? 'etpToken' : 'thorToken'
   
   await prisma.user.update({
     where: { id: userId },
     data: {
       [field]: tokenHash,
+      [legacyField]: null,
       [`${tokenType}TokenExpiresAt`]: expiresAt
     }
   })
@@ -40,12 +42,14 @@ export async function verifySecureToken(token: string, tokenType: 'etp' | 'thor'
 
 export async function revokeSecureToken(userId: string, tokenType: 'etp' | 'thor') {
   const field = tokenType === 'etp' ? 'etpTokenHash' : 'thorTokenHash'
+  const legacyField = tokenType === 'etp' ? 'etpToken' : 'thorToken'
   const expiresField = `${tokenType}TokenExpiresAt`
   
   await prisma.user.update({
     where: { id: userId },
     data: {
       [field]: null,
+      [legacyField]: null,
       [expiresField]: null
     }
   })

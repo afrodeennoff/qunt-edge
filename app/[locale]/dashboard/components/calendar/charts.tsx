@@ -167,8 +167,9 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
   const DistributionTooltip = ({ active, payload }: any) => {
     if (active && payload?.[0]) {
       const data = payload[0].payload
+      const hasValidTotal = Number.isFinite(totalPnL) && totalPnL !== 0
       const percentage = data.account !== 'total'
-        ? ((data.value / totalPnL) * 100).toFixed(1)
+        ? (hasValidTotal ? ((data.value / totalPnL) * 100).toFixed(1) : "0.0")
         : '100'
       return (
         <div className="bg-background p-2 border rounded shadow-xs text-xs md:text-sm">

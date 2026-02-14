@@ -461,9 +461,11 @@ export function DailySummaryModal() {
 
 function MetricCard({ label, value, active, theme, displayMode, totalValue }: { label: string, value: number, active: boolean, theme: Theme, displayMode: 'currency' | 'percent', totalValue: number }) {
     const isPos = value >= 0
+    const safeTotal = Number.isFinite(totalValue) && totalValue > 0 ? totalValue : 0
+    const percentValue = safeTotal > 0 ? Math.abs((value / safeTotal) * 100) : 0
     const displayValue = displayMode === 'currency'
         ? `${isPos ? '+' : '-'}$${Math.abs(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-        : `${isPos ? '+' : '-'}${Math.abs(value / totalValue * 100).toFixed(1)}%`
+        : `${isPos ? '+' : '-'}${percentValue.toFixed(1)}%`
     return (
         <div className={cn("p-4 rounded-2xl border transition-all duration-700 relative overflow-hidden group", active ? "bg-white/[0.04] border-white/10 backdrop-blur-md shadow-2xl" : "opacity-10 blur-sm scale-95 shadow-none")}>
             <div className={cn("absolute top-0 left-0 w-1 h-full opacity-40 group-hover:opacity-100 transition-opacity", isPos ? "bg-white" : "bg-white/20")} />

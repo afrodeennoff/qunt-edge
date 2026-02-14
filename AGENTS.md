@@ -36,6 +36,31 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Complete Project End-to-End Audit (Code, Build, Tests, Security Signals)
+- **What changed:** Performed a full-project audit sweep across static quality gates, runtime build behavior, test suites, dependency/security checks, and high-risk server/client patterns.
+- **What I want:** A release-ready confidence snapshot that distinguishes hard blockers from operational risks and clearly documents coverage gaps caused by environment/network limits.
+- **What I don't want:** False confidence from partial checks (for example tests passing while production build/runtime environment is misconfigured or security defaults are weak).
+- **How we fixed that:**
+  - Executed `npm run typecheck` successfully.
+  - Executed `npm test` and `npm run test:payment`; both suites passed in this environment (with expected skipped DB-backed tests when `DATABASE_URL` is absent).
+  - Executed production `npm run build` and observed successful compile + static page generation, but also captured high-risk runtime warnings:
+    - `NODE_TLS_REJECT_UNAUTHORIZED=0` warning during build execution,
+    - missing `OPENAI_API_KEY`,
+    - missing `WHOP_API_KEY`,
+    - Prisma pool logging `rejectUnauthorized: false`.
+  - Dependency audit commands requiring registry network access could not complete (`npm audit` / `npm outdated` blocked by DNS/network).
+  - Identified security/code-health hotspots:
+    - non-cryptographic slug generation via `Math.random` in server slug/referral helpers,
+    - extensive `@ts-ignore` usage in consent UI,
+    - large persistent ESLint warning backlog from prior baseline.
+- **Key Files:** `lib/prisma.ts`, `lib/ai/client.ts`, `lib/whop.ts`, `server/referral.ts`, `server/shared.ts`, `components/consent-banner.tsx`, `AGENTS.md`
+- **Verification:** 
+  - `npm run typecheck` -> success.
+  - `npm test` -> `20 passed | 1 skipped`, `88 passed | 46 skipped`.
+  - `npm run test:payment` -> `10 passed | 1 skipped`, `65 passed | 46 skipped`.
+  - Build logs show static generation completed (`86/86`) and captured env/security warnings above.
+  - `npm audit` failed due `getaddrinfo ENOTFOUND registry.npmjs.org` (environment network limitation).
+
 ### 2026-02-14: End-to-End Repository Audit (Build Gate + Test Gate)
 - **What changed:** Ran a full audit pass across lint, production build, tests, and high-risk changed files; documented a release-blocking TypeScript regression in account save flow.
 - **What I want:** CI and deploy gates should reflect true production health, with failing build blockers surfaced before release and test status clearly separated from lint-noise.
@@ -548,6 +573,19 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/pnl-summary.tsx`, `app/[locale]/dashboard/components/statistics/trade-performance-card.tsx`, `app/[locale]/dashboard/components/statistics/long-short-card.tsx`, `app/[locale]/dashboard/components/statistics/statistics-widget.tsx`, `app/[locale]/dashboard/components/statistics/profit-factor-card.tsx`, `locales/en.ts`, `locales/fr.ts`, `AGENTS.md`
 - **Verification:** Ran ESLint on all edited dashboard/locale files; no errors (remaining warnings are pre-existing in `statistics-widget.tsx` and unrelated to this regression fix).
 
+### 2026-02-14: Mobile Clarity Hardening (Charts + Widget Density)
+- **What changed:** Extended the NaN-safe mobile cleanup across additional dashboard chart tooltips and tightened mobile widget vertical density to reduce the “stacked card” look.
+- **What I want:** No percentage tooltip should ever show `NaN%`, and mobile dashboard cards should feel more compact and readable when data is sparse.
+- **What I don't want:** Hidden remaining divide-by-zero paths in chart tooltips, oversized empty mobile widgets, or unstable numeric rendering from non-finite metric inputs.
+- **How we fixed that:**
+  - Added guarded win-rate formatters for `pnl-by-side`, `pnl-per-contract`, and `pnl-per-contract-daily` tooltip displays.
+  - Hardened `trade-distribution` percentage math with safe denominator checks.
+  - Added non-finite numeric guards in `risk-metrics-widget` and `pnl-summary`, plus robust stat sanitization in `cumulative-pnl-card`.
+  - Protected `daily-summary-modal` and calendar distribution percentage math against zero/invalid totals.
+  - Reduced mobile widget stacking pressure by tuning mobile grid sizing (`medium` and `large`) and lowering mobile row height in `widget-canvas`.
+- **Key Files:** `app/[locale]/dashboard/components/charts/pnl-by-side.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`, `app/[locale]/dashboard/components/charts/trade-distribution.tsx`, `app/[locale]/dashboard/components/widgets/risk-metrics-widget.tsx`, `app/[locale]/dashboard/components/pnl-summary.tsx`, `app/[locale]/dashboard/components/statistics/cumulative-pnl-card.tsx`, `app/[locale]/dashboard/components/daily-summary-modal.tsx`, `app/[locale]/dashboard/components/calendar/charts.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, `AGENTS.md`
+- **Verification:** ESLint run on all touched files completed with 0 errors (warnings are pre-existing project debt); production build reached compile/type/static generation stages successfully before failing at final trace collection due environment memory exhaustion (OOM), not type/runtime code errors.
+
 ### 2026-02-14: Vercel Build Fix - Prop Firms Translator Type Simplification
 - **What changed:** Replaced an overly complex inferred translator type in the Prop Firms landing page with a minimal callable translator signature.
 - **What I want:** Keep i18n typing safe enough for page usage while ensuring TypeScript can complete production builds on Vercel.
@@ -626,6 +664,19 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `proxy.ts`, `app/api/auth/callback/route.ts`, `server/accounts.ts`, `app/[locale]/(landing)/community/post/[id]/page.tsx`, `app/[locale]/(authentication)/components/user-auth-form.tsx`, `AGENTS.md`
 - **Verification:** `npm run lint` (0 errors, 1419 warnings), `npm run typecheck` (fails with `server/accounts.ts(215,5)`), `npm test` (passes: 20 files, 88 tests; 1 file skipped).
 
+### 2026-02-14: Frontend + Backend Audit Remediation Pass
+- **What changed:** Implemented direct fixes for the concrete audit findings and re-ran full verification.
+- **What I want:** Eliminate blocking security/type/runtime issues while keeping behavior stable and measurable.
+- **What I don't want:** Leaving known high-impact findings unresolved, especially auth redirect/cookie risk and build-breaking type errors.
+- **How we fixed that:**
+  - Fixed account setup type regression by removing non-existent `updatedAt` destructuring from `Account` in `setupAccountAction`.
+  - Refactored community post page to only wrap data fetching in `try/catch` and moved JSX rendering outside the catch scope (error-boundary-safe pattern).
+  - Removed dead/unreferenced OAuth query-param variables in the auth form Google submit handler.
+  - Replaced benchmark endpoint in-memory all-user trade aggregation with a DB-side window/aggregate query (`$queryRaw`) to reduce app server memory/CPU pressure and return the same benchmark shape.
+  - Confirmed auth hardening already present from earlier pass (`httpOnly` cookie default and canonical callback redirects).
+- **Key Files:** `server/accounts.ts`, `app/[locale]/(landing)/community/post/[id]/page.tsx`, `app/[locale]/(authentication)/components/user-auth-form.tsx`, `app/api/trader-profile/benchmark/route.ts`, `AGENTS.md`
+- **Verification:** `npm run typecheck` (pass), `npm test` (pass: 20 files, 88 tests; 1 file skipped), targeted ESLint run on touched files (0 errors; warnings only).
+
 ### 2026-02-14: Authentication Re-Audit (Post-Hardening Validation)
 - **What changed:** Re-audited authentication after header-trust and callback hardening changes to confirm closures and identify any remaining auth weaknesses.
 - **What I want:** Verify that previously reported web-session auth issues are closed and isolate residual high-risk paths for the next patch.
@@ -636,3 +687,34 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Documented remaining critical/high findings with line-level evidence and exploit context.
 - **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `proxy.ts`, `server/trades.ts`, `app/api/thor/store/route.ts`, `app/api/etp/v1/store/route.ts`, `server/thor.ts`, `app/[locale]/dashboard/components/import/thor/action.ts`, `app/[locale]/dashboard/components/import/etp/action.ts`, `AGENTS.md`
 - **Verification:** Used targeted code-path review with line references to confirm fixed items and remaining vulnerabilities before publishing re-audit findings.
+
+### 2026-02-14: Complete Authentication Re-Audit (Full API Surface)
+- **What changed:** Performed a complete re-audit of authentication/authorization across all API routes, middleware/session boundaries, callback flow, admin gates, cron/webhook endpoints, and token-based ingestion routes.
+- **What I want:** A complete, current-state auth risk map that distinguishes already-fixed issues from remaining exploitable paths across the full backend surface.
+- **What I don't want:** Narrow auth confidence that only covers dashboard session flows while cron, webhook, AI-cost, and API-token endpoints remain weakly protected.
+- **How we fixed that:**
+  - Enumerated API routes and reviewed auth guards (`getDatabaseUserId`, `supabase.auth.getUser`, `assertAdminAccess`, bearer checks, webhook verification).
+  - Validated previous hardening remained effective (header-trust removal in core auth helpers, callback redirect hardening, httpOnly cookie protection).
+  - Identified remaining high-impact issues: unauthenticated cron DB-write paths, unsigned welcome-email webhook endpoint, plaintext long-lived ETP/THOR bearer token auth, and unauthenticated high-cost AI endpoints.
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `proxy.ts`, `app/api/cron/investing/route.ts`, `app/api/cron/compute-trade-data/route.ts`, `app/api/email/welcome/route.ts`, `app/api/thor/store/route.ts`, `app/api/etp/v1/store/route.ts`, `server/thor.ts`, `app/[locale]/dashboard/components/import/thor/action.ts`, `app/[locale]/dashboard/components/import/etp/action.ts`, `app/api/ai/support/route.ts`, `app/api/ai/transcribe/route.ts`, `app/api/ai/analysis/accounts/route.ts`, `AGENTS.md`
+- **Verification:** Re-checked line-level control flow for every cited route and confirmed exploitability conditions before issuing final findings.
+
+### 2026-02-14: Authentication Hardening Completion (Complete Re-Audit Fix Pass)
+- **What changed:** Implemented a full hardening pass for the complete re-audit findings across cron/webhook authentication, API token verification, AI route abuse controls, and redirect/user-resolution edge paths.
+- **What I want:** Close the remaining high-impact auth and abuse vectors so sensitive operations are gated by verified secrets/sessions and API tokens are validated with expiry-aware secure checks.
+- **What I don't want:** Publicly callable heavy cron jobs, unsigned webhook side effects, long-lived plaintext bearer-token auth, or expensive AI routes callable anonymously at scale.
+- **How we fixed that:**
+  - Locked cron DB-write/compute endpoints behind `Authorization: Bearer ${CRON_SECRET}` checks in `app/api/cron/investing/route.ts` and `app/api/cron/compute-trade-data/route.ts`.
+  - Added webhook authorization gate for welcome-email ingestion using `WELCOME_WEBHOOK_SECRET` (fallback `SUPABASE_WEBHOOK_SECRET`) with timing-safe comparison in `app/api/email/welcome/route.ts`.
+  - Migrated ETP/THOR token handling to hashed+expiry verification by:
+    - switching generation to `generateSecureToken(...)` and clearing legacy plaintext fields,
+    - switching API ingestion auth to `verifySecureToken(...)`,
+    - and preserving only one-time token return on generation flows.
+  - Added auth + rate-limit protection to high-cost AI endpoints:
+    - `app/api/ai/support/route.ts`,
+    - `app/api/ai/transcribe/route.ts`,
+    - `app/api/ai/analysis/accounts/route.ts`.
+  - Hardened client `next` path normalization to reject protocol-relative values in `app/[locale]/(authentication)/components/user-auth-form.tsx`.
+  - Removed unsafe user auto-bootstrap fallback in `resolveWritableUserId` so unresolved identities now fail closed in `server/trades.ts`.
+- **Key Files:** `app/api/cron/investing/route.ts`, `app/api/cron/compute-trade-data/route.ts`, `app/api/email/welcome/route.ts`, `lib/api-auth.ts`, `app/api/thor/store/route.ts`, `app/api/etp/v1/store/route.ts`, `server/thor.ts`, `app/[locale]/dashboard/components/import/thor/action.ts`, `app/[locale]/dashboard/components/import/etp/action.ts`, `app/api/ai/support/route.ts`, `app/api/ai/transcribe/route.ts`, `app/api/ai/analysis/accounts/route.ts`, `app/[locale]/(authentication)/components/user-auth-form.tsx`, `server/trades.ts`, `AGENTS.md`
+- **Verification:** Ran `npx eslint` on all touched auth/security files (0 errors, warnings only); re-checked token auth paths now route through `verifySecureToken(...)` and cron/webhook endpoints now enforce secret authorization.

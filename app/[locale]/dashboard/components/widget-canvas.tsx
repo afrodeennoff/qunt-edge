@@ -49,12 +49,12 @@ const sizeToGrid = (size: WidgetSize, isSmallScreen = false): { w: number, h: nu
       case 'small-long':
         return { w: 12, h: 2 }
       case 'medium':
-        return { w: 12, h: 4 }
+        return { w: 12, h: 3 }
       case 'large':
       case 'extra-large':
-        return { w: 12, h: 6 }
-      default:
         return { w: 12, h: 4 }
+      default:
+        return { w: 12, h: 3 }
     }
   }
 
@@ -745,13 +745,13 @@ export default function WidgetCanvas() {
             layouts={responsiveLayout}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-            rowHeight={isMobile ? 62 : 68}
+            rowHeight={isMobile ? 56 : 68}
             isDraggable={isCustomizing}
             isResizable={false}
             draggableHandle=".drag-handle"
             onDragStart={() => setIsUserAction(true)}
             onLayoutChange={handleLayoutChange}
-            margin={isMobile ? [6, 6] : [8, 8]}
+            margin={isMobile ? [6, 4] : [8, 8]}
             containerPadding={[0, 0]}
             useCSSTransforms={true}
           >

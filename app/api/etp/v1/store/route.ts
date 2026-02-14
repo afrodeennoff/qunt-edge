@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifySecureToken } from '@/lib/api-auth'
 
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
@@ -18,12 +19,7 @@ async function authenticateRequest(req: NextRequest) {
   const token = authHeader.split(' ')[1];
   
   try {
-    // Verify the token by finding the user
-    const user = await prisma.user.findFirst({
-      where: {
-        etpToken: token
-      }
-    });
+    const user = await verifySecureToken(token, 'etp')
     
     if (!user) {
       return { 
@@ -36,7 +32,7 @@ async function authenticateRequest(req: NextRequest) {
     }
     
     return { authenticated: true, user };
-  } catch (error) {
+  } catch {
     return {
       authenticated: false,
       error: {

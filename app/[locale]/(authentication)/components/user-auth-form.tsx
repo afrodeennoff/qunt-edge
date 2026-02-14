@@ -52,8 +52,8 @@ function normalizeNextPath(next: string | null): string | null {
     if (!next) return null
     const trimmed = next.trim()
     if (!trimmed) return null
-    if (trimmed.startsWith('/')) return trimmed
-    return `/${trimmed}`
+    if (trimmed.startsWith('//') || trimmed.startsWith('\\')) return null
+    return `/${trimmed.replace(/^\/+/, '')}`
 }
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {

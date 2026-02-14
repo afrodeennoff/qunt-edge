@@ -32,14 +32,20 @@ export function PnLSummary({ className }: PnLSummaryProps) {
       const date = parseISO(dateStr)
       if (!isWithinInterval(date, { start: startDay, end: endDay })) return
 
-      daily.pnl += dayData.pnl ?? 0
+      const safeDayPnl = Number(dayData.pnl ?? 0)
+      daily.pnl += Number.isFinite(safeDayPnl) ? safeDayPnl : 0
       for (const trade of dayData.trades ?? []) {
         daily.total += 1
-        if ((trade.pnl || 0) > 0) {
+        const safeTradePnl = Number(trade.pnl ?? 0)
+        if (Number.isFinite(safeTradePnl) && safeTradePnl > 0) {
           daily.wins += 1
         }
       }
     })
+
+    if (!Number.isFinite(daily.pnl)) {
+      daily.pnl = 0
+    }
 
     const winRate = daily.total > 0 ? Math.round((daily.wins / daily.total) * 100) : 0
     return { daily, winRate }

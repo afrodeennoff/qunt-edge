@@ -3,8 +3,7 @@
 import { Trade as PrismaTrade, Prisma } from '@/prisma/generated/prisma'
 import { Trade as NormalizedTrade } from '@/lib/data-types'
 import { revalidatePath, revalidateTag, updateTag, unstable_cache } from 'next/cache'
-import { headers } from 'next/headers'
-import { createClient, getDatabaseUserId, getUserId } from './auth'
+import { getDatabaseUserId, getUserId } from './auth'
 import { isAfter } from 'date-fns'
 import { prisma } from '@/lib/prisma'
 import { formatTimestamp, isChronologicalRange, normalizeToUtcTimestamp } from '@/lib/date-utils'
@@ -121,34 +120,7 @@ export async function resolveWritableUserId(rawUserId: string): Promise<string> 
   })
   if (byAuthId?.id) return byAuthId.id
 
-  const headersList = await headers()
-  const emailFromHeader = headersList.get('x-user-email')?.trim().toLowerCase() || ''
-  let resolvedEmail = emailFromHeader
-
-  if (!resolvedEmail) {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    resolvedEmail = user?.email?.trim().toLowerCase() || ''
-  }
-
-  if (!resolvedEmail) {
-    resolvedEmail = `${rawUserId}@users.qunt-edge.local`
-  }
-
-  const created = await prisma.user.upsert({
-    where: { id: rawUserId },
-    create: {
-      id: rawUserId,
-      auth_user_id: rawUserId,
-      email: resolvedEmail,
-    },
-    update: {},
-    select: { id: true },
-  })
-
-  return created.id
+  throw new Error('Unable to resolve writable user')
 }
 
 function generateTradeUUID(trade: Partial<PrismaTrade> | any): string {

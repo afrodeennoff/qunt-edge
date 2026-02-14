@@ -42,6 +42,11 @@ const chartConfig = {
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+const formatWinRate = (wins: number, total: number) => {
+  if (!Number.isFinite(wins) || !Number.isFinite(total) || total <= 0) return "0.0"
+  return ((wins / total) * 100).toFixed(1)
+}
+
 export default function PnLBySideChart({
   size = "medium",
 }: PnLBySideChartProps) {
@@ -116,7 +121,7 @@ export default function PnLBySideChart({
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
               <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.winRate")}</span>
               <span className="font-black text-white/60 text-[11px]">
-                {((data.winCount / data.tradeCount) * 100).toFixed(1)}%
+                {formatWinRate(data.winCount, data.tradeCount)}%
               </span>
             </div>
             <div className="flex justify-between items-center">

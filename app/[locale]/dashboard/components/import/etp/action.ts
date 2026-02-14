@@ -2,8 +2,8 @@
 
 import { createClient } from '@/server/auth'
 import { revalidatePath } from 'next/cache'
-import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { generateSecureToken } from '@/lib/api-auth'
 
 export async function generateEtpToken() {
   const supabase = await createClient()
@@ -14,19 +14,14 @@ export async function generateEtpToken() {
   }
 
   try {
-    
-    // Generate a secure random token
-    const token = crypto.randomBytes(32).toString('hex')
-    
-    // Update or create user with new token
-    await prisma.user.update({
-      where: {
-        auth_user_id: user.id
-      },
-      data: {
-        etpToken: token
-      }
+    const dbUser = await prisma.user.findUnique({
+      where: { auth_user_id: user.id },
+      select: { id: true },
     })
+    if (!dbUser?.id) {
+      return { error: 'Failed to generate token' }
+    }
+    const token = await generateSecureToken(dbUser.id, 'etp')
 
     revalidatePath('/dashboard')
     return { token }
@@ -50,11 +45,17 @@ export async function getEtpToken() {
         auth_user_id: user.id
       },
       select: {
-        etpToken: true
+        etpTokenHash: true,
+        etpTokenExpiresAt: true,
       }
     })
 
-    return { token: userData?.etpToken }
+    const hasToken = Boolean(
+      userData?.etpTokenHash &&
+      userData.etpTokenExpiresAt &&
+      userData.etpTokenExpiresAt > new Date()
+    )
+    return { token: null, hasToken }
   } catch (error) {
     console.error('Failed to get ETP token:', error)
     return { error: 'Failed to get token' }

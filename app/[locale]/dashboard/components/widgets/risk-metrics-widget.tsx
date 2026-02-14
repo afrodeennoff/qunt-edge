@@ -16,6 +16,13 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
 
     const { kellyHalf, kellyFull, sharpeRatio, sortinoRatio, calmarRatio, maxDrawdown } = React.useMemo(() => calculateAdvancedMetrics(trades as any), [trades])
     const hasData = (trades?.length ?? 0) > 0
+    const safeNumber = (value: number) => (Number.isFinite(value) ? value : 0)
+    const safeKellyHalf = safeNumber(kellyHalf)
+    const safeKellyFull = safeNumber(kellyFull)
+    const safeSharpeRatio = safeNumber(sharpeRatio)
+    const safeSortinoRatio = safeNumber(sortinoRatio)
+    const safeCalmarRatio = safeNumber(calmarRatio)
+    const safeMaxDrawdown = safeNumber(maxDrawdown)
 
     // Format currency helper
     const formatCurrency = (value: number) => {
@@ -48,20 +55,20 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Sharpe</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", sharpeRatio > 1 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
-                                    {sharpeRatio.toFixed(2)}
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSharpeRatio > 1 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
+                                    {safeSharpeRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Sortino</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", sortinoRatio > 1.5 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
-                                    {sortinoRatio.toFixed(2)}
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSortinoRatio > 1.5 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
+                                    {safeSortinoRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Calmar</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", calmarRatio > 1 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
-                                    {calmarRatio.toFixed(2)}
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeCalmarRatio > 1 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
+                                    {safeCalmarRatio.toFixed(2)}
                                 </span>
                             </div>
                         </div>
@@ -76,20 +83,20 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs text-balance">Kelly Half</span>
-                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyHalf > 0 ? "metric-positive" : "metric-negative")}>
-                                    {(kellyHalf * 100).toFixed(1)}%
+                                <span className={cn("text-xs font-mono font-bold tabular-nums", safeKellyHalf > 0 ? "metric-positive" : "metric-negative")}>
+                                    {(safeKellyHalf * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Optimal</span>
-                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyFull > 0 ? "metric-positive" : "metric-negative")}>
-                                    {(kellyFull * 100).toFixed(1)}%
+                                <span className={cn("text-xs font-mono font-bold tabular-nums", safeKellyFull > 0 ? "metric-positive" : "metric-negative")}>
+                                    {(safeKellyFull * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-white/40 text-xs">Conservative</span>
-                                <span className={cn("text-xs font-mono font-bold tabular-nums", kellyHalf > 0 ? "metric-positive" : "metric-negative")}>
-                                    {((kellyHalf / 2) * 100).toFixed(1)}%
+                                <span className={cn("text-xs font-mono font-bold tabular-nums", safeKellyHalf > 0 ? "metric-positive" : "metric-negative")}>
+                                    {((safeKellyHalf / 2) * 100).toFixed(1)}%
                                 </span>
                             </div>
                         </div>
@@ -103,7 +110,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         <div className="flex justify-between items-end mb-2">
                             <div className="flex flex-col">
                                 <span className="text-xl font-bold font-mono tracking-tight tabular-nums text-white/80">
-                                    {formatCurrency(maxDrawdown)}
+                                    {formatCurrency(safeMaxDrawdown)}
                                 </span>
                             </div>
                         </div>

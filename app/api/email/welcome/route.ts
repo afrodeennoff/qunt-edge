@@ -3,10 +3,31 @@ import { prisma } from "@/lib/prisma"
 import { Resend } from 'resend'
 import WelcomeEmail from '@/components/emails/welcome'
 import { getLatestVideoFromPlaylist } from "@/app/[locale]/admin/actions/youtube"
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
+function isAuthorizedWebhook(request: Request): boolean {
+  const secret = process.env.WELCOME_WEBHOOK_SECRET || process.env.SUPABASE_WEBHOOK_SECRET
+  if (!secret) return process.env.NODE_ENV !== 'production'
+
+  const authHeader = request.headers.get('authorization') || ''
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+  const candidate = bearer || request.headers.get('x-webhook-secret') || ''
+
+  if (!candidate) return false
+  try {
+    return crypto.timingSafeEqual(Buffer.from(candidate), Buffer.from(secret))
+  } catch {
+    return false
+  }
+}
+
 export async function POST(req: Request) {
+  if (!isAuthorizedWebhook(req)) {
+    return NextResponse.json({ error: 'Unauthorized webhook request' }, { status: 401 })
+  }
+
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY is missing')
     return NextResponse.json({ error: 'Missing API key' }, { status: 500 })

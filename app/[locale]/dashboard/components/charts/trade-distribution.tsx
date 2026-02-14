@@ -46,8 +46,12 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     // Safety check for nbTrades
     if (!nbTrades) return []
 
-    const winRate = Number((nbWin / nbTrades * 100).toFixed(2))
-    const lossRate = Number((nbLoss / nbTrades * 100).toFixed(2))
+    const toPercent = (value: number, total: number) => {
+      if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
+      return Number(((value / total) * 100).toFixed(2))
+    }
+    const winRate = toPercent(nbWin, nbTrades)
+    const lossRate = toPercent(nbLoss, nbTrades)
     // Explicitly handle float precision issues
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 

@@ -1,9 +1,9 @@
 // CRON JOB RUNNING EVERY WEEK
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
-import { startOfWeek, endOfWeek, subWeeks, parseISO, format } from "date-fns";
+import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
 
 // PURPOSE:
 // - Compute MAE and MFE for all trades of the week
@@ -56,6 +56,13 @@ interface InstrumentData {
 // Databento API configuration
 const DATABENTO_API_KEY = process.env.DATABENTO_API_KEY;
 const DATABENTO_BASE_URL = 'https://hist.databento.com/v0';
+
+function isAuthorizedCronRequest(request: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = request.headers.get('authorization')
+  return authHeader === `Bearer ${cronSecret}`
+}
 
 // Databento symbol mapping for futures
 const FUTURES_SYMBOL_MAP: { [key: string]: string } = {
@@ -291,8 +298,12 @@ async function processInstrumentTrades(instrumentData: InstrumentData): Promise<
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    if (!isAuthorizedCronRequest(request)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     console.log('Starting MAE/MFE computation cron job');
 
     if (!DATABENTO_API_KEY) {
