@@ -62,6 +62,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [countdown, setCountdown] = React.useState<number>(0)
     const [isSubscription, setIsSubscription] = React.useState<boolean>(false)
     const [lookupKey, setLookupKey] = React.useState<string | null>(null)
+    const [plan, setPlan] = React.useState<string | null>(null)
     const [referralCode, setReferralCode] = React.useState<string | null>(null)
     const [promoCode, setPromoCode] = React.useState<string | null>(null)
     const [authMethod, setAuthMethod] = React.useState<AuthMethod>(null)
@@ -79,16 +80,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         const next = normalizeNextPath(urlParams.get('next'))
         const referral = urlParams.get('referral')
         const promo_code = urlParams.get('promo_code')
-        setIsSubscription(subscription === 'true')
         const lookup_key = urlParams.get('lookup_key')
+        const plan_param = urlParams.get('plan')
+
+        setIsSubscription(subscription === 'true')
         setLookupKey(lookup_key)
+        setPlan(plan_param)
         setNextUrl(next)
-        
+
         // Get promo code from URL
         if (promo_code) {
             setPromoCode(promo_code)
         }
-        
+
         // Get referral code from URL or localStorage
         if (referral) {
             setReferralCode(referral)
@@ -126,14 +130,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
     async function onSubmitEmail(values: z.infer<typeof formSchema>) {
         if (countdown > 0) return
-        
+
         setIsLoading(true)
         setAuthMethod('email')
         try {
             const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
             const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const next = isSubscription 
-                ? `api/whop/checkout?lookup_key=${lookupKey}${referralParam}${promoParam}` 
+            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
+
+            const next = isSubscription
+                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
                 : nextUrl;
             await signInWithEmail(values.email, next, locale)
             setIsEmailSent(true)
@@ -156,7 +163,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         const errorMessage = error.message.toLowerCase()
 
         // Password validation errors
-        if (errorMessage.includes('password should contain') || 
+        if (errorMessage.includes('password should contain') ||
             errorMessage.includes('password must contain') ||
             errorMessage.includes('password requirements')) {
             return {
@@ -245,7 +252,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         } catch (error) {
             console.error(error)
             const parsedError = parseAuthError(error)
-            
+
             // Set form field error if applicable
             if (parsedError.field === 'password') {
                 form.setError('password', {
@@ -258,7 +265,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     message: parsedError.message
                 })
             }
-            
+
             // Show toast with user-friendly message
             toast.error(t('error'), {
                 description: parsedError.message,
@@ -299,8 +306,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         try {
             const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
             const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const next = isSubscription 
-                ? `api/whop/checkout?lookup_key=${lookupKey}${referralParam}${promoParam}` 
+            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
+
+            const next = isSubscription
+                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
                 : nextUrl;
             await signInWithDiscord(next, locale)
         } catch (error) {
@@ -318,8 +328,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         try {
             const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
             const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const next = isSubscription 
-                ? `api/whop/checkout?lookup_key=${lookupKey}${referralParam}${promoParam}` 
+            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
+
+            const next = isSubscription
+                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
                 : nextUrl;
             await signInWithGoogle(next, locale)
         } catch (error) {
@@ -336,22 +349,22 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         if (domain?.includes('gmail.com')) {
             window.open('https://mail.google.com', '_blank', 'noopener,noreferrer')
         } else if (
-            domain?.includes('outlook.com') || 
-            domain?.includes('hotmail.com') || 
+            domain?.includes('outlook.com') ||
+            domain?.includes('hotmail.com') ||
             domain?.includes('live.com') ||
             domain?.includes('msn.com') ||
             domain?.includes('office365.com')
         ) {
             window.open('https://outlook.live.com', '_blank', 'noopener,noreferrer')
         } else if (
-            domain?.includes('proton.me') || 
-            domain?.includes('protonmail.com') || 
+            domain?.includes('proton.me') ||
+            domain?.includes('protonmail.com') ||
             domain?.includes('pm.me')
         ) {
             window.open('https://mail.proton.me', '_blank', 'noopener,noreferrer')
         } else if (
-            domain?.includes('icloud.com') || 
-            domain?.includes('me.com') || 
+            domain?.includes('icloud.com') ||
+            domain?.includes('me.com') ||
             domain?.includes('mac.com')
         ) {
             window.open('https://www.icloud.com/mail', '_blank', 'noopener,noreferrer')

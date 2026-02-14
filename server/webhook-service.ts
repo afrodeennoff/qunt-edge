@@ -58,7 +58,7 @@ export class WebhookService {
       const hmac = crypto.createHmac('sha256', secret)
       hmac.update(payload)
       const digest = hmac.digest('hex')
-      
+
       return crypto.timingSafeEqual(
         Buffer.from(signature),
         Buffer.from(digest)
@@ -319,37 +319,37 @@ export class WebhookService {
     switch (type) {
       case 'membership.activated':
         return await this.handleMembershipActivated(data, prisma)
-      
+
       case 'membership.deactivated':
         return await this.handleMembershipDeactivated(data, prisma)
-      
+
       case 'membership.updated':
         return await this.handleMembershipUpdated(data, prisma)
-      
+
       case 'membership.trialing':
         return await this.handleMembershipTrialing(data, prisma)
-      
+
       case 'payment.succeeded':
         return await this.handlePaymentSucceeded(data, prisma)
-      
+
       case 'payment.failed':
         return await this.handlePaymentFailed(data, prisma)
-      
+
       case 'payment.refunded':
         return await this.handlePaymentRefunded(data, prisma)
-      
+
       case 'payment.partially_refunded':
         return await this.handlePaymentPartiallyRefunded(data, prisma)
-      
+
       case 'invoice.created':
         return await this.handleInvoiceCreated(data, prisma)
-      
+
       case 'invoice.paid':
         return await this.handleInvoicePaid(data, prisma)
-      
+
       case 'invoice.payment_failed':
         return await this.handleInvoicePaymentFailed(data, prisma)
-      
+
       default:
         logger.warn('[WebhookService] Unhandled event type', { eventType: type })
         return {
@@ -374,11 +374,12 @@ export class WebhookService {
         }
       }
 
-      const email = membership.user.email
+      const email = membership.user.email.toLowerCase().trim();
       const metadata = membership.metadata || {}
       const userId = metadata.user_id
+      const type = metadata.type || 'individual'
       const planName = metadata.plan || membership.product?.title || 'PLUS'
-      
+
       const interval = planName.toLowerCase().includes('monthly') ? 'month' :
         planName.toLowerCase().includes('quarterly') ? 'quarter' :
           planName.toLowerCase().includes('yearly') ? 'year' :
@@ -386,6 +387,14 @@ export class WebhookService {
 
       const isTrial = membership.status === 'trialing'
 
+      // Handle different types of memberships
+      if (type === 'team') {
+        return await this.handleTeamMembershipActivated(membership, email, userId, planName, interval, prisma);
+      } else if (type === 'business') {
+        return await this.handleBusinessMembershipActivated(membership, email, userId, planName, interval, prisma);
+      }
+
+      // Default: Individual membership
       await subscriptionManager.createSubscription({
         userId: userId || membership.user?.id || crypto.randomUUID(),
         email,
@@ -422,6 +431,185 @@ export class WebhookService {
     }
   }
 
+  private async handleTeamMembershipActivated(
+    membership: any,
+    email: string,
+    userId: string | undefined,
+    planName: string,
+    interval: any,
+    prisma: PrismaClient
+  ): Promise<WebhookProcessingResult> {
+    const metadata = membership.metadata || {}
+    const teamName = metadata.team_name || 'My Team'
+    const teamId = metadata.team_id
+
+    // 1. Ensure user exists
+    let user = userId ? await prisma.user.findUnique({ where: { id: userId } }) : null
+    if (!user) {
+      user = await prisma.user.findUnique({ where: { email } })
+    }
+
+    if (!user) {
+      // Create user if not exists (Whop user purchasing for the first time)
+      user = await prisma.user.create({
+        data: {
+          email,
+          auth_user_id: userId || `whop_${membership.user.id}`,
+        }
+      })
+    }
+
+    // 2. Find or create team
+    let team = teamId ? await prisma.team.findUnique({ where: { id: teamId } }) : null
+    if (!team) {
+      team = await prisma.team.findFirst({
+        where: { userId: user.id, name: teamName }
+      })
+    }
+
+    if (!team) {
+      team = await prisma.team.create({
+        data: {
+          name: teamName,
+          userId: user.id,
+          traderIds: [user.id],
+          managers: {
+            create: {
+              managerId: user.id,
+              access: 'admin'
+            }
+          }
+        }
+      })
+    }
+
+    // 3. Create/Update TeamSubscription
+    const endDate = interval === 'lifetime' ?
+      new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) :
+      (interval === 'year' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
+
+    await prisma.teamSubscription.upsert({
+      where: { teamId: team.id },
+      update: {
+        status: 'ACTIVE',
+        plan: planName.toUpperCase(),
+        interval,
+        endDate,
+        email,
+        userId: user.id
+      },
+      create: {
+        teamId: team.id,
+        userId: user.id,
+        email,
+        plan: planName.toUpperCase(),
+        status: 'ACTIVE',
+        interval,
+        endDate
+      }
+    })
+
+    logger.info('[WebhookService] Team Membership activated', {
+      email,
+      teamId: team.id,
+      teamName: team.name,
+      plan: planName
+    })
+
+    return {
+      success: true,
+      eventType: 'membership.activated',
+      processed: true
+    }
+  }
+
+  private async handleBusinessMembershipActivated(
+    membership: any,
+    email: string,
+    userId: string | undefined,
+    planName: string,
+    interval: any,
+    prisma: PrismaClient
+  ): Promise<WebhookProcessingResult> {
+    const metadata = membership.metadata || {}
+    const businessName = metadata.business_name || 'My Business'
+
+    // 1. Ensure user exists
+    let user = userId ? await prisma.user.findUnique({ where: { id: userId } }) : null
+    if (!user) {
+      user = await prisma.user.findUnique({ where: { email } })
+    }
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email,
+          auth_user_id: userId || `whop_${membership.user.id}`,
+        }
+      })
+    }
+
+    // 2. Find or create business
+    let business = await prisma.business.findFirst({
+      where: { userId: user.id, name: businessName }
+    })
+
+    if (!business) {
+      business = await prisma.business.create({
+        data: {
+          name: businessName,
+          userId: user.id,
+          traderIds: [user.id],
+          managers: {
+            create: {
+              managerId: user.id,
+              access: 'admin'
+            }
+          }
+        }
+      })
+    }
+
+    // 3. Create/Update BusinessSubscription
+    const endDate = interval === 'lifetime' ?
+      new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) :
+      (interval === 'year' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
+
+    await prisma.businessSubscription.upsert({
+      where: { businessId: business.id },
+      update: {
+        status: 'ACTIVE',
+        plan: planName.toUpperCase(),
+        interval,
+        endDate,
+        email,
+        userId: user.id
+      },
+      create: {
+        businessId: business.id,
+        userId: user.id,
+        email,
+        plan: planName.toUpperCase(),
+        status: 'ACTIVE',
+        interval,
+        endDate
+      }
+    })
+
+    logger.info('[WebhookService] Business Membership activated', {
+      email,
+      businessId: business.id,
+      businessName: business.name,
+      plan: planName
+    })
+
+    return {
+      success: true,
+      eventType: 'membership.activated',
+      processed: true
+    }
+  }
+
   private async handleMembershipDeactivated(
     membership: any,
     prisma: PrismaClient
@@ -436,13 +624,23 @@ export class WebhookService {
         }
       }
 
+      const email = membership.user.email.toLowerCase().trim();
+      const metadata = membership.metadata || {}
+      const type = metadata.type || 'individual'
+
+      if (type === 'team') {
+        return await this.handleTeamMembershipDeactivated(membership, email, prisma)
+      } else if (type === 'business') {
+        return await this.handleBusinessMembershipDeactivated(membership, email, prisma)
+      }
+
       const subscription = await prisma.subscription.findUnique({
-        where: { email: membership.user.email },
+        where: { email },
       })
 
       if (!subscription) {
         logger.warn('[WebhookService] Subscription not found for deactivation', {
-          email: membership.user.email,
+          email,
         })
         return {
           success: true,
@@ -452,16 +650,14 @@ export class WebhookService {
       }
 
       await prisma.subscription.update({
-        where: { email: membership.user.email },
+        where: { email },
         data: {
           status: 'CANCELLED',
           endDate: new Date(),
         },
       })
 
-      logger.info('[WebhookService] Membership deactivated', {
-        email: membership.user.email,
-      })
+      logger.info('[WebhookService] Membership deactivated', { email })
 
       return {
         success: true,
@@ -479,6 +675,60 @@ export class WebhookService {
     }
   }
 
+  private async handleTeamMembershipDeactivated(
+    membership: any,
+    email: string,
+    prisma: PrismaClient
+  ): Promise<WebhookProcessingResult> {
+    const subscription = await prisma.teamSubscription.findUnique({
+      where: { email }
+    })
+
+    if (!subscription) {
+      logger.warn('[WebhookService] Team Subscription not found for deactivation', { email })
+      return { success: true, eventType: 'membership.deactivated', processed: false }
+    }
+
+    await prisma.teamSubscription.update({
+      where: { email },
+      data: {
+        status: 'CANCELLED',
+        endDate: new Date()
+      }
+    })
+
+    logger.info('[WebhookService] Team Membership deactivated', { email })
+
+    return { success: true, eventType: 'membership.deactivated', processed: true }
+  }
+
+  private async handleBusinessMembershipDeactivated(
+    membership: any,
+    email: string,
+    prisma: PrismaClient
+  ): Promise<WebhookProcessingResult> {
+    const subscription = await prisma.businessSubscription.findUnique({
+      where: { email }
+    })
+
+    if (!subscription) {
+      logger.warn('[WebhookService] Business Subscription not found for deactivation', { email })
+      return { success: true, eventType: 'membership.deactivated', processed: false }
+    }
+
+    await prisma.businessSubscription.update({
+      where: { email },
+      data: {
+        status: 'CANCELLED',
+        endDate: new Date()
+      }
+    })
+
+    logger.info('[WebhookService] Business Membership deactivated', { email })
+
+    return { success: true, eventType: 'membership.deactivated', processed: true }
+  }
+
   private async handleMembershipUpdated(
     membership: any,
     prisma: PrismaClient
@@ -493,41 +743,56 @@ export class WebhookService {
         }
       }
 
-      const planName = membership.metadata?.plan || membership.product?.title || 'PLUS'
+      const email = membership.user.email.toLowerCase().trim();
+      const metadata = membership.metadata || {}
+      const type = metadata.type || 'individual'
+      const planName = metadata.plan || membership.product?.title || 'PLUS'
+
       const interval = planName.toLowerCase().includes('monthly') ? 'month' :
         planName.toLowerCase().includes('quarterly') ? 'quarter' :
           planName.toLowerCase().includes('yearly') ? 'year' :
             planName.toLowerCase().includes('lifetime') ? 'lifetime' : 'month'
 
-      const subscription = await prisma.subscription.findUnique({
-        where: { email: membership.user.email },
-      })
+      const status = membership.status.toUpperCase()
+      const endDate = membership.renewal_period_end
+        ? new Date(typeof membership.renewal_period_end === 'number' ? membership.renewal_period_end * 1000 : membership.renewal_period_end)
+        : undefined
 
-      if (!subscription) {
-        logger.warn('[WebhookService] Subscription not found for update', {
-          email: membership.user.email,
+      if (type === 'team') {
+        await prisma.teamSubscription.updateMany({
+          where: { email },
+          data: {
+            plan: planName.toUpperCase(),
+            interval,
+            status,
+            endDate
+          }
         })
-        return {
-          success: true,
-          eventType: 'membership.updated',
-          processed: false,
-        }
+      } else if (type === 'business') {
+        await prisma.businessSubscription.updateMany({
+          where: { email },
+          data: {
+            plan: planName.toUpperCase(),
+            interval,
+            status,
+            endDate
+          }
+        })
+      } else {
+        await prisma.subscription.update({
+          where: { email },
+          data: {
+            plan: planName.toUpperCase(),
+            interval,
+            status,
+            endDate,
+          },
+        })
       }
 
-      await prisma.subscription.update({
-        where: { email: membership.user.email },
-        data: {
-          plan: planName.toUpperCase(),
-          interval,
-          status: membership.status.toUpperCase(),
-          endDate: membership.renewal_period_end 
-            ? new Date(membership.renewal_period_end * 1000)
-            : undefined,
-        },
-      })
-
       logger.info('[WebhookService] Membership updated', {
-        email: membership.user.email,
+        email,
+        type,
         plan: planName,
       })
 
@@ -551,7 +816,66 @@ export class WebhookService {
     membership: any,
     prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
-    return await this.handleMembershipActivated(membership, prisma)
+    try {
+      if (!membership.user?.email) {
+        return {
+          success: false,
+          eventType: 'membership.trialing',
+          processed: false,
+          error: 'No user email in membership data',
+        }
+      }
+
+      const email = membership.user.email.toLowerCase().trim();
+      const metadata = membership.metadata || {}
+      const type = metadata.type || 'individual'
+
+      const trialEndsAt = membership.trial_period_end
+        ? new Date(typeof membership.trial_period_end === 'number' ? membership.trial_period_end * 1000 : membership.trial_period_end)
+        : undefined
+
+      if (type === 'team') {
+        await prisma.teamSubscription.updateMany({
+          where: { email },
+          data: {
+            status: 'TRIAL',
+            trialEndsAt
+          }
+        })
+      } else if (type === 'business') {
+        await prisma.businessSubscription.updateMany({
+          where: { email },
+          data: {
+            status: 'TRIAL',
+            trialEndsAt
+          }
+        })
+      } else {
+        await prisma.subscription.update({
+          where: { email },
+          data: {
+            status: 'TRIAL',
+            trialEndsAt,
+          },
+        })
+      }
+
+      logger.info('[WebhookService] Membership trialing', { email, type })
+
+      return {
+        success: true,
+        eventType: 'membership.trialing',
+        processed: true,
+      }
+    } catch (error) {
+      logger.error('[WebhookService] Failed to handle membership.trialing', { error })
+      return {
+        success: false,
+        eventType: 'membership.trialing',
+        processed: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
+    }
   }
 
   private async handlePaymentSucceeded(

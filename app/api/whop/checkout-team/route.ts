@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, getWebsiteURL } from "@/server/auth";
-import { whop } from "@/lib/whop";
+import { getWhop } from "@/lib/whop";
 
 async function handleWhopTeamCheckout(user: any, websiteURL: string, teamName?: string) {
     const planId = process.env.NEXT_PUBLIC_WHOP_TEAM_PLAN_ID;
@@ -10,6 +10,7 @@ async function handleWhopTeamCheckout(user: any, websiteURL: string, teamName?: 
     }
 
     const companyId = process.env.WHOP_COMPANY_ID || "biz_jh37YZGpH5dWIY";
+    const whop = getWhop();
 
     try {
         const checkoutConfig = await whop.checkoutConfigurations.create({
@@ -17,12 +18,16 @@ async function handleWhopTeamCheckout(user: any, websiteURL: string, teamName?: 
             plan_id: planId,
             metadata: {
                 user_id: user.id,
-                email: user.email,
+                email: user.email || '',
                 team_name: teamName || '',
                 type: 'team',
             },
             redirect_url: `${websiteURL}dashboard/settings?success=team_created`,
         });
+
+        if (!checkoutConfig.purchase_url) {
+            throw new Error("No purchase_url returned from Whop");
+        }
 
         return NextResponse.redirect(checkoutConfig.purchase_url, 303);
     } catch (error) {

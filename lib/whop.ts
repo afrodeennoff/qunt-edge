@@ -5,14 +5,16 @@ let whopInstance: Whop | null = null;
 
 export const getWhop = () => {
   if (!whopInstance) {
+    const apiKey = process.env.WHOP_API_KEY;
+    if (!apiKey && process.env.NODE_ENV === 'production') {
+      console.warn("WHOP_API_KEY is missing in production!");
+    }
     whopInstance = new Whop({
-      apiKey: process.env.WHOP_API_KEY as string
+      apiKey: apiKey || "dummy_key_for_build"
     });
   }
   return whopInstance;
 };
 
-// Deprecated export for backward compatibility - use getWhop() instead
-export const whop = new Whop({
-  apiKey: process.env.WHOP_API_KEY || "dummy_key_for_build"
-});
+// Default export for convenience
+export const whop = getWhop();

@@ -1,15 +1,16 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { createClient, getWebsiteURL } from "@/server/auth";
-import { whop } from "@/lib/whop";
-import { getSubscriptionDetails } from "@/server/subscription";
+import { getWhop } from "@/lib/whop";
 import { getReferralBySlug } from "@/server/referral";
+import { getSubscriptionDetails } from "@/server/subscription";
 
 async function handleWhopCheckout(
   lookupKey: string,
   user: { id: string; email?: string | null },
   websiteURL: string,
   referral?: string | null,
+  teamId?: string | null,
 ) {
   const subscriptionDetails = await getSubscriptionDetails();
 
@@ -44,6 +45,7 @@ async function handleWhopCheckout(
   }
 
   const companyId = process.env.WHOP_COMPANY_ID || "biz_jh37YZGpH5dWIY";
+  const whop = getWhop();
 
   try {
     const checkoutConfig = await whop.checkoutConfigurations.create({
@@ -51,11 +53,12 @@ async function handleWhopCheckout(
       plan_id: planId,
       metadata: {
         user_id: user.id,
-        email: user.email ?? "",
+        email: user.email || '',
         plan: lookupKey,
         ...(safeReferral ? { referral_code: safeReferral } : {}),
+        ...(teamId ? { team_id: teamId } : {}),
       },
-      redirect_url: `${websiteURL}dashboard?success=true&referral_applied=${safeReferral ? "true" : "false"}`,
+      redirect_url: `${websiteURL}dashboard?success=true&referral_applied=${safeReferral ? "true" : "false"}${teamId ? '&team_id=' + teamId : ''}`,
     });
 
     if (!checkoutConfig.purchase_url) {
