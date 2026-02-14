@@ -273,6 +273,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, `AGENTS.md`
 - **Verification:** Open `/dashboard` with and without `?tab=` query params and confirm widget data is visible by default and card/chart contrast matches the previous commit aesthetic.
 
+### 2026-02-14: Widget Tab Empty-State (Prevent “Invisible Data” When Layout Is Empty)
+- **What changed:** Added a clear empty-state UI to the Widgets tab when the dashboard layout has zero widgets, plus a loading skeleton while layout is still being fetched.
+- **What I want:** If a user has trades but no widgets (or a fresh/empty layout), they should not see a blank screen; they should get a one-click way to restore the default widget layout and immediately see charts/stats.
+- **What I don't want:** A blank Widgets view that looks like “no data” even though the underlying trade data is present.
+- **How we fixed that:**
+  - In `WidgetCanvas`, added:
+    - a `!layouts` loading skeleton,
+    - a `currentLayout.length === 0` panel with `Restore default layout` and `Edit` actions.
+  - Added i18n strings for the new empty-state message in English and French.
+- **Key Files:** `app/[locale]/dashboard/components/widget-canvas.tsx`, `locales/en.ts`, `locales/fr.ts`, `AGENTS.md`
+- **Verification:** Remove all widgets (or start with an empty layout) -> open `/dashboard?tab=widgets` -> confirm the empty-state appears and `Restore default layout` repopulates widgets and makes data visible.
+
 ### 2026-02-14: Unified Master Prompt Consolidation
 - **What changed:** Consolidated a fragmented, overlapping instruction set into a single coherent master prompt template.
 - **What I want:** One copy-paste prompt that is consistent, reusable, and easy to run without conflicting directives.
