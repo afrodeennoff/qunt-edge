@@ -3,7 +3,6 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { headers } from "next/headers"
 import { User } from '@supabase/supabase-js'
 
 export async function getWebsiteURL() {
@@ -559,30 +558,24 @@ export async function verifyOtp(email: string, token: string, type: 'email' | 's
   }
 }
 
-// Optimized function that uses middleware data when available
-export async function getUserId(): Promise<string> {
-  // First try to get user ID from middleware headers
-  const headersList = await headers()
-  const userIdFromMiddleware = headersList.get("x-user-id")
+async function requireAuthenticatedUser() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
 
-  if (userIdFromMiddleware) {
-    console.log("[Auth] Using user ID from middleware")
-    return userIdFromMiddleware
+  if (error || !user?.id) {
+    throw new Error("User not authenticated")
   }
 
-  // Fallback to Supabase call (for API routes or edge cases)
+  return user
+}
+
+// Optimized function that uses middleware data when available
+export async function getUserId(): Promise<string> {
   try {
-    console.log("[Auth] Fallback to Supabase call")
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
-
-    if (error || !user) {
-      throw new Error("User not authenticated")
-    }
-
+    const user = await requireAuthenticatedUser()
     return user.id
   } catch (error: any) {
     handleAuthError(error)
@@ -594,7 +587,8 @@ export async function getUserId(): Promise<string> {
  * Most relational tables (`Account`, `Trade`, `Tag`, `Mood`, etc.) reference `User.id`.
  */
 export async function getDatabaseUserId(): Promise<string> {
-  const rawUserId = await getUserId()
+  const user = await requireAuthenticatedUser()
+  const rawUserId = user.id
 
   const byId = await prisma.user.findUnique({
     where: { id: rawUserId },
@@ -608,17 +602,7 @@ export async function getDatabaseUserId(): Promise<string> {
   })
   if (byAuthId?.id) return byAuthId.id
 
-  const headersList = await headers()
-  const emailFromHeader = headersList.get("x-user-email")?.trim().toLowerCase() || ""
-
-  let resolvedEmail = emailFromHeader
-  if (!resolvedEmail) {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    resolvedEmail = user?.email?.trim().toLowerCase() || ""
-  }
+  let resolvedEmail = user.email?.trim().toLowerCase() || ""
 
   if (!resolvedEmail) {
     resolvedEmail = `${rawUserId}@users.qunt-edge.local`
@@ -639,10 +623,8 @@ export async function getDatabaseUserId(): Promise<string> {
 }
 
 export async function getUserEmail(): Promise<string> {
-  const headersList = await headers()
-  const userEmail = headersList.get("x-user-email")
-  console.log("[Auth] getUserEmail FROM HEADERS", userEmail)
-  return userEmail || ""
+  const user = await requireAuthenticatedUser()
+  return user.email || ""
 }
 
 // Lightweight updater for user language without full ensure logic

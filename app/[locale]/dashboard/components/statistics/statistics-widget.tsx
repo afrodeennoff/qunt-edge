@@ -87,9 +87,13 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
   const netPnlWithPayouts = cumulativePnl - cumulativeFees - totalPayouts
 
   // Calculate rates
-  const winRate = Number((nbWin / nbTrades * 100).toFixed(2))
-  const lossRate = Number((nbLoss / nbTrades * 100).toFixed(2))
-  const beRate = Number((nbBe / nbTrades * 100).toFixed(2))
+  const toPercent = (value: number, total: number) => {
+    if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
+    return Number(((value / total) * 100).toFixed(2))
+  }
+  const winRate = toPercent(nbWin, nbTrades)
+  const lossRate = toPercent(nbLoss, nbTrades)
+  const beRate = toPercent(nbBe, nbTrades)
 
   // Calculate long/short data
   const chartData = Object.entries(calendarData).map(([date, values]) => ({
@@ -102,8 +106,8 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
   const longNumber = chartData.reduce((acc, curr) => acc + curr.longNumber, 0)
   const shortNumber = chartData.reduce((acc, curr) => acc + curr.shortNumber, 0)
   const totalTrades = longNumber + shortNumber
-  const longRate = Number((longNumber / totalTrades * 100).toFixed(2))
-  const shortRate = Number((shortNumber / totalTrades * 100).toFixed(2))
+  const longRate = toPercent(longNumber, totalTrades)
+  const shortRate = toPercent(shortNumber, totalTrades)
 
   // Calculate average win/loss based on daily P&L
   // For single day mode, use the day's P&L directly; for multi-day, calculate average

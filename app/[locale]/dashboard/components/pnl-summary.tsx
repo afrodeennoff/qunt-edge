@@ -46,7 +46,10 @@ export function PnLSummary({ className }: PnLSummaryProps) {
   }, [calendarData])
 
   const isPositive = stats.daily.pnl >= 0
-  const longTermWinRate = typeof statistics?.winRate === "number" ? Math.round(statistics.winRate) : null
+  const longTermWinRate =
+    typeof statistics?.winRate === "number" && Number.isFinite(statistics.winRate)
+      ? Math.round(statistics.winRate)
+      : null
 
   const summaryItems: Array<{
     label: string

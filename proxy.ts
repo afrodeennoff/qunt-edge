@@ -46,12 +46,12 @@ async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            // Use more permissive cookie options for better compatibility
+            // Preserve Supabase defaults while enforcing secure production behavior.
             response.cookies.set(name, value, {
               ...options,
               secure: process.env.NODE_ENV === "production",
-              sameSite: "lax", // More permissive than 'strict'
-              httpOnly: false, // Allow client-side access if needed
+              sameSite: options?.sameSite ?? "lax",
+              httpOnly: options?.httpOnly ?? true,
             })
           })
         },

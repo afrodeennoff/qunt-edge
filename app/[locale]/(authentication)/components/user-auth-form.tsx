@@ -329,11 +329,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setAuthMethod('google')
 
         try {
-            const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
-            const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
-            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
-
             let next = nextUrl;
             if (isSubscription) {
                 const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';

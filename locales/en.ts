@@ -651,6 +651,7 @@ export default {
   "widgets.dragToMove": "Drag to move",
   "widgets.changeSize": "Change Size",
   "widgets.clickToAdd": "Click to add",
+  "widgets.emptyState": "No trades yet.",
   "widgets.widgetAdded": "Widget Added",
   "widgets.widgetAddedDescription":
     "The widget has been added to your dashboard",

@@ -3,10 +3,21 @@
 import { useEffect, useMemo, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
-import { ChevronDown, CircleDot, Zap } from "lucide-react"
+import { CalendarIcon, ChevronDown, CircleDot, Zap } from "lucide-react"
+import { endOfDay, format, startOfDay, subDays, subMonths, subYears } from "date-fns"
+import type { DateRange } from "react-day-picker"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -35,6 +46,8 @@ interface TraderMetrics {
   sumGain: number
   breakEvenRate: number
 }
+
+type DateFilterPreset = "last_week" | "last_month" | "last_3_months" | "last_6_months" | "last_year" | "custom"
 
 function clamp(value: number, min = 0, max = 100) {
   return Math.min(max, Math.max(min, value))
@@ -94,12 +107,23 @@ function getWinningStreak(values: number[]) {
   return count
 }
 
+function isDateWithinRange(value: Date, range?: DateRange) {
+  const from = range?.from ? startOfDay(range.from) : undefined
+  const to = range?.to ? endOfDay(range.to) : undefined
+  if (from && value < from) return false
+  if (to && value > to) return false
+  return true
+}
+
 export default function TraderProfilePage() {
   const { formattedTrades, isLoading, accounts } = useData()
   const user = useUserStore((state) => state.user)
   const supabaseUser = useUserStore((state) => state.supabaseUser)
   const [benchmark, setBenchmark] = useState<BenchmarkMetrics | null>(null)
   const [isBenchmarkLoading, setIsBenchmarkLoading] = useState(true)
+  const [dateFilterPreset, setDateFilterPreset] = useState<DateFilterPreset>("last_month")
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined)
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<Date | undefined>(undefined)
 
   useEffect(() => {
     let alive = true
@@ -156,8 +180,53 @@ export default function TraderProfilePage() {
 
   }, [profileName])
 
-  const metrics = useMemo<TraderMetrics>(() => {
+  const activeDateRange = useMemo<DateRange | undefined>(() => {
+    const now = new Date()
+    switch (dateFilterPreset) {
+      case "last_week":
+        return { from: startOfDay(subDays(now, 7)), to: endOfDay(now) }
+      case "last_month":
+        return { from: startOfDay(subMonths(now, 1)), to: endOfDay(now) }
+      case "last_3_months":
+        return { from: startOfDay(subMonths(now, 3)), to: endOfDay(now) }
+      case "last_6_months":
+        return { from: startOfDay(subMonths(now, 6)), to: endOfDay(now) }
+      case "last_year":
+        return { from: startOfDay(subYears(now, 1)), to: endOfDay(now) }
+      case "custom":
+        return customDateRange
+      default:
+        return undefined
+    }
+  }, [customDateRange, dateFilterPreset])
+
+  const filteredTrades = useMemo(() => {
     const trades = formattedTrades || []
+    const from = activeDateRange?.from ? startOfDay(activeDateRange.from) : undefined
+    const to = activeDateRange?.to ? endOfDay(activeDateRange.to) : undefined
+    if (!from && !to) return trades
+    return trades.filter((trade) => {
+      const entry = new Date(trade.entryDate)
+      if (Number.isNaN(entry.getTime())) return false
+      if (from && entry < from) return false
+      if (to && entry > to) return false
+      return true
+    })
+  }, [activeDateRange?.from, activeDateRange?.to, formattedTrades])
+
+  const dateFilterLabel = useMemo(() => {
+    if (dateFilterPreset !== "custom") return null
+    if (customDateRange?.from && customDateRange?.to) {
+      return `${format(customDateRange.from, "MMM d, yyyy")} - ${format(customDateRange.to, "MMM d, yyyy")}`
+    }
+    if (customDateRange?.from) {
+      return format(customDateRange.from, "MMM d, yyyy")
+    }
+    return "Pick date range"
+  }, [customDateRange?.from, customDateRange?.to, dateFilterPreset])
+
+  const metrics = useMemo<TraderMetrics>(() => {
+    const trades = filteredTrades || []
     const sorted = [...trades].sort(
       (a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime(),
     )
@@ -207,7 +276,7 @@ export default function TraderProfilePage() {
       sumGain,
       breakEvenRate,
     }
-  }, [formattedTrades])
+  }, [filteredTrades])
 
   const radarData = useMemo(() => {
     const baseline = benchmark ?? { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0, sampleSize: 0 }
@@ -222,30 +291,33 @@ export default function TraderProfilePage() {
   }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.totalTrades, metrics.winRate])
 
   const recentTrades = useMemo(() => {
-    return [...(formattedTrades || [])]
+    return [...(filteredTrades || [])]
       .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
       .slice(0, 6)
-  }, [formattedTrades])
+  }, [filteredTrades])
 
   const totalWithdrawAllAccounts = useMemo(() => {
     return (accounts || []).reduce((accountSum, account) => {
       const accountWithdraw = (account.payouts || [])
-        .filter((payout) => payout.status === "PAID")
+        .filter((payout) => {
+          if (payout.status !== "PAID") return false
+          const payoutDate = new Date(payout.date)
+          if (Number.isNaN(payoutDate.getTime())) return false
+          return isDateWithinRange(payoutDate, activeDateRange)
+        })
         .reduce((withdrawSum, payout) => withdrawSum + Number(payout.amount || 0), 0)
       return accountSum + accountWithdraw
     }, 0)
-  }, [accounts])
+  }, [accounts, activeDateRange])
 
   const totalCapitalAllAccounts = useMemo(() => {
-    return (accounts || []).reduce((sum, account) => {
-      const startingBalance = Number(account.startingBalance || 0)
-      const tradingProfit = Number(account.metrics?.totalProfit || 0)
-      const paidWithdraw = (account.payouts || [])
-        .filter((payout) => payout.status === "PAID")
-        .reduce((withdrawSum, payout) => withdrawSum + Number(payout.amount || 0), 0)
-      return sum + startingBalance + tradingProfit - paidWithdraw
-    }, 0)
-  }, [accounts])
+    const openingCapital = (accounts || []).reduce((sum, account) => sum + Number(account.startingBalance || 0), 0)
+    const filteredTradingPnl = (filteredTrades || []).reduce(
+      (sum, trade) => sum + Number(trade.pnl || 0) - Number(trade.commission || 0),
+      0,
+    )
+    return openingCapital + filteredTradingPnl - totalWithdrawAllAccounts
+  }, [accounts, filteredTrades, totalWithdrawAllAccounts])
 
   const activeAccountsCount = useMemo(() => {
     return (accounts || []).filter((account) => Boolean(account.number)).length
@@ -253,17 +325,56 @@ export default function TraderProfilePage() {
 
   const tradeCalendarDays = useMemo(() => {
     const byDay = new Map<string, Date>()
-    ;(formattedTrades || []).forEach((trade) => {
+    ;(filteredTrades || []).forEach((trade) => {
       const date = new Date(trade.entryDate)
       if (Number.isNaN(date.getTime())) return
       const key = date.toISOString().slice(0, 10)
       if (!byDay.has(key)) byDay.set(key, new Date(date.getFullYear(), date.getMonth(), date.getDate()))
     })
     return Array.from(byDay.values()).sort((a, b) => a.getTime() - b.getTime())
-  }, [formattedTrades])
+  }, [filteredTrades])
+
+  const tradePnlByDay = useMemo(() => {
+    const map = new Map<string, number>()
+    ;(filteredTrades || []).forEach((trade) => {
+      const date = new Date(trade.entryDate)
+      if (Number.isNaN(date.getTime())) return
+      const key = date.toISOString().slice(0, 10)
+      const prev = map.get(key) ?? 0
+      const net = Number(trade.pnl || 0) - Number(trade.commission || 0)
+      map.set(key, prev + net)
+    })
+    return map
+  }, [filteredTrades])
+
+  const positivePnlDays = useMemo(() => {
+    return tradeCalendarDays.filter((day) => {
+      const key = day.toISOString().slice(0, 10)
+      return (tradePnlByDay.get(key) ?? 0) > 0
+    })
+  }, [tradeCalendarDays, tradePnlByDay])
+
+  const negativePnlDays = useMemo(() => {
+    return tradeCalendarDays.filter((day) => {
+      const key = day.toISOString().slice(0, 10)
+      return (tradePnlByDay.get(key) ?? 0) < 0
+    })
+  }, [tradeCalendarDays, tradePnlByDay])
 
   const latestTradeDay = tradeCalendarDays.length > 0 ? tradeCalendarDays[tradeCalendarDays.length - 1] : undefined
   const winRateGuidePercent = Math.min(30, Math.max(25, 100 - metrics.winRate))
+  const selectedPnl = useMemo(() => {
+    const target = selectedCalendarDay ?? latestTradeDay
+    if (!target) return 0
+    const key = target.toISOString().slice(0, 10)
+    return tradePnlByDay.get(key) ?? 0
+  }, [latestTradeDay, selectedCalendarDay, tradePnlByDay])
+
+  useEffect(() => {
+    if (!selectedCalendarDay && latestTradeDay) {
+      setSelectedCalendarDay(latestTradeDay)
+    }
+  }, [latestTradeDay, selectedCalendarDay])
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-5">
@@ -274,6 +385,51 @@ export default function TraderProfilePage() {
 
       <div className="relative grid gap-3 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-3">
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Date Filter</p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <Select
+                  value={dateFilterPreset}
+                  onValueChange={(value: DateFilterPreset) => setDateFilterPreset(value)}
+                >
+                  <SelectTrigger className="h-9 w-full border-white/15 bg-[hsl(var(--qe-surface-2))] text-xs text-fg-primary sm:w-[220px]">
+                    <SelectValue placeholder="Select range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="last_week">Last Week</SelectItem>
+                    <SelectItem value="last_month">Last Month</SelectItem>
+                    <SelectItem value="last_3_months">Last 3 Months</SelectItem>
+                    <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+                    <SelectItem value="last_year">Last Year</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9 justify-start border-white/15 bg-[hsl(var(--qe-surface-2))] text-xs text-fg-primary hover:bg-white/10"
+                    >
+                      <CalendarIcon className="h-3.5 w-3.5" />
+                      {dateFilterLabel ?? "Custom Range"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto border-white/15 bg-[hsl(var(--qe-surface-1))] p-2" align="start">
+                    <Calendar
+                      mode="range"
+                      selected={customDateRange}
+                      onSelect={setCustomDateRange}
+                      numberOfMonths={2}
+                      className="p-0"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </Card>
+
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="flex items-start gap-4">
               <Avatar className="h-20 w-20 border border-white/20 bg-white/5">
@@ -330,20 +486,31 @@ export default function TraderProfilePage() {
 
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-fg-primary">Trade Calendar</p>
+              <p className="text-sm font-semibold text-fg-primary">PnL Calendar</p>
               <p className="text-xs text-fg-muted">{tradeCalendarDays.length} active days</p>
             </div>
             <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2">
               <Calendar
                 mode="single"
-                selected={latestTradeDay}
+                selected={selectedCalendarDay ?? latestTradeDay}
+                onSelect={setSelectedCalendarDay}
                 defaultMonth={latestTradeDay}
-                modifiers={{ traded: tradeCalendarDays }}
+                modifiers={{
+                  positive: positivePnlDays,
+                  negative: negativePnlDays,
+                }}
                 modifiersClassNames={{
-                  traded: "bg-white/20 text-white font-semibold",
+                  positive: "bg-emerald-400/25 text-emerald-100 font-semibold",
+                  negative: "bg-rose-400/25 text-rose-100 font-semibold",
                 }}
                 className="w-full p-0"
               />
+            </div>
+            <div className="mt-2 flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2">
+              <p className="text-xs text-fg-muted">Selected Day PnL</p>
+              <p className={`text-sm font-semibold ${selectedPnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                {formatSigned(selectedPnl)}
+              </p>
             </div>
           </Card>
 

@@ -47,6 +47,7 @@ export default function ReferralButton({ variant = 'sidebar' }: { variant?: 'nav
   const [referralData, setReferralData] = useState<ReferralData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const affiliateUrl = 'https://whop.com/quantedge-solutions/affiliates'
 
   useEffect(() => {
     if (isOpen) {
@@ -157,6 +158,16 @@ export default function ReferralButton({ variant = 'sidebar' }: { variant?: 'nav
             <div className="flex items-center justify-between">
               <h4 className="font-semibold text-lg">{t('referral.title')}</h4>
               {getTierIcon(referralData.referral.tier.level)}
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-muted/30 p-3">
+              <p className="text-sm font-semibold">{t('referral.landing.heroTitle')}</p>
+              <Button asChild size="sm" className="mt-2 h-8 w-full">
+                <Link href={affiliateUrl} target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)}>
+                  {t('referral.landing.affiliateCta')}
+                  <ExternalLink className="ml-1 h-3.5 w-3.5" />
+                </Link>
+              </Button>
             </div>
 
             {/* How It Works Link */}
@@ -332,4 +343,3 @@ export default function ReferralButton({ variant = 'sidebar' }: { variant?: 'nav
     </Popover>
   )
 }
-

@@ -754,9 +754,11 @@ export const DataProvider: React.FC<{
 
     // Get hidden accounts for filtering
     const hiddenGroup = groups.find((g) => g.name === "Hidden Accounts");
-    const hiddenAccountNumbers = accounts
-      .filter((a) => a.groupId === hiddenGroup?.id)
-      .map((a) => a.number);
+    const hiddenAccountNumbers = hiddenGroup
+      ? accounts
+        .filter((a) => a.groupId === hiddenGroup.id)
+        .map((a) => a.number)
+      : [];
 
     // Apply all filters in a single pass
     return trades

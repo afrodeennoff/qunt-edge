@@ -36,6 +36,38 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: End-to-End Repository Audit (Build Gate + Test Gate)
+- **What changed:** Ran a full audit pass across lint, production build, tests, and high-risk changed files; documented a release-blocking TypeScript regression in account save flow.
+- **What I want:** CI and deploy gates should reflect true production health, with failing build blockers surfaced before release and test status clearly separated from lint-noise.
+- **What I don't want:** Shipping with a green test suite but a broken production build caused by type-model drift in server actions.
+- **How we fixed that:**
+  - Executed `npm run lint` (no hard errors; warning backlog remains).
+  - Executed `npm run build` and identified a blocking compile/type failure in `setupAccountAction` destructuring.
+  - Executed `npm test` to confirm unit/integration baseline is healthy despite build break.
+  - Isolated failure root: `updatedAt` is destructured from `Account` in `server/accounts.ts`, but `Account` type no longer includes that property.
+- **Key Files:** `server/accounts.ts`, `lib/data-types.ts`, `AGENTS.md`
+- **Verification:** `npm run build` fails at `server/accounts.ts:215` with `Type error: Property 'updatedAt' does not exist on type 'Account'.`; `npm test` passes (`20 passed | 1 skipped`, `88 passed | 46 skipped`).
+
+### 2026-02-14: Account Update Prisma Validation Fix (`updatedAt` payload leak)
+- **What changed:** Fixed a server-action regression where saving account settings could crash with `PrismaClientValidationError` because `updatedAt` was passed into `prisma.account.update()`.
+- **What I want:** Account save/update flows from Dashboard should succeed reliably without schema-validation crashes on managed deployments.
+- **What I don't want:** Client-normalized account objects leaking immutable/system timestamp fields into Prisma update payloads (`Unknown argument 'updatedAt'`).
+- **How we fixed that:**
+  - Updated `setupAccountAction` payload sanitization to explicitly strip `createdAt` and `updatedAt` before building Prisma `data` objects for both update/create paths.
+  - Kept the rest of relation handling (`group` connect/disconnect and `considerBuffer`) unchanged.
+- **Key Files:** `server/accounts.ts`, `AGENTS.md`
+- **Verification:** Trigger an account edit/save from `/dashboard` and confirm no Prisma validation error appears in logs; verify account values persist correctly.
+
+### 2026-02-14: Dashboard Chart Widgets Data Visibility Fix (Hidden Group Filter Guard)
+- **What changed:** Fixed a data-filtering regression that could hide all chart-widget data by incorrectly treating ungrouped accounts as hidden.
+- **What I want:** Chart widgets should consistently show real trade data whenever the user has trades, unless accounts are intentionally placed in the `Hidden Accounts` group.
+- **What I don't want:** A fallback comparison against an undefined hidden-group id that silently filters out all ungrouped account trades and makes widgets appear empty.
+- **How we fixed that:**
+  - Updated `formattedTrades` filtering in `DataProvider` so hidden-account filtering is only applied when the `Hidden Accounts` group actually exists.
+  - Added a small defensive date-shape guard in `formatCalendarData` so side fallback logic remains stable even if trade date fields arrive in mixed formats.
+- **Key Files:** `context/data-provider.tsx`, `lib/utils.ts`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets` and confirm chart widgets render real values again for users with existing trades; verify hidden-account behavior still works when an actual `Hidden Accounts` group is present.
+
 ### 2026-02-14: Home End-to-End Audit + Conversion-Focused Content Redesign
 - **What changed:** Audited the Home page end-to-end and reworked the section architecture + copy strategy to clearly answer: problem, features, process, why us, why different, AI value, and pricing/CTA.
 - **What I want:** A high-conviction marketing flow that explains product value fast and makes differentiation obvious to both individual traders and team leads.
@@ -324,6 +356,29 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Open Trader Profile and confirm the second Win Rate guide line stays in ~25–30% range and a trade-highlight calendar appears above Trade Feed.
 
+### 2026-02-14: Trader Profile Date Filtering (Preset + Custom)
+- **What changed:** Added a shadcn-based date filter system on Trader Profile with presets and custom calendar range selection.
+- **What I want:** Users should be able to switch metrics/feed context quickly between `Last Week`, `Last Month`, `Last 3 Months`, `Last 6 Months`, `Last Year`, and a custom range.
+- **What I don't want:** Static all-time metrics that cannot be sliced by period, or custom date selection without a proper calendar UX.
+- **How we fixed that:**
+  - Added `Select` presets for the requested time windows plus `Custom`.
+  - Added `Popover` + `Calendar` (range mode) for custom date range selection.
+  - Introduced `filteredTrades` and wired all trade-driven sections to it (`metrics`, `recentTrades`, and trade-calendar highlights).
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** On Trader Profile, switch each preset and confirm cards/feed update; select a custom range and confirm the same sections update immediately.
+
+### 2026-02-14: Trader Profile Full Filter Binding + Standalone PnL Calendar
+- **What changed:** Extended date filter coverage to capital/withdraw metrics and converted calendar block into a standalone PnL calendar.
+- **What I want:** All visible Trader Profile data should respond to the selected date filter, and the calendar should show day-level PnL context (not only marked trade presence).
+- **What I don't want:** Mixed behavior where some cards ignore the selected range or calendar acts as a passive date marker without PnL meaning.
+- **How we fixed that:**
+  - Applied active date range to `Total Withdraw` by filtering payout dates (`PAID`) within the selected range.
+  - Updated `Total Capital` to use filtered period math: opening capital + filtered trade net PnL - filtered paid withdraw.
+  - Added daily PnL map for filtered trades and calendar modifiers for positive/negative day coloring.
+  - Added selected-day PnL readout under the calendar and bound calendar selection state.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Change date preset/custom range and confirm all cards update; in calendar, click a date and verify selected-day PnL value updates with positive/negative styling.
+
 ### 2026-02-14: Trader Profile Real-Time + Cache Isolation Hardening
 - **What changed:** Hardened benchmark data fetching to prevent stale/shared-cache behavior and improve real-time freshness.
 - **What I want:** Trader Profile metrics should stay fresh and user-scoped behavior should never be affected by cross-session caching artifacts.
@@ -481,6 +536,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/(home)/components/AnalysisDemo.tsx`, `app/[locale]/(home)/components/analysis-demo-chart.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/HomeContent.tsx`, `app/[locale]/(landing)/components/navbar.tsx`, `app/[locale]/(landing)/components/marketing-layout-shell.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `components/ui/sidebar.tsx`, `app/globals.css`, `AGENTS.md`
 - **Verification:** Ran ESLint against all edited TSX files with no errors; confirmed mobile-specific CSS/perf changes compile cleanly (CSS file is intentionally outside ESLint config and reports one ignore warning).
 
+### 2026-02-14: Mobile Dashboard Clarity + NaN Guard Fix
+- **What changed:** Fixed broken mobile stat chips (`NaN%`) and reduced stacked visual density in the dashboard mobile header/action row.
+- **What I want:** Mobile dashboard should read clearly at a glance with stable percentages, valid empty-state copy, and less layered/chunky top navigation styling.
+- **What I don't want:** Raw translation keys (`widgets.emptyState`), `NaN%` badges, or cramped header wrappers that feel stacked and hard to parse on phone screens.
+- **How we fixed that:**
+  - Added explicit `widgets.emptyState` translations in English/French locale dictionaries.
+  - Added safe percentage guards (zero/invalid denominator handling) in trade-performance, long/short, and statistics widget calculations.
+  - Added finite-number guards for summary and profit-factor outputs to prevent `NaN` rendering.
+  - Simplified mobile dashboard header styling by reducing nested chrome/wrappers and keeping controls visually lighter.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/pnl-summary.tsx`, `app/[locale]/dashboard/components/statistics/trade-performance-card.tsx`, `app/[locale]/dashboard/components/statistics/long-short-card.tsx`, `app/[locale]/dashboard/components/statistics/statistics-widget.tsx`, `app/[locale]/dashboard/components/statistics/profit-factor-card.tsx`, `locales/en.ts`, `locales/fr.ts`, `AGENTS.md`
+- **Verification:** Ran ESLint on all edited dashboard/locale files; no errors (remaining warnings are pre-existing in `statistics-widget.tsx` and unrelated to this regression fix).
+
 ### 2026-02-14: Vercel Build Fix - Prop Firms Translator Type Simplification
 - **What changed:** Replaced an overly complex inferred translator type in the Prop Firms landing page with a minimal callable translator signature.
 - **What I want:** Keep i18n typing safe enough for page usage while ensuring TypeScript can complete production builds on Vercel.
@@ -499,3 +566,73 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Deleted the repeated `useMemo` block and kept a single source of truth for paid-withdraw aggregation.
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Run `npx tsc --noEmit --pretty false` and confirm zero errors.
+
+### 2026-02-14: Pricing Strategy Audit (Project-Wide Capability Mapping)
+- **What changed:** Audited implemented product capabilities and current billing surfaces to define a coherent Free/Paid pricing architecture aligned with existing code.
+- **What I want:** A pricing model that matches real feature depth (AI workflows, multi-platform imports, team analytics, embeds/sharing) and removes conflicting plan narratives across Home and Billing.
+- **What I don't want:** Inconsistent tier messaging (`Basic/Plus` vs `Starter/Pro AI/Desk`) or pricing that over-promises features not enforced by entitlement logic.
+- **How we fixed that:**
+  - Reviewed billing and checkout flow (`/api/whop/checkout`, `components/pricing-plans.tsx`, `server/billing.ts`) to confirm live intervals and lookup-key behavior.
+  - Mapped actual product scope from dashboard, import platform config, team modules, AI routes, and share/embed surfaces.
+  - Identified plan-surface drift: Home page presents 3 tiers while Billing currently sells 2 tiers + lifetime.
+  - Produced a unified recommendation: `Free -> Pro -> Desk` (with optional lifetime upsell), plus account/history/AI/team/export/embedding limits that can be instrumented via existing `UsageMetric` and `AiRequestLog` models.
+- **Key Files:** `components/pricing-plans.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `locales/en/pricing.ts`, `server/billing.ts`, `server/payment-service.ts`, `server/subscription-manager.ts`, `app/api/whop/checkout/route.ts`, `app/api/whop/checkout-team/route.ts`, `prisma/schema.prisma`, `AGENTS.md`
+- **Verification:** Cross-check proposed tiers against implemented capabilities/routes and ensure pricing copy is consistent across Home + Billing before rollout.
+
+### 2026-02-14: Referral Page Redesign + Whop Affiliate Link Integration
+- **What changed:** Redesigned the referral landing page with a conversion-focused hero, added the Whop affiliate link, and surfaced a clear “Get Earn Up To 30% Commission” message in both the referral page and referral popover.
+- **What I want:** Users should instantly understand the affiliate value proposition and have a direct path to join the affiliate program.
+- **What I don't want:** A generic referral page without a strong CTA, or users needing extra steps to find where to apply for affiliate commissions.
+- **How we fixed that:**
+  - Added a new referral hero block with stronger hierarchy, CTA button, and direct affiliate URL display in `app/[locale]/(landing)/referral/page.tsx`.
+  - Integrated the affiliate link `https://whop.com/quantedge-solutions/affiliates` as the primary outbound CTA.
+  - Added a compact affiliate CTA card inside `components/referral-button.tsx` so users can access the same flow from the in-app popover.
+  - Extended referral locale copy in both English and French with new hero/CTA translation keys.
+- **Key Files:** `app/[locale]/(landing)/referral/page.tsx`, `components/referral-button.tsx`, `locales/en/referral.ts`, `locales/fr/referral.ts`, `AGENTS.md`
+- **Verification:** Run `npx eslint app/[locale]/(landing)/referral/page.tsx components/referral-button.tsx locales/en/referral.ts locales/fr/referral.ts` and confirm no errors (one pre-existing warning remains: unused `getProgressPercentage` in `components/referral-button.tsx`).
+
+### 2026-02-14: Authentication Security Audit (Findings Only)
+- **What changed:** Completed a targeted audit of authentication and authorization flows across middleware, callback redirects, and identity resolution helpers.
+- **What I want:** A clear, severity-ranked list of concrete auth risks with file/line evidence to prioritize remediation.
+- **What I don't want:** Hidden auth regressions (header trust, redirect abuse, and identity bootstrap side effects) that go undocumented and resurface later.
+- **How we fixed that:**
+  - Audited core auth boundaries in `server/auth.ts`, `proxy.ts`, `app/api/auth/callback/route.ts`, and API routes consuming `getDatabaseUserId`.
+  - Confirmed exploitable issues: trust of client-supplied identity headers, weak callback redirect normalization, and redirect host construction from forwarded headers.
+  - Prepared a severity-ordered report with affected paths and practical exploit implications.
+- **Key Files:** `server/auth.ts`, `proxy.ts`, `app/api/auth/callback/route.ts`, `app/api/referral/route.ts`, `AGENTS.md`
+- **Verification:** Re-read all cited code paths with line numbers and validated each finding against current control flow before publishing the audit.
+
+### 2026-02-14: Authentication Hardening Fixes (Header Trust + Redirect Safety)
+- **What changed:** Implemented direct fixes for the authentication audit findings in identity resolution, callback redirects, and auth-cookie handling.
+- **What I want:** Ensure authenticated identity is derived from verified Supabase session state, prevent callback redirect abuse, and keep session cookies protected from client-side script access.
+- **What I don't want:** Trusting caller-controlled headers for user identity, protocol-relative/host-poisoned post-auth redirects, or weakened cookie flags that amplify XSS impact.
+- **How we fixed that:**
+  - Reworked identity helpers in `server/auth.ts` to require a live Supabase-authenticated user for `getUserId`, `getDatabaseUserId`, and `getUserEmail` (removed `x-user-id`/`x-user-email` trust path).
+  - Hardened `app/api/auth/callback/route.ts` by rejecting absolute/protocol-relative `next` values, normalizing to single-slash internal paths, and redirecting via canonical `getWebsiteURL()` base instead of `x-forwarded-host`.
+  - Updated `proxy.ts` cookie writes to preserve Supabase options while defaulting `httpOnly` to `true` and keeping secure production behavior.
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `proxy.ts`, `AGENTS.md`
+- **Verification:** Ran `npx eslint server/auth.ts app/api/auth/callback/route.ts proxy.ts` (0 errors). `npx tsc --noEmit` currently fails due existing project config include for missing `.next/types/cache-life.d.ts`.
+
+### 2026-02-14: Frontend + Backend Audit (Findings Only)
+- **What changed:** Completed a full-stack audit pass with static verification (`lint`, `typecheck`, tests) and targeted code review over auth, middleware, account mutation, and landing/community frontend paths.
+- **What I want:** A severity-ranked, file-referenced issue list that clearly separates blocking defects from hygiene warnings so fixes can be prioritized quickly.
+- **What I don't want:** Another broad warning dump without concrete impact analysis, or hidden regressions in security and build safety.
+- **How we fixed that:**
+  - Ran `npm run lint` and captured warning-heavy frontend/backend hotspots.
+  - Ran `npm run typecheck` and confirmed one build-blocking TypeScript error in account setup payload handling.
+  - Ran `npm test` and confirmed the current test suite passes (20 files passed, 1 skipped).
+  - Re-read high-risk auth/session files (`proxy.ts`, `app/api/auth/callback/route.ts`, `server/auth.ts`) and surfaced concrete security issues with line-level evidence.
+  - Flagged additional frontend/backend correctness and maintainability issues from lint + direct file inspection.
+- **Key Files:** `proxy.ts`, `app/api/auth/callback/route.ts`, `server/accounts.ts`, `app/[locale]/(landing)/community/post/[id]/page.tsx`, `app/[locale]/(authentication)/components/user-auth-form.tsx`, `AGENTS.md`
+- **Verification:** `npm run lint` (0 errors, 1419 warnings), `npm run typecheck` (fails with `server/accounts.ts(215,5)`), `npm test` (passes: 20 files, 88 tests; 1 file skipped).
+
+### 2026-02-14: Authentication Re-Audit (Post-Hardening Validation)
+- **What changed:** Re-audited authentication after header-trust and callback hardening changes to confirm closures and identify any remaining auth weaknesses.
+- **What I want:** Verify that previously reported web-session auth issues are closed and isolate residual high-risk paths for the next patch.
+- **What I don't want:** Assuming auth is fully secure after partial fixes while API-token and auxiliary identity flows still carry exploitable risk.
+- **How we fixed that:**
+  - Re-checked patched files (`server/auth.ts`, `app/api/auth/callback/route.ts`, `proxy.ts`) and verified prior findings were addressed.
+  - Audited residual auth surfaces (`server/trades.ts`, token import APIs, token-generation actions) for plaintext token usage, expiry enforcement, and identity resolution behavior.
+  - Documented remaining critical/high findings with line-level evidence and exploit context.
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `proxy.ts`, `server/trades.ts`, `app/api/thor/store/route.ts`, `app/api/etp/v1/store/route.ts`, `server/thor.ts`, `app/[locale]/dashboard/components/import/thor/action.ts`, `app/[locale]/dashboard/components/import/etp/action.ts`, `AGENTS.md`
+- **Verification:** Used targeted code-path review with line references to confirm fixed items and remaining vulnerabilities before publishing re-audit findings.

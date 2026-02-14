@@ -142,12 +142,17 @@ export function DashboardHeader() {
 
                 {/* Right Side: Actions & Configuration */}
                 <div className={cn(
-                    "flex items-center gap-2 rounded-2xl border border-border/40 bg-muted/20 p-1 shadow-sm",
-                    isMobile && "max-w-[58vw] overflow-x-auto"
+                    "flex items-center gap-2",
+                    isMobile
+                        ? "rounded-none border-0 bg-transparent p-0 shadow-none"
+                        : "rounded-2xl border border-border/40 bg-muted/20 p-1 shadow-sm"
                 )}>
 
                     {/* Global Utilities Group */}
-                    <div className="flex shrink-0 items-center gap-1 rounded-xl bg-background/50 px-1 py-0.5 ring-1 ring-border/10">
+                    <div className={cn(
+                        "flex shrink-0 items-center gap-1",
+                        isMobile ? "" : "rounded-xl bg-background/50 px-1 py-0.5 ring-1 ring-border/10"
+                    )}>
                         <FilterCommandMenu variant="navbar" />
 
                         {!isMobile && <GlobalSyncButton />}
@@ -173,7 +178,12 @@ export function DashboardHeader() {
 
                     {/* Customization Group (Conditional) */}
                     {isDashboardRoot && isWidgetsTab && (
-                        <div className="ml-1 flex shrink-0 items-center gap-1.5 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm p-1.5 shadow-sm ring-1 ring-white/5">
+                        <div className={cn(
+                            "ml-1 flex shrink-0 items-center gap-1.5",
+                            isMobile
+                                ? "rounded-lg border border-border/35 bg-background/70 p-1"
+                                : "rounded-xl border border-border/50 bg-background/50 p-1.5 shadow-sm ring-1 ring-white/5 backdrop-blur-sm"
+                        )}>
                             <button
                                 type="button"
                                 onClick={toggleCustomizing}

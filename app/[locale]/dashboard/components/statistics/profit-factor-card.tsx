@@ -1,5 +1,4 @@
 import { useData } from "@/context/data-provider"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Scale, HelpCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '../../types/dashboard'
@@ -16,11 +15,13 @@ interface ProfitFactorCardProps {
 }
 
 export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardProps) {
+  void size
   const { statistics: { profitFactor } } = useData()
   const t = useI18n()
 
-  const formattedPF = profitFactor.toFixed(2)
-  const isProfitable = profitFactor >= 1
+  const safeProfitFactor = Number.isFinite(profitFactor) ? profitFactor : 0
+  const formattedPF = safeProfitFactor.toFixed(2)
+  const isProfitable = safeProfitFactor >= 1
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">

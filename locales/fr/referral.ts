@@ -19,6 +19,11 @@ export default {
     landing: {
       title: 'Programme de Parrainage',
       subtitle: 'Invitez des amis et gagnez des récompenses lorsqu\'ils s\'abonnent à Plus',
+      heroBadge: 'Programme affilié',
+      heroTitle: 'Gagnez jusqu\'à 30% de commission',
+      heroDescription: 'Recommandez Qunt Edge à votre audience et gagnez jusqu\'à 30% de commission pour chaque parrainage qualifié.',
+      affiliateCta: 'Rejoindre le programme affilié',
+      affiliateLinkLabel: 'Lien direct d\'inscription',
       howItWorks: 'Comment ça marche',
       step1Title: 'Partagez votre lien',
       step1Description: 'Copiez votre lien de parrainage unique et partagez-le avec vos amis, votre famille ou votre communauté.',
@@ -44,4 +49,3 @@ export default {
     },
   }
 } as const;
-

@@ -652,6 +652,7 @@ export default {
   "widgets.dragToMove": "Glisser pour déplacer",
   "widgets.changeSize": "Changer la taille",
   "widgets.clickToAdd": "Cliquer pour ajouter",
+  "widgets.emptyState": "Aucun trade pour le moment.",
   "widgets.widgetAdded": "Widget ajouté",
   "widgets.widgetAddedDescription":
     "Le widget a été ajouté à votre tableau de bord",
