@@ -567,6 +567,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `components/ui/calendar.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Open Trader Profile, switch date presets and custom ranges, and confirm: day cells show signed PnL for trade days, legend appears, and selected-day readout stays in-range after filter changes.
 
+### 2026-02-14: Trader Profile Layout Refinement (Filter Above PnL + Closed Trade Pagination)
+- **What changed:** Refined Trader Profile layout so the date filter sits directly above the PnL calendar and upgraded Trade Feed to closed-trades-only with 5 items per page using shadcn pagination controls.
+- **What I want:** Filtering controls should be visually attached to the calendar they drive, and Trade Feed should stay clean/readable by showing a small paged slice of closed trades.
+- **What I don't want:** A detached top-level filter block that feels disconnected from the calendar, or a long unpaginated feed that overwhelms the profile view.
+- **How we fixed that:**
+  - Removed the standalone top Date Filter card and embedded the full filter toolbar (preset select + custom range popover calendar) inside the PnL Calendar card header area.
+  - Added `closedTrades` derivation from filtered trades using valid `closeDate`, then paginated at `5` items per page.
+  - Switched Trade Feed rows to render close timestamp context and added shadcn `Pagination` with `Previous` / `Next` and current-page indicator.
+  - Added feed page reset behavior whenever date filter/range changes so pagination stays valid.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile and confirm Date Filter appears directly above PnL calendar; Trade Feed shows only closed trades, 5 rows max per page, and pagination updates results correctly across date presets/custom range.
+
 ### 2026-02-14: Trader Profile Real-Time + Cache Isolation Hardening
 - **What changed:** Hardened benchmark data fetching to prevent stale/shared-cache behavior and improve real-time freshness.
 - **What I want:** Trader Profile metrics should stay fresh and user-scoped behavior should never be affected by cross-session caching artifacts.

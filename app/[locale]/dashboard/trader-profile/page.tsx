@@ -13,11 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { CalendarIcon, ChevronDown, CircleDot, Zap } from "lucide-react"
 import { endOfDay, format, startOfDay, subDays, subMonths, subYears } from "date-fns"
-import type { DateRange } from "react-day-picker"
+import type { DateRange, DayButtonProps } from "react-day-picker"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -135,6 +143,7 @@ export default function TraderProfilePage() {
   const [dateFilterPreset, setDateFilterPreset] = useState<DateFilterPreset>("last_month")
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined)
   const [selectedCalendarDay, setSelectedCalendarDay] = useState<Date | undefined>(undefined)
+  const [tradeFeedPage, setTradeFeedPage] = useState(1)
 
   useEffect(() => {
     let alive = true
@@ -301,11 +310,27 @@ export default function TraderProfilePage() {
     ]
   }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.totalTrades, metrics.winRate])
 
-  const recentTrades = useMemo(() => {
+  const closedTrades = useMemo(() => {
     return [...(filteredTrades || [])]
-      .sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime())
-      .slice(0, 6)
+      .filter((trade) => {
+        const closeDate = (trade as { closeDate?: string | Date | null }).closeDate
+        if (!closeDate) return false
+        const parsed = new Date(closeDate)
+        return !Number.isNaN(parsed.getTime())
+      })
+      .sort((a, b) => {
+        const closeA = new Date((a as { closeDate?: string | Date | null }).closeDate as string | Date).getTime()
+        const closeB = new Date((b as { closeDate?: string | Date | null }).closeDate as string | Date).getTime()
+        return closeB - closeA
+      })
   }, [filteredTrades])
+
+  const tradesPerPage = 5
+  const tradeFeedTotalPages = Math.max(1, Math.ceil(closedTrades.length / tradesPerPage))
+  const paginatedClosedTrades = useMemo(() => {
+    const start = (tradeFeedPage - 1) * tradesPerPage
+    return closedTrades.slice(start, start + tradesPerPage)
+  }, [closedTrades, tradeFeedPage])
 
   const totalWithdrawAllAccounts = useMemo(() => {
     return (accounts || []).reduce((accountSum, account) => {
@@ -390,6 +415,10 @@ export default function TraderProfilePage() {
     }
   }, [activeDateRange, latestTradeDay, selectedCalendarDay])
 
+  useEffect(() => {
+    setTradeFeedPage(1)
+  }, [dateFilterPreset, customDateRange?.from, customDateRange?.to, closedTrades.length])
+
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-5">
       <div className="pointer-events-none absolute inset-0 opacity-70">
@@ -399,51 +428,6 @@ export default function TraderProfilePage() {
 
       <div className="relative grid gap-3 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-3">
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Date Filter</p>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <Select
-                  value={dateFilterPreset}
-                  onValueChange={(value: DateFilterPreset) => setDateFilterPreset(value)}
-                >
-                  <SelectTrigger className="h-9 w-full border-white/15 bg-[hsl(var(--qe-surface-2))] text-xs text-fg-primary sm:w-[220px]">
-                    <SelectValue placeholder="Select range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="last_week">Last Week</SelectItem>
-                    <SelectItem value="last_month">Last Month</SelectItem>
-                    <SelectItem value="last_3_months">Last 3 Months</SelectItem>
-                    <SelectItem value="last_6_months">Last 6 Months</SelectItem>
-                    <SelectItem value="last_year">Last Year</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-9 justify-start border-white/15 bg-[hsl(var(--qe-surface-2))] text-xs text-fg-primary hover:bg-white/10"
-                    >
-                      <CalendarIcon className="h-3.5 w-3.5" />
-                      {dateFilterLabel ?? "Custom Range"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto border-white/15 bg-[hsl(var(--qe-surface-1))] p-2" align="start">
-                    <Calendar
-                      mode="range"
-                      selected={customDateRange}
-                      onSelect={setCustomDateRange}
-                      numberOfMonths={2}
-                      className="p-0"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          </Card>
-
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="flex items-start gap-4">
               <Avatar className="h-20 w-20 border border-white/20 bg-white/5">
@@ -499,6 +483,50 @@ export default function TraderProfilePage() {
           </div>
 
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
+            <div className="mb-3 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Date Filter</p>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Select
+                    value={dateFilterPreset}
+                    onValueChange={(value: DateFilterPreset) => setDateFilterPreset(value)}
+                  >
+                    <SelectTrigger className="h-9 w-full border-white/15 bg-[hsl(var(--qe-surface-1))] text-xs text-fg-primary sm:w-[210px]">
+                      <SelectValue placeholder="Select range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="last_week">Last Week</SelectItem>
+                      <SelectItem value="last_month">Last Month</SelectItem>
+                      <SelectItem value="last_3_months">Last 3 Months</SelectItem>
+                      <SelectItem value="last_6_months">Last 6 Months</SelectItem>
+                      <SelectItem value="last_year">Last Year</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-9 justify-start border-white/15 bg-[hsl(var(--qe-surface-1))] text-xs text-fg-primary hover:bg-white/10"
+                      >
+                        <CalendarIcon className="h-3.5 w-3.5" />
+                        {dateFilterLabel ?? "Custom Range"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto border-white/15 bg-[hsl(var(--qe-surface-1))] p-2" align="start">
+                      <Calendar
+                        mode="range"
+                        selected={customDateRange}
+                        onSelect={setCustomDateRange}
+                        numberOfMonths={2}
+                        className="p-0"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-fg-primary">PnL Calendar</p>
               <div className="flex items-center gap-3 text-xs text-fg-muted">
@@ -535,9 +563,9 @@ export default function TraderProfilePage() {
                     "h-10 w-10 rounded-md p-0 font-normal text-fg-primary hover:bg-white/10 aria-selected:bg-white/15 aria-selected:text-fg-primary",
                 }}
                 components={{
-                  DayButton: ({ day, className, ...buttonProps }: any) => {
-                    const date = day.date as Date
-                    const displayMonth = day.displayMonth as Date
+                  DayButton: ({ day, className, ...buttonProps }: DayButtonProps) => {
+                    const date = day.date
+                    const displayMonth = day.displayMonth
                     if (date.getMonth() !== displayMonth.getMonth()) {
                       return (
                         <button
@@ -603,15 +631,18 @@ export default function TraderProfilePage() {
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-fg-primary">Trade Feed</p>
-              <p className="text-xs text-fg-muted">Last {recentTrades.length} trades</p>
+              <p className="text-xs text-fg-muted">
+                Closed trades {closedTrades.length === 0 ? "0" : `${(tradeFeedPage - 1) * tradesPerPage + 1}-${Math.min(tradeFeedPage * tradesPerPage, closedTrades.length)}`} of {closedTrades.length}
+              </p>
             </div>
             {isLoading ? <p className="mb-2 text-xs text-fg-muted">Loading trades...</p> : null}
             <div className="space-y-2">
-              {recentTrades.length === 0 ? (
-                <p className="text-sm text-fg-muted">No trades available yet.</p>
+              {paginatedClosedTrades.length === 0 ? (
+                <p className="text-sm text-fg-muted">No closed trades in this range.</p>
               ) : (
-                recentTrades.map((trade) => {
+                paginatedClosedTrades.map((trade) => {
                   const pnl = Number(trade.pnl || 0)
+                  const closeDate = (trade as { closeDate?: string | Date | null }).closeDate
                   return (
                     <div
                       key={trade.id}
@@ -621,7 +652,9 @@ export default function TraderProfilePage() {
                         <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`} />
                         <div>
                           <p className="text-sm font-semibold text-fg-primary">{trade.instrument || "N/A"}</p>
-                          <p className="text-[11px] text-fg-muted">{new Date(trade.entryDate).toLocaleString()}</p>
+                          <p className="text-[11px] text-fg-muted">
+                            Closed {closeDate ? new Date(closeDate).toLocaleString() : new Date(trade.entryDate).toLocaleString()}
+                          </p>
                         </div>
                       </div>
                       <p className={`text-sm font-semibold ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
@@ -632,6 +665,39 @@ export default function TraderProfilePage() {
                 })
               )}
             </div>
+            {closedTrades.length > tradesPerPage ? (
+              <div className="mt-3 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-1.5 py-1">
+                <Pagination className="justify-end">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          setTradeFeedPage((current) => Math.max(1, current - 1))
+                        }}
+                        className={tradeFeedPage === 1 ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink href="#" isActive size="default" className="min-w-20">
+                        {tradeFeedPage} / {tradeFeedTotalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          setTradeFeedPage((current) => Math.min(tradeFeedTotalPages, current + 1))
+                        }}
+                        className={tradeFeedPage >= tradeFeedTotalPages ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            ) : null}
           </Card>
         </section>
 
