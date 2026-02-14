@@ -28,8 +28,6 @@ interface TraderMetrics {
   winRate: number
   avgReturn: number
   totalTrades: number
-  avgWin: number
-  avgLoss: number
   netPnl: number
   consistencyRate: number
   winningStreak: number
@@ -65,6 +63,15 @@ function formatValue(value: number, digits = 2) {
 function formatSigned(value: number, digits = 2) {
   if (!Number.isFinite(value)) return "0.00"
   return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`
+}
+
+function formatCapitalCompact(value: number) {
+  if (!Number.isFinite(value)) return "0"
+  const sign = value < 0 ? "-" : ""
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}m`
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(abs >= 100_000 ? 0 : 1)}k`
+  return `${sign}${abs.toFixed(0)}`
 }
 
 function getTradeDay(dateValue: string | Date) {
@@ -187,8 +194,6 @@ export default function TraderProfilePage() {
       winRate,
       avgReturn,
       totalTrades,
-      avgWin,
-      avgLoss: avgLossAbs,
       netPnl: cumulativePnl,
       consistencyRate,
       winningStreak,
@@ -221,6 +226,17 @@ export default function TraderProfilePage() {
         .filter((payout) => payout.status === "PAID")
         .reduce((withdrawSum, payout) => withdrawSum + Number(payout.amount || 0), 0)
       return accountSum + accountWithdraw
+    }, 0)
+  }, [accounts])
+
+  const totalCapitalAllAccounts = useMemo(() => {
+    return (accounts || []).reduce((sum, account) => {
+      const startingBalance = Number(account.startingBalance || 0)
+      const tradingProfit = Number(account.metrics?.totalProfit || 0)
+      const paidWithdraw = (account.payouts || [])
+        .filter((payout) => payout.status === "PAID")
+        .reduce((withdrawSum, payout) => withdrawSum + Number(payout.amount || 0), 0)
+      return sum + startingBalance + tradingProfit - paidWithdraw
     }, 0)
   }, [accounts])
 
@@ -354,12 +370,12 @@ export default function TraderProfilePage() {
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Win</p>
-                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgWin)}%</p>
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Capital</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatCapitalCompact(totalCapitalAllAccounts)}</p>
               </div>
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Loss</p>
-                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}%</p>
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Withdraw</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatCapitalCompact(totalWithdrawAllAccounts)}</p>
               </div>
             </div>
             <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">

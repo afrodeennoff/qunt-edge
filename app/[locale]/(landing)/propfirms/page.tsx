@@ -10,8 +10,6 @@ import { TimeframeControls } from './components/timeframe-controls'
 import type { Timeframe } from './actions/timeframe-utils'
 import type { PropfirmCatalogueStats } from './actions/types'
 
-type Translator = Awaited<ReturnType<typeof getI18n>>
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getI18n()
 
@@ -51,7 +49,7 @@ function formatCompactCount(value: number): string {
 function renderPropfirmCard(
   propfirmName: string,
   stat: PropfirmCatalogueStats,
-  t: Translator
+  t: any
 ) {
   const paidAmount = stat.payouts.paidAmount
   const paidCount = stat.payouts.paidCount

@@ -273,6 +273,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Open Trader Profile and verify the right panel card order/structure matches the screenshot component-by-component.
 
+### 2026-02-14: Trader Profile Capital + Payout Metrics Swap
+- **What changed:** Replaced the top right-panel pair from `Avg. Win` / `Avg. Loss` to `Total Capital` / `Total Payouts`.
+- **What I want:** Those two headline stats should reflect real account-level user data (capital and payouts), including compact values like `100k` when users have multiple accounts.
+- **What I don't want:** Percentage-style averages in that slot when the user expects account aggregates.
+- **How we fixed that:**
+  - Updated `totalCapitalAllAccounts` to equity-style aggregation across all accounts: `startingBalance + metrics.totalProfit - paidWithdraw`.
+  - Added `totalWithdrawAllAccounts` as sum of payout amounts with `PAID` status across all user accounts.
+  - Rendered both values with compact `k/m` formatting for quick readability.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile and confirm first right-side two stats now show `Total Capital` and `Total Withdraw` based on real user account data.
+
 ### 2026-02-14: Trader Profile Audit Pass
 - **What changed:** Audited Trader Profile metric logic and removed stale internal fields from the page model.
 - **What I want:** Clear metric semantics with minimal technical debt so future agents can safely iterate.
@@ -418,3 +429,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Added CSS mobile performance guardrails to disable expensive decorative animations and reduce blur/shadow cost on small screens.
 - **Key Files:** `app/[locale]/(home)/components/AnalysisDemo.tsx`, `app/[locale]/(home)/components/analysis-demo-chart.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/HomeContent.tsx`, `app/[locale]/(landing)/components/navbar.tsx`, `app/[locale]/(landing)/components/marketing-layout-shell.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `components/ui/sidebar.tsx`, `app/globals.css`, `AGENTS.md`
 - **Verification:** Ran ESLint against all edited TSX files with no errors; confirmed mobile-specific CSS/perf changes compile cleanly (CSS file is intentionally outside ESLint config and reports one ignore warning).
+
+### 2026-02-14: Vercel Build Fix - Prop Firms Translator Type Simplification
+- **What changed:** Replaced an overly complex inferred translator type in the Prop Firms landing page with a minimal callable translator signature.
+- **What I want:** Keep i18n typing safe enough for page usage while ensuring TypeScript can complete production builds on Vercel.
+- **What I don't want:** Build failures from `Expression produces a union type that is too complex to represent` caused by deep inference from `Awaited<ReturnType<typeof getI18n>>`.
+- **How we fixed that:**
+  - Updated `Translator` in `app/[locale]/(landing)/propfirms/page.tsx` to a lightweight function type: `(key: string, params?: Record<string, unknown>) => string`.
+  - Kept all call sites unchanged (`t('key')` and `t('key', { ... })`) to preserve runtime behavior.
+- **Key Files:** `app/[locale]/(landing)/propfirms/page.tsx`, `AGENTS.md`
+- **Verification:** Run `npm run build` and confirm the prior type error at line 13 in the Prop Firms page no longer appears.
+
+### 2026-02-14: Build Fix - Trader Profile Duplicate Variable Removal
+- **What changed:** Removed a duplicate `totalWithdrawAllAccounts` declaration in Trader Profile.
+- **What I want:** Keep strict TypeScript checks passing so production builds are not blocked by local symbol redeclaration.
+- **What I don't want:** `TS2451: Cannot redeclare block-scoped variable` failures that stop `next build` during type-check.
+- **How we fixed that:**
+  - Deleted the repeated `useMemo` block and kept a single source of truth for paid-withdraw aggregation.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Run `npx tsc --noEmit --pretty false` and confirm zero errors.
