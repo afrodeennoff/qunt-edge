@@ -136,14 +136,14 @@ function TagsColumnHeader() {
         >
           <span>{t("trade-table.tags")}</span>
           {hasActiveFilter && (
-            <Filter className="ml-1 h-3.5 w-3.5 text-white/40" />
+            <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <Filter className="mr-2 h-3.5 w-3.5 text-white/20" />
+            <Filter className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
             {t("table.filter")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-80">
@@ -950,7 +950,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           return (
             <div className="text-right font-medium">
               <span
-                className={cn(pnl >= 0 ? "text-emerald-400 font-bold" : "text-white/40")}
+                className={cn(pnl >= 0 ? "text-emerald-400 font-bold" : "text-muted-foreground")}
               >
                 {pnl.toFixed(2)}
               </span>
@@ -1031,7 +1031,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           return (
             <div className="text-right font-medium">
               <span
-                className={cn(value >= 0 ? "text-white" : "text-white/40")}
+                className={cn(value >= 0 ? "text-foreground" : "text-muted-foreground")}
               >
                 {showPoints ? value.toFixed(2) : value}
               </span>
@@ -1445,7 +1445,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                 </tr>
               )}
             </tbody>
-            <tfoot className="sticky bottom-0 z-10 bg-black/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_12px_rgba(0,0,0,0.5)]">
+            <tfoot className="sticky bottom-0 z-10 bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
               <tr className="border-b transition-colors">
                 {visibleColumns.map((column, index) => {
                   const columnId = column.id || (column as any).accessorKey;
@@ -1499,7 +1499,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                       >
                         <span
                           className={cn(
-                            totals.totalPnl >= 0 ? "text-emerald-400" : "text-white/40"
+                            totals.totalPnl >= 0 ? "text-emerald-400" : "text-muted-foreground"
                           )}
                         >
                           {totals.totalPnl.toFixed(2)}

@@ -1354,28 +1354,28 @@ export function AccountsOverview({
 
       {/* Unconfigured accounts banner */}
       {(unconfiguredAccounts.length > 0 && !isLoading) && (
-        <div className="border-b border-orange-200/30 bg-orange-50/40 dark:border-orange-700/30 dark:bg-orange-950/30">
+        <div className="border-b border-border bg-secondary/20 backdrop-blur-sm">
           <div className="px-4 py-2 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
-                <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                  {t('propFirm.status.needsConfiguration')}:
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  {t('propFirm.status.needsConfiguration')}
                 </span>
               </div>
               <div className="flex gap-2 overflow-x-auto">
                 {unconfiguredAccounts.map((accountNumber, index) => (
                   <div
                     key={accountNumber}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-orange-100 dark:bg-orange-900/50"
+                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-background border border-border"
                   >
-                    <span className="text-xs font-medium text-orange-800 dark:text-orange-200">
+                    <span className="text-[10px] font-bold text-foreground">
                       {accountNumber}
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 p-0 hover:bg-orange-200 dark:hover:bg-orange-800/50"
+                      className="h-5 w-5 p-0 hover:bg-muted"
                       onClick={() => {
                         // Create a minimal account object for configuration
                         const tempAccount = {
@@ -1395,7 +1395,7 @@ export function AccountsOverview({
                         setSelectedAccountForTable(tempAccount as any)
                       }}
                     >
-                      <Settings className="h-3 w-3 text-orange-600 dark:text-orange-400" />
+                      <Settings className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </Button>
                   </div>
                 ))}
@@ -1425,12 +1425,12 @@ export function AccountsOverview({
                 {sortedGroupEntries.map(({ group, accounts: orderedAccounts }, groupIndex) => {
                   // Generate a consistent color for each group based on group index
                   const groupColors = [
-                    'border-blue-200/50 bg-blue-50/30 dark:border-blue-800/30 dark:bg-blue-950/20',
-                    'border-purple-200/50 bg-purple-50/30 dark:border-purple-800/30 dark:bg-purple-950/20',
-                    'border-white/20 bg-white/10 dark:border-white/15 dark:bg-white/5',
-                    'border-orange-200/50 bg-orange-50/30 dark:border-orange-800/30 dark:bg-orange-950/20',
-                    'border-pink-200/50 bg-pink-50/30 dark:border-pink-800/30 dark:bg-pink-950/20',
-                    'border-cyan-200/50 bg-cyan-50/30 dark:border-cyan-800/30 dark:bg-cyan-950/20',
+                    'border-primary/20 bg-primary/[0.02]',
+                    'border-muted-foreground/20 bg-muted-foreground/[0.02]',
+                    'border-border bg-card',
+                    'border-primary/10 bg-primary/[0.01]',
+                    'border-secondary bg-secondary/10',
+                    'border-foreground/10 bg-foreground/[0.02]',
                   ];
 
                   const groupColorClass = groupColors[groupIndex % groupColors.length];
@@ -1445,13 +1445,13 @@ export function AccountsOverview({
                       )}
                     >
                       {/* Group header with subtle styling */}
-                      <div className="px-4 py-3 border-b border-current/10">
+                      <div className="px-4 py-3 border-b border-border/40">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-foreground/80 tracking-wide uppercase">
+                          <h3 className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] uppercase">
                             {group.name}
                           </h3>
-                          <div className="text-xs text-muted-foreground bg-white/50 dark:bg-black/20 px-2 py-1 rounded-full">
-                            {orderedAccounts.length} {orderedAccounts.length === 1 ? 'account' : 'accounts'}
+                          <div className="text-[9px] font-bold text-muted-foreground bg-background/50 px-2 py-0.5 rounded-full border border-border/40">
+                            {orderedAccounts.length} {orderedAccounts.length === 1 ? 'ACCOUNT' : 'ACCOUNTS'}
                           </div>
                         </div>
                       </div>
@@ -1495,18 +1495,18 @@ export function AccountsOverview({
                   return (
                     <div
                       className={cn(
-                        "relative border-l-4 border-gray-200/50 bg-gray-50/30 dark:border-gray-700/30 dark:bg-gray-900/20 rounded-r-lg",
-                        "transition-all duration-200 hover:shadow-md"
+                        "relative border-l-4 border-border bg-secondary/5 rounded-r-lg",
+                        "transition-all duration-300 hover:shadow-md hover:bg-secondary/10"
                       )}
                     >
                       {/* Ungrouped header */}
-                      <div className="px-4 py-3 border-b border-gray-200/20 dark:border-gray-700/20">
+                      <div className="px-4 py-3 border-b border-border/40">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-muted-foreground tracking-wide uppercase">
+                          <h3 className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] uppercase">
                             {t('propFirm.ungrouped')}
                           </h3>
-                          <div className="text-xs text-muted-foreground bg-white/50 dark:bg-black/20 px-2 py-1 rounded-full">
-                            {sortedUngroupedAccounts.length} {sortedUngroupedAccounts.length === 1 ? 'account' : 'accounts'}
+                          <div className="text-[9px] font-bold text-muted-foreground bg-background/50 px-2 py-0.5 rounded-full border border-border/40">
+                            {sortedUngroupedAccounts.length} {sortedUngroupedAccounts.length === 1 ? 'ACCOUNT' : 'ACCOUNTS'}
                           </div>
                         </div>
                       </div>

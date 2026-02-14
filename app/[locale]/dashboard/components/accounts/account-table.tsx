@@ -36,8 +36,8 @@ interface AccountTableProps {
   onEditPayout?: (payout: { id: string, amount: number, date: Date, status: string }) => void
 }
 
-export function AccountTable({ 
-  accountNumber, 
+export function AccountTable({
+  accountNumber,
   startingBalance,
   profitTarget,
   dailyMetrics,
@@ -71,12 +71,12 @@ export function AccountTable({
                 <TableCell colSpan={7} className="h-[400px] text-center relative">
                   <div className="absolute inset-0 backdrop-blur-[2px] bg-background/80 flex flex-col items-center justify-center gap-2">
                     <h3 className="font-semibold text-lg">
-                      {hasPendingChanges 
-                        ? t('propFirm.setup.saveFirst.title') 
+                      {hasPendingChanges
+                        ? t('propFirm.setup.saveFirst.title')
                         : t('propFirm.setup.configureFirst.title')}
                     </h3>
                     <p className="text-muted-foreground">
-                      {hasPendingChanges 
+                      {hasPendingChanges
                         ? t('propFirm.setup.saveFirst.description')
                         : t('propFirm.setup.configureFirst.description')}
                     </p>
@@ -94,10 +94,10 @@ export function AccountTable({
   const sortedMetrics = [...dailyMetrics].sort((a, b) => a.date.getTime() - b.date.getTime())
 
   // Split metrics into before and after reset
-  const metricsBeforeReset = resetDate 
+  const metricsBeforeReset = resetDate
     ? sortedMetrics.filter(metric => metric.date < resetDate)
     : []
-  
+
   const metricsAfterReset = resetDate
     ? sortedMetrics.filter(metric => metric.date > resetDate)
     : sortedMetrics
@@ -174,7 +174,7 @@ export function AccountTable({
         <TableCell className="text-right">
           {metric.payout && (
             <div className="flex items-center justify-end gap-2">
-              <div 
+              <div
                 className={cn(
                   "flex items-center gap-2",
                   onEditPayout && "cursor-pointer hover:opacity-80 transition-opacity"
@@ -186,7 +186,7 @@ export function AccountTable({
                 )}>
                   -${metric.payout.amount.toFixed(2)}
                 </span>
-                <Badge 
+                <Badge
                   variant={metric.payout.status === 'PENDING' ? 'secondary' : 'default'}
                 >
                   {metric.payout.status}
@@ -232,7 +232,7 @@ export function AccountTable({
 
   function renderTotalRow(metrics: typeof sortedMetrics, totalPnL: number, runningBalance: number) {
     // Calculate total payouts
-    const totalPayouts = metrics.reduce((sum, metric) => 
+    const totalPayouts = metrics.reduce((sum, metric) =>
       sum + (metric.payout?.status === 'PAID' ? metric.payout.amount : 0), 0)
 
     // Calculate profits after payouts
@@ -241,12 +241,12 @@ export function AccountTable({
     // Calculate the base amount for consistency (profit target until exceeded)
     const baseAmount = profitsAfterPayouts <= profitTarget ? profitTarget : profitsAfterPayouts
     const maxAllowedDailyProfit = baseAmount * (consistencyPercentage / 100)
-    
+
     // Check if any daily PnL exceeds the max allowed
     const hasInconsistentDays = metrics.some(metric => metric.pnl > maxAllowedDailyProfit)
 
     return (
-      <TableRow className="bg-muted/50 font-medium">
+      <TableRow className="bg-muted/30 font-medium">
         <TableCell>{t('calendar.modal.total')}</TableCell>
         <TableCell className={cn(
           "text-right",
@@ -270,8 +270,8 @@ export function AccountTable({
           "text-right",
           hasInconsistentDays ? "metric-negative" : "metric-positive"
         )}>
-          {hasInconsistentDays ? 
-            t('propFirm.consistency.inconsistent') : 
+          {hasInconsistentDays ?
+            t('propFirm.consistency.inconsistent') :
             t('propFirm.consistency.consistent')
           }
         </TableCell>
@@ -286,7 +286,7 @@ export function AccountTable({
     <div className="space-y-8">
       {resetDate && metricsBeforeReset.length > 0 && (
         <div>
-          <div className="mb-2 text-sm font-medium text-muted-foreground">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             {t('propFirm.beforeReset')}
           </div>
           <div className="rounded-md border">
@@ -317,15 +317,15 @@ export function AccountTable({
       )}
 
       {resetDate && (
-        <div className="rounded-md border bg-yellow-100/50 dark:bg-yellow-900/20 p-4">
+        <div className="rounded-md border border-border bg-secondary/20 backdrop-blur-sm p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium">{t('propFirm.resetDate.label')}</div>
-              <div className="text-sm text-muted-foreground">{format(resetDate, 'PP', { locale: dateLocale })}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{t('propFirm.resetDate.label')}</div>
+              <div className="font-medium text-foreground">{format(resetDate, 'PP', { locale: dateLocale })}</div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-muted-foreground">{t('propFirm.startingBalance')}</div>
-              <div className="font-medium">${startingBalance.toFixed(2)}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{t('propFirm.startingBalance')}</div>
+              <div className="font-medium text-foreground">${startingBalance.toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -333,7 +333,7 @@ export function AccountTable({
 
       <div>
         {resetDate && (
-          <div className="mb-2 text-sm font-medium text-muted-foreground">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             {t('propFirm.afterReset')}
           </div>
         )}

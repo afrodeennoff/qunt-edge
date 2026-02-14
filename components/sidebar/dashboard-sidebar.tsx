@@ -202,15 +202,15 @@ export function DashboardSidebar() {
     ]
 
     return (
-        <Sidebar collapsible="icon" className="border-r border-white/5 bg-[#050505]">
-            <SidebarHeader className="h-14 flex items-center px-4 border-b border-white/5">
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
+            <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border">
                 <div className="flex items-center gap-2 px-1">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                         <Command className="size-5" />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                        <span className="truncate font-semibold">Qunt Edge</span>
-                        <span className="truncate text-xs text-white/50">Trading Platform</span>
+                        <span className="truncate font-semibold text-sidebar-foreground">Qunt Edge</span>
+                        <span className="truncate text-xs text-sidebar-foreground/70">Trading Platform</span>
                     </div>
                 </div>
             </SidebarHeader>
@@ -218,7 +218,7 @@ export function DashboardSidebar() {
             <SidebarContent>
                 {groups.map((group) => (
                     <SidebarGroup key={group.label}>
-                        <SidebarGroupLabel className="text-white/30">{group.label}</SidebarGroupLabel>
+                        <SidebarGroupLabel className="text-sidebar-foreground/40">{group.label}</SidebarGroupLabel>
                         <SidebarMenu>
                             {group.items.map((item) => {
                                 const isActive = item.href ? pathname === item.href || (item.href.includes('?') && pathname === item.href.split('?')[0]) : false
@@ -230,7 +230,7 @@ export function DashboardSidebar() {
                                             isActive={isActive}
                                             onClick={item.onClick}
                                             tooltip={item.label}
-                                            className="hover:bg-white/5 hover:text-white data-[active=true]:bg-white/10 data-[active=true]:text-white transition-colors"
+                                            className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                                         >
                                             {item.href ? (
                                                 <Link href={item.href}>
@@ -252,14 +252,14 @@ export function DashboardSidebar() {
                 ))}
             </SidebarContent>
 
-            <SidebarFooter className="p-2 border-t border-white/5 space-y-2">
+            <SidebarFooter className="p-2 border-t border-sidebar-border space-y-2">
                 <div className="px-2 group-data-[collapsible=icon]:hidden">
                     <ReferralButton />
                 </div>
 
                 <div className="px-2 group-data-[collapsible=icon]:hidden">
                     <Select value={timezone} onValueChange={setTimezone}>
-                        <SelectTrigger className="h-8 bg-transparent border-white/10 text-xs text-white/70">
+                        <SelectTrigger className="h-8 bg-transparent border-sidebar-border text-xs text-sidebar-foreground/70">
                             <SelectValue placeholder="Timezone" />
                         </SelectTrigger>
                         <SelectContent>
@@ -278,79 +278,79 @@ export function DashboardSidebar() {
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton
                                     size="lg"
-                                    className="data-[state=open]:bg-white/5 data-[state=open]:text-white mb-2"
+                                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground mb-2"
                                 >
-                                    <Avatar className="h-8 w-8 rounded-lg border border-white/10">
+                                    <Avatar className="h-8 w-8 rounded-lg border border-sidebar-border">
                                         <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
-                                        <AvatarFallback className="rounded-lg bg-white/5 text-white/50 text-xs">
+                                        <AvatarFallback className="rounded-lg bg-sidebar-accent text-sidebar-foreground/50 text-xs">
                                             {user?.user_metadata?.full_name?.charAt(0) || 'U'}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                                        <span className="truncate font-semibold text-white">
+                                        <span className="truncate font-semibold text-sidebar-foreground">
                                             {user?.user_metadata?.full_name || 'User'}
                                         </span>
-                                        <span className="truncate text-xs text-white/50">
+                                        <span className="truncate text-xs text-sidebar-foreground/50">
                                             {user?.email}
                                         </span>
                                     </div>
-                                    <ChevronsUpDown className="ml-auto size-4 text-white/30 group-data-[collapsible=icon]:hidden" />
+                                    <ChevronsUpDown className="ml-auto size-4 text-sidebar-foreground/30 group-data-[collapsible=icon]:hidden" />
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
-                                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-[#0a0a0a] border-white/10 text-white"
+                                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-popover border-border text-popover-foreground"
                                 side={isMobile ? "bottom" : "right"}
                                 align="end"
                                 sideOffset={4}
                             >
                                 <DropdownMenuLabel className="p-0 font-normal">
                                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                        <Avatar className="h-8 w-8 rounded-lg border border-white/10">
+                                        <Avatar className="h-8 w-8 rounded-lg border border-border">
                                             <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
-                                            <AvatarFallback className="rounded-lg bg-white/5 text-white/50 text-xs">
+                                            <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs">
                                                 {user?.user_metadata?.full_name?.charAt(0) || 'U'}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="grid flex-1 text-left text-sm leading-tight">
-                                            <span className="truncate font-semibold text-white">
+                                            <span className="truncate font-semibold text-foreground">
                                                 {user?.user_metadata?.full_name || 'User'}
                                             </span>
-                                            <span className="truncate text-xs text-white/50">
+                                            <span className="truncate text-xs text-muted-foreground">
                                                 {user?.email}
                                             </span>
                                         </div>
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuSeparator className="bg-white/5" />
+                                <DropdownMenuSeparator className="bg-border" />
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem className="focus:bg-white/5 focus:text-white">
+                                    <DropdownMenuItem className="focus:bg-accent focus:text-accent-foreground">
                                         <Sparkles className="mr-2 h-4 w-4 text-blue-400" />
                                         <span>Upgrade to Pro</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
-                                <DropdownMenuSeparator className="bg-white/5" />
+                                <DropdownMenuSeparator className="bg-border" />
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem className="focus:bg-white/5 focus:text-white" asChild>
+                                    <DropdownMenuItem className="focus:bg-accent focus:text-accent-foreground" asChild>
                                         <Link href={`/${locale}/dashboard/settings`}>
                                             <User className="mr-2 h-4 w-4" />
                                             <span>Account</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="focus:bg-white/5 focus:text-white" asChild>
+                                    <DropdownMenuItem className="focus:bg-accent focus:text-accent-foreground" asChild>
                                         <Link href={`/${locale}/dashboard/billing`}>
                                             <CreditCard className="mr-2 h-4 w-4" />
                                             <span>Billing</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="focus:bg-white/5 focus:text-white" asChild>
+                                    <DropdownMenuItem className="focus:bg-accent focus:text-accent-foreground" asChild>
                                         <Link href={`/${locale}/dashboard/settings`}>
                                             <Settings2 className="mr-2 h-4 w-4" />
                                             <span>Settings</span>
                                         </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
-                                <DropdownMenuSeparator className="bg-white/5" />
-                                <DropdownMenuItem onClick={handleLogout} className="focus:bg-red-500/10 focus:text-red-500 text-red-500/80">
+                                <DropdownMenuSeparator className="bg-border" />
+                                <DropdownMenuItem onClick={handleLogout} className="focus:bg-destructive/10 focus:text-destructive text-destructive">
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>Log out</span>
                                 </DropdownMenuItem>

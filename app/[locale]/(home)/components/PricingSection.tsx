@@ -4,9 +4,10 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useCurrentLocale } from '@/locales/client'
 import { Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const plans = [
   {
@@ -51,73 +52,78 @@ export default function PricingSection() {
   const locale = useCurrentLocale()
 
   return (
-    <section id="pricing" className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <section id="pricing" className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8 bg-background">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-8 text-center sm:mb-12"
+          className="mb-12 text-center"
         >
-          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
+          <Badge variant="outline" className="mb-4">
             Pricing
           </Badge>
-          <h2 className="mt-3 text-[clamp(1.9rem,4.6vw,3.15rem)] font-semibold leading-[0.95] tracking-[-0.03em] [font-family:var(--home-display)]">
-            Transparent plans for
-            <span className="block text-[hsl(var(--brand-primary))]">individual and team growth</span>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            Transparent plans for <br />
+            <span className="text-primary">individual and team growth</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-[1.7] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
             Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
           </p>
-          <p className="mx-auto mt-2 text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Billed monthly. Cancel anytime.</p>
+          <p className="mt-4 text-xs font-mono text-muted-foreground">Billed monthly. Cancel anytime.</p>
         </motion.div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3">
           {plans.map((plan, idx) => (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.06 }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="flex"
             >
-                <Card
-                  variant="glass"
-                  className={`h-full rounded-2xl border-[hsl(var(--mk-border)/0.35)] ${plan.popular ? 'ring-2 ring-[hsl(var(--brand-primary)/0.45)] shadow-[0_28px_60px_-36px_hsl(var(--brand-primary)/0.55)]' : ''}`}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between gap-3">
-                      <CardTitle className="text-xl tracking-[-0.01em] [font-family:var(--home-display)]">{plan.name}</CardTitle>
-                    {plan.popular ? (
-                      <Badge className="bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">Most Popular</Badge>
-                    ) : null}
+              <Card
+                className={cn(
+                  "flex flex-col w-full transition-all duration-300 hover:shadow-xl hover:border-primary/50",
+                  plan.popular && "border-primary shadow-lg shadow-primary/10 relative overflow-hidden"
+                )}
+              >
+                {plan.popular && (
+                  <div className="absolute top-0 right-0 p-4">
+                    <Badge variant="default" className="bg-primary text-primary-foreground">
+                      Most Popular
+                    </Badge>
                   </div>
-                  <p className="mt-3 text-[2rem] font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">
+                )}
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+                  <div className="mt-4 flex items-baseline text-5xl font-bold tracking-tight">
                     {plan.price}
-                    <span className="ml-1 text-sm font-medium text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{plan.period}</span>
-                  </p>
-                  <p className="text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{plan.subtitle}</p>
-                  <p className="mt-1 text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">{plan.note}</p>
+                    <span className="ml-1 text-sm font-medium text-muted-foreground">{plan.period}</span>
+                  </div>
+                  <CardDescription className="mt-2 text-sm">{plan.subtitle}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--brand-primary))]" />
+                      <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <Check className="h-5 w-5 shrink-0 text-primary" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col gap-2">
                   <Button
                     asChild
-                    className={`h-11 w-full rounded-full ${plan.popular ? 'bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]' : ''}`}
                     variant={plan.popular ? 'default' : 'outline'}
+                    className={cn("w-full h-12 rounded-full", plan.popular && "shadow-md shadow-primary/25")}
                   >
                     <Link href={`/${locale}/authentication?next=dashboard`}>{plan.cta}</Link>
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground font-mono">{plan.note}</p>
                 </CardFooter>
               </Card>
             </motion.div>

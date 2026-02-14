@@ -258,8 +258,8 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
 
       <CardContent className="space-y-6">
         {error && (
-          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
-            <p className="text-sm text-red-600 dark:text-red-400">
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">
               {error.message || t("analysis.errorGeneric")}
             </p>
           </div>
@@ -271,7 +271,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
         {/* Simple Account Performance Display */}
         {accountPerformanceData && (
           <div className="space-y-4">
-            <h4 className="font-medium text-sm text-muted-foreground">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               {t("analysis.accountPerformance")}
             </h4>
 
@@ -350,7 +350,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                                 {account.accountNumber}
                               </td>
                               <td
-                                className={`p-2 ${account.netPnL >= 0 ? "text-white" : "text-red-600"}`}
+                                className={`p-2 ${account.netPnL >= 0 ? "text-primary font-bold" : "text-destructive font-bold"}`}
                               >
                                 ${account.netPnL?.toLocaleString() || 0}
                               </td>
@@ -368,10 +368,10 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                                   variant="outline"
                                   className={
                                     account.riskLevel === "high"
-                                      ? "text-red-600 border-red-200"
+                                      ? "text-destructive border-destructive/30"
                                       : account.riskLevel === "medium"
-                                        ? "text-yellow-600 border-yellow-200"
-                                        : "text-white border-white/25"
+                                        ? "text-orange-500 border-orange-500/30"
+                                        : "text-foreground border-border"
                                   }
                                 >
                                   {account.riskLevel || "N/A"}
@@ -389,72 +389,55 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
             {/* Best/Worst Performing Accounts */}
             {(accountPerformanceData.bestPerformingAccount ||
               accountPerformanceData.worstPerformingAccount) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {accountPerformanceData.bestPerformingAccount && (
-                  <Card className="p-4 border-white/25 bg-white/10 dark:bg-white/5">
-                    <h5 className="font-medium text-white mb-2">
-                      {t("analysis.bestPerformingAccount")}
-                    </h5>
-                    <div className="space-y-1 text-sm">
-                      <div>
-                        <strong>{t("analysis.account")}:</strong>{" "}
-                        {
-                          accountPerformanceData.bestPerformingAccount
-                            .accountNumber
-                        }
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {accountPerformanceData.bestPerformingAccount && (
+                    <Card className="p-4 border-primary/20 bg-primary/5 backdrop-blur-sm">
+                      <h5 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">
+                        {t("analysis.bestPerformingAccount")}
+                      </h5>
+                      <div className="space-y-1.5 text-sm">
+                        <div>
+                          <strong className="text-muted-foreground">{t("analysis.account")}:</strong>{" "}
+                          <span className="font-medium">{accountPerformanceData.bestPerformingAccount.accountNumber}</span>
+                        </div>
+                        <div>
+                          <strong className="text-muted-foreground">{t("analysis.netPnL")}:</strong>{" "}
+                          <span className="font-bold text-primary">
+                            ${accountPerformanceData.bestPerformingAccount.netPnL?.toLocaleString() || 0}
+                          </span>
+                        </div>
+                        <div>
+                          <strong className="text-muted-foreground">{t("analysis.winRate")}:</strong>{" "}
+                          <span className="font-medium">{accountPerformanceData.bestPerformingAccount.winRate?.toFixed(1) || 0}%</span>
+                        </div>
                       </div>
-                      <div>
-                        <strong>{t("analysis.netPnL")}:</strong>{" "}
-                        <span className="text-white">
-                          $
-                          {accountPerformanceData.bestPerformingAccount.netPnL?.toLocaleString() ||
-                            0}
-                        </span>
+                    </Card>
+                  )}
+                  {accountPerformanceData.worstPerformingAccount && (
+                    <Card className="p-4 border-destructive/20 bg-destructive/5 backdrop-blur-sm">
+                      <h5 className="text-[10px] font-bold uppercase tracking-widest text-destructive mb-3">
+                        {t("analysis.worstPerformingAccount")}
+                      </h5>
+                      <div className="space-y-1.5 text-sm">
+                        <div>
+                          <strong className="text-muted-foreground">{t("analysis.account")}:</strong>{" "}
+                          <span className="font-medium">{accountPerformanceData.worstPerformingAccount.accountNumber}</span>
+                        </div>
+                        <div>
+                          <strong className="text-muted-foreground">{t("analysis.netPnL")}:</strong>{" "}
+                          <span className="font-bold text-destructive">
+                            ${accountPerformanceData.worstPerformingAccount.netPnL?.toLocaleString() || 0}
+                          </span>
+                        </div>
+                        <div>
+                          <strong className="text-muted-foreground">{t("analysis.winRate")}:</strong>{" "}
+                          <span className="font-medium">{accountPerformanceData.worstPerformingAccount.winRate?.toFixed(1) || 0}%</span>
+                        </div>
                       </div>
-                      <div>
-                        <strong>{t("analysis.winRate")}:</strong>{" "}
-                        {accountPerformanceData.bestPerformingAccount.winRate?.toFixed(
-                          1,
-                        ) || 0}
-                        %
-                      </div>
-                    </div>
-                  </Card>
-                )}
-
-                {accountPerformanceData.worstPerformingAccount && (
-                  <Card className="p-4 border-red-200 bg-red-50 dark:bg-red-950/20">
-                    <h5 className="font-medium text-red-800 dark:text-red-200 mb-2">
-                      {t("analysis.worstPerformingAccount")}
-                    </h5>
-                    <div className="space-y-1 text-sm">
-                      <div>
-                        <strong>{t("analysis.account")}:</strong>{" "}
-                        {
-                          accountPerformanceData.worstPerformingAccount
-                            .accountNumber
-                        }
-                      </div>
-                      <div>
-                        <strong>{t("analysis.netPnL")}:</strong>{" "}
-                        <span className="text-red-600">
-                          $
-                          {accountPerformanceData.worstPerformingAccount.netPnL?.toLocaleString() ||
-                            0}
-                        </span>
-                      </div>
-                      <div>
-                        <strong>{t("analysis.winRate")}:</strong>{" "}
-                        {accountPerformanceData.worstPerformingAccount.winRate?.toFixed(
-                          1,
-                        ) || 0}
-                        %
-                      </div>
-                    </div>
-                  </Card>
-                )}
-              </div>
-            )}
+                    </Card>
+                  )}
+                </div>
+              )}
           </div>
         )}
 
@@ -559,89 +542,89 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                     {/* Simplified 4-Part AI Analysis */}
                     {(analysisResult || storedAnalysisResult)
                       ?.structuredAnalysis && (
-                      <div className="space-y-6">
-                        {/* Summary */}
-                        <Card className="p-6">
-                          <h4 className="font-semibold mb-3 flex items-center gap-2">
-                            <Activity className="h-4 w-4" />
-                            {t("analysis.summary")}
-                          </h4>
-                          <p className="text-sm leading-relaxed text-muted-foreground">
-                            {
-                              (analysisResult || storedAnalysisResult)
-                                ?.structuredAnalysis.summary
-                            }
-                          </p>
-                        </Card>
-
-                        {/* Strengths and Improvements */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-6">
+                          {/* Summary */}
                           <Card className="p-6">
-                            <h4 className="font-semibold mb-3 text-white dark:text-white">
-                              {t("analysis.strengths")}
+                            <h4 className="font-semibold mb-3 flex items-center gap-2">
+                              <Activity className="h-4 w-4" />
+                              {t("analysis.summary")}
                             </h4>
-                            <ul className="space-y-2">
-                              {(
-                                analysisResult || storedAnalysisResult
-                              )?.structuredAnalysis.strengths.map(
-                                (strength, index) => (
-                                  <li
-                                    key={index}
-                                    className="text-sm text-muted-foreground flex items-start gap-2"
-                                  >
-                                    <CheckCircle className="h-4 w-4 text-white mt-0.5 shrink-0" />
-                                    {strength}
-                                  </li>
-                                ),
-                              )}
-                            </ul>
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                              {
+                                (analysisResult || storedAnalysisResult)
+                                  ?.structuredAnalysis.summary
+                              }
+                            </p>
                           </Card>
 
-                          <Card className="p-6">
-                            <h4 className="font-semibold mb-3 text-orange-700 dark:text-orange-400">
-                              {t("analysis.improvements")}
+                          {/* Strengths and Improvements */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Card className="p-6 border-border/40 bg-background/30 backdrop-blur-sm">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-primary">
+                                {t("analysis.strengths")}
+                              </h4>
+                              <ul className="space-y-2">
+                                {(
+                                  analysisResult || storedAnalysisResult
+                                )?.structuredAnalysis.strengths.map(
+                                  (strength, index) => (
+                                    <li
+                                      key={index}
+                                      className="text-sm text-muted-foreground flex items-start gap-2"
+                                    >
+                                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                                      {strength}
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            </Card>
+
+                            <Card className="p-6 border-border/40 bg-background/30 backdrop-blur-sm">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-orange-500">
+                                {t("analysis.improvements")}
+                              </h4>
+                              <ul className="space-y-2">
+                                {(
+                                  analysisResult || storedAnalysisResult
+                                )?.structuredAnalysis.improvements.map(
+                                  (improvement, index) => (
+                                    <li
+                                      key={index}
+                                      className="text-sm text-muted-foreground flex items-start gap-2"
+                                    >
+                                      <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                                      {improvement}
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            </Card>
+                          </div>
+
+                          {/* Recommendations */}
+                          <Card className="p-6 border-border/40 bg-background/30 backdrop-blur-sm">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-blue-500">
+                              {t("analysis.recommendations")}
                             </h4>
                             <ul className="space-y-2">
                               {(
                                 analysisResult || storedAnalysisResult
-                              )?.structuredAnalysis.improvements.map(
-                                (improvement, index) => (
+                              )?.structuredAnalysis.recommendations.map(
+                                (recommendation, index) => (
                                   <li
                                     key={index}
                                     className="text-sm text-muted-foreground flex items-start gap-2"
                                   >
-                                    <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                                    {improvement}
+                                    <Play className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                                    {recommendation}
                                   </li>
                                 ),
                               )}
                             </ul>
                           </Card>
                         </div>
-
-                        {/* Recommendations */}
-                        <Card className="p-6">
-                          <h4 className="font-semibold mb-3 text-blue-700 dark:text-blue-400">
-                            {t("analysis.recommendations")}
-                          </h4>
-                          <ul className="space-y-2">
-                            {(
-                              analysisResult || storedAnalysisResult
-                            )?.structuredAnalysis.recommendations.map(
-                              (recommendation, index) => (
-                                <li
-                                  key={index}
-                                  className="text-sm text-muted-foreground flex items-start gap-2"
-                                >
-                                  <Play className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                                  {recommendation}
-                                </li>
-                              ),
-                            )}
-                          </ul>
-                        </Card>
-                      </div>
-                    )}
+                      )}
 
                     {/* Metadata */}
                     <div className="flex items-center justify-between text-xs text-muted-foreground">

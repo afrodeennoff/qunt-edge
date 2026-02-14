@@ -28,7 +28,7 @@ export default async function DashboardLayout({
       <Modals />
       <DashboardProvider>
         <SidebarProvider>
-          <div className="flex min-h-screen w-full bg-[#050505] selection:bg-[hsl(var(--precision-cobalt)/0.28)] selection:text-fg-primary">
+          <div className="flex min-h-screen w-full bg-background selection:bg-primary/20 selection:text-primary">
             <DashboardSidebar />
             <SidebarInset className="flex-1 relative overflow-hidden">
               {/* Global Background Effects */}

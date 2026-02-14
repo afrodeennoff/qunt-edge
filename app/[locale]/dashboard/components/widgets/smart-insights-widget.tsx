@@ -63,10 +63,10 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
 
     const getIcon = (type: SmartInsight['type']) => {
         switch (type) {
-            case 'risk': return <AlertTriangle className="h-4 w-4 text-red-500" />
-            case 'opportunity': return <Lightbulb className="h-4 w-4 text-yellow-500" />
-            case 'achievement': return <CheckCircle2 className="h-4 w-4 text-green-500" />
-            default: return <TrendingUp className="h-4 w-4 text-blue-500" />
+            case 'risk': return <AlertTriangle className="h-4 w-4 text-destructive" />
+            case 'opportunity': return <Lightbulb className="h-4 w-4 text-orange-500" />
+            case 'achievement': return <CheckCircle2 className="h-4 w-4 text-primary" />
+            default: return <TrendingUp className="h-4 w-4 text-primary" />
         }
     }
 
@@ -83,17 +83,17 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
     const isCompact = size === 'tiny' || size === 'small' || size === 'small-long'
 
     return (
-        <Card className="h-full flex flex-col overflow-hidden border-white/5 bg-black/40 backdrop-blur-xl relative group">
+        <Card className="h-full flex flex-col overflow-hidden border-border bg-card/50 backdrop-blur-xl relative group">
             {/* Background Decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10" />
 
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
                 <div className="space-y-1">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Brain className="h-4 w-4 text-blue-400" />
+                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                        <Brain className="h-4 w-4 text-primary" />
                         {t('widgets.smartInsights.title')}
                     </CardTitle>
-                    <CardDescription className="text-xs text-muted-foreground">
+                    <CardDescription className="text-[10px] text-muted-foreground/70 uppercase tracking-widest">
                         {t('widgets.smartInsights.tooltip')}
                     </CardDescription>
                 </div>
@@ -113,7 +113,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                     <div className="space-y-3 pt-2">
                         {loading && insights.length === 0 ? (
                             Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3">
+                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/50 bg-secondary/10 p-3">
                                     <Skeleton className="h-8 w-8 rounded-full" />
                                     <div className="space-y-2 flex-1">
                                         <Skeleton className="h-4 w-24" />
@@ -130,13 +130,13 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-white/5 bg-white/5 p-3 hover:bg-white/10 transition-colors"
+                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/50 bg-secondary/10 p-3 hover:bg-secondary/20 transition-colors"
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-2">
-                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-black/50 border border-white/10",
-                                                    insight.type === 'risk' && "bg-red-500/10 border-red-500/20",
-                                                    insight.type === 'opportunity' && "bg-yellow-500/10 border-yellow-500/20",
+                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/50 border border-border",
+                                                    insight.type === 'risk' && "bg-destructive/10 border-destructive/20",
+                                                    insight.type === 'opportunity' && "bg-orange-500/10 border-orange-500/20",
                                                 )}>
                                                     {getIcon(insight.type)}
                                                 </div>
@@ -148,7 +148,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                                 </div>
                                             </div>
                                             {insight.confidence && (
-                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-white/10 border-white/5 text-white/70">
+                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/30 border-border text-muted-foreground">
                                                     {insight.confidence}% Conf.
                                                 </Badge>
                                             )}
@@ -160,7 +160,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
 
                                         {insight.action && (
                                             <div className="flex justify-end mt-1">
-                                                <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 gap-1 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10" asChild>
+                                                <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 gap-1 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold uppercase tracking-widest" asChild>
                                                     <Link href={insight.action.href || '#'}>
                                                         {insight.action.label}
                                                         <ArrowRight className="h-3 w-3" />

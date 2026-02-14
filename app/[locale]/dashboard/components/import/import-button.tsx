@@ -433,13 +433,13 @@ export default function ImportButton() {
     <div>
       <Button
         onClick={() => setIsOpen(true)}
-        variant="default"
-        className={cn("justify-start text-left font-normal w-full")}
+        variant="outline"
+        className={cn("gap-2 flex border-border hover:bg-accent/50 bg-background/50 backdrop-blur-sm group h-10 items-center px-3 md:px-4 w-auto justify-center")}
         id="import-data"
         onMouseEnter={() => uploadIconRef.current?.startAnimation()}
         onMouseLeave={() => uploadIconRef.current?.stopAnimation()}
       >
-        <UploadIcon ref={uploadIconRef} className="h-4 w-4 mr-2" />
+        <UploadIcon ref={uploadIconRef} className="h-4 w-4" />
         <span className="hidden md:block">{t("import.button")}</span>
       </Button>
 

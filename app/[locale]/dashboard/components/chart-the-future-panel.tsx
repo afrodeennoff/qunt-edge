@@ -91,12 +91,12 @@ function ChartPanel() {
   const [interval, setInterval] = useState<TimeframeValue>(TIMEFRAMES[2].value);
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[hsl(var(--qe-surface-1))]">
-      <header className="flex flex-wrap items-center gap-2 border-b border-white/10 p-3">
+    <section className="rounded-2xl border border-border bg-card overflow-hidden">
+      <header className="flex flex-wrap items-center gap-2 border-b border-border p-3">
         <select
           value={symbol}
           onChange={(event) => setSymbol(event.target.value as SymbolValue)}
-          className="h-8 rounded-md border border-white/15 bg-black/35 px-2 text-xs text-slate-100 outline-none"
+          className="h-8 rounded-md border border-input bg-background px-2 text-[10px] font-bold uppercase tracking-widest text-foreground outline-none hover:bg-muted transition-colors"
         >
           {SYMBOLS.map((item) => (
             <option key={item.value} value={item.value}>
@@ -146,10 +146,10 @@ function AssistantPanel() {
   };
 
   return (
-    <aside className="flex min-h-[500px] flex-col rounded-2xl border border-white/10 bg-[hsl(var(--qe-surface-1))]">
-      <div className="flex items-center justify-between border-b border-white/10 p-4">
-        <h3 className="text-sm font-semibold text-slate-100">AI Assistant</h3>
-        <Bot className="size-4 text-cyan-300" />
+    <aside className="flex min-h-[500px] flex-col rounded-2xl border border-border bg-card overflow-hidden">
+      <div className="flex items-center justify-between border-b border-border p-4">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">AI Assistant</h3>
+        <Bot className="size-4 text-primary" />
       </div>
 
       <div className="flex-1 space-y-2 overflow-y-auto p-4">
@@ -157,10 +157,10 @@ function AssistantPanel() {
           <div
             key={message.id}
             className={cn(
-              "rounded-lg border px-3 py-2 text-xs",
+              "rounded-lg border px-3 py-2 text-xs leading-relaxed",
               message.role === "user"
-                ? "border-cyan-300/30 bg-cyan-400/10 text-cyan-100"
-                : "border-white/10 bg-white/[0.02] text-slate-200",
+                ? "border-primary/20 bg-primary/10 text-foreground"
+                : "border-border bg-muted/40 text-muted-foreground",
             )}
           >
             {message.text}
@@ -168,8 +168,8 @@ function AssistantPanel() {
         ))}
       </div>
 
-      <div className="border-t border-white/10 p-3">
-        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/25 px-2 py-1.5">
+      <div className="border-t border-border p-3">
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-2 py-1.5 focus-within:border-primary/50 transition-colors">
           <input
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
@@ -177,12 +177,12 @@ function AssistantPanel() {
               if (event.key === "Enter") onSend();
             }}
             placeholder="Ask about this chart..."
-            className="h-8 flex-1 bg-transparent text-xs text-slate-100 outline-none placeholder:text-slate-500"
+            className="h-8 flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/50"
           />
           <button
             type="button"
             onClick={onSend}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-cyan-300/35 bg-cyan-400/10 text-cyan-200"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Send className="size-3.5" />
           </button>
@@ -194,7 +194,7 @@ function AssistantPanel() {
 
 export function ChartTheFuturePanel() {
   return (
-    <div className="text-slate-100">
+    <div className="text-foreground">
       <TopNav title="Chart the Future" />
 
       <div className="grid gap-3 xl:grid-cols-[1.9fr_1fr]">

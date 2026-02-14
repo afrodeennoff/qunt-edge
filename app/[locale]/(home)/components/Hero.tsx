@@ -5,6 +5,10 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { useCurrentLocale } from '@/locales/client'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -24,76 +28,78 @@ export default function Hero() {
   return (
     <section ref={ref} className="relative overflow-hidden px-4 pb-18 pt-34 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8">
       <motion.div style={{ opacity }} className="pointer-events-none absolute inset-0">
-        <div className="marketing-grid absolute inset-0 opacity-60" />
-        <div className="absolute left-1/2 top-[-180px] h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[hsl(var(--brand-primary)/0.15)] blur-[90px]" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+        <div className="absolute left-1/2 top-[-180px] h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary/20 blur-[90px]" />
       </motion.div>
 
       <div className="relative z-10 mx-auto max-w-6xl">
         <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.1 } } }}>
-          <motion.div variants={fadeUp} className="mb-7 flex justify-center">
-            <div className="marketing-badge inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.2em] [font-family:var(--home-mono)]">
-              <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-primary))]" />
+          <motion.div variants={fadeUp} className="mb-8 flex justify-center">
+            <Badge variant="secondary" className="px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-medium backdrop-blur-sm border-white/10">
+              <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" />
               Execution Intelligence Platform
-            </div>
+            </Badge>
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
-            className="mx-auto max-w-5xl text-center text-[clamp(2.7rem,8.4vw,6.1rem)] font-semibold leading-[0.88] tracking-[-0.035em] [font-family:var(--home-display)]"
+            className="mx-auto max-w-5xl text-center text-5xl font-bold tracking-tight sm:text-7xl lg:text-8xl"
           >
             Grow the trader.
-            <span className="block bg-gradient-to-r from-[hsl(var(--brand-primary))] to-[hsl(var(--brand-secondary))] bg-clip-text text-transparent">
+            <span className="block mt-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Not just the equity curve.
             </span>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-center text-[15px] leading-[1.75] text-[hsl(var(--mk-text-muted))] sm:text-[18px] [font-family:var(--home-copy)]">
+          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-center text-lg leading-8 text-muted-foreground">
             Qunt Edge V2 helps you understand why performance changes, what behavior caused it, and exactly what to fix next
             using auditable AI coaching and process-first analytics.
           </motion.p>
 
-          <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href={`/${locale}/authentication?next=dashboard`}
-              className="inline-flex h-12 min-w-[220px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-8 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))] [font-family:var(--home-mono)]"
-            >
-              Start Free Audit
-            </Link>
-            <Link
-              href={`/${locale}/#pricing`}
-              className="inline-flex h-12 min-w-[220px] items-center justify-center gap-2 rounded-full border border-[hsl(var(--mk-border)/0.4)] bg-[hsl(var(--mk-surface)/0.7)] px-8 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--mk-text))] transition-all duration-300 hover:border-[hsl(var(--brand-primary)/0.55)] [font-family:var(--home-mono)]"
-            >
-              See Pricing
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+          <motion.div variants={fadeUp} className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button asChild size="lg" className="h-12 min-w-[200px] rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/25">
+              <Link href={`/${locale}/authentication?next=dashboard`}>
+                Start Free Audit
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 min-w-[200px] rounded-full border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest backdrop-blur-sm hover:bg-white/10">
+              <Link href={`/${locale}/#pricing`}>
+                See Pricing
+                <ArrowRight className="ml-2 h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-12 rounded-3xl border border-[hsl(var(--mk-border)/0.34)] bg-[hsl(var(--mk-surface)/0.72)] p-4 shadow-[0_26px_60px_-36px_hsl(var(--brand-ink)/0.7)] sm:p-6">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.7)] p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">AI Coaching Precision</p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">92%</p>
-              </div>
-              <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.7)] p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Plan Compliance Uplift</p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">+31%</p>
-              </div>
-              <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.7)] p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Weekly Review Time</p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[hsl(var(--brand-primary))] [font-family:var(--home-display)]">-68%</p>
-              </div>
-            </div>
+          <motion.div variants={fadeUp} className="mt-16">
+            <Card className="border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
+              <CardContent className="p-6 sm:p-8">
+                <div className="grid gap-6 sm:grid-cols-3">
+                  <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">AI Coaching Precision</p>
+                    <p className="mt-2 text-3xl font-bold tracking-tight">92%</p>
+                  </div>
+                  <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Plan Compliance Uplift</p>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-green-400">+31%</p>
+                  </div>
+                  <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Weekly Review Time</p>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-primary">-68%</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-11 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] font-medium tracking-[0.16em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">
-            <span>TRADOVATE</span>
-            <span>RITHMIC</span>
+          <motion.div variants={fadeUp} className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+            <span>Tradovate</span>
+            <span>Rithmic</span>
             <span>IBKR</span>
             <span>CQG</span>
-            <span>CSV IMPORT</span>
+            <span>CSV Import</span>
           </motion.div>
 
-          <motion.p variants={fadeUp} className="mt-5 text-center text-xs tracking-[0.08em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
+          <motion.p variants={fadeUp} className="mt-6 text-center text-xs tracking-wider text-muted-foreground/60">
             No credit card required. Setup in under 10 minutes.
           </motion.p>
         </motion.div>

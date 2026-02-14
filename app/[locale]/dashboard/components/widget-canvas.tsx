@@ -198,7 +198,7 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
           <div className="absolute inset-0 rounded-xl border border-white/25 border-dashed shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" />
           <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),rgba(0,0,0,0.74)_62%)] opacity-100 backdrop-blur-[2px]" />
           <div className="absolute inset-0 flex items-center justify-center opacity-100 drag-handle cursor-grab active:cursor-grabbing">
-            <div className="flex flex-col items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-4 py-3 text-white/85 backdrop-blur-md">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-border bg-background/80 px-4 py-3 text-foreground backdrop-blur-md">
               <GripVertical className="h-6 w-4" />
               <p className="text-sm font-medium">{t('widgets.dragToMove')}</p>
             </div>
@@ -209,12 +209,12 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-8 rounded-full border-white/25 bg-black/55 text-white hover:bg-black/75 hover:border-white/40 backdrop-blur-md"
+                  className="h-8 w-8 rounded-full border-border bg-popover text-popover-foreground hover:bg-popover/90 hover:border-border backdrop-blur-md"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 border-white/15 bg-black/85 p-2 text-white backdrop-blur-xl">
+              <PopoverContent className="w-56 border-border bg-popover p-2 text-popover-foreground backdrop-blur-xl">
                 <div className="flex flex-col gap-1">
                   {isMobile ? (
                     <>
@@ -784,12 +784,12 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
+                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-border",
                       isCustomizing
                         ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_rgba(0,0,0,0.95)]"
-                        : "bg-black/95 hover:border-white/20"
+                        : "bg-card hover:border-primary/50"
                     )}>
-                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-b from-foreground/[0.02] to-transparent pointer-events-none" />
                       <div className="relative h-full w-full">
                         {renderWidget(widget)}
                       </div>

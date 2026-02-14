@@ -36,6 +36,28 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Unified Master Prompt Consolidation
+- **What changed:** Consolidated a fragmented, overlapping instruction set into a single coherent master prompt template.
+- **What I want:** One copy-paste prompt that is consistent, reusable, and easy to run without conflicting directives.
+- **What I don't want:** Repetitive or contradictory instruction blocks that dilute output quality and create execution ambiguity.
+- **How we fixed that:**
+  - Merged answering, self-reflection, persistence, planning, and code-editing guidance into one structured prompt.
+  - Removed structural duplication while keeping core behavioral constraints and UX/engineering standards intact.
+  - Preserved explicit format sections (`<request>`, `<instructions>`, `<constraints>`) for one-shot reuse.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Review the generated unified prompt and confirm it contains all major rule groups in one contiguous block.
+
+### 2026-02-14: Unified Prompt Refinement (Single-Block)
+- **What changed:** Refined the merged prompt into an even cleaner single-block format that preserves all core rule groups while removing repeated phrasing.
+- **What I want:** A copy-paste-ready prompt that stays strict, readable, and predictable in one place.
+- **What I don't want:** Duplicated sections (`self_reflection`, repeated planning rules, repeated completion checks) that create ambiguity.
+- **How we fixed that:**
+  - Reorganized content into compact sections: core mandates, answering rules, execution behavior, problem-solving framework, and code-editing rules.
+  - Kept user-specified structure markers (`<request>`, `<instructions>`, `<constraints>`) for immediate reuse.
+  - Preserved intent while de-duplicating overlapping directives.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Confirm the delivered prompt is one contiguous block and includes both answering + code-editing constraints.
+
 ### 2026-02-14: Home Page Typography Rewrite
 - **What changed:** Refined the Home page visual hierarchy and rewrote typography across Hero + deferred sections to use a single editorial type system.
 - **What I want:** The home experience should feel premium and intentional, with clear contrast between display headlines, data labels, and body copy.
@@ -179,6 +201,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Used named export resolution for `SmartInsightsWidget` since it's not a default export.
 - **Key Files:** `app/[locale]/dashboard/components/lazy-widget.tsx`
 - **Verification:** Run `npm run build` locally to confirm the type error is resolved.
+
+### 2026-02-14: Premium Dashboard UI Refactor
+- **What changed:** Comprehensive refactor of dashboard and account components to a premium monochrome/glassmorphic aesthetic using semantic Tailwind CSS tokens.
+- **What I want:** A consistent, elite design system that works across transitions and follows the established glassmorphic brand identity.
+- **What I don't want:** Hardcoded hex codes, inconsistent component triggers, and colorful "Christmas tree" UI patterns that mismatch the premium aesthetic.
+- **How we fixed that:**
+  - Replaced hardcoded colors with semantic tokens: `text-primary`, `text-destructive`, `text-orange-500`.
+  - Standardized interactive triggers (Import, Sync, PnL Summary) to a unified `outline` variant with `bg-background/50`, `border-border`, and `backdrop-blur-sm`.
+  - Modernized all labels and headers to `text-[10px] font-bold uppercase tracking-widest` for a "trading terminal" aesthetic.
+  - Updated AI assistant containers and message bubbles to use semantic backgrounds (`bg-secondary/40`, `bg-card`) and borders (`border-border`).
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/accounts/account-configurator.tsx`, `app/[locale]/dashboard/components/accounts/accounts-overview.tsx`, `app/[locale]/dashboard/components/analysis/accounts-analysis.tsx`, `app/[locale]/dashboard/components/widgets/smart-insights-widget.tsx`, `app/[locale]/dashboard/components/chat/bot-message.tsx`.
+- **Verification:** Confirm all dashboard buttons share the same glassmorphic outline style; verify account tables and AI message bubbles use standard secondary/muted tokens instead of hardcoded hex values.
 
 ### 2026-02-14: Build Repair - CSS Import
 - **What changed:** Removed `@import "tw-animate-css";` from `globals.css`.

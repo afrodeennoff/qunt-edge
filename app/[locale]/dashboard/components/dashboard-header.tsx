@@ -107,17 +107,17 @@ export function DashboardHeader() {
         Boolean(weekdayFilter?.days && weekdayFilter.days.length > 0);
 
     return (
-        <header className="sticky top-0 z-50 overflow-hidden border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl" data-dashboard-header="true">
+        <header className="sticky top-0 z-50 overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur-xl" data-dashboard-header="true">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
             <div className="relative min-h-14 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground" />
                     <div className="flex min-w-0 items-start gap-3">
-                        <div className="mt-0.5 hidden h-7 w-px bg-white/20 sm:block" />
+                        <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                                <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+                                <span className="rounded-full border border-border/40 bg-muted/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                                     {sectionLabel}
                                 </span>
                                 <h1 className="truncate whitespace-nowrap text-sm font-bold uppercase tracking-[0.16em] text-foreground">
@@ -130,10 +130,10 @@ export function DashboardHeader() {
                 </div>
 
                 {/* Right Side: Actions & Configuration */}
-                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
+                <div className="flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/20 p-1.5 shadow-sm">
 
                     {/* Global Utilities Group */}
-                    <div className="flex items-center gap-1 rounded-xl bg-white/[0.02] px-1 py-0.5">
+                    <div className="flex items-center gap-1 rounded-xl bg-background/50 px-1 py-0.5 ring-1 ring-border/10">
                         <FilterCommandMenu variant="navbar" />
 
                         <GlobalSyncButton />
@@ -141,7 +141,7 @@ export function DashboardHeader() {
                         <DailySummaryModal />
                     </div>
 
-                    <div className="h-6 w-px bg-white/10 mx-1 hidden sm:block" />
+                    <div className="h-6 w-px bg-border/40 mx-1 hidden sm:block" />
 
                     {/* Operations & Status Group */}
                     <div className="hidden sm:flex items-center gap-2">
@@ -149,7 +149,7 @@ export function DashboardHeader() {
 
                         {!isPlusUser() && (
                             <Link href={billingHref}>
-                                <button className="group flex h-8 items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-white/10 hover:border-white/40">
+                                <button className="group flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-secondary px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-foreground transition-all hover:bg-accent hover:border-primary/50">
                                     <Sparkles className="h-3 w-3 animate-pulse" />
                                     <span>UPGRADE</span>
                                 </button>
