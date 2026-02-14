@@ -36,6 +36,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Dashboard Not Loading Fix (Mobile-Safe Timeouts + IndexedDB Fail-Open)
+- **What changed:** Hardened dashboard data loading so it cannot hang forever on mobile browsers, and removed fragile type coupling that could block builds.
+- **What I want:** On iOS Safari (including private mode), `/dashboard` should either load real data or gracefully fall back without an infinite “Loading your trades…” state.
+- **What I don't want:** A single stalled network call or IndexedDB open to keep `isLoading=true` indefinitely, leaving users stuck with a permanent loading toast.
+- **How we fixed that:**
+  - Added a `withTimeout()` wrapper inside `DataProvider` to cap the duration of critical async steps (`supabase.auth.getUser`, trades fetch, user data fetch, metrics calc).
+  - Made IndexedDB cache opening fail-open with a short timeout so cache issues never block dashboard loading.
+  - Relaxed overly strict Recharts tooltip typings and generalized risk-metric trade typing to accept client-normalized trades, unblocking `npm run typecheck`.
+- **Key Files:** `context/data-provider.tsx`, `lib/indexeddb/trades-cache.ts`, `lib/analytics/metrics-v1.ts`, `lib/advanced-metrics.ts`
+- **Verification:** `npm run typecheck` exits 0; on slow/mobile networks the dashboard no longer hangs indefinitely and `isLoading` reliably clears.
+
 ### 2026-02-14: True Self-Heal Pass (Build OOM + Local Build Stability)
 - **What changed:** Implemented a real self-heal workflow and fixed the actual failing issue that blocked smooth runs: production build OOM during trace collection.
 - **What I want:** Commands should run reliably in local development without crashing at the end of `next build`, and one command should handle lint auto-fix + validation.
