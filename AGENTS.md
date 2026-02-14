@@ -36,6 +36,25 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Sidebar Reliability + Active-State Accuracy + Collapse UX Fix
+- **What changed:** Audited and fixed the shared sidebar system end-to-end: active-route matching, locale handling, collapse persistence, mobile close behavior, provider layering, and sidebar wrapper cleanup.
+- **What I want:** Sidebar navigation should always highlight the correct active item (including locale-prefixed routes), collapse controls should feel predictable across desktop/mobile, and sidebar state should persist after refresh.
+- **What I don't want:** Non-highlighted active links, inconsistent locale routing between sidebars, duplicated provider state/listeners, dead sidebar code paths, or collapse controls that behave inconsistently.
+- **How we fixed that:**
+  - Fixed active-link matching in `UnifiedSidebar` by normalizing both `pathname` and item `href` via locale-stripping before comparisons.
+  - Expanded locale stripping to support both `xx` and `xx-XX` patterns.
+  - Improved sidebar functionality on mobile:
+    - sidebar now closes automatically after selecting a nav link or action item,
+    - collapse icon button in sidebar header is now desktop-only to avoid mobile control overlap.
+  - Added cookie-backed restore for sidebar open/collapsed state by reading `sidebar:state` on provider init.
+  - Removed nested `SidebarProvider` wrappers from dashboard and team layouts (root provider remains the single source of truth).
+  - Cleaned sidebar wrappers:
+    - removed unused imports/vars in `dashboard-sidebar.tsx`,
+    - removed abandoned duplicate nav-building block in `aimodel-sidebar.tsx`,
+    - unified `AIModelSidebar` links to locale-prefixed routes for consistency.
+- **Key Files:** `components/ui/unified-sidebar.tsx`, `components/ui/sidebar.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `components/sidebar/aimodel-sidebar.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/teams/manage/layout.tsx`, `app/[locale]/teams/dashboard/layout.tsx`, `AGENTS.md`
+- **Verification:** Run `npx eslint` on all edited sidebar/layout files (clean), open dashboard and team/admin contexts, confirm active item highlight works on locale routes, collapse state persists after refresh, and mobile sidebar closes after nav selection.
+
 ### 2026-02-14: Dashboard Not Loading Fix (Mobile-Safe Timeouts + IndexedDB Fail-Open)
 - **What changed:** Hardened dashboard data loading so it cannot hang forever on mobile browsers, and removed fragile type coupling that could block builds.
 - **What I want:** On iOS Safari (including private mode), `/dashboard` should either load real data or gracefully fall back without an infinite “Loading your trades…” state.

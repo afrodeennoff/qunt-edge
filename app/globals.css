@@ -568,7 +568,7 @@
   }
 
   .chart-negative-muted {
-    opacity: 0.14 !important;
+    opacity: 0.65 !important;
     filter: saturate(0.35) brightness(0.78);
   }
 

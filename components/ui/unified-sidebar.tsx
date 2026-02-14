@@ -66,7 +66,7 @@ export interface UnifiedSidebarConfig {
 export type UnifiedSidebarStyle = "minimal" | "glassy" | "matte"
 
 function stripLocalePrefix(pathname: string) {
-  const withoutLocale = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "")
+  const withoutLocale = pathname.replace(/^\/[a-z]{2}(?:-[A-Za-z]{2})?(?=\/|$)/, "")
   return withoutLocale.length > 0 ? withoutLocale : "/"
 }
 
@@ -91,7 +91,8 @@ function useActiveLink() {
     if (!pathname) return false
 
     const normalizedPathname = stripLocalePrefix(pathname)
-    const [basePath, queryString] = href.split("?")
+    const [hrefPath, queryString] = href.split("?")
+    const basePath = stripLocalePrefix(hrefPath)
     const hrefParams = new URLSearchParams(queryString ?? "")
     const hrefTab = hrefParams.get("tab")
 
@@ -188,7 +189,7 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { state, toggleSidebar } = useSidebar()
+  const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
 
   const groupedItems = useMemo(() => {
@@ -228,8 +229,10 @@ export function UnifiedSidebar({
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
+            aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+            title={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
             className={cn(
-              "ml-auto h-7 w-7 transition-all duration-300",
+              "ml-auto hidden h-7 w-7 transition-all duration-300 md:inline-flex",
               state === "collapsed" && "ml-0 mx-auto",
               styles.collapseButton
             )}
@@ -270,7 +273,15 @@ export function UnifiedSidebar({
                               isActive={itemIsActive}
                               tooltip={label}
                             >
-                              <Link href={item.href} aria-current={itemIsActive ? "page" : undefined}>
+                              <Link
+                                href={item.href}
+                                aria-current={itemIsActive ? "page" : undefined}
+                                onClick={() => {
+                                  if (isMobile) {
+                                    setOpenMobile(false)
+                                  }
+                                }}
+                              >
                                 {item.icon}
                                 <span>{label}</span>
                               </Link>
@@ -280,7 +291,12 @@ export function UnifiedSidebar({
                               type="button"
                               tooltip={label}
                               disabled={isItemDisabled}
-                              onClick={item.action}
+                              onClick={() => {
+                                item.action?.()
+                                if (isMobile) {
+                                  setOpenMobile(false)
+                                }
+                              }}
                             >
                               {item.icon}
                               <span>{label}</span>
