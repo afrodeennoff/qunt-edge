@@ -284,6 +284,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Open Trader Profile and confirm first right-side two stats now show `Total Capital` and `Total Withdraw` based on real user account data.
 
+### 2026-02-14: Trader Profile Real-Time + Cache Isolation Hardening
+- **What changed:** Hardened benchmark data fetching to prevent stale/shared-cache behavior and improve real-time freshness.
+- **What I want:** Trader Profile metrics should stay fresh and user-scoped behavior should never be affected by cross-session caching artifacts.
+- **What I don't want:** Browser/CDN cache accidentally serving old benchmark payloads or delayed updates that feel non-realtime.
+- **How we fixed that:**
+  - Marked benchmark API route as fully dynamic (`force-dynamic`) with `revalidate = 0`.
+  - Added `Cache-Control: no-store` headers on benchmark responses.
+  - Updated client fetch to `cache: "no-store"` and added periodic refresh every 30 seconds.
+- **Key Files:** `app/api/trader-profile/benchmark/route.ts`, `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Lint passes for edited files; benchmark route and client fetch now explicitly disable caching and auto-refresh.
+
 ### 2026-02-14: Trader Profile Audit Pass
 - **What changed:** Audited Trader Profile metric logic and removed stale internal fields from the page model.
 - **What I want:** Clear metric semantics with minimal technical debt so future agents can safely iterate.

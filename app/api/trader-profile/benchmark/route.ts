@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getDatabaseUserId } from "@/server/auth"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 interface UserAggregate {
   totalTrades: number
   wins: number
@@ -105,6 +108,10 @@ export async function GET() {
           avgReturn: 0,
           sampleSize: 0,
         },
+      }, {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
       })
     }
 
@@ -127,6 +134,10 @@ export async function GET() {
         winRate: Number((totals.winRate / sampleSize).toFixed(2)),
         avgReturn: Number((totals.avgReturn / sampleSize).toFixed(2)),
         sampleSize,
+      },
+    }, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
       },
     })
   } catch (error) {

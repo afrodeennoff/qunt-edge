@@ -105,7 +105,11 @@ export default function TraderProfilePage() {
     const load = async () => {
       setIsBenchmarkLoading(true)
       try {
-        const res = await fetch("/api/trader-profile/benchmark", { method: "GET", credentials: "include" })
+        const res = await fetch("/api/trader-profile/benchmark", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const payload = (await res.json()) as { benchmark?: BenchmarkMetrics }
         if (alive) setBenchmark(payload.benchmark ?? null)
@@ -117,8 +121,10 @@ export default function TraderProfilePage() {
       }
     }
     load()
+    const timer = window.setInterval(load, 30_000)
     return () => {
       alive = false
+      window.clearInterval(timer)
     }
   }, [])
 
