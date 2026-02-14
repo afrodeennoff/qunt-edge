@@ -36,6 +36,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Widget Donut Design Refresh (Trade Distribution + Commissions)
+- **What changed:** Refined donut-style dashboard widgets to match the requested visual reference: centered ring, stronger contrast, cleaner legend spacing, and more readable label hierarchy.
+- **What I want:** Widget charts should feel premium and immediately readable, with white/gray monochrome contrast and balanced spacing so the graph is the visual focus.
+- **What I don't want:** Cramped legends, low-visibility text, or inconsistent donut styling across widgets that makes charts feel disconnected.
+- **How we fixed that:**
+  - Reworked `TradeDistribution` donut presentation:
+    - removed center text clutter,
+    - tuned ring thickness/position for stronger center composition,
+    - switched to a vertical bottom legend with clearer dots and labels,
+    - increased contrast using intentional white/gray token shades.
+  - Aligned `CommissionsPnL` legend structure to the same vertical, high-visibility style for consistency.
+- **Key Files:** `app/[locale]/dashboard/components/charts/trade-distribution.tsx`, `app/[locale]/dashboard/components/charts/commissions-pnl.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets` and confirm both donut widgets render with a centered ring, stronger white/gray contrast, and a clean bottom legend similar to the design reference.
+
 ### 2026-02-14: Sidebar Collapse Behavior Stabilization (State Toggle Hardening)
 - **What changed:** Hardened the core sidebar open/collapse state setter to remove stale-state edge cases during rapid toggles (button + keyboard).
 - **What I want:** Sidebar collapse/expand should feel consistent and deterministic even with quick repeated interactions.
