@@ -76,7 +76,7 @@ import {
   generateMockTrades
 } from "@/lib/mock-trades";
 import { isValid, startOfDay, endOfDay } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { calculateStatistics, formatCalendarData, cn, groupBy, calculateTradingDays } from "@/lib/utils";
 import { useParams } from "next/navigation";
 
@@ -829,15 +829,10 @@ export const DataProvider: React.FC<{
         const rawDate = new Date(trade.entryDate);
         if (!isValid(rawDate)) return false;
 
+        // Convert to timezone without string re-parsing (browser-safe, including Safari).
         let entryDate: Date;
         try {
-          entryDate = new Date(
-            formatInTimeZone(
-              rawDate,
-              timezone,
-              "yyyy-MM-dd HH:mm:ssXXX"
-            )
-          );
+          entryDate = toZonedTime(rawDate, timezone || "UTC");
         } catch (e) {
           console.warn("[DataProvider] Date formatting failed, falling back to raw date", e);
           entryDate = rawDate;
