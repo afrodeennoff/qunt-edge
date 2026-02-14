@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { Resend } from 'resend'
-import { createClient } from '@/server/auth'
 import TeamInvitationEmail from '@/components/emails/team-invitation'
 import { render } from "@react-email/render"
 import { prisma } from "@/lib/prisma"
+import { createRouteClient } from "@/lib/supabase/route-client"
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createRouteClient(req)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user?.id || !user.email) {
       return NextResponse.json(
