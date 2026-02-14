@@ -568,9 +568,9 @@
   }
 
   .chart-negative-muted {
-    opacity: 0.65 !important;
-    filter: saturate(0.35) brightness(0.78);
+    opacity: 1 !important;
   }
+
 
   .no-select {
     -webkit-user-select: none;
@@ -751,6 +751,7 @@
   }
 
   @media (max-width: 767px) {
+
     .dashboard-mesh-layer,
     .dashboard-texture-layer,
     .marketing-orb,

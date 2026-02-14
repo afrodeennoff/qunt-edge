@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { ChevronsLeft, ChevronsRight, Globe, LogOut } from "lucide-react"
+import { Globe, LogOut } from "lucide-react"
 
 import { Logo } from "@/components/logo"
 import { SubscriptionBadge } from "@/components/subscription-badge"
@@ -29,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -189,7 +190,7 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar()
+  const { state, isMobile, setOpenMobile } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
 
   const groupedItems = useMemo(() => {
@@ -224,26 +225,15 @@ export function UnifiedSidebar({
             </p>
             <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
+          <SidebarTrigger
             aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
             title={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
             className={cn(
-              "ml-auto hidden h-7 w-7 transition-all duration-300 md:inline-flex",
+              "ml-auto hidden transition-all duration-300 md:inline-flex",
               state === "collapsed" && "ml-0 mx-auto",
               styles.collapseButton
             )}
-          >
-            {state === "expanded" ? (
-              <ChevronsLeft className="size-4" />
-            ) : (
-              <ChevronsRight className="size-4" />
-            )}
-            <span className="sr-only">Toggle sidebar</span>
-          </Button>
+          />
         </div>
       </SidebarHeader>
 

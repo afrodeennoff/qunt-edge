@@ -36,6 +36,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Sidebar Collapse Control Migrated to shadcn Trigger
+- **What changed:** Replaced the custom chevron collapse button in the unified sidebar header with the native `SidebarTrigger` from the shadcn sidebar primitive.
+- **What I want:** Collapse/expand behavior should follow one consistent shadcn interaction model across dashboard sidebars.
+- **What I don't want:** A custom collapse control drifting from shadcn behavior or creating inconsistent toggle handling between header/rail/mobile controls.
+- **How we fixed that:**
+  - Removed bespoke chevron-toggle UI logic from `UnifiedSidebar`.
+  - Wired the header control directly to `SidebarTrigger` while preserving explicit `aria-label`/`title` for expand/collapse states.
+  - Kept footer actions and existing nav grouping intact to avoid behavioral regressions.
+- **Key Files:** `components/ui/unified-sidebar.tsx`, `AGENTS.md`
+- **Verification:** Run `npx eslint components/ui/unified-sidebar.tsx` (clean). Open dashboard and confirm the sidebar header toggle uses shadcn trigger behavior and collapses/expands correctly.
+
 ### 2026-02-14: Whop Checkout Flow Hardening (Locale-Safe Redirects + Frontend/Backend Alignment)
 - **What changed:** Hardened the Whop payment flow end-to-end so checkout/auth redirects remain locale-safe and purchase entry points consistently route into dynamic Whop checkout with preserved params.
 - **What I want:** Users should be able to start checkout from pricing surfaces without broken query strings or locale drops, then return to the correct localized dashboard/auth pages after sign-in and Whop redirect.
