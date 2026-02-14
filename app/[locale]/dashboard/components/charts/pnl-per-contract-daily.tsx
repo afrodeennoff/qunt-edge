@@ -43,7 +43,11 @@ interface PnLPerContractDailyChartProps {
 }
 
 type DailyInstrumentSummary = {
-  trades: Array<{ pnl?: number | string; commission?: number | string; quantity?: number | string }>;
+  trades: Array<{
+    pnl?: number | string | null;
+    commission?: number | string | null;
+    quantity?: number | string | null;
+  }>;
   totalPnl: number;
   totalContracts: number;
   winCount: number;
@@ -143,9 +147,10 @@ export default function PnLPerContractDailyChart({
 
   const maxPnL = Math.max(...chartData.map((d) => d.averagePnl));
   const minPnL = Math.min(...chartData.map((d) => d.averagePnl));
-  const renderTooltip = React.useCallback(({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartDatum }> }) => {
+  const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload as ChartDatum | undefined;
+      if (!data) return null;
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[160px]">
           <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">

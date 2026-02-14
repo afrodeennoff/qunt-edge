@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { createClient, getWebsiteURL } from "@/server/auth";
+import { getWebsiteURL } from "@/server/auth";
 import { getWhop } from "@/lib/whop";
 import { getReferralBySlug } from "@/server/referral";
 import { getSubscriptionDetails } from "@/server/subscription";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 function safeLocale(value: string | null | undefined): string {
   const raw = (value || "").trim().toLowerCase();
@@ -148,7 +149,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const supabase = await createClient();
+  const supabase = createRouteClient(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -181,7 +182,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ message: "Lookup key is required" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createRouteClient(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();
