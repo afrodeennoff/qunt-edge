@@ -560,7 +560,7 @@
 
   .metric-negative {
     color: hsl(var(--chart-loss));
-    opacity: 0.58;
+    opacity: 0.78;
   }
 
   .chart-positive-emphasis {

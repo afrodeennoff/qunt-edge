@@ -28,7 +28,7 @@ export function ChartSurface({
   actions,
   info,
   state = "ready",
-  emptyMessage = "No chart data available.",
+  emptyMessage = "No trades yet.",
   errorMessage = "Unable to load chart.",
   size = "medium",
   className,
@@ -60,7 +60,7 @@ export function ChartSurface({
 
     if (state === "empty") {
       return (
-        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-muted-foreground">
+        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-white/55">
           {emptyMessage}
         </div>
       )

@@ -36,6 +36,19 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Full Dashboard Widget Audit (34 Widgets) + Cross-Widget Visibility Fixes
+- **What changed:** Audited all registered dashboard widgets (34 total) and fixed recurring visibility/UX regressions across chart widgets in one consistency pass.
+- **What I want:** Every widget should present data with clear contrast and consistent empty-state behavior, so users don’t mistake styling inconsistencies for missing data.
+- **What I don't want:** Hardcoded “No data available” strings, inconsistent empty-state wording, and low-contrast negative/secondary labels making widgets feel broken or unreadable.
+- **How we fixed that:**
+  - Audited widget set from `WIDGET_REGISTRY` (`34` widget types).
+  - Replaced hardcoded chart empty text in chart components with localized `widgets.emptyState` fallback (`No trades yet.`) across all chart implementations.
+  - Improved global negative metric readability by raising `.metric-negative` opacity (`0.58` -> `0.78`) in `app/globals.css`.
+  - Tightened shared chart fallback defaults in `ChartSurface` (`emptyMessage` default + stronger empty text visibility).
+  - Kept the previously requested donut design refresh and applied matching legend spacing/contrast language for consistency.
+- **Key Files:** `app/[locale]/dashboard/components/charts/*.tsx`, `components/ui/chart-surface.tsx`, `app/globals.css`, `app/[locale]/dashboard/config/widget-registry.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets` and cycle through chart widgets; confirm empty widgets show localized “No trades yet.” messaging and active widgets have improved negative-value/readout contrast.
+
 ### 2026-02-15: Widget Donut Design Refresh (Trade Distribution + Commissions)
 - **What changed:** Refined donut-style dashboard widgets to match the requested visual reference: centered ring, stronger contrast, cleaner legend spacing, and more readable label hierarchy.
 - **What I want:** Widget charts should feel premium and immediately readable, with white/gray monochrome contrast and balanced spacing so the graph is the visual focus.

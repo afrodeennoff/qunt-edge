@@ -1039,7 +1039,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
               </ChartContainer>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-fg-muted text-xs">
-                No data available
+                {t("widgets.emptyState") ?? "No trades yet."}
               </div>
             )}
           </div>

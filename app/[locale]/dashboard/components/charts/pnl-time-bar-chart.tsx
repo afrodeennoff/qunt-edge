@@ -271,7 +271,7 @@ export default function TimeOfDayTradeChart({
             </ResponsiveContainer>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-white/20">
-              No data available
+              {t("widgets.emptyState") ?? "No trades yet."}
             </div>
           )}
         </div>

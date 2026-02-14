@@ -187,7 +187,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
             </>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
-              No data available
+              {t("widgets.emptyState") ?? "No trades yet."}
             </div>
           )}
         </div>
