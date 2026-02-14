@@ -146,6 +146,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/teams/actions/user.ts`, `app/[locale]/teams/components/trader-info.tsx`, `app/[locale]/teams/dashboard/trader/[slug]/page.tsx`
 - **Verification:** Open `/teams/dashboard/trader/[slug]` and confirm the "1-Day Value at Risk" section appears.
 
+### 2026-02-14: Build Repair - Trader Profile Type
+- **What changed:** Added explicit `string` types to map callbacks in `TraderProfile`.
+- **What I want:** Resolve `Parameter "value" implicitly has an "any" type` errors blocking the build.
+- **What I don't want:** TypeScript strict mode failures in the production pipeline.
+- **How we fixed that:**
+  - Added `: string` annotation to arguments in the `profileInitials` calculation logic.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`
+- **Verification:** Run `npm run build` locally.
+
 ### 2026-02-14: Build Repair - Lazy Widget Registration
 - **What changed:** Manually registered `smartInsights` and `propFirmCatalogue` in `lazy-widget.tsx`.
 - **What I want:** To pass the production build type-check for the dashboard's lazy loader.
