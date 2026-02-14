@@ -420,26 +420,26 @@ export default function TraderProfilePage() {
   }, [dateFilterPreset, customDateRange?.from, customDateRange?.to, closedTrades.length])
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-5">
+    <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-2.5 sm:p-3.5 lg:p-4">
       <div className="pointer-events-none absolute inset-0 opacity-70">
         <div className="absolute -top-24 left-[-8%] h-72 w-72 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute top-28 right-[-6%] h-80 w-80 rounded-full bg-white/[0.03] blur-3xl" />
       </div>
 
-      <div className="relative grid gap-3 xl:grid-cols-[1.35fr_1fr]">
-        <section className="space-y-3">
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
-            <div className="flex items-start gap-4">
-              <Avatar className="h-20 w-20 border border-white/20 bg-white/5">
+      <div className="relative mx-auto grid w-full max-w-[1600px] gap-2.5 xl:grid-cols-[1.35fr_1fr]">
+        <section className="space-y-2.5">
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="flex items-start gap-3.5">
+              <Avatar className="h-18 w-18 border border-white/20 bg-white/5">
                 <AvatarImage src={profileAvatar ?? undefined} alt={`${profileName} avatar`} />
                 <AvatarFallback className="bg-white/10 text-xs font-semibold text-fg-primary">
                   {profileInitials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-3xl font-semibold text-fg-primary">{profileName}</p>
+                <p className="truncate text-[2rem] font-semibold leading-tight text-fg-primary">{profileName}</p>
                 <p className="mt-1 text-sm text-fg-muted">{activeAccountsCount} active accounts</p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">
                     <Zap className="h-3 w-3" />
                     Trader Profile
@@ -453,37 +453,37 @@ export default function TraderProfilePage() {
                 </div>
               </div>
             </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+            <div className="mt-3 grid gap-1.5 sm:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
                 <p className="mt-1 text-lg font-semibold text-fg-primary">{metrics.totalTrades}</p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Current Streak</p>
                 <p className="mt-1 text-lg font-semibold text-fg-primary">
                   {metrics.winningStreak > 0 ? `${metrics.winningStreak} wins` : "No winning streak"}
                 </p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Net PnL</p>
                 <p className="mt-1 text-lg font-semibold text-fg-primary">{formatSigned(metrics.netPnl)}</p>
               </div>
             </div>
           </Card>
 
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
-            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
+          <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-2">
+            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-2.5">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Risk Reward</p>
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.riskReward)}</p>
             </Card>
-            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3">
+            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-2.5">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Max Drawdown</p>
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.drawdown)}</p>
             </Card>
           </div>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
-            <div className="mb-3 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="mb-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Date Filter</p>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -527,7 +527,7 @@ export default function TraderProfilePage() {
                 </div>
               </div>
             </div>
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-2.5 flex items-center justify-between">
               <p className="text-sm font-semibold text-fg-primary">PnL Calendar</p>
               <div className="flex items-center gap-3 text-xs text-fg-muted">
                 <span>{tradeCalendarDays.length} active days</span>
@@ -539,7 +539,7 @@ export default function TraderProfilePage() {
                 ) : null}
               </div>
             </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2">
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-1.5">
               <Calendar
                 mode="single"
                 selected={selectedCalendarDay ?? latestTradeDay}
@@ -615,7 +615,7 @@ export default function TraderProfilePage() {
                 </span>
               </div>
             </div>
-            <div className="mt-2 flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2">
+            <div className="mt-1.5 flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2">
               <div className="min-w-0">
                 <p className="text-xs text-fg-muted">Selected Day</p>
                 <p className="truncate text-xs font-semibold text-fg-primary">
@@ -628,15 +628,15 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
-            <div className="mb-3 flex items-center justify-between">
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="mb-2.5 flex items-center justify-between">
               <p className="text-sm font-semibold text-fg-primary">Trade Feed</p>
               <p className="text-xs text-fg-muted">
                 Closed trades {closedTrades.length === 0 ? "0" : `${(tradeFeedPage - 1) * tradesPerPage + 1}-${Math.min(tradeFeedPage * tradesPerPage, closedTrades.length)}`} of {closedTrades.length}
               </p>
             </div>
             {isLoading ? <p className="mb-2 text-xs text-fg-muted">Loading trades...</p> : null}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {paginatedClosedTrades.length === 0 ? (
                 <p className="text-sm text-fg-muted">No closed trades in this range.</p>
               ) : (
@@ -646,7 +646,7 @@ export default function TraderProfilePage() {
                   return (
                     <div
                       key={trade.id}
-                      className="flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2.5"
+                      className="flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2"
                     >
                       <div className="flex items-center gap-2">
                         <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`} />
@@ -701,7 +701,7 @@ export default function TraderProfilePage() {
           </Card>
         </section>
 
-        <aside className="mx-auto w-full max-w-[430px] space-y-2.5 xl:max-w-none">
+        <aside className="mx-auto w-full max-w-[430px] space-y-2 xl:max-w-none">
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
             <div className="flex items-center justify-between text-sm text-fg-muted">
               <span className="inline-flex items-center gap-1">

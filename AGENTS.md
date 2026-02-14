@@ -590,6 +590,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Open Trader Profile and confirm Date Filter appears directly above PnL calendar; Trade Feed shows only closed trades, 5 rows max per page, and pagination updates results correctly across date presets/custom range.
 
+### 2026-02-14: Trader Profile Gap + Visual Rhythm Refinement
+- **What changed:** Tightened spacing and card rhythm across Trader Profile to remove excess visual gaps and create a cleaner, more consistent shadcn-style surface.
+- **What I want:** The page should feel compact and premium with balanced spacing between sections/cards, without changing the existing data behavior.
+- **What I don't want:** Uneven blank space between major blocks, oversized paddings that make the profile feel stretched, or mismatched left/right column rhythm.
+- **How we fixed that:**
+  - Reduced outer page padding and centered the content in a max-width container for better desktop balance.
+  - Normalized section/card spacing (`gap` + `space-y`) across both columns and tightened inner card paddings.
+  - Refined header block density (avatar/name/badge row + KPI tiles) and tightened Trade Feed row vertical spacing.
+  - Kept all metric logic and filter behavior intact while improving pure layout cadence.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile and confirm reduced empty gaps, tighter but readable card spacing, and consistent left/right visual rhythm across desktop/mobile.
+
 ### 2026-02-14: Trader Profile Real-Time + Cache Isolation Hardening
 - **What changed:** Hardened benchmark data fetching to prevent stale/shared-cache behavior and improve real-time freshness.
 - **What I want:** Trader Profile metrics should stay fresh and user-scoped behavior should never be affected by cross-session caching artifacts.
