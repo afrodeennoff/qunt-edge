@@ -136,7 +136,6 @@ const SIDEBAR_STYLES: Record<
     userName: string
     userMeta: string
     groupLabel: string
-    collapseButton: string
   }
 > = {
   minimal: {
@@ -149,8 +148,6 @@ const SIDEBAR_STYLES: Record<
     userName: "text-sidebar-foreground",
     userMeta: "text-sidebar-foreground/60",
     groupLabel: "text-sidebar-foreground/60",
-    collapseButton:
-      "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent",
   },
   glassy: {
     sidebar: "border-r border-white/10 bg-black/95 text-zinc-100 backdrop-blur-xl",
@@ -162,7 +159,6 @@ const SIDEBAR_STYLES: Record<
     userName: "text-zinc-100",
     userMeta: "text-zinc-400",
     groupLabel: "text-zinc-500",
-    collapseButton: "text-zinc-400 hover:text-zinc-100 hover:bg-white/10",
   },
   matte: {
     sidebar: "border-r border-white/5 bg-black text-zinc-200",
@@ -174,7 +170,6 @@ const SIDEBAR_STYLES: Record<
     userName: "text-zinc-100",
     userMeta: "text-zinc-400",
     groupLabel: "text-zinc-500",
-    collapseButton: "text-zinc-400 hover:text-zinc-100 hover:bg-white/10",
   },
 }
 
@@ -190,7 +185,7 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { state, isMobile, setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
 
   const groupedItems = useMemo(() => {
@@ -226,13 +221,7 @@ export function UnifiedSidebar({
             <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
           </div>
           <SidebarTrigger
-            aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
-            title={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
-            className={cn(
-              "ml-auto hidden transition-all duration-300 md:inline-flex",
-              state === "collapsed" && "ml-0 mx-auto",
-              styles.collapseButton
-            )}
+            className="ml-auto hidden h-7 w-7 md:inline-flex"
           />
         </div>
       </SidebarHeader>

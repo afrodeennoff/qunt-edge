@@ -36,6 +36,28 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Sidebar Collapse Behavior Stabilization (State Toggle Hardening)
+- **What changed:** Hardened the core sidebar open/collapse state setter to remove stale-state edge cases during rapid toggles (button + keyboard).
+- **What I want:** Sidebar collapse/expand should feel consistent and deterministic even with quick repeated interactions.
+- **What I don't want:** Intermittent mis-toggles caused by stale closure values when toggling quickly or from multiple controls.
+- **How we fixed that:**
+  - Added a `ref` mirror of the current `open` state in `SidebarProvider`.
+  - Updated `setOpen` to resolve functional updates against `openRef.current` instead of a captured render value.
+  - Narrowed `setOpen` callback dependencies to avoid recreating it on every open-state change.
+- **Key Files:** `components/ui/sidebar.tsx`, `AGENTS.md`
+- **Verification:** Run `npx eslint components/ui/sidebar.tsx components/ui/unified-sidebar.tsx` (clean). Toggle collapse rapidly (header trigger + keyboard shortcut) and confirm stable, predictable behavior.
+
+### 2026-02-14: Unified Sidebar Aligned to shadcn Default Trigger Pattern
+- **What changed:** Simplified the unified sidebar header collapse control to match shadcn default behavior and removed custom style-specific collapse-button variants.
+- **What I want:** A sidebar interaction model that feels like standard shadcn across all style variants, with one predictable trigger behavior.
+- **What I don't want:** Extra custom collapse styling/logic per visual variant that drifts from shadcn baseline behavior.
+- **How we fixed that:**
+  - Kept `SidebarTrigger` as the single header collapse control.
+  - Removed custom `collapseButton` style-token plumbing from `SIDEBAR_STYLES`.
+  - Normalized trigger classes to the compact shadcn pattern (`h-7 w-7`, desktop header visibility).
+- **Key Files:** `components/ui/unified-sidebar.tsx`, `AGENTS.md`
+- **Verification:** Run `npx eslint components/ui/unified-sidebar.tsx components/ui/sidebar.tsx` (clean). Open dashboard and verify the header collapse control behaves like standard shadcn trigger.
+
 ### 2026-02-14: Sidebar Collapse Control Migrated to shadcn Trigger
 - **What changed:** Replaced the custom chevron collapse button in the unified sidebar header with the native `SidebarTrigger` from the shadcn sidebar primitive.
 - **What I want:** Collapse/expand behavior should follow one consistent shadcn interaction model across dashboard sidebars.
