@@ -51,14 +51,14 @@ export default function WhyChooseUs() {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="text-center"
         >
-          <Badge variant="outline" className="border-[hsl(var(--brand-primary)/0.4)] bg-[hsl(var(--brand-primary)/0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--mk-text))]">
+          <Badge variant="outline" className="border-[hsl(var(--brand-primary)/0.4)] bg-[hsl(var(--brand-primary)/0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text))] [font-family:var(--home-mono)]">
             Why Traders Choose Us
           </Badge>
-          <h2 className="mt-3 text-[clamp(1.9rem,4.7vw,3.35rem)] font-semibold leading-[0.95] tracking-[-0.03em] [font-family:var(--home-display)]">
+          <h2 className="mt-3 text-[clamp(2rem,4.9vw,3.55rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
             Built for traders who want
             <span className="block text-[hsl(var(--brand-primary))]">repeatable performance, not lucky spikes</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-3xl text-[15px] leading-[1.72] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
+          <p className="mx-auto mt-4 max-w-3xl text-[15px] leading-[1.78] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
             Qunt Edge combines execution analytics, journaling, and AI coaching in one workflow so every week ends with a
             clearer process than the week before.
           </p>

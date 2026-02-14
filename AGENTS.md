@@ -36,6 +36,24 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Home Typography-Only Rewrite (Editorial Pass)
+- **What changed:** Rewrote Home page typography only, introducing a distinct display/body font pairing and re-tuning type scale, tracking, and line-height across active Home sections.
+- **What I want:** The Home page should feel clearly premium through typography alone, with visible contrast between headline voice, body readability, and micro-label metadata.
+- **What I don't want:** Another "light tweak" that keeps the same visual voice, or any unintended layout/color/component refactors while trying to improve type.
+- **How we fixed that:**
+  - Added dedicated Home typography fonts in `app/layout.tsx` (`Cormorant Garamond` for display and `Manrope` for copy) via `next/font/google` variables.
+  - Scoped Home tokens in `HomeContent`:
+    - `--home-display: var(--font-cormorant)`
+    - `--home-copy: var(--font-manrope)`
+    - `--home-mono: var(--font-ibm-mono)`
+  - Updated typography classes only in Hero, Analysis Demo, Why Choose Us, Comparison, AI Futures, Pricing, and CTA:
+    - headline clamp sizes + tighter display tracking/leading,
+    - mono uppercase kicker/button label rhythm,
+    - improved body text leading for readability.
+  - Kept structure, spacing system, component composition, and color styling intact.
+- **Key Files:** `app/layout.tsx`, `app/[locale]/(home)/components/HomeContent.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/AnalysisDemo.tsx`, `app/[locale]/(home)/components/WhyChooseUs.tsx`, `app/[locale]/(home)/components/ComparisonSection.tsx`, `app/[locale]/(home)/components/AIFuturesSection.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(home)/components/CTA.tsx`, `AGENTS.md`
+- **Verification:** Open `/` and confirm the new serif-forward headline voice, mono micro-labels, and improved body rhythm across all Home sections; run ESLint on edited files with no errors.
+
 ### 2026-02-14: Dashboard Data Visibility + Color Parity Restore (Commit 198b8ed)
 - **What changed:** Restored dashboard default widget visibility behavior and reverted widget-canvas surface styling to match the data display look from commit `198b8ed`.
 - **What I want:** Users should immediately see dashboard data in the widget view with the same high-contrast monochrome presentation that made chart and metric values clearly readable.

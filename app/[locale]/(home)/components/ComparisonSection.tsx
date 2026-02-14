@@ -39,10 +39,10 @@ export default function ComparisonSection() {
           transition={{ duration: 0.5 }}
           className="mb-8 text-center sm:mb-12"
         >
-          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
+          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-mono)]">
             Difference From Others
           </Badge>
-          <h2 className="mt-3 text-[clamp(1.9rem,4.5vw,3.15rem)] font-semibold leading-[0.95] tracking-[-0.03em] [font-family:var(--home-display)]">
+          <h2 className="mt-3 text-[clamp(2rem,4.7vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
             Why Qunt Edge is not
             <span className="block text-[hsl(var(--brand-primary))]">just another trading dashboard</span>
           </h2>

@@ -15,12 +15,12 @@ export default function CTA() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="marketing-panel mx-auto max-w-4xl rounded-[30px] px-6 py-11 text-center sm:px-10"
       >
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Ready</p>
-        <h2 className="mt-2 text-[clamp(1.9rem,5vw,3.5rem)] font-semibold leading-[0.92] tracking-[-0.03em] [font-family:var(--home-display)]">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Ready</p>
+        <h2 className="mt-2 text-[clamp(2rem,5vw,3.6rem)] font-semibold leading-[0.9] tracking-[-0.028em] [font-family:var(--home-display)]">
           Keep your current workflow.
           <span className="block text-[hsl(var(--brand-primary))]">Upgrade the decisions behind it.</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.7] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
+        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.78] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
           Join in minutes and get your first AI-backed execution audit before your next trading session.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
