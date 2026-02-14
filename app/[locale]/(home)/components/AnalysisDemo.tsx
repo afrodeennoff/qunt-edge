@@ -51,13 +51,13 @@ export default function AnalysisDemo() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Trading Journal Intelligence</p>
-            <h2 className="mt-2 text-[clamp(1.7rem,4.5vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Trading Journal Intelligence</p>
+            <h2 className="mt-2 text-[clamp(1.8rem,4.5vw,3.15rem)] font-semibold leading-[0.94] tracking-[-0.03em] [font-family:var(--home-display)]">
               Real-time review for
               <span className="block text-[hsl(var(--brand-primary))]">process over outcome</span>
             </h2>
           </div>
-          <p className="max-w-md text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">
+          <p className="max-w-md text-[15px] leading-[1.7] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
             Old journal context stays intact while the interface mirrors a modern SaaS presentation style.
           </p>
         </div>
@@ -73,10 +73,10 @@ export default function AnalysisDemo() {
             <div className="border-b border-[hsl(var(--mk-border)/0.24)] p-5 sm:p-7 lg:border-b-0 lg:border-r">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Execution Stream</p>
-                  <p className="mt-1 text-2xl font-semibold">4,367.00</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Execution Stream</p>
+                  <p className="mt-1 text-2xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">4,367.00</p>
                 </div>
-                <span className="rounded-full border border-[hsl(var(--brand-primary)/0.35)] bg-[hsl(var(--brand-primary)/0.1)] px-3 py-1 text-xs font-semibold text-[hsl(var(--brand-primary))]">
+                <span className="rounded-full border border-[hsl(var(--brand-primary)/0.35)] bg-[hsl(var(--brand-primary)/0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand-primary))] [font-family:var(--home-mono)]">
                   +1.27%
                 </span>
               </div>
@@ -113,7 +113,7 @@ export default function AnalysisDemo() {
             </div>
 
             <div className="bg-[hsl(var(--mk-surface-muted)/0.42)] p-5 sm:p-6">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Journal Signals</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Journal Signals</p>
               <div className="mt-4 min-h-[220px] space-y-3">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -122,7 +122,7 @@ export default function AnalysisDemo() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.35 }}
-                    className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))]"
+                    className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]"
                   >
                     {logs[logIndex]}
                   </motion.div>
@@ -130,7 +130,7 @@ export default function AnalysisDemo() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))]">Anomaly Probability</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Anomaly Probability</p>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-[hsl(var(--mk-border)/0.22)]">
                   <motion.div
                     initial={{ width: 0 }}

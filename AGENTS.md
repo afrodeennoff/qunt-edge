@@ -36,6 +36,21 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Home Page Typography Rewrite
+- **What changed:** Refined the Home page visual hierarchy and rewrote typography across Hero + deferred sections to use a single editorial type system.
+- **What I want:** The home experience should feel premium and intentional, with clear contrast between display headlines, data labels, and body copy.
+- **What I don't want:** Mixed typography patterns (inconsistent heading scales, mismatched label styles, and undefined font variables) that make the page feel stitched together.
+- **How we fixed that:**
+  - Introduced scoped typography variables at the home-page wrapper level (`--home-display`, `--home-copy`, `--home-mono`) in `HomeContent`.
+  - Updated Hero, Analysis Demo, Why Choose Us, Comparison, AI Futures, Pricing, and CTA sections to share:
+    - tighter display heading tracking/leading,
+    - mono uppercase kicker/label styling,
+    - consistent body copy sizing and rhythm,
+    - unified CTA/button label letterspacing.
+  - Removed direct `font-poppins` usage from active Home page sections in favor of the scoped home typography variables.
+- **Key Files:** `app/[locale]/(home)/components/HomeContent.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/AnalysisDemo.tsx`, `app/[locale]/(home)/components/WhyChooseUs.tsx`, `app/[locale]/(home)/components/ComparisonSection.tsx`, `app/[locale]/(home)/components/AIFuturesSection.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(home)/components/CTA.tsx`, `AGENTS.md`
+- **Verification:** Open `/` (home) -> confirm section titles share the same display style, labels are consistently mono uppercase, body copy has uniform rhythm, and CTA labels match the new typographic system.
+
 ### 2026-02-14: Engineering Log Restructure
 - **What changed:** Updated `AGENTS.md` to enforce a strict, conversational log structure.
 - **What I want:** Highly contextual documentation that explains the *why* and *how* of changes, not just the *what*.

@@ -54,11 +54,11 @@ export default function WhyChooseUs() {
           <Badge variant="outline" className="border-[hsl(var(--brand-primary)/0.4)] bg-[hsl(var(--brand-primary)/0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--mk-text))]">
             Why Traders Choose Us
           </Badge>
-          <h2 className="mt-3 text-[clamp(1.8rem,4.7vw,3.2rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+          <h2 className="mt-3 text-[clamp(1.9rem,4.7vw,3.35rem)] font-semibold leading-[0.95] tracking-[-0.03em] [font-family:var(--home-display)]">
             Built for traders who want
             <span className="block text-[hsl(var(--brand-primary))]">repeatable performance, not lucky spikes</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] sm:text-base">
+          <p className="mx-auto mt-4 max-w-3xl text-[15px] leading-[1.72] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
             Qunt Edge combines execution analytics, journaling, and AI coaching in one workflow so every week ends with a
             clearer process than the week before.
           </p>
@@ -74,9 +74,9 @@ export default function WhyChooseUs() {
               transition={{ duration: 0.45, delay: idx * 0.06 }}
               className="marketing-panel rounded-2xl p-5"
             >
-              <p className="text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--mk-text-muted))]">{stat.label}</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight">{stat.value}</p>
-              <p className="mt-2 text-sm text-[hsl(var(--mk-text-muted))]">{stat.note}</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">{stat.label}</p>
+              <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">{stat.value}</p>
+              <p className="mt-2 text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{stat.note}</p>
             </motion.div>
           ))}
         </div>
@@ -97,8 +97,8 @@ export default function WhyChooseUs() {
                     <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[hsl(var(--mk-border)/0.3)] bg-[hsl(var(--mk-surface-muted)/0.7)] text-[hsl(var(--brand-primary))]">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-xl tracking-tight">{reason.title}</CardTitle>
-                    <CardDescription className="text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">
+                    <CardTitle className="text-xl tracking-[-0.01em] [font-family:var(--home-display)]">{reason.title}</CardTitle>
+                    <CardDescription className="text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
                       {reason.description}
                     </CardDescription>
                   </CardHeader>
@@ -121,7 +121,7 @@ export default function WhyChooseUs() {
               {idx === 0 && <Sparkles className="h-4 w-4 text-[hsl(var(--brand-primary))]" />}
               {idx === 1 && <CheckCircle2 className="h-4 w-4 text-[hsl(var(--brand-primary))]" />}
               {idx === 2 && <CheckCircle2 className="h-4 w-4 text-[hsl(var(--brand-primary))]" />}
-              <span className="text-[hsl(var(--mk-text-muted))]">{item}</span>
+              <span className="text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item}</span>
             </motion.div>
           ))}
         </div>

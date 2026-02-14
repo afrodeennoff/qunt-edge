@@ -63,14 +63,14 @@ export default function PricingSection() {
           <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
             Pricing
           </Badge>
-          <h2 className="mt-3 text-[clamp(1.8rem,4.6vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+          <h2 className="mt-3 text-[clamp(1.9rem,4.6vw,3.15rem)] font-semibold leading-[0.95] tracking-[-0.03em] [font-family:var(--home-display)]">
             Transparent plans for
             <span className="block text-[hsl(var(--brand-primary))]">individual and team growth</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm text-[hsl(var(--mk-text-muted))] sm:text-base">
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-[1.7] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
             Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
           </p>
-          <p className="mx-auto mt-2 text-xs text-[hsl(var(--mk-text-muted))]">Billed monthly. Cancel anytime.</p>
+          <p className="mx-auto mt-2 text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Billed monthly. Cancel anytime.</p>
         </motion.div>
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -88,22 +88,22 @@ export default function PricingSection() {
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between gap-3">
-                      <CardTitle className="text-xl">{plan.name}</CardTitle>
+                      <CardTitle className="text-xl tracking-[-0.01em] [font-family:var(--home-display)]">{plan.name}</CardTitle>
                     {plan.popular ? (
                       <Badge className="bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-ink))]">Most Popular</Badge>
                     ) : null}
                   </div>
-                  <p className="mt-3 text-[2rem] font-semibold tracking-tight">
+                  <p className="mt-3 text-[2rem] font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">
                     {plan.price}
-                    <span className="ml-1 text-sm font-medium text-[hsl(var(--mk-text-muted))]">{plan.period}</span>
+                    <span className="ml-1 text-sm font-medium text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{plan.period}</span>
                   </p>
-                  <p className="text-sm text-[hsl(var(--mk-text-muted))]">{plan.subtitle}</p>
-                  <p className="mt-1 text-xs text-[hsl(var(--mk-text-muted))]">{plan.note}</p>
+                  <p className="text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{plan.subtitle}</p>
+                  <p className="mt-1 text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">{plan.note}</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-sm text-[hsl(var(--mk-text-muted))]">
+                      <li key={feature} className="flex items-start gap-2 text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--brand-primary))]" />
                         <span>{feature}</span>
                       </li>

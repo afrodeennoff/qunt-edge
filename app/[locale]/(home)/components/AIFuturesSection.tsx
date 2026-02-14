@@ -60,8 +60,8 @@ function FeatureGrid({ items }: { items: typeof intelligenceFeatures }) {
                 <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.75)] text-[hsl(var(--brand-primary))]">
                   <Icon className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-lg">{item.title}</CardTitle>
-                <CardDescription className="text-sm leading-relaxed text-[hsl(var(--mk-text-muted))]">
+                <CardTitle className="text-lg tracking-[-0.01em] [font-family:var(--home-display)]">{item.title}</CardTitle>
+                <CardDescription className="text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
                   {item.description}
                 </CardDescription>
               </CardHeader>
@@ -87,7 +87,7 @@ export default function AIFuturesSection() {
           <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
             Must-Have AI Features
           </Badge>
-          <h2 className="mt-3 text-[clamp(1.8rem,4.6vw,3rem)] font-semibold leading-[1.02] tracking-tight [font-family:var(--font-poppins)]">
+          <h2 className="mt-3 text-[clamp(1.9rem,4.6vw,3.15rem)] font-semibold leading-[0.95] tracking-[-0.03em] [font-family:var(--home-display)]">
             The AI layer that turns
             <span className="block text-[hsl(var(--brand-primary))]">raw trades into repeatable edges</span>
           </h2>
@@ -95,10 +95,10 @@ export default function AIFuturesSection() {
 
         <Tabs defaultValue="intelligence" className="w-full">
           <TabsList className="h-auto w-full justify-start rounded-xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.55)] p-1">
-            <TabsTrigger value="intelligence" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em]">
+            <TabsTrigger value="intelligence" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em] [font-family:var(--home-mono)]">
               Intelligence
             </TabsTrigger>
-            <TabsTrigger value="automation" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em]">
+            <TabsTrigger value="automation" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em] [font-family:var(--home-mono)]">
               Automation
             </TabsTrigger>
           </TabsList>
@@ -112,7 +112,7 @@ export default function AIFuturesSection() {
         </Tabs>
 
         <Card variant="glass" className="mt-6 rounded-2xl border-[hsl(var(--mk-border)/0.3)]">
-          <CardContent className="flex flex-col gap-2 p-5 text-sm text-[hsl(var(--mk-text-muted))] sm:flex-row sm:items-center sm:justify-between">
+          <CardContent className="flex flex-col gap-2 p-5 text-sm text-[hsl(var(--mk-text-muted))] sm:flex-row sm:items-center sm:justify-between [font-family:var(--home-copy)]">
             <p>
               AI decisions stay auditable with a transparent reason trail, so every recommendation can be reviewed.
             </p>
