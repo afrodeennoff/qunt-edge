@@ -212,16 +212,16 @@ export function UnifiedSidebar({
 
   return (
     <Sidebar collapsible="icon" className={styles.sidebar}>
-      <SidebarHeader className={cn("px-2 py-2", styles.header)}>
-        <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-md border border-current/15 bg-current/5">
+      <SidebarHeader className={cn("h-14 flex items-center px-4", styles.header)}>
+        <div className="flex items-center gap-2 w-full">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-current/15 bg-current/5">
             <Logo className="size-4.5" />
           </div>
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className={cn("truncate text-sm font-semibold", styles.brandName)}>
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <p className={cn("truncate text-sm font-semibold tracking-tight", styles.brandName)}>
               Qunt Edge
             </p>
-            <p className={cn("truncate text-[11px]", styles.brandSub)}>Workspace</p>
+            <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
           </div>
           <Button
             type="button"
@@ -229,7 +229,8 @@ export function UnifiedSidebar({
             size="icon"
             onClick={toggleSidebar}
             className={cn(
-              "ml-auto hidden h-7 w-7 md:inline-flex group-data-[collapsible=icon]:hidden",
+              "ml-auto h-7 w-7 transition-all duration-300",
+              state === "collapsed" && "ml-0 mx-auto",
               styles.collapseButton
             )}
           >

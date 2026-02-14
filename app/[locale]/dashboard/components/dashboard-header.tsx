@@ -107,12 +107,12 @@ export function DashboardHeader() {
         Boolean(weekdayFilter?.days && weekdayFilter.days.length > 0);
 
     return (
-        <header className="sticky top-0 z-50 overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur-xl" data-dashboard-header="true">
+        <header className="sticky top-0 z-50 overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur-xl h-14" data-dashboard-header="true">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
-            <div className="relative min-h-14 flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5">
+            <div className="relative h-full flex items-center justify-between gap-3 px-4 sm:px-6">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground" />
+                    <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
                     <div className="flex min-w-0 items-start gap-3">
                         <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">

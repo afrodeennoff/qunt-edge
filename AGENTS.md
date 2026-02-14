@@ -58,6 +58,48 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `AGENTS.md`
 - **Verification:** Confirm the delivered prompt is one contiguous block and includes both answering + code-editing constraints.
 
+### 2026-02-14: Prompt Rule Added - Always Read/Update AGENTS
+- **What changed:** Added an explicit instruction to always read `AGENTS.md` at task start and update `AGENTS.md` at task completion.
+- **What I want:** Guaranteed project-memory continuity so future agents retain context and avoid repeating mistakes.
+- **What I don't want:** Silent changes with no engineering-log trace or agents working without current project guidance.
+- **How we fixed that:**
+  - Introduced a dedicated mandatory rule in the unified prompt under core instructions.
+  - Kept wording direct so it can be reused as a non-optional workflow gate.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Check the newest prompt version includes: "Always read AGENTS.md when starting work and update AGENTS.md when finishing work."
+
+### 2026-02-14: Final Unified Master Prompt Delivery
+- **What changed:** Delivered a final single-block master prompt that consolidates all user-provided directives into one reusable template.
+- **What I want:** One authoritative prompt users can paste directly without missing rules or duplicated sections.
+- **What I don't want:** Partial/fragmented prompt versions that omit required behaviors or create conflicting instructions.
+- **How we fixed that:**
+  - Re-read full thread requirements and merged all mandatory parts: answering rules, self-reflection, tool preambles, persistence, problem-solving flow, code editing standards, and output constraints.
+  - Explicitly included the project-memory rule to always read and update `AGENTS.md`.
+  - Preserved `<request>`, `<instructions>`, and `<constraints>` blocks for direct reuse.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Confirm final delivered prompt is one contiguous block and includes all sections requested across the thread.
+
+### 2026-02-14: Memory Protocol Added to Master Prompt
+- **What changed:** Added a dedicated user-identification and memory-management protocol section to the master prompt.
+- **What I want:** Consistent handling of identity assumptions, memory retrieval language, and memory updates across every interaction.
+- **What I don't want:** Inconsistent memory behavior where key personal context or relationship data is missed between turns.
+- **How we fixed that:**
+  - Embedded a new required section covering user identification (`default_user`), memory retrieval phrasing, memory categories, and memory update logic.
+  - Preserved the rest of the consolidated prompt structure unchanged to avoid regressions.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Confirm the final master prompt includes the four-step memory protocol exactly as requested.
+
+### 2026-02-14: Final All-Round Master Prompt (Thread Re-Read)
+- **What changed:** Produced one final all-round master prompt after re-reading the entire thread and consolidating every required directive.
+- **What I want:** A single authoritative prompt that is robust across coding, analysis, conversation, planning, and execution workflows.
+- **What I don't want:** Additional revisions caused by missing rules, repeated blocks, or partial coverage of earlier thread requirements.
+- **How we fixed that:**
+  - Kept all mandatory rule groups: answering rules, self-reflection, AGENTS workflow, tool preambles, persistence, execution framework, code editing guidance, and memory protocol.
+  - Maintained a strict but reusable structure with clear section tags and reusable request/constraint placeholders.
+  - Ensured wording stays implementation-ready for direct copy-paste use.
+- **Key Files:** `AGENTS.md`
+- **Verification:** Confirm the delivered prompt contains all requested sections in one contiguous block with no missing required directives.
+
 ### 2026-02-14: Home Page Typography Rewrite
 - **What changed:** Refined the Home page visual hierarchy and rewrote typography across Hero + deferred sections to use a single editorial type system.
 - **What I want:** The home experience should feel premium and intentional, with clear contrast between display headlines, data labels, and body copy.
@@ -202,19 +244,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/components/lazy-widget.tsx`
 - **Verification:** Run `npm run build` locally to confirm the type error is resolved.
 
-### 2026-02-14: Premium Dashboard UI Refactor
-- **What changed:** Comprehensive refactor of dashboard and account components to a premium monochrome/glassmorphic aesthetic using semantic Tailwind CSS tokens.
-- **What I want:** A consistent, elite design system that works across transitions and follows the established glassmorphic brand identity.
-- **What I don't want:** Hardcoded hex codes, inconsistent component triggers, and colorful "Christmas tree" UI patterns that mismatch the premium aesthetic.
+### 2026-02-14: Navigation System Unification
+- **What changed:** Unified the sidebar across Dashboard and Teams using the `UnifiedSidebar` component; streamlined the `DashboardHeader` to prevent double-navigation visuals.
+- **What I want:** A single, cohesive navigation experience with consistent header heights, clear collapse buttons, and smooth global animations.
+- **What I don't want:** Multiple sidebar implementations, stacked/wrapping navigation headers, and missing mobile-to-desktop parity for sidebar controls.
 - **How we fixed that:**
-  - Replaced hardcoded colors with semantic tokens: `text-primary`, `text-destructive`, `text-orange-500`.
-  - Standardized interactive triggers (Import, Sync, PnL Summary) to a unified `outline` variant with `bg-background/50`, `border-border`, and `backdrop-blur-sm`.
-  - Modernized all labels and headers to `text-[10px] font-bold uppercase tracking-widest` for a "trading terminal" aesthetic.
-  - Updated AI assistant containers and message bubbles to use semantic backgrounds (`bg-secondary/40`, `bg-card`) and borders (`border-border`).
-- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/components/accounts/account-configurator.tsx`, `app/[locale]/dashboard/components/accounts/accounts-overview.tsx`, `app/[locale]/dashboard/components/analysis/accounts-analysis.tsx`, `app/[locale]/dashboard/components/widgets/smart-insights-widget.tsx`, `app/[locale]/dashboard/components/chat/bot-message.tsx`.
-- **Verification:** Confirm all dashboard buttons share the same glassmorphic outline style; verify account tables and AI message bubbles use standard secondary/muted tokens instead of hardcoded hex values.
+  - Migrated `DashboardSidebar` to use the same logic and component as `TeamsSidebar`.
+  - Added a persistent collapse button (`ChevronsLeft/Right`) to the sidebar and a `SidebarTrigger` to the desktop header.
+  - Standardized all top-level headers to `h-14` with a synchronized border-bottom line.
+  - Added a global CSS layer for smooth transitions on background and interactive color changes.
+- **Key Files:** `components/sidebar/dashboard-sidebar.tsx`, `components/ui/unified-sidebar.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/globals.css`.
+- **Verification:** Verify the sidebar collapses and expands correctly on both desktop and mobile; check that the top line of the sidebar and main content aligns perfectly at the same height.
 
-### 2026-02-14: Build Repair - CSS Import
+- **Status:** All requested UI fixes (Sidebar alignment, Collapse button, Color unification) are deployed.
+- **Next Steps:** Monitor for any layout regressions on extreme screen sizes (1024px-1280px range).
 - **What changed:** Removed `@import "tw-animate-css";` from `globals.css`.
 - **What I want:** A clean CSS build without missing dependency errors.
 - **What I don't want:** The Vercel build crashing because it can't resolve a CSS package that isn't in `package.json`.
