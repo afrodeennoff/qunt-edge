@@ -100,8 +100,8 @@ function renderPropfirmCard(
         <div>
           <h3 className="text-sm font-semibold mb-3">{t('landing.propfirms.payouts.title')}</h3>
           <div className="space-y-3">
-            {/* Paid - Highlighted */}
-            <div className="p-3 rounded-lg border border-white/20 bg-white/10">
+            {/* Paid */}
+            <div className="p-3 rounded-lg border border-white/10 bg-white/5">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium text-white">
                   {t('landing.propfirms.payouts.paid.label')}
@@ -110,33 +110,33 @@ function renderPropfirmCard(
                   {formatCurrency(paidAmount)}
                 </span>
               </div>
-              <p className="text-xs text-white/90">
+              <p className="text-xs text-white/60">
                 {t('landing.propfirms.payouts.count', { count: paidCount })}
               </p>
             </div>
 
             {/* Pending */}
-            <div className="p-3 rounded-lg border border-white/15 bg-white/6">
+            <div className="p-3 rounded-lg border border-white/10 bg-white/5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white/90">
+                <span className="text-sm font-medium text-white">
                   {t('landing.propfirms.payouts.pending.label')}
                 </span>
-                <span className="text-sm font-bold text-white/90">
+                <span className="text-sm font-bold text-white">
                   {formatCurrency(pendingAmount)}
                 </span>
               </div>
-              <p className="text-xs text-white/70">
+              <p className="text-xs text-white/60">
                 {t('landing.propfirms.payouts.count', { count: pendingCount })}
               </p>
             </div>
 
             {/* Refused */}
-            <div className="p-3 rounded-lg border border-white/10 bg-white/4">
+            <div className="p-3 rounded-lg border border-white/10 bg-white/5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white/75">
+                <span className="text-sm font-medium text-white">
                   {t('landing.propfirms.payouts.refused.label')}
                 </span>
-                <span className="text-sm font-bold text-white/75">
+                <span className="text-sm font-bold text-white">
                   {formatCurrency(refusedAmount)}
                 </span>
               </div>

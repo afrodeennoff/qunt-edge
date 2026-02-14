@@ -244,6 +244,16 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, `AGENTS.md`
 - **Verification:** Open `/propfirms` and confirm the chart is calmer by default (only Value + Reg), with lighter grid and fewer label distractions.
 
+### 2026-02-14: Prop Firm Catalogue Controls + Payout Rows Monochrome Unification
+- **What changed:** Unified the remaining out-of-theme UI pieces in Prop Firm Catalogue: timeframe/sort selects and payout statistic rows now use the same monochrome surface styling as the rest of the page.
+- **What I want:** The entire catalogue page should feel like one coherent design system: same borders, same surface tone, same text contrast.
+- **What I don't want:** Default-styled selects that look like a different UI kit and payout rows with inconsistent emphasis/contrast.
+- **How we fixed that:**
+  - Restyled `SelectTrigger` and `SelectContent` in timeframe + sort controls to match the monochrome black/glass palette.
+  - Normalized Paid/Pending/Refused payout rows to the same `bg-white/5` + `border-white/10` surface treatment with consistent text contrast.
+- **Key Files:** `app/[locale]/(landing)/propfirms/components/timeframe-controls.tsx`, `app/[locale]/(landing)/propfirms/components/sort-controls.tsx`, `app/[locale]/(landing)/propfirms/page.tsx`, `AGENTS.md`
+- **Verification:** Open `/propfirms` and verify the dropdowns match the dark theme and all payout rows share one consistent surface style.
+
 ### 2026-02-14: Home Typography-Only Rewrite (Editorial Pass)
 - **What changed:** Rewrote Home page typography only, introducing a distinct display/body font pairing and re-tuning type scale, tracking, and line-height across active Home sections.
 - **What I want:** The Home page should feel clearly premium through typography alone, with visible contrast between headline voice, body readability, and micro-label metadata.
