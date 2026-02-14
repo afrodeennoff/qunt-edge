@@ -259,9 +259,17 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            Object.defineProperty(navigator, 'onLine', {
+            const originalNavigator = globalThis.navigator
+            if (!originalNavigator) {
+                // @ts-expect-error - navigator is missing in node environment
+                globalThis.navigator = { onLine: true }
+            }
+
+            const originalOnLine = globalThis.navigator.onLine
+            Object.defineProperty(globalThis.navigator, 'onLine', {
                 writable: true,
                 value: false,
+                configurable: true,
             })
 
             const onOffline = vi.fn()
@@ -277,10 +285,17 @@ describe('AutoSaveService', () => {
             const queued = await queue.getAll()
             expect(queued.length).toBeGreaterThan(0)
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: true,
-            })
+            // Restore
+            if (originalNavigator) {
+                Object.defineProperty(globalThis.navigator, 'onLine', {
+                    writable: true,
+                    value: originalOnLine,
+                    configurable: true,
+                })
+            } else {
+                // @ts-expect-error - cleanup
+                delete globalThis.navigator
+            }
         })
 
         it('should process offline queue when connection restored', async () => {
