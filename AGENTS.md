@@ -36,6 +36,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Dashboard Data Visibility + Color Parity Restore (Commit 198b8ed)
+- **What changed:** Restored dashboard default widget visibility behavior and reverted widget-canvas surface styling to match the data display look from commit `198b8ed`.
+- **What I want:** Users should immediately see dashboard data in the widget view with the same high-contrast monochrome presentation that made chart and metric values clearly readable.
+- **What I don't want:** Dashboard opening in a non-widget context by default or widget surfaces inheriting theme token colors that can reduce contrast and make data appear missing.
+- **How we fixed that:**
+  - Reverted dashboard tab default behavior to `widgets` in `page.tsx` when no `tab` query param is provided.
+  - Removed temporary debug overlay rendering from dashboard page.
+  - Restored widget-canvas interactive/surface classes to the commit-matching dark style (`bg-black/95`, white-border hover, white-tinted overlays/popovers) for data readability consistency.
+- **Key Files:** `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard` with and without `?tab=` query params and confirm widget data is visible by default and card/chart contrast matches the previous commit aesthetic.
+
 ### 2026-02-14: Unified Master Prompt Consolidation
 - **What changed:** Consolidated a fragmented, overlapping instruction set into a single coherent master prompt template.
 - **What I want:** One copy-paste prompt that is consistent, reusable, and easy to run without conflicting directives.
@@ -175,6 +186,29 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Implemented the standard `shadcn` `Avatar` component for consistent sizing and fallback handling.
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`
 
+### 2026-02-14: Trader Profile Header Re-Arrangement
+- **What changed:** Re-arranged the user header to a social-style layout with a larger avatar, stronger name hierarchy, and compact badge row.
+- **What I want:** The profile top area should visually match a creator-style identity block while still using only existing account/trade data.
+- **What I don't want:** A flat header where name/avatar feel disconnected and badges look scattered or data is duplicated without purpose.
+- **How we fixed that:**
+  - Switched to left-aligned large avatar + stacked name/subtitle.
+  - Added structured badges using existing metrics only (`Trader Profile`, `Total Trades`, `Withdraw`).
+  - Kept downstream cards intact so no analytics data was removed.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile and confirm avatar/name/badge block appears in one compact row with improved visual hierarchy.
+
+### 2026-02-14: Trader Profile Right Panel Component Match
+- **What changed:** Rebuilt the right-side stats stack to mirror the requested component structure (radar, avg cards, win-rate card, total-trades card with badge, break-even/sum-gain, footer button).
+- **What I want:** Right column should match the reference component order and composition 1:1 while keeping the existing app theme intact.
+- **What I don't want:** A redesigned look, missing cards, or mixed metric groups that diverge from the provided reference layout.
+- **How we fixed that:**
+  - Replaced Profit/Withdraw summary block with `Avg. Win`, `Avg. Loss`, and `Avg. Return` block.
+  - Added dedicated `Win Rate` card with dual progress bars.
+  - Added `Total Trades` card with `Serial Trader` badge and split progress bars.
+  - Preserved existing `Break Even Rate` + `Sum Gain` card and added `Show All Stats` footer action.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile and verify the right panel card order/structure matches the screenshot component-by-component.
+
 ### 2026-02-14: Trader Profile Audit Pass
 - **What changed:** Audited Trader Profile metric logic and removed stale internal fields from the page model.
 - **What I want:** Clear metric semantics with minimal technical debt so future agents can safely iterate.
@@ -255,6 +289,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Added a global CSS layer for smooth transitions on background and interactive color changes.
 - **Key Files:** `components/sidebar/dashboard-sidebar.tsx`, `components/ui/unified-sidebar.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/globals.css`.
 - **Verification:** Verify the sidebar collapses and expands correctly on both desktop and mobile; check that the top line of the sidebar and main content aligns perfectly at the same height.
+
+### 2026-02-14: Sidebar Collapse De-duplication + Theme Blend
+- **What changed:** Removed duplicate sidebar collapse controls in Dashboard and unified sidebar color tokens with the monochrome design system.
+- **What I want:** One clear collapse control at desktop (inside the sidebar) and sidebar surfaces that visually blend with the app’s unified black/neutral palette.
+- **What I don't want:** Two collapse buttons visible at once or mismatched sidebar tones (light/default shadcn colors) that break visual consistency.
+- **How we fixed that:**
+  - Limited `SidebarTrigger` in `DashboardHeader` to mobile only (`md:hidden`) so desktop keeps a single collapse button in `UnifiedSidebar`.
+  - Replaced legacy shadcn sidebar token values (`--sidebar*`) in `app/globals.css` with monochrome tokens aligned to existing project theme values.
+  - Applied the same sidebar token set for both `:root` and `.dark` to prevent theme drift and keep the sidebar consistent.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/globals.css`, `AGENTS.md`
+- **Verification:** Open `/dashboard` on desktop and confirm only one collapse button is shown; switch between routes/themes and confirm sidebar background, borders, and hover accents stay in the unified monochrome scheme.
 
 - **Status:** All requested UI fixes (Sidebar alignment, Collapse button, Color unification) are deployed.
 - **Next Steps:** Monitor for any layout regressions on extreme screen sizes (1024px-1280px range).

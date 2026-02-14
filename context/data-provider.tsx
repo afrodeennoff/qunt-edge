@@ -446,7 +446,8 @@ export const DataProvider: React.FC<{
           console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
 
           // Fallback to mock data if no real trades exist, regardless of environment (for demo purposes)
-          const tradesToUse = safeTrades.length > 0 ? safeTrades : generateMockTrades(userId);
+          const tradesToUse = safeTrades.length > 0 ? safeTrades : generateMockTrades(userId || "demo-user");
+          console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0, ")");
           setTrades(tradesToUse);
           if (tradesToUse.length > 0) {
             setTradesCache(userId, tradesToUse).catch(console.error);
@@ -521,11 +522,13 @@ export const DataProvider: React.FC<{
         }).catch(console.error);
       }
     } catch (error) {
-      console.error("Error loading data:", error);
-      // Optionally handle specific error cases here
-      if (error instanceof Error) {
-        console.error("Error details:", error.message);
-      }
+      console.error("[DataProvider] FATAL: Error loading data:", error);
+      // Fallback to mock data on fatal load error
+      const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
+      console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
+      setTrades(generateMockTrades(currentUserId));
+      setAccounts([]);
+      setGroups([]);
     } finally {
       setIsLoading(false);
     }

@@ -63,15 +63,19 @@ export function DataDebug() {
                             <span className="text-white/90 font-mono">{formattedTrades.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
+                            <span className="text-white/40 uppercase font-black tracking-tighter">Accounts</span>
+                            <span className="text-white/90 font-mono">{useData().accounts.length}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px]">
                             <span className="text-white/40 uppercase font-black tracking-tighter">Environment</span>
                             <span className={cn("font-mono", process.env.NODE_ENV === 'development' ? "text-green-400" : "text-amber-400")}>
                                 {process.env.NODE_ENV}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">Data Type</span>
+                            <span className="text-white/40 uppercase font-black tracking-tighter">Data Logic</span>
                             <span className={cn("font-mono px-1.5 py-0.5 rounded text-[8px]", isMock ? "bg-amber-500/10 text-amber-500" : "bg-green-500/10 text-green-500")}>
-                                {isMock ? "MOCK" : "LIVE"}
+                                {isMock ? "MOCK (Fallback)" : "LIVE (Synced)"}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">

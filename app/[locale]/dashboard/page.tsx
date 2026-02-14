@@ -8,14 +8,9 @@ import { ChartTheFuturePanel } from "./components/chart-the-future-panel";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { clearReferralCode } from "@/lib/referral-storage";
-import { useUserStore } from "@/store/user-store";
-
-
-import { DataDebug } from "./components/data-debug";
 
 export default function Home() {
   const searchParams = useSearchParams();
-  const layout = useUserStore((state) => state.dashboardLayout);
 
   // Clear referral code after successful subscription
   useEffect(() => {
@@ -25,10 +20,7 @@ export default function Home() {
     }
   }, [searchParams]);
 
-  const requestedTab = searchParams.get("tab");
-  const hasWidgets =
-    (layout?.desktop?.length ?? 0) > 0 || (layout?.mobile?.length ?? 0) > 0;
-  const activeTab = requestedTab || (hasWidgets ? "widgets" : "table");
+  const activeTab = searchParams.get("tab") || "widgets";
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] px-3 pb-4 pt-2 sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3">
@@ -52,7 +44,6 @@ export default function Home() {
           <WidgetCanvas />
         </TabsContent>
       </Tabs>
-      <DataDebug />
     </div>
   );
 }

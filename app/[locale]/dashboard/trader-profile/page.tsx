@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
-import { ChevronDown, CircleDot } from "lucide-react"
+import { ChevronDown, CircleDot, Zap } from "lucide-react"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -28,6 +28,8 @@ interface TraderMetrics {
   winRate: number
   avgReturn: number
   totalTrades: number
+  avgWin: number
+  avgLoss: number
   netPnl: number
   consistencyRate: number
   winningStreak: number
@@ -185,6 +187,8 @@ export default function TraderProfilePage() {
       winRate,
       avgReturn,
       totalTrades,
+      avgWin,
+      avgLoss: avgLossAbs,
       netPnl: cumulativePnl,
       consistencyRate,
       winningStreak,
@@ -211,12 +215,6 @@ export default function TraderProfilePage() {
       .slice(0, 6)
   }, [formattedTrades])
 
-  const totalProfitAllAccounts = useMemo(() => {
-    return (accounts || []).reduce((sum, account) => {
-      return sum + Number(account.metrics?.totalProfit || 0)
-    }, 0)
-  }, [accounts])
-
   const totalWithdrawAllAccounts = useMemo(() => {
     return (accounts || []).reduce((accountSum, account) => {
       const accountWithdraw = (account.payouts || [])
@@ -224,6 +222,10 @@ export default function TraderProfilePage() {
         .reduce((withdrawSum, payout) => withdrawSum + Number(payout.amount || 0), 0)
       return accountSum + accountWithdraw
     }, 0)
+  }, [accounts])
+
+  const activeAccountsCount = useMemo(() => {
+    return (accounts || []).filter((account) => Boolean(account.number)).length
   }, [accounts])
 
   return (
@@ -236,17 +238,29 @@ export default function TraderProfilePage() {
       <div className="relative grid gap-3 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-3">
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.14em] text-fg-muted">Trader profile</p>
-                <p className="mt-2 text-3xl font-semibold text-fg-primary">{profileName}</p>
-              </div>
-              <Avatar className="h-12 w-12 border border-white/20 bg-white/5">
+            <div className="flex items-start gap-4">
+              <Avatar className="h-20 w-20 border border-white/20 bg-white/5">
                 <AvatarImage src={profileAvatar ?? undefined} alt={`${profileName} avatar`} />
                 <AvatarFallback className="bg-white/10 text-xs font-semibold text-fg-primary">
                   {profileInitials}
                 </AvatarFallback>
               </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-3xl font-semibold text-fg-primary">{profileName}</p>
+                <p className="mt-1 text-sm text-fg-muted">{activeAccountsCount} active accounts</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">
+                    <Zap className="h-3 w-3" />
+                    Trader Profile
+                  </span>
+                  <span className="inline-flex items-center rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">
+                    Total Trades {metrics.totalTrades}
+                  </span>
+                  <span className="inline-flex items-center rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">
+                    Withdraw {formatValue(totalWithdrawAllAccounts, 0)}
+                  </span>
+                </div>
+              </div>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
@@ -340,24 +354,51 @@ export default function TraderProfilePage() {
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Profit (All Accounts)</p>
-                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatSigned(totalProfitAllAccounts)}</p>
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Win</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgWin)}%</p>
               </div>
               <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
-                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Withdraw (All Accounts)</p>
-                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatSigned(totalWithdrawAllAccounts)}</p>
+                <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Loss</p>
+                <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.avgLoss)}%</p>
               </div>
             </div>
             <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Return</p>
               <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(Math.abs(metrics.avgReturn))}%</p>
             </div>
-            <div className="mt-3 flex items-center justify-between">
-              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Consistency Rate</p>
-              <p className="text-sm font-semibold text-fg-primary">{formatValue(metrics.consistencyRate)}%</p>
-            </div>
             <div className="mt-3 h-2 rounded-full bg-white/10">
               <div className="h-full rounded-full bg-white/30" style={{ width: `${Math.min(100, Math.max(8, metrics.consistencyRate))}%` }} />
+            </div>
+          </Card>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
+            <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="h-2 rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
+              </div>
+              <div className="h-2 rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-white/20" style={{ width: `${Math.min(100, Math.max(8, 100 - metrics.winRate))}%` }} />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
+              <span className="inline-flex items-center rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-primary">
+                Serial Trader
+              </span>
+            </div>
+            <p className="mt-1 text-4xl font-semibold text-fg-primary">{metrics.totalTrades}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="h-2 rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(8, metrics.totalTrades))}%` }} />
+              </div>
+              <div className="h-2 rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-white/20" style={{ width: `${Math.min(100, Math.max(8, 100 - Math.min(100, metrics.totalTrades)))}%` }} />
+              </div>
             </div>
           </Card>
 
@@ -373,6 +414,13 @@ export default function TraderProfilePage() {
               </div>
             </div>
           </Card>
+
+          <button
+            type="button"
+            className="w-full rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-1))] py-3 text-sm font-semibold text-fg-primary transition-colors hover:bg-[hsl(var(--qe-surface-2))]"
+          >
+            Show All Stats
+          </button>
         </aside>
       </div>
     </div>

@@ -309,7 +309,7 @@ export async function getTradesAction(
   pageSize: number = 50,
   forceRefresh: boolean = false
 ): Promise<PaginatedTrades> {
-  const currentUserId = userId || await resolveWritableUserId(await getUserId())
+  const currentUserId = await resolveWritableUserId(userId || await getUserId())
   if (!currentUserId) throw new Error('User not found')
 
   const tag = `trades-${currentUserId}`

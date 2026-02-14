@@ -112,7 +112,7 @@ export function DashboardHeader() {
             <div className="relative h-full flex items-center justify-between gap-3 px-4 sm:px-6">
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+                    <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground" />
                     <div className="flex min-w-0 items-start gap-3">
                         <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">
