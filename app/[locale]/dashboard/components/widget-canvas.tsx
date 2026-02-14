@@ -734,6 +734,51 @@ export default function WidgetCanvas() {
   // Add auto-scroll functionality for mobile
   useAutoScroll(isMobile && isCustomizing)
 
+  if (!layouts) {
+    return (
+      <div className="relative mt-0 w-full min-h-screen">
+        <div className="animate-pulse rounded-2xl border border-white/12 bg-black/60 p-6">
+          <div className="h-4 w-48 rounded bg-white/10" />
+          <div className="mt-3 h-3 w-96 max-w-full rounded bg-white/10" />
+          <div className="mt-6 flex gap-2">
+            <div className="h-9 w-44 rounded bg-white/10" />
+            <div className="h-9 w-28 rounded bg-white/10" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (currentLayout.length === 0) {
+    return (
+      <div className="relative mt-0 w-full min-h-screen">
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-black/90 p-6 text-white shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
+          <div className="text-sm font-semibold tracking-tight">
+            {(t as any)("widgets.emptyLayoutTitle") ?? "No widgets on your dashboard."}
+          </div>
+          <div className="mt-2 text-sm text-white/60 leading-relaxed">
+            {(t as any)("widgets.emptyLayoutDescription") ?? "Restore the default layout to show charts and stats, or switch to Edit mode to add widgets."}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button
+              onClick={restoreDefaultLayout}
+              className="bg-white text-black hover:bg-white/90 font-semibold"
+            >
+              {(t as any)("widgets.restoreDefaults") ?? "Restore default layout"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsCustomizing(true)}
+              className="border-white/15 bg-transparent text-white hover:bg-white/5 hover:text-white"
+            >
+              {(t as any)("widgets.edit") ?? "Edit"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={cn(
       "relative mt-0 w-full min-h-screen",

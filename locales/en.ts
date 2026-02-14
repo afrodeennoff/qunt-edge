@@ -651,6 +651,10 @@ export default {
   "widgets.dragToMove": "Drag to move",
   "widgets.changeSize": "Change Size",
   "widgets.clickToAdd": "Click to add",
+  "widgets.emptyState": "No trades yet.",
+  "widgets.emptyLayoutTitle": "No widgets on your dashboard.",
+  "widgets.emptyLayoutDescription":
+    "Restore the default layout to show charts and stats, or switch to Edit mode to add widgets.",
   "widgets.widgetAdded": "Widget Added",
   "widgets.widgetAddedDescription":
     "The widget has been added to your dashboard",
