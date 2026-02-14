@@ -151,11 +151,12 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
     }
 
     if (!acc[date]) {
-      acc[date] = { pnl: new Decimal(0), tradeNumber: 0, longNumber: 0, shortNumber: 0, trades: [] }
+      // IMPORTANT: Keep pnl as a plain number for chart consumers (Recharts can break on Decimal objects).
+      acc[date] = { pnl: 0, tradeNumber: 0, longNumber: 0, shortNumber: 0, trades: [] }
     }
     acc[date].tradeNumber++
     const netPnl = new Decimal(trade.pnl).minus(new Decimal(trade.commission || 0));
-    acc[date].pnl = acc[date].pnl.plus(netPnl);
+    acc[date].pnl = new Decimal(acc[date].pnl).plus(netPnl).toNumber();
 
     const isLong = trade.side
       ? (trade.side.toLowerCase() === 'long' || trade.side.toLowerCase() === 'buy' || trade.side.toLowerCase() === 'b')

@@ -152,6 +152,16 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/components/widget-canvas.tsx`, `locales/en.ts`, `locales/fr.ts`, `AGENTS.md`
 - **Verification:** Remove all widgets (or start with an empty layout) -> open `/dashboard?tab=widgets` -> confirm the empty-state appears and `Restore default layout` repopulates widgets and makes data visible.
 
+### 2026-02-15: Chart Data Visibility Fix (Calendar PnL Numeric Coercion)
+- **What changed:** Fixed a chart-rendering bug where widget charts could appear blank because `calendarData` stored PnL as a `Decimal` object instead of a plain number.
+- **What I want:** Widget charts (especially Daily PnL bar chart) should reliably render when trades exist, with correct scaling and tooltips.
+- **What I don't want:** “No data” / blank charts caused by non-numeric PnL values being passed into Recharts.
+- **How we fixed that:**
+  - Updated `formatCalendarData` to keep accumulator `pnl` as a `number` and convert Decimal math back to `number` on each update.
+  - This ensures `calendarData[date].pnl` matches the declared type and is safe for chart components.
+- **Key Files:** `lib/utils.ts`, `context/data-provider.tsx`, `app/[locale]/dashboard/components/charts/pnl-bar-chart.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets` -> ensure the Daily PnL chart renders bars and tooltips with real values; verify `calendarData` PnL values are numbers (not objects) in any debug logging.
+
 ### 2026-02-14: Unified Master Prompt Consolidation
 - **What changed:** Consolidated a fragmented, overlapping instruction set into a single coherent master prompt template.
 - **What I want:** One copy-paste prompt that is consistent, reusable, and easy to run without conflicting directives.
