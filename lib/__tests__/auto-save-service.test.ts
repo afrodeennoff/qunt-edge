@@ -259,9 +259,20 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            Object.defineProperty(navigator, 'onLine', {
+            // Mock navigator if it doesn't exist (Node environment)
+            if (typeof globalThis.navigator === 'undefined') {
+                Object.defineProperty(globalThis, 'navigator', {
+                    value: { onLine: true },
+                    writable: true,
+                    configurable: true
+                });
+            }
+
+            // Set offline
+            Object.defineProperty(globalThis.navigator, 'onLine', {
                 writable: true,
                 value: false,
+                configurable: true
             })
 
             const onOffline = vi.fn()
@@ -277,9 +288,11 @@ describe('AutoSaveService', () => {
             const queued = await queue.getAll()
             expect(queued.length).toBeGreaterThan(0)
 
-            Object.defineProperty(navigator, 'onLine', {
+            // Restore online
+            Object.defineProperty(globalThis.navigator, 'onLine', {
                 writable: true,
                 value: true,
+                configurable: true
             })
         })
 
