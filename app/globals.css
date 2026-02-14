@@ -446,7 +446,7 @@
 
   .font-terminal,
   .data-mono {
-    font-family: var(--font-ibm-plex-mono), ui-monospace, monospace;
+    font-family: var(--font-ibm-mono), ui-monospace, monospace;
   }
 
   .micro-sans {
@@ -747,6 +747,31 @@
 
     .terminal-cursor::after {
       animation: none !important;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .dashboard-mesh-layer,
+    .dashboard-texture-layer,
+    .marketing-orb,
+    .marketing-pulse,
+    .widget-breathe {
+      animation: none !important;
+    }
+
+    .marketing-glass {
+      backdrop-filter: blur(9px);
+      box-shadow:
+        inset 0 1px 0 hsl(var(--mk-text) / 0.03),
+        0 16px 32px -28px hsl(var(--brand-ink) / 0.52);
+    }
+
+    .marketing-panel {
+      box-shadow: 0 18px 36px -30px hsl(var(--brand-ink) / 0.58);
+    }
+
+    [data-dashboard-header="true"] {
+      backdrop-filter: blur(12px);
     }
   }
 }

@@ -1,18 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Line,
-  Area,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from 'recharts'
+import { cn } from '@/lib/utils'
 
 const mockData = [
   { time: '09:30', price: 4312, ema: 4308, volume: 32 },
@@ -35,23 +27,36 @@ const logs = [
   'Session stabilized, plan compliance restored.',
 ]
 
+const AnalysisDemoChart = dynamic(() => import('./analysis-demo-chart'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full animate-pulse rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.65)]" />
+  ),
+})
+
 export default function AnalysisDemo() {
   const [logIndex, setLogIndex] = useState(0)
+  const isMobile = useIsMobile()
+  const shouldAnimate = !isMobile
 
   useEffect(() => {
+    if (isMobile) return
+
     const timer = setInterval(() => {
       setLogIndex((prev) => (prev + 1) % logs.length)
     }, 1700)
 
     return () => clearInterval(timer)
-  }, [])
+  }, [isMobile])
+
+  const activeLog = isMobile ? logs[0] : logs[logIndex]
 
   return (
-    <section className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <section className="relative px-4 py-16 sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Trading Journal Intelligence</p>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Trading Journal Intelligence</p>
             <h2 className="mt-2 text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
               Real-time review for
               <span className="block text-[hsl(var(--brand-primary))]">process over outcome</span>
@@ -63,82 +68,86 @@ export default function AnalysisDemo() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          initial={shouldAnimate ? { opacity: 0, y: 22 } : false}
+          whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+          viewport={shouldAnimate ? { once: true } : undefined}
+          transition={shouldAnimate ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
           className="marketing-panel overflow-hidden rounded-[28px]"
         >
           <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="border-b border-[hsl(var(--mk-border)/0.24)] p-5 sm:p-7 lg:border-b-0 lg:border-r">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Execution Stream</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Execution Stream</p>
                   <p className="mt-1 text-2xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">4,367.00</p>
                 </div>
-                <span className="rounded-full border border-[hsl(var(--brand-primary)/0.35)] bg-[hsl(var(--brand-primary)/0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand-primary))] [font-family:var(--home-mono)]">
+                <span className="rounded-full border border-[hsl(var(--brand-primary)/0.35)] bg-[hsl(var(--brand-primary)/0.1)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand-primary))] [font-family:var(--home-copy)]">
                   +1.27%
                 </span>
               </div>
 
-              <div className="h-[300px] overflow-hidden rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.8)] p-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={mockData}>
-                    <defs>
-                      <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--brand-primary))" stopOpacity={0.28} />
-                        <stop offset="95%" stopColor="hsl(var(--brand-primary))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="hsl(var(--mk-border)/0.22)" strokeDasharray="3 3" />
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} fontSize={11} stroke="hsl(var(--mk-text-muted))" />
-                    <YAxis yAxisId="price" axisLine={false} tickLine={false} fontSize={11} stroke="hsl(var(--mk-text-muted))" />
-                    <YAxis yAxisId="volume" hide />
-                    <Tooltip
-                      cursor={{ stroke: 'hsl(var(--mk-border)/0.45)' }}
-                      contentStyle={{
-                        background: 'hsl(var(--mk-surface))',
-                        border: '1px solid hsl(var(--mk-border)/0.45)',
-                        borderRadius: '10px',
-                        color: 'hsl(var(--mk-text))',
-                      }}
-                    />
-                    <Bar yAxisId="volume" dataKey="volume" fill="hsl(var(--brand-secondary))" opacity={0.16} barSize={8} />
-                    <Area yAxisId="price" dataKey="price" stroke="none" fill="url(#chartArea)" />
-                    <Line yAxisId="price" dataKey="price" dot={false} stroke="hsl(var(--brand-primary))" strokeWidth={2} />
-                    <Line yAxisId="price" dataKey="ema" dot={false} stroke="hsl(var(--mk-text-muted))" strokeDasharray="6 4" strokeWidth={1.5} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
+              {isMobile ? (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.74)] p-4">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Plan Adherence</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">87%</p>
+                  </div>
+                  <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.74)] p-4">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Risk Drift</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[hsl(var(--brand-primary))] [font-family:var(--home-display)]">-22%</p>
+                  </div>
+                  <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.74)] p-4">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Review SLA</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">9m</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-[300px] overflow-hidden rounded-2xl border border-[hsl(var(--mk-border)/0.24)] bg-[hsl(var(--mk-surface-muted)/0.8)] p-3">
+                  <AnalysisDemoChart data={mockData} />
+                </div>
+              )}
             </div>
 
             <div className="bg-[hsl(var(--mk-surface-muted)/0.42)] p-5 sm:p-6">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Journal Signals</p>
-              <div className="mt-4 min-h-[220px] space-y-3">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Journal Signals</p>
+              <div className={cn("mt-4 space-y-3", isMobile ? "min-h-0" : "min-h-[220px]")}>
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={logIndex}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.35 }}
-                    className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]"
-                  >
-                    {logs[logIndex]}
-                  </motion.div>
+                  {shouldAnimate ? (
+                    <motion.div
+                      key={logIndex}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.35 }}
+                      className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]"
+                    >
+                      {activeLog}
+                    </motion.div>
+                  ) : (
+                    <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]">
+                      {activeLog}
+                    </div>
+                  )}
                 </AnimatePresence>
               </div>
 
               <div className="mt-5 rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Anomaly Probability</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Anomaly Probability</p>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-[hsl(var(--mk-border)/0.22)]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: '72%' }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
-                  />
+                  {shouldAnimate ? (
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '72%' }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                      className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
+                    />
+                  ) : (
+                    <div
+                      style={{ width: '72%' }}
+                      className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
+                    />
+                  )}
                 </div>
               </div>
             </div>

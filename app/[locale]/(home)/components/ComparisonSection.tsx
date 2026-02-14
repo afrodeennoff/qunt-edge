@@ -39,7 +39,7 @@ export default function ComparisonSection() {
           transition={{ duration: 0.5 }}
           className="mb-8 text-center sm:mb-12"
         >
-          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-mono)]">
+          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-copy)]">
             Difference From Others
           </Badge>
           <h2 className="mt-3 text-[clamp(2rem,4.7vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
@@ -57,9 +57,9 @@ export default function ComparisonSection() {
               <table className="w-full min-w-[680px] text-left">
                 <thead>
                   <tr className="border-b border-[hsl(var(--mk-border)/0.2)]">
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Capability</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Qunt Edge</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Most Alternatives</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Capability</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Qunt Edge</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Most Alternatives</th>
                   </tr>
                 </thead>
                 <tbody>

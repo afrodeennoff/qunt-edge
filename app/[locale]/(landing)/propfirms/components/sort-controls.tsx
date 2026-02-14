@@ -10,6 +10,7 @@ interface SortControlsProps {
     accounts: string
     paidPayout: string
     refusedPayout: string
+    accountValue: string
   }
 }
 
@@ -41,12 +42,12 @@ export function SortControls({ sortLabel, sortOptions }: SortControlsProps) {
           <SelectItem value="accounts">{sortOptions.accounts}</SelectItem>
           <SelectItem value="paidPayout">{sortOptions.paidPayout}</SelectItem>
           <SelectItem value="refusedPayout">{sortOptions.refusedPayout}</SelectItem>
+          <SelectItem value="accountValue">{sortOptions.accountValue}</SelectItem>
         </SelectContent>
       </Select>
     </div>
   )
 }
-
 
 
 

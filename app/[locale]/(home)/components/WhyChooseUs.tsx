@@ -51,7 +51,7 @@ export default function WhyChooseUs() {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="text-center"
         >
-          <Badge variant="outline" className="border-[hsl(var(--brand-primary)/0.4)] bg-[hsl(var(--brand-primary)/0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text))] [font-family:var(--home-mono)]">
+          <Badge variant="outline" className="border-[hsl(var(--brand-primary)/0.4)] bg-[hsl(var(--brand-primary)/0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]">
             Why Traders Choose Us
           </Badge>
           <h2 className="mt-3 text-[clamp(2rem,4.9vw,3.55rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
@@ -74,7 +74,7 @@ export default function WhyChooseUs() {
               transition={{ duration: 0.45, delay: idx * 0.06 }}
               className="marketing-panel rounded-2xl p-5"
             >
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">{stat.label}</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{stat.label}</p>
               <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">{stat.value}</p>
               <p className="mt-2 text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{stat.note}</p>
             </motion.div>

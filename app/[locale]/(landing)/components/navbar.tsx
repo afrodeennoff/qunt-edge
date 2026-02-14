@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 import { useCurrentLocale } from '@/locales/client'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 type NavLink = { title: string; href: string }
 
@@ -24,6 +25,7 @@ const LINKS: NavLink[] = [
 export default function Navbar() {
   const pathname = usePathname()
   const locale = useCurrentLocale()
+  const isMobile = useIsMobile()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -45,19 +47,19 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <motion.div
-        initial={{ opacity: 0, y: -18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        initial={isMobile ? false : { opacity: 0, y: -18 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
+        transition={isMobile ? undefined : { duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto w-full max-w-[1240px] px-4 pt-4 sm:px-6"
       >
         <motion.div
           className={cn(
-            'flex h-[62px] items-center rounded-full border px-3 sm:h-[66px] sm:px-4',
-            'border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface)/0.62)] backdrop-blur-xl',
-            scrolled ? 'shadow-[0_24px_44px_-30px_hsl(var(--brand-ink)/0.85)]' : ''
+            'flex h-[58px] items-center rounded-full border px-3 sm:h-[66px] sm:px-4',
+            'border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface)/0.62)] backdrop-blur-md sm:backdrop-blur-xl',
+            scrolled ? 'shadow-[0_18px_32px_-24px_hsl(var(--brand-ink)/0.8)] sm:shadow-[0_24px_44px_-30px_hsl(var(--brand-ink)/0.85)]' : ''
           )}
-          whileHover={{ y: -1 }}
-          transition={{ duration: 0.2 }}
+          whileHover={isMobile ? undefined : { y: -1 }}
+          transition={isMobile ? undefined : { duration: 0.2 }}
         >
           <Link href={`/${locale}`} className="flex items-center gap-2 rounded-full px-2 py-1.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface-muted)/0.85)]">
@@ -68,7 +70,7 @@ export default function Navbar() {
 
           <nav className="mx-auto hidden items-center gap-1 lg:flex">
             {LINKS.map((link) => (
-              <motion.div key={link.href} whileHover={{ y: -1 }} transition={{ duration: 0.2 }}>
+              <motion.div key={link.href} whileHover={isMobile ? undefined : { y: -1 }} transition={isMobile ? undefined : { duration: 0.2 }}>
                 <Link
                   key={link.href}
                   href={`/${locale}${link.href}`}
@@ -96,7 +98,7 @@ export default function Navbar() {
                   <Menu className="h-4.5 w-4.5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[320px] border-l border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-bg-1))] p-0">
+              <SheetContent side="right" className="w-[88vw] max-w-[320px] border-l border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-bg-1))] p-0">
                 <div className="flex h-full flex-col p-6">
                   <div className="space-y-2">
                     {LINKS.map((link) => (

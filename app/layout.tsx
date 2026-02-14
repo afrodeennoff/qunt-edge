@@ -3,7 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import { Cormorant_Garamond, Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
+import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
@@ -23,13 +23,6 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-ibm-mono",
-  display: "swap",
-});
-
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-cormorant",
   display: "swap",
 });
 
@@ -144,7 +137,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} ${cormorantGaramond.variable} ${manrope.variable} bg-background`}
+      className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} bg-background`}
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning

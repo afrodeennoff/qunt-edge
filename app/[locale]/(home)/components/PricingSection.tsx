@@ -61,7 +61,7 @@ export default function PricingSection() {
           transition={{ duration: 0.5 }}
           className="mb-12 text-center"
         >
-          <Badge variant="outline" className="mb-4 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-mono)]">
+          <Badge variant="outline" className="mb-4 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-copy)]">
             Pricing
           </Badge>
           <h2 className="text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
@@ -71,7 +71,7 @@ export default function PricingSection() {
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.78] text-muted-foreground sm:text-[18px] [font-family:var(--home-copy)]">
             Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
           </p>
-          <p className="mt-4 text-xs text-muted-foreground [font-family:var(--home-mono)]">Billed monthly. Cancel anytime.</p>
+          <p className="mt-4 text-xs text-muted-foreground [font-family:var(--home-copy)]">Billed monthly. Cancel anytime.</p>
         </motion.div>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -119,11 +119,11 @@ export default function PricingSection() {
                   <Button
                     asChild
                     variant={plan.popular ? 'default' : 'outline'}
-                    className={cn("h-12 w-full rounded-full text-[10px] font-semibold uppercase tracking-[0.18em] [font-family:var(--home-mono)]", plan.popular && "shadow-md shadow-primary/25")}
+                    className={cn("h-12 w-full rounded-full text-[10px] font-semibold uppercase tracking-[0.18em] [font-family:var(--home-copy)]", plan.popular && "shadow-md shadow-primary/25")}
                   >
                     <Link href={`/${locale}/authentication?next=dashboard`}>{plan.cta}</Link>
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground [font-family:var(--home-mono)]">{plan.note}</p>
+                  <p className="text-center text-xs text-muted-foreground [font-family:var(--home-copy)]">{plan.note}</p>
                 </CardFooter>
               </Card>
             </motion.div>

@@ -15,7 +15,7 @@ export default function CTA() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="marketing-panel mx-auto max-w-4xl rounded-[30px] px-6 py-11 text-center sm:px-10"
       >
-        <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-mono)]">Ready</p>
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Ready</p>
         <h2 className="mt-2 text-[clamp(2rem,5vw,3.6rem)] font-semibold leading-[0.9] tracking-[-0.028em] [font-family:var(--home-display)]">
           Keep your current workflow.
           <span className="block text-[hsl(var(--brand-primary))]">Upgrade the decisions behind it.</span>
@@ -26,7 +26,7 @@ export default function CTA() {
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link
             href={`/${locale}/authentication?next=dashboard`}
-            className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))] [font-family:var(--home-mono)]"
+            className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))] [font-family:var(--home-copy)]"
           >
             Start My Free Audit
           </Link>

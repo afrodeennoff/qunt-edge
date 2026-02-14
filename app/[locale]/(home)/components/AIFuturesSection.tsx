@@ -84,7 +84,7 @@ export default function AIFuturesSection() {
           transition={{ duration: 0.5 }}
           className="mb-8 text-center sm:mb-12"
         >
-          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-mono)]">
+          <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-copy)]">
             Must-Have AI Features
           </Badge>
           <h2 className="mt-3 text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
@@ -95,10 +95,10 @@ export default function AIFuturesSection() {
 
         <Tabs defaultValue="intelligence" className="w-full">
           <TabsList className="h-auto w-full justify-start rounded-xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.55)] p-1">
-            <TabsTrigger value="intelligence" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em] [font-family:var(--home-mono)]">
+            <TabsTrigger value="intelligence" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em] [font-family:var(--home-copy)]">
               Intelligence
             </TabsTrigger>
-            <TabsTrigger value="automation" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em] [font-family:var(--home-mono)]">
+            <TabsTrigger value="automation" className="rounded-lg px-4 py-2 text-xs uppercase tracking-[0.12em] [font-family:var(--home-copy)]">
               Automation
             </TabsTrigger>
           </TabsList>

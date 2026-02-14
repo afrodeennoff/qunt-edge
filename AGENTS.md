@@ -36,6 +36,52 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Home Redesign Inspired by CodeWiki (Google-Style Product Surface)
+- **What changed:** Reworked the Home page visual language toward a cleaner CodeWiki-inspired product-doc style with typography-led hierarchy and lighter UI texture.
+- **What I want:** A modern Google-like product marketing feel: crisp sans headings, readable copy, structured information blocks, and clear CTA hierarchy without terminal-like type treatment.
+- **What I don't want:** A heavy IBM Plex Mono visual tone across hero/sections or overly editorial/ornamental typography that conflicts with product SaaS clarity.
+- **How we fixed that:**
+  - Switched Home typography mapping to a sans-first stack:
+    - `--home-display` -> `--font-geist`
+    - `--home-copy` -> `--font-manrope`
+    - `--home-mono` -> `--font-geist` (for consistent non-mono microtype styling)
+  - Removed Cormorant usage from root font loading in `app/layout.tsx` and kept `Manrope` as the complementary readable body font.
+  - Updated Home components to consistently use display/copy typography utilities so badges, labels, CTA text, and metadata no longer render with a terminal-like mono feel.
+  - Preserved existing component structure and flow while refining typography hierarchy for Hero, Analysis Demo, Why Choose Us, Comparison, AI Futures, Pricing, and CTA sections.
+- **Key Files:** `app/layout.tsx`, `app/[locale]/(home)/components/HomeContent.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/AnalysisDemo.tsx`, `app/[locale]/(home)/components/WhyChooseUs.tsx`, `app/[locale]/(home)/components/ComparisonSection.tsx`, `app/[locale]/(home)/components/AIFuturesSection.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(home)/components/CTA.tsx`, `AGENTS.md`
+- **Verification:** Open `/` and confirm Home no longer appears mono-heavy; headings/body follow a clean sans hierarchy; run ESLint on edited files and confirm no errors.
+
+### 2026-02-14: Home Typography Regression Fix (Mono Leak)
+- **What changed:** Corrected a typography regression where Home text appeared overly mono/terminal-like.
+- **What I want:** Home should keep the editorial display + clean body typography while reserving true mono only for explicit code/terminal contexts.
+- **What I don't want:** A global or page-wide IBM Plex Mono feel that makes marketing copy look technical and harms readability.
+- **How we fixed that:**
+  - Updated Home token mapping in `HomeContent` so `--home-mono` resolves to `Manrope` instead of IBM Plex Mono, preventing mono styling from dominating labels/buttons.
+  - Fixed a global utility typo in `app/globals.css` by changing `--font-ibm-plex-mono` to the correct `--font-ibm-mono` so mono utilities are explicit and predictable.
+- **Key Files:** `app/[locale]/(home)/components/HomeContent.tsx`, `app/globals.css`, `AGENTS.md`
+- **Verification:** Open `/` and confirm Home typography no longer reads as mono; run ESLint on edited TSX file and confirm no errors.
+
+### 2026-02-14: Prop Firm Catalogue Analytics Redesign (Stacked + Multi-Line)
+- **What changed:** Rebuilt the Prop Firm Catalogue analytics surface with richer database-driven metrics, including a stacked payout chart, multi-line overlays, and expanded firm cards with account value + size-mix context.
+- **What I want:** Users should instantly understand each firm’s scale and quality through one glance: registered accounts (blue), total account value (red), and size participation/mix (yellow), plus paid/pending/refused payout composition.
+- **What I don't want:** A thin single-bar chart and shallow cards that hide key insights like aggregate account capital and real account-size distribution (e.g., `2x25k + 1x100k`).
+- **How we fixed that:**
+  - Extended `getPropfirmCatalogueData` to aggregate:
+    - `totalAccountValue` from `Account.startingBalance` sums per prop firm,
+    - `sizedAccountsCount` from accounts with positive starting balance,
+    - per-size distribution buckets grouped by starting balance and formatted into compact labels (`25k`, `100k`, `1m`),
+    - `sizeBreakdown` strings for card/chart context (`2x25k + 1x100k`).
+  - Upgraded shared types to carry the new distribution/value fields.
+  - Replaced the old single-series chart with a composed shadcn/recharts view:
+    - stacked bars for payout statuses (`Paid`, `Pending`, `Refused`),
+    - red line for `Total Account Value`,
+    - blue line for `Registered Accounts`,
+    - yellow dashed line for `Sized Accounts`.
+  - Redesigned firm cards to include a stronger KPI row (Registered, Total Paid, Total Account Value, Size Mix) while preserving payout status blocks below.
+  - Added sorting support for `Account Value`.
+- **Key Files:** `app/[locale]/(landing)/propfirms/actions/get-propfirm-catalogue.ts`, `app/[locale]/(landing)/propfirms/actions/types.ts`, `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, `app/[locale]/(landing)/propfirms/components/sort-controls.tsx`, `app/[locale]/(landing)/propfirms/page.tsx`, `AGENTS.md`
+- **Verification:** Open `/propfirms` and confirm the chart shows stacked payout bars + red/blue/yellow lines, cards show `Total Account Value` and `Size Mix` per firm, and sort control includes `Account Value`.
+
 ### 2026-02-14: Home Typography-Only Rewrite (Editorial Pass)
 - **What changed:** Rewrote Home page typography only, introducing a distinct display/body font pairing and re-tuning type scale, tracking, and line-height across active Home sections.
 - **What I want:** The Home page should feel clearly premium through typography alone, with visible contrast between headline voice, body readability, and micro-label metadata.
@@ -346,3 +392,29 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **i18n:** Always use the `t` function with proper casting (e.g., `t as any`) in widget components to avoid complex translation object type errors until the schema is fully unified.
 - **Tailwind:** This project uses Tailwind CSS v4 features. If you see `@config` or `@plugin` errors in the IDE, they are likely false positives from an older linter.
 - **Zustand stores:** When creating or updating stores, avoid unused parameters (like `get` in the create callback) and use `unknown` or specific types instead of `any` for persisted state migrations.
+
+### 2026-02-14: Vercel Log Export Audit + Normalization
+- **What changed:** Audited the exported Vercel log JSON and produced a cleaned, deduplicated version with consistent numeric/null typing.
+- **What I want:** A log file that can be safely consumed by analytics/ETL tooling without schema drift or parser failures.
+- **What I don't want:** Mixed field types (`number` vs empty string) and duplicate entries causing ingestion errors or skewed metrics.
+- **How we fixed that:**
+  - Validated source JSON integrity and record count.
+  - Removed one exact duplicate record (503 -> 502).
+  - Normalized `maxMemoryUsed`, `memorySize`, and `concurrency` from empty strings to `null` while preserving numeric values.
+  - Kept original export unchanged and wrote a fixed artifact for downstream use.
+- **Key Files:** `final-qunt-edge-log-export-2026-02-13T18-57-08.fixed.json`, `AGENTS.md`
+- **Verification:** `jq` confirms 502 records, 0 exact duplicates, and no non-number/non-null values for normalized fields.
+
+### 2026-02-14: Mobile-Only UX + Performance Optimization Pass
+- **What changed:** Reworked high-traffic home/landing and dashboard surfaces for a phone-first experience with lighter rendering and tighter touch ergonomics, while intentionally leaving desktop behavior secondary.
+- **What I want:** Fast first paint and smooth interaction on mobile: smaller visual overhead, easier tap targets, compact headers, and less expensive animation work on constrained devices.
+- **What I don't want:** Mobile users downloading/rendering heavy chart and background effects upfront, cramped header actions, or layout shifts from desktop-oriented spacing and controls.
+- **How we fixed that:**
+  - Split the Home analysis chart into a lazily loaded component (`analysis-demo-chart.tsx`) and replaced mobile with lightweight KPI cards instead of immediate Recharts rendering.
+  - Reduced mobile hero/marketing overhead by simplifying fixed grid/orb effects, trimming motion usage, and tightening mobile CTA/text rhythm.
+  - Optimized dashboard mobile rendering by removing animated mesh/texture background layers on phone breakpoints and using simpler gradients for the same visual direction.
+  - Refined dashboard mobile header ergonomics with larger touch trigger sizing, compact action grouping, mobile-safe filtering presentation, and less non-essential control noise.
+  - Improved sidebar sheet behavior on mobile with narrower width constraints and larger trigger hit area.
+  - Added CSS mobile performance guardrails to disable expensive decorative animations and reduce blur/shadow cost on small screens.
+- **Key Files:** `app/[locale]/(home)/components/AnalysisDemo.tsx`, `app/[locale]/(home)/components/analysis-demo-chart.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/HomeContent.tsx`, `app/[locale]/(landing)/components/navbar.tsx`, `app/[locale]/(landing)/components/marketing-layout-shell.tsx`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `components/ui/sidebar.tsx`, `app/globals.css`, `AGENTS.md`
+- **Verification:** Ran ESLint against all edited TSX files with no errors; confirmed mobile-specific CSS/perf changes compile cleanly (CSS file is intentionally outside ESLint config and reports one ignore warning).
