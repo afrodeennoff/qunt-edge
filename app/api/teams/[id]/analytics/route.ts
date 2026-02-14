@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/server/auth"
 import { getTeamById, getTeamAnalytics, updateTeamAnalytics } from "@/server/teams"
+import { createRouteClient } from "@/lib/supabase/route-client"
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createRouteClient(req)
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user?.id) {
@@ -46,7 +46,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createRouteClient(req)
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user?.id) {

@@ -96,9 +96,10 @@ export default function PnLBySideChart({
   const maxPnL = Math.max(...chartData.map((d) => d.pnl));
   const minPnL = Math.min(...chartData.map((d) => d.pnl));
   const hasData = chartData.some((d) => d.tradeCount > 0);
-  const renderTooltip = React.useCallback(({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartDatum }> }) => {
+  const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload as ChartDatum | undefined;
+      if (!data) return null;
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
           <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
