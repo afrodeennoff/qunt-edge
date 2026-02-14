@@ -304,14 +304,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setAuthMethod('discord')
 
         try {
-            const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
-            const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
-            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
+            let next = nextUrl;
+            if (isSubscription) {
+                const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+                const searchParams = new URLSearchParams();
+                if (lookupKey) searchParams.set('lookup_key', lookupKey);
+                if (referralCode) searchParams.set('referral', referralCode);
+                if (promoCode) searchParams.set('promo_code', promoCode);
 
-            const next = isSubscription
-                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
-                : nextUrl;
+                const queryString = searchParams.toString();
+                next = `${planParam}${queryString ? `?${queryString}` : ''}`;
+            }
             await signInWithDiscord(next, locale)
         } catch (error) {
             console.error(error)
@@ -331,9 +334,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
             const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
 
-            const next = isSubscription
-                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
-                : nextUrl;
+            let next = nextUrl;
+            if (isSubscription) {
+                const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+                const searchParams = new URLSearchParams();
+                if (lookupKey) searchParams.set('lookup_key', lookupKey);
+                if (referralCode) searchParams.set('referral', referralCode);
+                if (promoCode) searchParams.set('promo_code', promoCode);
+
+                const queryString = searchParams.toString();
+                next = `${planParam}${queryString ? `?${queryString}` : ''}`;
+            }
             await signInWithGoogle(next, locale)
         } catch (error) {
             console.error(error)

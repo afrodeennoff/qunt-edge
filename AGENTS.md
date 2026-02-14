@@ -36,6 +36,35 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Home End-to-End Audit + Conversion-Focused Content Redesign
+- **What changed:** Audited the Home page end-to-end and reworked the section architecture + copy strategy to clearly answer: problem, features, process, why us, why different, AI value, and pricing/CTA.
+- **What I want:** A high-conviction marketing flow that explains product value fast and makes differentiation obvious to both individual traders and team leads.
+- **What I don't want:** Generic landing copy, missing trust narrative, duplicate section anchors, or disconnected component flow that forces users to infer why Qunt Edge is better.
+- **How we fixed that:**
+  - Expanded the active Home flow in `DeferredHomeSections` to include stronger narrative sequencing:
+    - `ProblemStatement` -> `Features` -> `HowItWorks` -> `AnalysisDemo` -> `WhyChooseUs` -> `ComparisonSection` -> `AIFuturesSection` -> `PricingSection` -> `CTA`.
+  - Rewrote core messaging across sections:
+    - clearer value props in `Features`,
+    - process-first pipeline in `HowItWorks`,
+    - stronger trust and positioning statements in `WhyChooseUs`,
+    - explicit “why we are different” language in `ComparisonSection`,
+    - sharper AI-benefit messaging in `AIFuturesSection`,
+    - more conversion-oriented pricing/CTA wording.
+  - Standardized typography usage in updated sections to align with current Home type tokens (`--home-display`, `--home-copy`).
+  - Fixed audit issue: removed duplicate anchor ID usage by changing `WhyChooseUs` section from `id="features"` to `id="why-us"`.
+- **Key Files:** `app/[locale]/(home)/components/DeferredHomeSections.tsx`, `app/[locale]/(home)/components/ProblemStatement.tsx`, `app/[locale]/(home)/components/Features.tsx`, `app/[locale]/(home)/components/HowItWorks.tsx`, `app/[locale]/(home)/components/WhyChooseUs.tsx`, `app/[locale]/(home)/components/ComparisonSection.tsx`, `app/[locale]/(home)/components/AIFuturesSection.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(home)/components/CTA.tsx`, `AGENTS.md`
+- **Verification:** Run ESLint on all edited Home components and confirm no errors; open `/` and verify the full narrative stack renders in the order above with unique section IDs and stronger differentiation messaging.
+
+### 2026-02-14: Accounts Header Simplification (Workspace Badge Removed)
+- **What changed:** Removed the `WORKSPACE` badge from the Accounts dashboard header so the section reads as a clean `ACCOUNTS` title with the existing subtitle.
+- **What I want:** The Accounts view should have a unified, direct heading style focused on account context without an extra workspace tag.
+- **What I don't want:** A mixed header treatment where Accounts looks like a nested workspace label instead of its own clear section.
+- **How we fixed that:**
+  - Added a targeted visibility condition in `DashboardHeader` to hide the section badge when `activeTab === "accounts"` on the dashboard root.
+  - Kept title/subtitle behavior unchanged so only the badge treatment was simplified.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=accounts` and confirm the badge is gone, title shows `ACCOUNTS`, and subtitle remains: "Track account growth, balances, and consistency in one place."
+
 ### 2026-02-14: Home Redesign Inspired by CodeWiki (Google-Style Product Surface)
 - **What changed:** Reworked the Home page visual language toward a cleaner CodeWiki-inspired product-doc style with typography-led hierarchy and lighter UI texture.
 - **What I want:** A modern Google-like product marketing feel: crisp sans headings, readable copy, structured information blocks, and clear CTA hierarchy without terminal-like type treatment.
@@ -283,6 +312,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Rendered both values with compact `k/m` formatting for quick readability.
 - **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
 - **Verification:** Open Trader Profile and confirm first right-side two stats now show `Total Capital` and `Total Withdraw` based on real user account data.
+
+### 2026-02-14: Trader Profile Win-Rate Guide + Trade Calendar
+- **What changed:** Tuned the secondary win-rate guide line away from 50/50 look and added a trade calendar card above `Trade Feed`.
+- **What I want:** Right-side progress guidance should visually sit around a 25–30% band, and the left panel should show a calendar with user trade-day context before feed rows.
+- **What I don't want:** Equal-looking split bars that imply 50/50 when not intended, or no date context before reading raw trade list items.
+- **How we fixed that:**
+  - Added `winRateGuidePercent` clamped to `25..30` and wired it to the second line in the Win Rate card.
+  - Inserted a `Trade Calendar` card above `Trade Feed` using `shadcn` `Calendar`.
+  - Mapped user `formattedTrades` into unique calendar days and highlighted them via `modifiers` (`traded`).
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** Open Trader Profile and confirm the second Win Rate guide line stays in ~25–30% range and a trade-highlight calendar appears above Trade Feed.
 
 ### 2026-02-14: Trader Profile Real-Time + Cache Isolation Hardening
 - **What changed:** Hardened benchmark data fetching to prevent stale/shared-cache behavior and improve real-time freshness.

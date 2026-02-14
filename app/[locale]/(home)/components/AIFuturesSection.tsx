@@ -9,17 +9,17 @@ import { Brain, Bot, Radar, ShieldAlert, Sparkles } from 'lucide-react'
 const intelligenceFeatures = [
   {
     title: 'Behavior Drift Radar',
-    description: 'Detects micro-changes in risk behavior and setup quality before they turn into drawdowns.',
+    description: 'Flags subtle shifts in risk behavior and setup quality before they become drawdowns.',
     icon: Radar,
   },
   {
     title: 'AI Session Debrief',
-    description: 'Generates a concise post-session narrative: what worked, what broke, what to adjust tomorrow.',
+    description: 'Creates concise recaps of what worked, what broke, and what to adjust next session.',
     icon: Bot,
   },
   {
     title: 'Execution Quality Score',
-    description: 'Scores each trade against your ruleset, not just outcome, so process wins are measurable.',
+    description: 'Scores trades against your ruleset so process wins are visible, even on flat PnL days.',
     icon: Brain,
   },
 ]
@@ -27,17 +27,17 @@ const intelligenceFeatures = [
 const automationFeatures = [
   {
     title: 'Playbook Auto-Builder',
-    description: 'Turns your best days into reusable setup templates and checklist-ready plans.',
+    description: 'Converts your best sessions into reusable setup templates and checklist-ready plans.',
     icon: Sparkles,
   },
   {
     title: 'Risk Intervention Alerts',
-    description: 'Escalates coaching prompts when size, frequency, or emotional variance crosses your limits.',
+    description: 'Escalates coaching prompts when sizing, frequency, or emotional variance crosses limits.',
     icon: ShieldAlert,
   },
   {
     title: 'Weekly Performance Briefs',
-    description: 'Auto-compiles Monday-ready reports for personal review or team standups.',
+    description: 'Auto-compiles concise weekly reports for self-review, mentors, or desk standups.',
     icon: Bot,
   },
 ]
@@ -88,8 +88,8 @@ export default function AIFuturesSection() {
             Must-Have AI Features
           </Badge>
           <h2 className="mt-3 text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
-            The AI layer that turns
-            <span className="block text-[hsl(var(--brand-primary))]">raw trades into repeatable edges</span>
+            AI that improves
+            <span className="block text-[hsl(var(--brand-primary))]">decision quality, not just reporting</span>
           </h2>
         </motion.div>
 

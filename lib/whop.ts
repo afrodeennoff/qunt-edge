@@ -18,3 +18,24 @@ export const getWhop = () => {
 
 // Default export for convenience
 export const whop = getWhop();
+
+export const parseWhopDate = (value: string | number | null | undefined): Date | undefined => {
+  if (value === null || value === undefined) return undefined;
+
+  // If it's a number, assume seconds
+  if (typeof value === 'number') {
+    return new Date(value * 1000);
+  }
+
+  // If it's a string
+  if (typeof value === 'string') {
+    // Check if it's a string of digits (seconds)
+    if (/^\d+$/.test(value)) {
+      return new Date(parseInt(value, 10) * 1000);
+    }
+    // Otherwise assume ISO string or other date format
+    return new Date(value);
+  }
+
+  return undefined;
+};

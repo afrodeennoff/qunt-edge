@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Calendar } from "@/components/ui/calendar"
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { ChevronDown, CircleDot, Zap } from "lucide-react"
@@ -250,6 +251,20 @@ export default function TraderProfilePage() {
     return (accounts || []).filter((account) => Boolean(account.number)).length
   }, [accounts])
 
+  const tradeCalendarDays = useMemo(() => {
+    const byDay = new Map<string, Date>()
+    ;(formattedTrades || []).forEach((trade) => {
+      const date = new Date(trade.entryDate)
+      if (Number.isNaN(date.getTime())) return
+      const key = date.toISOString().slice(0, 10)
+      if (!byDay.has(key)) byDay.set(key, new Date(date.getFullYear(), date.getMonth(), date.getDate()))
+    })
+    return Array.from(byDay.values()).sort((a, b) => a.getTime() - b.getTime())
+  }, [formattedTrades])
+
+  const latestTradeDay = tradeCalendarDays.length > 0 ? tradeCalendarDays[tradeCalendarDays.length - 1] : undefined
+  const winRateGuidePercent = Math.min(30, Math.max(25, 100 - metrics.winRate))
+
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-3 sm:p-4 lg:p-5">
       <div className="pointer-events-none absolute inset-0 opacity-70">
@@ -312,6 +327,25 @@ export default function TraderProfilePage() {
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.drawdown)}</p>
             </Card>
           </div>
+
+          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-fg-primary">Trade Calendar</p>
+              <p className="text-xs text-fg-muted">{tradeCalendarDays.length} active days</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2">
+              <Calendar
+                mode="single"
+                selected={latestTradeDay}
+                defaultMonth={latestTradeDay}
+                modifiers={{ traded: tradeCalendarDays }}
+                modifiersClassNames={{
+                  traded: "bg-white/20 text-white font-semibold",
+                }}
+                className="w-full p-0"
+              />
+            </div>
+          </Card>
 
           <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-4">
             <div className="mb-3 flex items-center justify-between">
@@ -401,7 +435,7 @@ export default function TraderProfilePage() {
                 <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
               </div>
               <div className="h-2 rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-white/20" style={{ width: `${Math.min(100, Math.max(8, 100 - metrics.winRate))}%` }} />
+                <div className="h-full rounded-full bg-white/20" style={{ width: `${winRateGuidePercent}%` }} />
               </div>
             </div>
           </Card>

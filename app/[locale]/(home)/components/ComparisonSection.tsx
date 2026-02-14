@@ -8,23 +8,23 @@ import { Check, X } from 'lucide-react'
 const comparisonRows = [
   {
     item: 'Behavior drift detection',
-    qunt: 'In-session alerts with root-cause hints',
-    others: 'Post-session static reports',
+    qunt: 'In-session alerts with intervention guidance',
+    others: 'Mostly post-session summaries',
   },
   {
     item: 'AI coaching output',
-    qunt: 'Actionable playbook for next session',
-    others: 'Generic observations without priorities',
+    qunt: 'Prioritized playbook for the next session',
+    others: 'Generic observations with no ranking',
   },
   {
     item: 'Journal + execution sync',
-    qunt: 'Unified timeline with note anchors',
-    others: 'Separate tools and manual matching',
+    qunt: 'Single timeline with note-to-trade context',
+    others: 'Fragmented tools and manual stitching',
   },
   {
     item: 'Manager visibility',
     qunt: 'Desk-level process consistency analytics',
-    others: 'Limited to individual account stats',
+    others: 'Mostly account-level performance totals',
   },
 ]
 
@@ -43,8 +43,8 @@ export default function ComparisonSection() {
             Difference From Others
           </Badge>
           <h2 className="mt-3 text-[clamp(2rem,4.7vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
-            Why Qunt Edge is not
-            <span className="block text-[hsl(var(--brand-primary))]">just another trading dashboard</span>
+            Why we’re different
+            <span className="block text-[hsl(var(--brand-primary))]">from standard trading analytics tools</span>
           </h2>
         </motion.div>
 

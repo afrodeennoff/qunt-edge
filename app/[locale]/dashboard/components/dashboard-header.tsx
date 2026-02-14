@@ -89,6 +89,7 @@ export function DashboardHeader() {
     const title = getTitle();
     const currentLayout = layouts || { desktop: [], mobile: [] };
     const sectionLabel = isDashboardRoot ? "Workspace" : "Dashboard";
+    const showSectionLabel = !(isDashboardRoot && activeTab === 'accounts');
     const subtitle = isDashboardRoot
         ? (
             activeTab === 'table'
@@ -125,9 +126,11 @@ export function DashboardHeader() {
                         <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                                <span className="hidden sm:inline-flex rounded-full border border-border/40 bg-muted/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                                    {sectionLabel}
-                                </span>
+                                {showSectionLabel && (
+                                    <span className="hidden sm:inline-flex rounded-full border border-border/40 bg-muted/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                        {sectionLabel}
+                                    </span>
+                                )}
                                 <h1 className="truncate whitespace-nowrap text-[11px] sm:text-sm font-bold uppercase tracking-[0.16em] text-foreground">
                                     {title}
                                 </h1>

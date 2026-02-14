@@ -14,8 +14,8 @@ const plans = [
     name: 'Starter',
     price: '$0',
     period: '/month',
-    subtitle: 'For traders starting process discipline',
-    features: ['Manual journaling', 'Basic trade analytics', 'Weekly summary snapshot'],
+    subtitle: 'For traders building foundational review discipline',
+    features: ['Manual journaling', 'Core trade analytics', 'Weekly process snapshot'],
     cta: 'Start Free',
     note: 'No card required',
     popular: false,
@@ -65,8 +65,8 @@ export default function PricingSection() {
             Pricing
           </Badge>
           <h2 className="text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
-            Transparent plans for <br />
-            <span className="text-primary">individual and team growth</span>
+            Pricing built for <br />
+            <span className="text-primary">individual traders and performance desks</span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.78] text-muted-foreground sm:text-[18px] [font-family:var(--home-copy)]">
             Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
