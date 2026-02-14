@@ -131,11 +131,13 @@ export default function TraderProfilePage() {
   const profileInitials = useMemo(() => {
     const parts = profileName
       .split(" ")
-      .map((value) => value.trim())
+      .map((value: string) => value.trim())
+
       .filter(Boolean)
       .slice(0, 2)
     if (parts.length === 0) return "TR"
-    return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "TR"
+    return parts.map((part: string) => part[0]?.toUpperCase() ?? "").join("") || "TR"
+
   }, [profileName])
 
   const metrics = useMemo<TraderMetrics>(() => {
