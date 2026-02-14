@@ -36,6 +36,40 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-14: Whop Checkout Flow Hardening (Locale-Safe Redirects + Frontend/Backend Alignment)
+- **What changed:** Hardened the Whop payment flow end-to-end so checkout/auth redirects remain locale-safe and purchase entry points consistently route into dynamic Whop checkout with preserved params.
+- **What I want:** Users should be able to start checkout from pricing surfaces without broken query strings or locale drops, then return to the correct localized dashboard/auth pages after sign-in and Whop redirect.
+- **What I don't want:** Redirects to non-localized paths (`/dashboard`, `/authentication`) in a locale-routed app, malformed query strings (`?` + `&` mixing), or frontend entry points that bypass checkout while claiming paid upgrade behavior.
+- **How we fixed that:**
+  - Added shared checkout URL builder utilities in `lib/whop-checkout.ts` and shared currency detection hook in `hooks/use-currency.ts`.
+  - Updated `components/pricing-plans.tsx` to use deterministic checkout URL redirects (instead of ad-hoc DOM form creation) and include locale/referral context.
+  - Updated Home pricing CTA routing in `app/[locale]/(home)/components/PricingSection.tsx`:
+    - Pro AI now links directly into dynamic Whop checkout (`plus_monthly_{currency}`),
+    - Starter keeps auth onboarding flow,
+    - Desk remains support/sales-oriented.
+  - Fixed auth “next” URL composition in `app/[locale]/(authentication)/components/user-auth-form.tsx`:
+    - proper query param assembly via `URLSearchParams`,
+    - locale-aware next-path normalization,
+    - safe redirect defaults to `/${locale}/dashboard`.
+  - Hardened callback and checkout APIs for locale-aware redirects:
+    - `app/api/auth/callback/route.ts`,
+    - `app/api/whop/checkout/route.ts`,
+    - `app/api/whop/checkout-team/route.ts`.
+  - Improved checkout plan-id resolution in `app/api/whop/checkout/route.ts` with support for interval/currency-derived env lookups and legacy fallbacks.
+- **Key Files:** `lib/whop-checkout.ts`, `hooks/use-currency.ts`, `components/pricing-plans.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(authentication)/components/user-auth-form.tsx`, `app/api/auth/callback/route.ts`, `app/api/whop/checkout/route.ts`, `app/api/whop/checkout-team/route.ts`, `AGENTS.md`
+- **Verification:** Run `npm run build` and confirm successful compile, TypeScript pass, and route generation including `/api/whop/checkout` + `/api/whop/checkout-team` without checkout/auth redirect type errors.
+
+### 2026-02-14: Trader Profile Calendar Build Compatibility (`react-day-picker` v9)
+- **What changed:** Fixed trader-profile calendar customization to match current `react-day-picker` component API so production build no longer fails on removed legacy types/components.
+- **What I want:** Trader Profile should keep custom per-day PnL rendering while remaining compatible with the installed DayPicker version.
+- **What I don't want:** Build failures from deprecated/removed `react-day-picker` symbols like `DayContentProps` and unsupported `components.DayContent`.
+- **How we fixed that:**
+  - Removed deprecated `DayContentProps` import.
+  - Migrated custom calendar renderer from `components.DayContent` to supported `components.DayButton` override in `app/[locale]/dashboard/trader-profile/page.tsx`.
+  - Kept the visual behavior (day number + compact PnL text) inside the new DayButton implementation.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `AGENTS.md`
+- **Verification:** `npm run build` completes successfully after TypeScript + static generation, with no `DayContentProps`/`DayContent` errors.
+
 ### 2026-02-14: Sidebar Reliability + Active-State Accuracy + Collapse UX Fix
 - **What changed:** Audited and fixed the shared sidebar system end-to-end: active-route matching, locale handling, collapse persistence, mobile close behavior, provider layering, and sidebar wrapper cleanup.
 - **What I want:** Sidebar navigation should always highlight the correct active item (including locale-prefixed routes), collapse controls should feel predictable across desktop/mobile, and sidebar state should persist after refresh.

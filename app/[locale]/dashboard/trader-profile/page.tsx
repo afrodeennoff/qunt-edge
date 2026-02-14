@@ -535,9 +535,19 @@ export default function TraderProfilePage() {
                     "h-10 w-10 rounded-md p-0 font-normal text-fg-primary hover:bg-white/10 aria-selected:bg-white/15 aria-selected:text-fg-primary",
                 }}
                 components={{
-                  DayContent: ({ date, displayMonth }: { date: Date; displayMonth: Date }) => {
+                  DayButton: ({ day, className, ...buttonProps }: any) => {
+                    const date = day.date as Date
+                    const displayMonth = day.displayMonth as Date
                     if (date.getMonth() !== displayMonth.getMonth()) {
-                      return <span className="text-[11px] text-fg-muted">{format(date, "d")}</span>
+                      return (
+                        <button
+                          type="button"
+                          {...buttonProps}
+                          className={className}
+                        >
+                          <span className="text-[11px] text-fg-muted">{format(date, "d")}</span>
+                        </button>
+                      )
                     }
                     const key = date.toISOString().slice(0, 10)
                     const pnl = tradePnlByDay.get(key) ?? 0
@@ -546,12 +556,18 @@ export default function TraderProfilePage() {
                       pnl > 0 ? "text-emerald-200" : pnl < 0 ? "text-rose-200" : hasTrade ? "text-fg-primary" : "text-fg-muted"
 
                     return (
-                      <div className="flex h-full w-full flex-col items-center justify-center gap-0.5">
-                        <span className="text-[11px] leading-none">{format(date, "d")}</span>
-                        <span className={`text-[9px] font-semibold leading-none ${tint}`}>
-                          {hasTrade ? formatPnlCell(pnl) : ""}
-                        </span>
-                      </div>
+                      <button
+                        type="button"
+                        {...buttonProps}
+                        className={className}
+                      >
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-0.5">
+                          <span className="text-[11px] leading-none">{format(date, "d")}</span>
+                          <span className={`text-[9px] font-semibold leading-none ${tint}`}>
+                            {hasTrade ? formatPnlCell(pnl) : ""}
+                          </span>
+                        </div>
+                      </button>
                     )
                   },
                 }}
