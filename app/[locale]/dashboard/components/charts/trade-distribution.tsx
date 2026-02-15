@@ -163,10 +163,17 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                         <Cell
                           key={`cell-${index}`}
                           fill={entry.color}
-                          fillOpacity={0.95}
-                          className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
+                          fillOpacity={entry.color === '#f1f1f2' ? 0.95 : 1}
+                          className={cn(
+                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                            entry.color === "#f1f1f2" ? "chart-positive-emphasis" : "chart-negative-muted"
+                          )}
                         />
                       ))}
+                      <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
+                        <tspan x="50%" dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
+                        <tspan x="50%" dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
+                      </text>
                     </Pie>
                     <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
                   </PieChart>
