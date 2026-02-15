@@ -78,6 +78,27 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     return false
   }, [errors.length, successes.length, files.length])
 
+  const getScopedBasePath = useCallback(async (): Promise<string> => {
+    const { data, error } = await supabase.auth.getUser()
+
+    if (error || !data.user?.id) {
+      throw new Error('Authentication required for storage upload')
+    }
+
+    const authUid = data.user.id
+    const trimmedPath = (path ?? '').replace(/^\/+|\/+$/g, '')
+
+    if (!trimmedPath) {
+      return authUid
+    }
+
+    if (trimmedPath === authUid || trimmedPath.startsWith(`${authUid}/`)) {
+      return trimmedPath
+    }
+
+    return `${authUid}/${trimmedPath}`
+  }, [path])
+
   const onDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
       const validFiles = acceptedFiles
@@ -126,9 +147,17 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
+        let scopedBasePath: string
+        try {
+          scopedBasePath = await getScopedBasePath()
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Upload failed'
+          return { name: file.name, message }
+        }
+
         const { error } = await supabase.storage
           .from(bucketName)
-          .upload(!!path ? `${path}/${file.name}` : file.name, file, {
+          .upload(`${scopedBasePath}/${file.name}`, file, {
             cacheControl: cacheControl.toString(),
             upsert,
           })
@@ -151,7 +180,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     setSuccesses(newSuccesses)
 
     setLoading(false)
-  }, [files, path, bucketName, errors, successes])
+  }, [files, bucketName, errors, successes, cacheControl, upsert, getScopedBasePath])
 
   useEffect(() => {
     if (files.length === 0) {

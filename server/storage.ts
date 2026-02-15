@@ -27,18 +27,42 @@ export async function listStorageObjects(
   options: ListStorageObjectsOptions = {}
 ): Promise<StorageListObject[]> {
   const supabase = await createClient()
-  const { prefix = '', limit = 100, offset = 0 } = options
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
 
-  const { data, error } = await supabase.rpc('list_objects', {
-    bucket_id: bucketId,
-    prefix,
-    limits: limit,
-    offsets: offset,
+  if (authError || !user) {
+    throw new Error('Authentication required to list storage objects')
+  }
+
+  const { prefix = '', limit = 100, offset = 0 } = options
+  const userRootPrefix = `${user.id}/`
+  const normalizedPrefix = prefix.replace(/^\/+/, '')
+  const scopedPrefix = normalizedPrefix
+    ? normalizedPrefix.startsWith(userRootPrefix)
+      ? normalizedPrefix
+      : `${userRootPrefix}${normalizedPrefix}`
+    : userRootPrefix
+
+  const { data, error } = await supabase.storage.from(bucketId).list(scopedPrefix, {
+    limit,
+    offset,
+    sortBy: { column: 'name', order: 'asc' },
   })
 
   if (error) {
     throw new Error(`Failed to list storage objects: ${error.message}`)
   }
 
-  return (data ?? []) as StorageListObject[]
+  return (data ?? []).map((item) => ({
+    id: item.id ?? '',
+    name: `${scopedPrefix}${item.name}`,
+    bucket_id: bucketId,
+    owner: null,
+    created_at: item.created_at ?? '',
+    updated_at: item.updated_at ?? '',
+    last_accessed_at: null,
+    metadata: item.metadata ?? null,
+  })) as StorageListObject[]
 }

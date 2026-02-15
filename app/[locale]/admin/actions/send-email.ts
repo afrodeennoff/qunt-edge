@@ -5,6 +5,7 @@ import { Resend } from "resend"
 import { prisma } from "@/lib/prisma"
 import { createClient, type User } from "@supabase/supabase-js"
 import { render } from "@react-email/render"
+import { assertAdminAccess } from "@/server/authz"
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -181,6 +182,7 @@ export async function getRequiredTemplateProps(template: EmailTemplate): Promise
 }
 
 export async function renderEmailPreview(template: EmailTemplate, props: TemplateProps) {
+  await assertAdminAccess()
   try {
     const EmailComponent = await getEmailTemplate(template)
     const html = await render(React.createElement(EmailComponent, props))
@@ -215,6 +217,7 @@ interface UserListItem {
 }
 
 export async function getUsersList(): Promise<UserListItem[]> {
+  await assertAdminAccess()
   try {
     const supabase = getSupabaseAdminClient()
     let allUsers: User[] = []
@@ -272,6 +275,7 @@ export async function sendEmailsToUsers(
   customProps: TemplateProps,
   subject?: string
 ) {
+  await assertAdminAccess()
   try {
     const supabase = getSupabaseAdminClient()
 
@@ -415,4 +419,3 @@ function getDefaultSubject(template: EmailTemplate, language: string): string {
   const locale = language === "fr" ? "fr" : "en"
   return subjects[template][locale]
 }
-

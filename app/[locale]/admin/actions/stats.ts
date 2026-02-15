@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { normalizeTradesForClient } from '@/lib/data-types'
 import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
 import { Subscription } from '@/prisma/generated/prisma'
+import { assertAdminAccess } from '@/server/authz'
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -26,6 +27,7 @@ function getSupabaseAdminClient() {
 }
 
 export async function getUserStats() {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1
@@ -78,6 +80,7 @@ export async function getUserStats() {
 }
 
 export async function getFreeUsers() {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   console.log('Starting getFreeUsers function')
 

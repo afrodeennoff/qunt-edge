@@ -45,12 +45,34 @@ const supabase = createClient();
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGES = 10; // Maximum number of images allowed
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
   "image/webp",
 ];
+
+function extractTradeImagePath(imageReference: string): string | null {
+  if (!imageReference) return null;
+
+  const publicMarker = "/storage/v1/object/public/trade-images/";
+  const signedMarker = "/storage/v1/object/sign/trade-images/";
+
+  if (imageReference.includes(publicMarker)) {
+    return imageReference.split(publicMarker)[1]?.split("?")[0] ?? null;
+  }
+
+  if (imageReference.includes(signedMarker)) {
+    return imageReference.split(signedMarker)[1]?.split("?")[0] ?? null;
+  }
+
+  if (imageReference.startsWith("http://") || imageReference.startsWith("https://")) {
+    return null;
+  }
+
+  return imageReference.replace(/^\/+/, "");
+}
 
 interface TradeImageEditorProps {
   trade: any;
@@ -60,6 +82,7 @@ interface TradeImageEditorProps {
 export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   const t = useI18n();
   const user = useUserStore((state) => state.user);
+  const supabaseUser = useUserStore((state) => state.supabaseUser);
   const [isOpen, setIsOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -67,13 +90,14 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
   const [localImages, setLocalImages] = useState<{ imageBase64: string | null; imageBase64Second: string | null } | null>(null);
+  const [resolvedImageUrls, setResolvedImageUrls] = useState<string[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const { getTradeImages, updateTrades } = useData();
 
   // Use hash-based upload hook
   const uploadProps = useHashUpload({
     bucketName: "trade-images",
-    path: `${user?.id}/trades`,
+    path: supabaseUser?.id ? `${supabaseUser.id}/trades` : user?.auth_user_id ? `${user.auth_user_id}/trades` : "trades",
     allowedMimeTypes: ACCEPTED_IMAGE_TYPES,
     maxFileSize: MAX_FILE_SIZE,
     maxFiles: MAX_IMAGES,
@@ -90,6 +114,58 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
     trade.images && trade.images.length > 0
       ? trade.images
       : [resolvedImageBase64, resolvedImageBase64Second].filter(Boolean);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveImageUrls = async () => {
+      if (imageArray.length === 0) {
+        if (!cancelled) setResolvedImageUrls([]);
+        return;
+      }
+
+      const urls = await Promise.all(
+        imageArray.map(async (imageReference: string) => {
+          const path = extractTradeImagePath(imageReference);
+          if (!path) {
+            return imageReference;
+          }
+
+          // Backward compatibility for old publicly stored image URLs.
+          if (
+            imageReference.startsWith("http") &&
+            imageReference.includes("/storage/v1/object/public/trade-images/")
+          ) {
+            return imageReference;
+          }
+
+          const { data, error } = await supabase.storage
+            .from("trade-images")
+            .createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+
+          if (error || !data?.signedUrl) {
+            console.error("Failed to create signed URL for trade image:", error?.message);
+            return imageReference;
+          }
+
+          return data.signedUrl;
+        })
+      );
+
+      if (!cancelled) {
+        setResolvedImageUrls(urls);
+      }
+    };
+
+    void resolveImageUrls();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [imageArray]);
+
+  const displayImageArray =
+    resolvedImageUrls.length === imageArray.length ? resolvedImageUrls : imageArray;
 
   const handleOpenGallery = useCallback(async () => {
     setIsOpen(true);
@@ -115,8 +191,8 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   }, [trade.id, trade.images, trade.imageBase64, trade.imageBase64Second, localImages, isLoadingImages, getTradeImages]);
 
   const uploadCallback = useCallback(async () => {
-    if (uploadProps.isSuccess && uploadProps.uploadedUrls.length > 0) {
-      await handleUpdateImages(uploadProps.uploadedUrls);
+    if (uploadProps.isSuccess && uploadProps.uploadedPaths.length > 0) {
+      await handleUpdateImages(uploadProps.uploadedPaths);
       setUploadDialogOpen(false);
       toast.success(t("trade-table.imageUploadSuccess"));
 
@@ -127,12 +203,12 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       const error = uploadProps.errors[0].message;
       toast.error(t("trade-table.imageUploadError", { error }));
     }
-  }, [uploadProps.isSuccess, uploadProps.uploadedUrls, uploadProps.errors]);
+  }, [uploadProps.isSuccess, uploadProps.uploadedPaths, uploadProps.errors]);
 
   // Listen for successful uploads
   useEffect(() => {
     uploadCallback();
-  }, [uploadProps.isSuccess, uploadProps.uploadedUrls, uploadProps.errors]);
+  }, [uploadProps.isSuccess, uploadProps.uploadedPaths, uploadProps.errors]);
 
   const handleRemoveImage = async (imageIndex: number) => {
     try {
@@ -168,9 +244,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       // Remove the image from Supabase storage
       if (imageUrl) {
         // Extract the path from the full URL
-        const path = imageUrl.split(
-          "/storage/v1/object/public/trade-images/",
-        )[1];
+        const path = extractTradeImagePath(imageUrl);
         if (path) {
           await supabase.storage.from("trade-images").remove([path]);
         }
@@ -200,24 +274,18 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       // From new images array
       if (trade.images && trade.images.length > 0) {
         trade.images.forEach((imageUrl: string) => {
-          const path = imageUrl.split(
-            "/storage/v1/object/public/trade-images/",
-          )[1];
+          const path = extractTradeImagePath(imageUrl);
           if (path) imagesToRemove.push(path);
         });
       }
 
       // From legacy fields (in case they're not in the images array)
       if (trade.imageBase64) {
-        const path = trade.imageBase64.split(
-          "/storage/v1/object/public/trade-images/",
-        )[1];
+        const path = extractTradeImagePath(trade.imageBase64);
         if (path && !imagesToRemove.includes(path)) imagesToRemove.push(path);
       }
       if (trade.imageBase64Second) {
-        const path = trade.imageBase64Second.split(
-          "/storage/v1/object/public/trade-images/",
-        )[1];
+        const path = extractTradeImagePath(trade.imageBase64Second);
         if (path && !imagesToRemove.includes(path)) imagesToRemove.push(path);
       }
 
@@ -289,8 +357,8 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                 <>
                   <Image
                     src={
-                      imageArray[0]
-                        ? withSupabaseImageTransform(imageArray[0], {
+                      displayImageArray[0]
+                        ? withSupabaseImageTransform(displayImageArray[0], {
                             width: 80,
                             height: 80,
                             quality: 75,
@@ -428,7 +496,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                       >
                         <div className="flex items-center justify-center w-full h-full">
                           <img
-                            src={imageArray[selectedImageIndex]}
+                            src={displayImageArray[selectedImageIndex]}
                             alt="Trade image"
                             className="max-w-full max-h-full object-contain select-none"
                             style={{ margin: "auto" }}
@@ -469,7 +537,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
           <div className="border-t p-4">
             <Carousel className="w-full">
               <CarouselContent className="w-full flex items-center justify-center gap-2">
-                {imageArray.map((image: string, index: number) => (
+                {displayImageArray.map((image: string, index: number) => (
                   <CarouselItem key={index} className="basis-auto">
                     <div
                       className="relative aspect-square cursor-pointer"
@@ -534,7 +602,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
           </DialogHeader>
           <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto pr-2">
             <AnimatePresence mode="popLayout">
-              {imageArray.map((imageUrl: string, index: number) => (
+              {displayImageArray.map((imageUrl: string, index: number) => (
                 <motion.div
                   key={imageUrl}
                   layout

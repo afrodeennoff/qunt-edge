@@ -5,6 +5,7 @@ import { PrismaClient } from "@/prisma/generated/prisma"
 import { createClient } from '@supabase/supabase-js'
 import { generateTradingAnalysis } from "@/app/api/email/weekly-summary/[userid]/actions/analysis"
 import { getUserData, computeTradingStats } from "@/app/api/email/weekly-summary/[userid]/actions/user-data"
+import { assertAdminAccess } from '@/server/authz'
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -51,6 +52,7 @@ function formatPnL(value: number): string {
 }
 
 export async function generateAnalysis(content: WeeklyRecapContent) {
+  await assertAdminAccess()
   try {
     // Sort dailyPnL by date before analysis
     const sortedContent = {
@@ -77,6 +79,7 @@ export async function generateAnalysis(content: WeeklyRecapContent) {
 }
 
 export async function renderEmail(content: WeeklyRecapContent, analysis: { resultAnalysisIntro: string, tipsForNextWeek: string }) {
+  await assertAdminAccess()
   try {
     const html = await render(
       TraderStatsEmail({
@@ -122,6 +125,7 @@ export async function renderEmail(content: WeeklyRecapContent, analysis: { resul
 }
 
 export async function loadInitialContent(email?: string, userId?: string) {
+  await assertAdminAccess()
   // If no userId is provided, use the default admin user
   const targetUserId = userId || process.env.ALLOWED_ADMIN_USER_ID
 
@@ -146,6 +150,7 @@ export async function loadInitialContent(email?: string, userId?: string) {
 }
 
 export async function listUsers() {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1

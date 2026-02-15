@@ -36,6 +36,27 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-16: Complete RLS Policy Coverage Across All Public Tables
+- **What changed:** Added explicit RLS policy definitions so every table in `public` now has authenticated-role policy coverage (including explicit deny policies for system-only tables).
+- **What I want:** No table should rely on implicit deny behavior for `authenticated`/`anon`; policy posture should be explicit, auditable, and consistent across the full schema.
+- **What I don't want:** Any `public` table with only a `service_role` policy and no explicit authenticated-role policy definition.
+- **How we fixed that:**
+  - Identified remaining tables without `authenticated` policies:
+    - `FinancialEvent`, `HistoricalData`, `Newsletter`, `Organization`, `ProcessedWebhook`, `Promotion`, `SubscriptionFeedback`, `TickDetails`, `_UserOrganizations`, `_prisma_migrations`.
+  - Added explicit deny-all policies on each:
+    - `authenticated_no_access` (`to authenticated`, `using false`, `with check false`)
+    - `anon_no_access` (`to anon`, `using false`, `with check false`)
+  - Kept `service_role_all` policies for backend/system operations.
+- **Key Files:** `AGENTS.md` (DB changes applied directly via Supabase migration)
+- **Verification:**
+  - Query for tables missing authenticated policy returns `0` rows.
+  - Policy inspection confirms every former system-only table now has:
+    - `authenticated_no_access`,
+    - `anon_no_access`,
+    - `service_role_all`.
+  - Supabase security advisor remains clean except one auth setting warning:
+    - leaked password protection disabled.
+
 ### 2026-02-16: Bank-Grade Security Hardening Pass (API + Supabase RLS + Access Controls)
 - **What changed:** Executed a comprehensive security hardening pass across backend API surfaces and Supabase data access controls with defense-in-depth defaults.
 - **What I want:** User data and operational endpoints should be protected by strict authentication, signed action links, fail-closed secrets, and enforced least-privilege access at the database layer.
@@ -1387,3 +1408,63 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run typecheck` passes.
   - `npm run perf:check` passes (build + route budgets + bundle analysis).
   - `npx eslint` on all touched code/config files passes with warnings only and no errors.
+
+### 2026-02-15: Auth-First RLS Policy Rewrite (Supabase `auth.uid()` Mapping)
+- **What changed:** Rewrote authenticated RLS ownership policies to consistently anchor on Supabase Auth identity (`auth.uid()`) via `public."User".auth_user_id`, including parent-joined tables.
+- **What I want:** Every authenticated query/write should be user-scoped by the signed-in Supabase auth identity first, even when domain tables use internal `User.id` references.
+- **What I don't want:** Mixed policy semantics where some tables compare directly to `auth.uid()` and others compare against internal ids, creating gaps or inconsistent access behavior.
+- **How we fixed that:**
+  - Applied migration `rewrite_user_policies_to_auth_uid_mapping`.
+  - Recreated `authenticated_owner` policies for direct-owner tables with `EXISTS (...)` mapping:
+    - `table.userId -> User.id` and `User.auth_user_id = auth.uid()`.
+  - Recreated parent-chain policies (`authenticated_owner_via_parent`) for indirect-owner tables (`BusinessInvitation`, `BusinessManager`, `LayoutVersion`, `Payout`, `TeamAnalytics`, `TeamInvitation`, `TeamManager`, `TradeAnalytics`) with explicit joins to `User` and `auth.uid()`.
+  - Recreated `public."User"` owner policy as `auth_user_id = auth.uid()`.
+  - Verified `DashboardLayout.userId` FK targets `User.auth_user_id`, keeping `LayoutVersion` parent policy semantics consistent.
+- **Key Files:** `AGENTS.md` (DB migration applied on Supabase project; no local SQL file in repo for this step)
+- **Verification:**
+  - `pg_policies` inspection confirms authenticated policies now reference `auth.uid()` through user mapping.
+  - Query for public tables lacking authenticated policies returns empty.
+  - `anon` policies that remain are explicit deny policies (`anon_no_access` with `false` conditions).
+  - Supabase security advisors now only report one remaining auth setting warning: leaked password protection disabled.
+
+### 2026-02-15: Supabase User Isolation Hardening (Storage + Auth-Scoped Upload Paths)
+- **What changed:** Completed a user-isolation hardening pass for Supabase Storage and upload/read code paths so authenticated users can only operate inside their own object prefix.
+- **What I want:** Logged-in users can upload, list, view, update, and delete only their own files; storage access is scoped by Supabase Auth identity and no longer relies on public bucket exposure.
+- **What I don't want:** Cross-user object access via permissive/missing Storage RLS, public object URLs that bypass user isolation, or client-provided upload paths that are not auth-scoped.
+- **How we fixed that:**
+  - Applied Supabase migration `harden_storage_user_isolation_auth_uid_v3`:
+    - ensured `trade-images` bucket exists and is private (`public=false`),
+    - set file constraints (`5MB`, image-only MIME allowlist),
+    - created authenticated Storage object policies (`SELECT/INSERT/UPDATE/DELETE`) requiring first path segment to match `auth.uid()`.
+  - Hardened upload hooks to enforce auth-scoped object keys:
+    - `hooks/use-hash-upload.ts` now resolves authenticated user and scopes uploads under `auth.uid()/...`,
+    - `hooks/use-supabase-upload.ts` now resolves authenticated user and scopes uploads under `auth.uid()/...`.
+  - Hardened trade image UI for private storage:
+    - `trade-image-editor.tsx` now stores uploaded object paths (not public URLs),
+    - creates signed URLs for rendering private images,
+    - supports backward compatibility for legacy public URLs while deleting via normalized object path extraction.
+  - Hardened server-side storage listing in `server/storage.ts`:
+    - requires authenticated user,
+    - enforces user-root prefix scoping before listing.
+- **Key Files:** `hooks/use-hash-upload.ts`, `hooks/use-supabase-upload.ts`, `app/[locale]/dashboard/components/tables/trade-image-editor.tsx`, `server/storage.ts`, `AGENTS.md`
+- **Verification:**
+  - Storage policy inspection confirms four authenticated owner policies exist on `storage.objects` and all require `(storage.foldername(name))[1] = auth.uid()`.
+  - Bucket inspection confirms `trade-images` exists with `public=false`, `file_size_limit=5242880`, and MIME allowlist.
+  - `npx eslint` on touched files passes with warnings-only baseline (no errors).
+  - `npm run typecheck` exits `0`.
+  - Follow-up hardening: Storage object policies are also bucket-scoped to app buckets (`trade-images`, `quntedge`) in addition to auth-uid folder scoping.
+
+### 2026-02-15: Production Admin Surface Lockdown (Service-Role Action Gating)
+- **What changed:** Added mandatory admin authorization guards to all admin server actions that use Supabase Admin APIs or can access tenant-wide data.
+- **What I want:** Service-role powered admin actions should be executable only by authorized admin users, even if an action endpoint is invoked directly.
+- **What I don't want:** Un-gated `app/[locale]/admin/actions/*` server actions callable by non-admin authenticated users and exposing cross-tenant user/email/stats data.
+- **How we fixed that:**
+  - Imported and enforced `assertAdminAccess()` in:
+    - `app/[locale]/admin/actions/stats.ts` (`getUserStats`, `getFreeUsers`)
+    - `app/[locale]/admin/actions/send-email.ts` (`renderEmailPreview`, `getUsersList`, `sendEmailsToUsers`)
+    - `app/[locale]/admin/actions/weekly-recap.ts` (`generateAnalysis`, `renderEmail`, `loadInitialContent`, `listUsers`)
+  - Kept existing service-role client setup but gated all exported sensitive entry points before use.
+- **Key Files:** `app/[locale]/admin/actions/stats.ts`, `app/[locale]/admin/actions/send-email.ts`, `app/[locale]/admin/actions/weekly-recap.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint app/[locale]/admin/actions/stats.ts app/[locale]/admin/actions/send-email.ts app/[locale]/admin/actions/weekly-recap.ts` (warnings only, no errors).
+  - `npm run typecheck` passes.

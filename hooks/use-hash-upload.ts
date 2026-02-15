@@ -8,7 +8,7 @@ const supabase = createClient()
 interface FileWithPreview extends File {
   preview?: string
   errors: readonly FileError[]
-  uploadedUrl?: string
+  uploadedPath?: string
 }
 
 type UseHashUploadOptions = {
@@ -74,7 +74,7 @@ const useHashUpload = (options: UseHashUploadOptions) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [errors, setErrors] = useState<{ name: string; message: string }[]>([])
   const [successes, setSuccesses] = useState<string[]>([])
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
+  const [uploadedPaths, setUploadedPaths] = useState<string[]>([])
 
   const isSuccess = useMemo(() => {
     if (errors.length === 0 && successes.length === 0) {
@@ -108,6 +108,27 @@ const useHashUpload = (options: UseHashUploadOptions) => {
       ? file.name.split('.').pop() || ''
       : ''
     return (mimeExt || nameExt || 'bin').toLowerCase()
+  }
+
+  const getScopedBasePath = async (): Promise<string> => {
+    const { data, error } = await supabase.auth.getUser()
+
+    if (error || !data.user?.id) {
+      throw new Error('Authentication required for storage upload')
+    }
+
+    const authUid = data.user.id
+    const trimmedPath = (path ?? '').replace(/^\/+|\/+$/g, '')
+
+    if (!trimmedPath) {
+      return authUid
+    }
+
+    if (trimmedPath === authUid || trimmedPath.startsWith(`${authUid}/`)) {
+      return trimmedPath
+    }
+
+    return `${authUid}/${trimmedPath}`
   }
 
   const onDrop = useCallback(
@@ -158,13 +179,15 @@ const useHashUpload = (options: UseHashUploadOptions) => {
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
         try {
+          const scopedBasePath = await getScopedBasePath()
+
           // Compute hash for short filename
           const hashHex = await computeFileHash(file)
           const ext = getFileExtension(file)
 
           // Create short hash-based path
           const fileName = `${hashHex}.${ext}`
-          const filePath = path ? `${path}/${fileName}` : fileName
+          const filePath = `${scopedBasePath}/${fileName}`
 
           const { error } = await supabase.storage
             .from(bucketName)
@@ -175,34 +198,25 @@ const useHashUpload = (options: UseHashUploadOptions) => {
 
           // If file already exists, that's okay - we'll reuse it
           if (error && error.message && error.message.includes('already exists')) {
-            const { data: pub } = supabase.storage
-              .from(bucketName)
-              .getPublicUrl(filePath)
-
             return {
               name: file.name,
               message: undefined,
-              url: pub.publicUrl
+              path: filePath
             }
           }
 
           if (error) {
-            return { name: file.name, message: error.message, url: undefined }
+            return { name: file.name, message: error.message, path: undefined }
           }
-
-          // Get public URL for successful upload
-          const { data: pub } = supabase.storage
-            .from(bucketName)
-            .getPublicUrl(filePath)
 
           return {
             name: file.name,
             message: undefined,
-            url: pub.publicUrl
+            path: filePath
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Upload failed'
-          return { name: file.name, message: errorMessage, url: undefined }
+          return { name: file.name, message: errorMessage, path: undefined }
         }
       })
     )
@@ -216,11 +230,11 @@ const useHashUpload = (options: UseHashUploadOptions) => {
     )
     setSuccesses(newSuccesses)
 
-    // Store uploaded URLs
-    const newUrls = responseSuccesses
-      .map((x) => x.url)
-      .filter((url): url is string => url !== undefined)
-    setUploadedUrls((prev) => [...prev, ...newUrls])
+    // Store uploaded object paths (private-bucket safe)
+    const newPaths = responseSuccesses
+      .map((x) => x.path)
+      .filter((storedPath): storedPath is string => storedPath !== undefined)
+    setUploadedPaths((prev) => [...prev, ...newPaths])
 
     setLoading(false)
   }, [files, path, bucketName, errors, successes, cacheControl, upsert])
@@ -230,7 +244,7 @@ const useHashUpload = (options: UseHashUploadOptions) => {
       startTransition(() => {
         setErrors([])
         setSuccesses([])
-        setUploadedUrls([])
+        setUploadedPaths([])
       })
     }
 
@@ -259,7 +273,9 @@ const useHashUpload = (options: UseHashUploadOptions) => {
     errors,
     setErrors,
     onUpload,
-    uploadedUrls,
+    uploadedPaths,
+    // Backwards-compatible alias for existing callers.
+    uploadedUrls: uploadedPaths,
     maxFileSize: maxFileSize,
     maxFiles: maxFiles,
     allowedMimeTypes,
