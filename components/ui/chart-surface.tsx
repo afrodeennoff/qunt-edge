@@ -71,13 +71,16 @@ export function ChartSurface({
 
   return (
     <div
-      data-chart-surface="v2"
-      className={cn("h-full flex flex-col bg-transparent", className)}
+      data-chart-surface="modern"
+      className={cn(
+        "h-full flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-border/45 bg-[hsl(var(--surface-1))]/95 shadow-[var(--shadow-sm)]",
+        className
+      )}
     >
       {hasHeader && (
         <div
           className={cn(
-            "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+            "flex flex-col items-stretch space-y-0 border-b border-border/50 shrink-0",
             isSmall ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
             headerClassName
           )}

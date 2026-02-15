@@ -209,7 +209,7 @@ export function UnifiedSidebar({
 
   return (
     <Sidebar collapsible="icon" className={styles.sidebar}>
-      <SidebarHeader className={cn("h-14 flex items-center px-4", styles.header)}>
+      <SidebarHeader className={cn("h-14 flex items-center px-3", styles.header)}>
         <div className="flex items-center gap-2 w-full">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-current/15 bg-current/5">
             <Logo className="size-4.5" />
@@ -218,7 +218,7 @@ export function UnifiedSidebar({
             <p className={cn("truncate text-sm font-semibold tracking-tight", styles.brandName)}>
               Qunt Edge
             </p>
-            <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
+            <p className={cn("truncate text-[10px] uppercase tracking-[0.16em] opacity-60", styles.brandSub)}>Workspace</p>
           </div>
           <SidebarTrigger
             className="ml-auto hidden h-7 w-7 md:inline-flex"
@@ -255,6 +255,7 @@ export function UnifiedSidebar({
                               <Link
                                 href={item.href}
                                 aria-current={itemIsActive ? "page" : undefined}
+                                aria-label={label}
                                 onClick={() => {
                                   if (isMobile) {
                                     setOpenMobile(false)
@@ -262,7 +263,7 @@ export function UnifiedSidebar({
                                 }}
                               >
                                 {item.icon}
-                                <span>{label}</span>
+                                <span className={cn(itemIsActive ? "font-semibold" : "font-medium")}>{label}</span>
                               </Link>
                             </SidebarMenuButton>
                           ) : (
@@ -278,7 +279,7 @@ export function UnifiedSidebar({
                               }}
                             >
                               {item.icon}
-                              <span>{label}</span>
+                              <span className="font-medium">{label}</span>
                             </SidebarMenuButton>
                           )}
                           {item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}

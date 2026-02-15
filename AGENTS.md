@@ -36,6 +36,37 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Full Optimization Pass (UI/UX + Dashboard Server-Shell + Performance Guardrails)
+- **What changed:** Implemented a high-impact optimization pass focused on visual consistency, UX clarity, and frontend performance foundations across dashboard and shared UI primitives.
+- **What I want:** The app should feel premium and readable, with clearer dashboard navigation, lower hydration pressure on core routes, and measurable bundle governance instead of subjective “feels faster” claims.
+- **What I don't want:** Generic-looking surfaces, monolithic client-rendered dashboard entrypoints, typography bloat, and optimization work without enforceable checks.
+- **How we fixed that:**
+  - Added semantic token layer + strict 4px rhythm/typography/radius/shadow primitives in `styles/tokens.css`.
+  - Refined global visual baseline in `app/globals.css`:
+    - stronger semantic typography mapping,
+    - shared surface helpers,
+    - improved negative metric readability (`.metric-negative` opacity/weight),
+    - compatibility for both legacy/new widget shell data attributes.
+  - Standardized UI shell contracts:
+    - upgraded `WidgetShell` and `ChartSurface` container hierarchy/contrast,
+    - normalized `StatsCard` visual style to the new surface system.
+  - Reduced root font payload and simplified typography stack in `app/layout.tsx`:
+    - removed unused `Inter` + `IBM Plex Mono`,
+    - switched to `Geist` + `Geist Mono` + `Manrope` mapping.
+  - Migrated dashboard root route from full client page to server-shell architecture:
+    - `app/[locale]/dashboard/page.tsx` is now server-rendered and tab-sanitized,
+    - created client island `app/[locale]/dashboard/components/dashboard-tab-shell.tsx` with dynamic tab panel loading + clearer top-level tab chips.
+  - Improved nav confidence and interaction semantics in `components/ui/unified-sidebar.tsx` (active label emphasis + better aria labeling).
+  - Reduced production console noise in `components/providers/root-providers.tsx` service-worker registration path.
+  - Added measurable performance governance:
+    - `scripts/analyze-bundle.mjs`,
+    - `scripts/check-route-budgets.mjs`,
+    - new npm scripts: `analyze`, `check:route-budgets`,
+    - artifact output to `docs/audits/artifacts/bundle-summary.json`.
+  - Optimized shared media card image delivery by moving `components/ui/media-card.tsx` from `<img>` to `next/image`.
+- **Key Files:** `styles/tokens.css`, `app/globals.css`, `components/ui/widget-shell.tsx`, `components/ui/chart-surface.tsx`, `components/ui/stats-card.tsx`, `app/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`, `components/ui/unified-sidebar.tsx`, `components/providers/root-providers.tsx`, `components/ui/media-card.tsx`, `scripts/analyze-bundle.mjs`, `scripts/check-route-budgets.mjs`, `package.json`, `AGENTS.md`
+- **Verification:** `npx eslint` on all touched TS/TSX/MJS files passes (CSS files intentionally ignored by ESLint config); `npm run typecheck` passes; `npm run build` passes with full route generation; `node scripts/analyze-bundle.mjs && node scripts/check-route-budgets.mjs` passes and writes `docs/audits/artifacts/bundle-summary.json`.
+
 ### 2026-02-15: Full Dashboard Widget Audit (34 Widgets) + Cross-Widget Visibility Fixes
 - **What changed:** Audited all registered dashboard widgets (34 total) and fixed recurring visibility/UX regressions across chart widgets in one consistency pass.
 - **What I want:** Every widget should present data with clear contrast and consistent empty-state behavior, so users don’t mistake styling inconsistencies for missing data.
@@ -986,3 +1017,14 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Updated `server/layouts.ts` to stop using `x-user-email` as a fallback when ensuring user records.
 - **Key Files:** `app/api/ai/chat/route.ts`, `app/api/ai/editor/route.ts`, `server/subscription.ts`, `server/layouts.ts`, `AGENTS.md`
 - **Verification:** Ran `npx eslint` on touched files (0 errors; existing warning baseline remains).
+
+### 2026-02-15: Widget Data Visibility Debug Badge (`debugData=1`)
+- **What changed:** Added a temporary per-widget debug badge to quickly confirm whether trades are loaded but filtered out before chart rendering.
+- **What I want:** When users report "black widgets with titles only," we should immediately see if the root cause is empty `formattedTrades` (filtering) versus missing raw `trades` (load failure).
+- **What I don't want:** Blind troubleshooting where widget shells render but it is unclear whether data is absent, filtered, or blocked by layout state.
+- **How we fixed that:**
+  - Extended `WidgetCanvas` to read data context counts (`trades`, `formattedTrades`) and active filter signals (`instruments`, `accountNumbers`, `dateRange`).
+  - Added a small overlay badge on each widget card showing `T:<trades> F:<formattedTrades>` with an additional `filtered` indicator when relevant filters are active.
+  - Gated the badge behind query param `?debugData=1` so normal users are unaffected and debugging can be toggled on demand.
+- **Key Files:** `app/[locale]/dashboard/components/widget-canvas.tsx`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets&debugData=1`; confirm each widget shows `T` and `F` counts. If `T>0` and `F=0`, filtering is the direct cause of empty widget bodies.

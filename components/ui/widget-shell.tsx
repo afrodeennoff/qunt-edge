@@ -82,17 +82,20 @@ export function WidgetShell({
   return (
     <Card
       data-widget-shell="v2"
-      className={cn("h-full border-border/60 bg-card/90 backdrop-blur-sm", className)}
+      className={cn(
+        "h-full overflow-hidden border-border/50 bg-[hsl(var(--surface-1))]/95 shadow-[var(--shadow-sm)] backdrop-blur-sm",
+        className
+      )}
     >
       {(title || actions || icon || description) && (
-        <CardHeader className="border-b border-border/60 p-3 sm:p-4">
+        <CardHeader className="border-b border-border/60 px-4 py-3 sm:px-5 sm:py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               {(title || icon) && (
                 <div className="flex items-center gap-2">
                   {icon ? <span className="text-muted-foreground">{icon}</span> : null}
                   {title ? (
-                    <CardTitle className="line-clamp-1 text-sm sm:text-base">{title}</CardTitle>
+                    <CardTitle className="line-clamp-1 text-sm font-semibold text-primary-token sm:text-base">{title}</CardTitle>
                   ) : null}
                   {info ? (
                     <TooltipProvider>
@@ -113,7 +116,7 @@ export function WidgetShell({
                 </div>
               )}
               {description ? (
-                <p className="line-clamp-1 text-xs text-muted-foreground">{description}</p>
+                <p className="line-clamp-1 text-xs text-secondary-token">{description}</p>
               ) : null}
             </div>
             {actions ? <div className="shrink-0">{actions}</div> : null}

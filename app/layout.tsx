@@ -3,7 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
+import { Geist, Geist_Mono, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
@@ -13,16 +13,9 @@ const geist = Geist({
   display: "swap",
 });
 
-const inter = Inter({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-ibm-mono",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -137,7 +130,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} bg-background`}
+      className={`${geist.variable} ${geistMono.variable} ${manrope.variable} bg-background`}
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning
@@ -211,7 +204,7 @@ export default function RootLayout({
 
       </head>
       <body
-        className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}
+        className={`${geist.variable} ${geistMono.variable} font-sans antialiased text-foreground`}
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardProps } from "./card"
 import { Badge } from "./badge"
@@ -65,9 +66,11 @@ const MediaCard = React.forwardRef<HTMLDivElement, MediaCardProps>(
       {...props}
     >
       <div className={cn("relative overflow-hidden bg-muted", aspectClasses[imageAspect])} aria-hidden="true">
-        <img
+        <Image
           src={image}
-          alt=""
+          alt={title}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
         />
         {badges && badges.length > 0 && (

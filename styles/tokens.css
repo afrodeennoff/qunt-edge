@@ -6,6 +6,44 @@
 
 @layer base {
   :root {
+    /* ===== OPTIMIZATION PASS: SEMANTIC CORE TOKENS ===== */
+    --bg: 0 0% 0%;
+    --surface-1: 0 0% 4%;
+    --surface-2: 0 0% 7%;
+    --text-primary: 0 0% 97%;
+    --text-secondary: 0 0% 68%;
+    --accent-1: 0 0% 100%;
+    --accent-2: 0 0% 82%;
+    --success: 0 0% 88%;
+    --warning: 0 0% 66%;
+    --danger: 0 0% 42%;
+
+    /* ===== 4PX RHYTHM SPACING SCALE ===== */
+    --space-1: 0.25rem;  /* 4px */
+    --space-2: 0.5rem;   /* 8px */
+    --space-3: 0.75rem;  /* 12px */
+    --space-4: 1rem;     /* 16px */
+    --space-5: 1.25rem;  /* 20px */
+    --space-6: 1.5rem;   /* 24px */
+    --space-8: 2rem;     /* 32px */
+    --space-10: 2.5rem;  /* 40px */
+    --space-12: 3rem;    /* 48px */
+
+    /* ===== PRODUCT TYPO SCALE (5 LEVELS) ===== */
+    --type-xs: 0.75rem;
+    --type-sm: 0.875rem;
+    --type-md: 1rem;
+    --type-lg: 1.125rem;
+    --type-xl: 1.5rem;
+
+    /* ===== RADIUS + SHADOW SYSTEM ===== */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.28);
+    --shadow-md: 0 8px 18px -12px rgb(0 0 0 / 0.55);
+    --shadow-lg: 0 18px 28px -16px rgb(0 0 0 / 0.7);
+
     /* ===== GLOBAL BRAND COLORS ===== */
     --brand-primary: 0 0% 100%;
     --brand-primary-strong: 0 0% 90%;
