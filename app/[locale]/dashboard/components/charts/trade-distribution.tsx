@@ -168,7 +168,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                         />
                       ))}
                     </Pie>
-                    <Tooltip content={renderTooltip} cursor={{ fill: 'transparent' }} />
+                    <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
