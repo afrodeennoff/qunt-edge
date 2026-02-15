@@ -2,11 +2,12 @@ import 'server-only'
 import Whop from "@whop/sdk";
 
 let whopInstance: Whop | null = null;
+const isProductionBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
 export const getWhop = () => {
   if (!whopInstance) {
     const apiKey = process.env.WHOP_API_KEY;
-    if (!apiKey && process.env.NODE_ENV === 'production') {
+    if (!apiKey && process.env.NODE_ENV === 'production' && !isProductionBuildPhase) {
       console.warn("WHOP_API_KEY is missing in production!");
     }
     whopInstance = new Whop({
@@ -16,8 +17,12 @@ export const getWhop = () => {
   return whopInstance;
 };
 
-// Default export for convenience
-export const whop = getWhop();
+// Lazy proxy avoids eager SDK initialization during app boot/build import.
+export const whop = new Proxy({} as Whop, {
+  get(_target, property, receiver) {
+    return Reflect.get(getWhop() as unknown as object, property, receiver);
+  },
+});
 
 export const parseWhopDate = (value: string | number | null | undefined): Date | undefined => {
   if (value === null || value === undefined) return undefined;

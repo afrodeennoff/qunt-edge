@@ -36,6 +36,23 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Runtime Security Hardening (TLS Override Removal + Lazy Key Warnings)
+- **What changed:** Hardened runtime/build security defaults by removing global TLS bypass behavior and reducing noisy module-import warnings for optional provider keys.
+- **What I want:** Production builds should not silently disable TLS certificate checks globally, and missing optional provider keys should only surface when relevant functionality is actually used.
+- **What I don't want:** Build-time security anti-patterns (`NODE_TLS_REJECT_UNAUTHORIZED=0`) or misleading warning spam triggered by module imports during static generation.
+- **How we fixed that:**
+  - Updated `build` script in `package.json` to explicitly unset `NODE_TLS_REJECT_UNAUTHORIZED` before running Next build.
+  - Removed `NODE_TLS_REJECT_UNAUTHORIZED="0"` from `.env` and `.env.local`.
+  - Updated Prisma TLS policy in `lib/prisma.ts`:
+    - `PGSSL_REJECT_UNAUTHORIZED` now defaults to secure behavior in production unless explicitly overridden,
+    - added explicit warning when insecure DB cert mode is intentionally enabled.
+  - Refactored AI client warnings in `lib/ai/client.ts` from import-time to lazy one-time warnings when models are requested.
+  - Refactored Whop client initialization in `lib/whop.ts`:
+    - suppressed missing-key warning during Next production build phase,
+    - switched exported `whop` to lazy proxy to avoid eager SDK initialization at import.
+- **Key Files:** `package.json`, `.env`, `.env.local`, `lib/prisma.ts`, `lib/ai/client.ts`, `lib/whop.ts`, `AGENTS.md`
+- **Verification:** `npm run typecheck` passes; `npm run build` passes; build no longer prints the global `NODE_TLS_REJECT_UNAUTHORIZED=0` warning; Prisma now emits a targeted warning only when `PGSSL_REJECT_UNAUTHORIZED=false` remains configured.
+
 ### 2026-02-15: Full Optimization Pass (UI/UX + Dashboard Server-Shell + Performance Guardrails)
 - **What changed:** Implemented a high-impact optimization pass focused on visual consistency, UX clarity, and frontend performance foundations across dashboard and shared UI primitives.
 - **What I want:** The app should feel premium and readable, with clearer dashboard navigation, lower hydration pressure on core routes, and measurable bundle governance instead of subjective “feels faster” claims.

@@ -88,8 +88,8 @@ const shouldEnableSsl = (connectionString: string): boolean => {
 
 const shouldRejectUnauthorized = (): boolean => {
   const override = parseBooleanEnv(process.env.PGSSL_REJECT_UNAUTHORIZED)
-  // Default to false for serverless poolers to avoid self-signed chain failures.
-  return override ?? false
+  // Secure-by-default in production. Opt out explicitly with PGSSL_REJECT_UNAUTHORIZED=false.
+  return override ?? isProduction
 }
 
 // Runtime should prefer pooled DATABASE_URL (Supabase pooler).
@@ -111,6 +111,12 @@ const poolConfig: pg.PoolConfig = {
 
 if (shouldEnableSsl(connectionString)) {
   poolConfig.ssl = { rejectUnauthorized: shouldRejectUnauthorized() }
+  if (isProduction && poolConfig.ssl.rejectUnauthorized === false) {
+    console.warn(
+      "[Prisma] SSL certificate verification is disabled (PGSSL_REJECT_UNAUTHORIZED=false). " +
+      "Enable certificate verification in production unless your provider explicitly requires insecure TLS."
+    )
+  }
 }
 
 const pool = globalForPrisma.pool ?? new pg.Pool(poolConfig)
