@@ -191,6 +191,10 @@ export interface DataContextType {
   // Dashboard layout
   saveDashboardLayout: (layout: PrismaDashboardLayout) => Promise<void>;
 }
+
+export interface DataProviderInitialData {
+  dashboardLayout?: DashboardLayoutWithWidgets | null;
+}
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Add this hook before the UserDataProvider component
@@ -226,7 +230,8 @@ export const DataProvider: React.FC<{
   adminView?: {
     userId: string;
   };
-}> = ({ children, isSharedView = false, adminView = null }) => {
+  initialData?: DataProviderInitialData;
+}> = ({ children, isSharedView = false, adminView = null, initialData }) => {
   const router = useRouter();
   const params = useParams();
   const isMobile = useIsMobileDetection();
@@ -255,6 +260,7 @@ export const DataProvider: React.FC<{
   const locale = useCurrentLocale();
   const isLoading = useUserStore((state) => state.isLoading);
   const setIsLoading = useUserStore((state) => state.setIsLoading);
+  const initialDashboardLayout = initialData?.dashboardLayout ?? null;
 
   // Subscription store
   const setSubscriptionData = useSubscriptionStore(
@@ -290,6 +296,14 @@ export const DataProvider: React.FC<{
   const [hourFilter, setHourFilter] = useState<HourFilter>({ hour: null });
   const [tagFilter, setTagFilter] = useState<TagFilter>({ tags: [] });
   const [isFirstConnection, setIsFirstConnection] = useState(false);
+
+  useEffect(() => {
+    if (!initialDashboardLayout || dashboardLayout) {
+      return;
+    }
+
+    setDashboardLayout(initialDashboardLayout);
+  }, [dashboardLayout, initialDashboardLayout, setDashboardLayout]);
 
   const withTimeout = useCallback(
     async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
@@ -447,6 +461,9 @@ export const DataProvider: React.FC<{
       // CRITICAL: Get dashboard layout first
       // But check if the layout is already in the state
       if (!dashboardLayout) {
+        if (initialDashboardLayout) {
+          setDashboardLayout(initialDashboardLayout);
+        } else {
         const userId = await withTimeout(getUserId(), 15000, "getUserId(for layout)");
         const dashboardLayoutResponse = await withTimeout(
           getDashboardLayout(userId),
@@ -460,6 +477,7 @@ export const DataProvider: React.FC<{
         } else {
           // If no layout exists in database, use default layout
           setDashboardLayout(defaultLayouts);
+        }
         }
       }
 
@@ -591,6 +609,8 @@ export const DataProvider: React.FC<{
     fetchAllTrades,
     setIsLoading,
     withTimeout,
+    initialDashboardLayout,
+    dashboardLayout,
   ]);
 
   // Load data on mount and when isSharedView changes

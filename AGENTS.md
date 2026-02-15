@@ -1191,3 +1191,35 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Reduced default production pool size to `1` during build phase while keeping normal production runtime defaults unchanged.
 - **Key Files:** `lib/prisma.ts`, `AGENTS.md`
 - **Verification:** `npx eslint lib/prisma.ts` (clean), `npm run build` (pass) with Prisma build-time logs reduced.
+
+### 2026-02-15: Next.js Optimization Wave (Provider Scope Split + Home Lazy Boundaries + Cache/CI Guardrails)
+- **What changed:** Implemented a low-risk optimization wave across provider scoping, dashboard initial-layout hydration handoff, home-section lazy loading, route/cache policy tightening, and CI performance/monitoring guardrails.
+- **What I want:** Reduce unnecessary hydration on public routes, keep dashboard/auth experiences stable, enforce measurable perf gates in CI, and standardize cache behavior by route family without changing product behavior.
+- **What I don't want:** Global provider overhead on every locale route, avoidable dashboard client waterfalls, ad-hoc cache semantics on API routes, and perf regressions slipping through PRs.
+- **How we fixed that:**
+  - Split global and protected providers:
+    - `RootProviders` now keeps only global UI concerns (`Tooltip`, `Theme`, `Sidebar`, service-worker registration).
+    - Added `ProtectedRouteProviders` (`QueryProvider` + `AuthTimeout`) and applied to protected layouts (`dashboard`, `teams/manage`, `teams/dashboard`, `admin`).
+  - Added dashboard initial hydration contract:
+    - `DataProvider` now accepts `initialData` with optional `dashboardLayout`.
+    - `DashboardLayout` preloads `getDashboardLayout(user.id)` server-side and passes it into `DashboardProviders` to reduce first-load layout fetch waterfall.
+    - Marked dashboard route surfaces explicitly dynamic (`export const dynamic = "force-dynamic"` in layout/page).
+  - Improved home route strategy:
+    - Added ISR for public home route (`export const revalidate = 3600` in `app/[locale]/(home)/page.tsx`).
+    - Converted `DeferredHomeSections` to dynamic section loading with skeleton fallbacks for non-critical below-fold sections.
+  - Cache policy hardening:
+    - Added default `no-store` header for `/api/:path*` in `next.config.ts`.
+    - Added short public cache policy for health endpoint (`/api/health`: `max-age=15`, `stale-while-revalidate=60`).
+  - Asset/script compliance updates:
+    - Migrated dropzone thumbnail preview from `<img>` to `next/image` (with `unoptimized` for local previews).
+    - Updated non-critical PostHog script strategy reference to `lazyOnload` in `app/layout.tsx`.
+  - CI/monitoring guardrails:
+    - Updated perf workflow to run canonical `npm run perf:check`.
+    - Added new Lighthouse CI workflow (`.github/workflows/lighthouse-ci.yml`) for home/dashboard smoke URLs.
+- **Key Files:** `components/providers/root-providers.tsx`, `components/providers/protected-route-providers.tsx`, `components/providers/dashboard-providers.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `context/data-provider.tsx`, `app/[locale]/teams/manage/layout.tsx`, `app/[locale]/teams/dashboard/layout.tsx`, `app/[locale]/admin/layout.tsx`, `app/[locale]/(home)/components/DeferredHomeSections.tsx`, `app/[locale]/(home)/page.tsx`, `next.config.ts`, `app/api/health/route.ts`, `components/ui/dropzone.tsx`, `app/layout.tsx`, `.github/workflows/perf-quality.yml`, `.github/workflows/lighthouse-ci.yml`, `AGENTS.md`
+- **Verification:**
+  - `npm run check:route-budgets` passes.
+  - `node scripts/analyze-bundle.mjs` writes `docs/audits/artifacts/bundle-summary.json`.
+  - `npm run typecheck` passes.
+  - `npm run perf:check` passes (build + route budgets + bundle analysis).
+  - `npx eslint` on all touched code/config files passes with warnings only and no errors.

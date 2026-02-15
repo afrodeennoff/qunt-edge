@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { type UseSupabaseUploadReturn } from '@/hooks/use-supabase-upload'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, File, Loader2, Upload, X } from 'lucide-react'
+import Image from 'next/image'
 import { createContext, type PropsWithChildren, useCallback, useContext } from 'react'
 import { useI18n } from '@/locales/client'
 
@@ -108,9 +109,16 @@ const DropzoneContent = ({ className }: { className?: string }) => {
             key={`${file.name}-${idx}`}
             className="flex items-center gap-x-4 border-b py-2 first:mt-4 last:mb-4 "
           >
-            {file.type.startsWith('image/') ? (
-              <div className="h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
-                <img src={file.preview} alt={file.name} className="object-cover" />
+            {file.type.startsWith('image/') && file.preview ? (
+              <div className="relative h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+                <Image
+                  src={file.preview}
+                  alt={file.name}
+                  fill
+                  unoptimized
+                  sizes="40px"
+                  className="object-cover"
+                />
               </div>
             ) : (
               <div className="h-10 w-10 rounded border bg-muted flex items-center justify-center">

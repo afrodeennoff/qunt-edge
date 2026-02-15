@@ -4,6 +4,8 @@ import { getStaticParams } from "@/locales/server";
 import HomeContent from "./components/HomeContent";
 import { Metadata } from 'next';
 
+export const revalidate = 3600;
+
 export function generateStaticParams() {
     return getStaticParams();
 }
