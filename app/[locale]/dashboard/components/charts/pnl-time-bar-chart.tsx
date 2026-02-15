@@ -244,24 +244,17 @@ export default function TimeOfDayTradeChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.hour}`}
-                      fill="white"
+                      fill={entry.avgPnl >= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         hourFilter.hour === entry.hour
                           ? 1
                           : hourFilter.hour !== null
-                            ? 0.15
-                            : (entry.avgPnl >= 0 ? 0.98 : 0.22)
+                            ? 0.3
+                            : 1
                       }
-                      stroke="white"
-                      strokeOpacity={
-                        hourFilter.hour === entry.hour
-                          ? 0.8
-                          : hourFilter.hour !== null
-                            ? 0.1
-                            : (entry.avgPnl >= 0 ? 0.42 : 0.06)
-                      }
+                      stroke="none"
                       className={cn(
-                        "hover:fill-opacity-100 transition-all duration-300",
+                        "hover:brightness-110 transition-all duration-300",
                         entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />

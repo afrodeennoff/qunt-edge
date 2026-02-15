@@ -192,10 +192,11 @@ export default function CommissionsPnLChart({
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
-                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
+                          fill={entry.name === t("commissions.legend.netPnl") ? "white" : "#52525B"}
+                          fillOpacity={1}
+                          stroke="none"
                           className={cn(
-                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                            "hover:brightness-110 transition-all duration-300",
                             entry.name === t("commissions.legend.netPnl") ? "chart-positive-emphasis" : "chart-negative-muted"
                           )}
                         />
@@ -214,7 +215,7 @@ export default function CommissionsPnLChart({
                   {t("commissions.legend.netPnl")}
                 </span>
                 <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-white/58">
-                  <span className="h-3 w-3 rounded-full bg-white/35" />
+                  <span className="h-3 w-3 rounded-full bg-[#52525B]" />
                   {t("commissions.legend.commissions")}
                 </span>
               </div>

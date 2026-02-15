@@ -293,12 +293,17 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.range}`}
-                      fill="white"
-                      fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : (entry.avgPnl >= 0 ? 0.98 : 0.22))}
-                      stroke="white"
-                      strokeOpacity={timeRange.range === entry.range ? 1 : (entry.avgPnl >= 0 ? 0.42 : 0.06)}
+                      fill={entry.avgPnl >= 0 ? "white" : "#52525B"}
+                      fillOpacity={
+                        timeRange.range === entry.range
+                          ? 1
+                          : timeRange.range
+                            ? 0.3
+                            : 1
+                      }
+                      stroke="none"
                       className={cn(
-                        "hover:opacity-100",
+                        "hover:brightness-110 transition-all duration-300",
                         entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />

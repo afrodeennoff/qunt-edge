@@ -272,20 +272,15 @@ export default function WeekdayPNLChart({
                   {weekdayData.map((entry) => (
                     <Cell
                       key={`cell-${entry.day}`}
-                      fill="white"
+                      fill={entry.pnl >= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
-                          : (entry.pnl >= 0 ? 0.98 : 0.22)
+                          : 1
                       }
-                      stroke="white"
-                      strokeOpacity={
-                        weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
-                          ? 0.3
-                          : (entry.pnl >= 0 ? 0.42 : 0.06)
-                      }
+                      stroke="none"
                       className={cn(
-                        "hover:opacity-100",
+                        "hover:brightness-110 transition-all duration-300",
                         entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
