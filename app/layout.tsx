@@ -3,21 +3,8 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import { Geist, Geist_Mono } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -124,7 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable} bg-background`}
+      className="bg-background"
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning
@@ -198,7 +185,7 @@ export default function RootLayout({
 
       </head>
       <body
-        className={`${geist.variable} ${geistMono.variable} font-sans antialiased text-foreground`}
+        className="font-sans antialiased text-foreground"
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />

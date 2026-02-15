@@ -151,6 +151,8 @@
 
 @layer base {
   :root {
+    --font-geist: "Inter", "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-geist-mono: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
     --card: 0 0% 3%;
