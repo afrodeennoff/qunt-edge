@@ -209,15 +209,15 @@ export default function CommissionsPnLChart({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex items-center justify-center gap-4 pb-1 pt-1">
-                <span className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
+              <div className="flex flex-col items-center gap-2 pb-1 pt-1">
+                <div className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
                   <span className="h-3 w-3 rounded-full bg-white" />
-                  {t("commissions.legend.netPnl")}
-                </span>
-                <span className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
+                  <span className="whitespace-nowrap">{t("commissions.legend.netPnl")}</span>
+                </div>
+                <div className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
                   <span className="h-3 w-3 rounded-full bg-[#52525B]" />
-                  {t("commissions.legend.commissions")}
-                </span>
+                  <span className="whitespace-nowrap">{t("commissions.legend.commissions")}</span>
+                </div>
               </div>
             </>
           ) : (

@@ -237,8 +237,8 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                 data={chartData}
                 margin={
                   size === 'small'
-                    ? { left: 0, right: 0, top: 4, bottom: 14 }
-                    : { left: 0, right: 0, top: 8, bottom: 14 }
+                    ? { left: 0, right: 0, top: 4, bottom: 8 }
+                    : { left: 0, right: 0, top: 8, bottom: 8 }
                 }
               >
                 <CartesianGrid
