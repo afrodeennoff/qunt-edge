@@ -54,9 +54,9 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: '#f1f1f2', count: nbWin, total: nbTrades },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: '#4d4f56', count: nbBe, total: nbTrades },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: '#767982', count: nbLoss, total: nbTrades },
+      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: '#FFFFFF', count: nbWin, total: nbTrades },
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: '#4D4F56', count: nbBe, total: nbTrades },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: '#52525B', count: nbLoss, total: nbTrades },
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
@@ -163,10 +163,11 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                         <Cell
                           key={`cell-${index}`}
                           fill={entry.color}
-                          fillOpacity={entry.color === '#f1f1f2' ? 0.95 : 1}
+                          fillOpacity={1}
+                          stroke="none"
                           className={cn(
-                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
-                            entry.color === "#f1f1f2" ? "chart-positive-emphasis" : "chart-negative-muted"
+                            "transition-all duration-300 ease-in-out hover:brightness-110",
+                            entry.color === "#FFFFFF" ? "chart-positive-emphasis" : "chart-negative-muted"
                           )}
                         />
                       ))}

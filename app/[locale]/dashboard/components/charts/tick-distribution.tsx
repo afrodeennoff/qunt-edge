@@ -260,19 +260,17 @@ export default function TickDistributionChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.ticks}`}
-                      fill="white"
+                      fill={parseInt(entry.ticks) >= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         tickFilter.value === entry.ticks
                           ? 1
                           : tickFilter.value
-                            ? 0.1
-                            : parseInt(entry.ticks) >= 0 ? 0.98 : 0.22
+                            ? 0.3
+                            : 1
                       }
-                      stroke="white"
-                      strokeOpacity={parseInt(entry.ticks) >= 0 ? 0.42 : 0.06}
-                      strokeWidth={1}
+                      stroke="none"
                       className={cn(
-                        "hover:fill-opacity-100 transition-all duration-300",
+                        "hover:brightness-110 transition-all duration-300",
                         parseInt(entry.ticks) >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />

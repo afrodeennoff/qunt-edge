@@ -247,13 +247,11 @@ export default function PnLPerContractChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="white"
-                      fillOpacity={entry.averagePnl >= 0 ? 0.98 : 0.22}
-                      stroke="white"
-                      strokeOpacity={entry.averagePnl >= 0 ? 0.42 : 0.06}
-                      strokeWidth={1}
+                      fill={entry.averagePnl >= 0 ? "white" : "#52525B"}
+                      fillOpacity={1}
+                      stroke="none"
                       className={cn(
-                        "hover:fill-opacity-100 transition-all duration-300",
+                        "hover:brightness-110 transition-all duration-300",
                         entry.averagePnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
