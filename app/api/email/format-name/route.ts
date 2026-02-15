@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { openai } from "@ai-sdk/openai"
 import { generateText, Output } from "ai"
 import { z } from "zod"
 
@@ -17,7 +16,18 @@ const nameInferenceSchema = z.object({
 // Allow longer processing time for batch operations
 export const maxDuration = 60
 
+function isAuthorizedInternalRequest(req: NextRequest): boolean {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = req.headers.get("authorization")
+  return authHeader === `Bearer ${cronSecret}`
+}
+
 export async function POST(req: NextRequest) {
+  if (!isAuthorizedInternalRequest(req)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
     const body = await req.json()
     const { batchSize = 10, forceUpdate = false, emails: targetEmails }: { batchSize?: number, forceUpdate?: boolean, emails?: string[] } = body
@@ -177,6 +187,10 @@ Return the inferred names with confidence levels:
 
 // GET endpoint to check how many subscribers need name inference
 export async function GET(req: NextRequest) {
+  if (!isAuthorizedInternalRequest(req)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
     const { searchParams } = new URL(req.url)
     const forceUpdate = searchParams.get('forceUpdate') === 'true'

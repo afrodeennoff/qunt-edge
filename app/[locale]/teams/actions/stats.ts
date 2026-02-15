@@ -3,6 +3,7 @@
 import { createClient as createSupabaseClient, User } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
 import { createClient as createServerClient } from '@/server/auth'
+import { assertAdminAccess } from '@/server/authz'
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -66,6 +67,7 @@ const toIsoDateKey = (value: Date | string): string =>
   new Date(value).toISOString().slice(0, 10)
 
 export async function getUserStats() {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   let allUsers: any[] = []
   let page = 1
@@ -118,6 +120,7 @@ export async function getUserStats() {
 }
 
 export async function getTradeStats() {
+  await assertAdminAccess()
   const trades = await prisma.trade.findMany({
     select: {
       createdAt: true
@@ -147,6 +150,7 @@ export async function getTradeStats() {
 }
 
 export async function getFreeUsers() {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   console.log('Starting getFreeUsers function')
 
@@ -215,6 +219,7 @@ export async function getFreeUsers() {
 }
 
 export async function getUserEquityData(page: number = 1, limit: number = 10) {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   console.log('Starting getUserEquityData function')
 
@@ -365,6 +370,7 @@ export async function getUserEquityData(page: number = 1, limit: number = 10) {
 }
 
 export async function getIndividualUserEquityData(userId: string) {
+  await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
   console.log(`Starting getIndividualUserEquityData for user ${userId}`)
 

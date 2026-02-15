@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { verifyUnsubscribeToken } from "@/lib/unsubscribe-token"
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
+    const token = searchParams.get('token')
 
-    if (!email) {
+    if (!email || !token) {
       return NextResponse.json(
-        { error: 'Email parameter is required' },
-        { status: 400 }
+        { error: 'Invalid unsubscribe link' },
+        { status: 401 }
+      )
+    }
+
+    if (!verifyUnsubscribeToken(token, email)) {
+      return NextResponse.json(
+        { error: 'Invalid or expired unsubscribe token' },
+        { status: 401 }
       )
     }
 

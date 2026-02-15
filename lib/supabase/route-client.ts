@@ -31,7 +31,13 @@ export function createRouteClient(request: Request) {
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
-  // Match server/auth.ts behavior: allow running in dev/test without full env.
+  // Fail closed in production; only allow local defaults in non-production.
+  if (!url || !key) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Missing Supabase environment variables for route client");
+    }
+  }
+
   const resolvedUrl = url || "http://127.0.0.1:54321";
   const resolvedKey = key || "dummy-anon-key";
 
@@ -49,4 +55,3 @@ export function createRouteClient(request: Request) {
     },
   });
 }
-

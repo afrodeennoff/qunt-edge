@@ -36,6 +36,112 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-16: Bank-Grade Security Hardening Pass (API + Supabase RLS + Access Controls)
+- **What changed:** Executed a comprehensive security hardening pass across backend API surfaces and Supabase data access controls with defense-in-depth defaults.
+- **What I want:** User data and operational endpoints should be protected by strict authentication, signed action links, fail-closed secrets, and enforced least-privilege access at the database layer.
+- **What I don't want:** Unauthenticated mutation endpoints, fail-open secret checks, public unsubscribe abuse, indirect ownership tables missing user-scoped policies, or DB table-owner RLS bypass paths.
+- **How we fixed that:**
+  - Hardened high-risk API routes:
+    - `app/api/email/format-name/route.ts`: now requires internal bearer authorization (`CRON_SECRET`) for both `GET` and `POST`.
+    - `app/api/email/unsubscribe/route.ts`: replaced email-only unsubscribe with signed-token validation.
+    - `app/api/email/weekly-summary/[userid]/route.ts`: fail-closed cron secret check + removed stack trace exposure in API responses.
+    - `app/api/email/welcome/route.ts`: webhook auth now fails closed when secret missing.
+    - `app/api/cron/route.ts`, `app/api/cron/renewal-notice/route.ts`, `app/api/cron/renew-tradovate-token/route.ts`: explicit `CRON_SECRET` presence checks to prevent `Bearer undefined` bypass conditions.
+  - Added signed unsubscribe utility:
+    - `lib/unsubscribe-token.ts` provides HMAC-based token issuance/verification (expiry + constant-time signature comparison).
+    - Updated email send paths to include signed unsubscribe URLs in headers.
+  - Hardened privileged team stats server actions:
+    - `app/[locale]/teams/actions/stats.ts` now gates global/service-role analytics actions with `assertAdminAccess()` for admin-only execution.
+  - Strengthened Supabase DB posture:
+    - ensured RLS is enabled and **forced** (`FORCE ROW LEVEL SECURITY`) on all `public` tables,
+    - expanded authenticated user-scope policies to indirect ownership tables (`BusinessInvitation`, `BusinessManager`, `LayoutVersion`, `Payout`, `TeamAnalytics`, `TeamInvitation`, `TeamManager`, `TradeAnalytics`),
+    - revoked `anon`/`authenticated` grants from system/non-user tables (`FinancialEvent`, `HistoricalData`, `Newsletter`, `Organization`, `ProcessedWebhook`, `Promotion`, `SubscriptionFeedback`, `TickDetails`, `_UserOrganizations`, `_prisma_migrations`).
+- **Key Files:** `app/api/email/format-name/route.ts`, `app/api/email/unsubscribe/route.ts`, `app/api/email/welcome/route.ts`, `app/api/email/weekly-summary/[userid]/route.ts`, `app/api/cron/route.ts`, `app/api/cron/renewal-notice/route.ts`, `app/api/cron/renew-tradovate-token/route.ts`, `app/[locale]/teams/actions/stats.ts`, `lib/unsubscribe-token.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint` on touched files -> warnings-only, no errors.
+  - `npm run typecheck` -> exits `0`.
+  - Supabase checks:
+    - all `public` tables report `rls_enabled=true` and `rls_forced=true`,
+    - targeted system tables show no remaining `anon`/`authenticated` grants,
+    - security advisor reduced to one platform setting warning only:
+      - leaked password protection disabled.
+
+### 2026-02-16: Full Database Audit (User-Specific Access Coverage)
+- **What changed:** Performed a full Supabase database audit across all `public` tables and upgraded user-specific RLS coverage wherever ownership could be derived directly or through parent relations.
+- **What I want:** Every table that can be tied to an authenticated user should enforce user-scoped access under RLS, including relation-only tables that do not store `userId` directly.
+- **What I don't want:** RLS enabled but practically service-role-only access on tables that are still user-owned through parent links (`teamId`, `businessId`, `layoutId`, `accountId`, `tradeId`).
+- **How we fixed that:**
+  - Audited:
+    - table-level RLS status,
+    - full policy inventory (`pg_policies`),
+    - direct ownership columns (`userId`, `auth_user_id`),
+    - FK graph to detect derivable ownership paths.
+  - Added authenticated user-scoped policies for indirect ownership tables:
+    - `BusinessInvitation` via `Business.userId`,
+    - `BusinessManager` via `Business.userId`,
+    - `LayoutVersion` via `DashboardLayout.userId`,
+    - `Payout` via `Account.userId`,
+    - `TeamAnalytics` via `Team.userId`,
+    - `TeamInvitation` via `Team.userId`,
+    - `TeamManager` via `Team.userId`,
+    - `TradeAnalytics` via `Trade.userId`.
+  - Kept `service_role_all` policies for backend/system workflows.
+  - Re-validated security advisor and policy inventory after migration.
+- **Key Files:** `AGENTS.md` (database changes applied via Supabase migrations)
+- **Verification:**
+  - All `public` tables now have `rowsecurity = true`.
+  - Authenticated-scope policy coverage expanded to all user-derivable tables listed above.
+  - Remaining tables without authenticated policies are system/global by design (`FinancialEvent`, `HistoricalData`, `Newsletter`, `Organization`, `ProcessedWebhook`, `Promotion`, `SubscriptionFeedback`, `TickDetails`, `_UserOrganizations`, `_prisma_migrations`).
+  - Supabase security advisor now reports only one auth setting warning:
+    - leaked password protection disabled.
+
+### 2026-02-16: Supabase Hardening Pass (RLS Baseline + Client Env Fail-Closed)
+- **What changed:** Completed a Supabase-focused hardening pass across project security posture and app-side Supabase client configuration.
+- **What I want:** Public API exposure through PostgREST should be guarded by RLS/policies by default, and Supabase clients should fail closed in production when required env is missing.
+- **What I don't want:** Public tables reachable without RLS, sensitive columns exposed through Supabase API, or production silently using fallback/dummy Supabase client credentials.
+- **How we fixed that:**
+  - Applied Supabase migrations to enforce baseline RLS:
+    - enabled RLS on exposed `public` tables,
+    - added `service_role` full-access policy (`service_role_all`) for backend/admin operations,
+    - added authenticated owner policy (`authenticated_owner`) for tables with `userId`,
+    - added authenticated owner policy for `public."User"` using `auth_user_id`,
+    - optimized policy expressions to use `(select auth.uid())` to resolve `auth_rls_initplan` warnings.
+  - Added FK coverage indexes flagged by Supabase advisor:
+    - `Account_userId_idx`,
+    - `Payout_accountId_idx`,
+    - `Trade_accountNumber_userId_idx`.
+  - Hardened app-side Supabase client env behavior:
+    - `lib/supabase/route-client.ts` now throws in production if Supabase env vars are missing (non-production still allows local test fallback),
+    - `lib/supabase.ts` now throws in production if Supabase public env vars are missing instead of constructing empty-client config.
+  - Re-ran Supabase advisors after migration to confirm security posture shift.
+- **Key Files:** `lib/supabase/route-client.ts`, `lib/supabase.ts`, `AGENTS.md`
+- **Verification:**
+  - Supabase advisor (`security`) now reports only one remaining warning:
+    - leaked password protection disabled (`auth_leaked_password_protection`).
+  - Supabase advisor (`performance`) no longer reports:
+    - unindexed FK warnings for `Account_userId_fkey`, `Payout_accountId_fkey`, `Trade_accountNumber_userId_fkey`,
+    - `auth_rls_initplan` warnings for owner policies.
+  - `npx eslint lib/supabase.ts lib/supabase/route-client.ts` exits `0`.
+  - `npm run typecheck` exits `0`.
+
+### 2026-02-16: Backend Audit (Auth Surface + Public Endpoint Abuse Risks)
+- **What changed:** Completed a backend-focused audit pass across API routes, server actions, and backend utility modules; validated findings with lint/typecheck/test/build quality gates.
+- **What I want:** Sensitive backend routes should require explicit authorization, cron handlers should fail closed when secrets are missing, and error responses should not leak internal stack traces.
+- **What I don't want:** Public callers being able to trigger privileged newsletter/AI operations, silent auth bypass under env misconfiguration, or production responses exposing internals.
+- **How we fixed that:**
+  - Audit-only pass in this task (no functional code changes applied yet).
+  - Confirmed high-risk unauthenticated mutation/read endpoint in `app/api/email/format-name/route.ts` (database reads/writes + AI invocation + result disclosure without auth checks).
+  - Confirmed insecure unsubscribe flow in `app/api/email/unsubscribe/route.ts` (email-only query parameter allows third-party unsubscribe requests).
+  - Confirmed cron auth guard weakness in routes that compare directly against ``Bearer ${process.env.CRON_SECRET}`` without first validating secret presence.
+  - Confirmed stack trace disclosure in weekly summary API error payload.
+  - Captured backend quality-gate status for prioritization.
+- **Key Files:** `app/api/email/format-name/route.ts`, `app/api/email/unsubscribe/route.ts`, `app/api/cron/route.ts`, `app/api/cron/renewal-notice/route.ts`, `app/api/cron/renew-tradovate-token/route.ts`, `app/api/email/weekly-summary/[userid]/route.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint server app/api lib --max-warnings=999999` -> exits `0` (`287` warnings, `0` errors).
+  - `npm run typecheck` -> exits `0`.
+  - `npm test` -> exits `0` (`101 passed | 46 skipped`).
+  - `npm run build` -> exits `0` with full route generation.
+
 ### 2026-02-15: Widget Blank-State Root Cause Fix (IndexedDB Trade Cache Normalization)
 - **What changed:** Fixed a data-shape regression where dashboard charts could render blank despite visible trade counts due to stale cached trade payloads entering state without normalization.
 - **What I want:** Widgets should always receive normalized numeric/date trade fields, whether trades come from live fetches or IndexedDB cache.

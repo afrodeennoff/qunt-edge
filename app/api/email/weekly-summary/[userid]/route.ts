@@ -5,16 +5,21 @@ import MissingYouEmail from "@/components/emails/missing-data"
 import { render } from "@react-email/render"
 import { generateTradingAnalysis } from "./actions/analysis"
 import { getUserData, computeTradingStats } from "./actions/user-data"
-import { Resend } from "resend"
+import { createUnsubscribeToken } from "@/lib/unsubscribe-token"
 
 export async function POST(req: Request, props: { params: Promise<{ userid: string }> }) {
   const params = await props.params;
   try {
+    const cronSecret = process.env.CRON_SECRET
+    if (!cronSecret) {
+      return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 })
+    }
+
     // Verify that this is a legitimate request with the correct secret
     const headersList = await headers()
     const authHeader = headersList.get('authorization')
 
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -59,7 +64,8 @@ export async function POST(req: Request, props: { params: Promise<{ userid: stri
       ? baseUrl
       : `http://${baseUrl}`
 
-    const unsubscribeUrl = `${apiUrl}/api/email/unsubscribe?email=${encodeURIComponent(user.email)}`
+    const unsubscribeToken = createUnsubscribeToken(user.email)
+    const unsubscribeUrl = `${apiUrl}/api/email/unsubscribe?email=${encodeURIComponent(user.email)}&token=${encodeURIComponent(unsubscribeToken)}`
 
     const weeklyStatsEmailHtml = await render(
       TraderStatsEmail({
@@ -93,7 +99,7 @@ export async function POST(req: Request, props: { params: Promise<{ userid: stri
   } catch (error) {
     console.error('API error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error', stack: error instanceof Error ? error.stack : undefined },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

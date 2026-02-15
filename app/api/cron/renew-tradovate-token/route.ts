@@ -28,9 +28,14 @@ function shouldPerformDailySync(dailySyncTime: Date | null): boolean {
 }
 
 export async function GET(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    return new Response('Cron secret not configured', { status: 500 });
+  }
+
   // Verify this is a cron request
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return new Response('Unauthorized', { status: 401 });
   }
 

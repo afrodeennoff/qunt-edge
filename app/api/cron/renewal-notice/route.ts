@@ -71,6 +71,11 @@ const calculateNextPaymentDate = (currentDate: Date, frequency: string): Date =>
 
 // Daily cron job handler - runs every day at 9 AM UTC
 export async function GET(req: Request) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 })
+  }
+
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY is missing')
     return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
@@ -82,7 +87,7 @@ export async function GET(req: Request) {
     const headersList = await headers()
     const authHeader = headersList.get('authorization')
 
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

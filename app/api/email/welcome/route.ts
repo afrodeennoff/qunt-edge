@@ -4,12 +4,13 @@ import { Resend } from 'resend'
 import WelcomeEmail from '@/components/emails/welcome'
 import { getLatestVideoFromPlaylist } from "@/app/[locale]/admin/actions/youtube"
 import crypto from 'crypto'
+import { createUnsubscribeToken } from "@/lib/unsubscribe-token"
 
 export const dynamic = 'force-dynamic'
 
 function isAuthorizedWebhook(request: Request): boolean {
   const secret = process.env.WELCOME_WEBHOOK_SECRET || process.env.SUPABASE_WEBHOOK_SECRET
-  if (!secret) return process.env.NODE_ENV !== 'production'
+  if (!secret) return false
 
   const authHeader = request.headers.get('authorization') || ''
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
       }
     })
 
-    const unsubscribeUrl = `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(record.email)}`
+    const unsubscribeToken = createUnsubscribeToken(record.email)
+    const unsubscribeUrl = `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(record.email)}&token=${encodeURIComponent(unsubscribeToken)}`
 
     // Check user language preference from database
     const user = await prisma.user.findUnique({
