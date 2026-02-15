@@ -198,14 +198,14 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 </ResponsiveContainer>
               </div>
 
-              <div className="flex flex-col items-center gap-3 pb-1 pt-2">
+              <div className="flex flex-col items-center gap-2 pb-1 pt-1">
                 {chartData.map((entry) => (
                   <div
                     key={entry.name}
-                    className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em]"
+                    className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em]"
                   >
                     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span className="text-white/58">{entry.name}</span>
+                    <span className="text-white/58 whitespace-nowrap">{entry.name}</span>
                   </div>
                 ))}
               </div>

@@ -308,8 +308,8 @@ export default function PnLPerContractDailyChart({
               const domainMax = Math.max(maxP * 1.1, 0);
               const margin =
                 size === "small"
-                  ? { left: 0, right: 0, top: 4, bottom: 20 }
-                  : { left: 0, right: 0, top: 8, bottom: 24 };
+                  ? { left: 0, right: 0, top: 4, bottom: 14 }
+                  : { left: 0, right: 0, top: 8, bottom: 14 };
               return (
                 <div className={cn("w-full h-full animate-pulse relative")}>
                   <ResponsiveContainer width="100%" height="100%" minHeight={180}>
@@ -361,8 +361,8 @@ export default function PnLPerContractDailyChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 20 }
-                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                    ? { left: 0, right: 0, top: 4, bottom: 14 }
+                    : { left: 0, right: 0, top: 8, bottom: 14 }
                 }
               >
                 <CartesianGrid

@@ -338,35 +338,35 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
           {/* Distribution Section */}
           <div className={cn(
             "flex flex-col",
-            size === 'tiny' ? "p-1.5" : "p-3"
+            size === 'tiny' ? "p-1.5" : "p-2.5"
           )}>
-            <h3 className="font-terminal text-[10px] font-bold uppercase tracking-widest mb-1.5 text-white/40">{t('statistics.distribution.title')}</h3>
-            <div className="flex-1 flex flex-col justify-center gap-1.5">
-              <div className="space-y-1">
+            <h3 className="font-terminal text-[10px] font-bold uppercase tracking-widest mb-1 text-white/40">{t('statistics.distribution.title')}</h3>
+            <div className="flex-1 flex flex-col justify-center gap-1">
+              <div className="space-y-0.5">
                 <div className="flex justify-between items-center">
                   <span className="text-white/50 text-xs">{t('statistics.distribution.long')}</span>
-                  <span className="text-sm font-medium font-terminal metric-positive">{longRate}%</span>
+                  <span className="text-xs font-medium font-terminal metric-positive">{longRate}%</span>
                 </div>
                 <Progress value={longRate} className="h-1 bg-white/10" indicatorClassName="bg-white chart-positive-emphasis" />
               </div>
               {size !== 'tiny' ? (
                 <>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     <div className="flex justify-between items-center">
                       <span className="text-white/50 text-xs">{t('statistics.distribution.short')}</span>
-                      <span className="text-sm font-medium font-terminal metric-negative">{shortRate}%</span>
+                      <span className="text-xs font-medium font-terminal metric-negative">{shortRate}%</span>
                     </div>
                     <Progress value={shortRate} className="h-1 bg-white/10" indicatorClassName="bg-white/30 chart-negative-muted" />
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mt-0.5">
                     <span className="text-white/50 text-xs">{t('statistics.distribution.winningStreak')}</span>
-                    <span className="text-sm font-medium font-terminal">{winningStreak}</span>
+                    <span className="text-xs font-medium font-terminal">{winningStreak}</span>
                   </div>
                 </>
               ) : (
                 <div className="flex justify-between items-center">
                   <span className="text-white/50 text-xs">{t('statistics.distribution.winningStreak')}</span>
-                  <span className="text-sm font-medium font-terminal">{winningStreak}</span>
+                  <span className="text-xs font-medium font-terminal">{winningStreak}</span>
                 </div>
               )}
             </div>
