@@ -1468,3 +1468,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Verification:**
   - `npx eslint app/[locale]/admin/actions/stats.ts app/[locale]/admin/actions/send-email.ts app/[locale]/admin/actions/weekly-recap.ts` (warnings only, no errors).
   - `npm run typecheck` passes.
+
+### 2026-02-15: Schema Consistency Fix (DashboardLayout RLS vs FK Mapping)
+- **What changed:** Corrected `DashboardLayout` authenticated ownership RLS predicate to match its real foreign-key target (`User.auth_user_id`) instead of `User.id`.
+- **What I want:** Users can access only their own dashboard layouts while preserving the schema’s auth-UID based ownership model.
+- **What I don't want:** A policy condition that joins `DashboardLayout.userId` to the wrong `User` key and silently blocks legitimate owner access.
+- **How we fixed that:**
+  - Applied Supabase migration `fix_dashboardlayout_rls_auth_uid_fk_mapping` to recreate `public."DashboardLayout"` `authenticated_owner` policy.
+  - New `USING` / `WITH CHECK` conditions require:
+    - `User.auth_user_id = DashboardLayout.userId`
+    - `User.auth_user_id = auth.uid()`
+  - Added matching repo migration file for traceability:
+    - `prisma/migrations/20260215193000_fix_dashboardlayout_rls_auth_uid_fk_mapping/migration.sql`
+- **Key Files:** `prisma/migrations/20260215193000_fix_dashboardlayout_rls_auth_uid_fk_mapping/migration.sql`, `AGENTS.md`
+- **Verification:**
+  - `pg_policies` check confirms `DashboardLayout.authenticated_owner` now matches `auth_user_id` on both ownership and auth predicates.
