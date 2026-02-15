@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     mdxRs: true,
     webpackMemoryOptimizations: true,
     preloadEntriesOnStart: false,
-    cpus: 4,
+    cpus: 2,
     optimizePackageImports: [
       "lucide-react",
       "date-fns",
