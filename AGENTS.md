@@ -36,6 +36,31 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Frontend + Backend Audit (Quality Gates + Security Posture)
+- **What changed:** Performed a full frontend/backend audit pass across lint, typecheck, build, and tests; documented concrete risk areas with file-level evidence.
+- **What I want:** A reliable engineering baseline where CI quality gates are trustworthy, production TLS defaults remain secure, and frontend render paths avoid state anti-patterns that can regress UX/performance.
+- **What I don't want:** False-green confidence from partially broken scripts, production DB connections running with disabled certificate verification, or React render/effect anti-patterns that produce subtle UI bugs.
+- **How we fixed that:**
+  - Audit-only pass completed and findings documented (no functional code changes made in this task).
+  - Identified `typecheck` script gate mismatch:
+    - `package.json` currently runs `clean:build-artifacts` before `next typegen`,
+    - `tsconfig.json` includes `.next/types/**/*.ts`,
+    - resulting run fails on missing `.next/types/cache-life.d.ts` immediately after clean.
+  - Identified backend TLS posture risk:
+    - build logs confirm Prisma pool initialization with `rejectUnauthorized: false`,
+    - `lib/prisma.ts` allows non-verifying TLS under common runtime modes (including Supabase pooler defaults) unless explicitly overridden.
+  - Identified frontend React correctness risks:
+    - `account-card.tsx` uses synchronous `setState` in `useEffect`,
+    - `account-table.tsx` mutates render-scope accumulator during map render path.
+  - Captured lint baseline status for prioritization:
+    - `npm run lint` exits successfully but reports `1255` warnings (many low-priority, some behavior-affecting).
+- **Key Files:** `package.json`, `tsconfig.json`, `lib/prisma.ts`, `app/[locale]/dashboard/components/accounts/account-card.tsx`, `app/[locale]/dashboard/components/accounts/account-table.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run lint` -> exits `0`, reports `1255` warnings.
+  - `npm run typecheck` -> fails with `TS6053` missing `.next/types/cache-life.d.ts`.
+  - `npm test` -> passes (`20 passed | 1 skipped`, `88 passed | 46 skipped`).
+  - `npm run build` -> passes and generates routes; build log confirms Prisma pool runtime state with `rejectUnauthorized: false`.
+
 ### 2026-02-15: User Data Isolation Hardening (ETP Orders + Account Actions)
 - **What changed:** Closed several cross-user write/isolation gaps in API and server actions by enforcing authenticated-user ownership at mutation time.
 - **What I want:** Every write/update/delete must stay scoped to the currently authenticated user, even if a client submits foreign IDs.
@@ -1092,3 +1117,56 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Applied clean premium minimal normalization in core shared surfaces (`widget-shell`, `chart-surface`, `stats-card`) and reduced global font payload to two loaded families (`Geist` + `Geist Mono`).
 - **Key Files:** `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, `app/[locale]/dashboard/behavior/page-client.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `app/[locale]/dashboard/trader-profile/page-client.tsx`, `context/providers/trades-provider.tsx`, `context/providers/accounts-provider.tsx`, `context/providers/filters-provider.tsx`, `context/providers/subscription-provider.tsx`, `components/providers/dashboard-providers.tsx`, `.github/workflows/perf-quality.yml`, `package.json`, `components/ui/widget-shell.tsx`, `components/ui/chart-surface.tsx`, `components/ui/stats-card.tsx`, `app/layout.tsx`, `app/globals.css`, `app/[locale]/(home)/components/HomeContent.tsx`, `AGENTS.md`
 - **Verification:** Run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`, `node scripts/check-route-budgets.mjs`, and `node scripts/analyze-bundle.mjs`; validate dashboard/trader/behavior routes manually for stable nav state, no default polling loops, and responsive manual refresh behavior.
+
+### 2026-02-15: Auth TLS Recovery + Dashboard UX Simplification + Newsletter Builder Build Stabilization
+- **What changed:** Applied a focused rescue pass to resolve auth callback TLS failures, reduce noisy dashboard header UX density, and fix a production build blocker in admin newsletter-builder.
+- **What I want:** Auth callback should not fail with `P1011` TLS chain errors on pooled Supabase connections, dashboard controls should feel cleaner and less visually noisy, and full production build should stay stable.
+- **What I don't want:** Login loops caused by Prisma TLS mismatch, cluttered header UI that feels heavy/confusing, and build breaks from client-only newsletter modules being evaluated in server-page collection.
+- **How we fixed that:**
+  - Updated Prisma TLS policy resolution in `lib/prisma.ts`:
+    - honor `sslmode` semantics (`verify-full`/`verify-ca` => verify cert; `require`/`prefer`/`allow` => encrypted transport without strict verification),
+    - default Supabase pooler hosts to non-strict verification unless explicitly overridden,
+    - keep env override support via `PGSSL_REJECT_UNAUTHORIZED`.
+  - Simplified dashboard header surface in `app/[locale]/dashboard/components/dashboard-header.tsx`:
+    - removed decorative overlay layer,
+    - normalized panels/borders/backgrounds for clean premium minimal appearance,
+    - reduced aggressive visual accents (pulsing upgrade/save states, destructive icon treatment),
+    - unified filter-tag container styling for desktop/mobile.
+  - Refined behavior page hero density in `app/[locale]/dashboard/behavior/page-client.tsx`:
+    - replaced heavy gradient hero shell with calmer card surface,
+    - hid non-essential badge cluster on smaller widths,
+    - switched secondary CTA buttons to restrained `outline` style.
+  - Fixed `admin/newsletter-builder` build regression by using server wrapper + client page split:
+    - added `app/[locale]/admin/newsletter-builder/page-client.tsx` (client-only dynamic modules),
+    - `app/[locale]/admin/newsletter-builder/page.tsx` now server wrapper.
+- **Key Files:** `lib/prisma.ts`, `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/dashboard/behavior/page-client.tsx`, `app/[locale]/admin/newsletter-builder/page.tsx`, `app/[locale]/admin/newsletter-builder/page-client.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint lib/prisma.ts app/[locale]/dashboard/components/dashboard-header.tsx app/[locale]/dashboard/behavior/page-client.tsx app/[locale]/admin/newsletter-builder/page.tsx app/[locale]/admin/newsletter-builder/page-client.tsx` (0 errors),
+  - `npm run typecheck` (pass),
+  - `npm run build` (pass; routes include `/[locale]/admin/newsletter-builder` and auth callback routes).
+
+### 2026-02-15: Immediate Rescue Follow-Up (Header Weight Reduction + Build Safety + TLS Semantics)
+- **What changed:** Performed a follow-up emergency pass to reduce dashboard interaction weight and ensure the full app remains build-safe after recent performance/UX changes.
+- **What I want:** Dashboard should feel lighter/faster in day-to-day interaction and builds should stay green while auth/TLS behavior remains stable.
+- **What I don't want:** Animation-heavy header logic inflating client cost, server-build failures in admin newsletter route, or TLS mismatch regressions during auth callback DB access.
+- **How we fixed that:**
+  - Removed `framer-motion` usage from dashboard header and replaced animated wrappers with static conditional blocks for lower client overhead and cleaner UX rhythm.
+  - Preserved the simplified clean/minimal header styling introduced in the rescue pass.
+  - Kept Prisma TLS behavior aligned to `sslmode` + Supabase pooler characteristics in `lib/prisma.ts`.
+  - Fixed `admin/newsletter-builder` route to a correct server wrapper + client page split using `page-client.tsx` for client-only dynamic modules.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-header.tsx`, `app/[locale]/admin/newsletter-builder/page.tsx`, `app/[locale]/admin/newsletter-builder/page-client.tsx`, `lib/prisma.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint app/[locale]/dashboard/components/dashboard-header.tsx lib/prisma.ts app/[locale]/admin/newsletter-builder/page.tsx app/[locale]/admin/newsletter-builder/page-client.tsx app/[locale]/dashboard/behavior/page-client.tsx` (no errors),
+  - `npm run build` (pass; includes `/[locale]/dashboard/*`, `/api/auth/callback`, `/[locale]/admin/newsletter-builder`).
+
+### 2026-02-15: Prisma Build-Phase Noise Reduction + Pool Sizing Guard
+- **What changed:** Refined Prisma runtime logging/connection behavior to reduce build-time noise and unnecessary pool pressure while preserving auth/TLS reliability.
+- **What I want:** Production builds should be quieter and deterministic, without repeated Prisma warning/info spam during static generation.
+- **What I don't want:** Noisy Prisma initialization logs on every build page-data pass or oversized build-phase pool settings.
+- **How we fixed that:**
+  - Added Next build-phase detection (`NEXT_PHASE === 'phase-production-build'`) in `lib/prisma.ts`.
+  - Suppressed Prisma pool init info logs during build phase.
+  - Suppressed insecure TLS warning during build phase (warning still available for runtime when explicitly configured insecure).
+  - Reduced default production pool size to `1` during build phase while keeping normal production runtime defaults unchanged.
+- **Key Files:** `lib/prisma.ts`, `AGENTS.md`
+- **Verification:** `npx eslint lib/prisma.ts` (clean), `npm run build` (pass) with Prisma build-time logs reduced.

@@ -164,7 +164,7 @@ export default function DashboardBehaviorPage() {
 
   return (
     <div className="w-full space-y-6 p-3 sm:p-4 lg:p-6">
-      <Card className="rounded-3xl border border-border/60 bg-gradient-to-r from-white/10 via-white/10 to-white/5 shadow-sm backdrop-blur-sm">
+      <Card className="rounded-2xl border border-border/60 bg-card shadow-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-2">
@@ -180,7 +180,7 @@ export default function DashboardBehaviorPage() {
                 {t("analysis.description")}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 md:flex">
               <Badge variant="outline" className="gap-1">
                 <TrendingUp className="h-3.5 w-3.5" />
                 Performance
@@ -201,7 +201,7 @@ export default function DashboardBehaviorPage() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex flex-wrap gap-2 items-center mb-3">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             <Button
               size="sm"
               variant={periodDays === 7 ? "default" : "secondary"}
@@ -225,7 +225,7 @@ export default function DashboardBehaviorPage() {
             </Button>
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={() => {
                 const section = document.getElementById("analysis-section")
                 section?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -235,7 +235,7 @@ export default function DashboardBehaviorPage() {
             </Button>
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={() => {
                 const section = document.getElementById("coach-section")
                 section?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -245,7 +245,7 @@ export default function DashboardBehaviorPage() {
             </Button>
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={() => {
                 const section = document.getElementById("mindset-section")
                 section?.scrollIntoView({ behavior: "smooth", block: "start" })

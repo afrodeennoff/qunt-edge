@@ -15,7 +15,6 @@ import { GlobalSyncButton } from './global-sync-button';
 import { useI18n } from '@/locales/client';
 import { useData } from '@/context/data-provider';
 import { ActiveFilterTags } from './filters/active-filter-tags';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
     CloudUpload,
@@ -112,12 +111,11 @@ export function DashboardHeader() {
     return (
         <header
             className={cn(
-                "sticky top-0 z-50 overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur-xl",
+                "sticky top-0 z-50 overflow-hidden border-b border-border/50 bg-background/95 backdrop-blur-md",
                 isMobile ? "pt-safe" : "h-14"
             )}
             data-dashboard-header="true"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
             <div className={cn("relative flex items-center justify-between gap-3 px-3 sm:px-6", isMobile ? "h-14" : "h-full")}>
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
@@ -145,13 +143,13 @@ export function DashboardHeader() {
                     "flex items-center gap-2",
                     isMobile
                         ? "rounded-none border-0 bg-transparent p-0 shadow-none"
-                        : "rounded-2xl border border-border/40 bg-muted/20 p-1 shadow-sm"
+                        : "rounded-xl border border-border/50 bg-muted/35 p-1"
                 )}>
 
                     {/* Global Utilities Group */}
                     <div className={cn(
                         "flex shrink-0 items-center gap-1",
-                        isMobile ? "" : "rounded-xl bg-background/50 px-1 py-0.5 ring-1 ring-border/10"
+                        isMobile ? "" : "rounded-lg bg-background px-1 py-0.5"
                     )}>
                         <FilterCommandMenu variant="navbar" />
 
@@ -169,7 +167,7 @@ export function DashboardHeader() {
                         {!isPlusUser() && (
                             <Link href={billingHref}>
                                 <button className="group flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-secondary px-4 text-[9px] font-bold uppercase tracking-[0.2em] text-foreground transition-all hover:bg-accent hover:border-primary/50">
-                                    <Sparkles className="h-3 w-3 animate-pulse" />
+                                    <Sparkles className="h-3 w-3" />
                                     <span>UPGRADE</span>
                                 </button>
                             </Link>
@@ -182,7 +180,7 @@ export function DashboardHeader() {
                             "ml-1 flex shrink-0 items-center gap-1.5",
                             isMobile
                                 ? "rounded-lg border border-border/35 bg-background/70 p-1"
-                                : "rounded-xl border border-border/50 bg-background/50 p-1.5 shadow-sm ring-1 ring-white/5 backdrop-blur-sm"
+                                : "rounded-xl border border-border/50 bg-background p-1.5"
                         )}>
                             <button
                                 type="button"
@@ -195,28 +193,20 @@ export function DashboardHeader() {
                                         : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                                 )}
                             >
-                                <motion.div
-                                    animate={{ rotate: isCustomizing ? 180 : 0 }}
-                                    transition={{ duration: 0.3 }}
-                                >
+                                <div>
                                     {isCustomizing ? (
                                         <CheckCircle2 className="h-4 w-4" />
                                     ) : (
                                         <Sparkles className="h-4 w-4" />
                                     )}
-                                </motion.div>
+                                </div>
                                 <span className={cn("text-[10px] font-bold uppercase tracking-widest", isMobile && "sr-only")}>
                                     {isCustomizing ? t('widgets.done') : t('widgets.edit')}
                                 </span>
                             </button>
 
                             {isCustomizing && (
-                                <motion.div
-                                    initial={isMobile ? false : { width: 0, opacity: 0, scale: 0.9 }}
-                                    animate={isMobile ? undefined : { width: 'auto', opacity: 1, scale: 1 }}
-                                    exit={isMobile ? undefined : { width: 0, opacity: 0, scale: 0.9 }}
-                                    className="flex items-center gap-1.5"
-                                >
+                                <div className="flex items-center gap-1.5">
                                     <div className="h-4 w-px bg-border/50 mx-0.5" />
                                     <AddWidgetSheet
                                         onAddWidget={addWidget}
@@ -254,7 +244,7 @@ export function DashboardHeader() {
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <button
-                                                    className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     title={t('widgets.deleteAll')}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -271,7 +261,7 @@ export function DashboardHeader() {
                                                     <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                                                     <AlertDialogAction
                                                         onClick={removeAllWidgets}
-                                                        className="bg-white/10 text-white hover:bg-white/20 border border-white/10"
+                                                        className="border border-border bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                     >
                                                         {t('widgets.confirmDeleteAll')}
                                                     </AlertDialogAction>
@@ -284,7 +274,7 @@ export function DashboardHeader() {
                                         <button
                                             type="button"
                                             onClick={flushPendingSaves}
-                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors animate-pulse"
+                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-foreground hover:bg-accent transition-colors"
                                             title="Save Changes"
                                         >
                                             <CloudUpload className="w-4 h-4" />
@@ -294,7 +284,7 @@ export function DashboardHeader() {
                                             <CheckCircle2 className="w-4 h-4 text-white" />
                                         </div>
                                     )}
-                                </motion.div>
+                                </div>
                             )}
 
                             {!isMobile && (
@@ -312,26 +302,19 @@ export function DashboardHeader() {
             {isMobile ? (
                 hasActiveFilters && (
                     <div className="relative px-3 pb-3 pt-1">
-                        <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                        <div className="rounded-xl border border-border/60 bg-muted/35 px-2 py-1.5">
                             <ActiveFilterTags showAccountNumbers={true} />
                         </div>
                     </div>
                 )
             ) : (
-                <AnimatePresence>
-                    {hasActiveFilters && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="relative px-4 pb-3 pt-1 sm:px-8"
-                        >
-                            <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
-                                <ActiveFilterTags showAccountNumbers={true} />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                hasActiveFilters && (
+                    <div className="relative px-4 pb-3 pt-1 sm:px-8">
+                        <div className="rounded-xl border border-border/60 bg-muted/35 px-2 py-1.5">
+                            <ActiveFilterTags showAccountNumbers={true} />
+                        </div>
+                    </div>
+                )
             )}
         </header>
     );
