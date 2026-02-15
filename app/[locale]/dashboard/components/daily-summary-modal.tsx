@@ -2,13 +2,13 @@
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Share2, Download, CheckCircle2, Award, Zap, Target, BarChart3, TrendingUp, Calendar, LayoutGrid, DollarSign, Percent, Palette, Globe, User, ShieldCheck, ArrowRightLeft, Clock, Edit2, Sparkles, Trophy, BadgeCheck, RefreshCw, Eye, EyeOff, X } from "lucide-react"
+import { Zap, BarChart3, Eye, EyeOff, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useRef, useMemo, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useData } from "@/context/data-provider"
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, parseISO, isWithinInterval, format } from "date-fns"
-import { calculateTradingScore, getScoreColor, getScoreLabel } from "@/lib/score-calculator"
+import { calculateTradingScore } from "@/lib/score-calculator"
 import { type Account } from "@/lib/data-types"
 import html2canvas from "html2canvas"
 import { useUserStore } from "@/store/user-store"
@@ -31,15 +31,6 @@ const THEMES: Record<string, Theme> = {
 export function DailySummaryModal() {
     const { calendarData, statistics: overallStats, accounts } = useData()
     const user = useUserStore((state) => state.user)
-    const [selected, setSelected] = useState({
-        hero: true,
-        weekly: true,
-        monthly: true,
-        score: true,
-        trend: true,
-        winRate: true,
-        target: true
-    })
     const [displayMode, setDisplayMode] = useState<'currency' | 'percent'>('currency')
     const [currentTheme, setCurrentTheme] = useState<keyof typeof THEMES>('obsidian')
     const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'monthly' | 'total'>('daily')
@@ -48,7 +39,6 @@ export function DailySummaryModal() {
     const [isExporting, setIsExporting] = useState(false)
     const [customTarget, setCustomTarget] = useState(1000)
     const [isEditingTarget, setIsEditingTarget] = useState(false)
-    const [isRefreshing, setIsRefreshing] = useState(false)
     const [blurWeekly, setBlurWeekly] = useState(false)
     const [blurMonthly, setBlurMonthly] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
@@ -295,7 +285,7 @@ export function DailySummaryModal() {
                                         <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">{timeframe === 'total' ? 'Lifetime' : timeframe} PnL</span>
 
                                         <div className="ml-auto flex items-center gap-2">
-                                            <select className="bg-transparent text-[10px] uppercase font-bold text-white/10 outline-none cursor-pointer hover:text-white/40 transition-colors" value={timeframe} onChange={(e) => setTimeframe(e.target.value as any)}>
+                                            <select className="bg-transparent text-[10px] uppercase font-bold text-white/10 outline-none cursor-pointer hover:text-white/40 transition-colors" value={timeframe} onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}>
                                                 <option value="daily" className="bg-zinc-950 text-white">Daily</option>
                                                 <option value="weekly" className="bg-zinc-950 text-white">Weekly</option>
                                                 <option value="monthly" className="bg-zinc-950 text-white">Monthly</option>
@@ -456,37 +446,5 @@ export function DailySummaryModal() {
                 </div>
             </DialogContent>
         </Dialog>
-    )
-}
-
-function MetricCard({ label, value, active, theme, displayMode, totalValue }: { label: string, value: number, active: boolean, theme: Theme, displayMode: 'currency' | 'percent', totalValue: number }) {
-    const isPos = value >= 0
-    const displayValue = displayMode === 'currency'
-        ? `${isPos ? '+' : '-'}$${Math.abs(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-        : `${isPos ? '+' : '-'}${Math.abs(value / totalValue * 100).toFixed(1)}%`
-    return (
-        <div className={cn("p-4 rounded-2xl border transition-all duration-700 relative overflow-hidden group", active ? "bg-white/[0.04] border-white/10 backdrop-blur-md shadow-2xl" : "opacity-10 blur-sm scale-95 shadow-none")}>
-            <div className={cn("absolute top-0 left-0 w-1 h-full opacity-40 group-hover:opacity-100 transition-opacity", isPos ? "bg-white" : "bg-white/20")} />
-            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/20 mb-2.5 block group-hover:text-white/40 transition-colors">{label} Recap</span>
-            <div className={cn("text-2xl font-black tracking-tighter tabular-nums", active ? (isPos ? "text-white" : "text-white/40") : "")}>{displayValue}</div>
-        </div>
-    )
-}
-
-function AnalysisBadge({ icon, label, value, theme, progress }: { icon: any, label: string, value: string | number, theme: Theme, progress: number }) {
-    return (
-        <div className="p-4 rounded-[2.2rem] border border-white/10 bg-white/[0.02] flex flex-col items-center justify-center text-center relative overflow-hidden group hover:bg-white/[0.05] transition-all duration-500 shadow-xl backdrop-blur-lg">
-            <div className="relative z-10">
-                <div className="w-11 h-11 flex items-center justify-center mb-3 relative">
-                    <svg className="w-full h-full transform -rotate-90 absolute">
-                        <circle cx="22" cy="22" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-white/5" />
-                        <motion.circle cx="22" cy="22" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" strokeDasharray={125.6} initial={{ strokeDashoffset: 125.6 }} animate={{ strokeDashoffset: 125.6 - (125.6 * progress) / 100 }} transition={{ duration: 2.5, ease: "circOut" }} className={theme.primary} />
-                    </svg>
-                    <div className={cn("relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-none", theme.primary)}>{icon}</div>
-                </div>
-                <div className={cn("text-xl font-black tracking-tighter tabular-nums mb-1 leading-none shadow-sm", theme.primary)}>{value}</div>
-                <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white/20">{label}</span>
-            </div>
-        </div>
     )
 }

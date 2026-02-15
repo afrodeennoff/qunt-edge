@@ -1,5 +1,5 @@
 'use server'
-import { createClient, ensureUserInDatabase } from '@/server/auth'
+import { createClient, ensureUserInDatabase, getWebsiteURL } from '@/server/auth'
 import { NextResponse } from 'next/server'
 // The client you created from the Server-Side Auth instructions
 
@@ -32,14 +32,38 @@ export async function GET(request: Request) {
   })
 
   // Normalize next path so values like "dashboard" become "/dashboard".
-  // Keep redirects internal by ignoring absolute URLs.
+  // Keep redirects internal by rejecting protocol-relative and absolute URLs.
   let normalizedNext: string | null = null
   if (next) {
     const decodedNext = decodeURIComponent(next).trim()
-    if (decodedNext && !decodedNext.startsWith('http://') && !decodedNext.startsWith('https://')) {
-      normalizedNext = decodedNext.startsWith('/') ? decodedNext : `/${decodedNext}`
+    const isAbsolute =
+      decodedNext.startsWith('http://') ||
+      decodedNext.startsWith('https://') ||
+      decodedNext.startsWith('//') ||
+      decodedNext.startsWith('\\\\')
+
+    if (decodedNext && !isAbsolute) {
+      normalizedNext = `/${decodedNext.replace(/^\/+/, '')}`
     }
   }
+
+  const safeLocale = (() => {
+    const raw = (locale || '').trim().toLowerCase()
+    if (!raw) return 'en'
+    // Keep permissive: app supports multiple locales.
+    if (!/^[a-z]{2}(-[a-z]{2})?$/.test(raw)) return 'en'
+    return raw
+  })()
+
+  const withLocalePrefix = (path: string) => {
+    const normalized = `/${path.replace(/^\/+/, '')}`
+    if (normalized.startsWith('/api/')) return normalized
+    if (/^\/[a-z]{2}(?:-[a-z]{2})?(?:\/|$)/i.test(normalized)) return normalized
+    return `/${safeLocale}${normalized}`
+  }
+
+  const websiteURL = await getWebsiteURL()
+
   if (code) {
     try {
       const supabase = await createClient()
@@ -48,24 +72,12 @@ export async function GET(request: Request) {
       if (!error) {
         // Handle password recovery redirect
         if (type === 'recovery') {
-          const forwardedHost = request.headers.get('x-forwarded-host')
-          const isLocalEnv = process.env.NODE_ENV === 'development'
-          const baseUrl = isLocalEnv
-            ? `${origin}/dashboard/settings`
-            : `https://${forwardedHost || origin}/dashboard/settings`
-          const redirectUrl = `${baseUrl}?passwordReset=true`
-          return NextResponse.redirect(redirectUrl)
+          return NextResponse.redirect(new URL(withLocalePrefix('/dashboard/settings?passwordReset=true'), websiteURL))
         }
 
         // Handle identity linking redirect
         if (action === 'link') {
-          const forwardedHost = request.headers.get('x-forwarded-host')
-          const isLocalEnv = process.env.NODE_ENV === 'development'
-          const baseUrl = isLocalEnv
-            ? `${origin}/dashboard/settings`
-            : `https://${forwardedHost || origin}/dashboard/settings`
-          const redirectUrl = `${baseUrl}?linked=true`
-          return NextResponse.redirect(redirectUrl)
+          return NextResponse.redirect(new URL(withLocalePrefix('/dashboard/settings?linked=true'), websiteURL))
         }
 
         // Ensure DB user exists and persist locale before redirecting
@@ -82,25 +94,10 @@ export async function GET(request: Request) {
           // Non-fatal: continue redirect
         }
 
-        const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
-        const isLocalEnv = process.env.NODE_ENV === 'development'
-        if (isLocalEnv) {
-          // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-          if (normalizedNext) {
-            return NextResponse.redirect(new URL(normalizedNext, origin))
-          }
-          return NextResponse.redirect(`${origin}${normalizedNext ?? '/dashboard'}`)
-        } else if (forwardedHost) {
-          if (normalizedNext) {
-            return NextResponse.redirect(new URL(normalizedNext, `https://${forwardedHost}`))
-          }
-          return NextResponse.redirect(`https://${forwardedHost}${normalizedNext ?? '/dashboard'}`)
-        } else {
-          if (normalizedNext) {
-            return NextResponse.redirect(new URL(normalizedNext, origin))
-          }
-          return NextResponse.redirect(`${origin}${normalizedNext ?? '/dashboard'}`)
+        if (normalizedNext) {
+          return NextResponse.redirect(new URL(withLocalePrefix(normalizedNext), websiteURL))
         }
+        return NextResponse.redirect(new URL(withLocalePrefix('/dashboard'), websiteURL))
       } else {
         console.log('Auth callback error:', error)
       }
@@ -127,12 +124,12 @@ export async function GET(request: Request) {
       ) {
         console.error('[Auth Callback] Supabase API returned non-JSON response:', error)
         // Redirect to auth page with error message
-        return NextResponse.redirect(`${origin}/authentication?error=service_unavailable`)
+        return NextResponse.redirect(new URL(withLocalePrefix('/authentication?error=service_unavailable'), websiteURL))
       }
       console.error('Auth callback unexpected error:', error)
     }
   }
 
   // return the user to the authentication page
-  return NextResponse.redirect(`${origin}/authentication`)
+  return NextResponse.redirect(new URL(withLocalePrefix('/authentication'), websiteURL))
 }

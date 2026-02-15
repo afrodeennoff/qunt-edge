@@ -1,6 +1,5 @@
-import { Trade } from '@/prisma/generated/prisma'
 import { differenceInDays, startOfDay } from 'date-fns'
-import { addMoney, netPnl, toDecimal, toMoneyNumber } from '@/lib/financial-math'
+import { addMoney, netPnl, toDecimal, toMoneyNumber, type DecimalLike } from '@/lib/financial-math'
 import { ANALYTICS_METRIC_VERSION } from '@/lib/analytics/metric-definitions'
 
 export interface RiskMetricsV1 {
@@ -24,7 +23,13 @@ function safeDivide(numerator: number, denominator: number): number {
   return denominator === 0 ? 0 : numerator / denominator
 }
 
-function streaksFromTrades(sortedTrades: Trade[]): { winningStreak: number; losingStreak: number } {
+export type RiskTradeLike = {
+  entryDate: Date | string
+  pnl?: DecimalLike
+  commission?: DecimalLike
+}
+
+function streaksFromTrades(sortedTrades: RiskTradeLike[]): { winningStreak: number; losingStreak: number } {
   let currentWin = 0
   let currentLoss = 0
   let maxWin = 0
@@ -51,7 +56,7 @@ function streaksFromTrades(sortedTrades: Trade[]): { winningStreak: number; losi
   return { winningStreak: maxWin, losingStreak: maxLoss }
 }
 
-export function calculateRiskMetricsV1(trades: Trade[]): RiskMetricsV1 {
+export function calculateRiskMetricsV1(trades: RiskTradeLike[]): RiskMetricsV1 {
   if (!trades || trades.length === 0) {
     return {
       metricVersion: ANALYTICS_METRIC_VERSION,
@@ -160,4 +165,3 @@ export function calculateRiskMetricsV1(trades: Trade[]): RiskMetricsV1 {
     losingStreak,
   }
 }
-

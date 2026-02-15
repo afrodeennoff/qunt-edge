@@ -2,7 +2,7 @@
 
 import { createClient, getDatabaseUserId } from '@/server/auth'
 import { prisma } from '@/lib/prisma'
-import { getWhop } from '@/lib/whop'
+import { getWhop, parseWhopDate } from '@/lib/whop'
 import { logger } from '@/lib/logger'
 
 export type SubscriptionWithPrice = {
@@ -144,10 +144,12 @@ export async function getSubscriptionData() {
         planName.toLowerCase().includes('yearly') ? 'year' :
           planName.toLowerCase().includes('lifetime') ? 'lifetime' : 'month';
 
-    const created = Math.floor(new Date(membership.created_at).getTime() / 1000);
-    const periodEnd = membership.renewal_period_end
-      ? Math.floor(new Date(membership.renewal_period_end).getTime() / 1000)
-      : Math.floor(new Date(membership.created_at).getTime() / 1000) + 30 * 24 * 60 * 60; // Default 30 days
+    const createdDate = parseWhopDate(membership.created_at) || new Date();
+    const created = Math.floor(createdDate.getTime() / 1000);
+    const renewalDate = parseWhopDate(membership.renewal_period_end);
+    const periodEnd = renewalDate
+      ? Math.floor(renewalDate.getTime() / 1000)
+      : created + 30 * 24 * 60 * 60; // Default 30 days
 
     const whopStatus = membership.status.toLowerCase()
     const dbStatus =
@@ -164,7 +166,7 @@ export async function getSubscriptionData() {
         email: normalizedEmail,
         status: dbStatus,
         plan: planName,
-        endDate: membership.renewal_period_end ? new Date(membership.renewal_period_end) : null,
+        endDate: parseWhopDate(membership.renewal_period_end) || null,
         interval: interval
       },
       create: {
@@ -172,7 +174,7 @@ export async function getSubscriptionData() {
         email: normalizedEmail,
         plan: planName,
         status: dbStatus,
-        endDate: membership.renewal_period_end ? new Date(membership.renewal_period_end) : null,
+        endDate: parseWhopDate(membership.renewal_period_end) || null,
         interval: interval
       }
     });
@@ -184,8 +186,8 @@ export async function getSubscriptionData() {
       current_period_start: created,
       created: created,
       cancel_at_period_end: !!membership.cancel_at_period_end,
-      cancel_at: membership.renewal_period_end ? Math.floor(new Date(membership.renewal_period_end).getTime() / 1000) : null,
-      canceled_at: membership.canceled_at ? Math.floor(new Date(membership.canceled_at).getTime() / 1000) : null,
+      cancel_at: renewalDate ? Math.floor(renewalDate.getTime() / 1000) : null,
+      canceled_at: parseWhopDate(membership.canceled_at) ? Math.floor(parseWhopDate(membership.canceled_at)!.getTime() / 1000) : null,
       trial_end: membership.status === 'trialing' ? periodEnd : null,
       trial_start: membership.status === 'trialing' ? created : null,
       manage_url: membership.manage_url || undefined,

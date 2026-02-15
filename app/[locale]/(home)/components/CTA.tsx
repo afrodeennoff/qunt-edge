@@ -17,11 +17,11 @@ export default function CTA() {
       >
         <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Ready</p>
         <h2 className="mt-2 text-[clamp(2rem,5vw,3.6rem)] font-semibold leading-[0.9] tracking-[-0.028em] [font-family:var(--home-display)]">
-          Keep your current workflow.
-          <span className="block text-[hsl(var(--brand-primary))]">Upgrade the decisions behind it.</span>
+          Keep your strategy.
+          <span className="block text-[hsl(var(--brand-primary))]">Upgrade the decisions that drive it.</span>
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.78] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
-          Join in minutes and get your first AI-backed execution audit before your next trading session.
+          Join in minutes and receive your first AI-backed process audit before your next session opens.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link

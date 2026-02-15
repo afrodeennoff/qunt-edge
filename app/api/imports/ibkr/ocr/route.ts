@@ -2,6 +2,7 @@ import PDFParser from 'pdf2json'
 import { logger } from '@/lib/logger'
 import { apiError } from '@/lib/api-response'
 import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
+import { createRouteClient } from '@/lib/supabase/route-client'
 
 export const maxDuration = 60
 
@@ -99,6 +100,12 @@ export async function POST(request: Request) {
   const requestId = crypto.randomUUID()
 
   try {
+    const supabase = createRouteClient(request)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user?.id) {
+      return apiError('UNAUTHORIZED', 'Authentication required', 401, { requestId })
+    }
+
     const contentLength = Number(request.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_OCR_BODY_BYTES) {
       return apiError(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { saveTradesAction } from '@/server/database';
 import type { ImportTradeDraft } from '@/lib/trade-types';
+import { verifySecureToken } from '@/lib/api-auth';
 
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
@@ -20,12 +21,7 @@ async function authenticateRequest(req: NextRequest) {
   const token = authHeader.split(' ')[1];
   
   try {
-    // Verify the token by finding the user
-    const user = await prisma.user.findFirst({
-      where: {
-        thorToken: token
-      }
-    });
+    const user = await verifySecureToken(token, 'thor')
     
     if (!user) {
       return { 
@@ -38,7 +34,7 @@ async function authenticateRequest(req: NextRequest) {
     }
     
     return { authenticated: true, user };
-  } catch (error) {
+  } catch {
     return {
       authenticated: false,
       error: {
@@ -173,7 +169,7 @@ export async function GET(req: NextRequest) {
     const toDate = searchParams.get('to');
     
     // Build the query
-    const query: any = {
+    const query: Parameters<typeof prisma.trade.findMany>[0] = {
       where: {
         userId: user.id,
         accountNumber: accountNumber
@@ -184,16 +180,19 @@ export async function GET(req: NextRequest) {
       take: limit,
       skip: offset
     };
+
+    // `where` is optional in Prisma args types; keep a stable reference for type safety.
+    const where = (query.where ??= { userId: user.id, accountNumber });
     
     if (fromDate || toDate) {
-      query.where.entryDate = {};
+      where.entryDate = {};
       
       if (fromDate) {
-        query.where.entryDate.gte = new Date(fromDate);
+        where.entryDate.gte = new Date(fromDate);
       }
       
       if (toDate) {
-        query.where.entryDate.lte = new Date(toDate);
+        where.entryDate.lte = new Date(toDate);
       }
     }
     
@@ -202,7 +201,7 @@ export async function GET(req: NextRequest) {
     
     // Get total count for pagination
     const totalCount = await prisma.trade.count({
-      where: query.where
+      where
     });
     
     return NextResponse.json({ 

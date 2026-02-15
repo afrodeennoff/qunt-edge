@@ -19,6 +19,11 @@ export default {
     landing: {
       title: 'Referral Program',
       subtitle: 'Invite friends and earn rewards when they subscribe to Plus',
+      heroBadge: 'Affiliate Program',
+      heroTitle: 'Get Earn Up To 30% Commission',
+      heroDescription: 'Promote Qunt Edge to your audience and earn up to 30% commission for every qualified referral.',
+      affiliateCta: 'Join Affiliate Program',
+      affiliateLinkLabel: 'Direct application link',
       howItWorks: 'How It Works',
       step1Title: 'Share Your Link',
       step1Description: 'Copy your unique referral link and share it with friends, family, or your community.',
@@ -44,4 +49,3 @@ export default {
     },
   }
 } as const;
-

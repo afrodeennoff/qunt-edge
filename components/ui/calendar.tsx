@@ -13,6 +13,7 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  components,
   ...props
 }: CalendarProps) {
   return (
@@ -81,6 +82,8 @@ function Calendar({
               />
             )
           },
+          // Allow callers to customize DayPicker rendering while keeping our default Chevron icons.
+          ...(components ?? {}),
         }}
         {...props}
       />

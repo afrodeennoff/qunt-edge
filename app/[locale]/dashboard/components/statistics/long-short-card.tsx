@@ -1,9 +1,7 @@
 'use client'
 
 import { useData } from '@/context/data-provider'
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { ArrowLeftRight, ArrowUpFromLine, ArrowDownFromLine, HelpCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { ArrowUpFromLine, ArrowDownFromLine, HelpCircle } from "lucide-react"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
 import {
@@ -18,6 +16,7 @@ interface LongShortPerformanceCardProps {
 }
 
 export default function LongShortPerformanceCard({ size = 'medium' }: LongShortPerformanceCardProps) {
+  void size
   const { calendarData } = useData()
   const t = useI18n()
 
@@ -32,8 +31,12 @@ export default function LongShortPerformanceCard({ size = 'medium' }: LongShortP
   const longNumber = chartData.reduce((acc, curr) => acc + curr.longNumber, 0)
   const shortNumber = chartData.reduce((acc, curr) => acc + curr.shortNumber, 0)
   const totalTrades = longNumber + shortNumber
-  const longRate = Number((longNumber / totalTrades * 100).toFixed(2))
-  const shortRate = Number((shortNumber / totalTrades * 100).toFixed(2))
+  const toPercent = (value: number, total: number) => {
+    if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
+    return Number(((value / total) * 100).toFixed(2))
+  }
+  const longRate = toPercent(longNumber, totalTrades)
+  const shortRate = toPercent(shortNumber, totalTrades)
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">

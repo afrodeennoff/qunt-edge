@@ -1,5 +1,4 @@
 import { useData } from "@/context/data-provider"
-import { Card, CardContent } from "@/components/ui/card"
 import { TrendingUp, TrendingDown, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '../../types/dashboard'
@@ -16,8 +15,13 @@ interface CumulativePnlCardProps {
 }
 
 export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCardProps) {
-  const { statistics: { cumulativePnl, cumulativeFees, grossWin, grossLosses, totalPayouts, nbPayouts } } = useData()
-  const netPnl = cumulativePnl - cumulativeFees - totalPayouts
+  const { statistics } = useData()
+  const safeCumulativePnl = Number.isFinite(statistics.cumulativePnl) ? statistics.cumulativePnl : 0
+  const safeCumulativeFees = Number.isFinite(statistics.cumulativeFees) ? statistics.cumulativeFees : 0
+  const safeGrossWin = Number.isFinite(statistics.grossWin) ? statistics.grossWin : 0
+  const safeGrossLosses = Number.isFinite(statistics.grossLosses) ? statistics.grossLosses : 0
+  const safeTotalPayouts = Number.isFinite(statistics.totalPayouts) ? statistics.totalPayouts : 0
+  const netPnl = safeCumulativePnl - safeCumulativeFees - safeTotalPayouts
   const isPositive = netPnl > 0
   const t = useI18n()
   const locale = useCurrentLocale()
@@ -35,8 +39,6 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
     }
   }
 
-  const cardSize = size === 'tiny' ? 'sm' : 'md'
-  const textSizeClass = size === 'tiny' ? 'text-xs' : 'text-sm'
   const valueSizeClass = size === 'tiny' ? 'text-lg' : 'text-2xl'
   const iconSize = size === 'tiny' ? 'h-4 w-4' : 'h-5 w-5'
 
@@ -81,11 +83,11 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 border-dashed">
         <div className="flex flex-col gap-0.5">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Profits</span>
-          <span className="font-terminal text-[11px] font-bold text-white tabular-nums">{formatCurrency(grossWin)}</span>
+          <span className="font-terminal text-[11px] font-bold text-white tabular-nums">{formatCurrency(safeGrossWin)}</span>
         </div>
         <div className="flex flex-col gap-0.5 text-right">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Losses</span>
-          <span className="font-terminal text-[11px] font-bold metric-negative tabular-nums">{formatCurrency(grossLosses)}</span>
+          <span className="font-terminal text-[11px] font-bold metric-negative tabular-nums">{formatCurrency(safeGrossLosses)}</span>
         </div>
       </div>
     </div>

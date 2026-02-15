@@ -1,9 +1,9 @@
 // CRON JOB RUNNING EVERY WEEK
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
-import { startOfWeek, endOfWeek, subWeeks, parseISO, format } from "date-fns";
+import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
 
 // PURPOSE:
 // - Compute MAE and MFE for all trades of the week
@@ -46,9 +46,19 @@ interface TradeWithMAEMFE {
   priceDifference: number; // Difference between reported entry price and market data
 }
 
+type TradeRecord = Awaited<ReturnType<typeof prisma.trade.findMany>>[number]
+type DatabentoResponseBar = {
+  ts_event: number
+  open: number
+  high: number
+  low: number
+  close: number
+  volume: number
+}
+
 interface InstrumentData {
   instrument: string;
-  trades: any[];
+  trades: TradeRecord[];
   earliestDate: Date;
   latestDate: Date;
 }
@@ -56,6 +66,13 @@ interface InstrumentData {
 // Databento API configuration
 const DATABENTO_API_KEY = process.env.DATABENTO_API_KEY;
 const DATABENTO_BASE_URL = 'https://hist.databento.com/v0';
+
+function isAuthorizedCronRequest(request: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = request.headers.get('authorization')
+  return authHeader === `Bearer ${cronSecret}`
+}
 
 // Databento symbol mapping for futures
 const FUTURES_SYMBOL_MAP: { [key: string]: string } = {
@@ -120,8 +137,7 @@ const FUTURES_SYMBOL_MAP: { [key: string]: string } = {
 async function fetchDatabentoBars(
   symbol: string,
   startDate: string,
-  endDate: string,
-  resolution: string = '1m'
+  endDate: string
 ): Promise<DatabentoBars[]> {
   if (!DATABENTO_API_KEY) {
     throw new Error('DATABENTO_API_KEY is not configured');
@@ -151,10 +167,10 @@ async function fetchDatabentoBars(
     throw new Error(`Databento API error: ${response.status} - ${errorText}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as DatabentoResponseBar[];
 
   // Transform Databento response to our format
-  return data.map((bar: any) => ({
+  return data.map((bar) => ({
     symbol: databentSymbol,
     timestamp: new Date(bar.ts_event / 1000000).toISOString(), // Convert nanoseconds to milliseconds
     open: bar.open / 1000000000, // Convert from fixed-point
@@ -166,11 +182,14 @@ async function fetchDatabentoBars(
 }
 
 function calculateMAEMFE(
-  trade: any,
+  trade: TradeRecord,
   historicalBars: DatabentoBars[]
 ): { mae: number; mfe: number; entryPriceFromData: number; priceDifference: number } {
-  const entryPrice = parseFloat(trade.entryPrice);
-  const isLong = trade.side === 'BUY' || trade.side === 'LONG' || trade.quantity > 0;
+  const entryPrice = Number(trade.entryPrice);
+  const isLong =
+    trade.side === 'BUY' ||
+    trade.side === 'LONG' ||
+    Number(trade.quantity) > 0;
 
   // Find entry price from historical data (closest to entry time)
   const entryTime = new Date(trade.entryDate);
@@ -258,12 +277,12 @@ async function processInstrumentTrades(instrumentData: InstrumentData): Promise<
       return {
         id: trade.id,
         instrument: trade.instrument,
-        entryPrice: parseFloat(trade.entryPrice),
-        closePrice: parseFloat(trade.closePrice),
+        entryPrice: Number(trade.entryPrice),
+        closePrice: Number(trade.closePrice),
         entryDate: new Date(trade.entryDate),
         closeDate: new Date(trade.closeDate),
-        side: trade.side,
-        quantity: trade.quantity,
+        side: trade.side ?? "UNKNOWN",
+        quantity: Number(trade.quantity),
         mae,
         mfe,
         entryPriceFromData,
@@ -277,22 +296,26 @@ async function processInstrumentTrades(instrumentData: InstrumentData): Promise<
     return trades.map(trade => ({
       id: trade.id,
       instrument: trade.instrument,
-      entryPrice: parseFloat(trade.entryPrice),
-      closePrice: parseFloat(trade.closePrice),
+      entryPrice: Number(trade.entryPrice),
+      closePrice: Number(trade.closePrice),
       entryDate: new Date(trade.entryDate),
       closeDate: new Date(trade.closeDate),
-      side: trade.side,
-      quantity: trade.quantity,
+      side: trade.side ?? "UNKNOWN",
+      quantity: Number(trade.quantity),
       mae: 0,
       mfe: 0,
-      entryPriceFromData: parseFloat(trade.entryPrice),
+      entryPriceFromData: Number(trade.entryPrice),
       priceDifference: 0
     }));
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    if (!isAuthorizedCronRequest(request)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     console.log('Starting MAE/MFE computation cron job');
 
     if (!DATABENTO_API_KEY) {

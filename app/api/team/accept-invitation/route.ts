@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { createClient } from '@/server/auth'
+import { createRouteClient } from "@/lib/supabase/route-client"
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient()
+    const supabase = createRouteClient(req)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user?.id) {
       return NextResponse.json(

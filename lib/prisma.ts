@@ -8,6 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 const isProduction = process.env.NODE_ENV === 'production'
+const isNextBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
 
 const selectRuntimeConnectionString = (): string => {
   // Prefer provider-specific pooled URLs when available.
@@ -37,7 +38,7 @@ const normalizeSupabasePoolerMode = (connectionString: string): string => {
       }
       return url.toString()
     }
-  } catch (error) {
+  } catch {
     return connectionString
   }
 
@@ -56,7 +57,7 @@ const forceIPv4ConnectionString = (connectionString: string): string => {
     const family = 4
     const separator = connectionString.includes('?') ? '&' : '?'
     return `${connectionString}${separator}family=${family}`
-  } catch (error) {
+  } catch {
     return connectionString
   }
 }
@@ -86,17 +87,36 @@ const shouldEnableSsl = (connectionString: string): boolean => {
   return isProduction
 }
 
-const shouldRejectUnauthorized = (): boolean => {
+const shouldRejectUnauthorized = (connectionString: string): boolean => {
   const override = parseBooleanEnv(process.env.PGSSL_REJECT_UNAUTHORIZED)
-  // Default to false for serverless poolers to avoid self-signed chain failures.
-  return override ?? false
+  if (override !== undefined) return override
+
+  if (connectionString) {
+    try {
+      const url = new URL(connectionString)
+      const sslMode = url.searchParams.get('sslmode')?.toLowerCase()
+      const isSupabasePooler = url.hostname.endsWith('.pooler.supabase.com')
+
+      // Align TLS verification behavior with libpq sslmode semantics.
+      // - verify-full / verify-ca: verify certificate chain.
+      // - require / prefer / allow: encrypt transport without strict verification.
+      if (sslMode === 'verify-full' || sslMode === 'verify-ca') return true
+      if (sslMode === 'require' || sslMode === 'prefer' || sslMode === 'allow') return false
+      if (isSupabasePooler) return false
+    } catch {
+      // Fall through to production default.
+    }
+  }
+
+  // Secure-by-default fallback in production. Opt out explicitly with PGSSL_REJECT_UNAUTHORIZED=false.
+  return override ?? isProduction
 }
 
 // Runtime should prefer pooled DATABASE_URL (Supabase pooler).
 // DIRECT_URL is intended for migrations/admin operations.
 const connectionString = normalizeSupabasePoolerMode(selectRuntimeConnectionString())
 const parsedPoolMax = Number.parseInt(process.env.PG_POOL_MAX ?? '', 10)
-const poolMax = Number.isFinite(parsedPoolMax) && parsedPoolMax > 0 ? parsedPoolMax : isProduction ? 2 : 5
+const poolMax = Number.isFinite(parsedPoolMax) && parsedPoolMax > 0 ? parsedPoolMax : isProduction ? (isNextBuildPhase ? 1 : 2) : 5
 const parsedIdleTimeout = Number.parseInt(process.env.PG_POOL_IDLE_TIMEOUT_MS ?? '', 10)
 const idleTimeoutMillis = Number.isFinite(parsedIdleTimeout) && parsedIdleTimeout > 0 ? parsedIdleTimeout : 10000
 const parsedConnTimeout = Number.parseInt(process.env.PG_POOL_CONNECT_TIMEOUT_MS ?? '', 10)
@@ -110,12 +130,21 @@ const poolConfig: pg.PoolConfig = {
 }
 
 if (shouldEnableSsl(connectionString)) {
-  poolConfig.ssl = { rejectUnauthorized: shouldRejectUnauthorized() }
+  const rejectUnauthorized = shouldRejectUnauthorized(connectionString)
+  poolConfig.ssl = { rejectUnauthorized }
+  const explicitInsecureTls = parseBooleanEnv(process.env.PGSSL_REJECT_UNAUTHORIZED) === false
+
+  if (isProduction && !isNextBuildPhase && rejectUnauthorized === false && explicitInsecureTls) {
+    console.warn(
+      "[Prisma] SSL certificate verification is disabled (PGSSL_REJECT_UNAUTHORIZED=false). " +
+      "Enable certificate verification in production unless your provider explicitly requires insecure TLS."
+    )
+  }
 }
 
 const pool = globalForPrisma.pool ?? new pg.Pool(poolConfig)
 
-if (isProduction) {
+if (isProduction && !isNextBuildPhase) {
   console.info('[Prisma] Pool initialized', {
     host: (() => {
       try {

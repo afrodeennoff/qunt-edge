@@ -16,58 +16,17 @@ import {
     Sparkles,
     TrendingUp,
     Shield,
-    Command,
-    ChevronsUpDown,
-    LogOut,
-    User,
-    Settings2,
 } from "lucide-react"
-
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarRail,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarMenu,
-    SidebarMenuItem,
-    SidebarMenuButton,
-    useSidebar,
-} from "@/components/ui/sidebar"
 
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { useCurrentLocale } from "@/locales/client"
 import { checkAdminStatus } from "@/app/[locale]/dashboard/settings/actions"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import ReferralButton from "@/components/referral-button"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 
 export function DashboardSidebar() {
     const { refreshAllData } = useData()
     const locale = useCurrentLocale()
-    const pathname = usePathname()
     const user = useUserStore(state => state.supabaseUser)
     const timezone = useUserStore(state => state.timezone)
     const setTimezone = useUserStore(state => state.setTimezone)

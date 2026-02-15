@@ -1,10 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Label } from "recharts"
-import type { Props } from 'recharts/types/component/Label'
-import type { PolarViewBox } from 'recharts/types/util/types'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from "recharts"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
@@ -23,17 +20,20 @@ interface TradeDistributionProps {
 }
 
 interface ChartDataPoint {
-  name: string;
-  value: number;
-  color: string;
-  count: number;
+  name: string
+  value: number
+  color: string
+  count: number
+  total: number
+}
+
+interface TooltipPayload {
+  payload: ChartDataPoint
 }
 
 interface TooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    payload: ChartDataPoint;
-  }>;
+  active?: boolean
+  payload?: TooltipPayload[]
 }
 
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
@@ -42,80 +42,76 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
   const hasData = nbTrades > 0
 
   const chartData = React.useMemo(() => {
-
-    // Safety check for nbTrades
     if (!nbTrades) return []
 
-    const winRate = Number((nbWin / nbTrades * 100).toFixed(2))
-    const lossRate = Number((nbLoss / nbTrades * 100).toFixed(2))
-    // Explicitly handle float precision issues
+    const toPercent = (value: number, total: number) => {
+      if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
+      return Number(((value / total) * 100).toFixed(2))
+    }
+
+    const winRate = toPercent(nbWin, nbTrades)
+    const lossRate = toPercent(nbLoss, nbTrades)
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'white', count: nbWin },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'rgba(255,255,255,0.12)', count: nbBe },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'rgba(255,255,255,0.18)', count: nbLoss }
+      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: '#f1f1f2', count: nbWin, total: nbTrades },
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: '#4d4f56', count: nbBe, total: nbTrades },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: '#767982', count: nbLoss, total: nbTrades },
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
-  const renderColorfulLegendText = (value: string, entry: any) => {
-    return <span className="text-[9px] uppercase font-black tracking-widest text-white/40">{value}</span>;
-  }
-
   const pieLayout = React.useMemo(() => {
-    if (size === "small") {
-      return { innerRadius: "50%", outerRadius: "74%", cy: "46%", legendPaddingTop: 0 };
+    if (size === 'small') {
+      return { innerRadius: '58%', outerRadius: '82%', cy: '42%' }
     }
-    if (size === "large" || size === "extra-large") {
-      return { innerRadius: "60%", outerRadius: "88%", cy: "45%", legendPaddingTop: 4 };
+    if (size === 'large' || size === 'extra-large') {
+      return { innerRadius: '63%', outerRadius: '92%', cy: '43%' }
     }
-    return { innerRadius: "56%", outerRadius: "84%", cy: "45%", legendPaddingTop: 6 };
-  }, [size]);
+    return { innerRadius: '61%', outerRadius: '90%', cy: '43%' }
+  }, [size])
 
-  const CustomTooltip = ({ active, payload }: TooltipProps) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-          <div className="flex flex-col mb-1 border-b border-white/5 pb-1">
-            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
-              {t('tradeDistribution.tooltip.type')}
-            </span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">
-              {data.name}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
-              {t('tradeDistribution.tooltip.percentage')}
-            </span>
-            <span className={cn(
-              "font-black text-sm tabular-nums",
-              data.color === 'white' ? "metric-positive" : "metric-negative"
-            )}>
-              {data.value.toFixed(2)}%
-            </span>
-          </div>
+  const renderTooltip = React.useCallback(({ active, payload }: TooltipProps) => {
+    if (!active || !payload || payload.length === 0) return null
+
+    const data = payload[0]?.payload
+    if (!data) return null
+
+    return (
+      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
+        <div className="flex flex-col mb-1 border-b border-white/5 pb-1">
+          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            {t('tradeDistribution.tooltip.type')}
+          </span>
+          <span className="font-black text-white text-[11px] uppercase tracking-widest">
+            {data.name}
+          </span>
         </div>
-      );
-    }
-    return null;
-  };
+        <div className="flex flex-col">
+          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            {t('tradeDistribution.tooltip.percentage')}
+          </span>
+          <span className={cn('font-black text-sm tabular-nums', data.count > 0 ? 'text-white' : 'text-white/45')}>
+            {data.value.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    )
+  }, [t])
 
   return (
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-          size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
+          'flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0',
+          size === 'small' ? 'p-2 h-10 justify-center' : 'p-3 sm:p-3.5 h-12 justify-center'
         )}
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
-                size === "small" ? "text-sm" : "text-base"
+                'line-clamp-1 font-bold tracking-tight text-white',
+                size === 'small' ? 'text-sm' : 'text-base'
               )}
             >
               {t('tradeDistribution.title')}
@@ -125,8 +121,8 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-white/20 hover:text-white transition-colors cursor-help",
-                      size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
+                      'text-white/20 hover:text-white transition-colors cursor-help',
+                      size === 'small' ? 'h-3.5 w-3.5' : 'h-4 w-4'
                     )}
                   />
                 </TooltipTrigger>
@@ -138,81 +134,80 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           </div>
         </div>
       </div>
+
       <div
         className={cn(
-          "flex-1 min-h-0",
-          size === 'small' ? "p-1" : "p-2 sm:p-3"
+          'flex-1 min-h-0',
+          size === 'small' ? 'p-1.5' : 'p-2 sm:p-3'
         )}
       >
-        <div className="w-full h-full">
+        <div className="w-full h-full flex min-h-0 flex-col">
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy={pieLayout.cy}
-                  innerRadius={pieLayout.innerRadius}
-                  outerRadius={pieLayout.outerRadius}
-                  paddingAngle={3}
-                  dataKey="value"
-                  startAngle={90}
-                  endAngle={-270}
-                  stroke="none"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.color}
-                      fillOpacity={entry.color === 'white' ? 0.95 : 1}
-                      className={cn(
-                        "transition-all duration-300 ease-in-out hover:fill-opacity-100",
-                        entry.color === "white" ? "chart-positive-emphasis" : "chart-negative-muted"
-                      )}
-                    />
-                  ))}
-                  <Label
-                    position="center"
-                    content={({ viewBox }: any) => {
-                      if (!viewBox || !viewBox.cx || !viewBox.cy) return null;
-                      const { cx, cy } = viewBox;
-                      const centerText = Math.round(chartData[0].value) + "%";
+            <>
+              <div className="min-h-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy={pieLayout.cy}
+                      innerRadius={pieLayout.innerRadius}
+                      outerRadius={pieLayout.outerRadius}
+                      paddingAngle={2}
+                      dataKey="value"
+                      startAngle={90}
+                      endAngle={-270}
+                      stroke="rgba(0,0,0,0)"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          fillOpacity={entry.color === '#f1f1f2' ? 0.95 : 1}
+                          className={cn(
+                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                            entry.color === "#f1f1f2" ? "chart-positive-emphasis" : "chart-negative-muted"
+                          )}
+                        />
+                      ))}
+                      <Label
+                        content={({ viewBox }) => {
+                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                            return (
+                              <text
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                              >
+                                <tspan x={viewBox.cx} dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
+                                <tspan x={viewBox.cx} dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
+                              </text>
+                            )
+                          }
+                        }}
+                      />
+                    </Pie>
+                    <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
 
-                      return (
-                        <text
-                          x={cx}
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="central"
-                        >
-                          <tspan x={cx} dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
-                          <tspan x={cx} dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{centerText}</tspan>
-                        </text>
-                      );
-                    }}
-                  />
-                </Pie>
-                <Legend
-                  verticalAlign="bottom"
-                  align="center"
-                  iconSize={6}
-                  iconType="circle"
-                  formatter={renderColorfulLegendText}
-                  wrapperStyle={{
-                    paddingTop: pieLayout.legendPaddingTop,
-                    paddingBottom: 0
-                  }}
-                  layout="horizontal"
-                />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: 'transparent' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+              <div className="flex flex-col items-center gap-3 pb-1 pt-2">
+                {chartData.map((entry) => (
+                  <div
+                    key={entry.name}
+                    className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em]"
+                  >
+                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
+                    <span className="text-white/58">{entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
-              No data available
+              {t("widgets.emptyState") ?? "No trades yet."}
             </div>
           )}
         </div>

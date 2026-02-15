@@ -52,8 +52,16 @@ function normalizeNextPath(next: string | null): string | null {
     if (!next) return null
     const trimmed = next.trim()
     if (!trimmed) return null
-    if (trimmed.startsWith('/')) return trimmed
-    return `/${trimmed}`
+    if (trimmed.startsWith('//') || trimmed.startsWith('\\')) return null
+    return `/${trimmed.replace(/^\/+/, '')}`
+}
+
+function withLocalePrefix(path: string, locale: string): string {
+    const normalized = normalizeNextPath(path) || `/${path}`
+    if (normalized.startsWith('/api/')) return normalized
+    // Already locale-prefixed? Keep it.
+    if (/^\/[a-z]{2}(?:-[a-z]{2})?(?:\/|$)/i.test(normalized)) return normalized
+    return `/${locale}${normalized}`
 }
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
@@ -134,14 +142,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setIsLoading(true)
         setAuthMethod('email')
         try {
-            const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
-            const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
-            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
-
-            const next = isSubscription
-                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
-                : nextUrl;
+            let next = nextUrl
+            if (isSubscription) {
+                const planPath = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout'
+                const searchParams = new URLSearchParams()
+                if (lookupKey) searchParams.set('lookup_key', lookupKey)
+                if (referralCode) searchParams.set('referral', referralCode)
+                if (promoCode) searchParams.set('promo_code', promoCode)
+                if (locale) searchParams.set('locale', locale)
+                const qs = searchParams.toString()
+                next = `${planPath}${qs ? `?${qs}` : ''}`
+            } else if (nextUrl) {
+                next = withLocalePrefix(nextUrl, locale)
+            }
             await signInWithEmail(values.email, next, locale)
             setIsEmailSent(true)
             setShowOtpInput(true)
@@ -247,7 +260,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             await signInWithPasswordAction(values.email, values.password || '')
             toast.success(t('success'), { description: t('auth.signIn') })
             router.refresh()
-            router.push(nextUrl || '/dashboard')
+            router.push(nextUrl ? withLocalePrefix(nextUrl, locale) : `/${locale}/dashboard`)
             setLastAuthPreference('password')
         } catch (error) {
             console.error(error)
@@ -287,7 +300,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 description: "Successfully verified. Redirecting...",
             })
             router.refresh()
-            router.push(nextUrl || '/dashboard')
+            router.push(nextUrl ? withLocalePrefix(nextUrl, locale) : `/${locale}/dashboard`)
         } catch (error) {
             console.error(error)
             toast.error("Error", {
@@ -304,14 +317,20 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setAuthMethod('discord')
 
         try {
-            const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
-            const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
-            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
+            let next = nextUrl;
+            if (isSubscription) {
+                const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+                const searchParams = new URLSearchParams();
+                if (lookupKey) searchParams.set('lookup_key', lookupKey);
+                if (referralCode) searchParams.set('referral', referralCode);
+                if (promoCode) searchParams.set('promo_code', promoCode);
+                if (locale) searchParams.set('locale', locale);
 
-            const next = isSubscription
-                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
-                : nextUrl;
+                const queryString = searchParams.toString();
+                next = `${planParam}${queryString ? `?${queryString}` : ''}`;
+            } else if (nextUrl) {
+                next = withLocalePrefix(nextUrl, locale)
+            }
             await signInWithDiscord(next, locale)
         } catch (error) {
             console.error(error)
@@ -326,14 +345,20 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setAuthMethod('google')
 
         try {
-            const referralParam = referralCode ? `&referral=${encodeURIComponent(referralCode)}` : '';
-            const promoParam = promoCode ? `&promo_code=${encodeURIComponent(promoCode)}` : '';
-            const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
-            const lookupParam = lookupKey ? `?lookup_key=${lookupKey}` : '';
+            let next = nextUrl;
+            if (isSubscription) {
+                const planParam = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout';
+                const searchParams = new URLSearchParams();
+                if (lookupKey) searchParams.set('lookup_key', lookupKey);
+                if (referralCode) searchParams.set('referral', referralCode);
+                if (promoCode) searchParams.set('promo_code', promoCode);
+                if (locale) searchParams.set('locale', locale);
 
-            const next = isSubscription
-                ? `${planParam}${lookupParam}${referralParam}${promoParam}`
-                : nextUrl;
+                const queryString = searchParams.toString();
+                next = `${planParam}${queryString ? `?${queryString}` : ''}`;
+            } else if (nextUrl) {
+                next = withLocalePrefix(nextUrl, locale)
+            }
             await signInWithGoogle(next, locale)
         } catch (error) {
             console.error(error)

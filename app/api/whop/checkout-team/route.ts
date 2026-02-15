@@ -1,8 +1,23 @@
 import { NextResponse } from "next/server";
-import { createClient, getWebsiteURL } from "@/server/auth";
+import { getWebsiteURL } from "@/server/auth";
 import { getWhop } from "@/lib/whop";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
-async function handleWhopTeamCheckout(user: any, websiteURL: string, teamName?: string) {
+function safeLocale(value: string | null | undefined): string {
+    const raw = (value || "").trim().toLowerCase();
+    if (!raw) return "en";
+    if (!/^[a-z]{2}(-[a-z]{2})?$/.test(raw)) return "en";
+    return raw;
+}
+
+function withLocalePrefix(locale: string, pathWithOptionalQuery: string): string {
+    const normalized = `/${pathWithOptionalQuery.replace(/^\/+/, "")}`;
+    if (normalized.startsWith("/api/")) return normalized;
+    if (/^\/[a-z]{2}(?:-[a-z]{2})?(?:\/|$)/i.test(normalized)) return normalized;
+    return `/${locale}${normalized}`;
+}
+
+async function handleWhopTeamCheckout(user: any, websiteURL: string, locale: string, teamName?: string) {
     const planId = process.env.NEXT_PUBLIC_WHOP_TEAM_PLAN_ID;
 
     if (!planId) {
@@ -22,7 +37,10 @@ async function handleWhopTeamCheckout(user: any, websiteURL: string, teamName?: 
                 team_name: teamName || '',
                 type: 'team',
             },
-            redirect_url: `${websiteURL}dashboard/settings?success=team_created`,
+            redirect_url: new URL(
+                withLocalePrefix(locale, "/dashboard/settings?success=team_created"),
+                websiteURL
+            ).toString(),
         });
 
         if (!checkoutConfig.purchase_url) {
@@ -40,34 +58,46 @@ export async function POST(req: Request) {
     const body = await req.formData();
     const websiteURL = await getWebsiteURL();
     const teamName = body.get('teamName') as string | null;
+    const locale = safeLocale(body.get('locale') as string | null);
 
-    const supabase = await createClient();
+    const supabase = createRouteClient(req);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
+        const search = new URLSearchParams();
+        search.set('subscription', 'true');
+        search.set('plan', 'team');
+        search.set('locale', locale);
+        if (teamName) search.set('teamName', teamName);
         return NextResponse.redirect(
-            `${websiteURL}authentication?subscription=true&plan=team`,
+            new URL(withLocalePrefix(locale, `/authentication?${search.toString()}`), websiteURL),
             303
         );
     }
 
-    return handleWhopTeamCheckout(user, websiteURL, teamName || undefined);
+    return handleWhopTeamCheckout(user, websiteURL, locale, teamName || undefined);
 }
 
 export async function GET(req: Request) {
     const websiteURL = await getWebsiteURL();
     const { searchParams } = new URL(req.url);
     const teamName = searchParams.get('teamName');
+    const locale = safeLocale(searchParams.get('locale'));
 
-    const supabase = await createClient();
+    const supabase = createRouteClient(req);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
+        const search = new URLSearchParams();
+        search.set('subscription', 'true');
+        search.set('plan', 'team');
+        search.set('locale', locale);
+        if (teamName) search.set('teamName', teamName);
         return NextResponse.redirect(
-            `${websiteURL}authentication?subscription=true&plan=team`,
+            new URL(withLocalePrefix(locale, `/authentication?${search.toString()}`), websiteURL),
             303
         );
     }
 
-    return handleWhopTeamCheckout(user, websiteURL, teamName || undefined);
+    return handleWhopTeamCheckout(user, websiteURL, locale, teamName || undefined);
 }

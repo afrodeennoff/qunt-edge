@@ -46,12 +46,12 @@ async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            // Use more permissive cookie options for better compatibility
+            // Preserve Supabase defaults while enforcing secure production behavior.
             response.cookies.set(name, value, {
               ...options,
               secure: process.env.NODE_ENV === "production",
-              sameSite: "lax", // More permissive than 'strict'
-              httpOnly: false, // Allow client-side access if needed
+              sameSite: options?.sameSite ?? "lax",
+              httpOnly: options?.httpOnly ?? true,
             })
           })
         },
@@ -90,17 +90,8 @@ async function updateSession(request: NextRequest) {
     }
   }
 
-  // Add user info to headers only if user exists
-  if (user && !error) {
-    response.headers.set("x-user-id", user.id)
-    response.headers.set("x-user-email", user.email || "")
-    response.headers.set("x-auth-status", "authenticated")
-  } else {
-    response.headers.set("x-auth-status", "unauthenticated")
-    if (error) {
-      response.headers.set("x-auth-error", (error as any).message || "Unknown error")
-    }
-  }
+  // Do not expose auth identity or auth error details via response headers.
+  // Downstream code must derive identity from Supabase session server-side.
 
   return { response, user, error }
 }

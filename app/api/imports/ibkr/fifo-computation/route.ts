@@ -3,6 +3,8 @@ import { type FinancialInstrument } from '../extract-orders/schema'
 import { z } from 'zod/v3';
 import { addMoney, mulMoney, subMoney, toDecimal, toMoneyNumber } from '@/lib/financial-math'
 import { normalizeToUtcTimestamp } from '@/lib/date-utils'
+import { apiError } from '@/lib/api-response'
+import { createRouteClient } from '@/lib/supabase/route-client'
 
 export const maxDuration = 60 // Allow up to 60 seconds for AI processing
 
@@ -127,6 +129,12 @@ function matchOrdersWithFIFO(orders: Order[], instruments: FinancialInstrument[]
 
 export async function POST(request: Request) {
     try {
+        const supabase = createRouteClient(request)
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError || !user?.id) {
+            return apiError('UNAUTHORIZED', 'Authentication required', 401)
+        }
+
         const json = await request.json()
         const { orders, instruments } = json
 
@@ -155,12 +163,8 @@ export async function POST(request: Request) {
             }
         });
 
-        console.log(`Processing ${validOrders.length} valid orders with ${instruments.length} instruments`);
-
         // Match orders using custom FIFO algorithm
         const trades = matchOrdersWithFIFO(validOrders, instruments);
-
-        console.log(`Generated ${trades.length} trades`);
 
         // Validate trades
         const validTrades = trades.filter((trade: Trade) => {

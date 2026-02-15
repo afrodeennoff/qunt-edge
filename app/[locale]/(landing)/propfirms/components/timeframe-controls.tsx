@@ -35,14 +35,17 @@ export function TimeframeControls({ timeframeLabel, timeframeOptions }: Timefram
 
   return (
     <div className="flex items-center gap-2">
-      <Label htmlFor="timeframe-select" className="text-sm font-medium">
+      <Label htmlFor="timeframe-select" className="text-xs font-semibold tracking-wide text-white/60">
         {timeframeLabel}
       </Label>
       <Select value={currentTimeframe} onValueChange={handleTimeframeChange}>
-        <SelectTrigger id="timeframe-select" className="w-[200px]">
+        <SelectTrigger
+          id="timeframe-select"
+          className="w-[200px] border-white/10 bg-black/40 text-white/90 shadow-none backdrop-blur-sm hover:bg-white/5 focus:ring-1 focus:ring-white/15"
+        >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="border-white/10 bg-black/95 text-white/90">
           <SelectItem value="currentMonth">{timeframeOptions.currentMonth}</SelectItem>
           <SelectItem value="last3Months">{timeframeOptions.last3Months}</SelectItem>
           <SelectItem value="last6Months">{timeframeOptions.last6Months}</SelectItem>
@@ -55,4 +58,3 @@ export function TimeframeControls({ timeframeLabel, timeframeOptions }: Timefram
     </div>
   )
 }
-

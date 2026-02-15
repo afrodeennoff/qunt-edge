@@ -1,5 +1,4 @@
-import { Trade } from "@/prisma/generated/prisma";
-import { calculateRiskMetricsV1 } from "@/lib/analytics/metrics-v1";
+import { calculateRiskMetricsV1, type RiskTradeLike } from "@/lib/analytics/metrics-v1";
 
 export interface DatePnL {
     date: Date;
@@ -17,7 +16,7 @@ export interface RiskMetrics {
     maxDrawdownPercent: number; // Maximum Drawdown (%)
 }
 
-export function calculateAdvancedMetrics(trades: Trade[]): RiskMetrics {
+export function calculateAdvancedMetrics(trades: RiskTradeLike[]): RiskMetrics {
     const metrics = calculateRiskMetricsV1(trades)
     return {
         expectancy: metrics.expectancy,

@@ -1,38 +1,10 @@
 import { NextResponse } from "next/server"
+import { Prisma } from "@/prisma/generated/prisma"
 import { prisma } from "@/lib/prisma"
 import { getDatabaseUserId } from "@/server/auth"
 
-interface UserAggregate {
-  totalTrades: number
-  wins: number
-  losses: number
-  grossWin: number
-  grossLossAbs: number
-  cumulativePnl: number
-  runningNet: number
-  peakNet: number
-  maxDrawdown: number
-}
-
-interface BenchmarkMetrics {
-  riskReward: number
-  drawdown: number
-  winRate: number
-  avgReturn: number
-}
-
-function toUserMetrics(value: UserAggregate): BenchmarkMetrics {
-  const avgWin = value.wins > 0 ? value.grossWin / value.wins : 0
-  const avgLossAbs = value.losses > 0 ? value.grossLossAbs / value.losses : 0
-  const decisiveTrades = value.wins + value.losses
-
-  return {
-    riskReward: avgLossAbs > 0 ? avgWin / avgLossAbs : 0,
-    drawdown: value.maxDrawdown,
-    winRate: decisiveTrades > 0 ? (value.wins / decisiveTrades) * 100 : 0,
-    avgReturn: value.totalTrades > 0 ? value.cumulativePnl / value.totalTrades : 0,
-  }
-}
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 export async function GET() {
   try {
@@ -41,62 +13,94 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const trades = await prisma.trade.findMany({
-      select: {
-        userId: true,
-        pnl: true,
-        commission: true,
-        entryDate: true,
-      },
-      orderBy: [{ userId: "asc" }, { entryDate: "asc" }],
-    })
+    const benchmarkRows = await prisma.$queryRaw<Array<{
+      risk_reward: number | Prisma.Decimal | null
+      drawdown: number | Prisma.Decimal | null
+      win_rate: number | Prisma.Decimal | null
+      avg_return: number | Prisma.Decimal | null
+      sample_size: bigint | number
+    }>>`
+      WITH ordered_trades AS (
+        SELECT
+          "userId",
+          "id",
+          "entryDate",
+          COALESCE("pnl", 0)::double precision AS pnl,
+          COALESCE("commission", 0)::double precision AS commission
+        FROM "Trade"
+        WHERE "entryDate" >= NOW() - INTERVAL '365 days'
+      ),
+      running AS (
+        SELECT
+          "userId",
+          "id",
+          "entryDate",
+          pnl,
+          (pnl - commission) AS net,
+          SUM(pnl - commission) OVER (
+            PARTITION BY "userId"
+            ORDER BY "entryDate", "id"
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+          ) AS running_net
+        FROM ordered_trades
+      ),
+      drawdown_points AS (
+        SELECT
+          "userId",
+          pnl,
+          running_net,
+          MAX(running_net) OVER (
+            PARTITION BY "userId"
+            ORDER BY "entryDate", "id"
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+          ) AS peak_net
+        FROM running
+      ),
+      per_user AS (
+        SELECT
+          "userId",
+          COUNT(*)::double precision AS total_trades,
+          SUM(CASE WHEN pnl > 0 THEN 1 ELSE 0 END)::double precision AS wins,
+          SUM(CASE WHEN pnl < 0 THEN 1 ELSE 0 END)::double precision AS losses,
+          SUM(CASE WHEN pnl > 0 THEN pnl ELSE 0 END)::double precision AS gross_win,
+          SUM(CASE WHEN pnl < 0 THEN ABS(pnl) ELSE 0 END)::double precision AS gross_loss_abs,
+          SUM(pnl)::double precision AS cumulative_pnl,
+          MAX(peak_net - running_net)::double precision AS max_drawdown
+        FROM drawdown_points
+        GROUP BY "userId"
+      ),
+      per_user_metrics AS (
+        SELECT
+          CASE
+            WHEN losses > 0 AND wins > 0 AND gross_loss_abs > 0
+              THEN (gross_win / wins) / (gross_loss_abs / losses)
+            ELSE 0
+          END AS risk_reward,
+          max_drawdown AS drawdown,
+          CASE
+            WHEN (wins + losses) > 0 THEN (wins / (wins + losses)) * 100
+            ELSE 0
+          END AS win_rate,
+          CASE
+            WHEN total_trades > 0 THEN cumulative_pnl / total_trades
+            ELSE 0
+          END AS avg_return
+        FROM per_user
+        WHERE total_trades > 0
+      )
+      SELECT
+        COALESCE(AVG(risk_reward), 0)::double precision AS risk_reward,
+        COALESCE(AVG(drawdown), 0)::double precision AS drawdown,
+        COALESCE(AVG(win_rate), 0)::double precision AS win_rate,
+        COALESCE(AVG(avg_return), 0)::double precision AS avg_return,
+        COUNT(*)::bigint AS sample_size
+      FROM per_user_metrics
+    `
 
-    const users = new Map<string, UserAggregate>()
-    for (const trade of trades) {
-      const pnl = Number(trade.pnl ?? 0)
-      const commission = Number(trade.commission ?? 0)
-      const net = pnl - commission
+    const summary = benchmarkRows[0]
+    const sampleSize = Number(summary?.sample_size ?? 0)
 
-      const entry = users.get(trade.userId) ?? {
-        totalTrades: 0,
-        wins: 0,
-        losses: 0,
-        grossWin: 0,
-        grossLossAbs: 0,
-        cumulativePnl: 0,
-        runningNet: 0,
-        peakNet: 0,
-        maxDrawdown: 0,
-      }
-
-      entry.totalTrades += 1
-      entry.cumulativePnl += pnl
-      entry.runningNet += net
-
-      if (pnl > 0) {
-        entry.wins += 1
-        entry.grossWin += pnl
-      } else if (pnl < 0) {
-        entry.losses += 1
-        entry.grossLossAbs += Math.abs(pnl)
-      }
-
-      if (entry.runningNet > entry.peakNet) {
-        entry.peakNet = entry.runningNet
-      }
-      const drawdown = entry.peakNet - entry.runningNet
-      if (drawdown > entry.maxDrawdown) {
-        entry.maxDrawdown = drawdown
-      }
-
-      users.set(trade.userId, entry)
-    }
-
-    const metrics = Array.from(users.values())
-      .filter((user) => user.totalTrades > 0)
-      .map(toUserMetrics)
-
-    if (metrics.length === 0) {
+    if (sampleSize === 0) {
       return NextResponse.json({
         benchmark: {
           riskReward: 0,
@@ -105,28 +109,24 @@ export async function GET() {
           avgReturn: 0,
           sampleSize: 0,
         },
+      }, {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
       })
     }
 
-    const totals = metrics.reduce(
-      (acc, metric) => ({
-        riskReward: acc.riskReward + metric.riskReward,
-        drawdown: acc.drawdown + metric.drawdown,
-        winRate: acc.winRate + metric.winRate,
-        avgReturn: acc.avgReturn + metric.avgReturn,
-      }),
-      { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0 },
-    )
-
-    const sampleSize = metrics.length
-
     return NextResponse.json({
       benchmark: {
-        riskReward: Number((totals.riskReward / sampleSize).toFixed(2)),
-        drawdown: Number((totals.drawdown / sampleSize).toFixed(2)),
-        winRate: Number((totals.winRate / sampleSize).toFixed(2)),
-        avgReturn: Number((totals.avgReturn / sampleSize).toFixed(2)),
+        riskReward: Number(Number(summary?.risk_reward ?? 0).toFixed(2)),
+        drawdown: Number(Number(summary?.drawdown ?? 0).toFixed(2)),
+        winRate: Number(Number(summary?.win_rate ?? 0).toFixed(2)),
+        avgReturn: Number(Number(summary?.avg_return ?? 0).toFixed(2)),
         sampleSize,
+      },
+    }, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
       },
     })
   } catch (error) {

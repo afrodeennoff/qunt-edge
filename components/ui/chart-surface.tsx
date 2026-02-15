@@ -28,7 +28,7 @@ export function ChartSurface({
   actions,
   info,
   state = "ready",
-  emptyMessage = "No chart data available.",
+  emptyMessage = "No trades yet.",
   errorMessage = "Unable to load chart.",
   size = "medium",
   className,
@@ -60,7 +60,7 @@ export function ChartSurface({
 
     if (state === "empty") {
       return (
-        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-muted-foreground">
+        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-white/55">
           {emptyMessage}
         </div>
       )
@@ -71,14 +71,17 @@ export function ChartSurface({
 
   return (
     <div
-      data-chart-surface="v2"
-      className={cn("h-full flex flex-col bg-transparent", className)}
+      data-chart-surface="modern"
+      className={cn(
+        "h-full flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-border/55 bg-[hsl(var(--surface-1))] shadow-[var(--shadow-sm)]",
+        className
+      )}
     >
       {hasHeader && (
         <div
           className={cn(
-            "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-            isSmall ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
+            "flex flex-col items-stretch space-y-0 border-b border-border/50 shrink-0",
+            isSmall ? "p-2 h-10 justify-center" : "p-3 h-12 justify-center",
             headerClassName
           )}
         >

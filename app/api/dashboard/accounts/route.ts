@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { Prisma } from '@/prisma/generated/prisma'
 import { getAccountsAction } from '@/server/accounts'
 import { apiError } from '@/lib/api-response'
+import { createRouteClient } from '@/lib/supabase/route-client'
 
 
 function serializeWithDecimals<T>(value: T): T {
@@ -15,8 +16,17 @@ function serializeWithDecimals<T>(value: T): T {
   ) as T
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const supabase = createRouteClient(request)
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user?.id) {
+      return apiError('UNAUTHORIZED', 'Authentication required', 401)
+    }
+
     const accounts = await getAccountsAction()
     return NextResponse.json(serializeWithDecimals(accounts))
   } catch (error) {

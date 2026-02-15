@@ -12,9 +12,8 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -31,15 +30,33 @@ interface PnLPerContractChartProps {
   size?: WidgetSize;
 }
 
-const chartConfig = {
-  pnl: {
-    label: "Avg P/L per Contract",
-    color: "white",
-  },
-} satisfies ChartConfig;
+type InstrumentSummary = {
+  trades: Array<{
+    pnl?: number | string | null;
+    commission?: number | string | null;
+    quantity?: number | string | null;
+  }>;
+  totalPnl: number;
+  totalContracts: number;
+  winCount: number;
+}
+
+type ChartDatum = {
+  instrument: string;
+  averagePnl: number;
+  totalPnl: number;
+  tradeCount: number;
+  winCount: number;
+  totalContracts: number;
+}
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+const formatWinRate = (wins: number, total: number) => {
+  if (!Number.isFinite(wins) || !Number.isFinite(total) || total <= 0) return "0.0"
+  return ((wins / total) * 100).toFixed(1)
+}
 
 export default function PnLPerContractChart({
   size = "medium",
@@ -70,15 +87,7 @@ export default function PnLPerContractChart({
         }
         return acc;
       },
-      {} as Record<
-        string,
-        {
-          trades: any[];
-          totalPnl: number;
-          totalContracts: number;
-          winCount: number;
-        }
-      >,
+      {} as Record<string, InstrumentSummary>,
     );
 
     // Convert to chart data format
@@ -98,11 +107,10 @@ export default function PnLPerContractChart({
   const maxPnL = Math.max(...chartData.map((d) => d.averagePnl));
   const minPnL = Math.min(...chartData.map((d) => d.averagePnl));
   const hasData = chartData.some((d) => d.tradeCount > 0);
-  const absMax = Math.max(Math.abs(maxPnL), Math.abs(minPnL));
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload as ChartDatum | undefined;
+      if (!data) return null;
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[150px]">
           <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
@@ -126,7 +134,7 @@ export default function PnLPerContractChart({
             <div className="flex justify-between items-center">
               <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContract.tooltip.trades")}</span>
               <span className="font-black text-white/60 text-[11px]">
-                {data.tradeCount} ({((data.winCount / data.tradeCount) * 100).toFixed(1)}% WR)
+                {data.tradeCount} ({formatWinRate(data.winCount, data.tradeCount)}% WR)
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -140,7 +148,7 @@ export default function PnLPerContractChart({
       );
     }
     return null;
-  };
+  }, [t]);
 
   return (
     <ChartSurface>
@@ -227,7 +235,7 @@ export default function PnLPerContractChart({
                 />
                 <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={renderTooltip}
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                 />
                 <Bar
@@ -255,7 +263,7 @@ export default function PnLPerContractChart({
             </ResponsiveContainer>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
-              No data available
+              {t("widgets.emptyState") ?? "No trades yet."}
             </div>
           )}
         </div>

@@ -19,6 +19,7 @@ import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { apiError } from "@/lib/api-response";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
+import { createRouteClient } from "@/lib/supabase/route-client";
 
 export const maxDuration = 60;
 const MAX_CHAT_BODY_BYTES = 1024 * 1024;
@@ -142,6 +143,12 @@ export async function POST(req: NextRequest) {
   const startedAt = Date.now();
 
   try {
+    const supabase = createRouteClient(req)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user?.id) {
+      return apiError("UNAUTHORIZED", "Authentication required", 401)
+    }
+
     const lengthHeader = req.headers.get("content-length");
     const contentLength = lengthHeader ? Number(lengthHeader) : 0;
 

@@ -33,20 +33,20 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
     const sizeClasses = {
       sm: {
         icon: "h-4 w-4",
-        value: "text-lg",
+        value: "text-base",
         title: "text-xs",
         trend: "text-xs"
       },
       md: {
         icon: "h-5 w-5",
-        value: "text-2xl",
+        value: "text-xl",
         title: "text-sm",
         trend: "text-sm"
       },
       lg: {
         icon: "h-6 w-6",
-        value: "text-3xl",
-        title: "text-base",
+        value: "text-2xl",
+        title: "text-sm",
         trend: "text-base"
       }
     }
@@ -58,7 +58,10 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
         ref={ref}
         hover={!!onClick}
         clickable={!!onClick}
-        className={cn("group", className)}
+        className={cn(
+          "group border-border/55 bg-[hsl(var(--surface-1))] shadow-[var(--shadow-sm)]",
+          className
+        )}
         onClick={onClick}
         aria-label={title}
         {...props}
@@ -79,7 +82,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
               <div
                 className={cn(
                   "flex items-center gap-1 shrink-0",
-                  trend.isPositive ? "text-white" : "text-zinc-500",
+                  trend.isPositive ? "text-primary-token" : "text-secondary-token",
                   currentSize.trend
                 )}
                 aria-label={`${trend.isPositive ? 'Increased' : 'Decreased'} by ${Math.abs(trend.value)}%`}
@@ -95,7 +98,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
             className={cn(
               "font-bold tracking-tight",
               currentSize.value,
-              trend?.isPositive ? "text-white" : trend?.isPositive === false ? "text-zinc-400" : "text-foreground"
+              trend?.isPositive ? "text-primary-token" : trend?.isPositive === false ? "text-secondary-token" : "text-foreground"
             )}
             aria-label={`Value: ${value}`}
           >

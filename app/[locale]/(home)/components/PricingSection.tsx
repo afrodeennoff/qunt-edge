@@ -8,14 +8,16 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { useCurrentLocale } from '@/locales/client'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { buildWhopCheckoutUrl } from '@/lib/whop-checkout'
+import { useCurrency } from '@/hooks/use-currency'
 
 const plans = [
   {
     name: 'Starter',
     price: '$0',
     period: '/month',
-    subtitle: 'For traders starting process discipline',
-    features: ['Manual journaling', 'Basic trade analytics', 'Weekly summary snapshot'],
+    subtitle: 'For traders building foundational review discipline',
+    features: ['Manual journaling', 'Core trade analytics', 'Weekly process snapshot'],
     cta: 'Start Free',
     note: 'No card required',
     popular: false,
@@ -50,6 +52,7 @@ const plans = [
 
 export default function PricingSection() {
   const locale = useCurrentLocale()
+  const { currency } = useCurrency()
 
   return (
     <section id="pricing" className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8 bg-background">
@@ -65,8 +68,8 @@ export default function PricingSection() {
             Pricing
           </Badge>
           <h2 className="text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
-            Transparent plans for <br />
-            <span className="text-primary">individual and team growth</span>
+            Pricing built for <br />
+            <span className="text-primary">individual traders and performance desks</span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.78] text-muted-foreground sm:text-[18px] [font-family:var(--home-copy)]">
             Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
@@ -121,7 +124,20 @@ export default function PricingSection() {
                     variant={plan.popular ? 'default' : 'outline'}
                     className={cn("h-12 w-full rounded-full text-[10px] font-semibold uppercase tracking-[0.18em] [font-family:var(--home-copy)]", plan.popular && "shadow-md shadow-primary/25")}
                   >
-                    <Link href={`/${locale}/authentication?next=dashboard`}>{plan.cta}</Link>
+                    <Link
+                      href={
+                        plan.name === 'Pro AI'
+                          ? buildWhopCheckoutUrl({
+                              lookupKey: `plus_monthly_${currency.toLowerCase()}`,
+                              locale,
+                            })
+                          : plan.name === 'Desk'
+                            ? `/${locale}/support`
+                            : `/${locale}/authentication?next=dashboard`
+                      }
+                    >
+                      {plan.cta}
+                    </Link>
                   </Button>
                   <p className="text-center text-xs text-muted-foreground [font-family:var(--home-copy)]">{plan.note}</p>
                 </CardFooter>

@@ -26,6 +26,7 @@ import { useDashboard } from '../dashboard-context'
 import { motion, useReducedMotion } from 'framer-motion'
 import { WidgetShell } from "@/components/ui/widget-shell"
 import { isUiV2Enabled } from "@/lib/ui-v2"
+import { useSearchParams } from "next/navigation"
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
   return {
@@ -49,12 +50,12 @@ const sizeToGrid = (size: WidgetSize, isSmallScreen = false): { w: number, h: nu
       case 'small-long':
         return { w: 12, h: 2 }
       case 'medium':
-        return { w: 12, h: 4 }
+        return { w: 12, h: 3 }
       case 'large':
       case 'extra-large':
-        return { w: 12, h: 6 }
-      default:
         return { w: 12, h: 4 }
+      default:
+        return { w: 12, h: 3 }
     }
   }
 
@@ -371,7 +372,8 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
   const user = useUserStore(state => state.user)
-  const { saveDashboardLayout } = useData()
+  const { saveDashboardLayout, trades, formattedTrades, instruments, accountNumbers, dateRange } = useData()
+  const searchParams = useSearchParams()
   const {
     isCustomizing,
     setIsCustomizing,
@@ -386,6 +388,7 @@ export default function WidgetCanvas() {
   const [isUserAction, setIsUserAction] = useState(false)
   const t = useI18n()
   const shouldReduceMotion = useReducedMotion()
+  const showDataDebug = searchParams.get("debugData") === "1"
 
   // Add this state to track if the layout change is from user interaction
   const activeLayout = useMemo(() => isMobile ? 'mobile' : 'desktop', [isMobile])
@@ -734,6 +737,51 @@ export default function WidgetCanvas() {
   // Add auto-scroll functionality for mobile
   useAutoScroll(isMobile && isCustomizing)
 
+  if (!layouts) {
+    return (
+      <div className="relative mt-0 w-full min-h-screen">
+        <div className="animate-pulse rounded-2xl border border-white/12 bg-black/60 p-6">
+          <div className="h-4 w-48 rounded bg-white/10" />
+          <div className="mt-3 h-3 w-96 max-w-full rounded bg-white/10" />
+          <div className="mt-6 flex gap-2">
+            <div className="h-9 w-44 rounded bg-white/10" />
+            <div className="h-9 w-28 rounded bg-white/10" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (currentLayout.length === 0) {
+    return (
+      <div className="relative mt-0 w-full min-h-screen">
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-black/90 p-6 text-white shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
+          <div className="text-sm font-semibold tracking-tight">
+            {(t as any)("widgets.emptyLayoutTitle") ?? "No widgets on your dashboard."}
+          </div>
+          <div className="mt-2 text-sm text-white/60 leading-relaxed">
+            {(t as any)("widgets.emptyLayoutDescription") ?? "Restore the default layout to show charts and stats, or switch to Edit mode to add widgets."}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button
+              onClick={restoreDefaultLayout}
+              className="bg-white text-black hover:bg-white/90 font-semibold"
+            >
+              {(t as any)("widgets.restoreDefaults") ?? "Restore default layout"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsCustomizing(true)}
+              className="border-white/15 bg-transparent text-white hover:bg-white/5 hover:text-white"
+            >
+              {(t as any)("widgets.edit") ?? "Edit"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={cn(
       "relative mt-0 w-full min-h-screen",
@@ -745,13 +793,13 @@ export default function WidgetCanvas() {
             layouts={responsiveLayout}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-            rowHeight={isMobile ? 62 : 68}
+            rowHeight={isMobile ? 56 : 68}
             isDraggable={isCustomizing}
             isResizable={false}
             draggableHandle=".drag-handle"
             onDragStart={() => setIsUserAction(true)}
             onLayoutChange={handleLayoutChange}
-            margin={isMobile ? [6, 6] : [8, 8]}
+            margin={isMobile ? [6, 4] : [8, 8]}
             containerPadding={[0, 0]}
             useCSSTransforms={true}
           >
@@ -789,6 +837,14 @@ export default function WidgetCanvas() {
                         ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_rgba(0,0,0,0.95)]"
                         : "bg-black/95 hover:border-white/20"
                     )}>
+                      {showDataDebug && !isCustomizing && (
+                        <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white/80 backdrop-blur-sm">
+                          T:{trades.length} F:{formattedTrades.length}
+                          {(instruments.length > 0 || accountNumbers.length > 0 || Boolean(dateRange?.from || dateRange?.to)) && (
+                            <span className="ml-2 text-white/40">filtered</span>
+                          )}
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
                       <div className="relative h-full w-full">
                         {renderWidget(widget)}

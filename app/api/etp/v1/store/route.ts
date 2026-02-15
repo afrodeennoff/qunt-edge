@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifySecureToken } from '@/lib/api-auth'
 
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
@@ -18,12 +19,7 @@ async function authenticateRequest(req: NextRequest) {
   const token = authHeader.split(' ')[1];
   
   try {
-    // Verify the token by finding the user
-    const user = await prisma.user.findFirst({
-      where: {
-        etpToken: token
-      }
-    });
+    const user = await verifySecureToken(token, 'etp')
     
     if (!user) {
       return { 
@@ -36,7 +32,7 @@ async function authenticateRequest(req: NextRequest) {
     }
     
     return { authenticated: true, user };
-  } catch (error) {
+  } catch {
     return {
       authenticated: false,
       error: {
@@ -71,22 +67,33 @@ export async function POST(req: NextRequest) {
     // Process and store each order
     const createdOrders = await Promise.all(
       orders.map(async (order) => {
-        return prisma.order.upsert({
+        const existingOrder = await prisma.order.findFirst({
           where: {
+            userId: user.id,
             orderId: order.OrderId
           },
-          update: {
-            accountId: order.AccountId,
-            orderId: order.OrderId,
-            orderAction: order.OrderAction,
-            quantity: order.Quantity,
-            averageFilledPrice: order.AverageFilledPrice,
-            isOpeningOrder: order.IsOpeningOrder,
-            time: new Date(order.Time),
-            symbol: order.Instrument.Symbol,
-            instrumentType: order.Instrument.Type
-          },
-          create: {
+          select: { id: true }
+        })
+
+        if (existingOrder) {
+          return prisma.order.update({
+            where: { id: existingOrder.id },
+            data: {
+              accountId: order.AccountId,
+              orderId: order.OrderId,
+              orderAction: order.OrderAction,
+              quantity: order.Quantity,
+              averageFilledPrice: order.AverageFilledPrice,
+              isOpeningOrder: order.IsOpeningOrder,
+              time: new Date(order.Time),
+              symbol: order.Instrument.Symbol,
+              instrumentType: order.Instrument.Type
+            }
+          })
+        }
+
+        return prisma.order.create({
+          data: {
             accountId: order.AccountId,
             orderId: order.OrderId,
             orderAction: order.OrderAction,
@@ -98,7 +105,7 @@ export async function POST(req: NextRequest) {
             instrumentType: order.Instrument.Type,
             userId: user.id
           }
-        });
+        })
       })
     );
     
@@ -137,7 +144,7 @@ export async function GET(req: NextRequest) {
     const toDate = searchParams.get('to');
     
     // Build the query
-    const query: any = {
+    const query: Parameters<typeof prisma.order.findMany>[0] = {
       where: {
         userId: user.id
       },
@@ -147,21 +154,24 @@ export async function GET(req: NextRequest) {
       take: limit,
       skip: offset
     };
+
+    // `where` is optional in Prisma args types; keep a stable reference for type safety.
+    const where = (query.where ??= { userId: user.id });
     
     // Add filters if provided
     if (accountId) {
-      query.where.accountId = accountId;
+      where.accountId = accountId;
     }
     
     if (fromDate || toDate) {
-      query.where.time = {};
+      where.time = {};
       
       if (fromDate) {
-        query.where.time.gte = new Date(fromDate);
+        where.time.gte = new Date(fromDate);
       }
       
       if (toDate) {
-        query.where.time.lte = new Date(toDate);
+        where.time.lte = new Date(toDate);
       }
     }
     
@@ -170,7 +180,7 @@ export async function GET(req: NextRequest) {
     
     // Get total count for pagination
     const totalCount = await prisma.order.count({
-      where: query.where
+      where
     });
     
     return NextResponse.json({ 

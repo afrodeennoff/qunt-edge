@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useState, startTransition } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -19,80 +19,8 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from 'sonner'
 import { cn } from "@/lib/utils"
-
-// Currency detection hook
-// Handles special case for French overseas territories (DOM/TOM) that use EUR currency
-// but must be billed in USD due to Stripe pricing configuration limitations
-function useCurrency() {
-  const [currency, setCurrency] = useState<'USD' | 'EUR'>('USD')
-  const [symbol, setSymbol] = useState('$')
-  const locale = useCurrentLocale()
-
-  const detectCurrency = useCallback(() => {
-    // Eurozone countries as per official EU list
-    const eurozoneCountries = [
-      'AT', 'BE', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT',
-      'LV', 'LT', 'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES', 'CH',
-      // French overseas territories
-      'GP', 'MQ', 'GF', 'RE', 'YT', 'PM', 'BL', 'MF', 'NC', 'PF', 'WF', 'TF'
-    ]
-
-
-    // Function to set currency based on country code
-    const setCurrencyFromCountry = (countryCode: string) => {
-      const upperCountryCode = countryCode.toUpperCase()
-      startTransition(() => {
-        if (eurozoneCountries.includes(upperCountryCode)) {
-          setCurrency('EUR')
-          setSymbol('€')
-        } else {
-          setCurrency('USD')
-          setSymbol('$')
-        }
-      })
-      return true
-    }
-
-    // First, try to get country from cookie (set by middleware)
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`
-      const parts = value.split(`; ${name}=`)
-      if (parts.length === 2) return parts.pop()?.split(';').shift()
-      return null
-    }
-
-    const countryFromCookie = getCookie('user-country')
-    if (countryFromCookie) {
-      setCurrencyFromCountry(countryFromCookie)
-      return
-    }
-
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-    // Check if timezone indicates European location
-    const isEuropeanTimezone = timezone.startsWith('Europe/') ||
-      ['Paris', 'Berlin', 'Madrid', 'Rome', 'Amsterdam', 'Brussels', 'Vienna'].some(city => timezone.includes(city))
-
-    // Check if locale indicates European country
-    const isEuropeanLocale = /^(fr|de|es|it|nl|pt|el|fi|et|lv|lt|sl|sk|mt|cy)-/.test(locale)
-
-    startTransition(() => {
-      if (isEuropeanTimezone || isEuropeanLocale) {
-        setCurrency('EUR')
-        setSymbol('€')
-      } else {
-        setCurrency('USD')
-        setSymbol('$')
-      }
-    })
-  }, [locale])
-
-  useEffect(() => {
-    detectCurrency()
-  }, [detectCurrency])
-
-  return { currency, symbol }
-}
+import { buildWhopCheckoutUrl } from '@/lib/whop-checkout'
+import { useCurrency } from '@/hooks/use-currency'
 
 type BillingPeriod = 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
 
@@ -138,6 +66,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   const [pendingLookupKey, setPendingLookupKey] = useState<string>('')
   const [referralCode, setReferralCode] = useState<string | null>(null)
   const t = useI18n()
+  const locale = useCurrentLocale()
   const { currency, symbol } = useCurrency()
 
   // Read referral code from URL params or localStorage on mount
@@ -209,28 +138,14 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   // Function to handle plan switching
   const handlePlanSwitch = async (lookupKey: string) => {
     if (!currentSubscription) {
-      // No subscription exists, use checkout session
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = '/api/whop/checkout'
-
-      const input = document.createElement('input')
-      input.type = 'hidden'
-      input.name = 'lookup_key'
-      input.value = lookupKey
-      form.appendChild(input)
-
-      // Add referral code if present
-      if (referralCode) {
-        const referralInput = document.createElement('input')
-        referralInput.type = 'hidden'
-        referralInput.name = 'referral'
-        referralInput.value = referralCode
-        form.appendChild(referralInput)
-      }
-
-      document.body.appendChild(form)
-      form.submit()
+      // No subscription exists: jump straight into Whop checkout.
+      window.location.assign(
+        buildWhopCheckoutUrl({
+          lookupKey,
+          referral: referralCode,
+          locale,
+        }),
+      )
       return
     }
 
@@ -285,28 +200,14 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
         window.location.reload()
       } else if ('requiresCheckout' in result && result.requiresCheckout) {
         // Lifetime plans need checkout session, redirect to checkout
-        const form = document.createElement('form')
-        form.method = 'POST'
-        form.action = '/api/whop/checkout'
-
         const finalLookupKey = result.lookupKey || lookupKey
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = 'lookup_key'
-        input.value = finalLookupKey
-        form.appendChild(input)
-
-        // Add referral code if present
-        if (referralCode) {
-          const referralInput = document.createElement('input')
-          referralInput.type = 'hidden'
-          referralInput.name = 'referral'
-          referralInput.value = referralCode
-          form.appendChild(referralInput)
-        }
-
-        document.body.appendChild(form)
-        form.submit()
+        window.location.assign(
+          buildWhopCheckoutUrl({
+            lookupKey: finalLookupKey,
+            referral: referralCode,
+            locale,
+          }),
+        )
       } else {
         toast.error(t('billing.error'), {
           description: result.error,

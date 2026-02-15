@@ -21,6 +21,13 @@ interface InvestingEvent {
   type?: string
 }
 
+function isAuthorizedCronRequest(request: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = request.headers.get('authorization')
+  return authHeader === `Bearer ${cronSecret}`
+}
+
 function mapImpactToImportance(impact: string): 'HIGH' | 'MEDIUM' | 'LOW' {
   // Count the number of filled bull icons
   const filledBulls = (impact.match(/grayFullBullishIcon/g) || []).length
@@ -76,7 +83,7 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
         if (dateMatch) {
           const dateStr = dateMatch[1].trim()
           // Parse French date format (e.g., "Mercredi 7 mai 2025")
-          const [day, date, month, year] = dateStr.split(' ')
+          const [, date, month, year] = dateStr.split(' ')
           const monthMap: { [key: string]: string } = {
             'janvier': '01', 'février': '02', 'mars': '03', 'avril': '04',
             'mai': '05', 'juin': '06', 'juillet': '07', 'août': '08',
@@ -307,6 +314,10 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
 export async function GET(request: Request) {
   try {
+    if (!isAuthorizedCronRequest(request)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Get the URL and search params
     const { searchParams } = new URL(request.url)
     const lang = (searchParams.get('lang') || 'fr') as 'fr' | 'en'

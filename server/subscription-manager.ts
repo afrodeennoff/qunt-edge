@@ -349,15 +349,16 @@ export class SubscriptionManager {
     renewalDate?: Date
   }): Promise<{ success: boolean; error?: string }> {
     try {
-      const membership = await (whop.memberships as any).retrieve({
-        id: data.whopMembershipId,
-      })
+      const membership = await whop.memberships.retrieve(data.whopMembershipId)
 
-      const planName = membership.metadata?.plan || membership.product?.title || 'PLUS'
-      const interval = planName.toLowerCase().includes('monthly') ? 'month' :
-        planName.toLowerCase().includes('quarterly') ? 'quarter' :
-          planName.toLowerCase().includes('yearly') ? 'year' :
-            planName.toLowerCase().includes('lifetime') ? 'lifetime' : 'month'
+      const metadata = membership.metadata as Record<string, any> || {}
+      const planName = (metadata.plan as string) || membership.product?.title || 'PLUS'
+      const planNameLower = planName.toLowerCase()
+
+      const interval = planNameLower.includes('monthly') ? 'month' :
+        planNameLower.includes('quarterly') ? 'quarter' :
+          planNameLower.includes('yearly') ? 'year' :
+            planNameLower.includes('lifetime') ? 'lifetime' : 'month'
 
       let endDate = data.renewalDate
       if (!endDate) {

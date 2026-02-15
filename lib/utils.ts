@@ -157,9 +157,11 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
     const netPnl = new Decimal(trade.pnl).minus(new Decimal(trade.commission || 0));
     acc[date].pnl = acc[date].pnl.plus(netPnl);
 
+    const entryTime = new Date(trade.entryDate).getTime();
+    const closeTime = trade.closeDate ? new Date(trade.closeDate).getTime() : 0;
     const isLong = trade.side
       ? (trade.side.toLowerCase() === 'long' || trade.side.toLowerCase() === 'buy' || trade.side.toLowerCase() === 'b')
-      : (trade.entryDate.getTime() < (trade.closeDate?.getTime() ?? 0))
+      : (entryTime < closeTime)
 
     acc[date].longNumber += isLong ? 1 : 0
     acc[date].shortNumber += isLong ? 0 : 1

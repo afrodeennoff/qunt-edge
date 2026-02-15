@@ -4,10 +4,10 @@ import { useEffect, useRef, useCallback } from 'react'
 import { signOut } from '@/server/auth'
 import { useUserStore } from '@/store/user-store'
 
-const TIMEOUT_DURATION = 60 * 60 * 1000 // 1 hour in milliseconds
+const TIMEOUT_DURATION = 30 * 60 * 1000 // 30 minutes in milliseconds
 
 /**
- * AuthTimeout component handles automatic sign-out after 1 hour of inactivity.
+ * AuthTimeout component handles automatic sign-out after 30 minutes of inactivity.
  * Inactivity is defined by a lack of user interaction (mouse, keyboard, scroll, touch).
  */
 export function AuthTimeout() {

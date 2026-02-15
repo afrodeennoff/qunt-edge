@@ -1,9 +1,7 @@
 'use client'
 
 import { useData } from "@/context/data-provider"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { BarChart, TrendingUp, TrendingDown, Minus, HelpCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { TrendingUp, TrendingDown, Minus, HelpCircle } from "lucide-react"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
 import {
@@ -18,13 +16,18 @@ interface TradePerformanceCardProps {
 }
 
 export default function TradePerformanceCard({ size = 'medium' }: TradePerformanceCardProps) {
+  void size
   const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
   const t = useI18n()
 
   // Calculate rates
-  const winRate = Number((nbWin / nbTrades * 100).toFixed(2))
-  const lossRate = Number((nbLoss / nbTrades * 100).toFixed(2))
-  const beRate = Number((nbBe / nbTrades * 100).toFixed(2))
+  const toPercent = (value: number, total: number) => {
+    if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
+    return Number(((value / total) * 100).toFixed(2))
+  }
+  const winRate = toPercent(nbWin, nbTrades)
+  const lossRate = toPercent(nbLoss, nbTrades)
+  const beRate = toPercent(nbBe, nbTrades)
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">

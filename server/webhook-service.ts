@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { whop } from '@/lib/whop'
+import { whop, parseWhopDate } from '@/lib/whop'
 import type { PrismaClient } from '@/prisma/generated/prisma'
 import { logger } from '@/lib/logger'
 import { subscriptionManager } from './subscription-manager'
@@ -404,7 +404,7 @@ export class WebhookService {
         trial: isTrial,
         metadata: {
           whopMembershipId: membership.id,
-          activatedAt: new Date(membership.created_at).toISOString(),
+          activatedAt: parseWhopDate(membership.created_at)?.toISOString() || new Date().toISOString(),
         },
       })
 
@@ -754,9 +754,7 @@ export class WebhookService {
             planName.toLowerCase().includes('lifetime') ? 'lifetime' : 'month'
 
       const status = membership.status.toUpperCase()
-      const endDate = membership.renewal_period_end
-        ? new Date(typeof membership.renewal_period_end === 'number' ? membership.renewal_period_end * 1000 : membership.renewal_period_end)
-        : undefined
+      const endDate = parseWhopDate(membership.renewal_period_end)
 
       if (type === 'team') {
         await prisma.teamSubscription.updateMany({
@@ -830,9 +828,7 @@ export class WebhookService {
       const metadata = membership.metadata || {}
       const type = metadata.type || 'individual'
 
-      const trialEndsAt = membership.trial_period_end
-        ? new Date(typeof membership.trial_period_end === 'number' ? membership.trial_period_end * 1000 : membership.trial_period_end)
-        : undefined
+      const trialEndsAt = parseWhopDate(membership.trial_period_end)
 
       if (type === 'team') {
         await prisma.teamSubscription.updateMany({
@@ -894,11 +890,9 @@ export class WebhookService {
         }
       }
 
-      const membership = await (whop.memberships as any).retrieve({
-        id: membershipId,
-      })
+      const membership = await whop.memberships.retrieve(membershipId)
 
-      if (!membership || !membership.user?.email) {
+      if (!membership || !(membership.user as any)?.email) {
         return {
           success: false,
           eventType: 'payment.succeeded',
@@ -907,24 +901,33 @@ export class WebhookService {
         }
       }
 
-      const userId = membership.metadata?.user_id || membership.user?.id
+      const metadata = (membership.metadata as Record<string, any>) || {}
+      const userId = metadata.user_id || (membership.user as any)?.id
       const amount = payment.amount || 0
+      const email = (membership.user as any)?.email
+
+      if (!email) {
+        return {
+          success: false,
+          eventType: 'payment.succeeded',
+          processed: false,
+          error: 'Could not find user email in membership',
+        }
+      }
 
       await subscriptionManager.handlePaymentSuccess({
         userId,
-        email: membership.user.email,
+        email,
         whopMembershipId: membershipId,
         amount,
-        renewalDate: membership.renewal_period_end
-          ? new Date(membership.renewal_period_end * 1000)
-          : undefined,
+        renewalDate: parseWhopDate(membership.renewal_period_end),
       })
 
       // Reset retry state once a payment recovers successfully.
       this.retryAttempts.delete(membershipId)
 
       logger.info('[WebhookService] Payment succeeded', {
-        email: membership.user.email,
+        email,
         amount,
       })
 
@@ -960,11 +963,9 @@ export class WebhookService {
         }
       }
 
-      const membership = await (whop.memberships as any).retrieve({
-        id: membershipId,
-      })
+      const membership = await whop.memberships.retrieve(membershipId)
 
-      if (!membership || !membership.user?.email) {
+      if (!membership || !(membership.user as any)?.email) {
         return {
           success: false,
           eventType: 'payment.failed',
@@ -973,7 +974,9 @@ export class WebhookService {
         }
       }
 
-      const userId = membership.metadata?.user_id || membership.user?.id
+      const metadata = (membership.metadata as Record<string, any>) || {}
+      const userId = metadata.user_id || (membership.user as any)?.id
+      const email = (membership.user as any)?.email
 
       if (this.retryAttempts.size >= this.maxRetryAttemptEntries && !this.retryAttempts.has(membershipId)) {
         const oldestKey = this.retryAttempts.keys().next().value as string | undefined
@@ -987,13 +990,13 @@ export class WebhookService {
 
       await subscriptionManager.handlePaymentFailure({
         userId,
-        email: membership.user.email,
+        email: email || 'unknown@whop.com',
         whopMembershipId: membershipId,
         attemptNumber,
       })
 
       logger.info('[WebhookService] Payment failed', {
-        email: membership.user.email,
+        email,
         attemptNumber,
       })
 
@@ -1078,7 +1081,7 @@ export class WebhookService {
         whopMembershipId: invoice.membership.id,
         amountDue: invoice.amount_due || 0,
         currency: invoice.currency || 'USD',
-        dueDate: invoice.due_date ? new Date(invoice.due_date * 1000) : undefined,
+        dueDate: parseWhopDate(invoice.due_date),
         hostedInvoiceUrl: invoice.hosted_invoice_url,
       })
 
@@ -1113,7 +1116,7 @@ export class WebhookService {
         data: {
           status: 'PAID',
           amountPaid: invoice.amount_paid || 0,
-          paidAt: invoice.paid_at ? new Date(invoice.paid_at * 1000) : new Date(),
+          paidAt: parseWhopDate(invoice.paid_at) || new Date(),
         },
       })
 

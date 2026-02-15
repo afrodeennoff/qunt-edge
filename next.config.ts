@@ -4,9 +4,14 @@ import { fileURLToPath } from 'node:url';
 
 const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/+$/, '');
 const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
+const useStandaloneOutput = process.env.NEXT_STANDALONE === "1";
+const configuredBuildCpus = Number(process.env.NEXT_BUILD_CPUS ?? (process.env.VERCEL ? 4 : 1));
+const buildCpus = Number.isFinite(configuredBuildCpus) && configuredBuildCpus > 0
+  ? configuredBuildCpus
+  : 1;
 
 const nextConfig: NextConfig = {
-  output: process.env.VERCEL ? undefined : "standalone",
+  output: useStandaloneOutput ? "standalone" : undefined,
   compress: true,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
@@ -28,7 +33,7 @@ const nextConfig: NextConfig = {
     mdxRs: true,
     webpackMemoryOptimizations: true,
     preloadEntriesOnStart: false,
-    cpus: 4,
+    cpus: buildCpus,
     optimizePackageImports: [
       "lucide-react",
       "date-fns",
@@ -111,7 +116,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  outputFileTracingIncludes: process.env.VERCEL ? undefined : {
+  outputFileTracingIncludes: useStandaloneOutput ? {
     '/*': [
       '**/node_modules/@prisma/engines/libquery_engine-rhel-openssl-3.0.x.so.node',
       '**/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node',
@@ -119,7 +124,7 @@ const nextConfig: NextConfig = {
     '/app/api/**': [
       '**/node_modules/.prisma/client/**',
     ],
-  },
+  } : undefined,
 }
 
 const withMDX = createMDX({

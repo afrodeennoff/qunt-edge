@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { ChevronsLeft, ChevronsRight, Globe, LogOut } from "lucide-react"
+import { Globe, LogOut } from "lucide-react"
 
 import { Logo } from "@/components/logo"
 import { SubscriptionBadge } from "@/components/subscription-badge"
@@ -29,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -66,7 +67,7 @@ export interface UnifiedSidebarConfig {
 export type UnifiedSidebarStyle = "minimal" | "glassy" | "matte"
 
 function stripLocalePrefix(pathname: string) {
-  const withoutLocale = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "")
+  const withoutLocale = pathname.replace(/^\/[a-z]{2}(?:-[A-Za-z]{2})?(?=\/|$)/, "")
   return withoutLocale.length > 0 ? withoutLocale : "/"
 }
 
@@ -91,7 +92,8 @@ function useActiveLink() {
     if (!pathname) return false
 
     const normalizedPathname = stripLocalePrefix(pathname)
-    const [basePath, queryString] = href.split("?")
+    const [hrefPath, queryString] = href.split("?")
+    const basePath = stripLocalePrefix(hrefPath)
     const hrefParams = new URLSearchParams(queryString ?? "")
     const hrefTab = hrefParams.get("tab")
 
@@ -134,7 +136,6 @@ const SIDEBAR_STYLES: Record<
     userName: string
     userMeta: string
     groupLabel: string
-    collapseButton: string
   }
 > = {
   minimal: {
@@ -147,8 +148,6 @@ const SIDEBAR_STYLES: Record<
     userName: "text-sidebar-foreground",
     userMeta: "text-sidebar-foreground/60",
     groupLabel: "text-sidebar-foreground/60",
-    collapseButton:
-      "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent",
   },
   glassy: {
     sidebar: "border-r border-white/10 bg-black/95 text-zinc-100 backdrop-blur-xl",
@@ -160,7 +159,6 @@ const SIDEBAR_STYLES: Record<
     userName: "text-zinc-100",
     userMeta: "text-zinc-400",
     groupLabel: "text-zinc-500",
-    collapseButton: "text-zinc-400 hover:text-zinc-100 hover:bg-white/10",
   },
   matte: {
     sidebar: "border-r border-white/5 bg-black text-zinc-200",
@@ -172,7 +170,6 @@ const SIDEBAR_STYLES: Record<
     userName: "text-zinc-100",
     userMeta: "text-zinc-400",
     groupLabel: "text-zinc-500",
-    collapseButton: "text-zinc-400 hover:text-zinc-100 hover:bg-white/10",
   },
 }
 
@@ -188,7 +185,7 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { state, toggleSidebar } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
 
   const groupedItems = useMemo(() => {
@@ -212,7 +209,7 @@ export function UnifiedSidebar({
 
   return (
     <Sidebar collapsible="icon" className={styles.sidebar}>
-      <SidebarHeader className={cn("h-14 flex items-center px-4", styles.header)}>
+      <SidebarHeader className={cn("h-14 flex items-center px-3", styles.header)}>
         <div className="flex items-center gap-2 w-full">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-current/15 bg-current/5">
             <Logo className="size-4.5" />
@@ -221,26 +218,11 @@ export function UnifiedSidebar({
             <p className={cn("truncate text-sm font-semibold tracking-tight", styles.brandName)}>
               Qunt Edge
             </p>
-            <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
+            <p className={cn("truncate text-[10px] uppercase tracking-[0.16em] opacity-60", styles.brandSub)}>Workspace</p>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className={cn(
-              "ml-auto h-7 w-7 transition-all duration-300",
-              state === "collapsed" && "ml-0 mx-auto",
-              styles.collapseButton
-            )}
-          >
-            {state === "expanded" ? (
-              <ChevronsLeft className="size-4" />
-            ) : (
-              <ChevronsRight className="size-4" />
-            )}
-            <span className="sr-only">Toggle sidebar</span>
-          </Button>
+          <SidebarTrigger
+            className="ml-auto hidden h-7 w-7 md:inline-flex"
+          />
         </div>
       </SidebarHeader>
 
@@ -270,9 +252,18 @@ export function UnifiedSidebar({
                               isActive={itemIsActive}
                               tooltip={label}
                             >
-                              <Link href={item.href} aria-current={itemIsActive ? "page" : undefined}>
+                              <Link
+                                href={item.href}
+                                aria-current={itemIsActive ? "page" : undefined}
+                                aria-label={label}
+                                onClick={() => {
+                                  if (isMobile) {
+                                    setOpenMobile(false)
+                                  }
+                                }}
+                              >
                                 {item.icon}
-                                <span>{label}</span>
+                                <span className={cn(itemIsActive ? "font-semibold" : "font-medium")}>{label}</span>
                               </Link>
                             </SidebarMenuButton>
                           ) : (
@@ -280,10 +271,15 @@ export function UnifiedSidebar({
                               type="button"
                               tooltip={label}
                               disabled={isItemDisabled}
-                              onClick={item.action}
+                              onClick={() => {
+                                item.action?.()
+                                if (isMobile) {
+                                  setOpenMobile(false)
+                                }
+                              }}
                             >
                               {item.icon}
-                              <span>{label}</span>
+                              <span className="font-medium">{label}</span>
                             </SidebarMenuButton>
                           )}
                           {item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
