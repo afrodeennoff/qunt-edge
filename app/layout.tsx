@@ -3,7 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import { Geist, Geist_Mono, Manrope } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
@@ -16,12 +16,6 @@ const geist = Geist({
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -130,7 +124,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable} ${manrope.variable} bg-background`}
+      className={`${geist.variable} ${geistMono.variable} bg-background`}
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning

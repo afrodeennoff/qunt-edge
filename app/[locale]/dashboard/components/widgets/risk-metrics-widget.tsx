@@ -55,7 +55,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         "flex flex-col border-r border-b border-white/10",
                         size === 'tiny' ? "p-1.5" : "p-4"
                     )}>
-                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-fg-muted">Ratios</h3>
+                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-secondary-token">Ratios</h3>
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-muted text-xs">Sharpe</span>
@@ -83,7 +83,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                         "flex flex-col border-b border-white/10",
                         size === 'tiny' ? "p-1.5" : "p-4"
                     )}>
-                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-fg-muted">Position sizing</h3>
+                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-secondary-token">Position sizing</h3>
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-muted text-xs text-balance">Kelly Half</span>
@@ -113,7 +113,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                     )}>
                         <div className="flex justify-between items-end mb-2">
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold font-mono tracking-tight tabular-nums text-white/90">
+                                <span className="text-xl font-bold font-mono tracking-tight tabular-nums text-primary-token">
                                     {formatCurrency(safeMaxDrawdown)}
                                 </span>
                             </div>

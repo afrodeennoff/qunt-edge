@@ -36,6 +36,36 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: User Data Isolation Hardening (ETP Orders + Account Actions)
+- **What changed:** Closed several cross-user write/isolation gaps in API and server actions by enforcing authenticated-user ownership at mutation time.
+- **What I want:** Every write/update/delete must stay scoped to the currently authenticated user, even if a client submits foreign IDs.
+- **What I don't want:** Global-ID upserts or client-provided fallback IDs that can overwrite, relink, or delete another user’s records.
+- **How we fixed that:**
+  - Hardened `ETP` order ingestion in `app/api/etp/v1/store/route.ts`:
+    - replaced global `upsert({ where: { orderId } })` with user-scoped lookup (`userId + orderId`) followed by `update`/`create`.
+  - Hardened `deleteInstrumentGroupAction` in `server/accounts.ts`:
+    - removed fallback to client-provided user id and now requires authenticated database user context.
+  - Hardened `setupAccountAction` in `server/accounts.ts`:
+    - validates `groupId` ownership (`group.userId === currentUserId`) before account-group connect operations.
+  - Hardened `savePayoutAction` in `server/accounts.ts`:
+    - removed global payout `upsert` by arbitrary id,
+    - now updates only if payout belongs to current user; otherwise creates a new payout for the authenticated user’s account.
+  - Hardened shared-layout server actions in `server/shared.ts`:
+    - `createShared` now uses authenticated database user id server-side (ignores client-supplied user id),
+    - `getUserShared` now lists only the current authenticated user’s shared links,
+    - `deleteShared` now authorizes against the authenticated owner server-side (no caller-provided user id trust).
+  - Hardened layout version actions in `server/layouts.ts`:
+    - `createLayoutVersionAction`, `getLayoutVersionHistoryAction`, `getLayoutVersionByNumberAction`, and `cleanupOldLayoutVersionsAction` now verify `layoutId` ownership against authenticated user context before read/write/delete.
+  - Hardened `fetchGroupedTradesAction` in `server/accounts.ts` to derive user scope from authenticated context instead of accepting a caller-provided user id.
+  - Updated caller in `app/[locale]/dashboard/data/components/data-management/data-management-card.tsx` to match the tightened delete action signature.
+  - Updated shared-layout manager callsites to match hardened server action signatures (`getUserShared()`, `deleteShared(slug)`).
+- **Key Files:** `app/api/etp/v1/store/route.ts`, `server/accounts.ts`, `app/[locale]/dashboard/data/components/data-management/data-management-card.tsx`, `AGENTS.md`
+- **Key Files (Additional):** `server/shared.ts`, `server/layouts.ts`, `app/[locale]/dashboard/components/shared-layouts-manager.tsx`
+- **Verification:** 
+  - `npx eslint app/api/etp/v1/store/route.ts server/accounts.ts app/[locale]/dashboard/data/components/data-management/data-management-card.tsx` exits with warnings only (no errors).
+  - `npx eslint server/shared.ts server/layouts.ts server/accounts.ts app/[locale]/dashboard/components/shared-layouts-manager.tsx` exits with warnings only (no errors).
+  - Manual logic validation confirms reads/writes/deletes now enforce authenticated ownership for shared links, layout versions, orders, payouts, and instrument-group deletes.
+
 ### 2026-02-15: Runtime Security Hardening (TLS Override Removal + Lazy Key Warnings)
 - **What changed:** Hardened runtime/build security defaults by removing global TLS bypass behavior and reducing noisy module-import warnings for optional provider keys.
 - **What I want:** Production builds should not silently disable TLS certificate checks globally, and missing optional provider keys should only surface when relevant functionality is actually used.
@@ -1045,3 +1075,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Gated the badge behind query param `?debugData=1` so normal users are unaffected and debugging can be toggled on demand.
 - **Key Files:** `app/[locale]/dashboard/components/widget-canvas.tsx`, `AGENTS.md`
 - **Verification:** Open `/dashboard?tab=widgets&debugData=1`; confirm each widget shows `T` and `F` counts. If `T>0` and `F=0`, filtering is the direct cause of empty widget bodies.
+
+### 2026-02-15: Performance Rescue Pass (Server Shells + Domain Provider Scaffolding + Perf Gates + Minimal UI Normalization)
+- **What changed:** Implemented a cross-cutting performance rescue pass focused on reducing route-level hydration pressure, stabilizing dashboard/trader behavior fetches, introducing domain-scoped provider boundaries, and enforcing bundle/route budget checks in CI while tightening the shared UI surface language.
+- **What I want:** Faster and more predictable first render on core routes, lower network churn on behavior/trader pages, and a cleaner premium-minimal visual baseline where performance gains are visible to users.
+- **What I don't want:** Duplicated dashboard section controls, page-level client-heavy shells on high-traffic flows, hidden polling loops hammering APIs, and unchecked route payload regressions that silently degrade UX over time.
+- **How we fixed that:**
+  - Removed duplicate dashboard tab navigation row from `dashboard-tab-shell` so section navigation has one deterministic source.
+  - Converted high-traffic behavior and trader-profile routes to server shell wrappers (`page.tsx`) with client island implementations in `page-client.tsx`.
+  - Behavior page now lazy-loads heavy modules (mindset, analysis, chat) and uses abortable fetch dedup to avoid stale/overlapping requests.
+  - Trader profile benchmark refresh changed from interval-driven polling to on-load + manual refresh with explicit “updated at” status and abortable request handling.
+  - Added provider decomposition scaffolding under `context/providers/*` (`trades`, `accounts`, `filters`, `subscription`) while preserving `useData()` compatibility.
+  - Wired domain providers into `components/providers/dashboard-providers.tsx` so consumers can migrate to focused hooks incrementally.
+  - Added perf CI workflow `.github/workflows/perf-quality.yml` with production build, route-budget enforcement, and bundle artifact upload.
+  - Added `perf:check` npm script to mirror CI perf checks locally.
+  - Applied clean premium minimal normalization in core shared surfaces (`widget-shell`, `chart-surface`, `stats-card`) and reduced global font payload to two loaded families (`Geist` + `Geist Mono`).
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, `app/[locale]/dashboard/behavior/page-client.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `app/[locale]/dashboard/trader-profile/page-client.tsx`, `context/providers/trades-provider.tsx`, `context/providers/accounts-provider.tsx`, `context/providers/filters-provider.tsx`, `context/providers/subscription-provider.tsx`, `components/providers/dashboard-providers.tsx`, `.github/workflows/perf-quality.yml`, `package.json`, `components/ui/widget-shell.tsx`, `components/ui/chart-surface.tsx`, `components/ui/stats-card.tsx`, `app/layout.tsx`, `app/globals.css`, `app/[locale]/(home)/components/HomeContent.tsx`, `AGENTS.md`
+- **Verification:** Run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`, `node scripts/check-route-budgets.mjs`, and `node scripts/analyze-bundle.mjs`; validate dashboard/trader/behavior routes manually for stable nav state, no default polling loops, and responsive manual refresh behavior.

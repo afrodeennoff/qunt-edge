@@ -13,6 +13,7 @@
     "build": "env -u NODE_TLS_REJECT_UNAUTHORIZED NODE_OPTIONS=--max-old-space-size=12288 NEXT_DISABLE_FONT_DOWNLOADS=1 NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321} NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-dummy-anon-key} next build --webpack",
     "analyze": "npm run build && node scripts/analyze-bundle.mjs",
     "check:route-budgets": "node scripts/check-route-budgets.mjs",
+    "perf:check": "npm run build && npm run check:route-budgets && node scripts/analyze-bundle.mjs",
     "bundle:check": "npm run build",
     "start": "next start",
     "lint": "eslint",

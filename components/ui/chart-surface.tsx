@@ -73,7 +73,7 @@ export function ChartSurface({
     <div
       data-chart-surface="modern"
       className={cn(
-        "h-full flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-border/45 bg-[hsl(var(--surface-1))]/95 shadow-[var(--shadow-sm)]",
+        "h-full flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-border/55 bg-[hsl(var(--surface-1))] shadow-[var(--shadow-sm)]",
         className
       )}
     >
@@ -81,7 +81,7 @@ export function ChartSurface({
         <div
           className={cn(
             "flex flex-col items-stretch space-y-0 border-b border-border/50 shrink-0",
-            isSmall ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
+            isSmall ? "p-2 h-10 justify-center" : "p-3 h-12 justify-center",
             headerClassName
           )}
         >

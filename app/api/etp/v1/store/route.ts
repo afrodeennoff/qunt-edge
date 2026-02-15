@@ -67,22 +67,33 @@ export async function POST(req: NextRequest) {
     // Process and store each order
     const createdOrders = await Promise.all(
       orders.map(async (order) => {
-        return prisma.order.upsert({
+        const existingOrder = await prisma.order.findFirst({
           where: {
+            userId: user.id,
             orderId: order.OrderId
           },
-          update: {
-            accountId: order.AccountId,
-            orderId: order.OrderId,
-            orderAction: order.OrderAction,
-            quantity: order.Quantity,
-            averageFilledPrice: order.AverageFilledPrice,
-            isOpeningOrder: order.IsOpeningOrder,
-            time: new Date(order.Time),
-            symbol: order.Instrument.Symbol,
-            instrumentType: order.Instrument.Type
-          },
-          create: {
+          select: { id: true }
+        })
+
+        if (existingOrder) {
+          return prisma.order.update({
+            where: { id: existingOrder.id },
+            data: {
+              accountId: order.AccountId,
+              orderId: order.OrderId,
+              orderAction: order.OrderAction,
+              quantity: order.Quantity,
+              averageFilledPrice: order.AverageFilledPrice,
+              isOpeningOrder: order.IsOpeningOrder,
+              time: new Date(order.Time),
+              symbol: order.Instrument.Symbol,
+              instrumentType: order.Instrument.Type
+            }
+          })
+        }
+
+        return prisma.order.create({
+          data: {
             accountId: order.AccountId,
             orderId: order.OrderId,
             orderAction: order.OrderAction,
@@ -94,7 +105,7 @@ export async function POST(req: NextRequest) {
             instrumentType: order.Instrument.Type,
             userId: user.id
           }
-        });
+        })
       })
     );
     

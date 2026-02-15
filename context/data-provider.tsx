@@ -109,7 +109,7 @@ import {
 } from "@/lib/data-types";
 
 // Combined Context Type
-interface DataContextType {
+export interface DataContextType {
   refreshTrades: () => Promise<void>;
   refreshTradesOnly: (options?: { force?: boolean }) => Promise<void>;
   refreshUserDataOnly: (options?: { force?: boolean; includeSubscription?: boolean }) => Promise<void>;
@@ -811,11 +811,24 @@ export const DataProvider: React.FC<{
         .map((a) => a.number)
       : [];
 
+    // Guardrail: if hidden-account mapping accidentally covers every account that has trades,
+    // fail open so widgets don't render as empty black cards.
+    const tradedAccountNumbers = new Set(
+      trades
+        .map((trade) => trade.accountNumber)
+        .filter((value): value is string => Boolean(value))
+    );
+    const hiddenCoversAllTradedAccounts =
+      tradedAccountNumbers.size > 0 &&
+      Array.from(tradedAccountNumbers).every((accountNumber) =>
+        hiddenAccountNumbers.includes(accountNumber)
+      );
+
     // Apply all filters in a single pass
     return trades
       .filter((trade) => {
         // Skip trades from hidden accounts
-        if (hiddenAccountNumbers.includes(trade.accountNumber)) {
+        if (!hiddenCoversAllTradedAccounts && hiddenAccountNumbers.includes(trade.accountNumber)) {
           return false;
         }
 

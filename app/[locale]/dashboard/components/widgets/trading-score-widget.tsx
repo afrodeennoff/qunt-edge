@@ -36,26 +36,26 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                         <span className={score >= 80 ? "metric-positive" : "metric-negative font-normal"}>
                             {score}
                         </span>
-                        <span className="text-base text-fg-muted ml-1">/ 100</span>
+                        <span className="text-base text-secondary-token ml-1">/ 100</span>
                     </div>
                 </div>
                 <div className={cn(
-                    "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight bg-white/5 text-white/90 border border-white/10"
+                    "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight bg-white/5 text-primary-token border border-white/10"
                 )}>
                     {normalizedLabel}
                 </div>
                 <div className="mt-6 grid grid-cols-3 gap-2 w-full text-center">
                     <div className="flex flex-col p-2.5 bg-white/5 rounded-xl border border-white/10">
-                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">Win Rate</span>
-                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-white/90">{metrics.winRate.toFixed(1)}%</span>
+                        <span className="text-[10px] font-medium tracking-tight text-secondary-token">Win Rate</span>
+                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-primary-token">{metrics.winRate.toFixed(1)}%</span>
                     </div>
                     <div className="flex flex-col p-2.5 bg-white/5 rounded-xl border border-white/10">
-                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">P. Factor</span>
-                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-white/90">{metrics.profitFactor.toFixed(2)}</span>
+                        <span className="text-[10px] font-medium tracking-tight text-secondary-token">P. Factor</span>
+                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-primary-token">{metrics.profitFactor.toFixed(2)}</span>
                     </div>
                     <div className="flex flex-col p-2.5 bg-white/5 rounded-xl border border-white/10">
-                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">Trades</span>
-                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-white/90">{metrics.totalTrades}</span>
+                        <span className="text-[10px] font-medium tracking-tight text-secondary-token">Trades</span>
+                        <span className="font-semibold text-sm tabular-nums mt-0.5 text-primary-token">{metrics.totalTrades}</span>
                     </div>
                 </div>
             </div>

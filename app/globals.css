@@ -289,7 +289,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-manrope), var(--font-geist), system-ui, sans-serif;
+    font-family: var(--font-geist), system-ui, sans-serif;
   }
 
   body[data-scroll-locked],
@@ -457,7 +457,7 @@
   }
 
   .micro-sans {
-    font-family: var(--font-manrope), var(--font-geist), system-ui, sans-serif;
+    font-family: var(--font-geist), system-ui, sans-serif;
     letter-spacing: 0.01em;
   }
 

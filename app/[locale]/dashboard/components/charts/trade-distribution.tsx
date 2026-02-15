@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from "recharts"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
@@ -170,10 +170,23 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                           )}
                         />
                       ))}
-                      <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
-                        <tspan x="50%" dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
-                        <tspan x="50%" dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
-                      </text>
+                      <Label
+                        content={({ viewBox }) => {
+                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                            return (
+                              <text
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                              >
+                                <tspan x={viewBox.cx} dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
+                                <tspan x={viewBox.cx} dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
+                              </text>
+                            )
+                          }
+                        }}
+                      />
                     </Pie>
                     <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
                   </PieChart>

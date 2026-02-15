@@ -33,20 +33,20 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
     const sizeClasses = {
       sm: {
         icon: "h-4 w-4",
-        value: "text-lg",
+        value: "text-base",
         title: "text-xs",
         trend: "text-xs"
       },
       md: {
         icon: "h-5 w-5",
-        value: "text-2xl",
+        value: "text-xl",
         title: "text-sm",
         trend: "text-sm"
       },
       lg: {
         icon: "h-6 w-6",
-        value: "text-3xl",
-        title: "text-base",
+        value: "text-2xl",
+        title: "text-sm",
         trend: "text-base"
       }
     }
@@ -59,7 +59,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
         hover={!!onClick}
         clickable={!!onClick}
         className={cn(
-          "group border-border/50 bg-[hsl(var(--surface-1))]/95 shadow-[var(--shadow-sm)]",
+          "group border-border/55 bg-[hsl(var(--surface-1))] shadow-[var(--shadow-sm)]",
           className
         )}
         onClick={onClick}
