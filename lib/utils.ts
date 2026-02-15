@@ -130,7 +130,7 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
 }
 
 export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
-  return trades.reduce((acc: any, trade: Trade) => {
+  const data = trades.reduce((acc: any, trade: Trade) => {
     let date = '';
     try {
       const rawDate = trade.entryDate;
@@ -166,6 +166,15 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
     acc[date].longNumber += isLong ? 1 : 0
     acc[date].shortNumber += isLong ? 0 : 1
     acc[date].trades.push(trade)
+    return acc
+  }, {} as Record<string, { pnl: Decimal | number; tradeNumber: number; longNumber: number; shortNumber: number; trades: Trade[] }>)
+
+  // Convert Decimal pnl to number for the final output
+  return Object.keys(data).reduce((acc: any, date) => {
+    acc[date] = {
+      ...data[date],
+      pnl: (data[date].pnl as Decimal).toNumber()
+    }
     return acc
   }, {})
 }
