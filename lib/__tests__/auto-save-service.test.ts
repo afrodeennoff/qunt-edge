@@ -259,9 +259,15 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            Object.defineProperty(navigator, 'onLine', {
+            if (!globalThis.navigator) {
+                // @ts-ignore
+                globalThis.navigator = {}
+            }
+
+            Object.defineProperty(globalThis.navigator, 'onLine', {
                 writable: true,
                 value: false,
+                configurable: true,
             })
 
             const onOffline = vi.fn()
@@ -277,9 +283,10 @@ describe('AutoSaveService', () => {
             const queued = await queue.getAll()
             expect(queued.length).toBeGreaterThan(0)
 
-            Object.defineProperty(navigator, 'onLine', {
+            Object.defineProperty(globalThis.navigator, 'onLine', {
                 writable: true,
                 value: true,
+                configurable: true,
             })
         })
 
