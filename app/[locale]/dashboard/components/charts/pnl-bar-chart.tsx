@@ -135,11 +135,11 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
   const getChartMargins = () => {
     switch (size) {
       case "small":
-        return { left: 0, right: 0, top: 4, bottom: 0 };
+        return { left: 0, right: 0, top: 4, bottom: 14 };
       case "medium":
       case "large":
       default:
-        return { left: 0, right: 0, top: 8, bottom: 0 };
+        return { left: 0, right: 0, top: 8, bottom: 14 };
     }
   };
 

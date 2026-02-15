@@ -457,6 +457,21 @@
     padding-bottom: 0 !important;
   }
 
+  [data-widget-shell="true"] [data-chart-surface="modern"] .recharts-legend-wrapper,
+  [data-widget-shell="v2"] [data-chart-surface="modern"] .recharts-legend-wrapper {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-widget-shell="true"] [data-chart-surface="modern"] .recharts-legend-item-text,
+  [data-widget-shell="v2"] [data-chart-surface="modern"] .recharts-legend-item-text {
+    white-space: nowrap;
+    font-size: 10px !important;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+
   img {
     @apply inline-block;
   }

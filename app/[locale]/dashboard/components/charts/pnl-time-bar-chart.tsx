@@ -187,8 +187,8 @@ export default function TimeOfDayTradeChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 0 }
-                    : { left: 0, right: 0, top: 8, bottom: 0 }
+                    ? { left: 0, right: 0, top: 4, bottom: 14 }
+                    : { left: 0, right: 0, top: 8, bottom: 14 }
                 }
               >
                 <CartesianGrid
