@@ -132,6 +132,13 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
     (entry) => (entry.shortNumber || 0) + (entry.longNumber || 0) > 0,
   );
 
+  console.log("PNLChart Debug:", {
+    calendarDataKeys: Object.keys(calendarData).length,
+    chartDataLength: chartData.length,
+    hasData,
+    firstChartEntry: chartData[0]
+  });
+
   const getChartMargins = () => {
     switch (size) {
       case "small":
