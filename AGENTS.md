@@ -499,6 +499,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, `AGENTS.md`
 - **Verification:** Open `/dashboard` with and without `?tab=` query params and confirm widget data is visible by default and card/chart contrast matches the previous commit aesthetic.
 
+### 2026-02-15: Merged Payment Gateway Fixes & Dashboard Data Hardening
+- **What changed:** Merged `fix/payment-gateway-whop` into `main`, resolving conflicts in `AGENTS.md` and `context/data-provider.tsx`.
+- **What I want:** synchronised `main` branch with the latest payment gateway fixes, empty-state improvements for widgets, and data-provider hardening (hidden accounts guard + safe timezone conversion).
+- **What I don't want:** Conflicting logic between the main dashboard data provider and the new payment flow enhancements.
+- **How we fixed that:**
+  - Merged branch `fix/payment-gateway-whop`.
+  - Resolved `AGENTS.md` conflict by preserving both history logs.
+  - Resolved `context/data-provider.tsx` conflict by retaining the `hiddenCoversAllTradedAccounts` safety check from the fix branch while keeping the more specific Safari-timezone comment from `HEAD`.
+- **Key Files:** `context/data-provider.tsx`, `AGENTS.md`
+- **Verification:** `git log` shows the merge commit `1d0f3cc`; the codebase now contains both the Whop payment fixes and the dashboard data hardening.
+
 ### 2026-02-15: Widget Charts “No Data” Fix (Hidden Accounts Guard + Safe Timezone Conversion)
 - **What changed:** Fixed a regression where widget charts (including white donut/pie charts) could show “No data” even when trades existed, because `formattedTrades` was being filtered down to empty.
 - **What I want:** Charts should render reliably across browsers (including Safari) and typical account setups (ungrouped accounts, grouped accounts, optional Hidden Accounts group).
