@@ -16,7 +16,7 @@ import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -65,28 +65,35 @@ export default function TimeInPositionChart({
 
     // Sum up time in position and count trades for each hour in UTC
     trades.forEach((trade: Trade) => {
-      const hour = formatInTimeZone(new Date(trade.entryDate), "UTC", "H");
-      hourlyData[hour].totalTime += Number(trade.timeInPosition) / 60; // Convert seconds to minutes
+      const entryDate = new Date(trade.entryDate);
+      if (Number.isNaN(entryDate.getTime())) return;
+
+      const hour = formatInTimeZone(entryDate, "UTC", "H");
+      if (!(hour in hourlyData)) return;
+
+      const timeInMinutes = toFiniteNumber(trade.timeInPosition, 0) / 60;
+      if (!Number.isFinite(timeInMinutes)) return;
+
+      hourlyData[hour].totalTime += timeInMinutes; // Convert seconds to minutes
       hourlyData[hour].count++;
     });
 
     // Convert to array format for Recharts and calculate average time in position
     return Object.entries(hourlyData)
       .map(([hour, data]) => ({
-        hour: parseInt(hour),
+        hour: toFiniteNumber(hour, 0),
         avgTimeInPosition: data.count > 0 ? data.totalTime / data.count : 0,
         tradeCount: data.count,
       }))
       .sort((a, b) => a.hour - b.hour);
   }, [trades]);
 
-  const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
-  const hasData = chartData.some((data) => data.tradeCount > 0);
-
-  const getColor = (count: number) => {
-    const intensity = Math.max(0.2, count / maxTradeCount);
-    return `hsl(var(--chart-8) / ${intensity})`;
-  };
+  const hasData = chartData.some(
+    (data) =>
+      Number.isFinite(data.tradeCount) &&
+      data.tradeCount > 0 &&
+      Number.isFinite(data.avgTimeInPosition),
+  );
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -98,7 +105,7 @@ export default function TimeInPositionChart({
               {t("timeInPosition.tooltip.time")}
             </span>
             <span className="font-bold text-fg-primary text-xs">
-              {`${label}:00 - ${(label + 1) % 24}:00`}
+              {`${toFiniteNumber(label, 0)}:00 - ${(toFiniteNumber(label, 0) + 1) % 24}:00`}
             </span>
           </div>
           <div className="flex flex-col mb-2">

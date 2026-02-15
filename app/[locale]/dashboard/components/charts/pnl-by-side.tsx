@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -61,11 +61,11 @@ export default function PnLBySideChart({
       (trade) => trade.side?.toLowerCase() === "short",
     );
 
-    const longPnL = longTrades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
-    const shortPnL = shortTrades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
+    const longPnL = longTrades.reduce((sum, trade) => sum + toFiniteNumber(trade.pnl, 0), 0);
+    const shortPnL = shortTrades.reduce((sum, trade) => sum + toFiniteNumber(trade.pnl, 0), 0);
 
-    const longWins = longTrades.filter((trade) => Number(trade.pnl) > 0).length;
-    const shortWins = shortTrades.filter((trade) => Number(trade.pnl) > 0).length;
+    const longWins = longTrades.filter((trade) => toFiniteNumber(trade.pnl, 0) > 0).length;
+    const shortWins = shortTrades.filter((trade) => toFiniteNumber(trade.pnl, 0) > 0).length;
 
     return [
       {

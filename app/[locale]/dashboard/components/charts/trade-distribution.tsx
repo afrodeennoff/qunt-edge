@@ -4,7 +4,7 @@ import * as React from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from "recharts"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
-import { cn } from "@/lib/utils"
+import { cn, toFiniteNumber } from "@/lib/utils"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { Info } from 'lucide-react'
 import {
@@ -39,26 +39,30 @@ interface TooltipProps {
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
   const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
   const t = useI18n()
-  const hasData = nbTrades > 0
+  const safeNbTrades = toFiniteNumber(nbTrades, 0)
+  const safeNbWin = toFiniteNumber(nbWin, 0)
+  const safeNbLoss = toFiniteNumber(nbLoss, 0)
+  const safeNbBe = toFiniteNumber(nbBe, 0)
+  const hasData = safeNbTrades > 0
 
   const chartData = React.useMemo(() => {
-    if (!nbTrades) return []
+    if (!safeNbTrades) return []
 
     const toPercent = (value: number, total: number) => {
       if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
       return Number(((value / total) * 100).toFixed(2))
     }
 
-    const winRate = toPercent(nbWin, nbTrades)
-    const lossRate = toPercent(nbLoss, nbTrades)
+    const winRate = toPercent(safeNbWin, safeNbTrades)
+    const lossRate = toPercent(safeNbLoss, safeNbTrades)
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: '#FFFFFF', count: nbWin, total: nbTrades },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: '#4D4F56', count: nbBe, total: nbTrades },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: '#52525B', count: nbLoss, total: nbTrades },
+      { name: t('tradeDistribution.winWithCount', { count: safeNbWin, total: safeNbTrades }), value: winRate, color: '#FFFFFF', count: safeNbWin, total: safeNbTrades },
+      { name: t('tradeDistribution.breakevenWithCount', { count: safeNbBe, total: safeNbTrades }), value: beRate, color: '#4D4F56', count: safeNbBe, total: safeNbTrades },
+      { name: t('tradeDistribution.lossWithCount', { count: safeNbLoss, total: safeNbTrades }), value: lossRate, color: '#52525B', count: safeNbLoss, total: safeNbTrades },
     ]
-  }, [nbWin, nbLoss, nbBe, nbTrades, t])
+  }, [safeNbWin, safeNbLoss, safeNbBe, safeNbTrades, t])
 
   const pieLayout = React.useMemo(() => {
     if (size === 'small') {

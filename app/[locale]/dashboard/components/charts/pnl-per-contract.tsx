@@ -15,7 +15,7 @@ import {
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -69,7 +69,7 @@ export default function PnLPerContractChart({
     const instrumentGroups = trades.reduce(
       (acc, trade) => {
         const instrument = trade.instrument || "Unknown";
-        const netPnl = Number(trade.pnl) - Number(trade.commission || 0); // Calculate net PnL (gross PnL - commission)
+        const netPnl = toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0); // Calculate net PnL (gross PnL - commission)
 
         if (!acc[instrument]) {
           acc[instrument] = {
@@ -81,7 +81,7 @@ export default function PnLPerContractChart({
         }
         acc[instrument].trades.push(trade);
         acc[instrument].totalPnl += netPnl;
-        acc[instrument].totalContracts += Number(trade.quantity);
+        acc[instrument].totalContracts += toFiniteNumber(trade.quantity, 0);
         if (netPnl > 0) {
           acc[instrument].winCount++;
         }

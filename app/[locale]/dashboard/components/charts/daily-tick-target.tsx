@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Target, HelpCircle, Plus, Minus, ArrowUp, ArrowDown } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, toFiniteNumber } from "@/lib/utils"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { Info } from 'lucide-react'
 import {
@@ -115,7 +115,7 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
     if (displayTrades.length > 0) {
       displayTrades.forEach(trade => {
         // Validate required fields
-        if (!trade.pnl || !trade.quantity || !trade.instrument) return
+        if (!trade.instrument) return
 
         // Fix ticker matching logic - sort by length descending to match longer tickers first
         const matchingTicker = Object.keys(tickDetails)
@@ -123,14 +123,23 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
           .find(ticker => trade.instrument.includes(ticker))
 
         // Use tickValue (monetary value per tick) instead of tickSize (minimum price increment)
-        const tickValue = matchingTicker ? tickDetails[matchingTicker].tickValue : 1
+        const tickValue = toFiniteNumber(
+          matchingTicker ? tickDetails[matchingTicker]?.tickValue : 1,
+          1
+        )
+        if (tickValue === 0) return
+
+        const quantity = toFiniteNumber(trade.quantity, 0)
+        if (quantity === 0) return
 
         // Calculate PnL per contract first
-        const pnlPerContract = Number(trade.pnl) / Number(trade.quantity)
-        if (isNaN(pnlPerContract)) return
+        const pnlPerContract = toFiniteNumber(trade.pnl, 0) / quantity
+        if (!Number.isFinite(pnlPerContract)) return
 
-        const ticks = Math.round(pnlPerContract / Number(tickValue))
-        if (!isNaN(ticks)) {
+        const ticksRaw = pnlPerContract / tickValue
+        if (Number.isFinite(ticksRaw)) {
+          const ticks = Math.round(ticksRaw)
+          if (!Number.isFinite(ticks)) return
           totalTicks += ticks
           totalAbsoluteTicks += Math.abs(ticks)
 

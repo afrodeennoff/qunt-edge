@@ -15,7 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
+import { hasPositiveFiniteByKey } from "@/lib/chart-guards";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
 import {
@@ -34,6 +35,7 @@ interface TickDistributionProps {
 
 interface ChartDataPoint {
   ticks: string;
+  tickNumber: number;
   count: number;
 }
 
@@ -74,6 +76,8 @@ export default function TickDistributionChart({
 
     // Count trades for each tick value
     trades.forEach((trade) => {
+      if (!trade.instrument) return;
+
       // Fix ticker matching logic - sort by length descending to match longer tickers first
       // This prevents "ES" from matching "MES" trades
       const matchingTicker = Object.keys(tickDetails)
@@ -81,28 +85,40 @@ export default function TickDistributionChart({
         .find((ticker) => trade.instrument.includes(ticker));
 
       // Use tickValue (monetary value per tick) instead of tickSize (minimum price increment)
-      const tickValue = matchingTicker
-        ? tickDetails[matchingTicker].tickValue
-        : 1;
+      const tickValue = toFiniteNumber(
+        matchingTicker ? tickDetails[matchingTicker]?.tickValue : 1,
+        1,
+      );
+      if (tickValue === 0) return;
+
+      const quantity = toFiniteNumber(trade.quantity, 0);
+      if (quantity === 0) return;
 
       // Calculate PnL per contract first
-      const pnlPerContract = Number(trade.pnl) / Number(trade.quantity);
-      const ticks = Math.round(pnlPerContract / Number(tickValue));
+      const pnlPerContract = toFiniteNumber(trade.pnl, 0) / quantity;
+      if (!Number.isFinite(pnlPerContract)) return;
+
+      const ticksRaw = pnlPerContract / tickValue;
+      if (!Number.isFinite(ticksRaw)) return;
+      const ticks = Math.round(ticksRaw);
       tickCounts[ticks] = (tickCounts[ticks] || 0) + 1;
     });
 
     // Convert the tick counts to sorted chart data
     return Object.entries(tickCounts)
-      .map(([tick, count]) => ({
-        ticks: tick === "0" ? "0" : Number(tick) > 0 ? `+${tick}` : `${tick}`,
-        count,
-      }))
-      .sort(
-        (a, b) =>
-          Number(a.ticks.replace("+", "")) - Number(b.ticks.replace("+", "")),
-      );
+      .map(([tick, count]) => {
+        const tickNumber = toFiniteNumber(tick, Number.NaN);
+        if (!Number.isFinite(tickNumber)) return null;
+        return {
+          ticks: tickNumber === 0 ? "0" : tickNumber > 0 ? `+${tickNumber}` : `${tickNumber}`,
+          tickNumber,
+          count: toFiniteNumber(count, 0),
+        };
+      })
+      .filter((entry): entry is ChartDataPoint => Boolean(entry))
+      .sort((a, b) => a.tickNumber - b.tickNumber);
   }, [trades, tickDetails]);
-  const hasData = chartData.some((entry) => entry.count > 0);
+  const hasData = hasPositiveFiniteByKey(chartData, "count");
 
   const handleBarClick = (data: any) => {
     if (!data || !trades.length) return;
@@ -260,7 +276,7 @@ export default function TickDistributionChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.ticks}`}
-                      fill={parseInt(entry.ticks) >= 0 ? "white" : "#52525B"}
+                      fill={entry.tickNumber >= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         tickFilter.value === entry.ticks
                           ? 1
@@ -271,7 +287,7 @@ export default function TickDistributionChart({
                       stroke="none"
                       className={cn(
                         "hover:brightness-110 transition-all duration-300",
-                        parseInt(entry.ticks) >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.tickNumber >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

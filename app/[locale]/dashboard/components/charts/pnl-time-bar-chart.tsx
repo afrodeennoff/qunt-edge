@@ -16,7 +16,7 @@ import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -73,7 +73,7 @@ export default function TimeOfDayTradeChart({
     // Sum up PNL and count trades for each hour in user's timezone
     trades.forEach((trade: Trade) => {
       const hour = formatInTimeZone(new Date(trade.entryDate), timezone, "H");
-      hourlyData[hour].totalPnl += Number(trade.pnl);
+      hourlyData[hour].totalPnl += toFiniteNumber(trade.pnl, 0);
       hourlyData[hour].count++;
     });
 
@@ -87,15 +87,7 @@ export default function TimeOfDayTradeChart({
       .sort((a, b) => a.hour - b.hour);
   }, [trades, timezone]);
 
-  const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
-  const maxPnL = Math.max(...chartData.map((data) => data.avgPnl));
-  const minPnL = Math.min(...chartData.map((data) => data.avgPnl));
   const hasData = chartData.some((data) => data.tradeCount > 0);
-
-  const getColor = (count: number) => {
-    const intensity = Math.max(0.2, count / maxTradeCount);
-    return `hsl(var(--chart-4) / ${intensity})`;
-  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     React.useEffect(() => {
@@ -108,11 +100,12 @@ export default function TimeOfDayTradeChart({
 
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const hourLabel = toFiniteNumber(label, 0);
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
           <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
             <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.time")}</span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${hourLabel}:00 - ${(hourLabel + 1) % 24}:00`}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">

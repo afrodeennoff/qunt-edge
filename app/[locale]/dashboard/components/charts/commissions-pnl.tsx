@@ -12,7 +12,7 @@ import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -92,9 +92,9 @@ export default function CommissionsPnLChart({
 
 
   const chartData = React.useMemo(() => {
-    const totalPnL = trades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
+    const totalPnL = trades.reduce((sum, trade) => sum + toFiniteNumber(trade.pnl, 0), 0);
     const totalCommissions = trades.reduce(
-      (sum, trade) => sum + Number(trade.commission),
+      (sum, trade) => sum + toFiniteNumber(trade.commission, 0),
       0,
     );
     const total = Math.abs(totalPnL) + Math.abs(totalCommissions);

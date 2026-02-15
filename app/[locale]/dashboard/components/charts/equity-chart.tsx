@@ -21,7 +21,7 @@ import {
 import { formatInTimeZone } from "date-fns-tz";
 import { fr, enUS } from "date-fns/locale";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
@@ -52,6 +52,7 @@ import { Payout as PrismaPayout } from "@/prisma/generated/prisma";
 import { AccountSelectionPopover } from "./account-selection-popover";
 import { getEquityChartDataAction } from "@/server/equity-chart";
 import { usePathname } from "next/navigation";
+import { hasFiniteKeyPrefix } from "@/lib/chart-guards";
 
 interface EquityChartProps {
   size?: WidgetSize;
@@ -629,16 +630,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       ) || [];
 
     if (validSelection.length === 0) {
-      console.log(
-        "[EquityChart] Resetting account selection to all available accounts"
-      );
       setSelectedAccountsToDisplay(availableAccountNumbers);
     } else if (
       validSelection.length !== config.selectedAccountsToDisplay?.length
     ) {
-      console.log(
-        "[EquityChart] Updating account selection to remove invalid accounts"
-      );
       setSelectedAccountsToDisplay(validSelection);
     }
   }, [
@@ -657,22 +652,65 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     [availableAccountNumbers]
   );
 
+  const sanitizeChartData = React.useCallback((input: ChartDataPoint[]): ChartDataPoint[] => {
+    return input
+      .map((row) => {
+        if (!row || typeof row !== "object") return null;
+        const parsedDate = new Date(row.date);
+        if (Number.isNaN(parsedDate.getTime())) return null;
+
+        const normalized: ChartDataPoint = {
+          date: formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd"),
+        } as ChartDataPoint;
+        const normalizedRecord = normalized as unknown as Record<string, unknown>;
+
+        for (const [key, value] of Object.entries(row)) {
+          if (key === "date") continue;
+
+          if (key.startsWith("payout_") || key.startsWith("reset_")) {
+            normalizedRecord[key] = Boolean(value);
+            continue;
+          }
+
+          if (key.startsWith("payoutStatus_")) {
+            normalizedRecord[key] = typeof value === "string" ? value : "";
+            continue;
+          }
+
+          normalizedRecord[key] = toFiniteNumber(value, 0);
+        }
+
+        normalized.equity = toFiniteNumber(
+          normalizedRecord.equity,
+          0
+        );
+
+        return normalized;
+      })
+      .filter((row): row is ChartDataPoint => Boolean(row));
+  }, [timezone]);
+
   const computeClientSideData = React.useCallback(() => {
     if (!formattedTrades || formattedTrades.length === 0) {
-      console.log("[EquityChart] No formatted trades available");
       return {
         chartData: [],
         accountNumbers: [],
       };
     }
 
-    console.log(
-      "[EquityChart] Computing client-side data for",
-      formattedTrades.length,
-      "trades"
-    );
+    const validTrades = formattedTrades.filter((trade) => {
+      const timestamp = new Date(trade.entryDate).getTime();
+      return Number.isFinite(timestamp);
+    });
 
-    const sortedTrades = [...formattedTrades].sort(
+    if (validTrades.length === 0) {
+      return {
+        chartData: [],
+        accountNumbers: [],
+      };
+    }
+
+    const sortedTrades = [...validTrades].sort(
       (a, b) =>
         new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
     );
@@ -710,25 +748,19 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       const dayTrades = tradesMap.get(dateKey) || [];
 
       dayTrades.forEach((trade) => {
-        cumulativeEquity += Number(trade.pnl) - Number(trade.commission || 0);
+        cumulativeEquity +=
+          toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0);
       });
 
       chartData.push({
         date: dateKey,
-        equity: cumulativeEquity,
+        equity: toFiniteNumber(cumulativeEquity, 0),
       });
     });
 
     const uniqueAccountNumbers = Array.from(
       new Set(sortedTrades.map((trade) => trade.accountNumber))
     );
-
-    console.log(
-      "[EquityChart] Computed chart data:",
-      chartData.length,
-      "points"
-    );
-    console.log("[EquityChart] Sample data:", chartData.slice(0, 3));
 
     return {
       chartData,
@@ -740,17 +772,11 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
 
     if (isSharedView || isTeamView || isMock) {
-      console.log("[EquityChart] Using client-side computation (shared/team view or mock data)");
       setIsLoading(true);
       try {
         const { chartData: computedData, accountNumbers: accNumbers } =
           computeClientSideData();
-        console.log(
-          "[EquityChart] Setting chart data:",
-          computedData.length,
-          "points"
-        );
-        setChartData(computedData);
+        setChartData(sanitizeChartData(computedData));
         setAvailableAccountNumbers(accNumbers);
       } catch (error) {
         console.error(
@@ -765,7 +791,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return;
     }
 
-    console.log("[EquityChart] Fetching server-side data");
     const fetchChartData = async () => {
       setIsLoading(true);
       try {
@@ -792,7 +817,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           dataSampling: config.dataSampling,
           selectedAccounts: Array.from(selectedAccounts),
         });
-        setChartData(result.chartData);
+        setChartData(sanitizeChartData(result.chartData));
         setAvailableAccountNumbers(result.accountNumbers);
       } catch (error) {
         console.error("Failed to fetch equity chart data:", error);
@@ -821,6 +846,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     showIndividual,
     config.dataSampling,
     selectedAccounts,
+    sanitizeChartData,
   ]);
 
   const chartConfig = React.useMemo(() => {
@@ -889,17 +915,13 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       );
     });
   }, [selectedAccounts, showIndividual, accountColorMap, isSharedView]);
-  const hasData = chartData.length > 0;
-
-  React.useEffect(() => {
-    console.log("[EquityChart Render] isSharedView:", isSharedView);
-    console.log("[EquityChart Render] showIndividual:", showIndividual);
-    console.log("[EquityChart Render] chartData length:", chartData.length);
-    console.log(
-      "[EquityChart Render] First 3 data points:",
-      chartData.slice(0, 3)
+  const hasData =
+    hasFiniteKeyPrefix(chartData, "equity_") ||
+    chartData.some((row) =>
+      Number.isFinite(
+        toFiniteNumber((row as unknown as Record<string, unknown>).equity, Number.NaN),
+      ),
     );
-  }, [isSharedView, showIndividual, chartData]);
 
   return (
     <ChartSurface>
@@ -992,9 +1014,11 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                         fontSize: size === "small" ? 9 : 10,
                         fill: "var(--fg-muted)",
                       }}
-                      tickFormatter={(value) =>
-                        format(new Date(value), "MMM d", { locale: dateLocale })
-                      }
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        if (Number.isNaN(date.getTime())) return "";
+                        return format(date, "MMM d", { locale: dateLocale });
+                      }}
                     />
                     <YAxis
                       ref={yAxisRef}
@@ -1006,7 +1030,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                         fontSize: size === "small" ? 9 : 10,
                         fill: "var(--fg-muted)",
                       }}
-                      tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
+                      tickFormatter={(value) => `$${(toFiniteNumber(value, 0) / 1000).toFixed(1)}k`}
                     />
                     <ReferenceLine
                       y={0}

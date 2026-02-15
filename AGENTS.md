@@ -36,6 +36,21 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Widget Blank-State Root Cause Fix (IndexedDB Trade Cache Normalization)
+- **What changed:** Fixed a data-shape regression where dashboard charts could render blank despite visible trade counts due to stale cached trade payloads entering state without normalization.
+- **What I want:** Widgets should always receive normalized numeric/date trade fields, whether trades come from live fetches or IndexedDB cache.
+- **What I don't want:** Cached trade objects with legacy/invalid numeric shapes causing `NaN` propagation (for example `Average Loss = -$NaN`) and blank Recharts render paths.
+- **How we fixed that:**
+  - Updated `DataProvider` cache-read paths in `context/data-provider.tsx` to normalize cached trades via `normalizeTradesForClient(...)` before `setTrades(...)`.
+  - Applied this in both:
+    - initial load path (`loadData` local cache branch),
+    - dev refresh path (`refreshTradesOnly` IndexedDB shortcut branch).
+  - This ensures stale cache payloads cannot bypass numeric/date sanitization.
+- **Key Files:** `context/data-provider.tsx`, `AGENTS.md`
+- **Verification:** 
+  - Open `/dashboard?tab=widgets` with existing cached data and confirm widgets render instead of blank cards.
+  - Confirm Trading Statistics no longer shows `-$NaN` for average loss.
+
 ### 2026-02-15: Widget Chart Visibility Fix (Collapsed `ChartSurface` Body Regression)
 - **What changed:** Fixed a dashboard widget rendering regression where chart widgets appeared blank even when trade data existed.
 - **What I want:** Widget charts should consistently render their chart area when data is available, regardless of whether the widget provides a custom internal header or uses `ChartSurface` header props.
@@ -47,6 +62,37 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Kept existing second-child body padding rule for true header+body surfaces.
 - **Key Files:** `app/globals.css`, `AGENTS.md`
 - **Verification:** Open `/dashboard?tab=widgets` and confirm previously blank chart widgets (e.g., `Daily Profit/Loss`, `Average P/L by Day`, `P/L by Side`, `Trade Distribution`, `P/L vs Commissions`) render chart content again when trade data exists.
+
+### 2026-02-15: Full Widget Reliability Hardening (V2 Visuals + V1 Behavior Parity)
+- **What changed:** Completed a full reliability hardening pass across targeted/missed chart widgets, shared chart shell contracts, cache schema handling, and numeric guardrails to prevent blank-chart regressions with valid trade data.
+- **What I want:** Keep V2 visuals while restoring V1 reliability behavior so widgets always choose a deterministic render state (loading/data/empty), ignore malformed trade fields safely, and recover from stale local cache entries.
+- **What I don't want:** Blank black chart panels, stale IndexedDB payloads re-introducing `NaN` math after refresh, or chart `hasData` checks returning false positives/false negatives due to non-finite values.
+- **How we fixed that:**
+  - Stabilized shared chart shell contract:
+    - added explicit `ChartSurface` structure hooks (`data-chart-surface-layout`, `data-chart-surface-header`, `data-chart-surface-body`) in `components/ui/chart-surface.tsx`,
+    - replaced brittle child-index CSS selectors with attribute-scoped selectors in `app/globals.css`.
+  - Hardened cache/data pipeline:
+    - added cache schema version parsing/invalidation helpers in `lib/indexeddb/trades-cache.ts`,
+    - added finite math helpers in `lib/utils.ts` (`toFiniteNumber`, `safeDivide`) and applied them to statistics/calendar/trading-day transforms,
+    - reinforced filtered trade normalization in `context/data-provider.tsx` so filtered render paths only consume finite numeric fields.
+  - Standardized widget behavior guards across targeted + missed chart widgets:
+    - finite/date guard updates in `pnl-bar-chart.tsx`, `pnl-time-bar-chart.tsx`, `commissions-pnl.tsx`, `time-range-performance.tsx`, `weekday-pnl.tsx`, `pnl-by-side.tsx`, `trade-distribution.tsx`, `pnl-per-contract.tsx`, `pnl-per-contract-daily.tsx`, `tick-distribution.tsx`, `equity-chart.tsx`, `time-in-position.tsx`, `contract-quantity.tsx`, and `daily-tick-target.tsx`,
+    - introduced reusable chart data guard helpers in `lib/chart-guards.ts` and used them in representative widget `hasData` paths (tick/equity).
+  - Added regression tests for reliability-critical paths:
+    - cache schema/version behavior,
+    - cache-read trade normalization,
+    - finite numeric/stat helpers,
+    - shared chart `hasData` guard utilities.
+- **Key Files:** `components/ui/chart-surface.tsx`, `app/globals.css`, `context/data-provider.tsx`, `lib/indexeddb/trades-cache.ts`, `lib/utils.ts`, `lib/chart-guards.ts`, `app/[locale]/dashboard/components/charts/*.tsx`, `tests/trades-cache-schema.test.ts`, `tests/cache-read-normalization.test.ts`, `tests/utils-finite-guards.test.ts`, `tests/chart-guards.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint` on all touched shared/chart/test files -> exits `0` (warnings-only baseline, no errors).
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0` with full route generation.
+  - `npm test` -> exits `0` (`101 passed | 46 skipped`), including new reliability tests:
+    - `tests/trades-cache-schema.test.ts`
+    - `tests/cache-read-normalization.test.ts`
+    - `tests/utils-finite-guards.test.ts`
+    - `tests/chart-guards.test.ts`
 
 ### 2026-02-15: Frontend + Backend Audit (Quality Gates + Security Posture)
 - **What changed:** Performed a full frontend/backend audit pass across lint, typecheck, build, and tests; documented concrete risk areas with file-level evidence.

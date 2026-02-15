@@ -5,7 +5,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContaine
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
-import { cn } from "@/lib/utils"
+import { cn, toFiniteNumber } from "@/lib/utils"
 import { Info } from 'lucide-react'
 import {
   Tooltip as UITooltip,
@@ -75,10 +75,11 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     }
 
     trades.forEach((trade: Trade) => {
-      const timeRange = getTimeRangeKey(Number(trade.timeInPosition))
-      timeRangeData[timeRange].totalPnl += Number(trade.pnl)
+      const timeRange = getTimeRangeKey(toFiniteNumber(trade.timeInPosition, 0))
+      const pnl = toFiniteNumber(trade.pnl, 0)
+      timeRangeData[timeRange].totalPnl += pnl
       timeRangeData[timeRange].totalTrades++
-      if (Number(trade.pnl) > 0) {
+      if (pnl > 0) {
         timeRangeData[timeRange].winCount++
       } else {
         timeRangeData[timeRange].lossCount++
@@ -123,6 +124,8 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
 
     if (active && payload && payload.length) {
       const data = payload[0].payload
+      const avgPnl = toFiniteNumber(data.avgPnl, 0)
+      const winRate = toFiniteNumber(data.winRate, 0)
       return (
         <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
           <div className="flex flex-col mb-2">
@@ -142,9 +145,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.avgPnl >= 0 ? "metric-positive" : "metric-negative"
+              avgPnl >= 0 ? "metric-positive" : "metric-negative"
             )}>
-              {data.avgPnl.toFixed(2)}
+              {avgPnl.toFixed(2)}
             </span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
@@ -153,9 +156,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-bold text-fg-primary text-xs",
-              data.winRate >= 50 ? "metric-positive" : "metric-negative"
+              winRate >= 50 ? "metric-positive" : "metric-negative"
             )}>
-              {data.winRate.toFixed(1)}%
+              {winRate.toFixed(1)}%
             </span>
           </div>
           <div className="flex flex-col pt-2">

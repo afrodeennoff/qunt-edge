@@ -77,7 +77,7 @@ import {
 } from "@/lib/mock-trades";
 import { isValid, startOfDay, endOfDay } from "date-fns";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
-import { calculateStatistics, formatCalendarData, cn, groupBy, calculateTradingDays } from "@/lib/utils";
+import { calculateStatistics, formatCalendarData, cn, groupBy, calculateTradingDays, toFiniteNumber } from "@/lib/utils";
 import { useParams } from "next/navigation";
 
 import {
@@ -379,6 +379,10 @@ export const DataProvider: React.FC<{
               }
               return {
                 ...trade,
+                pnl: toFiniteNumber(trade.pnl, 0),
+                commission: toFiniteNumber(trade.commission, 0),
+                quantity: toFiniteNumber(trade.quantity, 0),
+                timeInPosition: toFiniteNumber(trade.timeInPosition, 0),
                 utcDateStr,
               };
             });
@@ -488,7 +492,10 @@ export const DataProvider: React.FC<{
         const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           console.log("[DataProvider] Using local IndexedDB cache for trades");
-          setTrades(cachedTrades as Trade[]);
+          const normalizedCachedTrades = normalizeTradesForClient(
+            cachedTrades as (TradeInput | SerializedTrade)[]
+          );
+          setTrades(normalizedCachedTrades);
 
           // Refresh in background if not in dev or if we want freshest data
           fetchAllTrades(userId, false).then(freshTrades => {
@@ -688,7 +695,10 @@ export const DataProvider: React.FC<{
         if (process.env.NODE_ENV === "development" && !force) {
           const cachedTrades = await getTradesCache(userId);
           if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-            setTrades(cachedTrades);
+            const normalizedCachedTrades = normalizeTradesForClient(
+              cachedTrades as (TradeInput | SerializedTrade)[]
+            );
+            setTrades(normalizedCachedTrades);
             if (withLoading) setIsLoading(false);
             return;
           }
@@ -929,9 +939,10 @@ export const DataProvider: React.FC<{
         }
 
         // PnL range filter
+        const tradePnl = toFiniteNumber(trade.pnl, 0);
         if (
-          (pnlRange.min !== undefined && new Decimal(trade.pnl).toNumber() < pnlRange.min) ||
-          (pnlRange.max !== undefined && new Decimal(trade.pnl).toNumber() > pnlRange.max)
+          (pnlRange.min !== undefined && tradePnl < pnlRange.min) ||
+          (pnlRange.max !== undefined && tradePnl > pnlRange.max)
         ) {
           return false;
         }
@@ -943,11 +954,17 @@ export const DataProvider: React.FC<{
           const matchingTicker = Object.keys(tickDetails)
             .sort((a, b) => b.length - a.length) // Sort by length descending
             .find((ticker) => trade.instrument.includes(ticker));
-          const tickValue = matchingTicker
-            ? tickDetails[matchingTicker].tickValue
-            : 1;
-          const pnlPerContract = new Prisma.Decimal(trade.pnl).div(new Prisma.Decimal(trade.quantity)).toNumber();
-          const tradeTicks = Math.round(pnlPerContract / Number(tickValue));
+          const tickValue = toFiniteNumber(
+            matchingTicker ? tickDetails[matchingTicker].tickValue : 1,
+            1
+          );
+          const quantity = toFiniteNumber(trade.quantity, 0);
+          const pnl = toFiniteNumber(trade.pnl, 0);
+          if (quantity <= 0 || tickValue <= 0) {
+            return false;
+          }
+          const pnlPerContract = pnl / quantity;
+          const tradeTicks = Math.round(pnlPerContract / tickValue);
           const filterValue = tickFilter.value;
           if (
             filterValue &&
@@ -960,7 +977,7 @@ export const DataProvider: React.FC<{
         // Time range filter
         if (
           timeRange.range &&
-          getTimeRangeKey(Number(trade.timeInPosition)) !== timeRange.range
+          getTimeRangeKey(toFiniteNumber(trade.timeInPosition, 0)) !== timeRange.range
         ) {
           return false;
         }
@@ -993,7 +1010,14 @@ export const DataProvider: React.FC<{
       .sort(
         (a, b) =>
           new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
-      );
+      )
+      .map((trade) => ({
+        ...trade,
+        pnl: toFiniteNumber(trade.pnl, 0),
+        commission: toFiniteNumber(trade.commission, 0),
+        quantity: toFiniteNumber(trade.quantity, 0),
+        timeInPosition: toFiniteNumber(trade.timeInPosition, 0),
+      }));
   }, [
     trades,
     groups,
@@ -1017,13 +1041,13 @@ export const DataProvider: React.FC<{
 
     // Calculate gross profits and gross losses including commissions
     const grossProfits = formattedTrades.reduce((sum, trade) => {
-      const totalPnL = (trade.pnl || 0) - (trade.commission || 0);
+      const totalPnL = toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0);
       return totalPnL > 0 ? sum + totalPnL : sum;
     }, 0);
 
     const grossLosses = Math.abs(
       formattedTrades.reduce((sum, trade) => {
-        const totalPnL = (trade.pnl || 0) - (trade.commission || 0);
+        const totalPnL = toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0);
         return totalPnL < 0 ? sum + totalPnL : sum;
       }, 0)
     );

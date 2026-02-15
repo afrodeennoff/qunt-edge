@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -79,7 +79,7 @@ export default function WeekdayPNLChart({
 
     Object.entries(calendarData).forEach(([date, entry]) => {
       const dayOfWeek = new Date(date).getUTCDay();
-      weekdayTotals[dayOfWeek].total += entry.pnl;
+      weekdayTotals[dayOfWeek].total += toFiniteNumber(entry.pnl, 0);
       weekdayTotals[dayOfWeek].count += 1;
     });
 
@@ -98,7 +98,8 @@ export default function WeekdayPNLChart({
   const hasData = weekdayData.some((d) => d.tradeCount > 0);
 
   const getColor = (value: number) => {
-    const ratio = Math.abs((value - minPnL) / (maxPnL - minPnL));
+    const denominator = maxPnL - minPnL;
+    const ratio = denominator === 0 ? 0 : Math.abs((value - minPnL) / denominator);
     const baseColorVar = value >= 0 ? "--chart-win" : "--chart-loss";
     const intensity = darkMode
       ? Math.max(0.3, ratio) // Higher minimum intensity in dark mode

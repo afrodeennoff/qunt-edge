@@ -15,7 +15,7 @@ import {
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -107,6 +107,7 @@ export default function PnLPerContractDailyChart({
     const dateGroups = instrumentTrades.reduce(
       (acc, trade) => {
         const entryDate = new Date(trade.entryDate);
+        if (Number.isNaN(entryDate.getTime())) return acc;
         const dateKey = formatInTimeZone(entryDate, timezone, "yyyy-MM-dd");
 
         if (!acc[dateKey]) {
@@ -118,10 +119,10 @@ export default function PnLPerContractDailyChart({
           };
         }
 
-        const netPnl = Number(trade.pnl) - Number(trade.commission || 0);
+        const netPnl = toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0);
         acc[dateKey].trades.push(trade);
         acc[dateKey].totalPnl += netPnl;
-        acc[dateKey].totalContracts += Number(trade.quantity);
+        acc[dateKey].totalContracts += toFiniteNumber(trade.quantity, 0);
         if (netPnl > 0) {
           acc[dateKey].winCount++;
         }
@@ -135,18 +136,28 @@ export default function PnLPerContractDailyChart({
     return Object.entries(dateGroups)
       .map(([date, data]) => ({
         date,
-        averagePnl:
-          data.totalContracts > 0 ? data.totalPnl / data.totalContracts : 0,
-        totalPnl: data.totalPnl,
+        averagePnl: data.totalContracts > 0 ? data.totalPnl / data.totalContracts : 0,
+        totalPnl: toFiniteNumber(data.totalPnl, 0),
         tradeCount: data.trades.length,
         winCount: data.winCount,
-        totalContracts: data.totalContracts,
+        totalContracts: toFiniteNumber(data.totalContracts, 0),
       }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort((a, b) => {
+        const aDate = new Date(a.date).getTime();
+        const bDate = new Date(b.date).getTime();
+        if (!Number.isFinite(aDate) || !Number.isFinite(bDate)) return 0;
+        return aDate - bDate;
+      });
   }, [trades, config.selectedInstrument, timezone]);
 
   const maxPnL = Math.max(...chartData.map((d) => d.averagePnl));
   const minPnL = Math.min(...chartData.map((d) => d.averagePnl));
+  const hasData = chartData.some(
+    (d) =>
+      d.tradeCount > 0 &&
+      Number.isFinite(d.averagePnl) &&
+      Number.isFinite(d.totalPnl),
+  );
   const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as ChartDatum | undefined;
@@ -344,7 +355,7 @@ export default function PnLPerContractDailyChart({
                 </div>
               );
             })()
-          ) : chartData.length > 0 ? (
+          ) : hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}

@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
-import { cn } from "@/lib/utils";
+import { cn, toFiniteNumber } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
 import {
@@ -119,9 +119,9 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
       Object.entries(calendarData)
         .map(([date, values]) => ({
           date,
-          pnl: values.pnl,
-          shortNumber: values.shortNumber,
-          longNumber: values.longNumber,
+          pnl: toFiniteNumber(values.pnl, 0),
+          shortNumber: toFiniteNumber(values.shortNumber, 0),
+          longNumber: toFiniteNumber(values.longNumber, 0),
         }))
         .sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -131,13 +131,6 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
   const hasData = chartData.some(
     (entry) => (entry.shortNumber || 0) + (entry.longNumber || 0) > 0,
   );
-
-  console.log("PNLChart Debug:", {
-    calendarDataKeys: Object.keys(calendarData).length,
-    chartDataLength: chartData.length,
-    hasData,
-    firstChartEntry: chartData[0]
-  });
 
   const getChartMargins = () => {
     switch (size) {
