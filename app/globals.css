@@ -429,8 +429,8 @@
   }
 
   /* Dashboard-only spacing normalization for chart widgets */
-  [data-widget-shell="true"] [data-chart-surface="modern"]>div:first-child,
-  [data-widget-shell="v2"] [data-chart-surface="modern"]>div:first-child {
+  [data-widget-shell="true"] [data-chart-surface="modern"]>div:first-child:not(.flex-1),
+  [data-widget-shell="v2"] [data-chart-surface="modern"]>div:first-child:not(.flex-1) {
     height: 3rem !important;
     min-height: 3rem;
     padding: 0.65rem 0.85rem !important;

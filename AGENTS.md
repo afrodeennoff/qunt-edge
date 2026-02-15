@@ -36,6 +36,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-15: Widget Chart Visibility Fix (Collapsed `ChartSurface` Body Regression)
+- **What changed:** Fixed a dashboard widget rendering regression where chart widgets appeared blank even when trade data existed.
+- **What I want:** Widget charts should consistently render their chart area when data is available, regardless of whether the widget provides a custom internal header or uses `ChartSurface` header props.
+- **What I don't want:** Global shell CSS to force chart bodies to a fixed header height and accidentally collapse chart render space, making widgets look like data failed to load.
+- **How we fixed that:**
+  - Updated the dashboard chart-surface spacing selector in `app/globals.css`:
+    - header-height normalization now applies only when the first `ChartSurface` child is an actual header node (`:first-child:not(.flex-1)`),
+    - avoids treating single-child body-only `ChartSurface` layouts as headers.
+  - Kept existing second-child body padding rule for true header+body surfaces.
+- **Key Files:** `app/globals.css`, `AGENTS.md`
+- **Verification:** Open `/dashboard?tab=widgets` and confirm previously blank chart widgets (e.g., `Daily Profit/Loss`, `Average P/L by Day`, `P/L by Side`, `Trade Distribution`, `P/L vs Commissions`) render chart content again when trade data exists.
+
 ### 2026-02-15: Frontend + Backend Audit (Quality Gates + Security Posture)
 - **What changed:** Performed a full frontend/backend audit pass across lint, typecheck, build, and tests; documented concrete risk areas with file-level evidence.
 - **What I want:** A reliable engineering baseline where CI quality gates are trustworthy, production TLS defaults remain secure, and frontend render paths avoid state anti-patterns that can regress UX/performance.
