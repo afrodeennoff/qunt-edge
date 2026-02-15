@@ -149,7 +149,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           {hasData ? (
             <>
               <div className="min-h-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minHeight={180}>
                   <PieChart>
                     <Pie
                       data={chartData}

@@ -988,7 +988,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
               </div>
             ) : hasData ? (
               <ChartContainer config={chartConfig} className="w-full h-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minHeight={180}>
                   <LineChart
                     data={chartData}
                     margin={

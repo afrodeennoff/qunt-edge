@@ -312,7 +312,7 @@ export default function PnLPerContractDailyChart({
                   : { left: 0, right: 0, top: 8, bottom: 24 };
               return (
                 <div className={cn("w-full h-full animate-pulse relative")}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minHeight={180}>
                     <BarChart data={loadingMockData} margin={margin}>
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -356,7 +356,7 @@ export default function PnLPerContractDailyChart({
               );
             })()
           ) : hasData ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
               <BarChart
                 data={chartData}
                 margin={
