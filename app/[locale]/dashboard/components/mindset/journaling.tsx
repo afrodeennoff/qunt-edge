@@ -38,24 +38,27 @@ export function Journaling({
   const t = useI18n()
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-none">
-        <h3 className="text-sm font-medium mb-2">{t('mindset.emotion.title')}</h3>
-        <EmotionSelector
-          value={emotionValue}
-          onChange={onEmotionChange}
-        />
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <h3 className="mb-3 text-[11px] uppercase tracking-[0.2em] text-white/55">{t("mindset.emotion.title")}</h3>
+          <EmotionSelector
+            value={emotionValue}
+            onChange={onEmotionChange}
+          />
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <h3 className="mb-3 text-[11px] uppercase tracking-[0.2em] text-white/55">Day Tags</h3>
+          <DayTagSelector
+            trades={trades}
+            date={date}
+            onApplyTagToAll={onApplyTagToAll}
+          />
+        </section>
       </div>
 
-      <div className="flex-none mt-6">
-        <DayTagSelector
-          trades={trades}
-          date={date}
-          onApplyTagToAll={onApplyTagToAll}
-        />
-      </div>
-
-      <div className="flex-1 min-h-0 mt-6 flex flex-col">
+      <div className="min-h-0 flex-1 rounded-2xl border border-white/10 bg-black/35 p-3 sm:p-4">
         <TiptapEditor
           content={content}
           onChange={onChange}
@@ -69,10 +72,10 @@ export function Journaling({
         />
       </div>
 
-      <div className="flex-none flex gap-4 mt-6">
+      <div className="flex-none">
         <Button
           onClick={onSave}
-          className="w-full"
+          className="w-full border border-white/20 bg-white text-black transition hover:bg-white/90"
         >
           {t('mindset.journaling.save')}
         </Button>
