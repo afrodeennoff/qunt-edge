@@ -36,6 +36,33 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-16: Main Branch Sync + Enterprise Gap Audit Report
+- **What changed:** Merged and pushed the full optimization/security branch to `main`, then completed a full repository audit pass with prioritized enterprise readiness findings.
+- **What I want:** Keep `main` as the source of truth with a clear, auditable record of launch-blocking risks and the exact areas that still require hardening before enterprise-grade operation.
+- **What I don't want:** Shipping based on “build passes” only while leaving unresolved platform-level gaps in redirect safety, secrets posture, test reliability, and warning debt.
+- **How we fixed that:**
+  - Fast-forward merged `codex/nextjs-optimization-wave` into `main` and pushed to origin.
+  - Ran full audit gates and scans:
+    - `npm run lint` (0 errors, high warning debt),
+    - `npm test` (found failing trader VaR tests),
+    - `npm run build` (pass),
+    - `npm run check:route-budgets` (pass),
+    - targeted static scans for auth, CSP, secret fallbacks, redirect handling, and API guard coverage.
+  - Identified enterprise blockers with concrete code evidence:
+    - open-redirect handling via `next` param in auth redirect path,
+    - default secret fallback in widget message bus,
+    - permissive embed CSP allowances in production path,
+    - hardcoded/fallback payment config defaults,
+    - non-green test suite and high lint warning backlog.
+- **Key Files:** `proxy.ts`, `lib/widget-policy-engine/message-bus.ts`, `server/payment-service.ts`, `server/billing.ts`, `app/api/team/invite/route.ts`, `tests/trader-var-action.test.ts`, `.github/workflows/ci.yml`, `AGENTS.md`
+- **Verification:**
+  - Git push confirmed: `main` updated to commit `6f74cef`.
+  - Audit command outcomes captured:
+    - `npm run lint` -> `0` errors, `1227` warnings,
+    - `npm test` -> `3` failing tests (`tests/trader-var-action.test.ts`),
+    - `npm run build` -> pass,
+    - `npm run check:route-budgets` -> pass.
+
 ### 2026-02-16: Launch Optimization Pass (Preload + CDN + Image + Cache + Dashboard Read Path)
 - **What changed:** Completed a targeted production optimization pass across Next.js delivery config, preload hints, dashboard rendering behavior, and backend read caching.
 - **What I want:** Lower overhead on low-end devices, fewer unnecessary network prefetches, faster dashboard shell loads, and reduced repeated DB pressure on authenticated dashboard visits.
