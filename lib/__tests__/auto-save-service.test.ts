@@ -259,10 +259,15 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: false,
-            })
+            if (typeof navigator !== 'undefined') {
+                Object.defineProperty(navigator, 'onLine', {
+                    writable: true,
+                    value: false,
+                })
+            } else {
+                // Polyfill for environments where navigator is not defined
+                global.navigator = { onLine: false } as Navigator
+            }
 
             const onOffline = vi.fn()
             service.on('onOffline', onOffline)
@@ -277,10 +282,14 @@ describe('AutoSaveService', () => {
             const queued = await queue.getAll()
             expect(queued.length).toBeGreaterThan(0)
 
-            Object.defineProperty(navigator, 'onLine', {
-                writable: true,
-                value: true,
-            })
+            if (typeof navigator !== 'undefined') {
+                Object.defineProperty(navigator, 'onLine', {
+                    writable: true,
+                    value: true,
+                })
+            } else {
+                global.navigator = { onLine: true } as Navigator
+            }
         })
 
         it('should process offline queue when connection restored', async () => {
