@@ -8,9 +8,13 @@ import { useEffect } from "react";
  */
 export function ScrollLockFix() {
   useEffect(() => {
-    const removePadding = () => {
+    const hasOpenDialog = () =>
+      Boolean(document.querySelector('[role="dialog"][data-state="open"]'));
+
+    const normalizeScrollLock = () => {
       const body = document.body;
       const html = document.documentElement;
+      const shouldPreserveLock = hasOpenDialog();
 
       [body, html].forEach((element) => {
         if (element.style.paddingRight !== "0px") {
@@ -19,16 +23,32 @@ export function ScrollLockFix() {
         if (element.style.marginRight !== "0px") {
           element.style.setProperty("margin-right", "0", "important");
         }
+        if (!shouldPreserveLock) {
+          if (element.style.overflow === "hidden") {
+            element.style.removeProperty("overflow");
+          }
+          if (element.style.pointerEvents === "none") {
+            element.style.removeProperty("pointer-events");
+          }
+        }
       });
+
+      if (!shouldPreserveLock) {
+        body.removeAttribute("data-scroll-locked");
+        body.classList.remove("radix-scroll-lock");
+        html.classList.remove("radix-scroll-lock");
+      }
     };
 
-    removePadding();
+    normalizeScrollLock();
 
     const observer = new MutationObserver(() => {
-      removePadding();
+      normalizeScrollLock();
     });
 
     observer.observe(document.body, {
+      childList: true,
+      subtree: true,
       attributes: true,
       attributeFilter: ["style", "class"],
     });

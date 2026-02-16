@@ -119,7 +119,7 @@ export function DashboardHeader() {
             <div className={cn("relative flex items-center justify-between gap-3 px-3 sm:px-6", isMobile ? "h-14" : "h-full")}>
                 {/* Left Side: Sidebar Toggle & Title */}
                 <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
-                    <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground h-9 w-9" />
+                    <SidebarTrigger className="text-muted-foreground hover:text-foreground h-9 w-9" />
                     <div className="flex min-w-0 items-start gap-3">
                         <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">

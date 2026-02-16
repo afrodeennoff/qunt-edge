@@ -44,6 +44,7 @@ export interface UnifiedSidebarItem {
   badge?: React.ReactNode
   group?: string
   disabled?: boolean
+  exact?: boolean
 }
 
 export interface UnifiedSidebarConfig {
@@ -88,7 +89,7 @@ function useActiveLink() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  return (href: string) => {
+  return (href: string, exact = false) => {
     if (!pathname) return false
 
     const normalizedPathname = stripLocalePrefix(pathname)
@@ -117,10 +118,11 @@ function useActiveLink() {
       return true
     }
 
-    return (
-      normalizedPathname === basePath ||
-      normalizedPathname.startsWith(`${basePath}/`)
-    )
+    if (exact) {
+      return normalizedPathname === basePath
+    }
+
+    return normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`)
   }
 }
 
@@ -225,8 +227,16 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { isMobile, setOpenMobile } = useSidebar()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const { isMobile, openMobile, setOpenMobile } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
+  const routeSignature = `${pathname ?? ""}?${searchParams.toString()}`
+
+  React.useEffect(() => {
+    if (!isMobile || !openMobile) return
+    setOpenMobile(false)
+  }, [isMobile, openMobile, routeSignature, setOpenMobile])
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -282,7 +292,7 @@ export function UnifiedSidebar({
                       const label = item.i18nKey ? translate(item.i18nKey) : item.label
                       const isItemDisabled = Boolean(item.disabled)
                       const itemIsActive =
-                        !isItemDisabled && !!item.href && isActive(item.href)
+                        !isItemDisabled && !!item.href && isActive(item.href, item.exact)
                       const menuButtonClass = cn(
                         styles.menuButton,
                         itemIsActive ? styles.menuButtonActive : styles.menuButtonIdle
@@ -406,7 +416,12 @@ export function UnifiedSidebar({
               type="button"
               variant="ghost"
               className={cn("w-full justify-start group-data-[collapsible=icon]:justify-center", styles.footerButton)}
-              onClick={onLogout}
+              onClick={() => {
+                if (isMobile) {
+                  setOpenMobile(false)
+                }
+                onLogout()
+              }}
             >
               <LogOut className="size-4" />
               <span className="group-data-[collapsible=icon]:hidden">Logout</span>
