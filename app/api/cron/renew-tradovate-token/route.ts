@@ -1,6 +1,7 @@
 // app/api/cron/renew-tradovate-token/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
+import { requireServiceAuth, toErrorResponse } from '@/server/authz';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,15 +29,12 @@ function shouldPerformDailySync(dailySyncTime: Date | null): boolean {
 }
 
 export async function GET(request: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    return new Response('Cron secret not configured', { status: 500 });
-  }
-
   // Verify this is a cron request
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return new Response('Unauthorized', { status: 401 });
+  try {
+    requireServiceAuth(authHeader, { serviceName: 'cron-renew-tradovate-token' });
+  } catch (error) {
+    return toErrorResponse(error);
   }
 
   try {
@@ -97,7 +95,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Cron job error:', error);
-    return Response.json({ error: 'Cron job failed' }, { status: 500 });
+    return toErrorResponse(error);
   }
 }
 

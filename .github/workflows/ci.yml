@@ -50,6 +50,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Route Budgets
+        run: npm run check:route-budgets
+
       - name: Security Audit Report
         run: npm audit --json > npm-audit-report.json || true
 

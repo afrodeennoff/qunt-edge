@@ -21,26 +21,15 @@ import {
 import { useData } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { useCurrentLocale } from "@/locales/client"
-import { checkAdminStatus } from "@/app/[locale]/dashboard/settings/actions"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 
-export function DashboardSidebar() {
+export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
     const { refreshAllData } = useData()
     const locale = useCurrentLocale()
     const user = useUserStore(state => state.supabaseUser)
     const timezone = useUserStore(state => state.timezone)
     const setTimezone = useUserStore(state => state.setTimezone)
     const resetUser = useUserStore(state => state.resetUser)
-    const [isAdmin, setIsAdmin] = React.useState(false)
-
-    React.useEffect(() => {
-        async function check() {
-            const status = await checkAdminStatus()
-            setIsAdmin(status)
-        }
-        check()
-    }, [])
-
     const handleLogout = async () => {
         resetUser()
         const { signOut } = await import("@/server/auth")

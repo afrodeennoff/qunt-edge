@@ -254,6 +254,7 @@ export function UnifiedSidebar({
                             >
                               <Link
                                 href={item.href}
+                                prefetch={false}
                                 aria-current={itemIsActive ? "page" : undefined}
                                 aria-label={label}
                                 onClick={() => {

@@ -3,6 +3,7 @@ import { createI18nMiddleware } from "next-international/middleware"
 import { createServerClient } from "@supabase/ssr"
 import { geolocation } from "@vercel/functions"
 import { User } from "@supabase/supabase-js"
+import { buildAppCsp, createNonce } from "@/lib/security/csp"
 
 // Maintenance mode flag - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false
@@ -123,6 +124,9 @@ export default async function middleware(req: NextRequest) {
   // Apply i18n middleware first
   // This handles basic redirects for / to /en, etc.
   const response = I18nMiddleware(req)
+  const isDev = process.env.NODE_ENV === "development"
+  const nonce = createNonce()
+  response.headers.set("x-nonce", nonce)
 
   // Embed route check (public path, no auth/session roundtrip needed)
   if (isEmbedRoute) {
@@ -174,6 +178,8 @@ export default async function middleware(req: NextRequest) {
 
     return response
   }
+
+  response.headers.set("Content-Security-Policy", buildAppCsp(nonce, isDev))
 
   // Check for protected routes
   const needsSessionCheck = isDashboardRoute || isAdminRoute || isAuthRoute

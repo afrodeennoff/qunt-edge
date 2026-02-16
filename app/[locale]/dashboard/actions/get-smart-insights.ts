@@ -1,8 +1,8 @@
 "use server"
 
-import { Timeframe } from "@/app/[locale]/(landing)/propfirms/actions/timeframe-utils";
 import { prisma } from "@/lib/prisma";
-import { startOfDay, subDays, subMonths } from "date-fns";
+import { subDays, subMonths } from "date-fns";
+import { getDatabaseUserId } from "@/server/auth";
 
 export interface SmartInsight {
     id: string
@@ -19,8 +19,13 @@ export interface SmartInsight {
     timestamp: Date
 }
 
-export async function getSmartInsights(userId: string): Promise<SmartInsight[]> {
+export async function getSmartInsights(requestedUserId: string): Promise<SmartInsight[]> {
     try {
+        const userId = await getDatabaseUserId()
+        if (userId !== requestedUserId) {
+            throw new Error("Unauthorized")
+        }
+
         // 1. Get recent trading data for this user
         const endDate = new Date()
         const startDate = subMonths(endDate, 1)

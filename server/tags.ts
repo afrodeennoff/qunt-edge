@@ -4,14 +4,15 @@ import { getDatabaseUserId } from './auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function getTagsAction(userId: string) {
-  console.log('getTags', userId)
+export async function getTagsAction() {
+  const currentUserId = await getDatabaseUserId()
+  console.log('getTags', currentUserId)
 
 
   try {
     const tags = await prisma.tag.findMany({
       where: {
-        userId: userId,
+        userId: currentUserId,
       },
       orderBy: {
         createdAt: 'desc',

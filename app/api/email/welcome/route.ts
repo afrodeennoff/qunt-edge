@@ -5,8 +5,18 @@ import WelcomeEmail from '@/components/emails/welcome'
 import { getLatestVideoFromPlaylist } from "@/app/[locale]/admin/actions/youtube"
 import crypto from 'crypto'
 import { createUnsubscribeToken } from "@/lib/unsubscribe-token"
+import { z } from "zod"
+import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate"
 
 export const dynamic = 'force-dynamic'
+
+const welcomeWebhookSchema = z.object({
+  type: z.string(),
+  record: z.object({
+    email: z.string().email(),
+    raw_user_meta_data: z.record(z.string(), z.unknown()).optional(),
+  }).passthrough(),
+}).passthrough()
 
 function isAuthorizedWebhook(request: Request): boolean {
   const secret = process.env.WELCOME_WEBHOOK_SECRET || process.env.SUPABASE_WEBHOOK_SECRET
@@ -38,7 +48,7 @@ export async function POST(req: Request) {
   const fifteenMinutesFromNow = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
   try {
-    const payload = await req.json()
+    const payload = await parseJson(req, welcomeWebhookSchema)
 
     // Only process new user insertions
     if (payload.type !== 'INSERT') {
@@ -54,7 +64,12 @@ export async function POST(req: Request) {
     // Identify user based on email
 
     // Get the user's first name or use default
-    const fullName = record.raw_user_meta_data?.name || record.raw_user_meta_data?.full_name || ''
+    const rawName = record.raw_user_meta_data?.name
+    const rawFullName = record.raw_user_meta_data?.full_name
+    const fullName =
+      (typeof rawName === "string" && rawName) ||
+      (typeof rawFullName === "string" && rawFullName) ||
+      ""
     const firstName = fullName.split(' ')[0] || 'trader'
     const lastName = fullName.split(' ')[1] || ''
 
@@ -112,9 +127,6 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Webhook error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return toValidationErrorResponse(error)
   }
 }

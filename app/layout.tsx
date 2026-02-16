@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
+import { WebVitalsReporter } from "@/components/providers/web-vitals-reporter";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -107,6 +108,8 @@ export default function RootLayout({
 }) {
   const isProduction = process.env.NODE_ENV === "production";
   const uiVariant = getUiVariant();
+  const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   return (
     <html
@@ -120,18 +123,14 @@ export default function RootLayout({
       <head>
         {/* Resource Hinting for Performance */}
         <link rel="dns-prefetch" href="https://qunt-edge.vercel.app" />
+        <link rel="preconnect" href="https://qunt-edge.vercel.app" crossOrigin="anonymous" />
+        {cdnUrl ? <link rel="preconnect" href={cdnUrl} crossOrigin="anonymous" /> : null}
+        {supabaseUrl ? <link rel="preconnect" href={supabaseUrl} crossOrigin="anonymous" /> : null}
 
         {/* Mobile-First Meta Tags */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#050505" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="format-detection" content="telephone=no, address=no, email=no" />
-
-        {/* Accessibility & SEO */}
-        <meta name="google" content="notranslate" />
-        <meta name="robots" content="index, follow" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
         <Script id="init-theme" strategy="beforeInteractive">
@@ -189,6 +188,7 @@ export default function RootLayout({
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />
+        {isProduction ? <WebVitalsReporter /> : null}
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}
         {children}

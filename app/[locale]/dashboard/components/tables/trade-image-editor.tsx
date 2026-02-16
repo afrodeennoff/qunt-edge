@@ -494,11 +494,14 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                         wrapperClass="w-full! h-full!"
                         contentClass="w-full! h-full! flex items-center justify-center"
                       >
-                        <div className="flex items-center justify-center w-full h-full">
-                          <img
+                        <div className="relative flex items-center justify-center w-full h-full">
+                          <Image
                             src={displayImageArray[selectedImageIndex]}
                             alt="Trade image"
-                            className="max-w-full max-h-full object-contain select-none"
+                            className="object-contain select-none"
+                            fill
+                            unoptimized
+                            sizes="90vw"
                             style={{ margin: "auto" }}
                           />
                         </div>

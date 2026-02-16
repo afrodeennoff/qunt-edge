@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { MemberRole, Prisma } from '@/prisma/generated/prisma'
+import { MemberRole } from '@/prisma/generated/prisma'
 
 export async function createTeam(userId: string, name: string, organizationId?: string) {
   try {
@@ -222,7 +222,7 @@ export async function updateMemberRole(teamId: string, userId: string, requester
     const team = await prisma.team.findFirst({
       where: { id: teamId },
       include: { members: true }
-    }) as unknown as Prisma.TeamGetPayload<{ include: { members: true } }>
+    })
 
     if (!team) {
       throw new Error('Team not found')
@@ -259,7 +259,7 @@ export async function removeMember(teamId: string, userId: string, requesterUser
     const team = await prisma.team.findFirst({
       where: { id: teamId },
       include: { members: true }
-    }) as unknown as Prisma.TeamGetPayload<{ include: { members: true } }>
+    })
 
     if (!team) {
       throw new Error('Team not found')
@@ -323,84 +323,56 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
   try {
     const team = await prisma.team.findFirst({
       where: { id: teamId },
-      include: {
-        members: {
-          include: {
-            user: {
-              include: {
-                accounts: {
-                  include: {
-                    trades: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      include: { members: true }
     })
 
     if (!team) {
       throw new Error('Team not found')
     }
 
-    const teamWithMembers = team as unknown as Prisma.TeamGetPayload<{
-      include: {
-        members: {
-          include: {
-            user: {
-              include: {
-                accounts: {
-                  include: {
-                    trades: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }>
-
-    const member = teamWithMembers.members.find(m => m.userId === userId)
+    const member = team.members.find(m => m.userId === userId)
     if (!member || (member.role !== MemberRole.ADMIN && member.role !== MemberRole.TRADER && member.role !== MemberRole.ANALYST)) {
       throw new Error('Unauthorized')
     }
 
-    if (teamWithMembers.members.length === 0) {
+    if (team.members.length === 0) {
       return { success: true, analytics: null }
     }
 
+    const traderIds = team.members.map((member) => member.userId)
+    const [trades] = await Promise.all([
+      prisma.trade.findMany({
+        where: { userId: { in: traderIds } },
+        select: { userId: true, pnl: true, commission: true },
+      }),
+    ])
+
+    const memberPnLById = new Map<string, number>()
     let totalPnl = 0
     let totalTrades = 0
     let winningTrades = 0
-    const totalRr = 0
-    const rrCount = 0
 
-    for (const teamMember of teamWithMembers.members) {
-      for (const account of teamMember.user.accounts) {
-        for (const trade of account.trades) {
-          totalPnl += Number(trade.pnl)
-          totalTrades++
-          if (Number(trade.pnl) > 0) winningTrades++
-          // Simplified RR calculation based on risk taken vs reward
-          // This assumes a standard risk per trade if not available, can be improved
-        }
-      }
+    for (const trade of trades) {
+      const netPnl = Number(trade.pnl) - Number(trade.commission ?? 0)
+      totalPnl += netPnl
+      totalTrades++
+      if (netPnl > 0) winningTrades++
+      memberPnLById.set(trade.userId, (memberPnLById.get(trade.userId) ?? 0) + netPnl)
     }
 
     const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0
     const averageRr = 0 // Placeholder for better calculation logic
 
-    const bestMember = teamWithMembers.members.reduce((best: any, member: any) => {
-      const memberPnl = member.user.accounts.reduce((sum: number, acc: any) => {
-        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
-      }, 0)
-      const bestPnl = best.user.accounts.reduce((sum: number, acc: any) => {
-        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
-      }, 0)
-      return memberPnl > bestPnl ? member : best
-    }, teamWithMembers.members[0])
+    const bestMember = traderIds.reduce<{ userId: string | null; pnl: number }>(
+      (best, traderId) => {
+        const pnl = memberPnLById.get(traderId) ?? 0
+        if (best.userId === null || pnl > best.pnl) {
+          return { userId: traderId, pnl }
+        }
+        return best
+      },
+      { userId: null, pnl: Number.NEGATIVE_INFINITY }
+    )
 
     const analytics = await prisma.teamAnalytics.upsert({
       where: {
@@ -416,20 +388,16 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
         totalTrades,
         winRate,
         averageRr,
-        bestMemberId: bestMember?.userId,
-        bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
-        }, 0) : 0
+        bestMemberId: bestMember.userId,
+        bestMemberPnl: Number.isFinite(bestMember.pnl) ? bestMember.pnl : 0
       },
       update: {
         totalPnl,
         totalTrades,
         winRate,
         averageRr,
-        bestMemberId: bestMember?.userId,
-        bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
-        }, 0) : 0
+        bestMemberId: bestMember.userId,
+        bestMemberPnl: Number.isFinite(bestMember.pnl) ? bestMember.pnl : 0
       }
     })
 
@@ -445,24 +413,7 @@ export async function getTeamOverviewData(teamId: string, userId: string) {
     const team = await prisma.team.findFirst({
       where: { id: teamId },
       include: {
-        members: {
-          include: {
-            user: {
-              include: {
-                accounts: {
-                  include: {
-                    trades: {
-                      orderBy: {
-                        createdAt: 'desc'
-                      },
-                      take: 5
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
+        members: true,
         analytics: {
           where: { period: 'monthly' },
           take: 1
@@ -476,36 +427,64 @@ export async function getTeamOverviewData(teamId: string, userId: string) {
     const isMember = team.members.some(m => m.userId === userId)
     if (!isMember) throw new Error('Unauthorized')
 
+    const traderIds = team.members.map((member) => member.userId)
+    const [users, accounts, recentTrades] = await Promise.all([
+      prisma.user.findMany({
+        where: { id: { in: traderIds } },
+        select: { id: true, email: true },
+      }),
+      prisma.account.findMany({
+        where: { userId: { in: traderIds } },
+        select: { userId: true, startingBalance: true, balanceRequired: true },
+      }),
+      prisma.trade.findMany({
+        where: { userId: { in: traderIds } },
+        select: {
+          id: true,
+          userId: true,
+          instrument: true,
+          pnl: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      }),
+    ])
+
+    const userEmailMap = new Map(users.map((user) => [user.id, user.email || 'Unknown']))
     let totalBalance = 0
-    let activeTraders = 0
-    let recentActivity: any[] = []
+    let recentActivity: Array<{
+      id: string
+      type: 'TRADE_CLOSED'
+      description: string
+      amount: unknown
+      date: Date
+      userEmail: string
+    }> = []
 
     const now = new Date()
     const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const activeTraderSet = new Set<string>()
 
-    team.members.forEach(member => {
-      let memberHasRecentActivity = false
-      member.user.accounts.forEach(account => {
-        totalBalance += Number(account.startingBalance) + Number(account.balanceRequired || 0) // Basic balance calc
+    for (const account of accounts) {
+      totalBalance += Number(account.startingBalance) + Number(account.balanceRequired || 0)
+    }
 
-        // Check for recent activity
-        const hasRecentTrades = account.trades.some(t => t.createdAt > lastWeek)
-        if (hasRecentTrades) memberHasRecentActivity = true
-
-        // Collect recent activity
-        account.trades.forEach(trade => {
-          recentActivity.push({
-            id: trade.id,
-            type: 'TRADE_CLOSED',
-            description: `${member.user.email} closed ${trade.instrument} with PnL ${trade.pnl}`,
-            amount: trade.pnl,
-            date: trade.createdAt,
-            userEmail: member.user.email
-          })
-        })
+    for (const trade of recentTrades) {
+      if (trade.createdAt > lastWeek) {
+        activeTraderSet.add(trade.userId)
+      }
+      const userEmail = userEmailMap.get(trade.userId) || 'Unknown'
+      recentActivity.push({
+        id: trade.id,
+        type: 'TRADE_CLOSED',
+        description: `${userEmail} closed ${trade.instrument} with PnL ${trade.pnl}`,
+        amount: trade.pnl,
+        date: trade.createdAt,
+        userEmail,
       })
-      if (memberHasRecentActivity) activeTraders++
-    })
+    }
+    const activeTraders = activeTraderSet.size
 
     // Sort and limit activity
     recentActivity = recentActivity.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10)

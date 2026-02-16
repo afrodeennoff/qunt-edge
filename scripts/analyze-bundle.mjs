@@ -4,6 +4,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const NEXT_DIR = path.join(ROOT, ".next");
 const BUILD_MANIFEST_PATH = path.join(NEXT_DIR, "build-manifest.json");
+const APP_BUILD_MANIFEST_PATH = path.join(NEXT_DIR, "app-build-manifest.json");
 const APP_SERVER_DIR = path.join(NEXT_DIR, "server", "app");
 const OUTPUT_DIR = path.join(ROOT, "docs", "audits", "artifacts");
 const OUTPUT_PATH = path.join(OUTPUT_DIR, "bundle-summary.json");
@@ -24,32 +25,61 @@ function bytesToKb(bytes) {
   return Number((bytes / 1024).toFixed(2));
 }
 
-if (!fs.existsSync(BUILD_MANIFEST_PATH)) {
-  console.error("[analyze-bundle] Missing .next/build-manifest.json. Run `npm run build` first.");
+if (!fs.existsSync(BUILD_MANIFEST_PATH) && !fs.existsSync(APP_BUILD_MANIFEST_PATH)) {
+  console.error("[analyze-bundle] Missing build manifests. Run `npm run build` first.");
   process.exit(1);
 }
 
-const manifest = readJson(BUILD_MANIFEST_PATH);
-const allFiles = manifest?.allFiles ?? [];
-const fileSizes = allFiles.map((file) => {
+const buildManifest = fs.existsSync(BUILD_MANIFEST_PATH)
+  ? readJson(BUILD_MANIFEST_PATH)
+  : {};
+const appBuildManifest = fs.existsSync(APP_BUILD_MANIFEST_PATH)
+  ? readJson(APP_BUILD_MANIFEST_PATH)
+  : {};
+
+const fileSet = new Set(buildManifest?.allFiles ?? []);
+for (const files of Object.values(buildManifest?.pages ?? {})) {
+  if (!Array.isArray(files)) continue;
+  for (const file of files) fileSet.add(file);
+}
+for (const files of Object.values(appBuildManifest?.pages ?? {})) {
+  if (!Array.isArray(files)) continue;
+  for (const file of files) fileSet.add(file);
+}
+
+const fileSizes = Array.from(fileSet).map((file) => {
   const full = path.join(NEXT_DIR, file);
   return { file, bytes: fileSize(full), kb: bytesToKb(fileSize(full)) };
 });
 
 const largestFiles = [...fileSizes].sort((a, b) => b.bytes - a.bytes).slice(0, 30);
 
-const pages = manifest?.pages ?? {};
-const routeBudgets = Object.entries(pages).map(([route, files]) => {
-  const routeBytes = files.reduce((sum, file) => {
+const routeEntries = [
+  ...Object.entries(buildManifest?.pages ?? {}).map(([route, files]) => ({
+    route,
+    files,
+    kind: "pages",
+  })),
+  ...Object.entries(appBuildManifest?.pages ?? {}).map(([route, files]) => ({
+    route,
+    files,
+    kind: "app",
+  })),
+];
+
+const routeBudgets = routeEntries.map(({ route, files, kind }) => {
+  const normalizedFiles = Array.isArray(files) ? files : [];
+  const routeBytes = normalizedFiles.reduce((sum, file) => {
     const entry = fileSizes.find((s) => s.file === file);
     return sum + (entry?.bytes ?? 0);
   }, 0);
 
   return {
     route,
+    kind,
     bytes: routeBytes,
     kb: bytesToKb(routeBytes),
-    files,
+    files: normalizedFiles,
   };
 });
 

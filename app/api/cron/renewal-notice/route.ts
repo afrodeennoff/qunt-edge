@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { format, subDays, isEqual, startOfDay } from 'date-fns'
 import { enUS, fr } from 'date-fns/locale'
 import RenewalNoticeEmail from '@/components/emails/renewal-notice'
+import { requireServiceAuth, toErrorResponse } from '@/server/authz'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,11 +72,6 @@ const calculateNextPaymentDate = (currentDate: Date, frequency: string): Date =>
 
 // Daily cron job handler - runs every day at 9 AM UTC
 export async function GET(req: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 })
-  }
-
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY is missing')
     return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
@@ -86,13 +82,7 @@ export async function GET(req: Request) {
     // Verify that this is a legitimate Vercel cron job request
     const headersList = await headers()
     const authHeader = headersList.get('authorization')
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    requireServiceAuth(authHeader, { serviceName: 'cron-renewal-notice' })
 
     const today = startOfDay(new Date())
 
@@ -247,9 +237,6 @@ export async function GET(req: Request) {
 
   } catch (error) {
     console.error('Renewal notice cron job error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }

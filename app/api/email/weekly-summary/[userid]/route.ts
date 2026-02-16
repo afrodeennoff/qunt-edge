@@ -6,25 +6,14 @@ import { render } from "@react-email/render"
 import { generateTradingAnalysis } from "./actions/analysis"
 import { getUserData, computeTradingStats } from "./actions/user-data"
 import { createUnsubscribeToken } from "@/lib/unsubscribe-token"
+import { requireServiceAuth, toErrorResponse } from "@/server/authz"
 
 export async function POST(req: Request, props: { params: Promise<{ userid: string }> }) {
   const params = await props.params;
   try {
-    const cronSecret = process.env.CRON_SECRET
-    if (!cronSecret) {
-      return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 })
-    }
-
     // Verify that this is a legitimate request with the correct secret
     const headersList = await headers()
-    const authHeader = headersList.get('authorization')
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    requireServiceAuth(headersList.get('authorization'), { serviceName: 'email-weekly-summary' })
 
     // Get user data and compute stats
     const { user, newsletter, trades } = await getUserData(params.userid)
@@ -98,9 +87,6 @@ export async function POST(req: Request, props: { params: Promise<{ userid: stri
 
   } catch (error) {
     console.error('API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }

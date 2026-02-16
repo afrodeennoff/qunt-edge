@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { generateText, Output } from "ai"
 import { z } from "zod"
+import { requireServiceAuth, toErrorResponse } from "@/server/authz"
+import { parseJson, parseQuery } from "@/app/api/_utils/validate"
 
 // Schema for the AI response
 const nameInferenceSchema = z.object({
@@ -13,14 +15,26 @@ const nameInferenceSchema = z.object({
   }))
 })
 
+const formatNameRequestSchema = z.object({
+  batchSize: z.number().int().positive().max(100).optional(),
+  forceUpdate: z.boolean().optional(),
+  emails: z.array(z.string().email()).optional(),
+})
+
+const formatNameQuerySchema = z.object({
+  forceUpdate: z.coerce.boolean().optional(),
+})
+
 // Allow longer processing time for batch operations
 export const maxDuration = 60
 
 function isAuthorizedInternalRequest(req: NextRequest): boolean {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return false
-  const authHeader = req.headers.get("authorization")
-  return authHeader === `Bearer ${cronSecret}`
+  try {
+    requireServiceAuth(req.headers.get("authorization"), { serviceName: "email-format-name" })
+    return true
+  } catch {
+    return false
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -29,7 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json()
+    const body = await parseJson(req, formatNameRequestSchema)
     const { batchSize = 10, forceUpdate = false, emails: targetEmails }: { batchSize?: number, forceUpdate?: boolean, emails?: string[] } = body
 
     // Determine target subscribers
@@ -174,14 +188,7 @@ Return the inferred names with confidence levels:
 
   } catch (error) {
     console.error("Error in name inference:", error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: "Failed to process name inference",
-        details: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }
 
@@ -193,7 +200,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url)
-    const forceUpdate = searchParams.get('forceUpdate') === 'true'
+    const { forceUpdate = false } = parseQuery(searchParams, formatNameQuerySchema)
 
     const whereClause = forceUpdate 
       ? { isActive: true }
@@ -219,13 +226,6 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("Error checking subscribers:", error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: "Failed to check subscribers",
-        details: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }

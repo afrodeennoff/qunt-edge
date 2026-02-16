@@ -4,6 +4,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const NEXT_DIR = path.join(ROOT, ".next");
 const BUILD_MANIFEST_PATH = path.join(NEXT_DIR, "build-manifest.json");
+const APP_BUILD_MANIFEST_PATH = path.join(NEXT_DIR, "app-build-manifest.json");
 const APP_SERVER_DIR = path.join(NEXT_DIR, "server", "app");
 const DEFAULT_ROUTE_BUDGET_KB = Number(process.env.ROUTE_BUDGET_KB ?? 300);
 const HIGH_PRIORITY_ROUTE_BUDGET_KB = Number(process.env.HIGH_PRIORITY_ROUTE_BUDGET_KB ?? 80);
@@ -25,26 +26,48 @@ function toKb(bytes) {
   return Number((bytes / 1024).toFixed(2));
 }
 
-if (!fs.existsSync(BUILD_MANIFEST_PATH)) {
-  console.error("[route-budgets] Missing .next/build-manifest.json. Run `npm run build` first.");
+if (!fs.existsSync(BUILD_MANIFEST_PATH) && !fs.existsSync(APP_BUILD_MANIFEST_PATH)) {
+  console.error("[route-budgets] Missing build manifests. Run `npm run build` first.");
   process.exit(1);
 }
 
-const manifest = readJson(BUILD_MANIFEST_PATH);
-const pages = manifest?.pages ?? {};
-const allFiles = manifest?.allFiles ?? [];
+const buildManifest = fs.existsSync(BUILD_MANIFEST_PATH)
+  ? readJson(BUILD_MANIFEST_PATH)
+  : {};
+const appBuildManifest = fs.existsSync(APP_BUILD_MANIFEST_PATH)
+  ? readJson(APP_BUILD_MANIFEST_PATH)
+  : {};
+
+const pages = {
+  ...(buildManifest?.pages ?? {}),
+  ...(appBuildManifest?.pages ?? {}),
+};
+
+const allFiles = [
+  ...(buildManifest?.allFiles ?? []),
+  ...Object.values(buildManifest?.pages ?? {}).flatMap((files) =>
+    Array.isArray(files) ? files : []
+  ),
+  ...Object.values(appBuildManifest?.pages ?? {}).flatMap((files) =>
+    Array.isArray(files) ? files : []
+  ),
+];
 
 const fileSizes = new Map(
-  allFiles.map((file) => [file, sizeInBytes(path.join(NEXT_DIR, file))])
+  Array.from(new Set(allFiles)).map((file) => [file, sizeInBytes(path.join(NEXT_DIR, file))])
 );
 
 const violations = [];
 const results = [];
 
 for (const [route, files] of Object.entries(pages)) {
-  const bytes = files.reduce((sum, file) => sum + (fileSizes.get(file) ?? 0), 0);
+  const routeFiles = Array.isArray(files) ? files : [];
+  const bytes = routeFiles.reduce((sum, file) => sum + (fileSizes.get(file) ?? 0), 0);
   const kb = toKb(bytes);
-  const budgetKb = HIGH_PRIORITY_ROUTES.includes(route)
+  const isHighPriority = HIGH_PRIORITY_ROUTES.some(
+    (target) => route === target || route.includes("/dashboard") || route.includes("/(home)")
+  );
+  const budgetKb = isHighPriority
     ? HIGH_PRIORITY_ROUTE_BUDGET_KB
     : DEFAULT_ROUTE_BUDGET_KB;
 
@@ -100,8 +123,32 @@ function collectClientReferenceManifests(dir) {
 
 if (fs.existsSync(APP_SERVER_DIR)) {
   const appRoutes = collectClientReferenceManifests(APP_SERVER_DIR);
+  appRoutes
+    .sort((a, b) => b.kb - a.kb)
+    .slice(0, 15)
+    .forEach((entry) => {
+      const isHighPriority = HIGH_PRIORITY_ROUTES.some(
+        (target) =>
+          entry.route === target ||
+          entry.route.includes("/dashboard") ||
+          entry.route.includes("/(home)")
+      );
+      const budgetKb = isHighPriority
+        ? HIGH_PRIORITY_ROUTE_BUDGET_KB
+        : DEFAULT_ROUTE_BUDGET_KB;
+      console.log(
+        `[route-budgets] [app] ${entry.route}: ${entry.kb} KB (budget ${budgetKb} KB)`
+      );
+    });
+
   appRoutes.forEach((entry) => {
-    const budgetKb = HIGH_PRIORITY_ROUTES.includes(entry.route)
+    const isHighPriority = HIGH_PRIORITY_ROUTES.some(
+      (target) =>
+        entry.route === target ||
+        entry.route.includes("/dashboard") ||
+        entry.route.includes("/(home)")
+    );
+    const budgetKb = isHighPriority
       ? HIGH_PRIORITY_ROUTE_BUDGET_KB
       : DEFAULT_ROUTE_BUDGET_KB;
     if (entry.kb > budgetKb) {

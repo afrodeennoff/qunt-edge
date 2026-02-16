@@ -20,14 +20,22 @@ const nextConfig: NextConfig = {
   // cacheComponents: true, // Enable Cache Components (Next.js 16+)
   images: {
     formats: ["image/avif", "image/webp"],
+    deviceSizes: [320, 420, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 24, 32, 48, 64, 96, 128, 256, 384],
+    qualities: [60, 75],
     minimumCacheTTL: 2678400, // 31 days to reduce repeated image optimization work
+    dangerouslyAllowSVG: false,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    maximumRedirects: 0,
     remotePatterns: [
       {
         hostname: process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '') || '',
       },
     ],
   },
-  pageExtensions: ['mdx', 'ts', 'tsx'],
+  // Include JS extensions to keep Next.js internals compatible across versions.
+  pageExtensions: ['mdx', 'ts', 'tsx', 'js', 'jsx', 'mjs'],
   experimental: {
     useCache: true,
     mdxRs: true,
@@ -58,10 +66,6 @@ const nextConfig: NextConfig = {
             value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
           },
@@ -76,6 +80,14 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
           },
         ],
       },
@@ -116,6 +128,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/logos/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/fonts/:path*",
         headers: [
           {
             key: "Cache-Control",

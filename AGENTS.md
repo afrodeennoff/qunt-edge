@@ -36,6 +36,33 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-16: Launch Optimization Pass (Preload + CDN + Image + Cache + Dashboard Read Path)
+- **What changed:** Completed a targeted production optimization pass across Next.js delivery config, preload hints, dashboard rendering behavior, and backend read caching.
+- **What I want:** Lower overhead on low-end devices, fewer unnecessary network prefetches, faster dashboard shell loads, and reduced repeated DB pressure on authenticated dashboard visits.
+- **What I don't want:** Sidebar-triggered over-prefetching, expensive uncached dashboard layout reads on every request, weak image optimization defaults, or avoidable dynamic rendering overhead on dashboard tab routing.
+- **How we fixed that:**
+  - Hardened and tuned `next.config.ts` image pipeline:
+    - added explicit `deviceSizes`/`imageSizes`/`qualities`,
+    - kept modern formats (`avif`, `webp`) with long TTL,
+    - added safer image hardening (`dangerouslyAllowSVG: false`, image CSP, `maximumRedirects: 0`).
+  - Improved preload/connect setup in root layout:
+    - added `preconnect` hints for primary origin and optional CDN/Supabase origins.
+  - Reduced unnecessary navigation prefetch pressure:
+    - disabled automatic prefetch for dense dashboard sidebar link list in `UnifiedSidebar`.
+  - Reduced client-side auth/admin overhead:
+    - removed client-side `checkAdminStatus()` fetch/effect in dashboard sidebar,
+    - computed `isAdmin` server-side in dashboard layout and passed as prop.
+  - Improved rendering/caching behavior:
+    - removed redundant `force-dynamic` from dashboard tab page shell,
+    - added `unstable_cache` for `getDashboardLayout(userId)` with tag invalidation (`dashboard-${userId}`), aligned with existing `updateTag` in layout save action.
+- **Key Files:** `next.config.ts`, `app/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/layout.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `components/ui/unified-sidebar.tsx`, `server/user-data.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint` on touched optimization files -> `0` errors.
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0` with full route generation.
+  - `npm run check:route-budgets` -> all thresholds pass.
+  - `node scripts/analyze-bundle.mjs` -> bundle artifact updated at `docs/audits/artifacts/bundle-summary.json`.
+
 ### 2026-02-16: Unified Widget Tightness Pass (Gap + Legend Alignment + Overflow Fit)
 - **What changed:** Removed fixed chart min-height forcing and unified chart fill/spacing behavior so widgets render tighter without dead bottom space; aligned donut legends and tightened stats overflow behavior.
 - **What I want:** All chart widgets should keep a consistent tight vertical composition, with legend alignment matching across donut widgets and no clipped/overflowing rows in statistics blocks.

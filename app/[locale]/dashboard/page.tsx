@@ -2,8 +2,6 @@ import { DashboardTabShell } from "./components/dashboard-tab-shell";
 
 type DashboardTab = "widgets" | "table" | "accounts" | "chart";
 
-export const dynamic = "force-dynamic";
-
 function sanitizeTab(tab?: string): DashboardTab {
   if (tab === "table" || tab === "accounts" || tab === "chart") {
     return tab;

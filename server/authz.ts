@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/server/auth'
 import { logger } from '@/lib/logger'
+import { timingSafeEqual } from 'node:crypto'
 
 export interface ErrorResponse {
   error: string
@@ -12,6 +13,17 @@ export interface ErrorResponse {
 export interface AdminAccessContext {
   userId: string
   email: string
+  requestId: string
+}
+
+export interface UserAccessContext {
+  userId: string
+  email: string
+  requestId: string
+}
+
+export interface ServiceAccessContext {
+  service: string
   requestId: string
 }
 
@@ -76,6 +88,87 @@ export async function assertAdminAccess(
     email: user.email,
     requestId,
   }
+}
+
+export async function requireUser(
+  requestId = crypto.randomUUID()
+): Promise<UserAccessContext> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.id) {
+    throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
+  }
+
+  return {
+    userId: user.id,
+    email: user.email ?? '',
+    requestId,
+  }
+}
+
+export async function requireAdmin(
+  requestId = crypto.randomUUID()
+): Promise<AdminAccessContext> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.id || !user?.email) {
+    throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
+  }
+
+  if (!isAdminUser(user)) {
+    throw new AuthzError('Forbidden', 403, 'AUTH_FORBIDDEN', requestId)
+  }
+
+  return {
+    userId: user.id,
+    email: user.email,
+    requestId,
+  }
+}
+
+export function requireServiceAuth(
+  authHeader: string | null,
+  options?: {
+    requestId?: string
+    serviceName?: string
+    secretEnvKey?: string
+  }
+): ServiceAccessContext {
+  const requestId = options?.requestId ?? crypto.randomUUID()
+  const serviceName = options?.serviceName ?? 'cron'
+  const secretEnvKey = options?.secretEnvKey ?? 'CRON_SECRET'
+  const secret = process.env[secretEnvKey]
+
+  if (!secret) {
+    throw new AuthzError(
+      `${serviceName} secret not configured`,
+      500,
+      'AUTH_SERVICE_MISCONFIGURED',
+      requestId
+    )
+  }
+
+  const candidate = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!candidate) {
+    throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
+  }
+
+  try {
+    const isValid = timingSafeEqual(Buffer.from(candidate), Buffer.from(secret))
+    if (!isValid) {
+      throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
+    }
+  } catch {
+    throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
+  }
+
+  return { service: serviceName, requestId }
 }
 
 export function toErrorResponse(error: unknown): NextResponse<ErrorResponse> {

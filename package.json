@@ -17,7 +17,7 @@
     "bundle:check": "npm run build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "npm run clean:build-artifacts && next typegen && tsc --noEmit",
+    "typecheck": "npm run clean:build-artifacts && node scripts/ensure-next-type-stubs.mjs && next typegen && node scripts/ensure-next-type-stubs.mjs && tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "loadtest:k6": "k6 run scripts/loadtest/k6-smoke.js",

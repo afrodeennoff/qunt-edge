@@ -1,0 +1,15 @@
+{
+  "generatedAt": "",
+  "version": 1,
+  "metrics": {
+    "lcpMs": null,
+    "inpMs": null,
+    "cls": null,
+    "ttfbMs": null
+  },
+  "budgets": {
+    "defaultRouteKb": 300,
+    "highPriorityRouteKb": 80
+  },
+  "notes": "Populate this file from CI perf jobs after baseline collection."
+}

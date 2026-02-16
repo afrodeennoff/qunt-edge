@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Resend } from 'resend'
 import { headers } from 'next/headers'
+import { requireServiceAuth, toErrorResponse } from "@/server/authz"
 
 export const dynamic = 'force-dynamic'
 
@@ -24,11 +25,6 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_R
 }
 
 export async function GET(req: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 })
-  }
-
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY is missing')
     return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
@@ -39,13 +35,7 @@ export async function GET(req: Request) {
     // Verify that this is a legitimate Vercel cron job request
     const headersList = await headers()
     const authHeader = headersList.get('authorization')
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    requireServiceAuth(authHeader, { serviceName: 'cron' })
 
     // Get all users with newsletter enabled
     const usersWithNewsletter = await prisma.newsletter.findMany({
@@ -100,7 +90,7 @@ export async function GET(req: Request) {
               {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${cronSecret}`
+                  'Authorization': `Bearer ${process.env.CRON_SECRET}`
                 }
               }
             )
@@ -147,9 +137,6 @@ export async function GET(req: Request) {
 
   } catch (error) {
     console.error('Cron job error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return toErrorResponse(error)
   }
 }
