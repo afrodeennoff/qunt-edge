@@ -26,13 +26,13 @@ interface TimeRangePerformanceChartProps {
 function getTimeRangeKey(timeInPosition: number): string {
   const minutes = timeInPosition / 60 // Convert seconds to minutes
   if (minutes < 1) return 'under1min'
-  if (minutes >= 1 && minutes < 5) return '1to5min'
-  if (minutes >= 5 && minutes < 10) return '5to10min'
-  if (minutes >= 10 && minutes < 15) return '10to15min'
-  if (minutes >= 15 && minutes < 30) return '15to30min'
-  if (minutes >= 30 && minutes < 60) return '30to60min'
-  if (minutes >= 60 && minutes < 120) return '1to2hours'
-  if (minutes >= 120 && minutes < 300) return '2to5hours'
+  if (minutes>= 1 && minutes < 5) return '1to5min'
+  if (minutes>= 5 && minutes < 10) return '5to10min'
+  if (minutes>= 10 && minutes < 15) return '10to15min'
+  if (minutes>= 15 && minutes < 30) return '15to30min'
+  if (minutes>= 30 && minutes < 60) return '30to60min'
+  if (minutes>= 60 && minutes < 120) return '1to2hours'
+  if (minutes>= 120 && minutes < 300) return '2to5hours'
   return 'over5hours'
 }
 
@@ -79,7 +79,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
       const pnl = toFiniteNumber(trade.pnl, 0)
       timeRangeData[timeRange].totalPnl += pnl
       timeRangeData[timeRange].totalTrades++
-      if (pnl > 0) {
+      if (pnl> 0) {
         timeRangeData[timeRange].winCount++
       } else {
         timeRangeData[timeRange].lossCount++
@@ -87,17 +87,17 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     })
 
     return Object.entries(timeRangeData).map(([range, data]) => {
-      const winRate = data.totalTrades > 0 ? (data.winCount / data.totalTrades) * 100 : 0
+      const winRate = data.totalTrades> 0 ? (data.winCount / data.totalTrades) * 100 : 0
       return {
         range,
-        avgPnl: data.totalTrades > 0 ? data.totalPnl / data.totalTrades : 0,
+        avgPnl: data.totalTrades> 0 ? data.totalPnl / data.totalTrades : 0,
         winRate,
         trades: data.totalTrades,
         color: getColorByWinRate(winRate)
       }
     })
   }, [trades])
-  const hasData = chartData.some((d) => d.trades > 0)
+  const hasData = chartData.some((d) => d.trades> 0)
 
   const handleClick = React.useCallback(() => {
     if (!activeRange) return
@@ -145,7 +145,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-black text-sm",
-              avgPnl >= 0 ? "metric-positive" : "metric-negative"
+              avgPnl>= 0 ? "metric-positive" : "metric-negative"
             )}>
               {avgPnl.toFixed(2)}
             </span>
@@ -156,7 +156,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-bold text-fg-primary text-xs",
-              winRate >= 50 ? "metric-positive" : "metric-negative"
+              winRate>= 50 ? "metric-positive" : "metric-negative"
             )}>
               {winRate.toFixed(1)}%
             </span>
@@ -181,16 +181,14 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === 'small' ? "text-sm" : "text-base"
-              )}
-            >
+              )}>
               {t('timeRangePerformance.title')}
             </span>
             <TooltipProvider>
@@ -214,8 +212,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
               variant="ghost"
               size="sm"
               className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-fg-muted hover:text-white hover:bg-white/10"
-              onClick={() => setTimeRange({ range: null })}
-            >
+              onClick={() => setTimeRange({ range: null })}>
               {t('timeRangePerformance.clearFilter')}
             </Button>
           )}
@@ -225,22 +222,19 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-1" : "p-2 sm:p-3"
-        )}
-      >
+        )}>
         <div
           className="w-full h-full cursor-pointer"
-          onClick={handleClick}
-        >
+          onClick={handleClick}>
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
                   size === 'small'
                     ? { left: 0, right: 0, top: 4, bottom: 8 }
                     : { left: 0, right: 0, top: 8, bottom: 8 }
-                }
-              >
+                }>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -264,7 +258,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                           textAnchor="middle"
                           fill="var(--fg-muted)"
                           fontSize={size === 'small' ? 9 : 10}
-                          transform={size === 'small' ? 'rotate(0)' : 'rotate(0)'} // Removed rotation for cleaner look if space permits, or adjust
+                          transform={size === 'small' ? 'rotate(0)' : 'rotate(0)'}
                         >
                           {label}
                         </text>
@@ -291,12 +285,11 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   dataKey="avgPnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === 'small' ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out"
-                >
+                  className="transition-all duration-300 ease-in-out">
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.range}`}
-                      fill={entry.avgPnl >= 0 ? "white" : "#52525B"}
+                      fill={entry.avgPnl>= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         timeRange.range === entry.range
                           ? 1
@@ -307,7 +300,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                       stroke="none"
                       className={cn(
                         "hover:brightness-110 transition-all duration-300",
-                        entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.avgPnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

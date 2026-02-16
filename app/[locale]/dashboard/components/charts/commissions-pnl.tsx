@@ -53,7 +53,7 @@ function CommissionsTooltip({
           </span>
           <span className={cn(
             "font-black text-sm",
-            data.raw >= 0 ? "metric-positive" : "metric-negative"
+            data.raw>= 0 ? "metric-positive" : "metric-negative"
           )}>{formatCurrency(data.raw)}</span>
         </div>
         <div className="flex flex-col pt-2 border-t border-white/5">
@@ -98,8 +98,8 @@ export default function CommissionsPnLChart({
       0,
     );
     const total = Math.abs(totalPnL) + Math.abs(totalCommissions);
-    const pnlPercent = total > 0 ? Number(((Math.abs(totalPnL) / total) * 100).toFixed(2)) : 0;
-    const commPercent = total > 0 ? Number(((Math.abs(totalCommissions) / total) * 100).toFixed(2)) : 0;
+    const pnlPercent = total> 0 ? Number(((Math.abs(totalPnL) / total) * 100).toFixed(2)) : 0;
+    const commPercent = total> 0 ? Number(((Math.abs(totalCommissions) / total) * 100).toFixed(2)) : 0;
     return [
       {
         name: t("commissions.legend.netPnl"),
@@ -115,7 +115,7 @@ export default function CommissionsPnLChart({
       },
     ];
   }, [trades, t]);
-  const hasData = chartData.some((item) => item.value > 0);
+  const hasData = chartData.some((item) => item.value> 0);
 
 
   // Keep donut visually centered and larger to avoid dead space.
@@ -135,16 +135,14 @@ export default function CommissionsPnLChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === 'small' ? "text-sm" : "text-base"
-              )}
-            >
+              )}>
               {t("commissions.title")}
             </CardTitle>
             <TooltipProvider>
@@ -167,13 +165,12 @@ export default function CommissionsPnLChart({
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-0.5" : "p-1"
-        )}
-      >
+        )}>
         <div className="w-full h-full flex min-h-0 flex-col">
           {hasData ? (
             <>
               <div className="min-h-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={chartData}
@@ -187,8 +184,7 @@ export default function CommissionsPnLChart({
                       startAngle={90}
                       endAngle={-270}
                       stroke="rgba(0,0,0,0)"
-                      strokeWidth={1}
-                    >
+                      strokeWidth={1}>
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
@@ -209,7 +205,7 @@ export default function CommissionsPnLChart({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex flex-col items-center gap-2 pb-1 pt-1">
+              <div className="mx-auto flex flex-col items-start gap-2 pb-1 pt-1">
                 <div className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
                   <span className="h-3 w-3 rounded-full bg-white" />
                   <span className="whitespace-nowrap">{t("commissions.legend.netPnl")}</span>

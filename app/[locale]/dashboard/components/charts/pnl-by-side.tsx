@@ -64,14 +64,14 @@ export default function PnLBySideChart({
     const longPnL = longTrades.reduce((sum, trade) => sum + toFiniteNumber(trade.pnl, 0), 0);
     const shortPnL = shortTrades.reduce((sum, trade) => sum + toFiniteNumber(trade.pnl, 0), 0);
 
-    const longWins = longTrades.filter((trade) => toFiniteNumber(trade.pnl, 0) > 0).length;
-    const shortWins = shortTrades.filter((trade) => toFiniteNumber(trade.pnl, 0) > 0).length;
+    const longWins = longTrades.filter((trade) => toFiniteNumber(trade.pnl, 0)> 0).length;
+    const shortWins = shortTrades.filter((trade) => toFiniteNumber(trade.pnl, 0)> 0).length;
 
     return [
       {
         side: "Long",
         pnl: showAverage
-          ? longTrades.length > 0
+          ? longTrades.length> 0
             ? longPnL / longTrades.length
             : 0
           : longPnL,
@@ -82,7 +82,7 @@ export default function PnLBySideChart({
       {
         side: "Short",
         pnl: showAverage
-          ? shortTrades.length > 0
+          ? shortTrades.length> 0
             ? shortPnL / shortTrades.length
             : 0
           : shortPnL,
@@ -95,7 +95,7 @@ export default function PnLBySideChart({
 
   const maxPnL = Math.max(...chartData.map((d) => d.pnl));
   const minPnL = Math.min(...chartData.map((d) => d.pnl));
-  const hasData = chartData.some((d) => d.tradeCount > 0);
+  const hasData = chartData.some((d) => d.tradeCount> 0);
   const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as ChartDatum | undefined;
@@ -113,7 +113,7 @@ export default function PnLBySideChart({
               </span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.pnl >= 0 ? "metric-positive" : "metric-negative"
+                data.pnl>= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.pnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -141,16 +141,14 @@ export default function PnLBySideChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
-              )}
-            >
+              )}>
               {t("pnlBySide.title")}
             </span>
             <TooltipProvider>
@@ -173,8 +171,7 @@ export default function PnLBySideChart({
             <span
               className={cn(
                 "text-[10px] uppercase font-bold tracking-wider text-fg-muted",
-              )}
-            >
+              )}>
               {t("pnlBySide.toggle.showAverage")}
             </span>
             <Switch
@@ -189,19 +186,17 @@ export default function PnLBySideChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}
-      >
+        )}>
         <div className={cn("w-full h-full")}>
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
                   size === "small"
                     ? { left: 0, right: 0, top: 4, bottom: 8 }
                     : { left: 0, right: 0, top: 8, bottom: 8 }
-                }
-              >
+                }>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -239,17 +234,16 @@ export default function PnLBySideChart({
                   dataKey="pnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out"
-                >
+                  className="transition-all duration-300 ease-in-out">
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.pnl >= 0 ? "white" : "#52525B"}
+                      fill={entry.pnl>= 0 ? "white" : "#52525B"}
                       fillOpacity={1}
                       stroke="none"
                       className={cn(
                         "hover:brightness-110 transition-all duration-300",
-                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.pnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

@@ -55,7 +55,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const formatCount = (value: number) => {
-  if (value >= 1000) {
+  if (value>= 1000) {
     return `${(value / 1000).toFixed(1)}k`;
   }
   return value.toString();
@@ -110,7 +110,7 @@ export default function TickDistributionChart({
         const tickNumber = toFiniteNumber(tick, Number.NaN);
         if (!Number.isFinite(tickNumber)) return null;
         return {
-          ticks: tickNumber === 0 ? "0" : tickNumber > 0 ? `+${tickNumber}` : `${tickNumber}`,
+          ticks: tickNumber === 0 ? "0" : tickNumber> 0 ? `+${tickNumber}` : `${tickNumber}`,
           tickNumber,
           count: toFiniteNumber(count, 0),
         };
@@ -157,16 +157,14 @@ export default function TickDistributionChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
-              )}
-            >
+              )}>
               {t("tickDistribution.title")}
             </span>
             <TooltipProvider>
@@ -190,8 +188,7 @@ export default function TickDistributionChart({
               variant="ghost"
               size="sm"
               className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-white/40 hover:text-white hover:bg-white/5"
-              onClick={() => setTickFilter({ value: null })}
-            >
+              onClick={() => setTickFilter({ value: null })}>
               {t("tickDistribution.clearFilter")}
             </Button>
           )}
@@ -201,11 +198,10 @@ export default function TickDistributionChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}
-      >
+        )}>
         <div className={cn("w-full h-full")}>
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
@@ -215,8 +211,7 @@ export default function TickDistributionChart({
                 }
                 onClick={(e) =>
                   e?.activePayload && handleBarClick(e.activePayload[0].payload)
-                }
-              >
+                }>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -241,8 +236,7 @@ export default function TickDistributionChart({
                           fontSize={size === "small" ? 9 : 10}
                           transform={
                             size === "small" ? "rotate(-45)" : "rotate(0)"
-                          }
-                        >
+                          }>
                           {payload.value}
                         </text>
                       </g>
@@ -271,12 +265,11 @@ export default function TickDistributionChart({
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
                   className="transition-all duration-300 ease-in-out"
-                  cursor="pointer"
-                >
+                  cursor="pointer">
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.ticks}`}
-                      fill={entry.tickNumber >= 0 ? "white" : "#52525B"}
+                      fill={entry.tickNumber>= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         tickFilter.value === entry.ticks
                           ? 1
@@ -287,7 +280,7 @@ export default function TickDistributionChart({
                       stroke="none"
                       className={cn(
                         "hover:brightness-110 transition-all duration-300",
-                        entry.tickNumber >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.tickNumber>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

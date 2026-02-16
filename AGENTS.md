@@ -36,6 +36,26 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-16: Unified Widget Tightness Pass (Gap + Legend Alignment + Overflow Fit)
+- **What changed:** Removed fixed chart min-height forcing and unified chart fill/spacing behavior so widgets render tighter without dead bottom space; aligned donut legends and tightened stats overflow behavior.
+- **What I want:** All chart widgets should keep a consistent tight vertical composition, with legend alignment matching across donut widgets and no clipped/overflowing rows in statistics blocks.
+- **What I don't want:** Persistent blank bottom bands under charts, mismatched donut legend alignment between widgets, or trade-distribution/streak rows spilling outside the card body.
+- **How we fixed that:**
+  - Removed per-widget `ResponsiveContainer minHeight={180}` overrides across chart widgets.
+  - Updated shared chart shell behavior:
+    - `ChartSurface` body now uses `flex flex-col`,
+    - global Recharts sizing in `app/globals.css` now enforces `height: 100%`/`min-height: 0` through widget shell + chart body selectors (instead of fixed min-height).
+  - Unified chart margin baseline to tighter bottom spacing (`bottom: 8`) for targeted chart widgets.
+  - Aligned donut legends (`trade-distribution`, `commissions-pnl`) to matching compact stacked layout with consistent spacing.
+  - Reduced overflow pressure in `statistics-widget` by tightening typography/spacing and limiting streak row density for non-large sizes.
+- **Key Files:** `app/globals.css`, `components/ui/chart-surface.tsx`, `app/[locale]/dashboard/components/charts/*.tsx`, `app/[locale]/dashboard/components/statistics/statistics-widget.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual check on `/dashboard?tab=widgets`:
+    - chart bottom gap is tighter/unified,
+    - donut legend alignment is consistent,
+    - statistics distribution rows no longer overflow container bounds.
+
 ### 2026-02-16: Complete RLS Policy Coverage Across All Public Tables
 - **What changed:** Added explicit RLS policy definitions so every table in `public` now has authenticated-role policy coverage (including explicit deny policies for system-only tables).
 - **What I want:** No table should rely on implicit deny behavior for `authenticated`/`anon`; policy posture should be explicit, auditable, and consistent across the full schema.

@@ -111,7 +111,7 @@ export function ChartSurface({
       <div
         data-chart-surface-body="true"
         className={cn(
-          "flex-1 min-h-0",
+          "flex flex-col flex-1 min-h-0",
           shouldPadBody ? (isSmall ? "p-1" : "p-2 sm:p-3") : "p-0",
           bodyClassName
         )}

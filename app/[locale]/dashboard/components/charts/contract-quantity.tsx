@@ -89,7 +89,7 @@ export default function ContractQuantityChart({
   const hasData = chartData.some(
     (data) =>
       Number.isFinite(data.tradeCount) &&
-      data.tradeCount > 0 &&
+      data.tradeCount> 0 &&
       Number.isFinite(data.totalQuantity),
   );
 
@@ -126,16 +126,14 @@ export default function ContractQuantityChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
-              )}
-            >
+              )}>
               {t("contracts.title")}
             </CardTitle>
             <TooltipProvider>
@@ -160,19 +158,17 @@ export default function ContractQuantityChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}
-      >
+        )}>
         <div className={cn("w-full h-full")}>
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
                   size === "small"
                     ? { left: 0, right: 0, top: 4, bottom: 8 }
                     : { left: 0, right: 0, top: 8, bottom: 8 }
-                }
-              >
+                }>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -214,8 +210,7 @@ export default function ContractQuantityChart({
                   dataKey="totalQuantity"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out"
-                >
+                  className="transition-all duration-300 ease-in-out">
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}

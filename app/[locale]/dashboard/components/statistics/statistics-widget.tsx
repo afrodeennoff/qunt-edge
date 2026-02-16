@@ -349,7 +349,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
                 </div>
                 <Progress value={longRate} className="h-1 bg-white/10" indicatorClassName="bg-white chart-positive-emphasis" />
               </div>
-              {size !== 'tiny' ? (
+              {size === 'large' || size === 'extra-large' || size === 'small-long' ? (
                 <>
                   <div className="space-y-0.5">
                     <div className="flex justify-between items-center">

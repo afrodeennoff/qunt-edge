@@ -86,7 +86,7 @@ export default function WeekdayPNLChart({
     return daysOfWeek.map((day) => ({
       day,
       pnl:
-        weekdayTotals[day].count > 0
+        weekdayTotals[day].count> 0
           ? weekdayTotals[day].total / weekdayTotals[day].count
           : 0,
       tradeCount: weekdayTotals[day].count,
@@ -95,12 +95,12 @@ export default function WeekdayPNLChart({
 
   const maxPnL = Math.max(...weekdayData.map((d) => d.pnl));
   const minPnL = Math.min(...weekdayData.map((d) => d.pnl));
-  const hasData = weekdayData.some((d) => d.tradeCount > 0);
+  const hasData = weekdayData.some((d) => d.tradeCount> 0);
 
   const getColor = (value: number) => {
     const denominator = maxPnL - minPnL;
     const ratio = denominator === 0 ? 0 : Math.abs((value - minPnL) / denominator);
-    const baseColorVar = value >= 0 ? "--chart-win" : "--chart-loss";
+    const baseColorVar = value>= 0 ? "--chart-win" : "--chart-loss";
     const intensity = darkMode
       ? Math.max(0.3, ratio) // Higher minimum intensity in dark mode
       : Math.max(0.2, ratio); // Lower minimum intensity in light mode
@@ -146,7 +146,7 @@ export default function WeekdayPNLChart({
             </span>
             <span className={cn(
               "font-black text-sm",
-              data.pnl >= 0 ? "metric-positive" : "metric-negative"
+              data.pnl>= 0 ? "metric-positive" : "metric-negative"
             )}>{formatCurrency(data.pnl)}</span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
@@ -172,16 +172,14 @@ export default function WeekdayPNLChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
-              )}
-            >
+              )}>
               {t("weekdayPnl.title")}
             </span>
             <TooltipProvider>
@@ -200,13 +198,12 @@ export default function WeekdayPNLChart({
               </UITooltip>
             </TooltipProvider>
           </div>
-          {weekdayFilter.days && weekdayFilter.days.length > 0 && (
+          {weekdayFilter.days && weekdayFilter.days.length> 0 && (
             <Button
               variant="ghost"
               size="sm"
               className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-fg-muted hover:text-white hover:bg-white/10"
-              onClick={() => setWeekdayFilter({ days: [] })}
-            >
+              onClick={() => setWeekdayFilter({ days: [] })}>
               {t("weekdayPnl.clearFilter")}
             </Button>
           )}
@@ -216,19 +213,17 @@ export default function WeekdayPNLChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}
-      >
+        )}>
         <div className="w-full h-full cursor-pointer" onClick={handleClick}>
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={weekdayData}
                 margin={
                   size === "small"
                     ? { left: 0, right: 0, top: 4, bottom: 8 }
                     : { left: 0, right: 0, top: 8, bottom: 8 }
-                }
-              >
+                }>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -268,21 +263,20 @@ export default function WeekdayPNLChart({
                   dataKey="pnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out"
-                >
+                  className="transition-all duration-300 ease-in-out">
                   {weekdayData.map((entry) => (
                     <Cell
                       key={`cell-${entry.day}`}
-                      fill={entry.pnl >= 0 ? "white" : "#52525B"}
+                      fill={entry.pnl>= 0 ? "white" : "#52525B"}
                       fillOpacity={
-                        weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
+                        weekdayFilter.days && weekdayFilter.days.length> 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
                           : 1
                       }
                       stroke="none"
                       className={cn(
                         "hover:brightness-110 transition-all duration-300",
-                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.pnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

@@ -81,13 +81,13 @@ export default function TimeOfDayTradeChart({
     return Object.entries(hourlyData)
       .map(([hour, data]) => ({
         hour: parseInt(hour),
-        avgPnl: data.count > 0 ? data.totalPnl / data.count : 0,
+        avgPnl: data.count> 0 ? data.totalPnl / data.count : 0,
         tradeCount: data.count,
       }))
       .sort((a, b) => a.hour - b.hour);
   }, [trades, timezone]);
 
-  const hasData = chartData.some((data) => data.tradeCount > 0);
+  const hasData = chartData.some((data) => data.tradeCount> 0);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     React.useEffect(() => {
@@ -112,7 +112,7 @@ export default function TimeOfDayTradeChart({
               <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.averagePnl")}</span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.avgPnl >= 0 ? "metric-positive" : "metric-negative"
+                data.avgPnl>= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.avgPnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -134,16 +134,14 @@ export default function TimeOfDayTradeChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
-              )}
-            >
+              )}>
               {t("pnlTime.title")}
             </span>
             <TooltipProvider>
@@ -167,8 +165,7 @@ export default function TimeOfDayTradeChart({
               variant="ghost"
               size="sm"
               className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-white/40 hover:text-white hover:bg-white/5"
-              onClick={() => setHourFilter({ hour: null })}
-            >
+              onClick={() => setHourFilter({ hour: null })}>
               {t("pnlTime.clearFilter")}
             </Button>
           )}
@@ -178,19 +175,17 @@ export default function TimeOfDayTradeChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}
-      >
+        )}>
         <div className="w-full h-full cursor-pointer" onClick={handleClick}>
           {hasData ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
                   size === "small"
                     ? { left: 0, right: 0, top: 4, bottom: 8 }
                     : { left: 0, right: 0, top: 8, bottom: 8 }
-                }
-              >
+                }>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -232,12 +227,11 @@ export default function TimeOfDayTradeChart({
                   dataKey="avgPnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out"
-                >
+                  className="transition-all duration-300 ease-in-out">
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.hour}`}
-                      fill={entry.avgPnl >= 0 ? "white" : "#52525B"}
+                      fill={entry.avgPnl>= 0 ? "white" : "#52525B"}
                       fillOpacity={
                         hourFilter.hour === entry.hour
                           ? 1
@@ -248,7 +242,7 @@ export default function TimeOfDayTradeChart({
                       stroke="none"
                       className={cn(
                         "hover:brightness-110 transition-all duration-300",
-                        entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.avgPnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

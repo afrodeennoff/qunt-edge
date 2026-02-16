@@ -423,15 +423,19 @@
     background: transparent;
   }
 
-  /* Prevent zero-height plot areas in flex widget shells */
-  [data-widget-shell="true"] [data-chart-surface="modern"] .recharts-responsive-container,
-  [data-widget-shell="v2"] [data-chart-surface="modern"] .recharts-responsive-container {
-    min-height: 180px;
+  /* Ensure charts fill widget body without fixed dead space */
+  [data-widget-shell="true"] [data-chart-surface="modern"] [data-chart-surface-body="true"] > div,
+  [data-widget-shell="v2"] [data-chart-surface="modern"] [data-chart-surface-body="true"] > div {
+    height: 100%;
+    min-height: 0;
   }
 
+  [data-widget-shell="true"] [data-chart-surface="modern"] .recharts-responsive-container,
+  [data-widget-shell="v2"] [data-chart-surface="modern"] .recharts-responsive-container,
   [data-widget-shell="true"] [data-chart-surface="modern"] .recharts-wrapper,
   [data-widget-shell="v2"] [data-chart-surface="modern"] .recharts-wrapper {
-    min-height: 180px;
+    height: 100% !important;
+    min-height: 0 !important;
   }
 
   [data-chart-surface="modern"] .recharts-layer.recharts-cartesian-axis-tick text {

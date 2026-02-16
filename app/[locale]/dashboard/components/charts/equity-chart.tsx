@@ -146,7 +146,7 @@ const renderDot = (props: any) => {
     const resetAccounts = Object.keys(payload).filter(
       (key) => key.startsWith("reset_") && payload[key]
     );
-    if (resetAccounts.length > 0) {
+    if (resetAccounts.length> 0) {
       return (
         <circle
           key={`dot-${index}-reset`}
@@ -165,7 +165,7 @@ const renderDot = (props: any) => {
     const payoutAccounts = Object.keys(payload).filter(
       (key) => key.startsWith("payout_") && payload[key]
     );
-    if (payoutAccounts.length > 0) {
+    if (payoutAccounts.length> 0) {
       const accountNumber = payoutAccounts[0].replace("payout_", "");
       const status = payload[`payoutStatus_${accountNumber}`] || "";
       const { fg } = getPayoutColors(status);
@@ -329,13 +329,13 @@ const OptimizedTooltip = React.memo(
             </span>
             <span className={cn(
               "font-black text-sm tabular-nums",
-              (data.equity || 0) >= 0 ? "metric-positive" : "metric-negative"
+              (data.equity || 0)>= 0 ? "metric-positive" : "metric-negative"
             )}>
               {formatCurrency(data.equity || 0)}
             </span>
           </div>
 
-          {resetAccounts.length > 0 && (
+          {resetAccounts.length> 0 && (
             <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
               <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
                 {t("equity.tooltip.resets")}
@@ -360,7 +360,7 @@ const OptimizedTooltip = React.memo(
             </div>
           )}
 
-          {payoutAccounts.length > 0 && (
+          {payoutAccounts.length> 0 && (
             <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
               <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
                 {t("equity.tooltip.payouts")}
@@ -390,8 +390,7 @@ const OptimizedTooltip = React.memo(
                         style={{
                           backgroundColor: getPayoutColors(status).bg,
                           color: getPayoutColors(status).fg,
-                        }}
-                      >
+                        }}>
                         {status}
                       </span>
                     </div>
@@ -515,8 +514,7 @@ const AccountsLegend = React.memo(
                 }) => (
                   <div
                     key={accountNumber}
-                    className="flex items-center gap-1.5 shrink-0"
-                  >
+                    className="flex items-center gap-1.5 shrink-0">
                     <div
                       className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: color }}
@@ -532,8 +530,7 @@ const AccountsLegend = React.memo(
                         {hasPayout && (
                           <span
                             className="text-xs leading-tight"
-                            style={{ color: getPayoutColors(payoutStatus).fg }}
-                          >
+                            style={{ color: getPayoutColors(payoutStatus).fg }}>
                             {t("equity.legend.payout")}:{" "}
                             {formatCurrency(payoutAmount)}
                           </span>
@@ -548,7 +545,7 @@ const AccountsLegend = React.memo(
                   </div>
                 )
               )}
-            {accountsWithEquity.length > 20 && (
+            {accountsWithEquity.length> 20 && (
               <div className="flex items-center gap-1.5 shrink-0 text-xs text-muted-foreground h-[50px]">
                 +{accountsWithEquity.length - 20} more
               </div>
@@ -596,8 +593,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   const [chartData, setChartData] = React.useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [availableAccountNumbers, setAvailableAccountNumbers] = React.useState<
-    string[]
-  >([]);
+    string[]>([]);
 
   const throttledSetHoveredData = React.useCallback(
     React.useMemo(() => {
@@ -719,7 +715,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       formatInTimeZone(new Date(t.entryDate), timezone, "yyyy-MM-dd")
     );
     const startDate = dates.reduce((min, date) => (date < min ? date : min));
-    const endDate = dates.reduce((max, date) => (date > max ? date : max));
+    const endDate = dates.reduce((max, date) => (date> max ? date : max));
 
     const start = parseISO(startDate);
     const end = parseISO(endDate);
@@ -769,7 +765,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [formattedTrades, timezone]);
 
   React.useEffect(() => {
-    const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
+    const isMock = formattedTrades?.length> 0 && formattedTrades[0].id.startsWith("mock-");
 
     if (isSharedView || isTeamView || isMock) {
       setIsLoading(true);
@@ -929,16 +925,14 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
-        )}
-      >
+        )}>
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base"
-              )}
-            >
+              )}>
               {t("equity.title")}
             </span>
             <TooltipProvider>
@@ -976,8 +970,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3"
-        )}
-      >
+        )}>
         <div className="w-full h-full flex flex-col">
           <div className="flex-1 min-h-0">
             {isLoading ? (
@@ -988,7 +981,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
               </div>
             ) : hasData ? (
               <ChartContainer config={chartConfig} className="w-full h-full">
-                <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+                <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={chartData}
                     margin={
@@ -996,8 +989,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                         ? { left: 0, right: 0, top: 4, bottom: 8 }
                         : { left: 0, right: 0, top: 8, bottom: 8 }
                     }
-                    onMouseLeave={() => setHoveredData(null)}
-                  >
+                    onMouseLeave={() => setHoveredData(null)}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="text-border dark:opacity-[0.1] opacity-[0.2]"
