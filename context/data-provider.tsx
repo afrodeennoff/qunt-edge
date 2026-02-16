@@ -1027,7 +1027,7 @@ export const DataProvider: React.FC<{
     [formattedTrades, accounts]
   );
 
-  const isPlusUser = () => {
+  const isPlusUser = useCallback(() => {
     // Use Whop subscription store for more accurate subscription status
     const whopSubscription = useSubscriptionStore.getState().subscription;
     if (whopSubscription) {
@@ -1043,7 +1043,7 @@ export const DataProvider: React.FC<{
         dbSubscription?.plan?.split("_")[0].toUpperCase() || ""
       )
     );
-  };
+  }, []);
 
   const saveAccount = useCallback(
     async (newAccount: Account) => {
@@ -1730,87 +1730,131 @@ export const DataProvider: React.FC<{
     [supabaseUser?.id, setDashboardLayout]
   );
 
-  const contextValue: DataContextType = {
-    isPlusUser,
-    isLoading,
-    isMobile,
-    isSharedView,
-    sharedParams,
-    setSharedParams,
-    refreshTrades: refreshAllData,
-    refreshTradesOnly,
-    refreshUserDataOnly,
-    refreshAllData,
-    changeIsFirstConnection,
-    isFirstConnection,
-    setIsFirstConnection,
+  const contextValue: DataContextType = useMemo(
+    () => ({
+      isPlusUser,
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      setSharedParams,
+      refreshTrades: refreshAllData,
+      refreshTradesOnly,
+      refreshUserDataOnly,
+      refreshAllData,
+      changeIsFirstConnection,
+      isFirstConnection,
+      setIsFirstConnection,
 
-    // Formatted trades and filters
-    trades,
-    formattedTrades,
-    instruments,
-    setInstruments,
-    accountNumbers,
-    setAccountNumbers,
-    dateRange,
-    setDateRange,
-    tickRange,
-    setTickRange,
-    pnlRange,
-    setPnlRange,
+      // Formatted trades and filters
+      trades,
+      formattedTrades,
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
 
-    // Time range related
-    timeRange,
-    setTimeRange,
+      // Time range related
+      timeRange,
+      setTimeRange,
 
-    // Tick filter related
-    tickFilter,
-    setTickFilter,
+      // Tick filter related
+      tickFilter,
+      setTickFilter,
 
-    // Weekday filter related
-    weekdayFilter,
-    setWeekdayFilter,
+      // Weekday filter related
+      weekdayFilter,
+      setWeekdayFilter,
 
-    // Hour filter related
-    hourFilter,
-    setHourFilter,
+      // Hour filter related
+      hourFilter,
+      setHourFilter,
 
-    // Tag filter
-    tagFilter,
-    setTagFilter,
+      // Tag filter
+      tagFilter,
+      setTagFilter,
 
-    // Statistics and calendar
-    statistics,
-    calendarData,
-    accounts,
+      // Statistics and calendar
+      statistics,
+      calendarData,
+      accounts,
 
-    // Mutations
+      // Mutations
 
-    // Update trade
-    updateTrades,
-    deleteTrades,
-    groupTrades,
-    ungroupTrades,
+      // Update trade
+      updateTrades,
+      deleteTrades,
+      groupTrades,
+      ungroupTrades,
 
-    // Accounts
-    deleteAccount,
-    saveAccount,
+      // Accounts
+      deleteAccount,
+      saveAccount,
 
-    // Group functions
-    saveGroup,
-    renameGroup,
-    deleteGroup,
-    moveAccountToGroup,
-    moveAccountsToGroup,
+      // Group functions
+      saveGroup,
+      renameGroup,
+      deleteGroup,
+      moveAccountToGroup,
+      moveAccountsToGroup,
 
-    // Payout functions
-    deletePayout,
-    savePayout,
+      // Payout functions
+      deletePayout,
+      savePayout,
 
-    // Dashboard layout
-    saveDashboardLayout,
-    getTradeImages,
-  };
+      // Dashboard layout
+      saveDashboardLayout,
+      getTradeImages,
+    }),
+    [
+      isPlusUser,
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      refreshAllData,
+      refreshTradesOnly,
+      refreshUserDataOnly,
+      changeIsFirstConnection,
+      isFirstConnection,
+      trades,
+      formattedTrades,
+      instruments,
+      accountNumbers,
+      dateRange,
+      tickRange,
+      pnlRange,
+      timeRange,
+      tickFilter,
+      weekdayFilter,
+      hourFilter,
+      tagFilter,
+      statistics,
+      calendarData,
+      accounts,
+      updateTrades,
+      deleteTrades,
+      groupTrades,
+      ungroupTrades,
+      deleteAccount,
+      saveAccount,
+      saveGroup,
+      renameGroup,
+      deleteGroup,
+      moveAccountToGroup,
+      moveAccountsToGroup,
+      deletePayout,
+      savePayout,
+      saveDashboardLayout,
+      getTradeImages,
+    ]
+  );
 
   return (
     <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
