@@ -1852,3 +1852,14 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Kept rollback as one coherent changeset to simplify review and recovery if needed.
 - **Key Files:** `app/[locale]/dashboard/**`, `components/providers/**`, `components/ui/**`, `context/data-provider.tsx`, `next.config.ts`, `proxy.ts`, `scripts/**`, `.github/workflows/**`, `AGENTS.md`
 - **Verification:** `npm run typecheck` after rollback snapshot.
+
+### 2026-02-17: App Icon Replacement (User-Provided SVG)
+- **What changed:** Replaced the app icon asset with the user-provided SVG file.
+- **What I want:** The project should use the provided logo as the runtime app icon source.
+- **What I don't want:** Any auto-redesign, path edits, or shape/color alterations to the supplied file.
+- **How we fixed that:**
+  - Copied `/Users/timon/Downloads/Black Modern Abstract Logo-2/2.svg` directly over `app/icon.svg`.
+  - Preserved the source SVG content exactly as provided.
+- **Key Files:** `app/icon.svg`, `AGENTS.md`
+- **Verification:**
+  - Confirmed `app/icon.svg` now contains the provided SVG payload.
