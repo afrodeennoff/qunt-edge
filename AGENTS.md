@@ -36,6 +36,32 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Branch Consolidation (Merge-All Unified Branch)
+- **What changed:** Consolidated active local and remote feature branches into one integration branch and pushed it to origin.
+- **What I want:** A single branch with the full combined change set for unified testing/review.
+- **What I don't want:** Split branch state that requires manual cherry-picks or leaves commits out.
+- **How we fixed that:**
+  - Created `codex/merge-all-branches-20260217` from local `main`.
+  - Merged local branches:
+    - `codex/gap-fix-repush`,
+    - `codex/hotfix-weekday-merge-markers`,
+    - `codex/reset-5fa952d-main`.
+  - Merged remote branches:
+    - `origin/bolt-chart-container-optimization-6606269937374151707`,
+    - `origin/codex/clean-sidebarless`,
+    - `origin/codex/homepage-root-cause-fix`,
+    - `origin/codex/revert-optimization-wave`,
+    - `origin/codex/review-30-commits`,
+    - `origin/codex/sidebar-hardening-patch`,
+    - `origin/codex/sidebar-scroll-fixes`,
+    - `origin/fix-home-page-loading-3332966899418243021`,
+    - `origin/fix/csp-rollout`.
+  - Resolved merge conflicts to preserve the consolidated baseline where branch variants diverged.
+- **Key Files:** `AGENTS.md`
+- **Verification:**
+  - `git diff --name-only --diff-filter=U` returns no unresolved conflicts.
+  - `git push -u origin codex/merge-all-branches-20260217` succeeds.
+
 ### 2026-02-17: Widget Gap Root-Cause Fix (Bottom Padding Strip Removal)
 - **What changed:** Removed residual chart-body bottom padding that still rendered as a visible horizontal strip at the base of multiple dashboard widgets.
 - **What I want:** Chart bodies should visually sit flush with card bottoms (or legend blocks) without a fake empty floor band.
