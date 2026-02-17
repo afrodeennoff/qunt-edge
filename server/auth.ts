@@ -143,6 +143,12 @@ export async function signOut() {
   redirect('/')
 }
 
+export async function signOutWithoutRedirect() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  return { success: true as const }
+}
+
 async function signOutSilently() {
   const supabase = await createClient()
   await supabase.auth.signOut()

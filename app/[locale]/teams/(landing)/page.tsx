@@ -108,40 +108,40 @@ export default function TeamPage() {
 
 
   return (
-    <div className="flex flex-col min-h-dvh text-gray-900 dark:text-white transition-colors duration-300">
+    <div className="marketing-shell enterprise-grid flex min-h-dvh flex-col text-zinc-100 transition-colors duration-300">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative isolate overflow-hidden">
-          <div className="mx-auto max-w-7xl px-6 pt-6 pb-16 sm:pb-20 lg:flex lg:px-8 lg:py-20">
+          <div className="enterprise-shell mx-auto mt-4 max-w-7xl rounded-3xl px-6 pt-6 pb-16 sm:pb-20 lg:flex lg:px-8 lg:py-20">
             <div className="mx-auto max-w-2xl lg:mx-0 lg:shrink-0 lg:pt-4">
               <div className="mt-8 sm:mt-12 lg:mt-8">
                 <a href="#" className="inline-flex space-x-6">
-                  <span className="rounded-full bg-white text-black/10 dark:bg-[hsl(var(--chart-1))]/10 px-3 py-1 text-sm/6 font-semibold text-[#2E9987] dark:text-[hsl(var(--chart-1))] ring-1 ring-[#2E9987]/10 dark:ring-[hsl(var(--chart-1))]/10 ring-inset">
+                  <span className="rounded-full border border-white/20 bg-white/8 px-3 py-1 text-sm/6 font-semibold text-zinc-100 ring-inset">
                     {t('teams.badge')}
                   </span>
-                  <span className="inline-flex items-center space-x-2 text-sm/6 font-medium text-gray-600 dark:text-gray-400">
+                  <span className="inline-flex items-center space-x-2 text-sm/6 font-medium text-zinc-400">
                     <span>{t('teams.badge.description')}</span>
-                    <ChevronRight aria-hidden="true" className="size-5 text-gray-400" />
+                    <ChevronRight aria-hidden="true" className="size-5 text-zinc-500" />
                   </span>
                 </a>
               </div>
-              <h1 className="mt-6 text-5xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-7xl">
+              <h1 className="mt-6 text-5xl font-semibold tracking-tight text-pretty text-zinc-100 sm:text-7xl">
                 {t('teams.hero.title')}
               </h1>
-              <p className="mt-6 text-lg font-medium text-pretty text-gray-500 dark:text-gray-400 sm:text-xl/8">
+              <p className="mt-6 text-lg font-medium text-pretty text-zinc-400 sm:text-xl/8">
                 {t('teams.hero.description')}
               </p>
               <div className="mt-8 flex items-center gap-x-6">
-                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-white text-black hover:bg-zinc-200 dark:bg-[hsl(var(--chart-1))] dark:hover:bg-[hsl(var(--chart-1)/0.9)] shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200">
-                  <span className="font-medium text-sm text-white">{t('teams.cta')}</span>
+                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-white text-black hover:bg-zinc-200 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200">
+                  <span className="font-medium text-sm text-black">{t('teams.cta')}</span>
                 </Link>
                 <button
-                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200"
+                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-black/45 border border-white/15 hover:bg-white/10 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200"
                   data-cal-namespace="qunt-edge-team"
                   data-cal-link="hugo-demenez/qunt-edge-team"
                   data-cal-config='{"layout":"month_view"}'
                 >
-                  <span className="font-medium text-sm text-gray-900 dark:text-white">{t('teams.cta.secondary')} <span aria-hidden="true">→</span></span>
+                  <span className="font-medium text-sm text-zinc-100">{t('teams.cta.secondary')} <span aria-hidden="true">→</span></span>
                 </button>
               </div>
 
@@ -149,10 +149,10 @@ export default function TeamPage() {
               <div className="mt-12 grid grid-cols-3 gap-8">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-left">
-                    <div className="text-2xl font-bold text-[#2E9987] dark:text-[hsl(var(--chart-1))]">
+                    <div className="text-2xl font-bold text-zinc-100">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-zinc-400">
                       {stat.label}
                     </div>
                   </div>
@@ -189,15 +189,15 @@ export default function TeamPage() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 {t('teams.features.title')}
               </h2>
-              <p className="mx-auto max-w-[600px] text-gray-500 dark:text-gray-400 md:text-xl mt-4">
+              <p className="mx-auto max-w-[600px] text-zinc-400 md:text-xl mt-4">
                 {t('teams.features.description')}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <Card key={index} className="border-2 hover:border-[#2E9987] dark:hover:border-[hsl(var(--chart-1))] transition-colors duration-200">
+                <Card key={index} className="border border-white/14 hover:border-white/28 bg-black/35 transition-colors duration-200">
                   <CardHeader>
-                    <div className="w-12 h-12 bg-white text-black dark:bg-[hsl(var(--chart-1))] rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 border border-white/15 bg-white/10 text-zinc-100 rounded-lg flex items-center justify-center mb-4">
                       <feature.icon className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl">{feature.title}</CardTitle>
@@ -214,7 +214,7 @@ export default function TeamPage() {
         </section>
 
         {/* Use Cases Section */}
-        <section className="w-full py-6 md:py-12 lg:py-16 xl:py-24 bg-muted">
+        <section className="w-full py-6 md:py-12 lg:py-16 xl:py-24 bg-black/35">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -226,9 +226,9 @@ export default function TeamPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {useCases.map((useCase, index) => (
-                <Card key={index} className="border-2 hover:border-[#2E9987] dark:hover:border-[hsl(var(--chart-1))] transition-colors duration-200">
+                <Card key={index} className="border border-white/14 hover:border-white/28 bg-black/35 transition-colors duration-200">
                   <CardHeader>
-                    <div className="w-12 h-12 bg-white text-black dark:bg-[hsl(var(--chart-1))] rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 border border-white/15 bg-white/10 text-zinc-100 rounded-lg flex items-center justify-center mb-4">
                       <useCase.icon className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl">{useCase.title}</CardTitle>
@@ -251,23 +251,23 @@ export default function TeamPage() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
                 {t('teams.cta.createAccount.title')}
               </h2>
-              <p className="mx-auto max-w-[600px] text-gray-500 dark:text-gray-400 md:text-xl mb-8">
+              <p className="mx-auto max-w-[600px] text-zinc-400 md:text-xl mb-8">
                 {t('teams.cta.createAccount.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-white text-black hover:bg-zinc-200 dark:bg-[hsl(var(--chart-1))] dark:hover:bg-[hsl(var(--chart-1)/0.9)] shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200">
-                  <span className="font-medium text-sm text-white">{t('teams.cta.createAccount.button')}</span>
+                <Link href="/authentication?next=teams/dashboard" className="flex justify-center items-center px-8 py-2.5 h-10 bg-white text-black hover:bg-zinc-200 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200">
+                  <span className="font-medium text-sm text-black">{t('teams.cta.createAccount.button')}</span>
                 </Link>
                 <button
-                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200"
+                  className="flex justify-center items-center px-8 py-2.5 h-10 bg-black/45 border border-white/15 hover:bg-white/10 shadow-none hover:shadow-none dark:shadow-none dark:hover:shadow-none rounded-xl transition-all duration-200"
                   data-cal-namespace="qunt-edge-team"
                   data-cal-link="hugo-demenez/qunt-edge-team"
                   data-cal-config='{"layout":"month_view"}'
                 >
-                  <span className="font-medium text-sm text-gray-900 dark:text-white">{t('teams.cta.demo.button')}</span>
+                  <span className="font-medium text-sm text-zinc-100">{t('teams.cta.demo.button')}</span>
                 </button>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+              <p className="text-sm text-zinc-400 mt-4">
                 {t('teams.cta.createAccount.subtext')}
               </p>
             </div>

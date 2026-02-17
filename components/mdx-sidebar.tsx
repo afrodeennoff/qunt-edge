@@ -1,11 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
-import { ChevronRight, FileText, Book, Code, Layout, Zap, Shield, Cpu, Database as DatabaseIcon } from "lucide-react"
+import { FileText, Book, Code, Layout, Zap, Shield, Cpu, Database as DatabaseIcon } from "lucide-react"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 
 interface DocGroup {
@@ -48,28 +43,6 @@ const docGroups: DocGroup[] = [
 ]
 
 export function MdxSidebar() {
-  const pathname = usePathname()
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    const currentGroup = docGroups.find(group =>
-      group.items.some(item => item.href === pathname)
-    )
-    if (currentGroup) {
-      setExpandedGroups(new Set([currentGroup.title]))
-    }
-  }, [pathname])
-
-  const toggleGroup = (title: string) => {
-    const newExpanded = new Set(expandedGroups)
-    if (newExpanded.has(title)) {
-      newExpanded.delete(title)
-    } else {
-      newExpanded.add(title)
-    }
-    setExpandedGroups(newExpanded)
-  }
-
   const sidebarItems: UnifiedSidebarItem[] = docGroups.flatMap(group =>
     group.items.map(item => ({
       ...item,
