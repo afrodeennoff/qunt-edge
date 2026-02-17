@@ -259,6 +259,10 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
+            if (typeof navigator === 'undefined') {
+                global.navigator = { onLine: true } as Navigator
+            }
+
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
                 value: false,
