@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AutoSaveService, OfflineQueueManager } from '../auto-save-service'
 import { DashboardLayout } from '@/prisma/generated/prisma'
