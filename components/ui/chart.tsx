@@ -46,8 +46,11 @@ const ChartContainer = React.forwardRef<
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  const contextValue = React.useMemo(() => ({ config }), [config])
+
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={contextValue}>
       <div
         data-chart={chartId}
         ref={ref}
@@ -67,7 +70,8 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "Chart"
 
-const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+// Memoize ChartStyle to prevent re-generating styles on every render
+const ChartStyle = React.memo(({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
   )
@@ -98,7 +102,7 @@ ${colorConfig
       }}
     />
   )
-}
+})
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
