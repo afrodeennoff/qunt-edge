@@ -24,25 +24,34 @@ export async function GET() {
         SELECT
           "userId",
           "id",
-          "entryDate",
+          CASE
+            WHEN NULLIF("entryDate"::text, '') IS NOT NULL
+            THEN ("entryDate"::text)::timestamptz
+            ELSE NULL
+          END AS entry_ts,
           COALESCE("pnl", 0)::double precision AS pnl,
           COALESCE("commission", 0)::double precision AS commission
         FROM "Trade"
-        WHERE "entryDate" >= NOW() - INTERVAL '365 days'
+      ),
+      filtered_trades AS (
+        SELECT *
+        FROM ordered_trades
+        WHERE entry_ts IS NOT NULL
+          AND entry_ts >= NOW() - INTERVAL '365 days'
       ),
       running AS (
         SELECT
           "userId",
           "id",
-          "entryDate",
+          entry_ts,
           pnl,
           (pnl - commission) AS net,
           SUM(pnl - commission) OVER (
             PARTITION BY "userId"
-            ORDER BY "entryDate", "id"
+            ORDER BY entry_ts, "id"
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
           ) AS running_net
-        FROM ordered_trades
+        FROM filtered_trades
       ),
       drawdown_points AS (
         SELECT
@@ -51,7 +60,7 @@ export async function GET() {
           running_net,
           MAX(running_net) OVER (
             PARTITION BY "userId"
-            ORDER BY "entryDate", "id"
+            ORDER BY entry_ts, "id"
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
           ) AS peak_net
         FROM running

@@ -36,6 +36,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Vercel 500 Fix (Trader Benchmark SQL Date Cast)
+- **What changed:** Fixed production `500` errors on `/api/trader-profile/benchmark` caused by comparing text dates against `timestamptz`.
+- **What I want:** Benchmark endpoint should return stable JSON without SQL type-operator crashes in production.
+- **What I don't want:** Runtime Prisma raw-query failures (`42883 operator does not exist: text >= timestamp with time zone`) from mixed column typing/data shape.
+- **How we fixed that:**
+  - Updated benchmark SQL in `app/api/trader-profile/benchmark/route.ts`:
+    - parse `entryDate` safely to `timestamptz` via `NULLIF(..., '')::timestamptz`,
+    - moved date-window filter to parsed datetime (`entry_ts >= NOW() - INTERVAL '365 days'`),
+    - ordered running/drawdown windows by `entry_ts` instead of raw text.
+  - This removes direct text-vs-time comparisons and protects the query from empty date values.
+- **Key Files:** `app/api/trader-profile/benchmark/route.ts`, `AGENTS.md`
+- **Verification:**
+  - `npm run build` -> exits `0`.
+  - `npm run typecheck` -> exits `0`.
+  - Vercel log root-cause matched and addressed (`42883` on benchmark endpoint).
+
 ### 2026-02-17: Sidebar Freeze Fix (Mid-Session Scroll Lock Leak Recovery)
 - **What changed:** Hardened global scroll-lock recovery logic so dashboard no longer freezes after mixed sidebar/dialog/select interactions.
 - **What I want:** Main dashboard scroll and pointer interaction should stay responsive during long sessions, even after opening/closing modal and sidebar controls repeatedly.
