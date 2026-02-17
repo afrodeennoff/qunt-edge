@@ -36,6 +36,27 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Full Widget Spacing Unification Pass (All Chart Cards)
+- **What changed:** Applied a full dashboard-wide spacing normalization to remaining chart widgets that still used legacy roomy axis/margin/body settings.
+- **What I want:** Every widget card should have consistent compact vertical rhythm, with no leftover bottom dead-space from mixed old/new chart spacing configurations.
+- **What I don't want:** Some widgets looking fixed while others still show axis-floor gaps because they were not included in earlier partial patches.
+- **How we fixed that:**
+  - Unified compact chart body padding + axis reserve across previously untouched chart components:
+    - `weekday-pnl`, `time-range-performance`, `contract-quantity`, `pnl-per-contract`, `pnl-per-contract-daily`, `equity-chart`.
+  - Reduced bottom chart reserve in untouched bar widgets:
+    - lowered `BarChart margin.bottom` from legacy `20/24` style values to compact `12/16` style values where applicable.
+  - Reduced x-axis footprint in untouched widgets:
+    - lowered `XAxis height` and `tickMargin` to match the compact standard used in earlier fixed widgets.
+  - Tightened non-chart daily-target card body density:
+    - reduced card body padding and internal vertical gap in `daily-tick-target`.
+  - Reduced shared Recharts minimum floor:
+    - updated `app/globals.css` `min-height` guard for chart containers from `140px` to `120px`.
+- **Key Files:** `app/[locale]/dashboard/components/charts/weekday-pnl.tsx`, `app/[locale]/dashboard/components/charts/time-range-performance.tsx`, `app/[locale]/dashboard/components/charts/contract-quantity.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`, `app/[locale]/dashboard/components/charts/equity-chart.tsx`, `app/[locale]/dashboard/components/charts/daily-tick-target.tsx`, `app/globals.css`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` blocked in this worktree because `next` is not installed (`sh: next: command not found`).
+  - Manual target:
+    - `/dashboard?tab=widgets` should now show consistent compact bottom spacing across all chart cards.
+
 ### 2026-02-17: Widget Gap Follow-up (Yellow-Line Dead Space Reduction)
 - **What changed:** Applied a second spacing pass to remove remaining bottom dead space highlighted in dashboard widgets (yellow-marked areas).
 - **What I want:** Chart content should sit tighter to the widget baseline with less empty floor across bar-chart cards.

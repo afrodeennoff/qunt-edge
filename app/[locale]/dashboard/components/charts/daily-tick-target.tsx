@@ -307,10 +307,10 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === "small" ? "p-1" : "p-2 sm:p-3"
+          size === "small" ? "p-0.5" : "p-1 sm:p-2"
         )}
       >
-        <div className="w-full h-full flex flex-col justify-center gap-4">
+        <div className="w-full h-full flex flex-col justify-center gap-3">
           {/* Current vs Target Display */}
           <div className="flex items-center justify-around w-full px-4 py-3 bg-white/[0.03] rounded-lg border border-white/5">
             <div className="flex flex-col items-center gap-1">

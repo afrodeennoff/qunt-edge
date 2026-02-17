@@ -953,7 +953,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === "small" ? "p-1" : "p-2 sm:p-3"
+          size === "small" ? "p-0.5" : "p-1 sm:p-2"
         )}
       >
         <div className="w-full h-full flex flex-col">
@@ -972,7 +972,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                     margin={
                       size === "small"
                         ? { left: 0, right: 0, top: 4, bottom: 0 }
-                        : { left: 0, right: 0, top: 10, bottom: 0 }
+                        : { left: 0, right: 0, top: 6, bottom: 0 }
                     }
                     onMouseLeave={() => setHoveredData(null)}
                   >
@@ -985,8 +985,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                       dataKey="date"
                       tickLine={false}
                       axisLine={false}
-                      height={size === "small" ? 20 : 24}
-                      tickMargin={size === "small" ? 4 : 8}
+                      height={size === "small" ? 18 : 22}
+                      tickMargin={size === "small" ? 2 : 6}
                       minTickGap={30}
                       tick={{
                         fontSize: size === "small" ? 9 : 10,
