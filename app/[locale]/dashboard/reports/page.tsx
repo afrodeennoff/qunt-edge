@@ -10,7 +10,7 @@ export default function DashboardReportsPage() {
 
   return (
     <div className="w-full p-3 sm:p-4 lg:p-6">
-      <section className="rounded-3xl border border-border/60 bg-card/75 p-4 shadow-sm backdrop-blur-sm sm:p-6">
+      <section className="enterprise-shell rounded-3xl p-4 sm:p-6">
         <AnalysisOverview />
       </section>
     </div>

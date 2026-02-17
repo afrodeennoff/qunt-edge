@@ -27,7 +27,7 @@ export default async function TeamLayout({
 ) {
   return (
     <MarketingLayoutShell contentClassName="w-full">
-      <div>
+      <div className="marketing-shell enterprise-grid">
         {children}
       </div>
     </MarketingLayoutShell>

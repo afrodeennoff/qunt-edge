@@ -11,10 +11,10 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="relative flex w-full min-h-screen px-3 pb-4 pt-0 sm:px-4 sm:pb-4 sm:pt-0 lg:px-6 lg:pb-6 lg:pt-0">
+    <div className="relative flex w-full min-h-screen px-3 pb-4 pt-2 sm:px-4 sm:pb-4 lg:px-6 lg:pb-6">
       <div className="flex w-full flex-1 flex-col p-2 sm:p-3">
-        <Tabs defaultValue="accounts" className="w-full space-y-4">
-          <TabsList className="h-auto rounded-2xl border border-border/70 bg-background/70 p-1">
+        <Tabs defaultValue="accounts" className="enterprise-shell w-full space-y-4 rounded-3xl p-3 sm:p-4">
+          <TabsList className="h-auto rounded-2xl border border-white/15 bg-black/40 p-1">
             <TabsTrigger value="accounts">Accounts</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
             {/* <TabsTrigger value="propfirm">Prop Firm</TabsTrigger> */}
@@ -22,7 +22,7 @@ export default function DashboardPage() {
           <TabsContent value="accounts" className="mt-0">
             <DataManagementCard />
           </TabsContent>
-          <TabsContent value="trades" className="mt-0 h-[calc(100vh-var(--navbar-height)-var(--tabs-height)-16px)]">
+          <TabsContent value="trades" className="mt-0 h-[calc(100vh-var(--navbar-height)-var(--tabs-height)-34px)]">
             <TradeTableReview />
           </TabsContent>
         </Tabs>
