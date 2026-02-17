@@ -36,6 +36,37 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Next.js Optimization Audit (Current Main Baseline)
+- **What changed:** Ran a full optimization audit on current `main` using build, route-budget, bundle-summary, lint/typecheck, and configuration/middleware inspection.
+- **What I want:** A verifiable baseline for launch-readiness decisions with clear P0/P1 blockers and measurable optimization priorities.
+- **What I don't want:** Assumption-based “optimized” claims, silent production blank-page regressions, or bundle/cache checks that pass without reflecting real App Router risk.
+- **How we fixed that:**
+  - Verified quality gates and optimization scripts:
+    - `npm run build` passes,
+    - `npm run check:route-budgets` passes for current configured thresholds,
+    - `node scripts/analyze-bundle.mjs` updates `docs/audits/artifacts/bundle-summary.json`.
+  - Captured core optimization metrics:
+    - `336` `"use client"` boundaries in `app` + `components`,
+    - `0` raw `<img>` matches in `app` + `components`,
+    - `0` `next/font` imports detected,
+    - `47` API route handlers, but only `5` parse helper (`parseJson`/`parseQuery`) usages,
+    - `10` `force-dynamic` route declarations.
+  - Confirmed route-budget surface is app-route aware but still high-level:
+    - top App Router client manifest routes are dashboard family (`~49–51KB`) and within current 80KB threshold,
+    - bundle summary still reports `/_app` as only pages route with `0 KB`, which is expected for App Router-heavy apps but weak as a sole governance indicator.
+  - Reconfirmed likely production blank-page risk area:
+    - app-wide CSP uses nonce + `strict-dynamic` in `lib/security/csp.ts` and is applied in `proxy.ts`,
+    - this remains a high-risk area for script loading regressions if nonce propagation is inconsistent in deployed environment.
+  - Captured maintainability/perf debt signal from lint:
+    - `1223` warnings (`0` errors), including React render/effect anti-pattern warnings in dashboard account components.
+- **Key Files:** `next.config.ts`, `proxy.ts`, `lib/security/csp.ts`, `scripts/check-route-budgets.mjs`, `docs/audits/artifacts/bundle-summary.json`, `AGENTS.md`
+- **Verification:**
+  - `npm run build` -> exits `0`.
+  - `npm run check:route-budgets` -> exits `0`.
+  - `node scripts/analyze-bundle.mjs` -> exits `0`.
+  - `npm run typecheck` -> exits `0`.
+  - `npm run lint` -> exits `0` with `1223` warnings.
+
 ### 2026-02-16: Launch Optimization Pass (Preload + CDN + Image + Cache + Dashboard Read Path)
 - **What changed:** Completed a targeted production optimization pass across Next.js delivery config, preload hints, dashboard rendering behavior, and backend read caching.
 - **What I want:** Lower overhead on low-end devices, fewer unnecessary network prefetches, faster dashboard shell loads, and reduced repeated DB pressure on authenticated dashboard visits.
@@ -1594,4 +1625,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Reduced SEO language alternates in `app/layout.tsx` to English canonical only.
   - Kept `fr` registered in `locales/client.ts` and `locales/server.ts` strictly for compile-time/runtime compatibility with existing `en/fr` checks; non-English locale routing is still blocked at middleware.
 - **Key Files:** `proxy.ts`, `locales/client.ts`, `locales/server.ts`, `app/layout.tsx`, `AGENTS.md`
+- **Verification:** `npm run -s typecheck` exits `0`.
+
+### 2026-02-17: Immediate Safe-Mode Stabilization (Crash Prevention Defaults)
+- **What changed:** Applied immediate safe defaults to high-risk optimization surfaces so production behavior stays stable unless explicitly enabled.
+- **What I want:** Prevent homepage/runtime crashes from optimization toggles by making heavy features opt-in instead of implicitly on.
+- **What I don't want:** New deploys accidentally enabling service worker or aggressive motion paths that can amplify hydration/runtime failures.
+- **How we fixed that:**
+  - Changed service worker gate in `components/providers/root-providers.tsx` to enable only when `NEXT_PUBLIC_SW_ENABLED === "true"`.
+  - Added marketing motion feature gate in `app/[locale]/(home)/components/Hero.tsx` via `NEXT_PUBLIC_ENABLE_MARKETING_MOTION === 'true'`.
+  - Added same motion gate in `app/[locale]/(landing)/components/navbar.tsx` and removed hidden-first animation default (`initial={false}`) for safer first paint.
+- **Key Files:** `components/providers/root-providers.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(landing)/components/navbar.tsx`, `AGENTS.md`
 - **Verification:** `npm run -s typecheck` exits `0`.

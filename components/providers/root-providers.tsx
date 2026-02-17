@@ -11,7 +11,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
             return;
         }
 
-        const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED !== "false";
+        const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED === "true";
         const handleServiceWorker = () => {
             if (swEnabled) {
                 navigator.serviceWorker.register("/sw.js").then(
