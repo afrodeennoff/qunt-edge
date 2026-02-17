@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -213,10 +214,11 @@ export default async function RootLayout({
 
       </head>
       <body
-        className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}
+        className={`${geist.variable} ${ibmPlexMono.variable} scroll-smooth-native font-sans antialiased text-foreground`}
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />
+        <SmoothScrollProvider />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}
         {children}
