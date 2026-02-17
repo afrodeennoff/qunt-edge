@@ -3,7 +3,7 @@ import { createI18nMiddleware } from "next-international/middleware"
 import { createServerClient } from "@supabase/ssr"
 import { geolocation } from "@vercel/functions"
 import { User } from "@supabase/supabase-js"
-import { buildAppCsp, createNonce } from "@/lib/security/csp"
+import { buildAppCsp, buildEmbedCsp, createNonce } from "@/lib/security/csp"
 
 // Maintenance mode flag - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false
@@ -97,6 +97,15 @@ async function updateSession(request: NextRequest) {
   return { response, user, error }
 }
 
+function setCspHeader(response: NextResponse, csp: string, reportOnly: boolean) {
+  response.headers.delete("Content-Security-Policy")
+  response.headers.delete("Content-Security-Policy-Report-Only")
+  response.headers.set(
+    reportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy",
+    csp
+  )
+}
+
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
   const locale = getLocale(pathname)
@@ -104,6 +113,10 @@ export default async function middleware(req: NextRequest) {
   const isAdminRoute = pathname.includes("/admin")
   const isAuthRoute = pathname.includes("/authentication")
   const isEmbedRoute = pathname.includes("/embed")
+  const isDev = process.env.NODE_ENV === "development"
+  const cspEnabled = process.env.CSP_ENABLED !== "false"
+  const cspReportOnly = process.env.CSP_REPORT_ONLY !== "false"
+  const cspStrictMode = process.env.CSP_STRICT_MODE === "true"
   const isStaticAsset =
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/") ||
@@ -124,7 +137,6 @@ export default async function middleware(req: NextRequest) {
   // Apply i18n middleware first
   // This handles basic redirects for / to /en, etc.
   const response = I18nMiddleware(req)
-  const isDev = process.env.NODE_ENV === "development"
   const nonce = createNonce()
   response.headers.set("x-nonce", nonce)
 
@@ -136,17 +148,17 @@ export default async function middleware(req: NextRequest) {
     const origin = req.headers.get("origin")
     const referer = req.headers.get("referer")
     const isLocalFile = origin === "null" || referer?.startsWith("file://") || (!origin && !referer)
-    const isDev = process.env.NODE_ENV === "development"
-
     // If embedding from a local file (file://), omit CSP entirely so browsers don't block
     if (isLocalFile) {
       response.headers.delete("Content-Security-Policy")
+      response.headers.delete("Content-Security-Policy-Report-Only")
       return response
     }
 
     // Development: omit CSP entirely to prevent frame-ancestors blocking during local testing
     if (isDev) {
       response.headers.delete("Content-Security-Policy")
+      response.headers.delete("Content-Security-Policy-Report-Only")
       return response
     }
 
@@ -163,18 +175,9 @@ export default async function middleware(req: NextRequest) {
       "https://app.thortradecopier.com",
     ].join(" ")
 
-    response.headers.set(
-      "Content-Security-Policy",
-      `frame-ancestors ${allowedOrigins}; ` +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data: blob:; " +
-      "connect-src 'self' https://vercel.live; " +
-      "font-src 'self' data:; " +
-      "object-src 'none'; " +
-      "base-uri 'self'; " +
-      "form-action 'self';",
-    )
+    if (cspEnabled) {
+      setCspHeader(response, buildEmbedCsp(allowedOrigins), cspReportOnly)
+    }
 
     return response
   }
@@ -341,6 +344,11 @@ export default async function middleware(req: NextRequest) {
       if (city) response.headers.set("x-user-city", encodeURIComponent(city))
       if (region) response.headers.set("x-user-region", encodeURIComponent(region))
     }
+  }
+
+  if (cspEnabled) {
+    const appCsp = buildAppCsp({ nonce, isDev, strictMode: cspStrictMode })
+    setCspHeader(response, appCsp, cspReportOnly)
   }
 
   return response

@@ -3,6 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
+import { headers } from "next/headers";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 import { WebVitalsReporter } from "@/components/providers/web-vitals-reporter";
@@ -100,11 +101,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const isProduction = process.env.NODE_ENV === "production";
   const uiVariant = getUiVariant();
   const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL;
@@ -132,7 +134,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
-        <Script id="init-theme" strategy="beforeInteractive">
+        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce}>
           {`
             (function() {
               try {

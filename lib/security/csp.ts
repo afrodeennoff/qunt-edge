@@ -1,3 +1,9 @@
+type AppCspOptions = {
+  nonce: string;
+  isDev: boolean;
+  strictMode: boolean;
+};
+
 const PROD_CONNECT_SOURCES = [
   "'self'",
   "https://*.supabase.co",
@@ -28,22 +34,39 @@ export function createNonce(): string {
   return btoa(binary);
 }
 
-export function buildAppCsp(nonce: string, isDev: boolean): string {
+export function buildAppCsp({ nonce, isDev, strictMode }: AppCspOptions): string {
   const connectSources = isDev ? DEV_CONNECT_SOURCES : PROD_CONNECT_SOURCES;
+  const scriptSources = strictMode
+    ? [`'self'`, `'nonce-${nonce}'`]
+    : [`'self'`, `'nonce-${nonce}'`, `'unsafe-eval'`];
 
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    `script-src ${scriptSources.join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
+    "font-src 'self' data: https:",
     `connect-src ${normalizeSources(connectSources)}`,
-    "font-src 'self' data:",
-    "object-src 'none'",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
+    "object-src 'none'",
     "upgrade-insecure-requests",
   ];
 
   return directives.join("; ");
+}
+
+export function buildEmbedCsp(allowedOrigins: string): string {
+  return [
+    `frame-ancestors ${allowedOrigins}`,
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "connect-src 'self' https://vercel.live",
+    "font-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
 }
