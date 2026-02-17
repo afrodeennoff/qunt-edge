@@ -217,12 +217,16 @@ export default function WeekdayPNLChart({
 <<<<<<< ours
 <<<<<<< ours
 <<<<<<< ours
+<<<<<<< ours
           size === "small" ? "p-0.5" : "p-1 sm:p-2",
 =======
           size === "small" ? "px-0.5 pt-0.5 pb-0" : "px-1 pt-1 pb-0 sm:px-2 sm:pt-2 sm:pb-0",
 >>>>>>> theirs
 =======
           size === "small" ? "px-0.5 pt-0.5 pb-0" : "px-1 pt-1 pb-0 sm:px-2 sm:pt-2 sm:pb-0",
+>>>>>>> theirs
+=======
+          size === "small" ? "p-0.5" : "p-1 sm:p-2",
 >>>>>>> theirs
 =======
           size === "small" ? "p-0.5" : "p-1 sm:p-2",
