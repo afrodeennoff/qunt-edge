@@ -44,7 +44,7 @@ export default function Hero() {
           <motion.div variants={fadeUp} className="mb-8 flex justify-center">
             <Badge variant="secondary" className="border-white/10 px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] backdrop-blur-sm [font-family:var(--home-copy)]">
               <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" />
-              Execution Intelligence Platform
+              Private Performance Intelligence
             </Badge>
           </motion.div>
 
@@ -52,26 +52,26 @@ export default function Hero() {
             variants={fadeUp}
             className="mx-auto max-w-5xl text-center text-[clamp(2.45rem,10.2vw,7rem)] font-semibold leading-[0.92] tracking-[-0.03em] [font-family:var(--home-display)]"
           >
-            Grow the trader.
+            Most traders log trades.
             <span className="block mt-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Not just the equity curve.
+              Elite traders build systems.
             </span>
           </motion.h1>
 
           <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-center text-[14px] leading-[1.72] text-muted-foreground sm:text-[18px] sm:leading-[1.8] [font-family:var(--home-copy)]">
-            Qunt Edge V2 helps you understand why performance changes, what behavior caused it, and exactly what to fix next
-            using auditable AI coaching and process-first analytics.
+            Qunt Edge exposes the decisions behind the numbers, so you stop performing for screenshots
+            and start trading like a professional desk.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
             <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-full text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg shadow-primary/25 sm:min-w-[200px] sm:w-auto [font-family:var(--home-copy)]">
               <Link href={`/${locale}/authentication?next=dashboard`}>
-                Start Free Audit
+                Claim My Edge
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-full border-white/10 bg-white/5 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm hover:bg-white/10 sm:min-w-[200px] sm:w-auto [font-family:var(--home-copy)]">
               <Link href={`/${locale}/#pricing`}>
-                See Pricing
+                Compare Plans
                 <ArrowRight className="ml-2 h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -83,15 +83,15 @@ export default function Hero() {
                 <div className="grid gap-6 sm:grid-cols-3">
                   <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">AI Coaching Precision</p>
-                    <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">92%</p>
+                    <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">91%</p>
                   </div>
                   <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Plan Compliance Uplift</p>
-                    <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-green-400 [font-family:var(--home-display)]">+31%</p>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Discipline Uplift</p>
+                    <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-green-400 [font-family:var(--home-display)]">+34%</p>
                   </div>
                   <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Weekly Review Time</p>
-                    <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-primary [font-family:var(--home-display)]">-68%</p>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Review Time Saved</p>
+                    <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-primary [font-family:var(--home-display)]">-71%</p>
                   </div>
                 </div>
               </CardContent>

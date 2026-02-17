@@ -16,17 +16,17 @@ const plans = [
     name: 'Starter',
     price: '$0',
     period: '/month',
-    subtitle: 'For traders building foundational review discipline',
-    features: ['Manual journaling', 'Core trade analytics', 'Weekly process snapshot'],
-    cta: 'Start Free',
-    note: 'No card required',
+    subtitle: 'For traders done with guesswork',
+    features: ['Core journaling stack', 'Foundational execution analytics', 'Weekly process snapshot'],
+    cta: 'Enter Free',
+    note: 'No card. No friction.',
     popular: false,
   },
   {
     name: 'Pro AI',
     price: '$29',
     period: '/month',
-    subtitle: 'For serious traders optimizing execution quality',
+    subtitle: 'For traders building professional consistency',
     features: [
       'AI session debriefs',
       'Behavior drift detection',
@@ -34,18 +34,18 @@ const plans = [
       'Advanced dashboards',
       'Priority support',
     ],
-    cta: 'Start Pro Trial',
-    note: 'Best for active discretionary traders',
+    cta: 'Unlock Pro AI',
+    note: 'Most selected by funded traders',
     popular: true,
   },
   {
     name: 'Desk',
     price: '$99',
     period: '/month',
-    subtitle: 'For prop teams, mentors, and performance managers',
+    subtitle: 'For desks, mentors, and high-accountability teams',
     features: ['Team analytics workspace', 'Role-based reporting', 'Coaching intervention feed', 'Shared playbooks'],
-    cta: 'Talk To Sales',
-    note: 'Volume pricing for larger desks',
+    cta: 'Book Desk Access',
+    note: 'Volume options available',
     popular: false,
   },
 ]
@@ -68,11 +68,11 @@ export default function PricingSection() {
             Pricing
           </Badge>
           <h2 className="text-[clamp(2rem,4.8vw,3.35rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
-            Pricing built for <br />
-            <span className="text-primary">individual traders and performance desks</span>
+            Price your edge. <br />
+            <span className="text-primary">Not your excuses.</span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.78] text-muted-foreground sm:text-[18px] [font-family:var(--home-copy)]">
-            Start free, upgrade when you are ready for AI coaching and institutional-grade review workflows.
+            Start free. Upgrade when your standards get expensive.
           </p>
           <p className="mt-4 text-xs text-muted-foreground [font-family:var(--home-copy)]">Billed monthly. Cancel anytime.</p>
         </motion.div>

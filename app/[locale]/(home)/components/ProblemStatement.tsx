@@ -3,18 +3,18 @@ import { AlertTriangle, Brain, Repeat } from 'lucide-react'
 
 const problems = [
   {
-    title: 'Outcome Bias',
-    desc: 'Winning trades can hide broken decisions. The process decays before PnL reveals it.',
+    title: 'Vanity PnL',
+    desc: 'A green day can still be bad trading. Sloppy decisions eventually collect interest.',
     icon: AlertTriangle,
   },
   {
-    title: 'Emotional Drift',
-    desc: 'Small frustration compounds into over-sizing, overtrading, and plan violations.',
+    title: 'Emotional Leaks',
+    desc: 'Tiny ego reactions become sizing mistakes, revenge entries, and broken risk.',
     icon: Brain,
   },
   {
-    title: 'No Feedback Loop',
-    desc: 'Without structured review, you repeat noise instead of reinforcing edge.',
+    title: 'No Standard',
+    desc: 'If performance is not measured against rules, improvement is just a story.',
     icon: Repeat,
   },
 ]
@@ -25,20 +25,20 @@ export default function ProblemStatement() {
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-7 lg:grid-cols-[1fr_1.1fr] lg:items-start">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Core Problem</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Reality Check</p>
             <h2 className="mt-3 text-[clamp(1.9rem,4.9vw,3.45rem)] font-semibold leading-[0.94] tracking-[-0.02em] [font-family:var(--home-display)]">
-              PnL tells you
-              <span className="block text-[hsl(var(--brand-primary))]">what happened, not why.</span>
+              Amateurs track outcomes.
+              <span className="block text-[hsl(var(--brand-primary))]">Professionals audit process.</span>
             </h2>
             <p className="mt-4 max-w-xl text-[15px] leading-[1.75] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
-              Most traders measure outcomes. Elite traders diagnose process quality. Qunt Edge shifts your review from
-              isolated numbers to repeatable decision intelligence.
+              You can keep guessing from PnL, or run your trading like a performance business.
+              Qunt Edge gives you decision-level diagnostics, not motivational noise.
             </p>
 
             <div className="mt-6 rounded-2xl border border-[hsl(var(--brand-primary)/0.3)] bg-[hsl(var(--brand-primary)/0.08)] p-4">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]">Framework Shift</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]">The Shift</p>
               <p className="mt-1 text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
-                Diagnose behavior first. Profit becomes a trailing result, not the steering wheel.
+                Score behavior first. Profit becomes the receipt, not the strategy.
               </p>
             </div>
           </motion.div>

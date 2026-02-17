@@ -1817,3 +1817,29 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Verification:**
   - `npx eslint components/sidebar/sidebar-helpers.tsx components/sidebar/dashboard-sidebar.tsx components/sidebar/aimodel-sidebar.tsx components/mdx-sidebar.tsx app/[locale]/teams/components/teams-sidebar.tsx app/[locale]/dashboard/settings/actions.ts` -> exits `0`.
   - `npm run -s typecheck` -> exits `0`.
+<<<<<<< Updated upstream
+=======
+
+### 2026-02-17: Brand Logo Asset Swap (User-Provided SVG)
+- **What changed:** Replaced the app logo asset with the user-provided SVG and updated the shared logo component to render that file.
+- **What I want:** Brand mark used across the app should match the provided `2.svg` artwork.
+- **What I don't want:** Inconsistent logo rendering between static asset usage and shared `Logo` component usage.
+- **How we fixed that:**
+  - Copied `/Users/timon/Downloads/Black Modern Abstract Logo-2/2.svg` into project as `public/logo.svg`.
+  - Updated `components/logo.tsx` to render `public/logo.svg` via `next/image` (with preserved class-based sizing).
+- **Key Files:** `public/logo.svg`, `components/logo.tsx`, `AGENTS.md`
+- **Verification:** `npx eslint components/logo.tsx` exits `0`.
+
+### 2026-02-17: Home Page Copy Rewrite (Minimal Luxury + Ego-Driven CTA Tone)
+- **What changed:** Rewrote homepage conversion copy to a sharper minimal-luxury voice with stronger status/discipline framing and higher-intent CTA language.
+- **What I want:** The home page should sound premium, decisive, and performance-first; CTAs should pressure action by appealing to identity and standards.
+- **What I don't want:** Generic SaaS language, soft/forgettable CTAs, or messaging that sounds like a template.
+- **How we fixed that:**
+  - Replaced hero badge/headline/body/primary CTA language with more assertive performance identity framing.
+  - Rewrote problem framing to highlight vanity-PnL traps and professional process discipline.
+  - Tightened feature section labels and descriptions toward elite-operating standards.
+  - Repositioned trust/why-us messaging to emphasize accountability and competitive review quality.
+  - Updated pricing and final CTA copy to preserve luxury tone while increasing urgency and ego-trigger conversion pressure.
+- **Key Files:** `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(home)/components/ProblemStatement.tsx`, `app/[locale]/(home)/components/Features.tsx`, `app/[locale]/(home)/components/WhyChooseUs.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(home)/components/CTA.tsx`, `AGENTS.md`
+- **Verification:** `npx eslint` run on all edited home components exits `0`.
+>>>>>>> Stashed changes
