@@ -36,6 +36,19 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Sidebar Redirect Stall Fix (Locale-Aware Dashboard Auth Redirect)
+- **What changed:** Fixed dashboard layout unauthenticated redirect to use locale-aware authentication path with a safe `next` target.
+- **What I want:** Unauthenticated users navigating dashboard routes should redirect once to the correct localized auth page, without mid-session redirect stalls/bounces.
+- **What I don't want:** Non-localized `/authentication` redirects from localized dashboard layouts causing extra middleware redirect hops and stuck sidebar navigation behavior.
+- **How we fixed that:**
+  - Updated `app/[locale]/dashboard/layout.tsx` to consume route `params`.
+  - Replaced hardcoded `redirect("/authentication")` with locale-safe redirect:
+    - `redirect(\`/${locale}/authentication?next=/${locale}/dashboard\`)` (URL-encoded).
+  - Kept fix scope minimal and did not alter dashboard data/auth logic beyond redirect target correctness.
+- **Key Files:** `app/[locale]/dashboard/layout.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0`.
 ### 2026-02-17: Safe CSP Reintroduction (Report-Only + Nonce + Strict Toggle)
 - **What changed:** Reintroduced CSP as a focused security follow-up on top of rollback state, using nonce-based script authorization with safe rollout controls (`report-only` by default, optional strict mode).
 - **What I want:** Restore browser-side security hardening (XSS/script-injection defense) without reintroducing blank-page regressions from overly strict policy rollout.
