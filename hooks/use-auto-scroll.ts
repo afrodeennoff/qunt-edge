@@ -5,6 +5,7 @@ export function useAutoScroll(isEnabled: boolean) {
     if (!isEnabled) return
 
     let scrollInterval: NodeJS.Timeout | null = null
+    let isDragging = false
     let lastTouchY = 0
     const scrollThreshold = 150 // px from top/bottom to start scrolling
     const baseScrollSpeed = 15 // base scroll speed
@@ -51,11 +52,18 @@ export function useAutoScroll(isEnabled: boolean) {
       }
     }
 
-    function handleTouchStart() {
+    function handleTouchStart(e: TouchEvent) {
+      const target = e.target as Element | null
+      if (!target?.closest('.drag-handle')) {
+        return
+      }
+      isDragging = true
       document.body.classList.add('dragging')
     }
 
     function handleTouchMove(e: TouchEvent) {
+      if (!isDragging) return
+
       // Prevent default to ensure smooth scrolling
       e.preventDefault()
 
@@ -76,6 +84,8 @@ export function useAutoScroll(isEnabled: boolean) {
     }
 
     function handleTouchEnd() {
+      if (!isDragging) return
+      isDragging = false
       document.body.classList.remove('dragging')
       if (scrollInterval) {
         clearInterval(scrollInterval)
@@ -94,6 +104,8 @@ export function useAutoScroll(isEnabled: boolean) {
       document.removeEventListener('touchmove', handleTouchMove)
       document.removeEventListener('touchend', handleTouchEnd)
       document.removeEventListener('touchcancel', handleTouchEnd)
+      isDragging = false
+      document.body.classList.remove('dragging')
       if (scrollInterval) {
         clearInterval(scrollInterval)
       }

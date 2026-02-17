@@ -57,6 +57,33 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Manual target:
     - `/dashboard?tab=widgets` should now show consistent compact bottom spacing across all chart cards.
 
+### 2026-02-17: Scroll Stability Patch (Sidebar/Main Scroll Isolation + Lock Leak Recovery)
+- **What changed:** Applied a focused scroll reliability patch to stop cases where sidebar remained scrollable while dashboard main content appeared frozen.
+- **What I want:** Keep normal dashboard/main scrolling reliable after dialogs/sheets/customize interactions, without breaking intentional modal lock behavior.
+- **What I don't want:** Persistent lock leakage (`overflow`/`pointer-events`/`touch-action`) after overlay close, or global touch handlers blocking page scroll while customizing widgets.
+- **How we fixed that:**
+  - Hardened lock cleanup logic in `components/scroll-lock-fix.tsx`:
+    - added open-dialog detection guard,
+    - kept spacing normalization (`padding-right`/`margin-right`),
+    - added safe cleanup of leaked lock styles (`overflow*`, `pointer-events`, `touch-action`) only when no Radix dialog/sheet is open.
+  - Scoped auto-scroll touch interception in `hooks/use-auto-scroll.ts`:
+    - drag mode now activates only when touch starts on `.drag-handle`,
+    - `touchmove` preventDefault applies only during active drag,
+    - ensures normal page scrolling remains available outside widget drag interactions.
+  - Removed wheel/touch propagation overrides in filter section:
+    - `app/[locale]/dashboard/components/filters/filter-selection.tsx` no longer hijacks wheel events or blocks touch propagation,
+    - relies on native/Radix scroll behavior to avoid outer scroll starvation.
+- **Key Files:** `components/scroll-lock-fix.tsx`, `hooks/use-auto-scroll.ts`, `app/[locale]/dashboard/components/filters/filter-selection.tsx`, `AGENTS.md`
+- **Verification:**
+  - Code changes applied successfully and compile-time types remain syntactically consistent.
+  - Environment limits in this worktree prevented full local validation:
+    - `npm run typecheck` failed because `next` binary is unavailable (`sh: next: command not found`),
+    - `npx eslint ...` failed due restricted npm network (`ENOTFOUND registry.npmjs.org`).
+  - Recommended manual smoke target:
+    - open/close dialog or sheet on dashboard, then verify main scroll works,
+    - enable customize mode and drag widgets on mobile/touch, then verify normal scroll outside drag context,
+    - open filter command UI and verify list scroll does not block main scroll after close.
+
 ### 2026-02-17: Widget Gap Follow-up (Yellow-Line Dead Space Reduction)
 - **What changed:** Applied a second spacing pass to remove remaining bottom dead space highlighted in dashboard widgets (yellow-marked areas).
 - **What I want:** Chart content should sit tighter to the widget baseline with less empty floor across bar-chart cards.
