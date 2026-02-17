@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const { findUniqueMock } = vi.hoisted(() => ({
+// Mocks must be hoisted to be used in vi.mock
+const { findUniqueMock, getDatabaseUserIdMock } = vi.hoisted(() => ({
   findUniqueMock: vi.fn(),
+  getDatabaseUserIdMock: vi.fn(),
 }))
 
 vi.mock("@/lib/prisma", () => ({
@@ -15,7 +17,15 @@ vi.mock("@/lib/prisma", () => ({
     trade: {
       findMany: vi.fn(),
     },
+    team: {
+      findFirst: vi.fn(),
+    }
   },
+}))
+
+// Mock auth module
+vi.mock("@/server/auth", () => ({
+  getDatabaseUserId: getDatabaseUserIdMock,
 }))
 
 import { getTraderVarSummary } from "@/app/[locale]/teams/actions/user"
@@ -23,10 +33,13 @@ import { prisma } from "@/lib/prisma"
 
 const accountFindManyMock = vi.mocked(prisma.account.findMany)
 const tradeFindManyMock = vi.mocked(prisma.trade.findMany)
+const teamFindFirstMock = vi.mocked(prisma.team.findFirst)
 
 describe("getTraderVarSummary", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Mock authenticated user as the trader itself to bypass permission check
+    getDatabaseUserIdMock.mockResolvedValue("trader-1")
   })
 
   it("returns all 4 VaR values for a trader with sufficient data", async () => {
@@ -38,6 +51,8 @@ describe("getTraderVarSummary", () => {
       createdAt: new Date(Date.UTC(2026, 0, idx + 1)),
     }))
 
+    // Setup mocks
+    getDatabaseUserIdMock.mockResolvedValue("trader-1")
     findUniqueMock.mockResolvedValue({
       id: "trader-1",
     })
@@ -62,6 +77,7 @@ describe("getTraderVarSummary", () => {
       createdAt: new Date(Date.UTC(2026, 0, idx + 1)),
     }))
 
+    getDatabaseUserIdMock.mockResolvedValue("trader-2")
     findUniqueMock.mockResolvedValue({
       id: "trader-2",
     })
@@ -85,6 +101,7 @@ describe("getTraderVarSummary", () => {
       createdAt: new Date(Date.UTC(2026, 0, idx + 1)),
     }))
 
+    getDatabaseUserIdMock.mockResolvedValue("trader-3")
     findUniqueMock.mockResolvedValue({
       id: "trader-3",
     })
