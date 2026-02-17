@@ -36,6 +36,26 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Widget Gap Tightening (Chart Body + Legend Spacing)
+- **What changed:** Tightened vertical spacing in dashboard chart widgets to remove the visible bottom dead-gap (blue-marked area) and compacted donut legends.
+- **What I want:** Widgets should keep chart content visually anchored with cleaner bottom spacing, while preserving all existing data/render logic.
+- **What I don't want:** Empty-looking bands under chart plots/labels, or oversized legend blocks creating visual imbalance in donut widgets.
+- **How we fixed that:**
+  - Reduced chart body padding for affected widgets:
+    - `pnl-bar-chart`, `pnl-time-bar-chart`, `time-in-position`, `tick-distribution`, `trade-distribution`, `commissions-pnl`.
+  - Reduced X-axis vertical footprint on key bar charts:
+    - lowered `XAxis` `height` and `tickMargin` in day/hour/time/tick charts.
+  - Reduced bottom chart margins where previously oversized:
+    - tightened `BarChart` `margin.bottom` in `time-in-position` and `tick-distribution`.
+  - Compact legend stack spacing for donut widgets:
+    - reduced `gap`, `pt`, `pb` in `trade-distribution` and `commissions-pnl`.
+- **Key Files:** `app/[locale]/dashboard/components/charts/pnl-bar-chart.tsx`, `app/[locale]/dashboard/components/charts/pnl-time-bar-chart.tsx`, `app/[locale]/dashboard/components/charts/time-in-position.tsx`, `app/[locale]/dashboard/components/charts/tick-distribution.tsx`, `app/[locale]/dashboard/components/charts/trade-distribution.tsx`, `app/[locale]/dashboard/components/charts/commissions-pnl.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual target:
+    - `/dashboard?tab=widgets` shows reduced bottom gaps in affected chart cards,
+    - donut legends sit tighter with less dead space.
+
 ### 2026-02-17: Emergency Widget Rendering Hotfix (NaN + Chart Surface Contract)
 - **What changed:** Applied an emergency end-to-end widget recovery patch to address blank chart panels with visible trade counts and `Average Loss = NaN`.
 - **What I want:** Dashboard widgets should reliably render charts and statistics from cached/server trade data, even after stale client cache states.

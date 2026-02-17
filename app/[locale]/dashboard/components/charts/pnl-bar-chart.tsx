@@ -182,7 +182,7 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === "small" ? "p-1" : "p-2 sm:p-3",
+          size === "small" ? "p-0.5" : "p-1 sm:p-2",
         )}
       >
         <div className={cn("w-full h-full")}>
@@ -198,8 +198,8 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                   dataKey="date"
                   tickLine={false}
                   axisLine={false}
-                  height={size === "small" ? 20 : 24}
-                  tickMargin={size === "small" ? 4 : 8}
+                  height={size === "small" ? 18 : 22}
+                  tickMargin={size === "small" ? 2 : 6}
                   tick={{
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",
