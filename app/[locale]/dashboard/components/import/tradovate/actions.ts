@@ -353,21 +353,7 @@ async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<an
           fills.push(...batchResults.filter(fill => fill !== null))
         }
       } catch (batchError) {
-        logger.warn(`Batch fills request error, falling back to individual requests for batch:`, batchError)
-        // Fallback to individual requests for this batch
-        const batchPromises = batch.map(async (fillId) => {
-          try {
-            // This is going to spam API calls so we don't do it
-            // const fill = await getFillById(accessToken, fillId)
-            return null
-          } catch (error) {
-            logger.warn(`Failed to fetch fill ${fillId}:`, error)
-            return null
-          }
-        })
-
-        const batchResults = await Promise.all(batchPromises)
-        fills.push(...batchResults.filter(fill => fill !== null))
+        logger.warn(`Batch fills request error. Skipping individual fallbacks to prevent API rate limiting. Error:`, batchError)
       }
 
       // Small delay between batches to respect rate limits
@@ -439,21 +425,7 @@ async function getOrdersByIds(accessToken: string, orderIds: number[]): Promise<
             orders.push(...batchOrders)
           }
         } else {
-          logger.warn(`Batch orders request failed (${response.status}), falling back to individual requests for batch`)
-          // Fallback to individual requests for this batch
-          const batchPromises = batch.map(async (orderId) => {
-            try {
-              // This is going to spam API calls so we don't do it
-              // const order = await getOrderById(accessToken, orderId)
-              return null
-            } catch (error) {
-              logger.warn(`Failed to fetch order ${orderId}:`, error)
-              return null
-            }
-          })
-
-          const batchResults = await Promise.all(batchPromises)
-          orders.push(...batchResults.filter(order => order !== null))
+          logger.warn(`Batch orders request failed (${response.status}). Skipping individual fallbacks to prevent API rate limiting.`)
         }
       } catch (batchError) {
         logger.warn(`Batch orders request error, falling back to individual requests for batch:`, batchError)
