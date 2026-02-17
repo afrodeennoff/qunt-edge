@@ -36,6 +36,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Widget Gap Root-Cause Fix (Bottom Padding Strip Removal)
+- **What changed:** Removed residual chart-body bottom padding that still rendered as a visible horizontal strip at the base of multiple dashboard widgets.
+- **What I want:** Chart bodies should visually sit flush with card bottoms (or legend blocks) without a fake empty floor band.
+- **What I don't want:** Repeated “gap still there” regressions caused by mixed body padding conventions across chart components.
+- **How we fixed that:**
+  - Standardized chart body spacing to side/top-only padding with zero bottom padding:
+    - replaced mixed `p-*` chart body classes with `px/pt + pb-0` variants in affected chart files.
+  - Applied this across dashboard chart widgets to prevent per-widget drift:
+    - `pnl-bar`, `weekday-pnl`, `pnl-time-bar`, `pnl-by-side`, `tick-distribution`, `time-in-position`,
+    - `time-range-performance`, `contract-quantity`, `pnl-per-contract`, `pnl-per-contract-daily`,
+    - `equity-chart`, `daily-tick-target`.
+- **Key Files:** `app/[locale]/dashboard/components/charts/pnl-bar-chart.tsx`, `app/[locale]/dashboard/components/charts/weekday-pnl.tsx`, `app/[locale]/dashboard/components/charts/pnl-time-bar-chart.tsx`, `app/[locale]/dashboard/components/charts/pnl-by-side.tsx`, `app/[locale]/dashboard/components/charts/tick-distribution.tsx`, `app/[locale]/dashboard/components/charts/time-in-position.tsx`, `app/[locale]/dashboard/components/charts/time-range-performance.tsx`, `app/[locale]/dashboard/components/charts/contract-quantity.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`, `app/[locale]/dashboard/components/charts/equity-chart.tsx`, `app/[locale]/dashboard/components/charts/daily-tick-target.tsx`, `AGENTS.md`
+- **Verification:**
+  - Manual target:
+    - `/dashboard?tab=widgets` no longer shows the highlighted bottom strip gap in the affected cards.
+
 ### 2026-02-17: Full Widget Spacing Unification Pass (All Chart Cards)
 - **What changed:** Applied a full dashboard-wide spacing normalization to remaining chart widgets that still used legacy roomy axis/margin/body settings.
 - **What I want:** Every widget card should have consistent compact vertical rhythm, with no leftover bottom dead-space from mixed old/new chart spacing configurations.
