@@ -18,6 +18,7 @@ class WidgetEncryptionService {
   private ivLength = 12
   private saltLength = 16
   private tagLength = 128
+  private constantSalt = 'widget-encryption-salt-v1'
 
   private async deriveKey(
     password: string,
@@ -71,6 +72,15 @@ class WidgetEncryptionService {
       true,
       ['encrypt', 'decrypt']
     )
+  }
+
+  private async getEncryptionKey(userId: string): Promise<CryptoKey> {
+    const encoder = new TextEncoder()
+    // Pad or slice salt to ensure consistent length/format if needed,
+    // but deriveKey accepts any length salt for PBKDF2 usually.
+    // However, keeping it simple.
+    const salt = encoder.encode(this.constantSalt)
+    return this.deriveKey(userId, salt)
   }
 
   async encryptLayout(
@@ -169,35 +179,76 @@ class WidgetEncryptionService {
     }
   }
 
-  encryptSensitiveFields(widget: Widget): Widget {
+  async encryptSensitiveFields(widget: Widget, key: CryptoKey): Promise<Widget> {
     const sensitiveFields: (keyof Widget)[] = ['i']
-
     const encrypted = { ...widget }
+    const encoder = new TextEncoder()
 
     for (const field of sensitiveFields) {
       if (encrypted[field]) {
-        const value = String(encrypted[field])
-        const encoded = btoa(encodeURIComponent(value))
-          ; (encrypted as any)[field] = encoded
+        try {
+          const value = String(encrypted[field])
+          const encodedValue = encoder.encode(value)
+          const iv = crypto.getRandomValues(new Uint8Array(this.ivLength))
+
+          const ciphertext = await crypto.subtle.encrypt(
+            { name: this.algorithm, iv },
+            key,
+            encodedValue
+          )
+
+          const combined = new Uint8Array(iv.length + ciphertext.byteLength)
+          combined.set(iv)
+          combined.set(new Uint8Array(ciphertext), iv.length)
+
+          // Use btoa for storage
+          const base64 = btoa(String.fromCharCode(...combined))
+          ;(encrypted as any)[field] = base64
+        } catch (error) {
+          console.error('Field encryption failed', error)
+          // Keep original value on error to avoid data loss
+        }
       }
     }
 
     return encrypted
   }
 
-  decryptSensitiveFields(widget: Widget): Widget {
+  async decryptSensitiveFields(widget: Widget, key: CryptoKey): Promise<Widget> {
     const sensitiveFields: (keyof Widget)[] = ['i']
-
     const decrypted = { ...widget }
+    const decoder = new TextDecoder()
 
     for (const field of sensitiveFields) {
       if (decrypted[field]) {
+        const value = String(decrypted[field])
         try {
-          const value = String(decrypted[field])
-          const decoded = decodeURIComponent(atob(value))
-            ; (decrypted as any)[field] = decoded
-        } catch {
-          continue
+          // Try AES-GCM decryption
+          const combined = Uint8Array.from(atob(value), c => c.charCodeAt(0))
+
+          if (combined.length < this.ivLength) {
+            throw new Error('Invalid encrypted data length')
+          }
+
+          const iv = combined.slice(0, this.ivLength)
+          const data = combined.slice(this.ivLength)
+
+          const decryptedData = await crypto.subtle.decrypt(
+            { name: this.algorithm, iv },
+            key,
+            data
+          )
+
+          ;(decrypted as any)[field] = decoder.decode(decryptedData)
+        } catch (e) {
+          // Fallback to legacy base64 decoding
+          try {
+            const decoded = decodeURIComponent(atob(value))
+            ;(decrypted as any)[field] = decoded
+          } catch {
+            // If both fail, keep original
+            continue
+          }
         }
       }
     }
@@ -205,19 +256,27 @@ class WidgetEncryptionService {
     return decrypted
   }
 
-  encryptLayoutData(layout: DashboardLayoutWithWidgets): DashboardLayoutWithWidgets {
+  async encryptLayoutData(layout: DashboardLayoutWithWidgets): Promise<DashboardLayoutWithWidgets> {
+    const key = await this.getEncryptionKey(layout.userId)
+    const desktop = await Promise.all(layout.desktop.map(w => this.encryptSensitiveFields(w, key)))
+    const mobile = await Promise.all(layout.mobile.map(w => this.encryptSensitiveFields(w, key)))
+
     return {
       ...layout,
-      desktop: layout.desktop.map(w => this.encryptSensitiveFields(w)),
-      mobile: layout.mobile.map(w => this.encryptSensitiveFields(w))
+      desktop,
+      mobile
     }
   }
 
-  decryptLayoutData(layout: DashboardLayoutWithWidgets): DashboardLayoutWithWidgets {
+  async decryptLayoutData(layout: DashboardLayoutWithWidgets): Promise<DashboardLayoutWithWidgets> {
+    const key = await this.getEncryptionKey(layout.userId)
+    const desktop = await Promise.all(layout.desktop.map(w => this.decryptSensitiveFields(w, key)))
+    const mobile = await Promise.all(layout.mobile.map(w => this.decryptSensitiveFields(w, key)))
+
     return {
       ...layout,
-      desktop: layout.desktop.map(w => this.decryptSensitiveFields(w)),
-      mobile: layout.mobile.map(w => this.decryptSensitiveFields(w))
+      desktop,
+      mobile
     }
   }
 
