@@ -1,6 +1,5 @@
-const CACHE_NAME = 'quntedge-static-v1';
+const CACHE_NAME = 'quntedge-static-v2';
 const ASSETS_TO_CACHE = [
-    '/',
     '/manifest.json',
     '/favicon.ico',
 ];
@@ -34,6 +33,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Never cache document navigations/app shell HTML.
+    if (request.mode === 'navigate' || request.destination === 'document') {
+        return;
+    }
+
     // Skip API, Auth, and Dashboard dynamic routes - these are handled by Edge/IndexedDB
     if (
         url.pathname.startsWith('/api') ||
@@ -64,7 +68,7 @@ self.addEventListener('fetch', (event) => {
                 }
                 return response;
             }).catch(() => {
-                // Offline fallback could go here
+                return cachedResponse || Response.error();
             });
         })
     );

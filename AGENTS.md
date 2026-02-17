@@ -36,6 +36,30 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Blank-Page Stability Hotfix (Service Worker Cache Loop)
+- **What changed:** Fixed a production blank-page loop caused by stale service-worker cached app shell/static bundles.
+- **What I want:** Reload and route transitions should recover reliably without requiring users to close/reopen tabs.
+- **What I don't want:** Cache-first service-worker behavior serving stale HTML/chunks and trapping users in non-recovering blank screens.
+- **How we fixed that:**
+  - Disabled service-worker registration by default in production unless explicitly enabled:
+    - `NEXT_PUBLIC_ENABLE_SW=true` is now required to register `/sw.js`.
+  - Added automatic cleanup path when SW is disabled:
+    - unregisters existing service workers,
+    - deletes legacy `quntedge-static*` caches.
+  - Hardened `public/sw.js` behavior for future opt-in:
+    - bumped cache name to `quntedge-static-v2`,
+    - removed `/` from precache list,
+    - skipped all document/navigation requests from caching,
+    - ensured fetch error path returns an explicit `Response.error()`.
+- **Key Files:** `components/providers/root-providers.tsx`, `public/sw.js`, `AGENTS.md`
+- **Verification:**
+  - Logic-level verification:
+    - default production path no longer registers SW and clears stale SW/cache,
+    - SW code no longer caches app shell HTML if re-enabled intentionally.
+  - Recommended deploy smoke:
+    - open app, hard refresh twice, navigate dashboard tabs,
+    - confirm no persistent blank page after idle/reload.
+
 ### 2026-02-17: Full Widget Spacing Unification Pass (All Chart Cards)
 - **What changed:** Applied a full dashboard-wide spacing normalization to remaining chart widgets that still used legacy roomy axis/margin/body settings.
 - **What I want:** Every widget card should have consistent compact vertical rhythm, with no leftover bottom dead-space from mixed old/new chart spacing configurations.
