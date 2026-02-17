@@ -36,6 +36,28 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Full Rollback of Optimization Wave (Preserve Security Hardening)
+- **What changed:** Reverted the optimization/performance/UI wave from `0d76a1b..HEAD` back to pre-wave baseline behavior (`9ece39f`) using file-level restore, while explicitly preserving security/auth/RLS hardening files.
+- **What I want:** Remove unstable optimization changes that contributed to production/runtime regressions (including blank-page risk), while keeping backend security posture improvements intact.
+- **What I don't want:** Reintroduce insecure API/auth behavior, cron secret bypass risk, unsubscribe token weakness, or Supabase/RLS hardening regressions.
+- **How we fixed that:**
+  - Created rollback branch and checkpoint tag:
+    - branch: `codex/revert-optimization-wave`
+    - tag: `rollback-pre-opt-wave-20260217-0938`
+  - Built rollback manifest from commit window `0d76a1b..HEAD` and restored non-security files to `9ece39f`.
+  - Preserved security file set from protected commits (`649615e`, `a1b5dee`, `a8b57f9`, `22b5645`) and validated none of these files changed after rollback.
+  - Removed optimization-era artifacts/scripts/routes introduced by the wave where absent in baseline:
+    - perf/bundle artifact docs,
+    - perf-quality workflow files,
+    - optimization helper scripts.
+  - Corrected baseline wiring break found during verification by restoring `app/[locale]/dashboard/page.tsx` to `9ece39f` behavior and keeping `scripts/ensure-next-type-stubs.mjs` for current `typecheck` script compatibility.
+- **Key Files:** `next.config.ts`, `app/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/layout.tsx`, `components/ui/unified-sidebar.tsx`, `proxy.ts`, `server/authz.ts`, `app/api/_utils/validate.ts`, `lib/supabase.ts`, `lib/supabase/route-client.ts`, `lib/unsubscribe-token.ts`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm test` -> exits `0` (`88 passed | 46 skipped`).
+  - `npm run build` -> fails in this environment due blocked DNS/network fetch to `fonts.googleapis.com` (`next/font` Google fetch), not due rollback compile wiring after page fix.
+  - Security-preservation check confirms `0` drift in protected file allowlist after rollback application.
+
 ### 2026-02-17: Next.js Optimization Audit (Current Main Baseline)
 - **What changed:** Ran a full optimization audit on current `main` using build, route-budget, bundle-summary, lint/typecheck, and configuration/middleware inspection.
 - **What I want:** A verifiable baseline for launch-readiness decisions with clear P0/P1 blockers and measurable optimization priorities.
