@@ -18,6 +18,7 @@ export function ScrollLockFix() {
     const normalizeScrollStyles = () => {
       const body = document.body;
       const html = document.documentElement;
+      const overlayOpen = hasOpenOverlay();
 
       [body, html].forEach((element) => {
         if (element.style.paddingRight !== "0px") {
@@ -25,6 +26,15 @@ export function ScrollLockFix() {
         }
         if (element.style.marginRight !== "0px") {
           element.style.setProperty("margin-right", "0", "important");
+        }
+
+        // Chrome may keep stale lock styles after modal close.
+        if (!overlayOpen) {
+          element.style.removeProperty("overflow");
+          element.style.removeProperty("overflow-y");
+          element.style.removeProperty("overflow-x");
+          element.style.removeProperty("pointer-events");
+          element.style.removeProperty("touch-action");
         }
       });
 
@@ -56,8 +66,26 @@ export function ScrollLockFix() {
       attributeFilter: ["style", "class"],
     });
 
+    const onFocus = () => cleanupScrollLock();
+    const onPageShow = () => cleanupScrollLock();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        cleanupScrollLock();
+      }
+    };
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("pageshow", onPageShow);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const intervalId = window.setInterval(cleanupScrollLock, 1500);
+
     return () => {
       observer.disconnect();
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.clearInterval(intervalId);
     };
   }, []);
 

@@ -1841,3 +1841,50 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Kept rollback as one coherent changeset to simplify review and recovery if needed.
 - **Key Files:** `app/[locale]/dashboard/**`, `components/providers/**`, `components/ui/**`, `context/data-provider.tsx`, `next.config.ts`, `proxy.ts`, `scripts/**`, `.github/workflows/**`, `AGENTS.md`
 - **Verification:** `npm run typecheck` after rollback snapshot.
+
+### 2026-02-17: Full Project Understanding Pass (Architecture + Runtime Flow)
+- **What changed:** Completed a repository-wide architecture/read-flow pass to build a current, code-grounded system model across routing, auth, data, security, state, and feature surfaces.
+- **What I want:** Enable fast, accurate follow-up implementation by documenting how the app actually works today instead of relying on stale assumptions.
+- **What I don't want:** Future changes made with partial context (especially around locale middleware, Supabase auth/session flow, CSP nonce propagation, and dashboard data caching boundaries).
+- **How we fixed that:**
+  - Reviewed runtime entry points and platform config:
+    - `package.json` scripts/dependencies,
+    - `next.config.ts` runtime/build/cache/image/security headers,
+    - root/middleware flow in `app/layout.tsx` and `proxy.ts`.
+  - Mapped auth + authorization boundaries:
+    - Supabase server/browser/route clients (`server/auth.ts`, `lib/supabase.ts`, `lib/supabase/route-client.ts`),
+    - authorization helpers (`server/authz.ts`) for admin/user/service access.
+  - Mapped data model + server data layer:
+    - Prisma schema and key entities (`prisma/schema.prisma`),
+    - user/dashboard data access and cache tiers (`server/user-data.ts`).
+  - Mapped primary product surface:
+    - locale route groups in `app/[locale]/**`,
+    - dashboard shell/tab/widget architecture (`app/[locale]/dashboard/**`),
+    - API route surface inventory (`app/api/**`),
+    - global/client state composition (`context/data-provider.tsx`, `store/**`).
+  - Captured current risk-sensitive mechanics for future work:
+    - nonce-based CSP rollout toggles (`lib/security/csp.ts` + `proxy.ts`),
+    - Supabase env fail-closed behavior in production clients,
+    - dashboard-heavy client surface with server-action mutation pattern.
+- **Key Files:** `package.json`, `next.config.ts`, `proxy.ts`, `app/layout.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/page.tsx`, `prisma/schema.prisma`, `server/user-data.ts`, `server/auth.ts`, `server/authz.ts`, `lib/supabase.ts`, `lib/supabase/route-client.ts`, `lib/security/csp.ts`, `context/data-provider.tsx`, `AGENTS.md`
+- **Verification:**
+  - Verified repo topology and route inventories via file scans (`rg --files`) across `app/[locale]`, `app/api`, `server`, `tests`, and `scripts`.
+  - Verified architecture claims against direct source reads of the key files listed above.
+
+### 2026-02-17: Sidebar Complete Audit (UI Shell + Feature Sidebars)
+- **What changed:** Ran a focused audit of the entire sidebar stack (shared primitives, unified renderer, dashboard/teams/admin/docs sidebars) and validated findings with targeted lint.
+- **What I want:** Keep navigation behavior consistent and reliable across dashboard, teams, admin, and docs while avoiding drift between authz, routing, and UI visibility logic.
+- **What I don't want:** Hidden-admin-link regressions from duplicated auth checks, dead sidebar code paths, avoidable client re-renders in sidebar effects, or long-term config divergence across sidebar variants.
+- **How we fixed that:**
+  - Inspected core sidebar primitives in `components/ui/sidebar.tsx` and `components/ui/unified-sidebar.tsx`.
+  - Audited feature wrappers:
+    - `components/sidebar/dashboard-sidebar.tsx`,
+    - `components/sidebar/aimodel-sidebar.tsx`,
+    - `app/[locale]/teams/components/teams-sidebar.tsx`,
+    - `app/[locale]/admin/components/sidebar-nav.tsx`,
+    - `components/mdx-sidebar.tsx`.
+  - Cross-checked auth/admin visibility implementation against `app/[locale]/dashboard/settings/actions.ts` and centralized authz patterns in `server/authz.ts`.
+  - Ran targeted lint on all sidebar-related files to confirm static findings.
+- **Key Files:** `components/ui/sidebar.tsx`, `components/ui/unified-sidebar.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `components/sidebar/aimodel-sidebar.tsx`, `app/[locale]/teams/components/teams-sidebar.tsx`, `app/[locale]/admin/components/sidebar-nav.tsx`, `components/mdx-sidebar.tsx`, `app/[locale]/dashboard/settings/actions.ts`, `server/authz.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint components/ui/sidebar.tsx components/ui/unified-sidebar.tsx components/sidebar/dashboard-sidebar.tsx components/sidebar/aimodel-sidebar.tsx components/mdx-sidebar.tsx app/[locale]/teams/components/teams-sidebar.tsx app/[locale]/admin/components/sidebar-nav.tsx` -> exits `0`, reports `7` warnings in `components/mdx-sidebar.tsx`.
