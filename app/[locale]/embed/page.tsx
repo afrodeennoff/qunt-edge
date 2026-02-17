@@ -263,7 +263,9 @@ export default function EmbedPage() {
                 security_storage: true
               }))
             }
-          } catch (e) {}`
+          } catch (e) {
+            console.error('Failed to set default cookie consent', e)
+          }`
           }
           </Script>
 
