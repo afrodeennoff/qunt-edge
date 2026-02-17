@@ -10,16 +10,21 @@ import { RithmicSyncNotifications } from "./components/import/rithmic/sync/rithm
 
 export default async function DashboardLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/authentication");
+    const safeLocale = locale || "en";
+    const nextPath = encodeURIComponent(`/${safeLocale}/dashboard`);
+    redirect(`/${safeLocale}/authentication?next=${nextPath}`);
   }
 
   return (
