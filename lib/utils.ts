@@ -238,3 +238,10 @@ export function generateTradeHash(trade: {
   const hashString = `${trade.userId || ''}-${trade.accountNumber || ''}-${trade.instrument || ''}-${trade.entryDate || ''}-${trade.closeDate || ''}-${trade.quantity || 0}-${trade.entryId || ''}-${trade.closeId || ''}-${trade.timeInPosition || 0}`
   return hashString
 }
+
+export function safeDivide(numerator: number, denominator: number, fallback = 0): number {
+  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
+    return fallback
+  }
+  return numerator / denominator
+}
