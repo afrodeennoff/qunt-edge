@@ -15,6 +15,21 @@ export function ScrollLockFix() {
         )
       );
 
+    const hasOpenOverlay = () =>
+      Boolean(
+        document.querySelector(
+          [
+            '[data-radix-dialog-overlay][data-state="open"]',
+            '[data-radix-dialog-content][data-state="open"]',
+            '[data-radix-alert-dialog-overlay][data-state="open"]',
+            '[data-radix-alert-dialog-content][data-state="open"]',
+            '[data-radix-popover-content][data-state="open"]',
+            '[data-radix-dropdown-menu-content][data-state="open"]',
+            '[data-radix-select-content][data-state="open"]',
+          ].join(", ")
+        )
+      );
+
     const normalizeScrollStyles = () => {
       const body = document.body;
       const html = document.documentElement;
@@ -49,6 +64,10 @@ export function ScrollLockFix() {
           element.removeAttribute("data-scroll-locked");
         });
       }
+    };
+
+    const cleanupScrollLock = () => {
+      normalizeScrollStyles();
     };
 
     normalizeScrollStyles();

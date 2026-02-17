@@ -36,6 +36,28 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Incident Recovery (Blank Page / Build Blockers)
+- **What changed:** Restored startup/build stability by fixing immediate compile/runtime blockers causing white-screen behavior.
+- **What I want:** App should compile and start consistently in local and Vercel environments without fatal startup blockers.
+- **What I don't want:** Deploy failures from missing symbols, duplicate Next edge entrypoints, or unresolved conflict artifacts passing CI.
+- **How we fixed that:**
+  - Fixed `components/scroll-lock-fix.tsx` missing helper references:
+    - added `hasOpenOverlay()` overlay-state detector,
+    - restored `cleanupScrollLock()` wrapper used by focus/pageshow/visibility handlers.
+  - Removed duplicate edge entrypoint conflict for Next 16:
+    - deleted `middleware.ts` so `proxy.ts` is the only active middleware/proxy file.
+  - Added CI guardrail:
+    - `.github/workflows/ci.yml` now fails if conflict markers are present in `app` or `components`.
+  - Verified runtime routes:
+    - `/en` renders successfully,
+    - `/en/dashboard?tab=widgets` redirects to auth (no blank page).
+- **Key Files:** `components/scroll-lock-fix.tsx`, `middleware.ts` (removed), `.github/workflows/ci.yml`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0`.
+  - Browser runtime check on `/en` and `/en/dashboard?tab=widgets` completed without fatal startup crash.
+  - Known pre-existing gap: `npm run test:smoke` fails because `scripts/smoke-http.mjs` is missing.
+
 ### 2026-02-17: Branch Consolidation (Merge-All Unified Branch)
 - **What changed:** Consolidated active local and remote feature branches into one integration branch and pushed it to origin.
 - **What I want:** A single branch with the full combined change set for unified testing/review.

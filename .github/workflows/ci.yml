@@ -27,6 +27,13 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Fail on Merge Conflict Markers
+        run: |
+          if rg -n '^(<<<<<<<|=======|>>>>>>>)' app components; then
+            echo "Merge conflict markers detected. Resolve conflicts before merge."
+            exit 1
+          fi
+
       - name: Lint
         run: npm run lint
 
