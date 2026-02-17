@@ -5,33 +5,33 @@ import { BarChart3, Brain, CalendarCheck2, Database, LayoutDashboard, ShieldChec
 
 const items = [
   {
-    title: 'Single Source Of Truth',
-    desc: 'Executions, notes, screenshots, and context in one premium workspace.',
+    title: 'Unified Trading Timeline',
+    desc: 'Merge executions, notes, and context in one source of truth across brokers and imports.',
     icon: BarChart3,
   },
   {
-    title: 'Rule-Based Scoring',
-    desc: 'Every trade is scored against your standards, not your mood.',
+    title: 'Execution Quality Scoring',
+    desc: 'Score trades against your rules, not just outcome, so discipline becomes measurable.',
     icon: Database,
   },
   {
-    title: 'AI Debrief Engine',
-    desc: 'High-signal post-session breakdowns with direct next-session priorities.',
+    title: 'AI Session Debriefs',
+    desc: 'Get concise post-session diagnostics with root-cause signals and next-session priorities.',
     icon: Brain,
   },
   {
-    title: 'Drift Detection',
-    desc: 'Catch ego-driven drift before it compounds into drawdown.',
+    title: 'Process Drift Detection',
+    desc: 'Catch emotional or sizing drift early, before it turns into multi-day damage.',
     icon: LayoutDashboard,
   },
   {
-    title: 'Coaching Loop',
-    desc: 'Convert weak patterns into enforceable interventions and measurable adherence.',
+    title: 'Structured Coaching Loop',
+    desc: 'Translate weak patterns into concrete interventions and track adherence week over week.',
     icon: CalendarCheck2,
   },
   {
-    title: 'Desk-Grade Visibility',
-    desc: 'Mentors and managers see process quality with an auditable, shared lens.',
+    title: 'Desk-Level Visibility',
+    desc: 'Give managers and mentors a consistent, auditable lens into trader process quality.',
     icon: ShieldCheck,
   },
 ]
@@ -41,10 +41,10 @@ export default function Features() {
     <section id="features" className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center sm:mb-14">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Capabilities</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Platform Capabilities</p>
           <h2 className="mt-2 text-[clamp(1.95rem,4.9vw,3.4rem)] font-semibold leading-[0.94] tracking-[-0.02em] [font-family:var(--home-display)]">
-            Built for traders
-            <span className="block text-[hsl(var(--brand-primary))]">who take standards personally</span>
+            Features built for
+            <span className="block text-[hsl(var(--brand-primary))]">process-first performance</span>
           </h2>
         </div>
 
