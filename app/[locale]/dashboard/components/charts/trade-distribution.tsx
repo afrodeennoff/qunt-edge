@@ -138,7 +138,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
       <div
         className={cn(
           'flex-1 min-h-0',
-          size === 'small' ? 'p-1' : 'p-1 sm:p-2'
+          size === 'small' ? 'px-1 pt-1 pb-0' : 'px-1 pt-1 pb-0 sm:px-2 sm:pt-2 sm:pb-0'
         )}
       >
         <div className="w-full h-full flex min-h-0 flex-col">
@@ -180,7 +180,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 </ResponsiveContainer>
               </div>
 
-              <div className="flex flex-col items-center gap-2 pb-0.5 pt-1">
+              <div className="flex flex-col items-center gap-1.5 pb-0 pt-1">
                 {chartData.map((entry) => (
                   <div
                     key={entry.name}

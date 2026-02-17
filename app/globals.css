@@ -448,7 +448,7 @@
   [data-widget-shell="true"] [data-chart-surface="v2"]>div:nth-child(2),
   [data-widget-shell="v2"] [data-chart-surface="modern"]>div:nth-child(2),
   [data-widget-shell="v2"] [data-chart-surface="v2"]>div:nth-child(2) {
-    padding: 0.25rem 0.5rem !important;
+    padding: 0 !important;
   }
 
   [data-chart-surface="modern"] .recharts-legend-wrapper,

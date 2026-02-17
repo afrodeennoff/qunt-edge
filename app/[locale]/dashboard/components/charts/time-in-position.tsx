@@ -175,8 +175,8 @@ export default function TimeInPositionChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 12 }
-                    : { left: 0, right: 0, top: 6, bottom: 16 }
+                    ? { left: 0, right: 0, top: 4, bottom: 6 }
+                    : { left: 0, right: 0, top: 6, bottom: 10 }
                 }
               >
                 <CartesianGrid
@@ -188,8 +188,8 @@ export default function TimeInPositionChart({
                   dataKey="hour"
                   tickLine={false}
                   axisLine={false}
-                  height={size === "small" ? 18 : 22}
-                  tickMargin={size === "small" ? 2 : 6}
+                  height={size === "small" ? 16 : 18}
+                  tickMargin={size === "small" ? 0 : 2}
                   tick={{
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",

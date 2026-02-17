@@ -36,6 +36,30 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Definitive Widget Bottom-Gap Fix (Yellow-Marked Dead Space)
+- **What changed:** Removed the persistent lower dead-space strip visible under dashboard charts/donut widgets (the yellow-marked area).
+- **What I want:** Chart and donut widgets should sit visually tight to the card floor with no extra unused band under axis labels/legends.
+- **What I don't want:** Repeated regressions from mixed spacing controls (global chart-surface padding + per-widget padding/margins) creating stacked bottom whitespace.
+- **How we fixed that:**
+  - Removed global duplicate chart-body padding:
+    - `app/globals.css` chart-surface body normalization (`> div:nth-child(2)`) now uses `padding: 0 !important`.
+  - Tightened bottom axis reserve on highlighted widgets:
+    - reduced `BarChart margin.bottom` and `XAxis height/tickMargin` in:
+      - `pnl-by-side`,
+      - `tick-distribution`,
+      - `time-in-position`,
+      - `pnl-time-bar`,
+      - `pnl-bar`.
+  - Tightened donut body/legend bottom spacing:
+    - `trade-distribution`,
+    - `commissions-pnl`
+    now use explicit `pb-0` body classes and compact legend gaps.
+- **Key Files:** `app/globals.css`, `app/[locale]/dashboard/components/charts/pnl-bar-chart.tsx`, `app/[locale]/dashboard/components/charts/pnl-time-bar-chart.tsx`, `app/[locale]/dashboard/components/charts/pnl-by-side.tsx`, `app/[locale]/dashboard/components/charts/tick-distribution.tsx`, `app/[locale]/dashboard/components/charts/time-in-position.tsx`, `app/[locale]/dashboard/components/charts/trade-distribution.tsx`, `app/[locale]/dashboard/components/charts/commissions-pnl.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual target:
+    - `/dashboard?tab=widgets` no longer shows the yellow-marked lower gap on the listed cards.
+
 ### 2026-02-17: Incident Recovery (Blank Page / Build Blockers)
 - **What changed:** Restored startup/build stability by fixing immediate compile/runtime blockers causing white-screen behavior.
 - **What I want:** App should compile and start consistently in local and Vercel environments without fatal startup blockers.

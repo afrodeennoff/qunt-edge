@@ -198,8 +198,8 @@ export default function PnLBySideChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 10 }
-                    : { left: 0, right: 0, top: 6, bottom: 14 }
+                    ? { left: 0, right: 0, top: 4, bottom: 6 }
+                    : { left: 0, right: 0, top: 6, bottom: 8 }
                 }
               >
                 <CartesianGrid
@@ -211,8 +211,8 @@ export default function PnLBySideChart({
                   dataKey="side"
                   tickLine={false}
                   axisLine={false}
-                  height={size === "small" ? 18 : 22}
-                  tickMargin={size === "small" ? 2 : 6}
+                  height={size === "small" ? 16 : 18}
+                  tickMargin={size === "small" ? 0 : 2}
                   tick={{
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",

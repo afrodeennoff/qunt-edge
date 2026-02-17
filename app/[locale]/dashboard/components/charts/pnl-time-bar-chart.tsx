@@ -207,8 +207,8 @@ export default function TimeOfDayTradeChart({
                   dataKey="hour"
                   tickLine={false}
                   axisLine={false}
-                  height={size === "small" ? 18 : 22}
-                  tickMargin={size === "small" ? 2 : 6}
+                  height={size === "small" ? 16 : 18}
+                  tickMargin={size === "small" ? 0 : 2}
                   tick={{
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",

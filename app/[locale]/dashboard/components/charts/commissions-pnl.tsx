@@ -166,7 +166,7 @@ export default function CommissionsPnLChart({
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === 'small' ? "p-0.5" : "p-1 sm:p-2"
+          size === 'small' ? "px-1 pt-1 pb-0" : "px-1 pt-1 pb-0 sm:px-2 sm:pt-2 sm:pb-0"
         )}
       >
         <div className="w-full h-full flex min-h-0 flex-col">
@@ -208,7 +208,7 @@ export default function CommissionsPnLChart({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex flex-col items-center gap-2 pb-0.5 pt-1">
+              <div className="flex flex-col items-center gap-1.5 pb-0 pt-1">
                 <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-white/58">
                   <span className="h-3 w-3 rounded-full bg-white" />
                   {t("commissions.legend.netPnl")}
