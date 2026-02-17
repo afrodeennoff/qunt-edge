@@ -10,7 +10,7 @@ const outputFilePath = path.join(__dirname, '../public/routes.json')
 // Directories to skip entirely
 const SKIP_DIRS = new Set(['api', 'admin', 'components', 'utils', 'styles'])
 
-function normalizeSegment(segment: string): string {
+function normalizeSegment(segment) {
   // Remove route group parentheses: (landing) -> empty string (skip in URL)
   if (segment.startsWith('(') && segment.endsWith(')')) {
     return '' // Route groups don't appear in URLs
@@ -18,9 +18,9 @@ function normalizeSegment(segment: string): string {
   return segment
 }
 
-function collectRoutes(dir: string, relativeParts: string[] = []): string[] {
+function collectRoutes(dir, relativeParts = []) {
   const entries = fs.readdirSync(dir, { withFileTypes: true })
-  const routes: string[] = []
+  const routes = []
 
   // Skip unwanted directories
   const currentName = path.basename(dir)
