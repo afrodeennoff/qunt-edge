@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 1, y: 0 },
   show: {
     opacity: 1,
     y: 0,
@@ -37,7 +37,7 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto max-w-6xl">
         <motion.div
-          initial={shouldAnimate ? "hidden" : false}
+          initial={false}
           animate={shouldAnimate ? "show" : undefined}
           variants={shouldAnimate ? { show: { transition: { staggerChildren: 0.1 } } } : undefined}
         >

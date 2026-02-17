@@ -1544,3 +1544,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run typecheck` -> exits `0`.
   - `npm run build` -> exits `0` with full route generation.
   - `curl -sS http://localhost:3000/en` after change shows normal rendered marketing markup and no root bailout stack referencing `ScrollLockFixLazy`.
+
+### 2026-02-17: Home Above-the-Fold Visibility Hardening (SSR-Safe Motion Defaults)
+- **What changed:** Hardened homepage above-the-fold rendering so critical hero/navigation content is visible directly from SSR markup even if client hydration or animation runtime is delayed.
+- **What I want:** Users should always see immediate homepage content (headline, CTA, top nav) instead of a visually blank first screen.
+- **What I don't want:** Framer Motion `initial` hidden states at first paint making the hero/nav appear blank whenever hydration is blocked/slow or a client-side error interrupts animations.
+- **How we fixed that:**
+  - Updated `app/[locale]/(home)/components/Hero.tsx` so the hero stagger variant no longer starts hidden on SSR (`hidden` now resolves to visible values).
+  - Forced the hero motion container to use `initial={false}` so first paint is server-visible instead of animation-hidden.
+  - Updated `app/[locale]/(landing)/components/navbar.tsx` to use `initial={false}` and avoid first-paint hidden navigation.
+  - Re-validated SSR HTML for `/en` and confirmed hero/title/CTA are emitted with `opacity:1`/`transform:none` in server markup.
+- **Key Files:** `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(landing)/components/navbar.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `curl -sS http://localhost:3000/en` shows hero text (`Grow the trader`) and CTA visible in SSR HTML styles (`opacity:1`).
