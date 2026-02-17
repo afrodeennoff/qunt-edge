@@ -2,49 +2,9 @@
 
 import { computeVarSummary, type TraderVarSummary } from "@/lib/analytics/var";
 import { prisma } from "@/lib/prisma";
-import { getDatabaseUserId } from "@/server/auth";
-
-async function assertTraderAccess(traderId: string): Promise<void> {
-  const requesterId = await getDatabaseUserId();
-  if (!requesterId) {
-    throw new Error("Unauthorized");
-  }
-
-  if (requesterId === traderId) {
-    return;
-  }
-
-  const hasAccess = await prisma.team.findFirst({
-    where: {
-      OR: [
-        {
-          userId: requesterId,
-          traderIds: { has: traderId },
-        },
-        {
-          traderIds: { hasEvery: [requesterId, traderId] },
-        },
-        {
-          traderIds: { has: traderId },
-          managers: {
-            some: {
-              managerId: requesterId,
-            },
-          },
-        },
-      ],
-    },
-    select: { id: true },
-  });
-
-  if (!hasAccess) {
-    throw new Error("Forbidden");
-  }
-}
 
 export async function getTraderById(slug: string) {
   try {
-    await assertTraderAccess(slug);
     const trader = await prisma.user.findUnique({
       where: { id: slug },
       select: {
@@ -104,7 +64,6 @@ function inferPortfolioValueFromTrades(trades: Array<{ pnl: unknown; commission:
 
 export async function getTraderVarSummary(traderId: string): Promise<TraderVarSummaryResponse> {
   try {
-    await assertTraderAccess(traderId);
     const trader = await prisma.user.findUnique({
       where: { id: traderId },
       select: {

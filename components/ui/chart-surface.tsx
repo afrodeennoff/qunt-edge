@@ -71,19 +71,14 @@ export function ChartSurface({
 
   return (
     <div
-      data-chart-surface="modern"
-      data-chart-surface-layout={hasHeader ? "standard" : "custom"}
-      className={cn(
-        "h-full flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-border/55 bg-[hsl(var(--surface-1))] shadow-[var(--shadow-sm)]",
-        className
-      )}
+      data-chart-surface="v2"
+      className={cn("h-full flex flex-col bg-transparent", className)}
     >
       {hasHeader && (
         <div
-          data-chart-surface-header="true"
           className={cn(
-            "flex flex-col items-stretch space-y-0 border-b border-border/50 shrink-0",
-            isSmall ? "p-2 h-10 justify-center" : "p-3 h-12 justify-center",
+            "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+            isSmall ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
             headerClassName
           )}
         >
@@ -109,9 +104,8 @@ export function ChartSurface({
         </div>
       )}
       <div
-        data-chart-surface-body="true"
         className={cn(
-          "flex flex-col flex-1 min-h-0",
+          "flex-1 min-h-0",
           shouldPadBody ? (isSmall ? "p-1" : "p-2 sm:p-3") : "p-0",
           bodyClassName
         )}

@@ -25,7 +25,7 @@ import { Trade } from "@/lib/data-types";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { useI18n } from "@/locales/client";
 import { formatInTimeZone } from "date-fns-tz";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -63,35 +63,28 @@ export default function ContractQuantityChart({
 
     // Sum up quantities for each hour in UTC
     trades.forEach((trade: Trade) => {
-      const entryDate = new Date(trade.entryDate);
-      if (Number.isNaN(entryDate.getTime())) return;
-
-      const hour = formatInTimeZone(entryDate, "UTC", "H");
-      if (!(hour in hourlyData)) return;
-
-      const quantity = toFiniteNumber(trade.quantity, 0);
-      if (!Number.isFinite(quantity)) return;
-
-      hourlyData[hour].totalQuantity += quantity;
+      const hour = formatInTimeZone(new Date(trade.entryDate), "UTC", "H");
+      hourlyData[hour].totalQuantity += Number(trade.quantity);
       hourlyData[hour].count++;
     });
 
     // Convert to array format for Recharts
     return Object.entries(hourlyData)
       .map(([hour, data]) => ({
-        hour: toFiniteNumber(hour, 0),
-        totalQuantity: toFiniteNumber(data.totalQuantity, 0),
+        hour: parseInt(hour),
+        totalQuantity: data.totalQuantity,
         tradeCount: data.count,
       }))
       .sort((a, b) => a.hour - b.hour);
   }, [trades]);
 
-  const hasData = chartData.some(
-    (data) =>
-      Number.isFinite(data.tradeCount) &&
-      data.tradeCount> 0 &&
-      Number.isFinite(data.totalQuantity),
-  );
+  const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
+  const hasData = chartData.some((data) => data.tradeCount > 0);
+
+  const getColor = (count: number) => {
+    const intensity = Math.max(0.2, count / maxTradeCount);
+    return `hsl(var(--chart-loss) / ${intensity})`;
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -100,7 +93,7 @@ export default function ContractQuantityChart({
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
           <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
             <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${toFiniteNumber(label, 0)}:00 - ${(toFiniteNumber(label, 0) + 1) % 24}:00`}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
@@ -126,14 +119,16 @@ export default function ContractQuantityChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
-              )}>
+              )}
+            >
               {t("contracts.title")}
             </CardTitle>
             <TooltipProvider>
@@ -158,7 +153,8 @@ export default function ContractQuantityChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}>
+        )}
+      >
         <div className={cn("w-full h-full")}>
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -166,9 +162,10 @@ export default function ContractQuantityChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 8 }
-                    : { left: 0, right: 0, top: 8, bottom: 8 }
-                }>
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -184,7 +181,7 @@ export default function ContractQuantityChart({
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",
                   }}
-                  tickFormatter={(value: number) => `${toFiniteNumber(value, 0)}h`}
+                  tickFormatter={(value: number) => `${value}h`}
                   ticks={
                     size === "small"
                       ? [0, 6, 12, 18]
@@ -200,7 +197,7 @@ export default function ContractQuantityChart({
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",
                   }}
-                  tickFormatter={(value: number) => toFiniteNumber(value, 0).toFixed(0)}
+                  tickFormatter={(value: number) => value.toFixed(0)}
                 />
                 <Tooltip
                   content={<CustomTooltip />}
@@ -210,7 +207,8 @@ export default function ContractQuantityChart({
                   dataKey="totalQuantity"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out">
+                  className="transition-all duration-300 ease-in-out"
+                >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}

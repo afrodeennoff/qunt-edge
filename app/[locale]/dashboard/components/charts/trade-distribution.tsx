@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
-import { cn, toFiniteNumber } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { Info } from 'lucide-react'
 import {
@@ -39,30 +39,26 @@ interface TooltipProps {
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
   const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
   const t = useI18n()
-  const safeNbTrades = toFiniteNumber(nbTrades, 0)
-  const safeNbWin = toFiniteNumber(nbWin, 0)
-  const safeNbLoss = toFiniteNumber(nbLoss, 0)
-  const safeNbBe = toFiniteNumber(nbBe, 0)
-  const hasData = safeNbTrades> 0
+  const hasData = nbTrades > 0
 
   const chartData = React.useMemo(() => {
-    if (!safeNbTrades) return []
+    if (!nbTrades) return []
 
     const toPercent = (value: number, total: number) => {
       if (!Number.isFinite(value) || !Number.isFinite(total) || total <= 0) return 0
       return Number(((value / total) * 100).toFixed(2))
     }
 
-    const winRate = toPercent(safeNbWin, safeNbTrades)
-    const lossRate = toPercent(safeNbLoss, safeNbTrades)
+    const winRate = toPercent(nbWin, nbTrades)
+    const lossRate = toPercent(nbLoss, nbTrades)
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: safeNbWin, total: safeNbTrades }), value: winRate, color: '#FFFFFF', count: safeNbWin, total: safeNbTrades },
-      { name: t('tradeDistribution.breakevenWithCount', { count: safeNbBe, total: safeNbTrades }), value: beRate, color: '#4D4F56', count: safeNbBe, total: safeNbTrades },
-      { name: t('tradeDistribution.lossWithCount', { count: safeNbLoss, total: safeNbTrades }), value: lossRate, color: '#52525B', count: safeNbLoss, total: safeNbTrades },
+      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: '#f1f1f2', count: nbWin, total: nbTrades },
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: '#4d4f56', count: nbBe, total: nbTrades },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: '#767982', count: nbLoss, total: nbTrades },
     ]
-  }, [safeNbWin, safeNbLoss, safeNbBe, safeNbTrades, t])
+  }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
   const pieLayout = React.useMemo(() => {
     if (size === 'small') {
@@ -94,7 +90,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
             {t('tradeDistribution.tooltip.percentage')}
           </span>
-          <span className={cn('font-black text-sm tabular-nums', data.count> 0 ? 'text-white' : 'text-white/45')}>
+          <span className={cn('font-black text-sm tabular-nums', data.count > 0 ? 'text-white' : 'text-white/45')}>
             {data.value.toFixed(2)}%
           </span>
         </div>
@@ -108,14 +104,16 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
         className={cn(
           'flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0',
           size === 'small' ? 'p-2 h-10 justify-center' : 'p-3 sm:p-3.5 h-12 justify-center'
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 'line-clamp-1 font-bold tracking-tight text-white',
                 size === 'small' ? 'text-sm' : 'text-base'
-              )}>
+              )}
+            >
               {t('tradeDistribution.title')}
             </span>
             <TooltipProvider>
@@ -141,7 +139,8 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
         className={cn(
           'flex-1 min-h-0',
           size === 'small' ? 'p-1.5' : 'p-2 sm:p-3'
-        )}>
+        )}
+      >
         <div className="w-full h-full flex min-h-0 flex-col">
           {hasData ? (
             <>
@@ -158,48 +157,37 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                       dataKey="value"
                       startAngle={90}
                       endAngle={-270}
-                      stroke="rgba(0,0,0,0)">
+                      stroke="rgba(0,0,0,0)"
+                    >
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={entry.color}
-                          fillOpacity={1}
-                          stroke="none"
+                          fillOpacity={entry.color === '#f1f1f2' ? 0.95 : 1}
                           className={cn(
-                            "transition-all duration-300 ease-in-out hover:brightness-110",
-                            entry.color === "#FFFFFF" ? "chart-positive-emphasis" : "chart-negative-muted"
+                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                            entry.color === "#f1f1f2" ? "chart-positive-emphasis" : "chart-negative-muted"
                           )}
                         />
                       ))}
-                      <Label
-                        content={({ viewBox }) => {
-                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                            return (
-                              <text
-                                x={viewBox.cx}
-                                y={viewBox.cy}
-                                textAnchor="middle"
-                                dominantBaseline="central">
-                                <tspan x={viewBox.cx} dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
-                                <tspan x={viewBox.cx} dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
-                              </text>
-                            )
-                          }
-                        }}
-                      />
+                      <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
+                        <tspan x="50%" dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
+                        <tspan x="50%" dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
+                      </text>
                     </Pie>
                     <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="mx-auto flex flex-col items-start gap-2 pb-1 pt-1">
+              <div className="flex flex-col items-center gap-3 pb-1 pt-2">
                 {chartData.map((entry) => (
                   <div
                     key={entry.name}
-                    className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em]">
+                    className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em]"
+                  >
                     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span className="text-white/58 whitespace-nowrap">{entry.name}</span>
+                    <span className="text-white/58">{entry.name}</span>
                   </div>
                 ))}
               </div>

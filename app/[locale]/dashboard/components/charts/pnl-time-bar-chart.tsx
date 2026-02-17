@@ -16,7 +16,7 @@ import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -73,7 +73,7 @@ export default function TimeOfDayTradeChart({
     // Sum up PNL and count trades for each hour in user's timezone
     trades.forEach((trade: Trade) => {
       const hour = formatInTimeZone(new Date(trade.entryDate), timezone, "H");
-      hourlyData[hour].totalPnl += toFiniteNumber(trade.pnl, 0);
+      hourlyData[hour].totalPnl += Number(trade.pnl);
       hourlyData[hour].count++;
     });
 
@@ -81,13 +81,21 @@ export default function TimeOfDayTradeChart({
     return Object.entries(hourlyData)
       .map(([hour, data]) => ({
         hour: parseInt(hour),
-        avgPnl: data.count> 0 ? data.totalPnl / data.count : 0,
+        avgPnl: data.count > 0 ? data.totalPnl / data.count : 0,
         tradeCount: data.count,
       }))
       .sort((a, b) => a.hour - b.hour);
   }, [trades, timezone]);
 
-  const hasData = chartData.some((data) => data.tradeCount> 0);
+  const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
+  const maxPnL = Math.max(...chartData.map((data) => data.avgPnl));
+  const minPnL = Math.min(...chartData.map((data) => data.avgPnl));
+  const hasData = chartData.some((data) => data.tradeCount > 0);
+
+  const getColor = (count: number) => {
+    const intensity = Math.max(0.2, count / maxTradeCount);
+    return `hsl(var(--chart-4) / ${intensity})`;
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     React.useEffect(() => {
@@ -100,19 +108,18 @@ export default function TimeOfDayTradeChart({
 
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const hourLabel = toFiniteNumber(label, 0);
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
           <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
             <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.time")}</span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${hourLabel}:00 - ${(hourLabel + 1) % 24}:00`}</span>
+            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlTime.tooltip.averagePnl")}</span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.avgPnl>= 0 ? "metric-positive" : "metric-negative"
+                data.avgPnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.avgPnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -134,14 +141,16 @@ export default function TimeOfDayTradeChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
-              )}>
+              )}
+            >
               {t("pnlTime.title")}
             </span>
             <TooltipProvider>
@@ -165,7 +174,8 @@ export default function TimeOfDayTradeChart({
               variant="ghost"
               size="sm"
               className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-white/40 hover:text-white hover:bg-white/5"
-              onClick={() => setHourFilter({ hour: null })}>
+              onClick={() => setHourFilter({ hour: null })}
+            >
               {t("pnlTime.clearFilter")}
             </Button>
           )}
@@ -175,7 +185,8 @@ export default function TimeOfDayTradeChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}>
+        )}
+      >
         <div className="w-full h-full cursor-pointer" onClick={handleClick}>
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -183,9 +194,10 @@ export default function TimeOfDayTradeChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 8 }
-                    : { left: 0, right: 0, top: 8, bottom: 8 }
-                }>
+                    ? { left: 0, right: 0, top: 4, bottom: 0 }
+                    : { left: 0, right: 0, top: 8, bottom: 0 }
+                }
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -227,22 +239,30 @@ export default function TimeOfDayTradeChart({
                   dataKey="avgPnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out">
+                  className="transition-all duration-300 ease-in-out"
+                >
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.hour}`}
-                      fill={entry.avgPnl>= 0 ? "white" : "#52525B"}
+                      fill="white"
                       fillOpacity={
                         hourFilter.hour === entry.hour
                           ? 1
                           : hourFilter.hour !== null
-                            ? 0.3
-                            : 1
+                            ? 0.15
+                            : (entry.avgPnl >= 0 ? 0.98 : 0.22)
                       }
-                      stroke="none"
+                      stroke="white"
+                      strokeOpacity={
+                        hourFilter.hour === entry.hour
+                          ? 0.8
+                          : hourFilter.hour !== null
+                            ? 0.1
+                            : (entry.avgPnl >= 0 ? 0.42 : 0.06)
+                      }
                       className={cn(
-                        "hover:brightness-110 transition-all duration-300",
-                        entry.avgPnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

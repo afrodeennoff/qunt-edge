@@ -5,7 +5,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Plus, Upload, Send, StopCircle, X, Image as ImageIcon, Link, FileText, Table } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
-import Image from "next/image"
 
 // Helper function to convert files to data URLs
 async function convertFilesToDataURLs(files: FileList) {
@@ -326,13 +325,10 @@ export function ChatInput({
             <div key={index} className="relative group">
               <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border bg-muted/50 flex items-center justify-center">
                 {file.mediaType.startsWith('image/') ? (
-                  <Image
+                  <img
                     src={file.url}
                     alt={`attachment-${index}`}
                     className="w-full h-full object-cover"
-                    width={64}
-                    height={64}
-                    unoptimized
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground">

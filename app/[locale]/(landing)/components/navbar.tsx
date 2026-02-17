@@ -26,7 +26,6 @@ export default function Navbar() {
   const pathname = usePathname()
   const locale = useCurrentLocale()
   const isMobile = useIsMobile()
-  const motionEnabled = process.env.NEXT_PUBLIC_ENABLE_MARKETING_MOTION === 'true'
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -48,9 +47,9 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <motion.div
-        initial={false}
-        animate={motionEnabled && !isMobile ? { opacity: 1, y: 0 } : undefined}
-        transition={motionEnabled && !isMobile ? { duration: 0.65, ease: [0.22, 1, 0.36, 1] } : undefined}
+        initial={isMobile ? false : { opacity: 0, y: -18 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
+        transition={isMobile ? undefined : { duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto w-full max-w-[1240px] px-4 pt-4 sm:px-6"
       >
         <motion.div
@@ -59,8 +58,8 @@ export default function Navbar() {
             'border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface)/0.62)] backdrop-blur-md sm:backdrop-blur-xl',
             scrolled ? 'shadow-[0_18px_32px_-24px_hsl(var(--brand-ink)/0.8)] sm:shadow-[0_24px_44px_-30px_hsl(var(--brand-ink)/0.85)]' : ''
           )}
-          whileHover={motionEnabled && !isMobile ? { y: -1 } : undefined}
-          transition={motionEnabled && !isMobile ? { duration: 0.2 } : undefined}
+          whileHover={isMobile ? undefined : { y: -1 }}
+          transition={isMobile ? undefined : { duration: 0.2 }}
         >
           <Link href={`/${locale}`} className="flex items-center gap-2 rounded-full px-2 py-1.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-surface-muted)/0.85)]">
@@ -71,7 +70,7 @@ export default function Navbar() {
 
           <nav className="mx-auto hidden items-center gap-1 lg:flex">
             {LINKS.map((link) => (
-              <motion.div key={link.href} whileHover={motionEnabled && !isMobile ? { y: -1 } : undefined} transition={motionEnabled && !isMobile ? { duration: 0.2 } : undefined}>
+              <motion.div key={link.href} whileHover={isMobile ? undefined : { y: -1 }} transition={isMobile ? undefined : { duration: 0.2 }}>
                 <Link
                   key={link.href}
                   href={`/${locale}${link.href}`}

@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
 import {
@@ -57,10 +57,10 @@ const chartConfig = {
 
 const formatCurrency = (value: number) => {
   const absValue = Math.abs(value);
-  if (absValue>= 1000000) {
+  if (absValue >= 1000000) {
     return `${value < 0 ? "-" : ""}$${(absValue / 1000000).toFixed(1)}M`;
   }
-  if (absValue>= 1000) {
+  if (absValue >= 1000) {
     return `${value < 0 ? "-" : ""}$${(absValue / 1000).toFixed(1)}k`;
   }
   return `${value < 0 ? "-" : ""}$${absValue.toFixed(0)}`;
@@ -87,7 +87,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
         </p>
         <div className="flex justify-between items-center mb-2">
           <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnl.tooltip.pnl")}</span>
-          <span className={cn("font-black text-sm tabular-nums", data.pnl>= 0 ? "metric-positive" : "metric-negative")}>
+          <span className={cn("font-black text-sm tabular-nums", data.pnl >= 0 ? "metric-positive" : "metric-negative")}>
             {formatCurrency(data.pnl)}
           </span>
         </div>
@@ -119,9 +119,9 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
       Object.entries(calendarData)
         .map(([date, values]) => ({
           date,
-          pnl: toFiniteNumber(values.pnl, 0),
-          shortNumber: toFiniteNumber(values.shortNumber, 0),
-          longNumber: toFiniteNumber(values.longNumber, 0),
+          pnl: values.pnl,
+          shortNumber: values.shortNumber,
+          longNumber: values.longNumber,
         }))
         .sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -129,17 +129,17 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
     [calendarData],
   );
   const hasData = chartData.some(
-    (entry) => (entry.shortNumber || 0) + (entry.longNumber || 0)> 0,
+    (entry) => (entry.shortNumber || 0) + (entry.longNumber || 0) > 0,
   );
 
   const getChartMargins = () => {
     switch (size) {
       case "small":
-        return { left: 0, right: 0, top: 4, bottom: 8 };
+        return { left: 0, right: 0, top: 4, bottom: 0 };
       case "medium":
       case "large":
       default:
-        return { left: 0, right: 0, top: 8, bottom: 8 };
+        return { left: 0, right: 0, top: 8, bottom: 0 };
     }
   };
 
@@ -149,14 +149,16 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
-              )}>
+              )}
+            >
               {t("pnl.title")}
             </span>
             <TooltipProvider>
@@ -181,7 +183,8 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}>
+        )}
+      >
         <div className={cn("w-full h-full")}>
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -228,16 +231,19 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                   dataKey="pnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out">
+                  className="transition-all duration-300 ease-in-out"
+                >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.pnl>= 0 ? "white" : "#52525B"}
-                      fillOpacity={1}
-                      stroke="none"
+                      fill={entry.pnl >= 0 ? positiveColor : negativeColor}
+                      fillOpacity={entry.pnl >= 0 ? 0.98 : 0.24}
+                      stroke="white"
+                      strokeOpacity={entry.pnl >= 0 ? 0.42 : 0.06}
+                      strokeWidth={1}
                       className={cn(
-                        "hover:brightness-110 transition-all duration-300",
-                        entry.pnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

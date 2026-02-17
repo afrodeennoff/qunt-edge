@@ -215,22 +215,13 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
 }
 
 export async function getDashboardLayout(userId: string): Promise<DashboardLayout | null> {
+  console.log('getDashboardLayout')
   try {
-    const getCachedDashboardLayout = unstable_cache(
-      async (targetUserId: string) =>
-        prisma.dashboardLayout.findUnique({
-          where: {
-            userId: targetUserId
-          }
-        }),
-      [`dashboard-layout-${userId}`],
-      {
-        tags: [`dashboard-${userId}`],
-        revalidate: 120,
+    const layout = await prisma.dashboardLayout.findUnique({
+      where: {
+        userId: userId  // Correct, as DashboardLayout.userId is linked to auth_user_id
       }
-    )
-
-    const layout = await getCachedDashboardLayout(userId)
+    })
 
     if (!layout) return null
 

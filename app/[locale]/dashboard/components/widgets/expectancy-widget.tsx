@@ -15,7 +15,6 @@ export default function ExpectancyWidget({ size }: { size?: string }) {
 
     const { expectancy } = React.useMemo(() => calculateAdvancedMetrics(trades as any), [trades])
     const hasData = (trades?.length ?? 0) > 0
-    const isCompact = size === "small" || size === "small-long"
 
     const formattedExpectancy = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(expectancy)
 
@@ -27,24 +26,23 @@ export default function ExpectancyWidget({ size }: { size?: string }) {
             state={hasData ? "ready" : "empty"}
             emptyMessage={(t as any)("widgets.emptyState") ?? "No trades yet."}
         >
-            <div className={cn("flex-1 flex flex-col items-center justify-center", isCompact ? "p-3" : "p-4")}>
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
                 <div className="flex flex-col items-center justify-center">
-                    <span className={cn("text-[11px] font-medium tracking-tight text-secondary-token", isCompact ? "mb-2" : "mb-3")}>Value per trade</span>
+                    <span className="text-[11px] font-medium tracking-tight text-fg-muted mb-3">Value per trade</span>
                     <div className={cn(
-                        "font-semibold tracking-tight tabular-nums",
-                        isCompact ? "text-3xl" : "text-4xl",
-                        expectancy > 0 ? "metric-positive" : expectancy < 0 ? "metric-negative" : "text-secondary-token"
+                        "text-4xl font-semibold tracking-tight tabular-nums",
+                        expectancy > 0 ? "metric-positive" : expectancy < 0 ? "metric-negative" : "text-fg-muted"
                     )}>
                         {expectancy > 0 ? '+' : ''}{formattedExpectancy}
                     </div>
-                    <div className={cn("flex flex-col items-center gap-1", isCompact ? "mt-3" : "mt-5")}>
+                    <div className="mt-5 flex flex-col items-center gap-1">
                         <div className={cn(
                             "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
                             expectancy > 0
                                 ? "bg-white/10 metric-positive border border-white/20"
                                 : expectancy < 0
                                     ? "bg-white/5 metric-negative border border-white/10"
-                                    : "bg-white/5 text-primary-token border border-white/10"
+                                    : "bg-white/5 text-fg-muted/50 border border-white/10"
                         )}>
                             {expectancy > 0 ? "Positive edge" : expectancy < 0 ? "Negative edge" : "Neutral"}
                         </div>

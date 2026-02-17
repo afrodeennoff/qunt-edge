@@ -5,7 +5,6 @@ import { getWhop } from "@/lib/whop";
 import { getReferralBySlug } from "@/server/referral";
 import { getSubscriptionDetails } from "@/server/subscription";
 import { createRouteClient } from "@/lib/supabase/route-client";
-import { rateLimit, createRateLimitResponse } from "@/lib/rate-limit";
 
 function safeLocale(value: string | null | undefined): string {
   const raw = (value || "").trim().toLowerCase();
@@ -14,12 +13,6 @@ function safeLocale(value: string | null | undefined): string {
   if (!/^[a-z]{2}(-[a-z]{2})?$/.test(raw)) return "en";
   return raw;
 }
-
-const checkoutRateLimiter = rateLimit({
-  identifier: "whop-checkout",
-  limit: 25,
-  window: 60_000,
-});
 
 function withLocalePrefix(locale: string, pathWithOptionalQuery: string): string {
   const normalized = `/${pathWithOptionalQuery.replace(/^\/+/, "")}`;
@@ -132,11 +125,6 @@ async function handleWhopCheckout(
 }
 
 export async function POST(req: Request) {
-  const limit = await checkoutRateLimiter(req);
-  if (!limit.success) {
-    return createRateLimitResponse(limit);
-  }
-
   const body = await req.formData();
   const websiteURL = await getWebsiteURL();
 
@@ -183,11 +171,6 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const limit = await checkoutRateLimiter(req);
-  if (!limit.success) {
-    return createRateLimitResponse(limit);
-  }
-
   const websiteURL = await getWebsiteURL();
   const { searchParams } = new URL(req.url);
   const lookupKey = searchParams.get("lookup_key");

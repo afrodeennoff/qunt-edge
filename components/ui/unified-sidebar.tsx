@@ -44,7 +44,6 @@ export interface UnifiedSidebarItem {
   badge?: React.ReactNode
   group?: string
   disabled?: boolean
-  exact?: boolean
 }
 
 export interface UnifiedSidebarConfig {
@@ -89,7 +88,7 @@ function useActiveLink() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  return (href: string, exact = false) => {
+  return (href: string) => {
     if (!pathname) return false
 
     const normalizedPathname = stripLocalePrefix(pathname)
@@ -118,11 +117,10 @@ function useActiveLink() {
       return true
     }
 
-    if (exact) {
-      return normalizedPathname === basePath
-    }
-
-    return normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`)
+    return (
+      normalizedPathname === basePath ||
+      normalizedPathname.startsWith(`${basePath}/`)
+    )
   }
 }
 
@@ -130,88 +128,48 @@ const SIDEBAR_STYLES: Record<
   UnifiedSidebarStyle,
   {
     sidebar: string
-    container: string
     header: string
     footer: string
-    logoWrap: string
-    logoIcon: string
     brandName: string
     brandSub: string
-    groupWrap: string
     userCard: string
     userName: string
     userMeta: string
     groupLabel: string
-    menuButton: string
-    menuButtonIdle: string
-    menuButtonActive: string
-    menuBadge: string
-    timezoneTrigger: string
-    footerButton: string
   }
 > = {
   minimal: {
     sidebar: "border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
-    container: "bg-[radial-gradient(420px_300px_at_0%_-10%,hsl(var(--sidebar-accent)/0.22),transparent_70%)]",
     header: "border-b border-sidebar-border/70",
     footer: "border-t border-sidebar-border/70",
-    logoWrap: "rounded-xl border border-sidebar-border/80 bg-sidebar-accent/45 shadow-[inset_0_1px_0_hsl(var(--sidebar-accent-foreground)/0.08)]",
-    logoIcon: "text-sidebar-foreground",
     brandName: "text-sidebar-foreground",
-    brandSub: "text-sidebar-foreground/55",
-    groupWrap: "rounded-xl border border-sidebar-border/60 bg-sidebar-accent/20 px-1.5 py-1",
-    userCard: "rounded-xl border border-sidebar-border/70 bg-sidebar-accent/35 p-2.5",
+    brandSub: "text-sidebar-foreground/60",
+    userCard: "rounded-md border border-sidebar-border/70 bg-sidebar-accent/40 p-2.5",
     userName: "text-sidebar-foreground",
-    userMeta: "text-sidebar-foreground/62",
-    groupLabel: "px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/55",
-    menuButton: "h-9 rounded-lg transition-all duration-150",
-    menuButtonIdle: "text-sidebar-foreground/85 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
-    menuButtonActive: "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_hsl(var(--sidebar-border)/0.8)]",
-    menuBadge: "rounded-md bg-sidebar-accent/80 text-sidebar-accent-foreground",
-    timezoneTrigger: "h-9 rounded-lg border-sidebar-border/70 bg-sidebar-accent/30",
-    footerButton: "h-9 rounded-lg text-sidebar-foreground/90 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
+    userMeta: "text-sidebar-foreground/60",
+    groupLabel: "text-sidebar-foreground/60",
   },
   glassy: {
     sidebar: "border-r border-white/10 bg-black/95 text-zinc-100 backdrop-blur-xl",
-    container: "bg-[radial-gradient(420px_320px_at_0%_-5%,rgba(255,255,255,0.14),transparent_72%)]",
     header: "border-b border-white/10",
     footer: "border-t border-white/10",
-    logoWrap: "rounded-xl border border-white/15 bg-white/[0.08]",
-    logoIcon: "text-white",
     brandName: "text-white",
     brandSub: "text-zinc-400",
-    groupWrap: "rounded-xl border border-white/10 bg-white/[0.03] px-1.5 py-1",
-    userCard: "rounded-xl border border-white/10 bg-white/5 p-2.5",
+    userCard: "rounded-md border border-white/10 bg-white/5 p-2.5",
     userName: "text-zinc-100",
     userMeta: "text-zinc-400",
-    groupLabel: "px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500",
-    menuButton: "h-9 rounded-lg transition-all duration-150",
-    menuButtonIdle: "text-zinc-200/90 hover:bg-white/10 hover:text-zinc-100",
-    menuButtonActive: "bg-white/14 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]",
-    menuBadge: "rounded-md bg-white/15 text-zinc-100",
-    timezoneTrigger: "h-9 rounded-lg border-white/10 bg-white/[0.04]",
-    footerButton: "h-9 rounded-lg text-zinc-200/90 hover:bg-white/10 hover:text-zinc-100",
+    groupLabel: "text-zinc-500",
   },
   matte: {
     sidebar: "border-r border-white/5 bg-black text-zinc-200",
-    container: "bg-[radial-gradient(420px_300px_at_0%_-10%,rgba(148,163,184,0.15),transparent_74%)]",
     header: "border-b border-white/5",
     footer: "border-t border-white/5",
-    logoWrap: "rounded-xl border border-white/10 bg-zinc-900",
-    logoIcon: "text-zinc-100",
     brandName: "text-zinc-100",
     brandSub: "text-zinc-500",
-    groupWrap: "rounded-xl border border-white/10 bg-zinc-950 px-1.5 py-1",
-    userCard: "rounded-xl border border-white/10 bg-zinc-950 p-2.5",
+    userCard: "rounded-md border border-white/10 bg-zinc-950 p-2.5",
     userName: "text-zinc-100",
     userMeta: "text-zinc-400",
-    groupLabel: "px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500",
-    menuButton: "h-9 rounded-lg transition-all duration-150",
-    menuButtonIdle: "text-zinc-300/90 hover:bg-zinc-800 hover:text-zinc-100",
-    menuButtonActive: "bg-zinc-800 text-zinc-100 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
-    menuBadge: "rounded-md bg-zinc-700 text-zinc-100",
-    timezoneTrigger: "h-9 rounded-lg border-white/10 bg-zinc-900",
-    footerButton: "h-9 rounded-lg text-zinc-300/90 hover:bg-zinc-800 hover:text-zinc-100",
+    groupLabel: "text-zinc-500",
   },
 }
 
@@ -227,16 +185,8 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const { isMobile, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
-  const routeSignature = `${pathname ?? ""}?${searchParams.toString()}`
-
-  React.useEffect(() => {
-    if (!isMobile || !openMobile) return
-    setOpenMobile(false)
-  }, [isMobile, openMobile, routeSignature, setOpenMobile])
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -258,17 +208,17 @@ export function UnifiedSidebar({
   const initials = useMemo(() => getUserInitials(user), [user])
 
   return (
-    <Sidebar collapsible="icon" className={cn(styles.sidebar, styles.container)}>
-      <SidebarHeader className={cn("h-16 flex items-center px-3", styles.header)}>
+    <Sidebar collapsible="icon" className={styles.sidebar}>
+      <SidebarHeader className={cn("h-14 flex items-center px-4", styles.header)}>
         <div className="flex items-center gap-2 w-full">
-          <div className={cn("flex size-9 shrink-0 items-center justify-center", styles.logoWrap)}>
-            <Logo className={cn("size-4.5", styles.logoIcon)} />
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-current/15 bg-current/5">
+            <Logo className="size-4.5" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <p className={cn("truncate text-sm font-semibold tracking-tight", styles.brandName)}>
               Qunt Edge
             </p>
-            <p className={cn("truncate text-[10px] uppercase tracking-[0.16em]", styles.brandSub)}>Trading Workspace</p>
+            <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
           </div>
           <SidebarTrigger
             className="ml-auto hidden h-7 w-7 md:inline-flex"
@@ -276,11 +226,11 @@ export function UnifiedSidebar({
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-3">
+      <SidebarContent className="px-2 py-2">
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
             {groupedItems.order.map((groupName) => (
-              <SidebarGroup key={groupName} className={cn("p-0", styles.groupWrap)}>
+              <SidebarGroup key={groupName} className="p-0">
                 {groupName !== "Main" && (
                   <SidebarGroupLabel className={styles.groupLabel}>
                     {groupName}
@@ -292,11 +242,7 @@ export function UnifiedSidebar({
                       const label = item.i18nKey ? translate(item.i18nKey) : item.label
                       const isItemDisabled = Boolean(item.disabled)
                       const itemIsActive =
-                        !isItemDisabled && !!item.href && isActive(item.href, item.exact)
-                      const menuButtonClass = cn(
-                        styles.menuButton,
-                        itemIsActive ? styles.menuButtonActive : styles.menuButtonIdle
-                      )
+                        !isItemDisabled && !!item.href && isActive(item.href)
 
                       return (
                         <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
@@ -305,13 +251,10 @@ export function UnifiedSidebar({
                               asChild
                               isActive={itemIsActive}
                               tooltip={label}
-                              className={menuButtonClass}
                             >
                               <Link
                                 href={item.href}
-                                prefetch={false}
                                 aria-current={itemIsActive ? "page" : undefined}
-                                aria-label={label}
                                 onClick={() => {
                                   if (isMobile) {
                                     setOpenMobile(false)
@@ -319,7 +262,7 @@ export function UnifiedSidebar({
                                 }}
                               >
                                 {item.icon}
-                                <span className={cn("truncate", itemIsActive ? "font-semibold" : "font-medium")}>{label}</span>
+                                <span>{label}</span>
                               </Link>
                             </SidebarMenuButton>
                           ) : (
@@ -327,7 +270,6 @@ export function UnifiedSidebar({
                               type="button"
                               tooltip={label}
                               disabled={isItemDisabled}
-                              className={menuButtonClass}
                               onClick={() => {
                                 item.action?.()
                                 if (isMobile) {
@@ -336,10 +278,10 @@ export function UnifiedSidebar({
                               }}
                             >
                               {item.icon}
-                              <span className="truncate font-medium">{label}</span>
+                              <span>{label}</span>
                             </SidebarMenuButton>
                           )}
-                          {item.badge ? <SidebarMenuBadge className={styles.menuBadge}>{item.badge}</SidebarMenuBadge> : null}
+                          {item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
                         </SidebarMenuItem>
                       )
                     })}
@@ -363,7 +305,7 @@ export function UnifiedSidebar({
                 <SidebarGroupContent>
                   <div className="px-2">
                     <Select value={timezone.value} onValueChange={timezone.onChange}>
-                      <SelectTrigger className={styles.timezoneTrigger}>
+                      <SelectTrigger className="h-8">
                         <div className="flex items-center gap-2 truncate">
                           <Globe className="size-3.5 text-muted-foreground" />
                           <SelectValue placeholder="Select timezone" />
@@ -415,13 +357,8 @@ export function UnifiedSidebar({
             <Button
               type="button"
               variant="ghost"
-              className={cn("w-full justify-start group-data-[collapsible=icon]:justify-center", styles.footerButton)}
-              onClick={() => {
-                if (isMobile) {
-                  setOpenMobile(false)
-                }
-                onLogout()
-              }}
+              className="w-full justify-start group-data-[collapsible=icon]:justify-center"
+              onClick={onLogout}
             >
               <LogOut className="size-4" />
               <span className="group-data-[collapsible=icon]:hidden">Logout</span>

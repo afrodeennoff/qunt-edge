@@ -15,12 +15,7 @@ interface FetchTradesResult {
   flattenedTrades: Trade[];
 }
 
-export async function fetchGroupedTradesAction(): Promise<FetchTradesResult> {
-  const userId = await getDatabaseUserId()
-  if (!userId) {
-    throw new Error('Unauthorized')
-  }
-
+export async function fetchGroupedTradesAction(userId: string): Promise<FetchTradesResult> {
   const trades = await prisma.trade.findMany({
     where: {
       userId: userId
@@ -78,21 +73,20 @@ export async function removeAccountFromTradesAction(accountNumber: string): Prom
   updateTag(`user-data-${userId}`)
 }
 
-export async function deleteInstrumentGroupAction(accountNumber: string, instrumentGroup: string): Promise<void> {
+export async function deleteInstrumentGroupAction(accountNumber: string, instrumentGroup: string, userId: string): Promise<void> {
   const currentUserId = await getDatabaseUserId()
-  if (!currentUserId) {
-    throw new Error('Unauthorized')
-  }
-
+  const effectiveUserId = currentUserId ?? userId
   await prisma.trade.deleteMany({
     where: {
       accountNumber: accountNumber,
       instrument: { startsWith: instrumentGroup },
-      userId: currentUserId
+      userId: effectiveUserId
     }
   })
-  updateTag(`trades-${currentUserId}`)
-  updateTag(`user-data-${currentUserId}`)
+  if (effectiveUserId) {
+    updateTag(`trades-${effectiveUserId}`)
+    updateTag(`user-data-${effectiveUserId}`)
+  }
 }
 
 export async function updateCommissionForGroupAction(accountNumber: string, instrumentGroup: string, newCommission: number): Promise<void> {
@@ -205,24 +199,6 @@ export async function deleteTradesByIdsAction(tradeIds: string[]): Promise<void>
 
 export async function setupAccountAction(account: Account): Promise<Account> {
   const userId = await getDatabaseUserId()
-  if (!userId) {
-    throw new Error('Unauthorized')
-  }
-
-  if (account.groupId) {
-    const ownedGroup = await prisma.group.findFirst({
-      where: {
-        id: account.groupId,
-        userId
-      },
-      select: { id: true }
-    })
-
-    if (!ownedGroup) {
-      throw new Error('Invalid group selection')
-    }
-  }
-
   const existingAccount = await prisma.account.findFirst({
     where: {
       number: account.number,
@@ -387,10 +363,6 @@ export async function savePayoutAction(payout: Payout) {
   try {
     // First find the account to get its ID
     const userId = await getDatabaseUserId()
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
     const account = await prisma.account.findFirst({
       where: {
         number: payout.accountNumber,
@@ -402,65 +374,34 @@ export async function savePayoutAction(payout: Payout) {
       throw new Error('Account not found')
     }
 
-    let result
-    if (payout.id) {
-      const existingPayout = await prisma.payout.findFirst({
-        where: {
-          id: payout.id,
-          account: {
-            userId
+    const result = await prisma.payout.upsert({
+      where: {
+        id: payout.id
+      },
+      create: {
+        id: crypto.randomUUID(),
+        accountNumber: payout.accountNumber,
+        date: payout.date,
+        amount: payout.amount,
+        status: payout.status,
+        account: {
+          connect: {
+            id: account.id
           }
-        },
-        select: { id: true }
-      })
-
-      if (existingPayout) {
-        result = await prisma.payout.update({
-          where: { id: existingPayout.id },
-          data: {
-            accountNumber: payout.accountNumber,
-            date: payout.date,
-            amount: payout.amount,
-            status: payout.status,
-            account: {
-              connect: {
-                id: account.id
-              }
-            }
-          },
-        })
-      } else {
-        result = await prisma.payout.create({
-          data: {
-            id: crypto.randomUUID(),
-            accountNumber: payout.accountNumber,
-            date: payout.date,
-            amount: payout.amount,
-            status: payout.status,
-            account: {
-              connect: {
-                id: account.id
-              }
-            }
-          },
-        })
-      }
-    } else {
-      result = await prisma.payout.create({
-        data: {
-          id: crypto.randomUUID(),
-          accountNumber: payout.accountNumber,
-          date: payout.date,
-          amount: payout.amount,
-          status: payout.status,
-          account: {
-            connect: {
-              id: account.id
-            }
+        }
+      },
+      update: {
+        accountNumber: payout.accountNumber,
+        date: payout.date,
+        amount: payout.amount,
+        status: payout.status,
+        account: {
+          connect: {
+            id: account.id
           }
-        },
-      })
-    }
+        }
+      },
+    })
     updateTag(`user-data-${userId}`)
     return result
   } catch (error) {

@@ -39,10 +39,5 @@ export async function GET() {
     latencyMs: Date.now() - startedAt,
   })
 
-  return NextResponse.json(body, {
-    status: healthy ? 200 : 503,
-    headers: {
-      "Cache-Control": "public, max-age=15, s-maxage=15, stale-while-revalidate=60",
-    },
-  })
+  return NextResponse.json(body, { status: healthy ? 200 : 503 })
 }

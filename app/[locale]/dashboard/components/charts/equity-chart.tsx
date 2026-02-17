@@ -21,7 +21,7 @@ import {
 import { formatInTimeZone } from "date-fns-tz";
 import { fr, enUS } from "date-fns/locale";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
@@ -52,7 +52,6 @@ import { Payout as PrismaPayout } from "@/prisma/generated/prisma";
 import { AccountSelectionPopover } from "./account-selection-popover";
 import { getEquityChartDataAction } from "@/server/equity-chart";
 import { usePathname } from "next/navigation";
-import { hasFiniteKeyPrefix } from "@/lib/chart-guards";
 
 interface EquityChartProps {
   size?: WidgetSize;
@@ -146,7 +145,7 @@ const renderDot = (props: any) => {
     const resetAccounts = Object.keys(payload).filter(
       (key) => key.startsWith("reset_") && payload[key]
     );
-    if (resetAccounts.length> 0) {
+    if (resetAccounts.length > 0) {
       return (
         <circle
           key={`dot-${index}-reset`}
@@ -165,7 +164,7 @@ const renderDot = (props: any) => {
     const payoutAccounts = Object.keys(payload).filter(
       (key) => key.startsWith("payout_") && payload[key]
     );
-    if (payoutAccounts.length> 0) {
+    if (payoutAccounts.length > 0) {
       const accountNumber = payoutAccounts[0].replace("payout_", "");
       const status = payload[`payoutStatus_${accountNumber}`] || "";
       const { fg } = getPayoutColors(status);
@@ -329,13 +328,13 @@ const OptimizedTooltip = React.memo(
             </span>
             <span className={cn(
               "font-black text-sm tabular-nums",
-              (data.equity || 0)>= 0 ? "metric-positive" : "metric-negative"
+              (data.equity || 0) >= 0 ? "metric-positive" : "metric-negative"
             )}>
               {formatCurrency(data.equity || 0)}
             </span>
           </div>
 
-          {resetAccounts.length> 0 && (
+          {resetAccounts.length > 0 && (
             <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
               <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
                 {t("equity.tooltip.resets")}
@@ -360,7 +359,7 @@ const OptimizedTooltip = React.memo(
             </div>
           )}
 
-          {payoutAccounts.length> 0 && (
+          {payoutAccounts.length > 0 && (
             <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
               <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
                 {t("equity.tooltip.payouts")}
@@ -390,7 +389,8 @@ const OptimizedTooltip = React.memo(
                         style={{
                           backgroundColor: getPayoutColors(status).bg,
                           color: getPayoutColors(status).fg,
-                        }}>
+                        }}
+                      >
                         {status}
                       </span>
                     </div>
@@ -514,7 +514,8 @@ const AccountsLegend = React.memo(
                 }) => (
                   <div
                     key={accountNumber}
-                    className="flex items-center gap-1.5 shrink-0">
+                    className="flex items-center gap-1.5 shrink-0"
+                  >
                     <div
                       className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: color }}
@@ -530,7 +531,8 @@ const AccountsLegend = React.memo(
                         {hasPayout && (
                           <span
                             className="text-xs leading-tight"
-                            style={{ color: getPayoutColors(payoutStatus).fg }}>
+                            style={{ color: getPayoutColors(payoutStatus).fg }}
+                          >
                             {t("equity.legend.payout")}:{" "}
                             {formatCurrency(payoutAmount)}
                           </span>
@@ -545,7 +547,7 @@ const AccountsLegend = React.memo(
                   </div>
                 )
               )}
-            {accountsWithEquity.length> 20 && (
+            {accountsWithEquity.length > 20 && (
               <div className="flex items-center gap-1.5 shrink-0 text-xs text-muted-foreground h-[50px]">
                 +{accountsWithEquity.length - 20} more
               </div>
@@ -593,7 +595,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   const [chartData, setChartData] = React.useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [availableAccountNumbers, setAvailableAccountNumbers] = React.useState<
-    string[]>([]);
+    string[]
+  >([]);
 
   const throttledSetHoveredData = React.useCallback(
     React.useMemo(() => {
@@ -626,10 +629,16 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       ) || [];
 
     if (validSelection.length === 0) {
+      console.log(
+        "[EquityChart] Resetting account selection to all available accounts"
+      );
       setSelectedAccountsToDisplay(availableAccountNumbers);
     } else if (
       validSelection.length !== config.selectedAccountsToDisplay?.length
     ) {
+      console.log(
+        "[EquityChart] Updating account selection to remove invalid accounts"
+      );
       setSelectedAccountsToDisplay(validSelection);
     }
   }, [
@@ -648,65 +657,22 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     [availableAccountNumbers]
   );
 
-  const sanitizeChartData = React.useCallback((input: ChartDataPoint[]): ChartDataPoint[] => {
-    return input
-      .map((row) => {
-        if (!row || typeof row !== "object") return null;
-        const parsedDate = new Date(row.date);
-        if (Number.isNaN(parsedDate.getTime())) return null;
-
-        const normalized: ChartDataPoint = {
-          date: formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd"),
-        } as ChartDataPoint;
-        const normalizedRecord = normalized as unknown as Record<string, unknown>;
-
-        for (const [key, value] of Object.entries(row)) {
-          if (key === "date") continue;
-
-          if (key.startsWith("payout_") || key.startsWith("reset_")) {
-            normalizedRecord[key] = Boolean(value);
-            continue;
-          }
-
-          if (key.startsWith("payoutStatus_")) {
-            normalizedRecord[key] = typeof value === "string" ? value : "";
-            continue;
-          }
-
-          normalizedRecord[key] = toFiniteNumber(value, 0);
-        }
-
-        normalized.equity = toFiniteNumber(
-          normalizedRecord.equity,
-          0
-        );
-
-        return normalized;
-      })
-      .filter((row): row is ChartDataPoint => Boolean(row));
-  }, [timezone]);
-
   const computeClientSideData = React.useCallback(() => {
     if (!formattedTrades || formattedTrades.length === 0) {
+      console.log("[EquityChart] No formatted trades available");
       return {
         chartData: [],
         accountNumbers: [],
       };
     }
 
-    const validTrades = formattedTrades.filter((trade) => {
-      const timestamp = new Date(trade.entryDate).getTime();
-      return Number.isFinite(timestamp);
-    });
+    console.log(
+      "[EquityChart] Computing client-side data for",
+      formattedTrades.length,
+      "trades"
+    );
 
-    if (validTrades.length === 0) {
-      return {
-        chartData: [],
-        accountNumbers: [],
-      };
-    }
-
-    const sortedTrades = [...validTrades].sort(
+    const sortedTrades = [...formattedTrades].sort(
       (a, b) =>
         new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
     );
@@ -715,7 +681,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       formatInTimeZone(new Date(t.entryDate), timezone, "yyyy-MM-dd")
     );
     const startDate = dates.reduce((min, date) => (date < min ? date : min));
-    const endDate = dates.reduce((max, date) => (date> max ? date : max));
+    const endDate = dates.reduce((max, date) => (date > max ? date : max));
 
     const start = parseISO(startDate);
     const end = parseISO(endDate);
@@ -744,19 +710,25 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       const dayTrades = tradesMap.get(dateKey) || [];
 
       dayTrades.forEach((trade) => {
-        cumulativeEquity +=
-          toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0);
+        cumulativeEquity += Number(trade.pnl) - Number(trade.commission || 0);
       });
 
       chartData.push({
         date: dateKey,
-        equity: toFiniteNumber(cumulativeEquity, 0),
+        equity: cumulativeEquity,
       });
     });
 
     const uniqueAccountNumbers = Array.from(
       new Set(sortedTrades.map((trade) => trade.accountNumber))
     );
+
+    console.log(
+      "[EquityChart] Computed chart data:",
+      chartData.length,
+      "points"
+    );
+    console.log("[EquityChart] Sample data:", chartData.slice(0, 3));
 
     return {
       chartData,
@@ -765,14 +737,20 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [formattedTrades, timezone]);
 
   React.useEffect(() => {
-    const isMock = formattedTrades?.length> 0 && formattedTrades[0].id.startsWith("mock-");
+    const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
 
     if (isSharedView || isTeamView || isMock) {
+      console.log("[EquityChart] Using client-side computation (shared/team view or mock data)");
       setIsLoading(true);
       try {
         const { chartData: computedData, accountNumbers: accNumbers } =
           computeClientSideData();
-        setChartData(sanitizeChartData(computedData));
+        console.log(
+          "[EquityChart] Setting chart data:",
+          computedData.length,
+          "points"
+        );
+        setChartData(computedData);
         setAvailableAccountNumbers(accNumbers);
       } catch (error) {
         console.error(
@@ -787,6 +765,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return;
     }
 
+    console.log("[EquityChart] Fetching server-side data");
     const fetchChartData = async () => {
       setIsLoading(true);
       try {
@@ -813,7 +792,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           dataSampling: config.dataSampling,
           selectedAccounts: Array.from(selectedAccounts),
         });
-        setChartData(sanitizeChartData(result.chartData));
+        setChartData(result.chartData);
         setAvailableAccountNumbers(result.accountNumbers);
       } catch (error) {
         console.error("Failed to fetch equity chart data:", error);
@@ -842,7 +821,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     showIndividual,
     config.dataSampling,
     selectedAccounts,
-    sanitizeChartData,
   ]);
 
   const chartConfig = React.useMemo(() => {
@@ -911,13 +889,17 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       );
     });
   }, [selectedAccounts, showIndividual, accountColorMap, isSharedView]);
-  const hasData =
-    hasFiniteKeyPrefix(chartData, "equity_") ||
-    chartData.some((row) =>
-      Number.isFinite(
-        toFiniteNumber((row as unknown as Record<string, unknown>).equity, Number.NaN),
-      ),
+  const hasData = chartData.length > 0;
+
+  React.useEffect(() => {
+    console.log("[EquityChart Render] isSharedView:", isSharedView);
+    console.log("[EquityChart Render] showIndividual:", showIndividual);
+    console.log("[EquityChart Render] chartData length:", chartData.length);
+    console.log(
+      "[EquityChart Render] First 3 data points:",
+      chartData.slice(0, 3)
     );
+  }, [isSharedView, showIndividual, chartData]);
 
   return (
     <ChartSurface>
@@ -925,14 +907,16 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base"
-              )}>
+              )}
+            >
               {t("equity.title")}
             </span>
             <TooltipProvider>
@@ -970,7 +954,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3"
-        )}>
+        )}
+      >
         <div className="w-full h-full flex flex-col">
           <div className="flex-1 min-h-0">
             {isLoading ? (
@@ -986,10 +971,11 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                     data={chartData}
                     margin={
                       size === "small"
-                        ? { left: 0, right: 0, top: 4, bottom: 8 }
-                        : { left: 0, right: 0, top: 8, bottom: 8 }
+                        ? { left: 0, right: 0, top: 4, bottom: 0 }
+                        : { left: 0, right: 0, top: 10, bottom: 0 }
                     }
-                    onMouseLeave={() => setHoveredData(null)}>
+                    onMouseLeave={() => setHoveredData(null)}
+                  >
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -1006,11 +992,9 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                         fontSize: size === "small" ? 9 : 10,
                         fill: "var(--fg-muted)",
                       }}
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        if (Number.isNaN(date.getTime())) return "";
-                        return format(date, "MMM d", { locale: dateLocale });
-                      }}
+                      tickFormatter={(value) =>
+                        format(new Date(value), "MMM d", { locale: dateLocale })
+                      }
                     />
                     <YAxis
                       ref={yAxisRef}
@@ -1022,7 +1006,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                         fontSize: size === "small" ? 9 : 10,
                         fill: "var(--fg-muted)",
                       }}
-                      tickFormatter={(value) => `$${(toFiniteNumber(value, 0) / 1000).toFixed(1)}k`}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
                     />
                     <ReferenceLine
                       y={0}

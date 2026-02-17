@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { getWebsiteURL } from "@/server/auth";
 import { getWhop } from "@/lib/whop";
 import { createRouteClient } from "@/lib/supabase/route-client";
-import { z } from "zod";
-import { rateLimit, createRateLimitResponse } from "@/lib/rate-limit";
-import { parseQuery } from "@/app/api/_utils/validate";
 
 function safeLocale(value: string | null | undefined): string {
     const raw = (value || "").trim().toLowerCase();
@@ -20,20 +17,7 @@ function withLocalePrefix(locale: string, pathWithOptionalQuery: string): string
     return `/${locale}${normalized}`;
 }
 
-const teamCheckoutQuerySchema = z.object({
-    teamName: z.string().trim().min(1).max(80).optional(),
-    locale: z.string().optional(),
-});
-
-const checkoutRateLimiter = rateLimit({
-    identifier: "whop-team-checkout",
-    limit: 20,
-    window: 60_000,
-});
-
-type CheckoutUser = { id: string; email?: string | null };
-
-async function handleWhopTeamCheckout(user: CheckoutUser, websiteURL: string, locale: string, teamName?: string) {
+async function handleWhopTeamCheckout(user: any, websiteURL: string, locale: string, teamName?: string) {
     const planId = process.env.NEXT_PUBLIC_WHOP_TEAM_PLAN_ID;
 
     if (!planId) {
@@ -71,24 +55,10 @@ async function handleWhopTeamCheckout(user: CheckoutUser, websiteURL: string, lo
 }
 
 export async function POST(req: Request) {
-    const limit = await checkoutRateLimiter(req);
-    if (!limit.success) {
-        return createRateLimitResponse(limit);
-    }
-
     const body = await req.formData();
     const websiteURL = await getWebsiteURL();
-    const parsed = teamCheckoutQuerySchema.safeParse({
-        teamName: body.get("teamName"),
-        locale: body.get("locale"),
-    });
-
-    if (!parsed.success) {
-        return NextResponse.json({ message: "Invalid checkout input" }, { status: 400 });
-    }
-
-    const teamName = parsed.data.teamName ?? null;
-    const locale = safeLocale(parsed.data.locale);
+    const teamName = body.get('teamName') as string | null;
+    const locale = safeLocale(body.get('locale') as string | null);
 
     const supabase = createRouteClient(req);
     const { data: { user } } = await supabase.auth.getUser();
@@ -109,15 +79,10 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-    const limit = await checkoutRateLimiter(req);
-    if (!limit.success) {
-        return createRateLimitResponse(limit);
-    }
-
     const websiteURL = await getWebsiteURL();
     const { searchParams } = new URL(req.url);
-    const { teamName, locale } = parseQuery(searchParams, teamCheckoutQuerySchema);
-    const safe = safeLocale(locale);
+    const teamName = searchParams.get('teamName');
+    const locale = safeLocale(searchParams.get('locale'));
 
     const supabase = createRouteClient(req);
     const { data: { user } } = await supabase.auth.getUser();
@@ -126,13 +91,13 @@ export async function GET(req: Request) {
         const search = new URLSearchParams();
         search.set('subscription', 'true');
         search.set('plan', 'team');
-        search.set('locale', safe);
+        search.set('locale', locale);
         if (teamName) search.set('teamName', teamName);
         return NextResponse.redirect(
-            new URL(withLocalePrefix(safe, `/authentication?${search.toString()}`), websiteURL),
+            new URL(withLocalePrefix(locale, `/authentication?${search.toString()}`), websiteURL),
             303
         );
     }
 
-    return handleWhopTeamCheckout(user, websiteURL, safe, teamName || undefined);
+    return handleWhopTeamCheckout(user, websiteURL, locale, teamName || undefined);
 }

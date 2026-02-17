@@ -16,7 +16,7 @@ import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -42,8 +42,8 @@ const chartConfig = {
 const formatTime = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
   const mins = Math.round(minutes % 60);
-  if (hours> 0) {
-    return mins> 0 ? `${hours}h${mins}m` : `${hours}h`;
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h${mins}m` : `${hours}h`;
   }
   return `${mins}m`;
 };
@@ -65,35 +65,28 @@ export default function TimeInPositionChart({
 
     // Sum up time in position and count trades for each hour in UTC
     trades.forEach((trade: Trade) => {
-      const entryDate = new Date(trade.entryDate);
-      if (Number.isNaN(entryDate.getTime())) return;
-
-      const hour = formatInTimeZone(entryDate, "UTC", "H");
-      if (!(hour in hourlyData)) return;
-
-      const timeInMinutes = toFiniteNumber(trade.timeInPosition, 0) / 60;
-      if (!Number.isFinite(timeInMinutes)) return;
-
-      hourlyData[hour].totalTime += timeInMinutes; // Convert seconds to minutes
+      const hour = formatInTimeZone(new Date(trade.entryDate), "UTC", "H");
+      hourlyData[hour].totalTime += Number(trade.timeInPosition) / 60; // Convert seconds to minutes
       hourlyData[hour].count++;
     });
 
     // Convert to array format for Recharts and calculate average time in position
     return Object.entries(hourlyData)
       .map(([hour, data]) => ({
-        hour: toFiniteNumber(hour, 0),
-        avgTimeInPosition: data.count> 0 ? data.totalTime / data.count : 0,
+        hour: parseInt(hour),
+        avgTimeInPosition: data.count > 0 ? data.totalTime / data.count : 0,
         tradeCount: data.count,
       }))
       .sort((a, b) => a.hour - b.hour);
   }, [trades]);
 
-  const hasData = chartData.some(
-    (data) =>
-      Number.isFinite(data.tradeCount) &&
-      data.tradeCount> 0 &&
-      Number.isFinite(data.avgTimeInPosition),
-  );
+  const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
+  const hasData = chartData.some((data) => data.tradeCount > 0);
+
+  const getColor = (count: number) => {
+    const intensity = Math.max(0.2, count / maxTradeCount);
+    return `hsl(var(--chart-8) / ${intensity})`;
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -105,14 +98,14 @@ export default function TimeInPositionChart({
               {t("timeInPosition.tooltip.time")}
             </span>
             <span className="font-bold text-fg-primary text-xs">
-              {`${toFiniteNumber(label, 0)}:00 - ${(toFiniteNumber(label, 0) + 1) % 24}:00`}
+              {`${label}:00 - ${(label + 1) % 24}:00`}
             </span>
           </div>
           <div className="flex flex-col mb-2">
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t("timeInPosition.tooltip.averageDuration")}
             </span>
-            <span className={cn("font-bold text-xs", data.avgTimeInPosition> 0 ? "metric-positive" : "metric-negative")}>
+            <span className={cn("font-bold text-xs", data.avgTimeInPosition > 0 ? "metric-positive" : "metric-negative")}>
               {formatTime(data.avgTimeInPosition)}
             </span>
           </div>
@@ -120,7 +113,7 @@ export default function TimeInPositionChart({
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t("timeInPosition.tooltip.trades")}
             </span>
-            <span className={cn("font-bold text-xs", data.tradeCount> 0 ? "metric-positive" : "metric-negative")}>
+            <span className={cn("font-bold text-xs", data.tradeCount > 0 ? "metric-positive" : "metric-negative")}>
               {data.tradeCount}{" "}
               {data.tradeCount !== 1
                 ? t("timeInPosition.tooltip.trades_plural")
@@ -139,14 +132,16 @@ export default function TimeInPositionChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === "small" ? "text-sm" : "text-base",
-              )}>
+              )}
+            >
               {t("timeInPosition.title")}
             </CardTitle>
             <TooltipProvider>
@@ -171,7 +166,8 @@ export default function TimeInPositionChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}>
+        )}
+      >
         <div className={cn("w-full h-full")}>
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -179,9 +175,10 @@ export default function TimeInPositionChart({
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 8 }
-                    : { left: 0, right: 0, top: 8, bottom: 8 }
-                }>
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -223,15 +220,16 @@ export default function TimeInPositionChart({
                   dataKey="avgTimeInPosition"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out">
+                  className="transition-all duration-300 ease-in-out"
+                >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill="white"
-                      fillOpacity={entry.tradeCount> 0 ? 0.9 : 0.15}
+                      fillOpacity={entry.tradeCount > 0 ? 0.9 : 0.15}
                       className={cn(
                         "hover:fill-opacity-100 transition-all duration-300",
-                        entry.tradeCount> 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        entry.tradeCount > 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

@@ -25,7 +25,6 @@ import { format } from "date-fns";
 import { DotStream } from "ldrs/react";
 import "ldrs/react/DotStream.css";
 import { useMoodStore } from "@/store/mood-store";
-import Image from "next/image";
 
 // Types
 interface ChatWidgetProps {
@@ -443,13 +442,10 @@ export default function ChatWidget({ size = "large" }: ChatWidgetProps) {
                                   key={`${message.id}-image-${index}`}
                                   className="mt-2"
                                 >
-                                  <Image
+                                  <img
                                     src={part.url}
                                     alt={`attachment-${index}`}
                                     className="rounded-lg max-w-full h-auto max-h-96"
-                                    width={1024}
-                                    height={768}
-                                    unoptimized
                                   />
                                 </div>
                               );
@@ -489,13 +485,10 @@ export default function ChatWidget({ size = "large" }: ChatWidgetProps) {
                                   status={uiStatus}
                                 >
                                   <div className="mt-2">
-                                    <Image
+                                    <img
                                       src={part.url}
                                       alt={`attachment-${index}`}
                                       className="rounded-lg max-w-full h-auto max-h-96"
-                                      width={1024}
-                                      height={768}
-                                      unoptimized
                                     />
                                   </div>
                                 </BotMessage>

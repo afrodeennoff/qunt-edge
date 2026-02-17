@@ -29,8 +29,7 @@ export function TeamsSidebar() {
       href: slug ? `${dashboardRoot}/${slug}` : dashboardRoot,
       icon: <LayoutDashboard className="size-4.5" />,
       label: "Overview",
-      group: "Team Overview",
-      exact: true
+      group: "Team Overview"
     },
     {
       href: slug ? `${dashboardRoot}/${slug}/analytics` : dashboardRoot,

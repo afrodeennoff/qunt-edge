@@ -12,7 +12,7 @@ import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
 import { useData } from "@/context/data-provider";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -53,7 +53,7 @@ function CommissionsTooltip({
           </span>
           <span className={cn(
             "font-black text-sm",
-            data.raw>= 0 ? "metric-positive" : "metric-negative"
+            data.raw >= 0 ? "metric-positive" : "metric-negative"
           )}>{formatCurrency(data.raw)}</span>
         </div>
         <div className="flex flex-col pt-2 border-t border-white/5">
@@ -92,14 +92,14 @@ export default function CommissionsPnLChart({
 
 
   const chartData = React.useMemo(() => {
-    const totalPnL = trades.reduce((sum, trade) => sum + toFiniteNumber(trade.pnl, 0), 0);
+    const totalPnL = trades.reduce((sum, trade) => sum + Number(trade.pnl), 0);
     const totalCommissions = trades.reduce(
-      (sum, trade) => sum + toFiniteNumber(trade.commission, 0),
+      (sum, trade) => sum + Number(trade.commission),
       0,
     );
     const total = Math.abs(totalPnL) + Math.abs(totalCommissions);
-    const pnlPercent = total> 0 ? Number(((Math.abs(totalPnL) / total) * 100).toFixed(2)) : 0;
-    const commPercent = total> 0 ? Number(((Math.abs(totalCommissions) / total) * 100).toFixed(2)) : 0;
+    const pnlPercent = total > 0 ? Number(((Math.abs(totalPnL) / total) * 100).toFixed(2)) : 0;
+    const commPercent = total > 0 ? Number(((Math.abs(totalCommissions) / total) * 100).toFixed(2)) : 0;
     return [
       {
         name: t("commissions.legend.netPnl"),
@@ -115,7 +115,7 @@ export default function CommissionsPnLChart({
       },
     ];
   }, [trades, t]);
-  const hasData = chartData.some((item) => item.value> 0);
+  const hasData = chartData.some((item) => item.value > 0);
 
 
   // Keep donut visually centered and larger to avoid dead space.
@@ -135,14 +135,16 @@ export default function CommissionsPnLChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === 'small' ? "text-sm" : "text-base"
-              )}>
+              )}
+            >
               {t("commissions.title")}
             </CardTitle>
             <TooltipProvider>
@@ -165,7 +167,8 @@ export default function CommissionsPnLChart({
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-0.5" : "p-1"
-        )}>
+        )}
+      >
         <div className="w-full h-full flex min-h-0 flex-col">
           {hasData ? (
             <>
@@ -184,15 +187,15 @@ export default function CommissionsPnLChart({
                       startAngle={90}
                       endAngle={-270}
                       stroke="rgba(0,0,0,0)"
-                      strokeWidth={1}>
+                      strokeWidth={1}
+                    >
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.name === t("commissions.legend.netPnl") ? "white" : "#52525B"}
-                          fillOpacity={1}
-                          stroke="none"
+                          fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
+                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
                           className={cn(
-                            "hover:brightness-110 transition-all duration-300",
+                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
                             entry.name === t("commissions.legend.netPnl") ? "chart-positive-emphasis" : "chart-negative-muted"
                           )}
                         />
@@ -205,15 +208,15 @@ export default function CommissionsPnLChart({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mx-auto flex flex-col items-start gap-2 pb-1 pt-1">
-                <div className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
+              <div className="flex flex-col items-center gap-3 pb-1 pt-2">
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-white/58">
                   <span className="h-3 w-3 rounded-full bg-white" />
-                  <span className="whitespace-nowrap">{t("commissions.legend.netPnl")}</span>
-                </div>
-                <div className="inline-flex items-center gap-2 whitespace-nowrap text-[9px] sm:text-[10px] uppercase font-black tracking-[0.04em] text-white/58">
-                  <span className="h-3 w-3 rounded-full bg-[#52525B]" />
-                  <span className="whitespace-nowrap">{t("commissions.legend.commissions")}</span>
-                </div>
+                  {t("commissions.legend.netPnl")}
+                </span>
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-white/58">
+                  <span className="h-3 w-3 rounded-full bg-white/35" />
+                  {t("commissions.legend.commissions")}
+                </span>
               </div>
             </>
           ) : (

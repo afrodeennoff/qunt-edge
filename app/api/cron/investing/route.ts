@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { isValid } from 'date-fns'
 import { scrapeWithSandbox } from '@/lib/browser-sandbox'
-import { requireServiceAuth, toErrorResponse } from '@/server/authz'
 
 interface InvestingEvent {
   time: string
@@ -20,6 +19,13 @@ interface InvestingEvent {
   date?: Date
   importance?: 'HIGH' | 'MEDIUM' | 'LOW'
   type?: string
+}
+
+function isAuthorizedCronRequest(request: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = request.headers.get('authorization')
+  return authHeader === `Bearer ${cronSecret}`
 }
 
 function mapImpactToImportance(impact: string): 'HIGH' | 'MEDIUM' | 'LOW' {
@@ -308,7 +314,9 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
 export async function GET(request: Request) {
   try {
-    requireServiceAuth(request.headers.get('authorization'), { serviceName: 'cron-investing' })
+    if (!isAuthorizedCronRequest(request)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Get the URL and search params
     const { searchParams } = new URL(request.url)
@@ -378,6 +386,13 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Error in GET route:', error)
-    return toErrorResponse(error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch events from Investing.com',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
 }

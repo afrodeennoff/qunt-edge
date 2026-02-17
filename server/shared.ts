@@ -7,7 +7,6 @@ import { parseISO, isValid } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { GroupWithAccounts } from './groups'
-import { getDatabaseUserId } from './auth'
 
 export interface SharedParams {
   userId: string
@@ -34,11 +33,6 @@ interface DateRange {
 
 export async function createShared(data: SharedParams): Promise<string> {
   try {
-    const currentUserId = await getDatabaseUserId()
-    if (!currentUserId) {
-      throw new Error('Unauthorized')
-    }
-
     // Validate date range
     if (!data.dateRange?.from) {
       throw new Error('Start date is required')
@@ -55,7 +49,7 @@ export async function createShared(data: SharedParams): Promise<string> {
       try {
         const sharedTrades = await prisma.shared.create({
           data: {
-            userId: currentUserId,
+            userId: data.userId,
             title: data.title,
             description: data.description,
             isPublic: data.isPublic,
@@ -215,15 +209,10 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   }
 }
 
-export async function getUserShared() {
+export async function getUserShared(userId: string) {
   try {
-    const currentUserId = await getDatabaseUserId()
-    if (!currentUserId) {
-      throw new Error('Unauthorized')
-    }
-
     const sharedTrades = await prisma.shared.findMany({
-      where: { userId: currentUserId },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -234,18 +223,13 @@ export async function getUserShared() {
   }
 }
 
-export async function deleteShared(slug: string) {
+export async function deleteShared(slug: string, userId: string) {
   try {
-    const currentUserId = await getDatabaseUserId()
-    if (!currentUserId) {
-      throw new Error('Unauthorized')
-    }
-
     const shared = await prisma.shared.findUnique({
       where: { slug },
     })
 
-    if (!shared || shared.userId !== currentUserId) {
+    if (!shared || shared.userId !== userId) {
       throw new Error('Unauthorized')
     }
 

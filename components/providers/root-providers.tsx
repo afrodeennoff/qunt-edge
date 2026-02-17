@@ -3,49 +3,32 @@
 import { ThemeProvider } from "@/context/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthTimeout } from "@/components/auth/auth-timeout";
 import { useEffect } from "react";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 export function RootProviders({ children }: { children: React.ReactNode }) {
     useEffect(() => {
-        if (!("serviceWorker" in navigator) || process.env.NODE_ENV !== "production") {
-            return;
-        }
-
-        const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED === "true";
-        const handleServiceWorker = () => {
-            if (swEnabled) {
+        if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+            window.addEventListener("load", () => {
                 navigator.serviceWorker.register("/sw.js").then(
-                    () => undefined,
-                    () => undefined
+                    (registration) => console.log("SW registered:", registration.scope),
+                    (err) => console.log("SW registration failed:", err)
                 );
-                return;
-            }
-
-            navigator.serviceWorker.getRegistrations().then((registrations) => {
-                registrations.forEach((registration) => {
-                    registration.unregister();
-                });
             });
-        };
-
-        if (document.readyState === "complete") {
-            handleServiceWorker();
-            return;
         }
-
-        window.addEventListener("load", handleServiceWorker);
-        return () => {
-            window.removeEventListener("load", handleServiceWorker);
-        };
     }, []);
 
     return (
-        <TooltipProvider>
-            <ThemeProvider>
-                <SidebarProvider>
-                    {children}
-                </SidebarProvider>
-            </ThemeProvider>
-        </TooltipProvider>
+        <QueryProvider>
+            <TooltipProvider>
+                <ThemeProvider>
+                    <SidebarProvider>
+                        <AuthTimeout />
+                        {children}
+                    </SidebarProvider>
+                </ThemeProvider>
+            </TooltipProvider>
+        </QueryProvider>
     );
 }

@@ -10,34 +10,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function toFiniteNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number") return Number.isFinite(value) ? value : fallback
-  if (typeof value === "string") {
-    const parsed = Number(value)
-    return Number.isFinite(parsed) ? parsed : fallback
-  }
-  if (value && typeof value === "object") {
-    const decimalLike = value as { toNumber?: () => number; toString?: () => string }
-    if (typeof decimalLike.toNumber === "function") {
-      const parsed = decimalLike.toNumber()
-      return Number.isFinite(parsed) ? parsed : fallback
-    }
-    if (typeof decimalLike.toString === "function") {
-      const parsed = Number(decimalLike.toString())
-      return Number.isFinite(parsed) ? parsed : fallback
-    }
-  }
-  return fallback
-}
-
-export function safeDivide(numerator: number, denominator: number, fallback = 0): number {
-  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
-    return fallback
-  }
-  const result = numerator / denominator
-  return Number.isFinite(result) ? result : fallback
-}
-
 export function parsePositionTime(timeInSeconds: number): string {
   const hours = Math.floor(timeInSeconds / 3600);
   const minutesLeft = Math.floor((timeInSeconds - (hours * 3600)) / 60);
@@ -89,9 +61,9 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
   let currentStreak = 0;
 
   trades.forEach((trade) => {
-    const pnl = new Decimal(toFiniteNumber(trade.pnl, 0));
-    const commission = new Decimal(toFiniteNumber(trade.commission, 0));
-    const timeInPos = new Decimal(toFiniteNumber(trade.timeInPosition, 0));
+    const pnl = new Decimal(trade.pnl);
+    const commission = new Decimal(trade.commission || 0);
+    const timeInPos = new Decimal(trade.timeInPosition || 0);
 
     cumulativePnl = cumulativePnl.plus(pnl);
     cumulativeFees = cumulativeFees.plus(commission);
@@ -113,7 +85,7 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
   });
 
   const totalTrades = nbWin + nbLoss;
-  const winRate = safeDivide(nbWin, totalTrades, 0) * 100;
+  const winRate = totalTrades > 0 ? (nbWin / totalTrades) * 100 : 0;
   const profitFactor = grossLosses.isZero() ? (grossWin.isZero() ? 1 : 100) : grossWin.dividedBy(grossLosses).toNumber();
 
   const statistics: StatisticsProps = {
@@ -144,7 +116,7 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
       payouts.forEach(payout => {
         const payoutDate = new Date(payout.date);
         if (!account.resetDate || payoutDate >= new Date(account.resetDate)) {
-          totalPayouts = totalPayouts.plus(new Decimal(toFiniteNumber(payout.amount, 0)));
+          totalPayouts = totalPayouts.plus(new Decimal(payout.amount));
           nbPayouts++;
         }
       });
@@ -158,7 +130,7 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
 }
 
 export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
-  const data = trades.reduce((acc: any, trade: Trade) => {
+  return trades.reduce((acc: any, trade: Trade) => {
     let date = '';
     try {
       const rawDate = trade.entryDate;
@@ -182,9 +154,7 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
       acc[date] = { pnl: new Decimal(0), tradeNumber: 0, longNumber: 0, shortNumber: 0, trades: [] }
     }
     acc[date].tradeNumber++
-    const netPnl = new Decimal(toFiniteNumber(trade.pnl, 0)).minus(
-      new Decimal(toFiniteNumber(trade.commission, 0))
-    );
+    const netPnl = new Decimal(trade.pnl).minus(new Decimal(trade.commission || 0));
     acc[date].pnl = acc[date].pnl.plus(netPnl);
 
     const entryTime = new Date(trade.entryDate).getTime();
@@ -196,15 +166,6 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
     acc[date].longNumber += isLong ? 1 : 0
     acc[date].shortNumber += isLong ? 0 : 1
     acc[date].trades.push(trade)
-    return acc
-  }, {} as Record<string, { pnl: Decimal | number; tradeNumber: number; longNumber: number; shortNumber: number; trades: Trade[] }>)
-
-  // Convert Decimal pnl to number for the final output
-  return Object.keys(data).reduce((acc: any, date) => {
-    acc[date] = {
-      ...data[date],
-      pnl: (data[date].pnl as Decimal).toNumber()
-    }
     return acc
   }, {})
 }
@@ -234,17 +195,14 @@ export function calculateTradingDays(trades: Trade[], minPnlToCountAsDay?: numbe
   const dailyPnL: { [date: string]: Decimal } = {};
 
   trades.forEach(trade => {
-    const tradeDate = trade.entryDate instanceof Date ? trade.entryDate : new Date(trade.entryDate);
-    if (Number.isNaN(tradeDate.getTime())) return;
+    const tradeDate = trade.entryDate;
     const dateKey = tradeDate.toISOString().split('T')[0];
 
     if (!dailyPnL[dateKey]) {
       dailyPnL[dateKey] = new Decimal(0);
     }
 
-    const netPnl = new Decimal(toFiniteNumber(trade.pnl, 0)).minus(
-      new Decimal(toFiniteNumber(trade.commission, 0))
-    );
+    const netPnl = new Decimal(trade.pnl).minus(new Decimal(trade.commission || 0));
     dailyPnL[dateKey] = dailyPnL[dateKey].plus(netPnl);
   });
 

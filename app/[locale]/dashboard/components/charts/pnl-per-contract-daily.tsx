@@ -15,7 +15,7 @@ import {
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { useData } from "@/context/data-provider";
-import { cn, toFiniteNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -90,7 +90,7 @@ export default function PnLPerContractDailyChart({
 
   // Set default instrument if none selected and instruments are available
   React.useEffect(() => {
-    if (!config.selectedInstrument && availableInstruments.length> 0) {
+    if (!config.selectedInstrument && availableInstruments.length > 0) {
       setSelectedInstrument(availableInstruments[0]);
     }
   }, [config.selectedInstrument, availableInstruments, setSelectedInstrument]);
@@ -107,7 +107,6 @@ export default function PnLPerContractDailyChart({
     const dateGroups = instrumentTrades.reduce(
       (acc, trade) => {
         const entryDate = new Date(trade.entryDate);
-        if (Number.isNaN(entryDate.getTime())) return acc;
         const dateKey = formatInTimeZone(entryDate, timezone, "yyyy-MM-dd");
 
         if (!acc[dateKey]) {
@@ -119,11 +118,11 @@ export default function PnLPerContractDailyChart({
           };
         }
 
-        const netPnl = toFiniteNumber(trade.pnl, 0) - toFiniteNumber(trade.commission, 0);
+        const netPnl = Number(trade.pnl) - Number(trade.commission || 0);
         acc[dateKey].trades.push(trade);
         acc[dateKey].totalPnl += netPnl;
-        acc[dateKey].totalContracts += toFiniteNumber(trade.quantity, 0);
-        if (netPnl> 0) {
+        acc[dateKey].totalContracts += Number(trade.quantity);
+        if (netPnl > 0) {
           acc[dateKey].winCount++;
         }
 
@@ -136,28 +135,18 @@ export default function PnLPerContractDailyChart({
     return Object.entries(dateGroups)
       .map(([date, data]) => ({
         date,
-        averagePnl: data.totalContracts> 0 ? data.totalPnl / data.totalContracts : 0,
-        totalPnl: toFiniteNumber(data.totalPnl, 0),
+        averagePnl:
+          data.totalContracts > 0 ? data.totalPnl / data.totalContracts : 0,
+        totalPnl: data.totalPnl,
         tradeCount: data.trades.length,
         winCount: data.winCount,
-        totalContracts: toFiniteNumber(data.totalContracts, 0),
+        totalContracts: data.totalContracts,
       }))
-      .sort((a, b) => {
-        const aDate = new Date(a.date).getTime();
-        const bDate = new Date(b.date).getTime();
-        if (!Number.isFinite(aDate) || !Number.isFinite(bDate)) return 0;
-        return aDate - bDate;
-      });
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [trades, config.selectedInstrument, timezone]);
 
   const maxPnL = Math.max(...chartData.map((d) => d.averagePnl));
   const minPnL = Math.min(...chartData.map((d) => d.averagePnl));
-  const hasData = chartData.some(
-    (d) =>
-      d.tradeCount> 0 &&
-      Number.isFinite(d.averagePnl) &&
-      Number.isFinite(d.totalPnl),
-  );
   const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as ChartDatum | undefined;
@@ -173,7 +162,7 @@ export default function PnLPerContractDailyChart({
               <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.averagePnl")}</span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
-                data.averagePnl>= 0 ? "metric-positive" : "metric-negative"
+                data.averagePnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.averagePnl)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
@@ -207,14 +196,16 @@ export default function PnLPerContractDailyChart({
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
-              )}>
+              )}
+            >
               {t("pnlPerContractDaily.title")}
             </CardTitle>
             <TooltipProvider>
@@ -236,13 +227,15 @@ export default function PnLPerContractDailyChart({
           <div className="flex items-center gap-2">
             <Select
               value={config.selectedInstrument}
-              onValueChange={setSelectedInstrument}>
+              onValueChange={setSelectedInstrument}
+            >
               <SelectTrigger
                 className={cn(
                   "w-[120px]",
                   size === "small" ? "h-6 text-[9px]" : "h-8 text-[10px]",
                   "bg-white/[0.03] border-white/10 text-white font-black uppercase tracking-widest"
-                )}>
+                )}
+              >
                 <SelectValue
                   placeholder={t("pnlPerContractDaily.selectInstrument")}
                 />
@@ -262,7 +255,8 @@ export default function PnLPerContractDailyChart({
         className={cn(
           "flex-1 min-h-0",
           size === "small" ? "p-1" : "p-2 sm:p-3",
-        )}>
+        )}
+      >
         <div className={cn("w-full h-full")}>
           {isLoading ? (
             (() => {
@@ -303,8 +297,8 @@ export default function PnLPerContractDailyChart({
               const domainMax = Math.max(maxP * 1.1, 0);
               const margin =
                 size === "small"
-                  ? { left: 0, right: 0, top: 4, bottom: 8 }
-                  : { left: 0, right: 0, top: 8, bottom: 8 };
+                  ? { left: 0, right: 0, top: 4, bottom: 20 }
+                  : { left: 0, right: 0, top: 8, bottom: 24 };
               return (
                 <div className={cn("w-full h-full animate-pulse relative")}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -336,7 +330,8 @@ export default function PnLPerContractDailyChart({
                         radius={[2, 2, 2, 2]}
                         maxBarSize={size === "small" ? 25 : 40}
                         className="transition-none"
-                        fill="rgba(255,255,255,0.05)">
+                        fill="rgba(255,255,255,0.05)"
+                      >
                         {loadingMockData.map((_, index) => (
                           <Cell
                             key={`skeleton-cell-${index}`}
@@ -349,15 +344,16 @@ export default function PnLPerContractDailyChart({
                 </div>
               );
             })()
-          ) : hasData ? (
+          ) : chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
                   size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 8 }
-                    : { left: 0, right: 0, top: 8, bottom: 8 }
-                }>
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -405,16 +401,18 @@ export default function PnLPerContractDailyChart({
                   dataKey="averagePnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out">
+                  className="transition-all duration-300 ease-in-out"
+                >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.averagePnl>= 0 ? "white" : "#52525B"}
-                      fillOpacity={1}
-                      stroke="none"
+                      fill={entry.averagePnl >= 0 ? "white" : "white"}
+                      stroke={entry.averagePnl >= 0 ? "white" : "white"}
+                      strokeOpacity={entry.averagePnl >= 0 ? 0.42 : 0.06}
+                      fillOpacity={entry.averagePnl >= 0 ? 0.98 : 0.22}
                       className={cn(
-                        "hover:brightness-110 transition-all duration-300",
-                        entry.averagePnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        "hover:fill-opacity-100 transition-all duration-300",
+                        entry.averagePnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

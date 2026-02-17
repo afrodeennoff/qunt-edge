@@ -7,7 +7,7 @@ import { Journaling } from "./journaling"
 import { Timeline } from "./timeline"
 import { MindsetSummary } from "./mindset-summary"
 import { useI18n } from "@/locales/client"
-import { Info, ChevronLeft, ChevronRight, Sparkles, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { Info, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Tooltip as UITooltip,
@@ -310,122 +310,158 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
   ]
 
   return (
-    <Card className="relative flex h-full w-full flex-col overflow-hidden border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),rgba(9,9,11,0.97)_44%,rgba(9,9,11,1)_100%)] p-0 shadow-[0_32px_90px_rgba(0,0,0,0.45)]">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-10 top-0 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute bottom-0 right-6 h-32 w-32 rounded-full bg-white/5 blur-3xl" />
-      </div>
-
+    <Card className="flex flex-col p-0 h-full w-full">
       <CardHeader
         className={cn(
-          "relative z-10 flex shrink-0 flex-row items-center justify-between space-y-0 border-b border-white/10",
-          size === "small" ? "h-11 px-3" : "h-16 px-4 sm:px-5"
+          "flex flex-row items-center justify-between space-y-0 border-b shrink-0",
+          size === 'small' ? "p-2 h-10" : "p-3 sm:p-4 h-14"
         )}
       >
-        <div className="flex min-w-0 items-center gap-2">
-          <Sparkles className="h-4 w-4 text-white/70" />
-          <CardTitle className={cn("line-clamp-1 text-white", size === "small" ? "text-sm" : "text-base")}>
-            {t("mindset.title")}
-          </CardTitle>
-          <TooltipProvider>
-            <UITooltip>
-              <TooltipTrigger asChild>
-                <Info className={cn(
-                  "cursor-help text-white/45 transition-colors hover:text-white/80",
-                  size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
-                )} />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>{t("mindset.description")}</p>
-              </TooltipContent>
-            </UITooltip>
-          </TooltipProvider>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 sm:flex">
-            {steps.map((step, index) => (
-              <span
-                key={step.title}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  current === index ? "w-5 bg-white" : "w-1.5 bg-white/35"
-                )}
-              />
-            ))}
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-1.5">
+            <CardTitle
+              className={cn(
+                "line-clamp-1",
+                size === 'small' ? "text-sm" : "text-base"
+              )}
+            >
+              {t('mindset.title')}
+            </CardTitle>
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <Info className={cn(
+                    "text-muted-foreground hover:text-foreground transition-colors cursor-help",
+                    size === 'small' ? "h-3.5 w-3.5" : "h-4 w-4"
+                  )} />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>{t('mindset.description')}</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => api?.scrollPrev()}
-            disabled={current === 0}
-            className="h-7 w-7 border-white/15 bg-white/5 hover:bg-white/10"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => api?.scrollNext()}
-            disabled={current === steps.length - 1}
-            className="h-7 w-7 border-white/15 bg-white/5 hover:bg-white/10"
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              {steps.map((_, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full transition-colors",
+                    current === index
+                      ? "bg-primary"
+                      : "bg-muted"
+                  )}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => api?.scrollPrev()}
+                disabled={current === 0}
+                className="h-6 w-6"
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => api?.scrollNext()}
+                disabled={current === steps.length - 1}
+                className="h-6 w-6"
+              >
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
         </div>
       </CardHeader>
-
-      <CardContent className="relative z-10 flex min-h-0 flex-1 flex-row overflow-hidden p-0">
+      <CardContent className="flex-1 overflow-hidden p-0 flex flex-row relative">
+        {/* Timeline with animation */}
         <div
           className={cn(
-            "relative border-r border-white/10 bg-black/25 transition-all duration-300",
-            isTimelineVisible ? "w-[220px] min-w-[220px]" : "w-0 min-w-0 overflow-hidden"
+            "relative transition-all duration-300 ease-out-quart",
+            isTimelineVisible ? "w-auto" : "w-0 overflow-hidden"
           )}
         >
           <Timeline
-            className="h-full"
+            className="shrink-0"
             selectedDate={selectedDate}
             onSelectDate={handleDateSelect}
             moodHistory={moods}
             onDeleteEntry={handleDeleteEntry}
           />
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={toggleTimeline}
-            className="absolute -right-3 top-4 h-6 w-6 rounded-full border border-white/10 bg-black/80"
-          >
-            <PanelLeftClose className="h-3.5 w-3.5" />
-          </Button>
+
+          {/* Hide/Show Button - positioned at right edge of timeline */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={toggleTimeline}
+                    className="h-8 w-4 rounded-r-none rounded-l-md border-r-0"
+                  >
+                    {isTimelineVisible ? (
+                      <ChevronLeft className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>{isTimelineVisible ? t('mindset.hideTimeline') : t('mindset.showTimeline')}</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+          </div>
         </div>
 
+        {/* Show Button when timeline is collapsed */}
         {!isTimelineVisible && (
-          <div className="absolute left-3 top-3 z-20">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={toggleTimeline}
-              className="h-7 w-7 rounded-full border border-white/10 bg-black/80"
-            >
-              <PanelLeftOpen className="h-3.5 w-3.5" />
-            </Button>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={toggleTimeline}
+                    className="h-8 w-4 rounded-l-none rounded-r-md border-l-0"
+                  >
+                    <ChevronRight className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>{t('mindset.showTimeline')}</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
           </div>
         )}
 
+        {/* Carousel */}
         <Carousel
           opts={{
             loop: false,
-            watchDrag: () => window.innerWidth < 768
+            watchDrag: (api, event) => {
+              // Disable drag on desktop
+              if (window.innerWidth >= 768) {
+                return false
+              }
+              return true
+            }
           }}
           setApi={setApi}
-          className="flex h-full min-w-0 flex-1 flex-col"
+          className="flex-1 min-w-0 h-full flex flex-col"
         >
-          <CarouselContent className="h-full flex-1 pl-0">
-            {steps.map((step) => (
-              <CarouselItem key={step.title} className="h-full p-3 sm:p-4">
-                <div className="h-full overflow-hidden rounded-2xl border border-white/10 bg-black/35 p-3 sm:p-4">
-                  {step.component}
-                </div>
+          <CarouselContent className="h-full flex-1 pl-4">
+            {steps.map((step, index) => (
+              <CarouselItem key={index} className="h-full p-4">
+                {step.component}
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -433,4 +469,4 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
       </CardContent>
     </Card>
   )
-}
+} 

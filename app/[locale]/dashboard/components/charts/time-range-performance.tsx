@@ -5,7 +5,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContaine
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartSurface } from "@/components/ui/chart-surface"
 import { useData } from "@/context/data-provider"
-import { cn, toFiniteNumber } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { Info } from 'lucide-react'
 import {
   Tooltip as UITooltip,
@@ -26,13 +26,13 @@ interface TimeRangePerformanceChartProps {
 function getTimeRangeKey(timeInPosition: number): string {
   const minutes = timeInPosition / 60 // Convert seconds to minutes
   if (minutes < 1) return 'under1min'
-  if (minutes>= 1 && minutes < 5) return '1to5min'
-  if (minutes>= 5 && minutes < 10) return '5to10min'
-  if (minutes>= 10 && minutes < 15) return '10to15min'
-  if (minutes>= 15 && minutes < 30) return '15to30min'
-  if (minutes>= 30 && minutes < 60) return '30to60min'
-  if (minutes>= 60 && minutes < 120) return '1to2hours'
-  if (minutes>= 120 && minutes < 300) return '2to5hours'
+  if (minutes >= 1 && minutes < 5) return '1to5min'
+  if (minutes >= 5 && minutes < 10) return '5to10min'
+  if (minutes >= 10 && minutes < 15) return '10to15min'
+  if (minutes >= 15 && minutes < 30) return '15to30min'
+  if (minutes >= 30 && minutes < 60) return '30to60min'
+  if (minutes >= 60 && minutes < 120) return '1to2hours'
+  if (minutes >= 120 && minutes < 300) return '2to5hours'
   return 'over5hours'
 }
 
@@ -75,11 +75,10 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     }
 
     trades.forEach((trade: Trade) => {
-      const timeRange = getTimeRangeKey(toFiniteNumber(trade.timeInPosition, 0))
-      const pnl = toFiniteNumber(trade.pnl, 0)
-      timeRangeData[timeRange].totalPnl += pnl
+      const timeRange = getTimeRangeKey(Number(trade.timeInPosition))
+      timeRangeData[timeRange].totalPnl += Number(trade.pnl)
       timeRangeData[timeRange].totalTrades++
-      if (pnl> 0) {
+      if (Number(trade.pnl) > 0) {
         timeRangeData[timeRange].winCount++
       } else {
         timeRangeData[timeRange].lossCount++
@@ -87,17 +86,17 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
     })
 
     return Object.entries(timeRangeData).map(([range, data]) => {
-      const winRate = data.totalTrades> 0 ? (data.winCount / data.totalTrades) * 100 : 0
+      const winRate = data.totalTrades > 0 ? (data.winCount / data.totalTrades) * 100 : 0
       return {
         range,
-        avgPnl: data.totalTrades> 0 ? data.totalPnl / data.totalTrades : 0,
+        avgPnl: data.totalTrades > 0 ? data.totalPnl / data.totalTrades : 0,
         winRate,
         trades: data.totalTrades,
         color: getColorByWinRate(winRate)
       }
     })
   }, [trades])
-  const hasData = chartData.some((d) => d.trades> 0)
+  const hasData = chartData.some((d) => d.trades > 0)
 
   const handleClick = React.useCallback(() => {
     if (!activeRange) return
@@ -124,8 +123,6 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
 
     if (active && payload && payload.length) {
       const data = payload[0].payload
-      const avgPnl = toFiniteNumber(data.avgPnl, 0)
-      const winRate = toFiniteNumber(data.winRate, 0)
       return (
         <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
           <div className="flex flex-col mb-2">
@@ -145,9 +142,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-black text-sm",
-              avgPnl>= 0 ? "metric-positive" : "metric-negative"
+              data.avgPnl >= 0 ? "metric-positive" : "metric-negative"
             )}>
-              {avgPnl.toFixed(2)}
+              {data.avgPnl.toFixed(2)}
             </span>
           </div>
           <div className="flex flex-col pt-2 border-t border-white/5">
@@ -156,9 +153,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
             </span>
             <span className={cn(
               "font-bold text-fg-primary text-xs",
-              winRate>= 50 ? "metric-positive" : "metric-negative"
+              data.winRate >= 50 ? "metric-positive" : "metric-negative"
             )}>
-              {winRate.toFixed(1)}%
+              {data.winRate.toFixed(1)}%
             </span>
           </div>
           <div className="flex flex-col pt-2">
@@ -181,14 +178,16 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
         className={cn(
           "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
           size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
-        )}>
+        )}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span
               className={cn(
                 "line-clamp-1 font-bold tracking-tight text-fg-primary",
                 size === 'small' ? "text-sm" : "text-base"
-              )}>
+              )}
+            >
               {t('timeRangePerformance.title')}
             </span>
             <TooltipProvider>
@@ -212,7 +211,8 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
               variant="ghost"
               size="sm"
               className="h-6 px-2 text-[10px] uppercase font-bold tracking-wider text-fg-muted hover:text-white hover:bg-white/10"
-              onClick={() => setTimeRange({ range: null })}>
+              onClick={() => setTimeRange({ range: null })}
+            >
               {t('timeRangePerformance.clearFilter')}
             </Button>
           )}
@@ -222,19 +222,22 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
         className={cn(
           "flex-1 min-h-0",
           size === 'small' ? "p-1" : "p-2 sm:p-3"
-        )}>
+        )}
+      >
         <div
           className="w-full h-full cursor-pointer"
-          onClick={handleClick}>
+          onClick={handleClick}
+        >
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={
                   size === 'small'
-                    ? { left: 0, right: 0, top: 4, bottom: 8 }
-                    : { left: 0, right: 0, top: 8, bottom: 8 }
-                }>
+                    ? { left: 0, right: 0, top: 4, bottom: 20 }
+                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                }
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   className="text-border dark:opacity-[0.1] opacity-[0.2]"
@@ -258,7 +261,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                           textAnchor="middle"
                           fill="var(--fg-muted)"
                           fontSize={size === 'small' ? 9 : 10}
-                          transform={size === 'small' ? 'rotate(0)' : 'rotate(0)'}
+                          transform={size === 'small' ? 'rotate(0)' : 'rotate(0)'} // Removed rotation for cleaner look if space permits, or adjust
                         >
                           {label}
                         </text>
@@ -285,22 +288,18 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   dataKey="avgPnl"
                   radius={[2, 2, 2, 2]}
                   maxBarSize={size === 'small' ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out">
+                  className="transition-all duration-300 ease-in-out"
+                >
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.range}`}
-                      fill={entry.avgPnl>= 0 ? "white" : "#52525B"}
-                      fillOpacity={
-                        timeRange.range === entry.range
-                          ? 1
-                          : timeRange.range
-                            ? 0.3
-                            : 1
-                      }
-                      stroke="none"
+                      fill="white"
+                      fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : (entry.avgPnl >= 0 ? 0.98 : 0.22))}
+                      stroke="white"
+                      strokeOpacity={timeRange.range === entry.range ? 1 : (entry.avgPnl >= 0 ? 0.42 : 0.06)}
                       className={cn(
-                        "hover:brightness-110 transition-all duration-300",
-                        entry.avgPnl>= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
+                        "hover:opacity-100",
+                        entry.avgPnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
                       )}
                     />
                   ))}

@@ -23,8 +23,7 @@ const fadeUp = {
 export default function Hero() {
   const locale = useCurrentLocale()
   const isMobile = useIsMobile()
-  const motionEnabled = process.env.NEXT_PUBLIC_ENABLE_MARKETING_MOTION === 'true'
-  const shouldAnimate = motionEnabled && !isMobile
+  const shouldAnimate = !isMobile
   const ref = useRef<HTMLElement | null>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const opacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])

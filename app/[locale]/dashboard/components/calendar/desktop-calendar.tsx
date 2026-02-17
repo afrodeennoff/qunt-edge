@@ -505,9 +505,9 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   }, [timezone])
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
+    <Card className="h-full flex flex-col">
       <CardHeader
-        className="flex flex-row items-center justify-between space-y-0 border-b shrink-0 p-3 sm:p-4"
+        className="flex flex-row items-center justify-between space-y-0 border-b shrink-0 p-3 sm:p-4 h-[56px]"
       >
         <div className="flex items-center gap-3">
           <CardTitle className="text-base sm:text-lg font-semibold truncate capitalize">
@@ -564,10 +564,10 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 p-1.5 sm:p-3 flex flex-col">
+      <CardContent className="flex-1 min-h-0 p-1.5 sm:p-4">
         {viewMode === 'daily' ? (
           <>
-            <div className="grid grid-cols-8 gap-x-px mb-1 shrink-0">
+            <div className="grid grid-cols-8 gap-x-px mb-1">
               {WEEKDAYS.map((day) => (
                 <div key={day} className="text-center font-medium text-[9px] sm:text-[11px] text-muted-foreground">
                   {translateWeekday(t, day)}
@@ -577,7 +577,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                 {t('calendar.weekdays.weekly')}
               </div>
             </div>
-            <div className="grid grid-cols-8 auto-rows-fr rounded-lg flex-1 min-h-0">
+            <div className="grid grid-cols-8 auto-rows-fr rounded-lg h-[calc(100%-20px)]">
               {calendarDays.map((date, index) => {
                 const dateString = format(date, 'yyyy-MM-dd')
                 const dayData = calendarData[dateString]
@@ -695,12 +695,10 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
             </div>
           </>
         ) : (
-          <div className="flex-1 min-h-0">
-            <WeeklyCalendarPnl
-              calendarData={calendarData}
-              year={getYear(currentDate)}
-            />
-          </div>
+          <WeeklyCalendarPnl
+            calendarData={calendarData}
+            year={getYear(currentDate)}
+          />
         )}
       </CardContent>
       <CalendarModal
@@ -721,7 +719,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
         calendarData={calendarData}
         isLoading={isLoading}
       />
-      <CardFooter className="flex justify-end px-3 py-2 sm:px-4 sm:py-2.5 border-t border-border/60 shrink-0">
+      <CardFooter className="flex justify-end">
         {/* View Mode Toggle */}
         <div className="flex items-center gap-1 border rounded-md p-0.5 bg-muted">
           <Button

@@ -1637,3 +1637,14 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Added same motion gate in `app/[locale]/(landing)/components/navbar.tsx` and removed hidden-first animation default (`initial={false}`) for safer first paint.
 - **Key Files:** `components/providers/root-providers.tsx`, `app/[locale]/(home)/components/Hero.tsx`, `app/[locale]/(landing)/components/navbar.tsx`, `AGENTS.md`
 - **Verification:** `npm run -s typecheck` exits `0`.
+
+### 2026-02-17: Full Optimization Wave Rollback (User-Requested Revert)
+- **What changed:** Reverted the recent optimization wave across dashboard, providers, scripts, CI perf workflows, and related UI/performance/security refactors in one consolidated rollback.
+- **What I want:** Restore pre-optimization baseline behavior and file structure exactly as requested.
+- **What I don't want:** Partial rollback leaving mixed old/new behavior, orphan scripts, or inconsistent route/provider patterns.
+- **How we fixed that:**
+  - Reverted optimization-era additions and refactors across app routes, dashboard shells, provider decomposition, chart guards, perf scripts, CI perf workflows, and service-worker/security helper changes.
+  - Removed optimization-specific files added in the wave (e.g. perf artifacts/scripts/provider splits) and restored prior implementations for modified files.
+  - Kept rollback as one coherent changeset to simplify review and recovery if needed.
+- **Key Files:** `app/[locale]/dashboard/**`, `components/providers/**`, `components/ui/**`, `context/data-provider.tsx`, `next.config.ts`, `proxy.ts`, `scripts/**`, `.github/workflows/**`, `AGENTS.md`
+- **Verification:** `npm run typecheck` after rollback snapshot.

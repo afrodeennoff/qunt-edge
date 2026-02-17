@@ -3,7 +3,6 @@ import { Trade, Account, Group } from "@/lib/data-types"
 
 const DB_NAME = "qunt-edge-cache"
 const DB_VERSION = 2 // Incremented version to add new stores
-export const CACHE_SCHEMA_VERSION = 1
 const STORES = {
   TRADES: "trades",
   ACCOUNTS: "accounts",
@@ -16,28 +15,7 @@ const KEY_PREFIX = "cache:"
 
 type CacheEntry<T> = {
   updatedAt: number
-  schemaVersion: number
   data: T
-}
-
-export function readCacheEntry<T>(value: unknown): { data: T | null; isStaleSchema: boolean } {
-  if (!value || typeof value !== "object") {
-    return { data: null, isStaleSchema: false }
-  }
-
-  const entry = value as Partial<CacheEntry<T>>
-  if (!("schemaVersion" in entry)) {
-    return { data: null, isStaleSchema: true }
-  }
-
-  if (entry.schemaVersion !== CACHE_SCHEMA_VERSION) {
-    return { data: null, isStaleSchema: true }
-  }
-
-  return {
-    data: (entry.data as T | undefined) ?? null,
-    isStaleSchema: false,
-  }
 }
 
 const isBrowser = typeof window !== "undefined" && typeof indexedDB !== "undefined"
@@ -90,18 +68,8 @@ async function getCache<T>(storeName: string, key: string): Promise<T | null> {
       const request = store.get(`${KEY_PREFIX}${key}`)
 
       request.onsuccess = () => {
-        const parsed = readCacheEntry<T>(request.result)
-        if (parsed.isStaleSchema) {
-          // Invalidate stale cache entries written with older shapes.
-          void clearStore(storeName, key).catch(() => undefined)
-          resolve(null)
-          return
-        }
-        if (!parsed.data) {
-          resolve(null)
-          return
-        }
-        resolve(parsed.data)
+        const value = request.result as CacheEntry<T> | undefined
+        resolve(value?.data ?? null)
       }
       request.onerror = () => reject(request.error)
     } catch (e) {
@@ -118,14 +86,7 @@ async function setCache<T>(storeName: string, key: string, data: T): Promise<voi
     try {
       const tx = db.transaction(storeName, "readwrite")
       const store = tx.objectStore(storeName)
-      store.put(
-        {
-          updatedAt: Date.now(),
-          schemaVersion: CACHE_SCHEMA_VERSION,
-          data,
-        } satisfies CacheEntry<T>,
-        `${KEY_PREFIX}${key}`
-      )
+      store.put({ updatedAt: Date.now(), data } satisfies CacheEntry<T>, `${KEY_PREFIX}${key}`)
 
       tx.oncomplete = () => resolve()
       tx.onerror = () => reject(tx.error)

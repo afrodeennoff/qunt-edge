@@ -8,4 +8,14 @@ export const {
 } = createI18nServer({
   en: () => import('./en'),
   fr: () => import('./fr'),
+  hi: () => import('./hi'),
+  ja: () => import('./ja'),
+  es: () => import('./es'),
+  it: () => import('./it'),
+  // Fallbacks for supported middleware locales that lack files
+  de: () => import('./en'),
+  pt: () => import('./en'),
+  vi: () => import('./en'),
+  zh: () => import('./en'),
+  yo: () => import('./en'),
 })

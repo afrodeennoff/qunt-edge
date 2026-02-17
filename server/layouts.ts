@@ -190,23 +190,9 @@ export async function createLayoutVersionAction(
   }
 ): Promise<void> {
   try {
-    const userId = await getUserId()
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
-    const ownedLayout = await prisma.dashboardLayout.findFirst({
-      where: { id: layoutId, userId },
-      select: { id: true }
-    })
-
-    if (!ownedLayout) {
-      throw new Error('Unauthorized')
-    }
-
     await prisma.layoutVersion.create({
       data: {
-        layoutId: ownedLayout.id,
+        layoutId,
         desktop: versionData.desktop as Prisma.JsonArray,
         mobile: versionData.mobile as Prisma.JsonArray,
         version: versionData.version,
@@ -218,7 +204,7 @@ export async function createLayoutVersionAction(
     })
 
     await prisma.dashboardLayout.update({
-      where: { id: ownedLayout.id },
+      where: { id: layoutId },
       data: {
         version: versionData.version,
         checksum: versionData.checksum,
@@ -248,17 +234,8 @@ export async function getLayoutVersionHistoryAction(
   createdAt: Date
 }>> {
   try {
-    const userId = await getUserId()
-    if (!userId) return []
-
-    const ownedLayout = await prisma.dashboardLayout.findFirst({
-      where: { id: layoutId, userId },
-      select: { id: true }
-    })
-    if (!ownedLayout) return []
-
     const versions = await prisma.layoutVersion.findMany({
-      where: { layoutId: ownedLayout.id },
+      where: { layoutId },
       orderBy: { version: 'desc' },
       take: limit
     })
@@ -295,18 +272,13 @@ export async function getLayoutVersionByNumberAction(
   createdAt: Date
 } | null> {
   try {
-    const userId = await getUserId()
-    if (!userId) return null
-
-    const ownedLayout = await prisma.dashboardLayout.findFirst({
-      where: { id: layoutId, userId },
-      select: { id: true }
-    })
-    if (!ownedLayout) return null
-
-    const version = await prisma.layoutVersion.findFirst({
-      where: { layoutId: ownedLayout.id, version: versionNumber },
-      orderBy: { createdAt: 'desc' }
+    const version = await prisma.layoutVersion.findUnique({
+      where: {
+        id: await prisma.layoutVersion.findFirst({
+          where: { layoutId, version: versionNumber },
+          select: { id: true }
+        }).then(v => v?.id)
+      }
     })
 
     if (!version) return null
@@ -333,21 +305,12 @@ export async function cleanupOldLayoutVersionsAction(
   keepCount = 50
 ): Promise<void> {
   try {
-    const userId = await getUserId()
-    if (!userId) return
-
-    const ownedLayout = await prisma.dashboardLayout.findFirst({
-      where: { id: layoutId, userId },
-      select: { id: true }
-    })
-    if (!ownedLayout) return
-
-    const totalCount = await prisma.layoutVersion.count({ where: { layoutId: ownedLayout.id } })
+    const totalCount = await prisma.layoutVersion.count({ where: { layoutId } })
 
     if (totalCount <= keepCount) return
 
     const versionsToDelete = await prisma.layoutVersion.findMany({
-      where: { layoutId: ownedLayout.id },
+      where: { layoutId },
       orderBy: { version: 'desc' },
       skip: keepCount,
       select: { id: true }
