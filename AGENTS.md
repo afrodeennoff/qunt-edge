@@ -36,6 +36,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Vercel Preview Redeploy Trigger Commit
+- **What changed:** Created and pushed an empty commit on `codex/reset-5fa952d-main` to trigger a fresh Vercel deployment run without changing application code.
+- **What I want:** Start a new Vercel preview deployment immediately from the current branch state.
+- **What I don't want:** Unnecessary code churn just to trigger hosting pipeline execution.
+- **How we fixed that:**
+  - Confirmed clean branch state on `codex/reset-5fa952d-main`.
+  - Created `--allow-empty` commit: `chore(deploy): trigger vercel preview`.
+  - Pushed branch to origin (`5fa952d..1a15c3b`).
+- **Key Files:** `AGENTS.md`
+- **Verification:**
+  - `git push origin codex/reset-5fa952d-main` -> exits `0` and updates remote head to `1a15c3b`.
+
 ### 2026-02-17: Safe CSP Reintroduction (Report-Only + Nonce + Strict Toggle)
 - **What changed:** Reintroduced CSP as a focused security follow-up on top of rollback state, using nonce-based script authorization with safe rollout controls (`report-only` by default, optional strict mode).
 - **What I want:** Restore browser-side security hardening (XSS/script-injection defense) without reintroducing blank-page regressions from overly strict policy rollout.
