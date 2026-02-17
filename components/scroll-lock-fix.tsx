@@ -8,9 +8,22 @@ import { useEffect } from "react";
  */
 export function ScrollLockFix() {
   useEffect(() => {
-    const removePadding = () => {
+    const hasOpenDialog = () =>
+      Boolean(
+        document.querySelector(
+          [
+            "[role='dialog'][data-state='open']",
+            "[data-radix-dialog-content][data-state='open']",
+            "[data-radix-popover-content][data-state='open']",
+            "[data-radix-dropdown-menu-content][data-state='open']",
+          ].join(",")
+        )
+      );
+
+    const cleanupScrollLock = () => {
       const body = document.body;
       const html = document.documentElement;
+      const hasOverlayOpen = hasOpenDialog();
 
       [body, html].forEach((element) => {
         if (element.style.paddingRight !== "0px") {
@@ -19,13 +32,22 @@ export function ScrollLockFix() {
         if (element.style.marginRight !== "0px") {
           element.style.setProperty("margin-right", "0", "important");
         }
+
+        // Chrome may keep stale lock styles after modal close.
+        if (!hasOverlayOpen) {
+          element.style.removeProperty("overflow");
+          element.style.removeProperty("overflow-y");
+          element.style.removeProperty("overflow-x");
+          element.style.removeProperty("pointer-events");
+          element.style.removeProperty("touch-action");
+        }
       });
     };
 
-    removePadding();
+    cleanupScrollLock();
 
     const observer = new MutationObserver(() => {
-      removePadding();
+      cleanupScrollLock();
     });
 
     observer.observe(document.body, {
