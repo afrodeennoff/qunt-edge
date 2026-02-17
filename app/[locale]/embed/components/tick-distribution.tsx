@@ -145,7 +145,18 @@ export default function TickDistributionChartEmbed({
     return `hsl(var(--chart-2) / ${intensity})`;
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  interface CustomTooltipProps {
+    active?: boolean;
+    payload?: Array<{
+      payload: {
+        ticks: string;
+        count: number;
+      };
+    }>;
+    label?: string;
+  }
+
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     React.useEffect(() => {
       if (active && payload && payload.length)
         setActiveTick(payload[0].payload.ticks);
@@ -258,7 +269,11 @@ export default function TickDistributionChartEmbed({
                   height={24}
                   tickMargin={8}
                   tick={(props) => {
-                    const { x, y, payload } = props as any;
+                    const { x, y, payload } = props as {
+                      x: number;
+                      y: number;
+                      payload: { value: string | number };
+                    };
                     return (
                       <g transform={`translate(${x},${y})`}>
                         <text
