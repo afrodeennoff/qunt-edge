@@ -47,7 +47,7 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: -18 }}
+        initial={false}
         animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         transition={isMobile ? undefined : { duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto w-full max-w-[1240px] px-4 pt-4 sm:px-6"
