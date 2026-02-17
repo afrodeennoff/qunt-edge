@@ -259,9 +259,20 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
+            if (typeof navigator === 'undefined') {
+                Object.defineProperty(global, 'navigator', {
+                    value: {
+                        onLine: true,
+                    },
+                    writable: true,
+                    configurable: true,
+                })
+            }
+
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
                 value: false,
+                configurable: true,
             })
 
             const onOffline = vi.fn()
