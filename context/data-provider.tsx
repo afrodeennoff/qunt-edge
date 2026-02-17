@@ -298,9 +298,10 @@ export const DataProvider: React.FC<{
       .map((t) => ({
         ...t,
         pnl: Number.isFinite(Number(t.pnl)) ? Number(t.pnl) : 0,
-        price: Number.isFinite(Number(t.price)) ? Number(t.price) : 0,
         quantity: Number.isFinite(Number(t.quantity)) ? Number(t.quantity) : 0,
         commission: Number.isFinite(Number(t.commission)) ? Number(t.commission) : 0,
+        entryPrice: Number.isFinite(Number(t.entryPrice)) ? Number(t.entryPrice) : 0,
+        closePrice: Number.isFinite(Number(t.closePrice)) ? Number(t.closePrice) : 0,
       }))
       .filter((t) => isValid(new Date(t.entryDate)));
   }, []);
@@ -481,9 +482,19 @@ export const DataProvider: React.FC<{
       const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
       if (userId && !isSharedView) {
         // Try local cache first
+        let cachedTrades: Trade[] | null = null;
+        try {
+          const result = await getTradesCache(userId);
+          if (Array.isArray(result)) {
+            cachedTrades = result as Trade[];
+          }
+        } catch (e) {
+          console.error("Error fetching trades cache:", e);
+        }
+
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           console.log("[DataProvider] Using local IndexedDB cache for trades");
-          setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
+          setTrades(sanitizeTradesForState(cachedTrades));
 
           // Refresh in background if not in dev or if we want freshest data
           fetchAllTrades(userId, false).then(freshTrades => {

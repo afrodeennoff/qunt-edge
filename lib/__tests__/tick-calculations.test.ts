@@ -8,6 +8,8 @@ import {
 import type { Trade, TickDetails } from '@/prisma/generated/prisma'
 
 // Helper to create a mock trade
+// Using any cast to bypass strict Decimal type requirements for tests
+// The implementation uses Number() which handles number or Decimal runtime objects
 const createMockTrade = (overrides: Partial<Trade> = {}): Trade => ({
   id: 'trade-1',
   instrument: 'ESZ23',
@@ -16,7 +18,7 @@ const createMockTrade = (overrides: Partial<Trade> = {}): Trade => ({
   entryDate: new Date(),
   exitDate: new Date(),
   ...overrides,
-} as Trade)
+} as unknown as Trade)
 
 // Helper to create mock tick details
 const createMockTickDetails = (overrides: Partial<TickDetails> = {}): TickDetails => ({
@@ -25,14 +27,14 @@ const createMockTickDetails = (overrides: Partial<TickDetails> = {}): TickDetail
   tickValue: 12.5,
   tickSize: 0.25,
   ...overrides,
-} as TickDetails)
+} as unknown as TickDetails)
 
 describe('tick-calculations', () => {
   describe('calculateTicksAndPoints', () => {
     it('calculates ticks and points correctly for a standard trade', () => {
-      const trade = createMockTrade({ pnl: 125, quantity: 1, instrument: 'ESZ23' })
+      const trade = createMockTrade({ pnl: 125 as any, quantity: 1 as any, instrument: 'ESZ23' })
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
 
       const result = calculateTicksAndPoints(trade, tickDetails)
@@ -46,7 +48,7 @@ describe('tick-calculations', () => {
     })
 
     it('uses default values when no matching tick details are found', () => {
-      const trade = createMockTrade({ pnl: 100, quantity: 1, instrument: 'UNKNOWN' })
+      const trade = createMockTrade({ pnl: 100 as any, quantity: 1 as any, instrument: 'UNKNOWN' })
       const tickDetails = {
         'ES': createMockTickDetails()
       }
@@ -62,10 +64,10 @@ describe('tick-calculations', () => {
     })
 
     it('finds the longest matching ticker', () => {
-      const trade = createMockTrade({ pnl: 100, quantity: 1, instrument: 'MESH24' })
+      const trade = createMockTrade({ pnl: 100 as any, quantity: 1 as any, instrument: 'MESH24' })
       const tickDetails = {
-        'MES': createMockTickDetails({ tickValue: 1.25, tickSize: 0.25 }), // Match
-        'M': createMockTickDetails({ tickValue: 10, tickSize: 1 }) // Shorter match
+        'MES': createMockTickDetails({ tickValue: 1.25 as any, tickSize: 0.25 as any }), // Match
+        'M': createMockTickDetails({ tickValue: 10 as any, tickSize: 1 as any }) // Shorter match
       }
 
       const result = calculateTicksAndPoints(trade, tickDetails)
@@ -80,9 +82,9 @@ describe('tick-calculations', () => {
     })
 
     it('handles negative PnL correctly', () => {
-      const trade = createMockTrade({ pnl: -50, quantity: 1, instrument: 'ESZ23' })
+      const trade = createMockTrade({ pnl: -50 as any, quantity: 1 as any, instrument: 'ESZ23' })
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
 
       const result = calculateTicksAndPoints(trade, tickDetails)
@@ -92,9 +94,9 @@ describe('tick-calculations', () => {
     })
 
     it('handles zero PnL correctly', () => {
-      const trade = createMockTrade({ pnl: 0, quantity: 1 })
+      const trade = createMockTrade({ pnl: 0 as any, quantity: 1 as any })
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
 
       const result = calculateTicksAndPoints(trade, tickDetails)
@@ -105,9 +107,9 @@ describe('tick-calculations', () => {
 
     it('handles rounding of points', () => {
       // Create a scenario where points would have many decimal places
-      const trade = createMockTrade({ pnl: 33.33, quantity: 1, instrument: 'TEST' })
+      const trade = createMockTrade({ pnl: 33.33 as any, quantity: 1 as any, instrument: 'TEST' })
       const tickDetails = {
-        'TEST': createMockTickDetails({ tickValue: 1, tickSize: 0.0123 })
+        'TEST': createMockTickDetails({ tickValue: 1 as any, tickSize: 0.0123 as any })
       }
 
       // ticks = 33.33 / 1 = 33
@@ -120,30 +122,21 @@ describe('tick-calculations', () => {
     })
 
     it('handles NaN results gracefully (e.g. zero quantity)', () => {
-      const trade = createMockTrade({ pnl: 100, quantity: 0 }) // Division by zero -> Infinity
+      const trade = createMockTrade({ pnl: 100 as any, quantity: 0 as any }) // Division by zero -> Infinity
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
-
-      // pnlPerContract = 100 / 0 = Infinity
-      // ticks = Infinity / 12.5 = Infinity
-      // isNaN(Infinity) is false. Wait, Infinity is not NaN.
-
-      // Let's see what the function does.
-      // const ticks = Math.round(pnlPerContract / tickValue)
-      // Math.round(Infinity) is Infinity.
-      // isNaN(Infinity) is false.
-
-      // If quantity is 0, we might get Infinity.
-      // The function returns { ticks: isNaN(ticks) ? 0 : ticks ... }
 
       const result = calculateTicksAndPoints(trade, tickDetails)
 
-      // If it returns Infinity, that might be technically correct math but maybe not desired UI.
-      // However, the function explicitly checks isNaN.
+      // Infinity handling depends on implementation, but NaN check should pass
+      // Note: Math.round(Infinity) is Infinity. isNaN(Infinity) is false.
+      // So checks in function: ticks = Infinity. points = Infinity.
 
-      // Let's test actual NaN case, e.g. 0/0
-      const tradeNaN = createMockTrade({ pnl: 0, quantity: 0 })
+      // Let's test explicit NaN case if possible, or just accept that 0 quantity might give Infinity
+      // The function returns: ticks: isNaN(ticks) ? 0 : ticks.
+
+      const tradeNaN = createMockTrade({ pnl: 0 as any, quantity: 0 as any })
       const resultNaN = calculateTicksAndPoints(tradeNaN, tickDetails)
 
       expect(resultNaN.ticks).toBe(0)
@@ -154,31 +147,26 @@ describe('tick-calculations', () => {
   describe('calculateTicksAndPointsForTrades', () => {
     it('calculates for multiple trades', () => {
       const trades = [
-        createMockTrade({ id: 't1', pnl: 125, quantity: 1, instrument: 'ES' }),
-        createMockTrade({ id: 't2', pnl: 250, quantity: 2, instrument: 'ES' })
+        createMockTrade({ id: 't1', pnl: 125 as any, quantity: 1 as any, instrument: 'ES' }),
+        createMockTrade({ id: 't2', pnl: 250 as any, quantity: 2 as any, instrument: 'ES' })
       ]
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
 
       const result = calculateTicksAndPointsForTrades(trades, tickDetails)
 
       expect(Object.keys(result)).toHaveLength(2)
       expect(result['t1']).toEqual({ ticks: 10, points: 2.5, tickValue: 12.5, tickSize: 0.25 })
-      // t2: 250/2 = 125 per contract. 125/12.5 = 10 ticks per contract?
-      // Wait, calculation uses pnlPerContract.
-      // pnlPerContract = 250 / 2 = 125.
-      // ticks = 125 / 12.5 = 10.
-      // So it's per contract ticks? Yes.
       expect(result['t2']).toEqual({ ticks: 10, points: 2.5, tickValue: 12.5, tickSize: 0.25 })
     })
   })
 
   describe('calculateTicksAndPointsForGroupedTrade', () => {
     it('calculates for a single trade object', () => {
-      const trade = createMockTrade({ pnl: 125, quantity: 1, instrument: 'ES' })
+      const trade = createMockTrade({ pnl: 125 as any, quantity: 1 as any, instrument: 'ES' })
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
 
       const result = calculateTicksAndPointsForGroupedTrade(trade, tickDetails)
@@ -189,12 +177,12 @@ describe('tick-calculations', () => {
     it('sums up ticks and points for grouped trades', () => {
       const groupedTrade = {
         trades: [
-          createMockTrade({ pnl: 125, quantity: 1, instrument: 'ES' }), // 10 ticks, 2.5 points
-          createMockTrade({ pnl: 250, quantity: 1, instrument: 'ES' })  // 20 ticks, 5.0 points
+          createMockTrade({ pnl: 125 as any, quantity: 1 as any, instrument: 'ES' }), // 10 ticks, 2.5 points
+          createMockTrade({ pnl: 250 as any, quantity: 1 as any, instrument: 'ES' })  // 20 ticks, 5.0 points
         ]
       }
       const tickDetails = {
-        'ES': createMockTickDetails({ tickValue: 12.5, tickSize: 0.25 })
+        'ES': createMockTickDetails({ tickValue: 12.5 as any, tickSize: 0.25 as any })
       }
 
       const result = calculateTicksAndPointsForGroupedTrade(groupedTrade, tickDetails)
