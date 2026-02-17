@@ -3,7 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
+import { ScrollLockFix } from "@/components/scroll-lock-fix";
 import { getUiVariant } from "@/lib/ui-v2";
 import { WebVitalsReporter } from "@/components/providers/web-vitals-reporter";
 
@@ -187,7 +187,7 @@ export default function RootLayout({
         className="font-sans antialiased text-foreground"
         data-ui-variant={uiVariant}
       >
-        <ScrollLockFixLazy />
+        <ScrollLockFix />
         {isProduction ? <WebVitalsReporter /> : null}
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}

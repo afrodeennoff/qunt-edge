@@ -1530,3 +1530,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `prisma/migrations/20260215193000_fix_dashboardlayout_rls_auth_uid_fk_mapping/migration.sql`, `AGENTS.md`
 - **Verification:**
   - `pg_policies` check confirms `DashboardLayout.authenticated_owner` now matches `auth_user_id` on both ownership and auth predicates.
+
+### 2026-02-17: Home Page Blank Render Fix (Root Layout CSR Bailout Removal)
+- **What changed:** Replaced the root-layout lazy dynamic wrapper for `ScrollLockFix` with a direct client component render to avoid server render bailout behavior that could produce a blank home shell.
+- **What I want:** The homepage should render immediately with server output instead of depending on a full client-side bailout path.
+- **What I don't want:** Root-level `next/dynamic` bailout behavior (`BAILOUT_TO_CLIENT_SIDE_RENDERING`) causing users to see a blank page while hydration/runtime recovers.
+- **How we fixed that:**
+  - Updated `app/layout.tsx` to import `ScrollLockFix` directly from `components/scroll-lock-fix`.
+  - Removed usage of the `ScrollLockFixLazy` dynamic wrapper in root layout and rendered `<ScrollLockFix />` directly.
+  - Verified `/en` SSR HTML response no longer includes root-layout bailout markers tied to the old lazy wrapper path.
+- **Key Files:** `app/layout.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0` with full route generation.
+  - `curl -sS http://localhost:3000/en` after change shows normal rendered marketing markup and no root bailout stack referencing `ScrollLockFixLazy`.
