@@ -232,11 +232,6 @@ export default async function middleware(req: NextRequest) {
     // If we are here, it means we are on a valid path (localized or root if rewrite was on... but we turned it off).
     // So pathname should be /en/dashboard or similar.
 
-    // Strip locale from next param if we want cleanliness, or keep it.
-    // let encodedSearchParams = `${pathname.substring(1)}${req.nextUrl.search}`
-    // This logic was stripping first char? No. substring(1)
-
-    // Better way to build 'next':
     const nextPath = pathname + req.nextUrl.search
     if (nextPath) {
       authUrl.searchParams.append("next", nextPath)
