@@ -27,9 +27,9 @@ export default async function DashboardLayout({
       <RithmicSyncNotifications />
       <Modals />
       <DashboardProvider>
-        <div className="enterprise-grid flex h-screen min-h-0 w-full bg-background selection:bg-primary/20 selection:text-primary">
+        <div className="flex h-screen min-h-0 w-full bg-background selection:bg-primary/20 selection:text-primary">
           <DashboardSidebar />
-          <SidebarInset className="relative flex-1 min-h-0 overflow-hidden border-l border-white/10">
+          <SidebarInset className="relative flex-1 min-h-0 overflow-hidden">
             {/* Global Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
               <div className="absolute inset-0 bg-[linear-gradient(180deg,#050505_0%,#07070a_42%,#050505_100%)] md:hidden" />

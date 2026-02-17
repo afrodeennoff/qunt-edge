@@ -190,13 +190,13 @@ export default function TeamNavbar() {
 
     return (
         <>
-            <div className={`fixed inset-0 z-40 bg-black/65 backdrop-blur-sm transition-opacity duration-300 ${hoveredItem ? 'opacity-100' : 'pointer-events-none opacity-0'}`} />
-            <span className={`fixed top-0 left-0 right-0 z-50 h-14 border-b border-white/12 bg-black/75 backdrop-blur-xl ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}></span>
-            <header className={`fixed top-0 left-0 right-0 z-50 mx-auto flex h-14 max-w-7xl items-center justify-between border-b border-white/12 bg-black/65 px-4 text-zinc-100 backdrop-blur-xl transition-transform duration-300 lg:px-6 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+            <div className={`fixed inset-0 bg-background/80  backdrop-blur-xs z-40 transition-opacity duration-300 ${hoveredItem ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
+            <span className={`h-14 fixed top-0 left-0 right-0 bg-background z-50 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}></span>
+            <header className={`max-w-7xl mx-auto fixed top-0 left-0 right-0 px-4 lg:px-6 h-14 flex items-center justify-between z-50  text-foreground transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
                 <Link href="/teams" className="flex items-center space-x-2">
                     <Logo className='w-6 h-6 fill-black dark:fill-white' />
                     <span className="font-bold text-xl">Qunt Edge</span>
-                    <Badge variant="secondary" className="border-white/15 bg-white/10 text-xs text-zinc-200">
+                    <Badge variant="secondary" className="text-xs">
                         {t('teams.badge')}
                     </Badge>
                 </Link>
@@ -204,7 +204,7 @@ export default function TeamNavbar() {
                     <NavigationMenu>
                         <NavigationMenuList className="list-none">
                             <NavigationMenuItem onMouseEnter={() => setHoveredItem('features')} onMouseLeave={() => setHoveredItem(null)}>
-                                <NavigationMenuTrigger className='bg-transparent text-zinc-200 hover:text-zinc-50'>{t('teams.navbar.features')}</NavigationMenuTrigger>
+                                <NavigationMenuTrigger className='bg-transparent'>{t('teams.navbar.features')}</NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] list-none">
                                         <li className="row-span-3">
@@ -238,7 +238,7 @@ export default function TeamNavbar() {
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
                             <NavigationMenuItem onMouseEnter={() => setHoveredItem('roadmap')} onMouseLeave={() => setHoveredItem(null)}>
-                                <NavigationMenuTrigger className='bg-transparent text-zinc-200 hover:text-zinc-50'>{t('teams.navbar.roadmap')}</NavigationMenuTrigger>
+                                <NavigationMenuTrigger className='bg-transparent'>{t('teams.navbar.roadmap')}</NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <ul className="grid gap-3 p-4 w-[400px] list-none">
                                         <ListItem href="/teams#roadmap" title={t('teams.navbar.roadmap.q1')}>
@@ -259,7 +259,7 @@ export default function TeamNavbar() {
 
                         </NavigationMenuList>
                         <Separator orientation="vertical" className="h-6 mx-4" />
-                        <Button variant="ghost" className="text-sm font-medium text-zinc-300 hover:bg-white/10 hover:text-zinc-50" asChild>
+                        <Button variant="ghost" className="text-sm font-medium hover:text-accent-foreground" asChild>
                             <Link href={"/teams/dashboard"}>{t('teams.cta')}</Link>
                         </Button>
                     </NavigationMenu>
@@ -269,7 +269,7 @@ export default function TeamNavbar() {
                     <LanguageSelector />
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" className="hidden h-9 w-9 border border-white/15 bg-white/5 px-0 text-zinc-200 hover:bg-white/12 lg:inline-flex">
+                            <Button variant="ghost" className="hidden lg:inline-flex h-9 w-9 px-0">
                                 {getThemeIcon()}
                                 <span className="sr-only">Toggle theme</span>
                             </Button>
@@ -302,7 +302,7 @@ export default function TeamNavbar() {
                                 <span className="sr-only">Open menu</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="w-[300px] border-white/12 bg-black/95 text-zinc-100 sm:w-[400px] lg:hidden">
+                        <SheetContent side="right" className="w-[300px] sm:w-[400px] lg:hidden">
                             <div className="flex flex-col h-full">
                                 <div className="grow overflow-y-auto py-6">
                                     <MobileNavContent onLinkClick={closeMenu} />

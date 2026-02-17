@@ -36,35 +36,6 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
-### 2026-02-17: Enterprise Monochrome Redesign (Targeted Routes, Design-Only)
-- **What changed:** Completed a full design-layer monochrome redesign across requested teams/marketing/dashboard surfaces with shared enterprise shell utilities and consistent premium panel hierarchy.
-- **What I want:** Targeted routes should feel visually cohesive, premium, and easier to scan on desktop/mobile without changing data/auth/action behavior.
-- **What I don't want:** Any backend/API/auth/state regression from redesign work, route wiring changes, or business logic drift hidden inside UI updates.
-- **How we fixed that:**
-  - Added reusable design primitives in `app/globals.css`:
-    - `enterprise-shell`, `enterprise-panel`, `enterprise-kicker`, `enterprise-grid`.
-  - Redesigned marketing/team entry routes:
-    - `/pricing`: hero+plans reframed in enterprise shell composition.
-    - `/support`: chat surface and Discord callout moved to monochrome panel system.
-    - `/teams`: landing visual refresh + monochrome section/card/buttons treatment.
-    - `/teams` layout wrappers updated for consistent shell background behavior.
-    - teams navbar updated to glassy monochrome header/sheet style.
-  - Redesigned dashboard route shells:
-    - `/dashboard/strategies`, `/dashboard/reports`, `/dashboard/behavior` updated to enterprise shells/panels.
-    - `/dashboard/data`, `/dashboard/billing`, `/dashboard/settings` updated with consistent panel framing and hierarchy.
-    - `/teams/dashboard` layout/page aligned to same design grammar.
-  - Kept strict design-only boundaries:
-    - no API route changes,
-    - no server action contract changes,
-    - no auth/session/data schema changes.
-- **Key Files:** `app/globals.css`, `app/[locale]/(landing)/pricing/page.tsx`, `app/[locale]/(landing)/support/page.tsx`, `app/[locale]/(landing)/support/components/support-form.tsx`, `app/[locale]/teams/(landing)/layout.tsx`, `app/[locale]/teams/(landing)/page.tsx`, `app/[locale]/teams/components/team-navbar.tsx`, `app/[locale]/teams/layout.tsx`, `app/[locale]/dashboard/layout.tsx`, `app/[locale]/dashboard/strategies/page.tsx`, `app/[locale]/dashboard/reports/page.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, `app/[locale]/dashboard/data/page.tsx`, `app/[locale]/dashboard/data/components/data-management/data-management-card.tsx`, `app/[locale]/dashboard/settings/page.tsx`, `app/[locale]/dashboard/billing/page.tsx`, `app/[locale]/dashboard/billing/components/billing-management.tsx`, `app/[locale]/teams/dashboard/layout.tsx`, `app/[locale]/teams/dashboard/page.tsx`
-- **Verification:**
-  - `npm run typecheck` -> exits `0`.
-  - `npm run build` -> exits `0` with full route generation.
-  - Visual behavior expectation:
-    - targeted routes load with enterprise monochrome shell/panel hierarchy,
-    - interactions (forms/tabs/buttons/dialogs/navigation) remain functional with unchanged logic contracts.
-
 ### 2026-02-17: Global Smooth Scroll Layer (Framer Motion + Native Fallback)
 - **What changed:** Added an app-wide smooth scrolling layer with Framer Motion-driven same-page anchor scroll animation, while keeping native smooth scrolling behavior enabled globally.
 - **What I want:** Consistent, polished scroll behavior across the full web app (landing + dashboard contexts), without breaking accessibility or existing scroll containers.
@@ -1884,13 +1855,3 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Verification:**
   - `npx eslint components/sidebar/sidebar-helpers.tsx components/sidebar/dashboard-sidebar.tsx components/sidebar/aimodel-sidebar.tsx components/mdx-sidebar.tsx app/[locale]/teams/components/teams-sidebar.tsx app/[locale]/dashboard/settings/actions.ts` -> exits `0`.
   - `npm run -s typecheck` -> exits `0`.
-
-### 2026-02-17: Brand Logo Asset Swap (User-Provided SVG)
-- **What changed:** Replaced the app logo asset with the user-provided SVG and updated the shared logo component to render that file.
-- **What I want:** Brand mark used across the app should match the provided `2.svg` artwork.
-- **What I don't want:** Inconsistent logo rendering between static asset usage and shared `Logo` component usage.
-- **How we fixed that:**
-  - Copied `/Users/timon/Downloads/Black Modern Abstract Logo-2/2.svg` into project as `public/logo.svg`.
-  - Updated `components/logo.tsx` to render `public/logo.svg` via `next/image` (with preserved class-based sizing).
-- **Key Files:** `public/logo.svg`, `components/logo.tsx`, `AGENTS.md`
-- **Verification:** `npx eslint components/logo.tsx` exits `0`.

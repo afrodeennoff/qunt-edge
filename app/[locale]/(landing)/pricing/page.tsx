@@ -13,23 +13,18 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <div className="marketing-shell enterprise-grid">
-      <main className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <section className="enterprise-shell rounded-3xl p-6 sm:p-8 lg:p-10">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="enterprise-kicker">Enterprise Pricing</span>
-            <h1 className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              {t("pricing.heading")}
-            </h1>
-            <p className="mt-4 text-base text-zinc-300 sm:text-lg">
-              {t("pricing.subheading")}
-            </p>
-          </div>
-          <div className="mt-10">
-            <PricingPlans />
-          </div>
-        </section>
+    <div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+        <h1 className="text-4xl font-bold text-center mb-4">
+          {t("pricing.heading")}
+        </h1>
+        <p className="text-xl text-center text-gray-600 mb-12">
+          {t("pricing.subheading")}
+        </p>
+
+        <PricingPlans />
       </main>
+
     </div>
   );
 }

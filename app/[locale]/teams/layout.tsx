@@ -26,9 +26,7 @@ export default async function TeamLayout({
 }) {
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-black text-zinc-100">
-        {children}
-      </div>
+      {children}
     </ThemeProvider>
   );
 }

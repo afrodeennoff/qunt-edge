@@ -295,10 +295,10 @@ export function DataManagementCard() {
     </Alert>
   )
   return (
-    <Card className="enterprise-shell border-white/15">
+    <Card>
       <CardHeader>
         <CardTitle className="flex flex-col md:flex-row gap-y-4 md:gap-y-0 justify-between items-start md:items-center">
-          <span className="text-xl text-zinc-50 md:text-2xl">{t('dataManagement.title')}</span>
+          <span className="text-xl md:text-2xl">{t('dataManagement.title')}</span>
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             <ExportButton trades={trades} />
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -381,7 +381,7 @@ export function DataManagementCard() {
       <CardContent>
         <div className="space-y-6">
           {Object.entries(groupedTrades).map(([accountNumber, instruments]) => (
-            <div key={accountNumber} className="border-b border-white/12 pb-4 last:border-b-0">
+            <div key={accountNumber} className="border-b pb-4 last:border-b-0">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2 mb-2">
                 <div className="flex items-center w-full sm:w-auto">
                   <Checkbox
@@ -464,7 +464,7 @@ export function DataManagementCard() {
               {expandedAccounts[accountNumber] && (
                 <div id={`account-${accountNumber}`} className="space-y-4 pl-2 sm:pl-4">
                   {Object.entries(instruments).map(([instrumentGroup, trades]) => (
-                    <div key={instrumentGroup} className="rounded-lg border border-white/12 bg-black/30 p-3 sm:p-4">
+                    <div key={instrumentGroup} className="bg-gray-100 dark:bg-white/5 p-3 sm:p-4 rounded-lg">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div className="flex items-center gap-2">
                           <h3 className="text-md font-medium">

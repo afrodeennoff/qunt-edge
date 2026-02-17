@@ -99,9 +99,9 @@ export default function SupportForm({ summary, locale, messages, setMessages, se
 
     return (
         <Dialog open={isContactFormOpen} onOpenChange={setIsContactFormOpen}>
-            <DialogContent className="enterprise-shell border-white/15 sm:max-w-2xl">
+            <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="text-zinc-50">{t('support.contactInformation')}</DialogTitle>
+                    <DialogTitle>{t('support.contactInformation')}</DialogTitle>
                     <DialogDescription>
                         {t('support.contactInformationDescription')}
                     </DialogDescription>
@@ -114,7 +114,6 @@ export default function SupportForm({ summary, locale, messages, setMessages, se
                             value={summary}
                             readOnly
                             required
-                            className="border-white/15 bg-black/35 text-zinc-100"
                         />
                     </div>
                     <div>
@@ -124,7 +123,6 @@ export default function SupportForm({ summary, locale, messages, setMessages, se
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            className="border-white/15 bg-black/35 text-zinc-100"
                         />
                     </div>
                     <div>
@@ -135,7 +133,6 @@ export default function SupportForm({ summary, locale, messages, setMessages, se
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="border-white/15 bg-black/35 text-zinc-100"
                         />
                     </div>
                     <div>
@@ -145,7 +142,6 @@ export default function SupportForm({ summary, locale, messages, setMessages, se
                             value={additionalInfo}
                             onChange={(e) => setAdditionalInfo(e.target.value)}
                             placeholder={t('support.form.additionalInfoPlaceholder')}
-                            className="border-white/15 bg-black/35 text-zinc-100"
                         />
                     </div>
                     <div className="flex justify-end space-x-2">
@@ -156,10 +152,10 @@ export default function SupportForm({ summary, locale, messages, setMessages, se
                                     text: t('support.form.cancel'),
                                 },
                             );
-                        }} className="border-white/20 bg-transparent text-zinc-200 hover:bg-white/10">
+                        }}>
                             {t('support.form.cancel')}
                         </Button>
-                        <Button type="submit" disabled={isSendingEmail} className="bg-white text-black hover:bg-zinc-200">
+                        <Button type="submit" disabled={isSendingEmail}>
                             {isSendingEmail ? t('support.form.sending') : t('support.form.submit')}
                         </Button>
                     </div>

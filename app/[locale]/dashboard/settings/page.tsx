@@ -153,15 +153,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-4 sm:py-8 lg:px-6">
-      <div className="enterprise-shell mb-8 rounded-3xl p-5 sm:p-6">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-50">{t('dashboard.settings')}</h1>
+    <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-8 lg:px-6">
+      <div className="mb-8 rounded-3xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.settings')}</h1>
         <p className="text-muted-foreground mt-2">{t('dashboard.settings.description')}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Profile Section */}
-        <Card className="enterprise-panel">
+        <Card className="border-border/70 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -211,7 +211,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Preferences Section */}
-        <Card className="enterprise-panel">
+        <Card className="border-border/70 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
@@ -334,7 +334,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Notifications Section */}
-        <Card className="enterprise-panel">
+        <Card className="border-border/70 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
@@ -404,7 +404,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Team Section */}
-        <Card className="enterprise-panel">
+        <Card className="border-border/70 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -507,7 +507,7 @@ export default function SettingsPage() {
         <LinkedAccounts />
 
         {/* Password (Migration) Section */}
-        <Card className="enterprise-panel">
+        <Card className="border-border/70 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
@@ -596,7 +596,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Account Management Section */}
-        <Card className="enterprise-panel">
+        <Card className="border-border/70 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
