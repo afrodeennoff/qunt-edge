@@ -182,7 +182,10 @@ export default async function middleware(req: NextRequest) {
     return response
   }
 
-  response.headers.set("Content-Security-Policy", buildAppCsp(nonce, isDev))
+  if (cspEnabled) {
+    const appCsp = buildAppCsp({ nonce, isDev, strictMode: cspStrictMode })
+    setCspHeader(response, appCsp, cspReportOnly)
+  }
 
   // Check for protected routes
   const needsSessionCheck = isDashboardRoute || isAdminRoute || isAuthRoute

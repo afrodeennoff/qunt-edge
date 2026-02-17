@@ -20,9 +20,6 @@ const DEV_CONNECT_SOURCES = [
   "ws://127.0.0.1:*",
 ];
 
-function normalizeSources(sources: string[]): string {
-  return Array.from(new Set(sources)).join(" ");
-}
 
 export function createNonce(): string {
   const bytes = new Uint8Array(16);
@@ -32,6 +29,10 @@ export function createNonce(): string {
     binary += String.fromCharCode(byte);
   }
   return btoa(binary);
+}
+
+function normalizeSources(sources: string[]): string {
+  return Array.from(new Set(sources)).join(" ");
 }
 
 export function buildAppCsp({ nonce, isDev, strictMode }: AppCspOptions): string {
