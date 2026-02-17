@@ -298,7 +298,7 @@ export const DataProvider: React.FC<{
       .map((t) => ({
         ...t,
         pnl: Number.isFinite(Number(t.pnl)) ? Number(t.pnl) : 0,
-        price: Number.isFinite(Number(t.price)) ? Number(t.price) : 0,
+        entryPrice: Number.isFinite(Number(t.entryPrice)) ? Number(t.entryPrice) : 0,
         quantity: Number.isFinite(Number(t.quantity)) ? Number(t.quantity) : 0,
         commission: Number.isFinite(Number(t.commission)) ? Number(t.commission) : 0,
       }))
@@ -479,8 +479,15 @@ export const DataProvider: React.FC<{
 
       // Step 2: Fetch trades (with caching server side)
       const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
+      let cachedTrades: Trade[] | null = null;
       if (userId && !isSharedView) {
         // Try local cache first
+        try {
+            cachedTrades = await getTradesCache(userId);
+        } catch (error) {
+            console.error("[DataProvider] Failed to read from IndexedDB:", error);
+        }
+
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           console.log("[DataProvider] Using local IndexedDB cache for trades");
           setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
