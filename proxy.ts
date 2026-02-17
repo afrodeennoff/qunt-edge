@@ -10,12 +10,12 @@ const MAINTENANCE_MODE = false
 
 // Use redirect strategy to ensure users are always on valid localized paths
 const I18nMiddleware = createI18nMiddleware({
-  locales: ["en", "fr", "de", "es", "it", "pt", "vi", "hi", "ja", "zh", "yo"],
+  locales: ["en"],
   defaultLocale: "en",
   urlMappingStrategy: "redirect",
 })
 
-const LOCALES = ["en", "fr", "de", "es", "it", "pt", "vi", "hi", "ja", "zh", "yo"] as const
+const LOCALES = ["en"] as const
 const LOCALE_SET = new Set<string>(LOCALES)
 const STATIC_FILE_REGEX = /\.[^/]+$/
 

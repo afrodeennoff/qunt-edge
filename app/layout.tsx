@@ -28,7 +28,6 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: "https://qunt-edge.vercel.app",
       languages: {
         "en-US": "https://qunt-edge.vercel.app",
-        "fr-FR": "https://qunt-edge.vercel.app/fr",
       },
     },
     // ---------- OPEN GRAPH ----------

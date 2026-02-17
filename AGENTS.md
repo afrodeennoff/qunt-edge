@@ -1550,3 +1550,48 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `git log -1 --pretty=fuller` confirms commit id/message/date.
   - `git show --stat -1` confirms `4` files changed, `118` insertions, `3` deletions.
   - `git show -1 -- <file>` reviewed patch contents for all touched files.
+
+### 2026-02-17: Home Page Locale Crash Fix (Middleware/Client Locale Parity)
+- **What changed:** Fixed client i18n locale mapping so all locales emitted by middleware are recognized by the client provider.
+- **What I want:** Home/marketing pages should render for every locale the edge middleware can redirect to, including fallback locales.
+- **What I don't want:** Client-side runtime failures on locale-prefixed routes (e.g. `/de`) because `createI18nClient` lacks that locale while middleware/server support it.
+- **How we fixed that:**
+  - Added missing fallback locale handlers in `locales/client.ts` for `de`, `pt`, `vi`, `zh`, and `yo` (mapped to `./en` placeholders).
+  - Kept existing server/middleware locale list unchanged; aligned client to that contract.
+- **Key Files:** `locales/client.ts`, `AGENTS.md`
+- **Verification:** `npm run -s typecheck` exits `0` after patch.
+
+### 2026-02-17: Home Page Reliability Hardening (Old + New Users)
+- **What changed:** Hardened locale routing and service worker initialization so both cached existing users and fresh users reliably reach a working home page.
+- **What I want:** Home route should load consistently across user cohorts regardless of browser cache/service worker state.
+- **What I don't want:** Middleware redirecting to locale prefixes that can mismatch client expectations, or SW kill-switch logic silently not running when the page is already loaded.
+- **How we fixed that:**
+  - Tightened middleware locale routing set in `proxy.ts` to `en/fr/es/it/hi/ja` (the stable client-supported set).
+  - Updated `RootProviders` SW logic to run immediately when `document.readyState === "complete"`, and to register/remove `load` listener cleanup to avoid missed execution and listener leaks.
+- **Key Files:** `proxy.ts`, `components/providers/root-providers.tsx`, `AGENTS.md`
+- **Verification:** `npm run -s typecheck` exits `0`.
+
+### 2026-02-17: Immediate Root-Cause Resolution (Home Page Reliability)
+- **What changed:** Finalized the true home-page root-cause fix by aligning locale support across middleware/server/client while preserving legacy locale URLs for existing users.
+- **What I want:** Both old users (already routed/cached on legacy locale prefixes) and new users should load the home page reliably with no i18n runtime mismatch.
+- **What I don't want:** Partial fixes that solve only first-paint animation visibility but still leave locale-contract divergence between edge routing and client i18n providers.
+- **How we fixed that:**
+  - Kept middleware locale surface in `proxy.ts` at full supported set (`en, fr, de, es, it, pt, vi, hi, ja, zh, yo`) to avoid breaking existing locale paths.
+  - Ensured client i18n parity in `locales/client.ts` by adding fallback handlers for `de, pt, vi, zh, yo`.
+  - Retained service-worker control hardening in `components/providers/root-providers.tsx` so register/unregister logic also executes when document is already loaded.
+- **Key Files:** `proxy.ts`, `locales/client.ts`, `components/providers/root-providers.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> exits `0`.
+  - `npm run -s build` -> exits `0` (full route generation).
+  - `npm run -s test:smoke` -> `Smoke checks passed.`
+
+### 2026-02-17: English-Only Routing Lockdown (Immediate)
+- **What changed:** Switched runtime locale routing to English-only while preserving minimal internal typing compatibility for existing en/fr conditional UI logic.
+- **What I want:** Public routing should resolve only English locale paths to simplify behavior and prevent non-English route variants.
+- **What I don't want:** Broken builds from strict locale-type narrowing across many components that still branch on `fr` labels/formatting.
+- **How we fixed that:**
+  - Updated `proxy.ts` locale middleware and locale set to `['en']` only.
+  - Reduced SEO language alternates in `app/layout.tsx` to English canonical only.
+  - Kept `fr` registered in `locales/client.ts` and `locales/server.ts` strictly for compile-time/runtime compatibility with existing `en/fr` checks; non-English locale routing is still blocked at middleware.
+- **Key Files:** `proxy.ts`, `locales/client.ts`, `locales/server.ts`, `app/layout.tsx`, `AGENTS.md`
+- **Verification:** `npm run -s typecheck` exits `0`.

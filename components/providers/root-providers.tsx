@@ -12,8 +12,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
         }
 
         const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED !== "false";
-
-        window.addEventListener("load", () => {
+        const handleServiceWorker = () => {
             if (swEnabled) {
                 navigator.serviceWorker.register("/sw.js").then(
                     () => undefined,
@@ -27,7 +26,17 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
                     registration.unregister();
                 });
             });
-        });
+        };
+
+        if (document.readyState === "complete") {
+            handleServiceWorker();
+            return;
+        }
+
+        window.addEventListener("load", handleServiceWorker);
+        return () => {
+            window.removeEventListener("load", handleServiceWorker);
+        };
     }, []);
 
     return (
