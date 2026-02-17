@@ -36,6 +36,43 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Immediate Widget Render Recovery (ChartSurface v2 CSS Binding)
+- **What changed:** Fixed a styling contract mismatch where global dashboard chart layout/sizing rules targeted `data-chart-surface="modern"` but chart components render `data-chart-surface="v2"`.
+- **What I want:** All dashboard chart widgets should consistently receive the intended container sizing/spacing styles so Recharts surfaces render instead of appearing blank.
+- **What I don't want:** Header-only widgets with empty chart bodies caused by selector drift between global CSS and `ChartSurface` implementation.
+- **How we fixed that:**
+  - Updated `app/globals.css` chart-surface selectors to support both:
+    - `data-chart-surface="modern"`,
+    - `data-chart-surface="v2"`.
+  - Applied this across:
+    - widget shell inheritance selectors,
+    - surface frame selectors,
+    - Recharts container/tick/legend selectors,
+    - dashboard chart header/body spacing normalization selectors.
+- **Key Files:** `app/globals.css`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual target:
+    - `/dashboard` chart widgets render data panels (not header-only blank surfaces),
+    - chart area respects expected padding/height within widget shells.
+
+### 2026-02-17: Widget Data Recovery Fix (Decimal Calendar Normalization + Cache Sanitization)
+- **What changed:** Fixed dashboard widget blank-state/`NaN` regression by normalizing calendar PnL outputs to finite numbers and sanitizing cached/server trades before state hydration.
+- **What I want:** Charts and statistics widgets should render consistently even when stale IndexedDB payloads contain malformed numeric/date values.
+- **What I don't want:** `Average Loss = NaN`, empty chart canvases with non-empty trade counts, or stale client cache poisoning widget render paths.
+- **How we fixed that:**
+  - Updated `lib/utils.ts`:
+    - `formatCalendarData(...)` now converts Decimal accumulators to plain finite numbers before returning chart data.
+  - Updated `context/data-provider.tsx`:
+    - added `sanitizeTradesForState(...)` to normalize trades with `normalizeTradesForClient(...)` and filter invalid date/non-finite numeric fields,
+    - applied sanitization on all cache/server trade hydration paths and cache write-back paths in `loadData` + `refreshTradesOnly`.
+- **Key Files:** `lib/utils.ts`, `context/data-provider.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual target:
+    - `/dashboard` widgets show chart bars/lines again,
+    - Trading Statistics no longer shows `Average Loss = NaN`.
+
 ### 2026-02-17: Enterprise Monochrome Redesign (Targeted Routes, Design-Only)
 - **What changed:** Completed a full design-layer monochrome redesign across requested teams/marketing/dashboard surfaces with shared enterprise shell utilities and consistent premium panel hierarchy.
 - **What I want:** Targeted routes should feel visually cohesive, premium, and easier to scan on desktop/mobile without changing data/auth/action behavior.

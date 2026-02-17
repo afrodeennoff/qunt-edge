@@ -130,7 +130,7 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
 }
 
 export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
-  return trades.reduce((acc: any, trade: Trade) => {
+  const reduced = trades.reduce((acc: any, trade: Trade) => {
     let date = '';
     try {
       const rawDate = trade.entryDate;
@@ -168,6 +168,25 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
     acc[date].trades.push(trade)
     return acc
   }, {})
+
+  // Normalize Decimal accumulators to finite numbers for chart consumers.
+  return Object.fromEntries(
+    Object.entries(reduced).map(([date, value]: [string, any]) => {
+      const pnlRaw = value?.pnl
+      const pnlNum =
+        pnlRaw instanceof Decimal
+          ? pnlRaw.toNumber()
+          : Number(pnlRaw ?? 0)
+
+      return [
+        date,
+        {
+          ...value,
+          pnl: Number.isFinite(pnlNum) ? pnlNum : 0,
+        },
+      ]
+    })
+  )
 }
 
 export function groupBy<T>(array: T[], key: keyof T): { [key: string]: T[] } {
