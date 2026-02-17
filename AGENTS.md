@@ -36,6 +36,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Cleanup Temporary Debug Scripts
+- **What changed:** Removed `check-db.ts` and `standalone-check-db.js` from the repository root.
+- **What I want:** Maintain a clean repository by removing temporary debugging scripts that are no longer needed.
+- **What I don't want:** Clutter in the root directory or confusion about whether these scripts are part of the maintained codebase.
+- **How we fixed that:**
+  - Deleted `check-db.ts` and `standalone-check-db.js`.
+  - Verified deletion and ensured `npm run build` still passes.
+- **Key Files:** `check-db.ts` (deleted), `standalone-check-db.js` (deleted), `AGENTS.md`
+- **Verification:**
+  - `ls check-db.ts` -> No such file.
+  - `npm run build` -> exits `0`.
+
 ### 2026-02-17: Sidebar Redirect Stall Fix (Locale-Aware Dashboard Auth Redirect)
 - **What changed:** Fixed dashboard layout unauthenticated redirect to use locale-aware authentication path with a safe `next` target.
 - **What I want:** Unauthenticated users navigating dashboard routes should redirect once to the correct localized auth page, without mid-session redirect stalls/bounces.
