@@ -259,6 +259,14 @@ describe('AutoSaveService', () => {
                 enableOfflineSupport: true,
             })
 
+            if (typeof navigator === 'undefined') {
+                Object.defineProperty(global, 'navigator', {
+                    value: { onLine: true },
+                    writable: true,
+                    configurable: true
+                })
+            }
+
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
                 value: false,
@@ -295,6 +303,22 @@ describe('AutoSaveService', () => {
                 timestamp: Date.now(),
                 retryCount: 0,
                 priority: 'normal',
+            })
+
+            if (typeof window === 'undefined') {
+                Object.defineProperty(global, 'window', {
+                    value: {
+                        dispatchEvent: (event: Event) => {},
+                        addEventListener: (event: string, cb: any) => {},
+                        removeEventListener: (event: string, cb: any) => {},
+                    },
+                    writable: true
+                })
+            }
+
+            Object.defineProperty(navigator, 'onLine', {
+                writable: true,
+                value: true,
             })
 
             const onlineEvent = new Event('online')
