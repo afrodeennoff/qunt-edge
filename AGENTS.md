@@ -36,6 +36,31 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Emergency Widget Rendering Hotfix (NaN + Chart Surface Contract)
+- **What changed:** Applied an emergency end-to-end widget recovery patch to address blank chart panels with visible trade counts and `Average Loss = NaN`.
+- **What I want:** Dashboard widgets should reliably render charts and statistics from cached/server trade data, even after stale client cache states.
+- **What I don't want:** Header-only blank widgets, NaN statistics values, or style-contract drift (`modern` vs `v2`) causing chart body collapse.
+- **How we fixed that:**
+  - Hardened trade hydration in `context/data-provider.tsx`:
+    - added `sanitizeTradesForState(...)` (normalize + finite-number/date filtering),
+    - applied sanitization to all cache/server/fallback trade `setTrades(...)` paths,
+    - ensured cache write-back uses sanitized trades.
+  - Hardened calendar output in `lib/utils.ts`:
+    - `formatCalendarData(...)` now returns finite numeric `pnl` values (converts Decimal accumulators safely).
+  - Fixed UI contract mismatch in `app/globals.css`:
+    - extended widget selectors to support both `data-widget-shell="true"` and `data-widget-shell="v2"`,
+    - extended chart selectors to support both `data-chart-surface="modern"` and `data-chart-surface="v2"`,
+    - added defensive `min-height` on Recharts responsive containers to avoid collapsed chart bodies.
+  - Added finite guards in `app/[locale]/dashboard/components/statistics/statistics-widget.tsx`:
+    - sanitized `chartData` values,
+    - guarded average win/loss computations against non-finite math.
+- **Key Files:** `context/data-provider.tsx`, `lib/utils.ts`, `app/globals.css`, `app/[locale]/dashboard/components/statistics/statistics-widget.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual target:
+    - `/dashboard?tab=widgets` chart panels render chart bodies,
+    - Trading Statistics no longer shows `Average Loss = NaN`.
+
 ### 2026-02-17: Vercel Preview Redeploy Trigger Commit
 - **What changed:** Created and pushed an empty commit on `codex/reset-5fa952d-main` to trigger a fresh Vercel deployment run without changing application code.
 - **What I want:** Start a new Vercel preview deployment immediately from the current branch state.

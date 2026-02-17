@@ -98,9 +98,9 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
   // Calculate long/short data
   const chartData = Object.entries(calendarData).map(([date, values]) => ({
     date,
-    pnl: values.pnl,
-    shortNumber: values.shortNumber,
-    longNumber: values.longNumber,
+    pnl: Number.isFinite(Number(values.pnl)) ? Number(values.pnl) : 0,
+    shortNumber: Number.isFinite(Number(values.shortNumber)) ? Number(values.shortNumber) : 0,
+    longNumber: Number.isFinite(Number(values.longNumber)) ? Number(values.longNumber) : 0,
   }))
 
   const longNumber = chartData.reduce((acc, curr) => acc + curr.longNumber, 0)
@@ -117,9 +117,13 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
       return dayData.pnl > 0 ? dayData.pnl : 0
     }
     const winningDays = chartData.filter(day => day.pnl > 0)
-    return winningDays.length > 0
-      ? winningDays.reduce((sum, day) => sum + day.pnl, 0) / winningDays.length
-      : 0
+    if (winningDays.length === 0) return 0
+    const total = winningDays.reduce((sum, day) => {
+      const pnl = Number(day.pnl)
+      return Number.isFinite(pnl) ? sum + pnl : sum
+    }, 0)
+    const result = total / winningDays.length
+    return Number.isFinite(result) ? result : 0
   }, [dayData, chartData])
 
   const avgLossPerDay = React.useMemo(() => {
@@ -128,9 +132,13 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
       return dayData.pnl < 0 ? Math.abs(dayData.pnl) : 0
     }
     const losingDays = chartData.filter(day => day.pnl < 0)
-    return losingDays.length > 0
-      ? Math.abs(losingDays.reduce((sum, day) => sum + day.pnl, 0) / losingDays.length)
-      : 0
+    if (losingDays.length === 0) return 0
+    const total = losingDays.reduce((sum, day) => {
+      const pnl = Number(day.pnl)
+      return Number.isFinite(pnl) ? sum + pnl : sum
+    }, 0)
+    const result = Math.abs(total / losingDays.length)
+    return Number.isFinite(result) ? result : 0
   }, [dayData, chartData])
 
   // Colors
