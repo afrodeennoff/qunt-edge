@@ -291,6 +291,20 @@ export const DataProvider: React.FC<{
   const [tagFilter, setTagFilter] = useState<TagFilter>({ tags: [] });
   const [isFirstConnection, setIsFirstConnection] = useState(false);
 
+  // Sanitize trades to prevent NaN/Infinity poisoning from bad cache/data
+  const sanitizeTradesForState = useCallback((incomingTrades: Trade[]) => {
+    if (!Array.isArray(incomingTrades)) return [];
+    return incomingTrades
+      .map((t) => ({
+        ...t,
+        pnl: Number.isFinite(Number(t.pnl)) ? Number(t.pnl) : 0,
+        price: Number.isFinite(Number(t.price)) ? Number(t.price) : 0,
+        quantity: Number.isFinite(Number(t.quantity)) ? Number(t.quantity) : 0,
+        commission: Number.isFinite(Number(t.commission)) ? Number(t.commission) : 0,
+      }))
+      .filter((t) => isValid(new Date(t.entryDate)));
+  }, []);
+
   const withTimeout = useCallback(
     async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
       let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -371,7 +385,7 @@ export const DataProvider: React.FC<{
 
           // Batch state updates
           const updates = async () => {
-            setTrades(processedSharedTrades as Trade[]);
+            setTrades(sanitizeTradesForState(processedSharedTrades as Trade[]));
             setSharedParams(sharedData.params);
 
             setDashboardLayout(defaultLayouts);
@@ -409,7 +423,7 @@ export const DataProvider: React.FC<{
           20000,
           "fetchAllTrades(admin)"
         );
-        setTrades(adminTrades);
+        setTrades(sanitizeTradesForState(adminTrades));
         // RESET ALL OTHER STATES
         setUser(null);
         setSubscription(null);
@@ -467,15 +481,14 @@ export const DataProvider: React.FC<{
       const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
       if (userId && !isSharedView) {
         // Try local cache first
-        const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           console.log("[DataProvider] Using local IndexedDB cache for trades");
-          setTrades(cachedTrades as Trade[]);
+          setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
 
           // Refresh in background if not in dev or if we want freshest data
           fetchAllTrades(userId, false).then(freshTrades => {
             if (freshTrades && freshTrades.length > 0) {
-              setTrades(freshTrades);
+              setTrades(sanitizeTradesForState(freshTrades));
               setTradesCache(userId, freshTrades).catch(console.error);
             }
           }).catch(console.error);
@@ -493,14 +506,14 @@ export const DataProvider: React.FC<{
           // Fallback to mock data if no real trades exist, regardless of environment (for demo purposes)
           const tradesToUse = safeTrades.length > 0 ? safeTrades : generateMockTrades(userId || "demo-user");
           console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0, ")");
-          setTrades(tradesToUse);
+          setTrades(sanitizeTradesForState(tradesToUse));
           if (tradesToUse.length > 0) {
             setTradesCache(userId, tradesToUse).catch(console.error);
           }
         }
       } else {
         const safeTrades = await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
-        setTrades(safeTrades);
+        setTrades(sanitizeTradesForState(safeTrades));
       }
 
       // Step 3: Fetch user data
@@ -578,7 +591,7 @@ export const DataProvider: React.FC<{
       // Fallback to mock data on fatal load error
       const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
       console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
-      setTrades(generateMockTrades(currentUserId));
+      setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
       setAccounts([]);
       setGroups([]);
     } finally {
@@ -668,7 +681,7 @@ export const DataProvider: React.FC<{
         if (process.env.NODE_ENV === "development" && !force) {
           const cachedTrades = await getTradesCache(userId);
           if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-            setTrades(cachedTrades);
+            setTrades(sanitizeTradesForState(cachedTrades));
             if (withLoading) setIsLoading(false);
             return;
           }
@@ -679,7 +692,7 @@ export const DataProvider: React.FC<{
           process.env.NODE_ENV === "development" && safeTrades.length === 0
             ? generateMockTrades(userId)
             : safeTrades;
-        setTrades(tradesToUse);
+        setTrades(sanitizeTradesForState(tradesToUse));
 
         if (process.env.NODE_ENV === "development") {
           // Best-effort cache write; do not block UI on failure
