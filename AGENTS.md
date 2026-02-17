@@ -36,6 +36,25 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Widget Gap Follow-up (Yellow-Line Dead Space Reduction)
+- **What changed:** Applied a second spacing pass to remove remaining bottom dead space highlighted in dashboard widgets (yellow-marked areas).
+- **What I want:** Chart content should sit tighter to the widget baseline with less empty floor across bar-chart cards.
+- **What I don't want:** Extra bottom whitespace under x-axis labels or inconsistent spacing between chart cards.
+- **How we fixed that:**
+  - Reduced shared chart body padding in global chart-surface normalization:
+    - `app/globals.css` `> div:nth-child(2)` now uses tighter padding.
+  - Tightened `P/L by Side` spacing:
+    - reduced body padding,
+    - reduced `BarChart` bottom margin,
+    - reduced `XAxis` height/tick margin.
+  - Added v2 selectors to base clipping normalization for consistency:
+    - included `[data-widget-shell="v2"]` and `[data-chart-surface="v2"]`.
+- **Key Files:** `app/globals.css`, `app/[locale]/dashboard/components/charts/pnl-by-side.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual target:
+    - `/dashboard?tab=widgets` shows tighter bottom spacing on yellow-marked chart cards.
+
 ### 2026-02-17: Widget Gap Tightening (Chart Body + Legend Spacing)
 - **What changed:** Tightened vertical spacing in dashboard chart widgets to remove the visible bottom dead-gap (blue-marked area) and compacted donut legends.
 - **What I want:** Widgets should keep chart content visually anchored with cleaner bottom spacing, while preserving all existing data/render logic.
