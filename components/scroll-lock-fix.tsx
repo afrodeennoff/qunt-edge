@@ -8,7 +8,14 @@ import { useEffect } from "react";
  */
 export function ScrollLockFix() {
   useEffect(() => {
-    const removePadding = () => {
+    const hasOpenDialog = () =>
+      Boolean(
+        document.querySelector(
+          '[role="dialog"][data-state="open"], [data-radix-dialog-content][data-state="open"], [data-radix-alert-dialog-content][data-state="open"]'
+        )
+      );
+
+    const normalizeScrollStyles = () => {
       const body = document.body;
       const html = document.documentElement;
 
@@ -20,12 +27,24 @@ export function ScrollLockFix() {
           element.style.setProperty("margin-right", "0", "important");
         }
       });
+
+      // Only clear leaked lock styles when no Radix dialog/sheet is open.
+      if (!hasOpenDialog()) {
+        [body, html].forEach((element) => {
+          element.style.removeProperty("overflow");
+          element.style.removeProperty("overflow-x");
+          element.style.removeProperty("overflow-y");
+          element.style.removeProperty("pointer-events");
+          element.style.removeProperty("touch-action");
+          element.removeAttribute("data-scroll-locked");
+        });
+      }
     };
 
-    removePadding();
+    normalizeScrollStyles();
 
     const observer = new MutationObserver(() => {
-      removePadding();
+      normalizeScrollStyles();
     });
 
     observer.observe(document.body, {
