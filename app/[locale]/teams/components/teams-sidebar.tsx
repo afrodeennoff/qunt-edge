@@ -4,6 +4,11 @@ import { LayoutDashboard, Users, BarChart3, TrendingUp, Globe, ArrowLeft } from 
 import { useUserStore } from "@/store/user-store"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 import { usePathname } from "next/navigation"
+import {
+  SIDEBAR_TIMEZONE_OPTIONS,
+  logoutWithServerSignOut,
+  toSidebarUser,
+} from "@/components/sidebar/sidebar-helpers"
 
 export function TeamsSidebar() {
   const user = useUserStore(state => state.supabaseUser)
@@ -65,34 +70,21 @@ export function TeamsSidebar() {
     },
   ]
 
-  const timezones = [
-    'UTC',
-    'Europe/Paris',
-    'America/New_York',
-    'America/Chicago',
-    'America/Los_Angeles',
-    'Asia/Tokyo',
-    'Asia/Shanghai',
-    'Australia/Sydney',
-  ]
-
   const resetUser = useUserStore(state => state.resetUser)
 
   const handleLogout = async () => {
-    resetUser()
-    const { signOut } = await import("@/server/auth")
-    await signOut()
+    await logoutWithServerSignOut(resetUser)
   }
 
   return (
     <UnifiedSidebar
       items={navItems}
-      user={user?.user_metadata}
+      user={toSidebarUser(user)}
       styleVariant="minimal"
       showSubscription={false}
       timezone={{
         value: timezone,
-        options: timezones,
+        options: SIDEBAR_TIMEZONE_OPTIONS,
         onChange: setTimezone
       }}
       onLogout={handleLogout}

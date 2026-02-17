@@ -5,29 +5,24 @@ import { usePathname, useParams } from 'next/navigation';
 import { useUserStore } from '@/store/user-store';
 import { useData } from "@/context/data-provider";
 import { checkAdminStatus } from "@/app/[locale]/dashboard/settings/actions";
-import { signOut } from "@/server/auth";
 import { useCurrentLocale } from "@/locales/client";
 import {
     LayoutDashboard,
-    Sparkles,
-    TrendingUp,
-    Activity,
-    BookOpen,
     BarChart3,
-    Brain,
     Building2,
-    Globe,
-    Database,
-    Download,
-    RefreshCw,
-    Settings,
-    CreditCard,
     Shield,
     Mail,
+    TrendingUp,
     Users
 } from "lucide-react";
 import TradeExportDialog from '@/components/export-button';
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
+import {
+    createDashboardNavigationItems,
+    createDashboardSystemItems,
+    logoutWithServerSignOut,
+    toSidebarUser,
+} from "@/components/sidebar/sidebar-helpers"
 
 export function AIModelSidebar() {
     const pathname = usePathname();
@@ -49,8 +44,7 @@ export function AIModelSidebar() {
     }, []);
 
     const handleLogout = async () => {
-        resetUser();
-        await signOut();
+        await logoutWithServerSignOut(resetUser);
     };
 
     const withLocale = useCallback(
@@ -79,18 +73,16 @@ export function AIModelSidebar() {
             );
         } else {
             items.push(
-                { label: 'Dashboard', href: withLocale('/dashboard?tab=widgets'), icon: <LayoutDashboard className="size-4.5" />, group: 'Inventory' },
-                { label: 'Chart the Future', href: withLocale('/dashboard?tab=chart'), icon: <Sparkles className="size-4.5" />, group: 'Inventory' },
-                { label: 'Trades', href: withLocale('/dashboard?tab=table'), icon: <TrendingUp className="size-4.5" />, group: 'Inventory' },
-                { label: 'Accounts', href: withLocale('/dashboard?tab=accounts'), icon: <Activity className="size-4.5" />, group: 'Inventory' },
-                { label: 'Trade Desk', href: withLocale('/dashboard/strategies'), icon: <BookOpen className="size-4.5" />, group: 'Inventory' },
-
-                { label: 'Reports', href: withLocale('/dashboard/reports'), icon: <BarChart3 className="size-4.5" />, group: 'Insights' },
-                { label: 'Behavior', href: withLocale('/dashboard/behavior'), icon: <Brain className="size-4.5" />, group: 'Insights' },
-
-                { label: 'Team', href: withLocale('/teams/dashboard'), icon: <Building2 className="size-4.5" />, group: 'Social' },
-                { label: 'Prop Firms', href: withLocale('/propfirms'), icon: <Globe className="size-4.5" />, group: 'Social' },
-            );
+                ...createDashboardNavigationItems(locale, {
+                    groups: {
+                        overview: "Inventory",
+                        trading: "Inventory",
+                        analytics: "Insights",
+                        community: "Social",
+                    },
+                    includeTraderProfile: false,
+                }),
+            )
         }
 
         if (isAdmin && !isAdminPath) {
@@ -100,29 +92,22 @@ export function AIModelSidebar() {
             );
         }
 
-        // System items
-        const systemItems: UnifiedSidebarItem[] = [
-            { label: 'Data', href: withLocale('/dashboard/data'), icon: <Database className="size-4.5" />, group: 'System' },
-            { label: 'Export', icon: <Download className="size-4.5" />, action: () => setIsExportOpen(true), group: 'System' },
-            { label: 'Sync', icon: <RefreshCw className="size-4.5" />, action: () => refreshAllData({ force: true }), group: 'System' },
-            { label: 'Settings', href: withLocale('/dashboard/settings'), icon: <Settings className="size-4.5" />, group: 'System' },
-            { label: 'Billing', href: withLocale('/dashboard/billing'), icon: <CreditCard className="size-4.5" />, group: 'System' },
-        ];
-
-        if (isTeamPath || isAdminPath) {
-            systemItems.unshift({ label: 'Main Dashboard', href: withLocale('/dashboard'), icon: <LayoutDashboard className="size-4.5" />, group: 'System' });
-        }
+        const systemItems = createDashboardSystemItems(locale, {
+            onSync: () => refreshAllData({ force: true }),
+            onExport: () => setIsExportOpen(true),
+            includeMainDashboard: isTeamPath || isAdminPath,
+        })
 
         items.push(...systemItems);
 
         return items;
-    }, [pathname, slug, isAdmin, refreshAllData, withLocale]);
+    }, [locale, pathname, slug, isAdmin, refreshAllData, withLocale]);
 
     return (
         <>
             <UnifiedSidebar
                 items={finalNavItems}
-                user={user?.user_metadata}
+                user={toSidebarUser(user)}
                 styleVariant="glassy"
                 onLogout={handleLogout}
             />

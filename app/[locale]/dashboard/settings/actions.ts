@@ -1,19 +1,18 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import auth from '@/locales/en/auth'
 import { createClient } from '@/server/auth'
 import { revalidatePath } from 'next/cache'
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
 import TeamInvitationEmail from '@/components/emails/team-invitation'
-import { getUserId } from '@/server/auth'
+import { requireAdmin } from '@/server/authz'
 
 export async function checkAdminStatus() {
   try {
-    const userId = await getUserId()
-    return userId === process.env.ALLOWED_ADMIN_USER_ID
-  } catch (error) {
+    await requireAdmin()
+    return true
+  } catch {
     return false
   }
 }

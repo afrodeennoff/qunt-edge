@@ -1788,3 +1788,32 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `components/ui/sidebar.tsx`, `components/ui/unified-sidebar.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `components/sidebar/aimodel-sidebar.tsx`, `app/[locale]/teams/components/teams-sidebar.tsx`, `app/[locale]/admin/components/sidebar-nav.tsx`, `components/mdx-sidebar.tsx`, `app/[locale]/dashboard/settings/actions.ts`, `server/authz.ts`, `AGENTS.md`
 - **Verification:**
   - `npx eslint components/ui/sidebar.tsx components/ui/unified-sidebar.tsx components/sidebar/dashboard-sidebar.tsx components/sidebar/aimodel-sidebar.tsx components/mdx-sidebar.tsx app/[locale]/teams/components/teams-sidebar.tsx app/[locale]/admin/components/sidebar-nav.tsx` -> exits `0`, reports `7` warnings in `components/mdx-sidebar.tsx`.
+
+### 2026-02-17: Sidebar Hardening Patch (Policy + Cleanup + Shared Helpers)
+- **What changed:** Implemented a focused sidebar hardening patch to centralize admin visibility checks, remove dead docs-sidebar logic, eliminate unused admin sidebar code, share sidebar configuration, and make logout flow fail-safe.
+- **What I want:** Keep all sidebar variants aligned on auth policy and navigation behavior while reducing code duplication and preventing client-state desync on logout failures.
+- **What I don't want:** Separate/weak admin checks in sidebar wrappers, stale unused sidebar components, repeated timezone/logout/nav config across files, or resetting local user state before sign-out succeeds.
+- **How we fixed that:**
+  - Centralized admin visibility source:
+    - updated `checkAdminStatus()` in `app/[locale]/dashboard/settings/actions.ts` to use `requireAdmin()` from `server/authz.ts` instead of direct env equality checks.
+  - Added shared sidebar config + logout helpers:
+    - new `components/sidebar/sidebar-helpers.tsx` provides:
+      - `SIDEBAR_TIMEZONE_OPTIONS`,
+      - `toSidebarUser(...)`,
+      - `createDashboardNavigationItems(...)`,
+      - `createDashboardSystemItems(...)`,
+      - `logoutWithServerSignOut(...)`.
+  - Made logout resilient:
+    - added `signOutWithoutRedirect()` in `server/auth.ts` for deterministic sign-out completion.
+    - sidebars now call sign-out first, then reset client user state, then redirect.
+  - Refactored sidebar wrappers to use shared helpers:
+    - `components/sidebar/dashboard-sidebar.tsx`,
+    - `components/sidebar/aimodel-sidebar.tsx`,
+    - `app/[locale]/teams/components/teams-sidebar.tsx`.
+  - Removed dead/unused sidebar code:
+    - simplified `components/mdx-sidebar.tsx` by deleting unused imports/state/effects/toggle handler.
+    - deleted orphan file `app/[locale]/admin/components/sidebar-nav.tsx` (not wired anywhere).
+- **Key Files:** `components/sidebar/sidebar-helpers.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `components/sidebar/aimodel-sidebar.tsx`, `app/[locale]/teams/components/teams-sidebar.tsx`, `app/[locale]/dashboard/settings/actions.ts`, `server/auth.ts`, `components/mdx-sidebar.tsx`, `app/[locale]/admin/components/sidebar-nav.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint components/sidebar/sidebar-helpers.tsx components/sidebar/dashboard-sidebar.tsx components/sidebar/aimodel-sidebar.tsx components/mdx-sidebar.tsx app/[locale]/teams/components/teams-sidebar.tsx app/[locale]/dashboard/settings/actions.ts` -> exits `0`.
+  - `npm run -s typecheck` -> exits `0`.
