@@ -36,6 +36,28 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: App-Wide Scroll Recovery Hardening (Chrome + Overlay States)
+- **What changed:** Extended global scroll-lock recovery so stuck body/html lock states are corrected across the full app lifecycle, not only after basic dialog close paths.
+- **What I want:** Reliable scrolling across Chrome/Safari after any overlay interaction (dialog, sheet, popover, dropdown, select, context menu) and after tab/page focus transitions.
+- **What I don't want:** Intermittent non-scrollable app states caused by stale `overflow`/`pointer-events` body locks that survive route/overlay transitions.
+- **How we fixed that:**
+  - Updated `components/scroll-lock-fix.tsx`:
+    - broadened open-overlay detection selectors (dialog/alert-dialog/sheet/popover/dropdown/select/context-menu),
+    - preserved padding/margin normalization for layout stability,
+    - clears stale lock styles (`overflow*`, `pointer-events`, `touch-action`) only when no overlay is open.
+  - Added recovery triggers beyond mutation observer:
+    - `window` `focus`,
+    - `window` `pageshow`,
+    - `document` `visibilitychange`,
+    - periodic cleanup interval (`1500ms`) as a defensive fallback.
+- **Key Files:** `components/scroll-lock-fix.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - Manual check:
+    - open/close modal/sheet/popover/dropdown on Chrome,
+    - switch tab away/back,
+    - confirm page and nested containers remain scrollable.
+
 ### 2026-02-17: Chrome Scroll-Lock Stuck State Fix
 - **What changed:** Hardened global scroll-lock cleanup logic to prevent Chrome from getting stuck in non-scrollable state after modal/popover/dialog close transitions.
 - **What I want:** Consistent scroll behavior across Safari and Chrome, especially after opening/closing Radix UI overlays.

@@ -8,14 +8,19 @@ import { useEffect } from "react";
  */
 export function ScrollLockFix() {
   useEffect(() => {
-    const hasOpenDialog = () =>
+    const hasOpenOverlay = () =>
       Boolean(
         document.querySelector(
           [
             "[role='dialog'][data-state='open']",
+            "[aria-modal='true'][data-state='open']",
             "[data-radix-dialog-content][data-state='open']",
+            "[data-radix-alert-dialog-content][data-state='open']",
+            "[data-radix-sheet-content][data-state='open']",
             "[data-radix-popover-content][data-state='open']",
             "[data-radix-dropdown-menu-content][data-state='open']",
+            "[data-radix-select-content][data-state='open']",
+            "[data-radix-context-menu-content][data-state='open']",
           ].join(",")
         )
       );
@@ -23,7 +28,7 @@ export function ScrollLockFix() {
     const cleanupScrollLock = () => {
       const body = document.body;
       const html = document.documentElement;
-      const hasOverlayOpen = hasOpenDialog();
+      const overlayOpen = hasOpenOverlay();
 
       [body, html].forEach((element) => {
         if (element.style.paddingRight !== "0px") {
@@ -34,7 +39,7 @@ export function ScrollLockFix() {
         }
 
         // Chrome may keep stale lock styles after modal close.
-        if (!hasOverlayOpen) {
+        if (!overlayOpen) {
           element.style.removeProperty("overflow");
           element.style.removeProperty("overflow-y");
           element.style.removeProperty("overflow-x");
@@ -59,8 +64,26 @@ export function ScrollLockFix() {
       attributeFilter: ["style", "class"],
     });
 
+    const onFocus = () => cleanupScrollLock();
+    const onPageShow = () => cleanupScrollLock();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        cleanupScrollLock();
+      }
+    };
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("pageshow", onPageShow);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const intervalId = window.setInterval(cleanupScrollLock, 1500);
+
     return () => {
       observer.disconnect();
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.clearInterval(intervalId);
     };
   }, []);
 
