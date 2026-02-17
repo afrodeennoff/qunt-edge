@@ -1530,3 +1530,23 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Key Files:** `prisma/migrations/20260215193000_fix_dashboardlayout_rls_auth_uid_fk_mapping/migration.sql`, `AGENTS.md`
 - **Verification:**
   - `pg_policies` check confirms `DashboardLayout.authenticated_owner` now matches `auth_user_id` on both ownership and auth predicates.
+
+### 2026-02-17: Latest Commit Study (`5a5ebf7`) - Production Smoke Checks + Service Worker Kill Switch
+- **What changed:** Reviewed commit `5a5ebf754b82d59cc4af51585df46b18e3f4d865` adding CI smoke checks and a production service-worker kill switch toggle.
+- **What I want:** CI should validate post-build HTTP behavior (locale redirect + auth redirect) and production should have an emergency flag to disable/unregister the service worker without code rollback.
+- **What I don't want:** False confidence from weak smoke readiness checks, or stale SW behavior when the load handler does not run in edge timing cases.
+- **How we fixed that:**
+  - Commit-level analysis only (no behavior changes in this pass).
+  - Confirmed additions:
+    - `test:smoke` script in `package.json`.
+    - New `scripts/smoke-http.mjs` spawning `next start` and validating `/`, `/en`, `/en/dashboard` behavior.
+    - CI integration of smoke step after build in `.github/workflows/ci.yml`.
+    - `NEXT_PUBLIC_SW_ENABLED` kill switch in `components/providers/root-providers.tsx` with unregister path.
+  - Highlighted follow-up risks:
+    - readiness gate currently accepts any status `>= 200` (including 4xx/5xx),
+    - SW registration/unregister is bound to `window.load` only (can be skipped if effect runs after load).
+- **Key Files:** `.github/workflows/ci.yml`, `package.json`, `scripts/smoke-http.mjs`, `components/providers/root-providers.tsx`, `AGENTS.md`
+- **Verification:**
+  - `git log -1 --pretty=fuller` confirms commit id/message/date.
+  - `git show --stat -1` confirms `4` files changed, `118` insertions, `3` deletions.
+  - `git show -1 -- <file>` reviewed patch contents for all touched files.
