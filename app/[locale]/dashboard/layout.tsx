@@ -27,9 +27,9 @@ export default async function DashboardLayout({
       <RithmicSyncNotifications />
       <Modals />
       <DashboardProvider>
-        <div className="flex h-screen min-h-0 w-full bg-background selection:bg-primary/20 selection:text-primary">
+        <div className="flex min-h-screen w-full bg-background selection:bg-primary/20 selection:text-primary">
           <DashboardSidebar />
-          <SidebarInset className="relative flex-1 min-h-0 overflow-hidden">
+          <SidebarInset className="flex-1 relative overflow-hidden">
             {/* Global Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
               <div className="absolute inset-0 bg-[linear-gradient(180deg,#050505_0%,#07070a_42%,#050505_100%)] md:hidden" />
@@ -39,9 +39,9 @@ export default async function DashboardLayout({
               <div className="hidden md:block absolute inset-y-0 left-0 w-px bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.22),transparent)]" />
             </div>
 
-            <div className="relative z-10 flex h-full min-h-0 flex-col">
+            <div className="relative z-10 flex flex-col min-h-screen">
               <DashboardHeader />
-              <main className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain pb-safe">
+              <main className="flex-1 overflow-auto overscroll-y-contain pb-safe">
                 {children}
               </main>
             </div>

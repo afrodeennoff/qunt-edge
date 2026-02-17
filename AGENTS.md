@@ -36,44 +36,6 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
-### 2026-02-17: Global Smooth Scroll Layer (Framer Motion + Native Fallback)
-- **What changed:** Added an app-wide smooth scrolling layer with Framer Motion-driven same-page anchor scroll animation, while keeping native smooth scrolling behavior enabled globally.
-- **What I want:** Consistent, polished scroll behavior across the full web app (landing + dashboard contexts), without breaking accessibility or existing scroll containers.
-- **What I don't want:** Janky hash-link jumps, uneven motion behavior between sections, or smooth-scroll logic that interferes with keyboard/accessibility preferences.
-- **How we fixed that:**
-  - Added `components/providers/smooth-scroll-provider.tsx`:
-    - intercepts same-page hash anchor clicks,
-    - animates `window.scrollTo` using Framer Motion `animate(...)`,
-    - respects `prefers-reduced-motion` via `useReducedMotion` and falls back to non-animated scroll.
-  - Wired provider globally in `app/layout.tsx`.
-  - Enabled native smooth behavior baseline by applying existing `scroll-smooth-native` utility class at `<body>`.
-- **Key Files:** `components/providers/smooth-scroll-provider.tsx`, `app/layout.tsx`, `AGENTS.md`
-- **Verification:**
-  - `npm run typecheck` -> exits `0`.
-  - Manual check:
-    - click same-page hash links on landing sections,
-    - verify smooth animated transition and correct final position,
-    - confirm reduced-motion path still jumps without animation.
-
-### 2026-02-17: Dashboard Main Scroll Container Fix (Sidebar Scroll OK, Content Stuck)
-- **What changed:** Fixed dashboard layout height/flex constraints so main content scroll is always handled by dashboard's internal scroll container instead of falling back to body scroll.
-- **What I want:** When sidebar scrolls, dashboard content area should also scroll reliably in Chrome/Safari regardless of body lock state.
-- **What I don't want:** Sidebar remaining scrollable while main dashboard panel appears frozen because body scroll is locked and main container lacks proper `min-h-0`/`h-screen` constraints.
-- **How we fixed that:**
-  - Updated `app/[locale]/dashboard/layout.tsx`:
-    - outer shell: `min-h-screen` -> `h-screen min-h-0`,
-    - `SidebarInset`: added `min-h-0`,
-    - inner dashboard column: `min-h-screen` -> `h-full min-h-0`,
-    - main scroll panel: added `min-h-0` and explicit `overflow-y-auto`.
-  - This forces the dashboard content region to be the primary scroll container and avoids dependency on body-level scrolling.
-- **Key Files:** `app/[locale]/dashboard/layout.tsx`, `AGENTS.md`
-- **Verification:**
-  - `npm run typecheck` -> exits `0`.
-  - Manual check target:
-    - `/dashboard` with long widget/table content,
-    - sidebar scroll and main content scroll both work,
-    - no stuck main panel after modal open/close.
-
 ### 2026-02-17: App-Wide Scroll Recovery Hardening (Chrome + Overlay States)
 - **What changed:** Extended global scroll-lock recovery so stuck body/html lock states are corrected across the full app lifecycle, not only after basic dialog close paths.
 - **What I want:** Reliable scrolling across Chrome/Safari after any overlay interaction (dialog, sheet, popover, dropdown, select, context menu) and after tab/page focus transitions.
