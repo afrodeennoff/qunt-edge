@@ -36,6 +36,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Widget Gap Root-Cause Final Fix (ChartSurface Flex Body)
+- **What changed:** Fixed the persistent dashboard dead-space gap at the shared chart-shell root by making the `ChartSurface` body a flex column container.
+- **What I want:** Widgets that use a custom header + body with `flex-1` should actually expand chart areas to full available height, eliminating repeated lower empty bands.
+- **What I don't want:** Repeated per-widget spacing patches that fail because `flex-1` has no effect when parent body isn’t a flex container.
+- **How we fixed that:**
+  - Updated `components/ui/chart-surface.tsx` body wrapper class:
+    - from: `flex-1 min-h-0`
+    - to: `flex flex-1 min-h-0 flex-col`
+  - This makes child widget sections (`header` + `flex-1` chart body) layout correctly in all chart widgets sharing `ChartSurface`.
+- **Key Files:** `components/ui/chart-surface.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run build` -> exits `0`.
+  - `npm run typecheck` -> exits `0`.
+  - Manual expectation:
+    - yellow-marked lower dead-space in dashboard widgets is removed at the root container level.
+
 ### 2026-02-17: Vercel 500 Fix (Trader Benchmark SQL Date Cast)
 - **What changed:** Fixed production `500` errors on `/api/trader-profile/benchmark` caused by comparing text dates against `timestamptz`.
 - **What I want:** Benchmark endpoint should return stable JSON without SQL type-operator crashes in production.
