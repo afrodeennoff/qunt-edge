@@ -214,7 +214,7 @@ export default function WeekdayPNLChart({
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === "small" ? "p-1" : "p-2 sm:p-3",
+          size === "small" ? "p-0.5" : "p-1 sm:p-2",
         )}
       >
         <div className="w-full h-full cursor-pointer" onClick={handleClick}>
@@ -225,7 +225,7 @@ export default function WeekdayPNLChart({
                 margin={
                   size === "small"
                     ? { left: 0, right: 0, top: 4, bottom: 0 }
-                    : { left: 0, right: 0, top: 8, bottom: 0 }
+                    : { left: 0, right: 0, top: 6, bottom: 0 }
                 }
               >
                 <CartesianGrid
@@ -237,8 +237,8 @@ export default function WeekdayPNLChart({
                   dataKey="day"
                   tickLine={false}
                   axisLine={false}
-                  height={size === "small" ? 20 : 24}
-                  tickMargin={size === "small" ? 4 : 8}
+                  height={size === "small" ? 18 : 22}
+                  tickMargin={size === "small" ? 2 : 6}
                   tick={{
                     fontSize: size === "small" ? 9 : 10,
                     fill: "var(--fg-muted)",

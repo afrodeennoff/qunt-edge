@@ -425,7 +425,7 @@
   [data-chart-surface="v2"] .recharts-responsive-container {
     border-radius: 14px;
     background: transparent;
-    min-height: 140px;
+    min-height: 120px;
   }
 
   [data-chart-surface="modern"] .recharts-layer.recharts-cartesian-axis-tick text,

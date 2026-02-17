@@ -221,7 +221,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
       <div
         className={cn(
           "flex-1 min-h-0",
-          size === 'small' ? "p-1" : "p-2 sm:p-3"
+          size === 'small' ? "p-0.5" : "p-1 sm:p-2"
         )}
       >
         <div
@@ -234,8 +234,8 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                 data={chartData}
                 margin={
                   size === 'small'
-                    ? { left: 0, right: 0, top: 4, bottom: 20 }
-                    : { left: 0, right: 0, top: 8, bottom: 24 }
+                    ? { left: 0, right: 0, top: 4, bottom: 12 }
+                    : { left: 0, right: 0, top: 6, bottom: 16 }
                 }
               >
                 <CartesianGrid
@@ -247,8 +247,8 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   dataKey="range"
                   tickLine={false}
                   axisLine={false}
-                  height={size === 'small' ? 20 : 24}
-                  tickMargin={size === 'small' ? 4 : 8}
+                  height={size === 'small' ? 18 : 22}
+                  tickMargin={size === 'small' ? 2 : 6}
                   tick={(props) => {
                     const { x, y, payload } = props;
                     const label = getTimeRangeLabel(payload.value);
