@@ -36,6 +36,37 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Safe CSP Reintroduction (Report-Only + Nonce + Strict Toggle)
+- **What changed:** Reintroduced CSP as a focused security follow-up on top of rollback state, using nonce-based script authorization with safe rollout controls (`report-only` by default, optional strict mode).
+- **What I want:** Restore browser-side security hardening (XSS/script-injection defense) without reintroducing blank-page regressions from overly strict policy rollout.
+- **What I don't want:** Another production white-screen caused by blocked Next.js runtime scripts, or a policy rollout that cannot be quickly relaxed during incident response.
+- **How we fixed that:**
+  - Added CSP helper module:
+    - `lib/security/csp.ts` now provides:
+      - `createNonce()`,
+      - `buildAppCsp({ nonce, isDev, strictMode })`,
+      - `buildEmbedCsp(allowedOrigins)`.
+  - Updated middleware/proxy wiring in `proxy.ts`:
+    - generates per-request nonce and sets `x-nonce`,
+    - applies app CSP for non-embed routes through shared helper,
+    - keeps embed route CSP separate,
+    - supports env-driven rollout controls:
+      - `CSP_ENABLED` (default on unless `false`),
+      - `CSP_REPORT_ONLY` (default report-only unless explicitly `false`),
+      - `CSP_STRICT_MODE` (default off unless `true`).
+  - Updated root layout script nonce wiring in `app/layout.tsx`:
+    - reads `x-nonce` from request headers (`next/headers`),
+    - applies nonce to `beforeInteractive` theme bootstrap script.
+  - Safe/default behavior:
+    - report-only mode by default,
+    - strict mode opt-in,
+    - fallback path available by toggling env without code rollback.
+- **Key Files:** `lib/security/csp.ts`, `proxy.ts`, `app/layout.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm test` -> exits `0` (`88 passed | 46 skipped`).
+  - Build was not used as CSP correctness gate in this environment due known external font DNS fetch limitation (`fonts.googleapis.com`), unrelated to CSP wiring.
+
 ### 2026-02-17: Full Rollback of Optimization Wave (Preserve Security Hardening)
 - **What changed:** Reverted the optimization/performance/UI wave from `0d76a1b..HEAD` back to pre-wave baseline behavior (`9ece39f`) using file-level restore, while explicitly preserving security/auth/RLS hardening files.
 - **What I want:** Remove unstable optimization changes that contributed to production/runtime regressions (including blank-page risk), while keeping backend security posture improvements intact.

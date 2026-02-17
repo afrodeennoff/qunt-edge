@@ -3,6 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
+import { headers } from "next/headers";
 import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
@@ -126,11 +127,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const isProduction = process.env.NODE_ENV === "production";
   const uiVariant = getUiVariant();
 
@@ -160,7 +162,7 @@ export default function RootLayout({
         <meta name="robots" content="index, follow" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
-        <Script id="init-theme" strategy="beforeInteractive">
+        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce}>
           {`
             (function() {
               try {
