@@ -57,22 +57,6 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Manual target:
     - `/dashboard?tab=widgets` should now show consistent compact bottom spacing across all chart cards.
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
 ### 2026-02-17: Scroll Stability Patch (Sidebar/Main Scroll Isolation + Lock Leak Recovery)
 - **What changed:** Applied a focused scroll reliability patch to stop cases where sidebar remained scrollable while dashboard main content appeared frozen.
 - **What I want:** Keep normal dashboard/main scrolling reliable after dialogs/sheets/customize interactions, without breaking intentional modal lock behavior.
@@ -100,23 +84,6 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
     - enable customize mode and drag widgets on mobile/touch, then verify normal scroll outside drag context,
     - open filter command UI and verify list scroll does not block main scroll after close.
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
 ### 2026-02-17: Widget Gap Follow-up (Yellow-Line Dead Space Reduction)
 - **What changed:** Applied a second spacing pass to remove remaining bottom dead space highlighted in dashboard widgets (yellow-marked areas).
 - **What I want:** Chart content should sit tighter to the widget baseline with less empty floor across bar-chart cards.
