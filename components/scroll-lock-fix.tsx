@@ -8,24 +8,15 @@ import { useEffect } from "react";
  */
 export function ScrollLockFix() {
   useEffect(() => {
-    const hasOpenDialog = () =>
-      Boolean(
-        document.querySelector(
-          '[role="dialog"][data-state="open"], [data-radix-dialog-content][data-state="open"], [data-radix-alert-dialog-content][data-state="open"]'
-        )
-      );
-
-    const hasOpenOverlay = () =>
+    const hasBlockingDialog = () =>
       Boolean(
         document.querySelector(
           [
+            '[role="dialog"][data-state="open"][aria-modal="true"]',
             '[data-radix-dialog-overlay][data-state="open"]',
-            '[data-radix-dialog-content][data-state="open"]',
+            '[data-radix-dialog-content][data-state="open"][aria-modal="true"]',
             '[data-radix-alert-dialog-overlay][data-state="open"]',
             '[data-radix-alert-dialog-content][data-state="open"]',
-            '[data-radix-popover-content][data-state="open"]',
-            '[data-radix-dropdown-menu-content][data-state="open"]',
-            '[data-radix-select-content][data-state="open"]',
           ].join(", ")
         )
       );
@@ -33,7 +24,7 @@ export function ScrollLockFix() {
     const normalizeScrollStyles = () => {
       const body = document.body;
       const html = document.documentElement;
-      const overlayOpen = hasOpenOverlay();
+      const dialogOpen = hasBlockingDialog();
 
       [body, html].forEach((element) => {
         if (element.style.paddingRight !== "0px") {
@@ -43,25 +34,37 @@ export function ScrollLockFix() {
           element.style.setProperty("margin-right", "0", "important");
         }
 
-        // Chrome may keep stale lock styles after modal close.
-        if (!overlayOpen) {
+        // Chrome may keep stale lock styles after modal/sheet close.
+        if (!dialogOpen) {
           element.style.removeProperty("overflow");
           element.style.removeProperty("overflow-y");
           element.style.removeProperty("overflow-x");
           element.style.removeProperty("pointer-events");
           element.style.removeProperty("touch-action");
+          element.style.removeProperty("position");
+          element.style.removeProperty("top");
+          element.style.removeProperty("left");
+          element.style.removeProperty("right");
+          element.style.removeProperty("width");
+          element.removeAttribute("inert");
         }
       });
 
-      // Only clear leaked lock styles when no Radix dialog/sheet is open.
-      if (!hasOpenDialog()) {
+      // Only clear leaked lock styles when no modal dialog/sheet is open.
+      if (!dialogOpen) {
         [body, html].forEach((element) => {
           element.style.removeProperty("overflow");
           element.style.removeProperty("overflow-x");
           element.style.removeProperty("overflow-y");
           element.style.removeProperty("pointer-events");
           element.style.removeProperty("touch-action");
+          element.style.removeProperty("position");
+          element.style.removeProperty("top");
+          element.style.removeProperty("left");
+          element.style.removeProperty("right");
+          element.style.removeProperty("width");
           element.removeAttribute("data-scroll-locked");
+          element.removeAttribute("inert");
         });
       }
     };

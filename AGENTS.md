@@ -36,6 +36,37 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-17: Sidebar Freeze Fix (Mid-Session Scroll Lock Leak Recovery)
+- **What changed:** Hardened global scroll-lock recovery logic so dashboard no longer freezes after mixed sidebar/dialog/select interactions.
+- **What I want:** Main dashboard scroll and pointer interaction should stay responsive during long sessions, even after opening/closing modal and sidebar controls repeatedly.
+- **What I don't want:** Mid-session "frozen screen" behavior where sidebar still appears active but main content stops scrolling/clicking due to leaked `pointer-events`/`overflow` lock styles.
+- **How we fixed that:**
+  - Refined lock detection in `components/scroll-lock-fix.tsx`:
+    - replaced broad overlay checks with blocking modal-only detection (`dialog/sheet/alert` selectors),
+    - prevents non-blocking overlays (popover/select/dropdown) from delaying cleanup of stale lock styles.
+  - Strengthened stale-style cleanup (only when no blocking modal is open):
+    - clears `overflow*`, `pointer-events`, `touch-action`, `position`, `top/left/right`, `width`,
+    - clears stale `inert` and `data-scroll-locked` attributes on `html`/`body`.
+  - Kept modal safety:
+    - lock styles are preserved while a true modal/sheet is actually open.
+- **Key Files:** `components/scroll-lock-fix.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run build` -> exits `0`.
+  - `npm run typecheck` -> exits `0`.
+  - Expected runtime outcome:
+    - dashboard main area remains scrollable/clickable after repeated sidebar + modal interactions.
+
+### 2026-02-17: Deployment Preference Lock (Vercel Project ID)
+- **What changed:** Captured user deployment preference for Vercel project targeting.
+- **What I want:** All deployment-oriented actions should consistently target the same Vercel project.
+- **What I don't want:** Accidental deployment to the wrong Vercel project/scope.
+- **How we fixed that:**
+  - Recorded required project identifier for future deployment operations:
+    - `prj_9GAURNDR5A6kW0rpk1H7TfLGd5Qt`.
+- **Key Files:** `AGENTS.md`
+- **Verification:**
+  - Future deploy commands/checks should explicitly validate/use this project id context.
+
 ### 2026-02-17: Definitive Widget Bottom-Gap Fix (Yellow-Marked Dead Space)
 - **What changed:** Removed the persistent lower dead-space strip visible under dashboard charts/donut widgets (the yellow-marked area).
 - **What I want:** Chart and donut widgets should sit visually tight to the card floor with no extra unused band under axis labels/legends.
