@@ -5,7 +5,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import { headers } from "next/headers";
 import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
-import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
 const geist = Geist({
@@ -216,7 +215,6 @@ export default async function RootLayout({
         className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}
         data-ui-variant={uiVariant}
       >
-        <ScrollLockFixLazy />
         {isProduction ? <SpeedInsights /> : null}
         {isProduction ? <Analytics /> : null}
         {children}
