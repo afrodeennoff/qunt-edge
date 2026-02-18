@@ -150,7 +150,7 @@ export const CONTRAST_RATIOS = {
 
 export function calculateContrastRatio(foreground: string, background: string): number {
   const getLuminance = (color: string): number => {
-    const rgb = color.match(/\d+/g);
+    const rgb = color.match(/-?[\d.]+/g);
     if (!rgb) return 0;
 
     const [r, g, b] = rgb.map(Number).map((v) => {
@@ -163,7 +163,7 @@ export function calculateContrastRatio(foreground: string, background: string): 
 
   const parseColor = (color: string): string => {
     if (color.startsWith('hsl')) {
-      const [h, s, l] = color.match(/\d+/g) || [];
+      const [h, s, l] = color.match(/-?[\d.]+/g) || [];
       const hslToRgb = (h: number, s: number, l: number) => {
         s /= 100;
         l /= 100;
