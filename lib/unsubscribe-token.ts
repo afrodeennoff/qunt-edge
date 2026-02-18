@@ -3,7 +3,7 @@ import crypto from "crypto"
 const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30
 
 function getSecret(): string {
-  const secret = process.env.UNSUBSCRIBE_TOKEN_SECRET || process.env.CRON_SECRET
+  const secret = process.env.UNSUBSCRIBE_TOKEN_SECRET
   if (!secret || secret.length < 32) {
     throw new Error("Missing unsubscribe token secret")
   }
