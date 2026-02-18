@@ -15,12 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Filter, X } from 'lucide-react'
 import { useI18n } from '@/locales/client'
 import { toast } from 'sonner'
+import type { Trade } from '@/prisma/generated/prisma'
 
 interface UserEquityData {
   userId: string
   email: string
   createdAt: string
-  trades: any[]
+  trades: Pick<Trade, 'id' | 'userId' | 'pnl' | 'createdAt' | 'entryDate' | 'closeDate' | 'instrument' | 'side' | 'entryPrice' | 'closePrice' | 'quantity' | 'commission'>[]
   equityCurve: {
     date: string
     pnl: number
