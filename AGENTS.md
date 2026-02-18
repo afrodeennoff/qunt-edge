@@ -1714,3 +1714,14 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Kept rollback as one coherent changeset to simplify review and recovery if needed.
 - **Key Files:** `app/[locale]/dashboard/**`, `components/providers/**`, `components/ui/**`, `context/data-provider.tsx`, `next.config.ts`, `proxy.ts`, `scripts/**`, `.github/workflows/**`, `AGENTS.md`
 - **Verification:** `npm run typecheck` after rollback snapshot.
+
+### 2026-02-18: Sidebar Hydration Fix (Server-Side Cookie)
+- **What changed:** Updated `app/[locale]/layout.tsx` to read the `sidebar:state` cookie and pass it as a `defaultOpen` prop to `RootProviders`, ensuring correct initial state on the server.
+- **What I want:** Eliminate the "FOUC" (Flash of Unstyled Content) or hydration mismatch where the sidebar flickers from expanded to collapsed on initial load.
+- **What I don't want:** Client-side only cookie reading in `SidebarProvider` causing a hydration error because server rendered default (true) and client rendered cookie state (false).
+- **How we fixed that:**
+  - `RootProviders` now accepts `defaultOpen`.
+  - `SidebarProvider` receives `defaultOpen` from `RootProviders`.
+  - `RootLayout` reads cookie via `next/headers` and passes the boolean value.
+- **Key Files:** `app/[locale]/layout.tsx`, `components/providers/root-providers.tsx`, `AGENTS.md`
+- **Verification:** `npm run typecheck` (skipped due to env limitations). Manual code review confirms prop drilling is correct.
