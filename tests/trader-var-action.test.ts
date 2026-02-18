@@ -15,6 +15,7 @@ vi.mock("@/lib/prisma", () => ({
     trade: {
       findMany: vi.fn(),
     },
+    $queryRaw: vi.fn(),
   },
 }))
 
@@ -22,7 +23,8 @@ import { getTraderVarSummary } from "@/app/[locale]/teams/actions/user"
 import { prisma } from "@/lib/prisma"
 
 const accountFindManyMock = vi.mocked(prisma.account.findMany)
-const tradeFindManyMock = vi.mocked(prisma.trade.findMany)
+// const tradeFindManyMock = vi.mocked(prisma.trade.findMany) // Unused
+const queryRawMock = vi.mocked(prisma.$queryRaw)
 
 describe("getTraderVarSummary", () => {
   beforeEach(() => {
@@ -30,19 +32,20 @@ describe("getTraderVarSummary", () => {
   })
 
   it("returns all 4 VaR values for a trader with sufficient data", async () => {
-    const trades = Array.from({ length: 40 }, (_, idx) => ({
+    // Aggregated daily returns simulation
+    const aggregatedTrades = Array.from({ length: 40 }, (_, idx) => ({
       pnl: idx % 3 === 0 ? -200 : 300,
       commission: 20,
-      entryDate: new Date(Date.UTC(2026, 0, idx + 1)),
-      closeDate: new Date(Date.UTC(2026, 0, idx + 1)),
-      createdAt: new Date(Date.UTC(2026, 0, idx + 1)),
+      date: new Date(Date.UTC(2026, 0, idx + 1)),
     }))
 
     findUniqueMock.mockResolvedValue({
       id: "trader-1",
     })
     accountFindManyMock.mockResolvedValue([{ id: "a1", startingBalance: 50000 }] as never)
-    tradeFindManyMock.mockResolvedValue(trades as never)
+
+    // Mock queryRaw to return aggregated trades
+    queryRawMock.mockResolvedValue(aggregatedTrades as never)
 
     const result = await getTraderVarSummary("trader-1")
 
@@ -54,19 +57,17 @@ describe("getTraderVarSummary", () => {
   })
 
   it("returns insufficientData when sample is too small", async () => {
-    const trades = Array.from({ length: 12 }, (_, idx) => ({
+    const aggregatedTrades = Array.from({ length: 12 }, (_, idx) => ({
       pnl: 100,
       commission: 10,
-      entryDate: new Date(Date.UTC(2026, 0, idx + 1)),
-      closeDate: new Date(Date.UTC(2026, 0, idx + 1)),
-      createdAt: new Date(Date.UTC(2026, 0, idx + 1)),
+      date: new Date(Date.UTC(2026, 0, idx + 1)),
     }))
 
     findUniqueMock.mockResolvedValue({
       id: "trader-2",
     })
     accountFindManyMock.mockResolvedValue([{ id: "a1", startingBalance: 50000 }] as never)
-    tradeFindManyMock.mockResolvedValue(trades as never)
+    queryRawMock.mockResolvedValue(aggregatedTrades as never)
 
     const result = await getTraderVarSummary("trader-2")
 
@@ -77,24 +78,31 @@ describe("getTraderVarSummary", () => {
   })
 
   it("falls back to inferred portfolio value when balances are missing", async () => {
-    const trades = Array.from({ length: 35 }, (_, idx) => ({
+    const aggregatedTrades = Array.from({ length: 35 }, (_, idx) => ({
       pnl: idx % 2 === 0 ? 250 : -180,
       commission: 10,
-      entryDate: new Date(Date.UTC(2026, 0, idx + 1)),
-      closeDate: new Date(Date.UTC(2026, 0, idx + 1)),
-      createdAt: new Date(Date.UTC(2026, 0, idx + 1)),
+      date: new Date(Date.UTC(2026, 0, idx + 1)),
     }))
+
+    // Min running PnL calculation simulation
+    // Let's assume the minimum cumulative PnL reached -1000
+    const minPnlResult = [{ min_pnl: -1000 }]
 
     findUniqueMock.mockResolvedValue({
       id: "trader-3",
     })
     accountFindManyMock.mockResolvedValue([{ id: "a1", startingBalance: 0 }] as never)
-    tradeFindManyMock.mockResolvedValue(trades as never)
+
+    // First call: fetchAggregatedVaRData
+    queryRawMock.mockResolvedValueOnce(aggregatedTrades as never)
+    // Second call: fetchMinRunningPnl
+    queryRawMock.mockResolvedValueOnce(minPnlResult as never)
 
     const result = await getTraderVarSummary("trader-3")
 
     expect(result.success).toBe(true)
     expect(result.summary).toBeDefined()
-    expect((result.methodMeta?.portfolioValue ?? 0)).toBeGreaterThan(0)
+    // Portfolio value should be inferred from minPnl (-1000) -> 1001
+    expect((result.methodMeta?.portfolioValue ?? 0)).toBe(1001)
   })
 })
