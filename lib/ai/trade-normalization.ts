@@ -1,5 +1,6 @@
 import type { SerializedTrade } from "@/server/database"
-import { decimalToNumber, toUtcDate } from "@/lib/trade-types"
+import { decimalToNumber } from "@/lib/trade-types"
+import { toValidDate } from "@/lib/date-utils"
 
 export interface AnalyticsTrade {
   id: string
@@ -29,8 +30,8 @@ export function normalizeTrade(trade: SerializedTrade): AnalyticsTrade {
     closePrice: decimalToNumber(trade.closePrice),
     pnl: decimalToNumber(trade.pnl),
     commission: decimalToNumber(trade.commission),
-    entryDate: toUtcDate(trade.entryDate) || new Date(0),
-    closeDate: toUtcDate(trade.closeDate),
+    entryDate: toValidDate(trade.entryDate) || new Date(0),
+    closeDate: toValidDate(trade.closeDate),
     timeInPosition: decimalToNumber(trade.timeInPosition),
   }
 }

@@ -42,6 +42,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { format, Locale } from "date-fns"
 import { cn, calculateTradingDays } from "@/lib/utils"
+import { toValidDate } from "@/lib/date-utils"
 import { useData } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { AccountTable } from './account-table'
@@ -133,12 +134,6 @@ interface PayoutDialogProps {
 type SortOption = {
   id: string
   label: string
-}
-
-function toValidDate(value: Date | string | null | undefined) {
-  if (!value) return null
-  const date = value instanceof Date ? value : new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date
 }
 
 function getAccountStartDate(account: Account) {

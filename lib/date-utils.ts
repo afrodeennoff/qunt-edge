@@ -41,3 +41,13 @@ export function normalizeToUtcTimestamp(value: string): string {
 export function isChronologicalRange(entryDate: string, closeDate: string): boolean {
   return new Date(closeDate).getTime() >= new Date(entryDate).getTime()
 }
+
+/**
+ * Safely converts a value to a valid Date object.
+ * Returns null if the value is null, undefined, or results in an invalid date.
+ */
+export function toValidDate(value: Date | string | null | undefined): Date | null {
+  if (!value) return null
+  const date = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
