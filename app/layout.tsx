@@ -166,9 +166,9 @@ export default async function RootLayout({
           {`
             (function() {
               try {
-                var root = document.documentElement;
-                var savedTheme = localStorage.getItem('theme');
-                var resolvedTheme = savedTheme === 'dark'
+                const root = document.documentElement;
+                const savedTheme = localStorage.getItem('theme');
+                const resolvedTheme = savedTheme === 'dark'
                   ? 'dark'
                   : savedTheme === 'light'
                     ? 'light'
@@ -177,8 +177,8 @@ export default async function RootLayout({
                 root.classList.remove('light', 'dark');
                 root.classList.add(resolvedTheme);
 
-                var savedIntensity = localStorage.getItem('intensity');
-                var intensity = savedIntensity ? Number(savedIntensity) : 100;
+                const savedIntensity = localStorage.getItem('intensity');
+                const intensity = savedIntensity ? Number(savedIntensity) : 100;
                 root.style.setProperty('--theme-intensity', intensity + '%');
               } catch (e) {
                 // Fail silently to avoid blocking render
