@@ -73,8 +73,8 @@ interface Team {
   traderIds: string[]
   traders: { id: string; email: string }[]
   managers: { id: string; managerId: string; access: string; email: string }[]
-  createdAt: any
-  updatedAt: any
+  createdAt: Date | string
+  updatedAt: Date | string
   userAccess?: string
 }
 
@@ -164,7 +164,7 @@ export function TeamManagement({
   const [renameTeamName, setRenameTeamName] = useState('')
   const [newTraderEmail, setNewTraderEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [pendingInvitations, setPendingInvitations] = useState<any[]>([])
+  const [pendingInvitations, setPendingInvitations] = useState<{ id: string; email: string }[]>([])
 
   // Load data on component mount
   useEffect(() => {
@@ -625,7 +625,7 @@ export function TeamManagement({
     }
   }
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: Date | string) => {
     if (date instanceof Date) {
       return date.toLocaleDateString()
     }

@@ -488,7 +488,7 @@ export const DataProvider: React.FC<{
         );
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           console.log("[DataProvider] Using local IndexedDB cache for trades");
-          setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
+          setTrades(sanitizeTradesForState(localCachedTrades as Trade[]));
 
           // Refresh in background if not in dev or if we want freshest data
           fetchAllTrades(userId, false).then(freshTrades => {

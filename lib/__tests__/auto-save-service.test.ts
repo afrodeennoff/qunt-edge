@@ -10,6 +10,11 @@ describe('AutoSaveService', () => {
     let mockLayout: DashboardLayout
 
     beforeEach(() => {
+        // Ensure navigator exists in test environment
+        if (typeof navigator === 'undefined') {
+            global.navigator = { onLine: true } as any
+        }
+
         mockSaveFunction = vi.fn()
         mockLayout = {
             desktop: [],
