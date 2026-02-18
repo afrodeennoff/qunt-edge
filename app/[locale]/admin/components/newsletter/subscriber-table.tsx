@@ -30,6 +30,46 @@ interface Subscriber {
   isActive: boolean
 }
 
+type InferenceConfidence = 'high' | 'medium' | 'low';
+
+type InferenceResultItem =
+  | {
+      status: 'updated';
+      email: string;
+      oldName: string | null;
+      newName: string | null;
+      confidence: InferenceConfidence;
+    }
+  | {
+      status: 'skipped';
+      email: string;
+      inferredName: string | null;
+      confidence: InferenceConfidence;
+      reason: string;
+    }
+  | {
+      status: 'error';
+      email: string;
+      error: string;
+      confidence?: never;
+    };
+
+interface InferenceSummary {
+  totalProcessed: number;
+  totalUpdated: number;
+  totalSkipped: number;
+  totalErrors: number;
+}
+
+interface InferenceResponse {
+  success: boolean;
+  message: string;
+  processed: number;
+  updated: number;
+  results: InferenceResultItem[];
+  summary: InferenceSummary;
+}
+
 export function SubscriberTable() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
@@ -38,7 +78,7 @@ export function SubscriberTable() {
   const [inferringNames, setInferringNames] = useState(false)
   const [needsInference, setNeedsInference] = useState(0)
   const [showOnlyTraders, setShowOnlyTraders] = useState(false)
-  const [lastInferenceResults, setLastInferenceResults] = useState<any>(null)
+  const [lastInferenceResults, setLastInferenceResults] = useState<InferenceResponse | null>(null)
   const [showResults, setShowResults] = useState(false)
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set())
   const { content } = useNewsletter()
@@ -314,7 +354,7 @@ export function SubscriberTable() {
                     <div className="space-y-2">
                       <h3 className="font-semibold">Detailed Results</h3>
                       <div className="max-h-96 overflow-y-auto border rounded-lg">
-                        {lastInferenceResults.results.map((result: any, index: number) => (
+                        {lastInferenceResults.results.map((result, index) => (
                           <div key={index} className="p-3 border-b last:border-b-0">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
