@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Post, PostType, PostStatus } from '@/prisma/generated/prisma'
+import { PostType, PostStatus } from '@/prisma/generated/prisma'
 import { PostCard } from './post-card'
 import { ExtendedPost } from '../types'
 import {

@@ -8,7 +8,7 @@
     "dev": "next dev",
     "clean:build-artifacts": "node scripts/clean-build-artifacts.mjs",
     "self-heal": "node scripts/self-heal.mjs",
-    "prebuild": "npm run clean:build-artifacts && ts-node --esm scripts/generate-routes.ts",
+    "prebuild": "npm run clean:build-artifacts && ts-node --esm scripts/generate-routes.mts",
     "db:sync": "node scripts/sync-stack.mjs",
     "build": "env -u NODE_TLS_REJECT_UNAUTHORIZED NODE_OPTIONS=--max-old-space-size=12288 NEXT_DISABLE_FONT_DOWNLOADS=1 NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321} NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-dummy-anon-key} next build --webpack",
     "analyze": "npm run build && node scripts/analyze-bundle.mjs",

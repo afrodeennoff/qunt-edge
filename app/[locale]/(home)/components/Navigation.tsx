@@ -120,7 +120,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                             <div className="flex flex-col h-full pt-16 px-6 pb-8">
                                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                                 <div className="flex flex-col gap-6 mb-8 flex-1">
-                                    {links.map((link, i) => (
+                                    {links.map((link) => (
                                         <Link
                                             key={link.name}
                                             href={link.href}

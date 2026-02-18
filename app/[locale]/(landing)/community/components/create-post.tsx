@@ -102,6 +102,7 @@ export function CreatePost({ children }: Props) {
       reader.readAsDataURL(file)
     } catch (error) {
       toast.error(t('community.createPost.error'))
+      console.error(error)
     } finally {
       setIsUploading(false)
     }
@@ -121,6 +122,7 @@ export function CreatePost({ children }: Props) {
       toast.success(t('community.createPost.success'))
     } catch (error) {
       toast.error(t('community.createPost.error'))
+      console.error(error)
     }
   }
 
