@@ -352,7 +352,6 @@ export const DataProvider: React.FC<{
 
   // Load data from the server
   const loadData = useCallback(async () => {
-    console.log("[DataProvider] loadData triggered, isSharedView:", isSharedView);
     // Prevent multiple simultaneous loads
     try {
       setIsLoading(true);
@@ -483,7 +482,6 @@ export const DataProvider: React.FC<{
         // Try local cache first
         const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-          console.log("[DataProvider] Using local IndexedDB cache for trades");
           setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
 
           // Refresh in background if not in dev or if we want freshest data
@@ -495,18 +493,15 @@ export const DataProvider: React.FC<{
           }).catch(console.error);
         } else {
           if (!userId) return;
-          console.log("[DataProvider] Refreshing trades for userId:", userId);
 
           const safeTrades = await withTimeout(
             fetchAllTrades(userId, false),
             20000,
             "fetchAllTrades(user)"
           );
-          console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
 
           // Fallback to mock data if no real trades exist, regardless of environment (for demo purposes)
           const tradesToUse = safeTrades.length > 0 ? safeTrades : generateMockTrades(userId || "demo-user");
-          console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0, ")");
           setTrades(sanitizeTradesForState(tradesToUse));
           if (tradesToUse.length > 0) {
             setTradesCache(userId, tradesToUse).catch(console.error);
@@ -522,7 +517,6 @@ export const DataProvider: React.FC<{
       if (userId && !isSharedView) {
         const cachedUserData = await withTimeout(getUserDataCache(userId), 2000, "getUserDataCache");
         if (cachedUserData) {
-          console.log("[DataProvider] Using local IndexedDB cache for user data");
           // Apply cached data immediately
           const normalizedAccounts = normalizeAccountsForClient(cachedUserData.accounts);
           setAccounts(normalizedAccounts);
@@ -537,11 +531,6 @@ export const DataProvider: React.FC<{
       }
 
       const data = await withTimeout(getUserData(), 20000, "getUserData");
-      console.log("[DataProvider] User data response:", {
-        hasData: !!data,
-        accountsCount: data?.accounts?.length || 0,
-        tagsCount: data?.tags?.length || 0
-      });
 
       if (!data) {
         await signOut();
@@ -591,7 +580,7 @@ export const DataProvider: React.FC<{
       console.error("[DataProvider] FATAL: Error loading data:", error);
       // Fallback to mock data on fatal load error
       const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
-      console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
+      console.warn("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
       setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
       setAccounts([]);
       setGroups([]);
@@ -785,7 +774,6 @@ export const DataProvider: React.FC<{
           includeSubscription: true,
           withLoading: false,
         });
-        console.log("[refreshAllData] Successfully refreshed trades and user data");
       } catch (error) {
         console.error("Error refreshing all data:", error);
       } finally {
@@ -812,7 +800,6 @@ export const DataProvider: React.FC<{
   }, [trades, supabaseUser?.id]);
 
   const formattedTrades = useMemo(() => {
-    console.log("[DataProvider] computing formattedTrades, trades count:", trades?.length);
     // Early return if no trades or if trades is not an array
     if (!trades || !Array.isArray(trades) || trades.length === 0)
       return [];
