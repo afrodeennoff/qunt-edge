@@ -44,6 +44,7 @@ export interface UnifiedSidebarItem {
   badge?: React.ReactNode
   group?: string
   disabled?: boolean
+  exact?: boolean
 }
 
 export interface UnifiedSidebarConfig {
@@ -88,7 +89,7 @@ function useActiveLink() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  return (href: string) => {
+  return (href: string, exact = false) => {
     if (!pathname) return false
 
     const normalizedPathname = stripLocalePrefix(pathname)
@@ -117,10 +118,11 @@ function useActiveLink() {
       return true
     }
 
-    return (
-      normalizedPathname === basePath ||
-      normalizedPathname.startsWith(`${basePath}/`)
-    )
+    if (exact) {
+      return normalizedPathname === basePath
+    }
+
+    return normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`)
   }
 }
 
@@ -250,7 +252,7 @@ export function UnifiedSidebar({
                       const label = item.i18nKey ? translate(item.i18nKey) : item.label
                       const isItemDisabled = Boolean(item.disabled)
                       const itemIsActive =
-                        !isItemDisabled && !!item.href && isActive(item.href)
+                        !isItemDisabled && !!item.href && isActive(item.href, item.exact)
 
                       return (
                         <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
@@ -262,6 +264,7 @@ export function UnifiedSidebar({
                             >
                               <Link
                                 href={item.href}
+                                prefetch={false}
                                 aria-current={itemIsActive ? "page" : undefined}
                                 onClick={() => {
                                   if (isMobile) {
