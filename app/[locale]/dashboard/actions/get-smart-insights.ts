@@ -1,8 +1,7 @@
 "use server"
 
-import { Timeframe } from "@/app/[locale]/(landing)/propfirms/actions/timeframe-utils";
 import { prisma } from "@/lib/prisma";
-import { startOfDay, subDays, subMonths } from "date-fns";
+import { subMonths } from "date-fns";
 
 export interface SmartInsight {
     id: string
@@ -35,6 +34,7 @@ export async function getSmartInsights(userId: string): Promise<SmartInsight[]> 
                 entryDate: { gte: startDate }
             },
             select: {
+                id: true,
                 pnl: true,
                 instrument: true,
                 entryDate: true,
@@ -43,6 +43,13 @@ export async function getSmartInsights(userId: string): Promise<SmartInsight[]> 
             orderBy: { entryDate: 'desc' },
             take: 100
         })
+
+        const tradeIds = recentTrades.map(t => t.id)
+        const tradeAnalytics = tradeIds.length > 0
+            ? await prisma.tradeAnalytics.findMany({
+                where: { tradeId: { in: tradeIds } }
+            })
+            : []
 
         const insights: SmartInsight[] = []
 
@@ -90,19 +97,80 @@ export async function getSmartInsights(userId: string): Promise<SmartInsight[]> 
             })
         }
 
-        // ---- Mock AI Insights (Placeholder for advanced ML models) ----
-        insights.push({
-            id: 'ai-opportunity',
-            type: 'opportunity',
-            title: 'Volatility Window',
-            description: 'High expected volatility for NQ futures in the 14:00-16:00 UTC window based on historicals.',
-            confidence: 72,
-            action: {
-                label: 'View Calendar',
-                href: '/dashboard/calendar'
-            },
-            timestamp: subDays(new Date(), 0)
-        })
+        // ---- Insight Logic 3: Execution Efficiency (from TradeAnalytics) ----
+        // Calculate average efficiency if data is available
+        const efficiencyValues = tradeAnalytics
+            .map(a => a.efficiency ? Number(a.efficiency) : null)
+            .filter((val): val is number => val !== null && val > 0)
+
+        if (efficiencyValues.length >= 5) {
+            const avgEfficiency = efficiencyValues.reduce((a, b) => a + b, 0) / efficiencyValues.length
+
+            if (avgEfficiency > 70) {
+                insights.push({
+                    id: 'high-efficiency',
+                    type: 'achievement',
+                    title: 'High Execution Efficiency',
+                    description: `Your average trade efficiency is ${avgEfficiency.toFixed(1)}%. You are capturing most of the available move.`,
+                    confidence: 90,
+                    metric: `${avgEfficiency.toFixed(1)}% Eff.`,
+                    trend: 'up',
+                    timestamp: new Date()
+                })
+            } else if (avgEfficiency < 30) {
+                insights.push({
+                    id: 'low-efficiency',
+                    type: 'opportunity',
+                    title: 'Efficiency Opportunity',
+                    description: `Your average efficiency is ${avgEfficiency.toFixed(1)}%. You might be leaving money on the table by exiting too early.`,
+                    confidence: 80,
+                    metric: `${avgEfficiency.toFixed(1)}% Eff.`,
+                    trend: 'neutral',
+                    action: {
+                        label: 'Review Exits',
+                        href: '/dashboard/journal'
+                    },
+                    timestamp: new Date()
+                })
+            }
+        }
+
+        // ---- Insight Logic 4: Risk/Reward Ratio (from TradeAnalytics) ----
+        const rrValues = tradeAnalytics
+            .map(a => a.riskRewardRatio ? Number(a.riskRewardRatio) : null)
+            .filter((val): val is number => val !== null && val > 0)
+
+        if (rrValues.length >= 5) {
+            const avgRR = rrValues.reduce((a, b) => a + b, 0) / rrValues.length
+
+            if (avgRR > 2) {
+                insights.push({
+                    id: 'good-rr',
+                    type: 'achievement',
+                    title: 'Excellent Risk/Reward',
+                    description: `Your average risk/reward ratio is ${avgRR.toFixed(2)}. This sustainable approach supports long-term profitability.`,
+                    confidence: 85,
+                    metric: `${avgRR.toFixed(2)} R:R`,
+                    trend: 'up',
+                    timestamp: new Date()
+                })
+            } else if (avgRR < 1) {
+                insights.push({
+                    id: 'low-rr',
+                    type: 'risk',
+                    title: 'Risk/Reward Alert',
+                    description: `Your average R:R is ${avgRR.toFixed(2)}. Your winners are smaller than your average risk per trade.`,
+                    confidence: 85,
+                    metric: `${avgRR.toFixed(2)} R:R`,
+                    trend: 'down',
+                    action: {
+                        label: 'Analyze R:R',
+                        href: '/dashboard/analytics'
+                    },
+                    timestamp: new Date()
+                })
+            }
+        }
 
         if (recentTrades.length === 0) {
             insights.push({

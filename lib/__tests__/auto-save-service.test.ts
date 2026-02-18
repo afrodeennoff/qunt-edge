@@ -254,6 +254,16 @@ describe('AutoSaveService', () => {
     })
 
     describe('Offline Support', () => {
+        beforeEach(() => {
+            if (typeof navigator === 'undefined') {
+                Object.defineProperty(global, 'navigator', {
+                    value: { onLine: true },
+                    writable: true,
+                    configurable: true,
+                })
+            }
+        })
+
         it('should enqueue saves when offline', async () => {
             // Setup navigator mock
             if (typeof navigator === 'undefined') {

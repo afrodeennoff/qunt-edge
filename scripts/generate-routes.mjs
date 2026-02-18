@@ -27,7 +27,7 @@ function collectRoutes(dir, relativeParts = []) {
   const currentName = path.basename(dir)
   if (SKIP_DIRS.has(currentName)) return routes
 
-  const hasPage = entries.some(e => e.isFile() && e.name === 'page.tsx')
+  const hasPage = entries.some(e => e.isFile() && (e.name === 'page.tsx' || e.name === 'page.ts' || e.name === 'page.js' || e.name === 'page.jsx'))
 
   if (hasPage) {
     const normalized = relativeParts
