@@ -301,6 +301,8 @@ export const DataProvider: React.FC<{
         entryPrice: Number.isFinite(Number(t.entryPrice)) ? Number(t.entryPrice) : 0,
         quantity: Number.isFinite(Number(t.quantity)) ? Number(t.quantity) : 0,
         commission: Number.isFinite(Number(t.commission)) ? Number(t.commission) : 0,
+        entryPrice: Number.isFinite(Number(t.entryPrice)) ? Number(t.entryPrice) : 0,
+        closePrice: Number.isFinite(Number(t.closePrice)) ? Number(t.closePrice) : 0,
       }))
       .filter((t) => isValid(new Date(t.entryDate)));
   }, []);
