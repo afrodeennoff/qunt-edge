@@ -24,22 +24,22 @@ export async function GET() {
         SELECT
           "userId",
           "id",
-          "entryDate",
+          "entryDate"::timestamptz AS entry_date_ts,
           COALESCE("pnl", 0)::double precision AS pnl,
           COALESCE("commission", 0)::double precision AS commission
         FROM "Trade"
-        WHERE "entryDate" >= NOW() - INTERVAL '365 days'
+        WHERE "entryDate"::timestamptz >= NOW() - INTERVAL '365 days'
       ),
       running AS (
         SELECT
           "userId",
           "id",
-          "entryDate",
+          entry_date_ts,
           pnl,
           (pnl - commission) AS net,
           SUM(pnl - commission) OVER (
             PARTITION BY "userId"
-            ORDER BY "entryDate", "id"
+            ORDER BY entry_date_ts, "id"
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
           ) AS running_net
         FROM ordered_trades
@@ -51,7 +51,7 @@ export async function GET() {
           running_net,
           MAX(running_net) OVER (
             PARTITION BY "userId"
-            ORDER BY "entryDate", "id"
+            ORDER BY entry_date_ts, "id"
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
           ) AS peak_net
         FROM running
