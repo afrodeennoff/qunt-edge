@@ -22,6 +22,20 @@ import { useI18n } from "@/locales/client";
 
 const days = [0, 1, 2, 3, 4, 5, 6]; // Sunday=0
 
+interface WeekdayDataPoint {
+  day: number;
+  pnl: number;
+  tradeCount: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: WeekdayDataPoint;
+  }>;
+  label?: number;
+}
+
 export default function WeekdayPnLChartEmbed({
   trades,
 }: {
@@ -78,14 +92,14 @@ export default function WeekdayPnLChartEmbed({
     return `hsl(var(${base}) / ${intensity})`;
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     React.useEffect(() => {
       if (active && payload && payload.length)
         setActiveDay(payload[0].payload.day);
       else setActiveDay(null);
     }, [active, payload]);
 
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length && typeof label === "number") {
       const data = payload[0].payload;
       return (
         <div
