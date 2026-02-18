@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 import { DailySummaryModal } from './daily-summary-modal'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { PnLSummary } from './pnl-summary'
+import { KeyboardShortcutsDialog } from '@/components/keyboard-shortcuts-dialog'
 
 export default function Navbar() {
   const {
@@ -43,12 +44,13 @@ export default function Navbar() {
   }
 
   // Initialize keyboard shortcuts
-  useKeyboardShortcuts()
+  const { isDialogOpen, setIsDialogOpen } = useKeyboardShortcuts()
 
   const currentLayout = layouts || { desktop: [], mobile: [] }
 
   return (
     <div className="sticky top-0 z-40 w-full px-4 sm:px-6 py-2.5 pointer-events-none">
+      <KeyboardShortcutsDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

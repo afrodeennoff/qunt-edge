@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import hotkeys from 'hotkeys-js';
 import { useRouter } from 'next/navigation';
 import { signOut } from '@/server/auth';
 
 export function useKeyboardShortcuts() {
   const router = useRouter();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     // Navigation shortcuts
@@ -32,7 +33,7 @@ export function useKeyboardShortcuts() {
     // Keyboard shortcuts dialog
     hotkeys('⌘+k, ctrl+k', (event) => {
       event.preventDefault();
-      // TODO: Implement keyboard shortcuts dialog
+      setIsDialogOpen(true);
     });
 
     // Logout shortcut
@@ -51,4 +52,6 @@ export function useKeyboardShortcuts() {
       hotkeys.unbind('⇧+⌘+q, shift+ctrl+q');
     };
   }, [router]);
-} 
+
+  return { isDialogOpen, setIsDialogOpen };
+}
