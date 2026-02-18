@@ -39,92 +39,93 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
 
     const navItems: UnifiedSidebarItem[] = [
         {
-            href: `/${locale}/dashboard?tab=widgets`,
-            icon: <LayoutDashboard className="size-4.5" />,
+            href: `/${locale}/dashboard`, // Matches widgets by default in our new mapping
+            icon: <LayoutDashboard className="size-4" />,
             label: "Dashboard",
-            group: "Overview"
+            group: "Overview",
+            exact: true
         },
         {
             href: `/${locale}/dashboard?tab=table`,
-            icon: <TrendingUp className="size-4.5" />,
+            icon: <TrendingUp className="size-4" />,
             label: "Trades",
             group: "Trading"
         },
         {
             href: `/${locale}/dashboard?tab=chart`,
-            icon: <Sparkles className="size-4.5" />,
+            icon: <Sparkles className="size-4" />,
             label: "Chart the Future",
             group: "Trading"
         },
         {
             href: `/${locale}/dashboard?tab=accounts`,
-            icon: <Activity className="size-4.5" />,
+            icon: <Activity className="size-4" />,
             label: "Accounts",
             group: "Trading"
         },
         {
             href: `/${locale}/dashboard/trader-profile`,
-            icon: <Brain className="size-4.5" />,
+            icon: <Brain className="size-4" />,
             label: "Trader Profile",
             group: "Trading"
         },
         {
             href: `/${locale}/dashboard/strategies`,
-            icon: <BookOpen className="size-4.5" />,
+            icon: <BookOpen className="size-4" />,
             label: "Trade Desk",
             group: "Trading"
         },
         {
             href: `/${locale}/dashboard/reports`,
-            icon: <BarChart3 className="size-4.5" />,
+            icon: <BarChart3 className="size-4" />,
             label: "Reports",
             group: "Analytics"
         },
         {
             href: `/${locale}/dashboard/behavior`,
-            icon: <Brain className="size-4.5" />,
+            icon: <Brain className="size-4" />,
             label: "Behavior",
             group: "Analytics"
         },
         {
             href: `/${locale}/teams/dashboard`,
-            icon: <Building2 className="size-4.5" />,
+            icon: <Building2 className="size-4" />,
             label: "Team",
             group: "Community"
         },
         {
             href: `/${locale}/propfirms`,
-            icon: <Globe className="size-4.5" />,
+            icon: <Globe className="size-4" />,
             label: "Prop Firms",
             group: "Community"
         },
         {
             href: `/${locale}/dashboard/data`,
-            icon: <Database className="size-4.5" />,
+            icon: <Database className="size-4" />,
             label: "Data",
             group: "System"
         },
         {
             label: "Sync",
-            icon: <RefreshCw className="size-4.5" />,
+            icon: <RefreshCw className="size-4" />,
             action: () => refreshAllData({ force: true }),
             group: "System"
         },
         {
             href: `/${locale}/dashboard/billing`,
-            icon: <CreditCard className="size-4.5" />,
+            icon: <CreditCard className="size-4" />,
             label: "Billing",
             group: "System"
         },
         {
             href: `/${locale}/dashboard/settings`,
-            icon: <Settings className="size-4.5" />,
+            icon: <Settings className="size-4" />,
             label: "Settings",
             group: "System"
         },
         ...(isAdmin ? [{
             href: `/${locale}/admin`,
-            icon: <Shield className="size-4.5" />,
+            icon: <Shield className="size-4" />,
             label: "Admin",
             group: "System"
         }] : []),
@@ -144,12 +145,11 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
     return (
         <UnifiedSidebar
             items={navItems}
-            user={user?.user_metadata ? {
-                avatar_url: user.user_metadata.avatar_url,
-                email: user.email,
-                full_name: user.user_metadata.full_name
-            } : undefined}
-            styleVariant="minimal"
+            user={{
+                avatar_url: user?.user_metadata?.avatar_url,
+                email: user?.email,
+                full_name: user?.user_metadata?.full_name
+            }}
             timezone={{
                 value: timezone,
                 options: timezones,

@@ -3,19 +3,20 @@
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { Globe, LogOut } from "lucide-react"
+import { Globe, LogOut, MoreHorizontal } from "lucide-react"
 
 import { Logo } from "@/components/logo"
 import { SubscriptionBadge } from "@/components/subscription-badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -62,14 +63,13 @@ export interface UnifiedSidebarConfig {
     onChange: (value: string) => void
   }
   onLogout?: () => void
-  styleVariant?: UnifiedSidebarStyle
+  styleVariant?: "default" | "minimal" // Simplified to shadcn default
 }
 
-export type UnifiedSidebarStyle = "minimal" | "glassy" | "matte"
-
 function stripLocalePrefix(pathname: string) {
+  if (!pathname) return "/"
   const withoutLocale = pathname.replace(/^\/[a-z]{2}(?:-[A-Za-z]{2})?(?=\/|$)/, "")
-  return withoutLocale.length > 0 ? withoutLocale : "/"
+  return withoutLocale.length > 0 ? (withoutLocale.startsWith("/") ? withoutLocale : `/${withoutLocale}`) : "/"
 }
 
 function getUserInitials(user?: UnifiedSidebarConfig["user"]) {
@@ -90,89 +90,44 @@ function useActiveLink() {
   const searchParams = useSearchParams()
 
   return (href: string, exact = false) => {
-    if (!pathname) return false
+    if (!pathname || !href) return false
 
-    const normalizedPathname = stripLocalePrefix(pathname)
+    // Normalize paths by stripping locale and trailing slashes
+    const normalizedPathname = stripLocalePrefix(pathname).replace(/\/$/, "") || "/"
     const [hrefPath, queryString] = href.split("?")
-    const basePath = stripLocalePrefix(hrefPath)
+    const normalizedHrefPath = stripLocalePrefix(hrefPath).replace(/\/$/, "") || "/"
+
     const hrefParams = new URLSearchParams(queryString ?? "")
     const hrefTab = hrefParams.get("tab")
 
-    if (basePath === "/dashboard" && hrefTab) {
+    // Priority 1: Exact Tab Match for Dashboard
+    if (normalizedHrefPath === "/dashboard" && hrefTab) {
       const activeTab = searchParams.get("tab") || "widgets"
       return normalizedPathname === "/dashboard" && activeTab === hrefTab
     }
 
-    if (basePath === "/dashboard") {
-      return (
-        normalizedPathname === "/dashboard" &&
-        (searchParams.get("tab") || "widgets") === "widgets"
-      )
+    // Priority 2: Dashboard Root (Defaults to widgets)
+    if (normalizedHrefPath === "/dashboard" && !hrefTab) {
+      const activeTab = searchParams.get("tab")
+      return normalizedPathname === "/dashboard" && (!activeTab || activeTab === "widgets")
     }
 
-    if (basePath === "/teams/manage" && normalizedPathname.includes("/teams/manage")) {
+    // Priority 3: Teams Dashboard Exception (from HEAD)
+    if (normalizedHrefPath === "/teams/dashboard" && normalizedPathname.includes("/teams/dashboard")) {
       return true
     }
 
-    if (basePath === "/teams/dashboard" && normalizedPathname.includes("/teams/dashboard")) {
-      return true
-    }
-
+    // Priority 4: Exact Match
     if (exact) {
-      return normalizedPathname === basePath
+      return normalizedPathname === normalizedHrefPath
     }
 
-    return normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`)
-  }
-}
+    // Priority 5: Nested Routes (Teams, Admin, etc)
+    if (normalizedPathname === normalizedHrefPath) return true
+    if (normalizedPathname.startsWith(`${normalizedHrefPath}/`)) return true
 
-const SIDEBAR_STYLES: Record<
-  UnifiedSidebarStyle,
-  {
-    sidebar: string
-    header: string
-    footer: string
-    brandName: string
-    brandSub: string
-    userCard: string
-    userName: string
-    userMeta: string
-    groupLabel: string
+    return false
   }
-> = {
-  minimal: {
-    sidebar: "border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
-    header: "border-b border-sidebar-border/70",
-    footer: "border-t border-sidebar-border/70",
-    brandName: "text-sidebar-foreground",
-    brandSub: "text-sidebar-foreground/60",
-    userCard: "rounded-md border border-sidebar-border/70 bg-sidebar-accent/40 p-2.5",
-    userName: "text-sidebar-foreground",
-    userMeta: "text-sidebar-foreground/60",
-    groupLabel: "text-sidebar-foreground/60",
-  },
-  glassy: {
-    sidebar: "border-r border-white/10 bg-black/95 text-zinc-100 backdrop-blur-xl",
-    header: "border-b border-white/10",
-    footer: "border-t border-white/10",
-    brandName: "text-white",
-    brandSub: "text-zinc-400",
-    userCard: "rounded-md border border-white/10 bg-white/5 p-2.5",
-    userName: "text-zinc-100",
-    userMeta: "text-zinc-400",
-    groupLabel: "text-zinc-500",
-  },
-  matte: {
-    sidebar: "border-r border-white/5 bg-black text-zinc-200",
-    header: "border-b border-white/5",
-    footer: "border-t border-white/5",
-    brandName: "text-zinc-100",
-    brandSub: "text-zinc-500",
-    userCard: "rounded-md border border-white/10 bg-zinc-950 p-2.5",
-    userName: "text-zinc-100",
-    userMeta: "text-zinc-400",
-    groupLabel: "text-zinc-500",
-  },
 }
 
 export function UnifiedSidebar({
@@ -182,28 +137,18 @@ export function UnifiedSidebar({
   showSubscription = true,
   timezone,
   onLogout,
-  styleVariant = "minimal",
 }: UnifiedSidebarConfig) {
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const { isMobile, openMobile, setOpenMobile } = useSidebar()
-  const styles = SIDEBAR_STYLES[styleVariant]
-  const routeSignature = `${pathname ?? ""}?${searchParams.toString()}`
-
-  React.useEffect(() => {
-    if (!isMobile || !openMobile) return
-    setOpenMobile(false)
-  }, [isMobile, openMobile, routeSignature, setOpenMobile])
+  const { isMobile, setOpenMobile } = useSidebar()
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
     const groups: Record<string, UnifiedSidebarItem[]> = {}
 
     items.forEach((item) => {
-      const group = item.group || "Main"
+      const group = item.group || "Settings"
       if (!groups[group]) {
         groups[group] = []
         order.push(group)
@@ -211,171 +156,195 @@ export function UnifiedSidebar({
       groups[group].push(item)
     })
 
-    return { groups, order }
+    // Move "Overview" or "Main" to top, "System" or "Settings" to bottom if they exist
+    const sortedOrder = order.sort((a, b) => {
+      const topGroups = ["Overview", "Trading", "Main"]
+      const bottomGroups = ["System", "Settings", "Admin"]
+
+      const aIdxTop = topGroups.indexOf(a)
+      const bIdxTop = topGroups.indexOf(b)
+      if (aIdxTop !== -1 && bIdxTop !== -1) return aIdxTop - bIdxTop
+      if (aIdxTop !== -1) return -1
+      if (bIdxTop !== -1) return 1
+
+      const aIdxBot = bottomGroups.indexOf(a)
+      const bIdxBot = bottomGroups.indexOf(b)
+      if (aIdxBot !== -1 && bIdxBot !== -1) return aIdxBot - bIdxBot
+      if (aIdxBot !== -1) return 1
+      if (bIdxBot !== -1) return -1
+
+      return a.localeCompare(b)
+    })
+
+    return { groups, order: sortedOrder }
   }, [items])
 
   const displayName = user?.full_name || user?.email?.split("@")[0] || "User"
   const initials = useMemo(() => getUserInitials(user), [user])
 
   return (
-    <Sidebar collapsible="icon" className={styles.sidebar}>
-      <SidebarHeader className={cn("h-14 flex items-center px-4", styles.header)}>
-        <div className="flex items-center gap-2 w-full">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-current/15 bg-current/5">
-            <Logo className="size-4.5" />
+    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground">
+      <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border/50">
+        <div className="flex items-center gap-3 w-full overflow-hidden">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <Logo className="size-5 fill-current" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className={cn("truncate text-sm font-semibold tracking-tight", styles.brandName)}>
+            <p className="truncate text-sm font-bold tracking-tight text-sidebar-foreground uppercase">
               Qunt Edge
             </p>
-            <p className={cn("truncate text-[10px] uppercase tracking-widest opacity-60", styles.brandSub)}>Workspace</p>
+            <p className="truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+              Workspace
+            </p>
           </div>
-          <SidebarTrigger
-            className="ml-auto hidden h-7 w-7 md:inline-flex"
-          />
+          <SidebarTrigger className="hidden md:flex ml-auto h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-2">
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex flex-col gap-3">
-            {groupedItems.order.map((groupName) => (
-              <SidebarGroup key={groupName} className="p-0">
-                {groupName !== "Main" && (
-                  <SidebarGroupLabel className={styles.groupLabel}>
-                    {groupName}
-                  </SidebarGroupLabel>
-                )}
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {groupedItems.groups[groupName].map((item, index) => {
-                      const label = item.i18nKey ? translate(item.i18nKey) : item.label
-                      const isItemDisabled = Boolean(item.disabled)
-                      const itemIsActive =
-                        !isItemDisabled && !!item.href && isActive(item.href, item.exact)
+      <SidebarContent className="scrollbar-thin">
+        {groupedItems.order.map((groupName) => (
+          <SidebarGroup key={groupName} className="px-2 py-3">
+            <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2">
+              {groupName}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {groupedItems.groups[groupName].map((item, index) => {
+                  const label = item.i18nKey ? translate(item.i18nKey) : item.label
+                  const isItemDisabled = Boolean(item.disabled)
+                  const itemIsActive = !isItemDisabled && !!item.href && isActive(item.href, item.exact)
 
-                      return (
-                        <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
-                          {item.href && !isItemDisabled ? (
-                            <SidebarMenuButton
-                              asChild
-                              isActive={itemIsActive}
-                              tooltip={label}
-                            >
-                              <Link
-                                href={item.href}
-                                prefetch={false}
-                                aria-current={itemIsActive ? "page" : undefined}
-                                onClick={() => {
-                                  if (isMobile) {
-                                    setOpenMobile(false)
-                                  }
-                                }}
-                              >
-                                {item.icon}
-                                <span>{label}</span>
-                              </Link>
-                            </SidebarMenuButton>
-                          ) : (
-                            <SidebarMenuButton
-                              type="button"
-                              tooltip={label}
-                              disabled={isItemDisabled}
-                              onClick={() => {
-                                item.action?.()
-                                if (isMobile) {
-                                  setOpenMobile(false)
-                                }
-                              }}
-                            >
+                  return (
+                    <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
+                      <SidebarMenuButton
+                        asChild={!!item.href}
+                        isActive={itemIsActive}
+                        tooltip={label}
+                        disabled={isItemDisabled}
+                        className={cn(
+                          "transition-all duration-200",
+                          itemIsActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                        )}
+                        onClick={!item.href ? () => {
+                          item.action?.()
+                          if (isMobile) setOpenMobile(false)
+                        } : undefined}
+                      >
+                        {item.href ? (
+                          <Link
+                            href={item.href}
+                            onClick={() => {
+                              if (isMobile) setOpenMobile(false)
+                            }}
+                            className="flex items-center w-full"
+                          >
+                            <span className={cn("shrink-0", itemIsActive ? "text-primary" : "text-muted-foreground/60")}>
                               {item.icon}
-                              <span>{label}</span>
-                            </SidebarMenuButton>
-                          )}
-                          {item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
-                        </SidebarMenuItem>
-                      )
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ))}
-          </div>
+                            </span>
+                            <span className="ml-3 truncate">{label}</span>
+                          </Link>
+                        ) : (
+                          <div className="flex items-center w-full">
+                            <span className="shrink-0 text-muted-foreground/60">{item.icon}</span>
+                            <span className="ml-3 truncate">{label}</span>
+                          </div>
+                        )}
+                      </SidebarMenuButton>
+                      {item.badge && (
+                        <SidebarMenuBadge className="group-data-[collapsible=icon]:hidden">
+                          {item.badge}
+                        </SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
 
-          <div className="mt-auto space-y-2 pt-2">
-            {actions ? (
-              <SidebarGroup className="p-0 group-data-[collapsible=icon]:hidden">
-                <SidebarGroupContent>
-                  <SidebarMenu>{actions}</SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ) : null}
-
-            {timezone ? (
-              <SidebarGroup className="p-0 group-data-[collapsible=icon]:hidden">
-                <SidebarGroupContent>
-                  <div className="px-2">
-                    <Select value={timezone.value} onValueChange={timezone.onChange}>
-                      <SelectTrigger className="h-8">
-                        <div className="flex items-center gap-2 truncate">
-                          <Globe className="size-3.5 text-muted-foreground" />
-                          <SelectValue placeholder="Select timezone" />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {timezone.options.map((tz) => (
-                          <SelectItem key={tz} value={tz} className="text-xs">
-                            {tz}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ) : null}
-          </div>
-        </div>
+        {actions && (
+          <SidebarGroup className="px-2 mt-auto border-t border-sidebar-border/30 pt-4 pb-2">
+            <SidebarMenu>{actions}</SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
-      <SidebarFooter className={cn("p-2", styles.footer)}>
-        <div className="space-y-2">
-          {user ? (
-            <div className={cn(styles.userCard, "group-data-[collapsible=icon]:p-1.5")}>
-              <div className="flex items-center gap-2.5">
-                <Avatar className="size-8 rounded-md">
-                  <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                  <p className={cn("truncate text-sm font-medium", styles.userName)}>
-                    {displayName}
-                  </p>
-                  <p className={cn("truncate text-[11px]", styles.userMeta)}>
-                    {user.email || "Signed in"}
-                  </p>
-                </div>
-                {showSubscription ? (
-                  <div className="group-data-[collapsible=icon]:hidden">
-                    <SubscriptionBadge className="scale-90 shadow-none" />
+      <SidebarFooter className="p-3 border-t border-sidebar-border/50 bg-sidebar/50">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user?.avatar_url} alt={displayName} />
+                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-2">
+                    <span className="truncate font-semibold text-sidebar-foreground">{displayName}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user?.email || "Free Plan"}</span>
                   </div>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-
-          {onLogout ? (
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full justify-start group-data-[collapsible=icon]:justify-center"
-              onClick={onLogout}
-            >
-              <LogOut className="size-4" />
-              <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-            </Button>
-          ) : null}
-        </div>
+                  <MoreHorizontal className="ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                side="right"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage src={user?.avatar_url} alt={displayName} />
+                      <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{displayName}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {timezone && (
+                  <div className="px-2 py-1.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 mb-1">Timezone</p>
+                    <select
+                      value={timezone.value}
+                      onChange={(e) => timezone.onChange(e.target.value)}
+                      className="w-full bg-transparent text-xs p-1 focus:outline-none cursor-pointer border rounded-md border-border/50 hover:border-border transition-colors"
+                    >
+                      {timezone.options.map((tz) => (
+                        <option key={tz} value={tz} className="bg-sidebar">
+                          {tz}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <DropdownMenuSeparator />
+                {onLogout && (
+                  <DropdownMenuItem
+                    onClick={onLogout}
+                    className="text-destructive focus:text-destructive cursor-pointer"
+                  >
+                    <LogOut className="mr-2 size-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
