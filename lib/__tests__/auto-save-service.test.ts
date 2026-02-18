@@ -253,6 +253,13 @@ describe('AutoSaveService', () => {
 
     describe('Offline Support', () => {
         it('should enqueue saves when offline', async () => {
+            // Setup navigator mock
+            if (typeof navigator === 'undefined') {
+                global.navigator = { onLine: true } as Navigator
+            }
+
+            const originalOnLine = navigator.onLine
+
             mockSaveFunction.mockResolvedValue({ success: true })
             service = new AutoSaveService(mockSaveFunction, {
                 debounceMs: 10,
@@ -290,7 +297,7 @@ describe('AutoSaveService', () => {
 
             Object.defineProperty(navigator, 'onLine', {
                 writable: true,
-                value: true,
+                value: originalOnLine,
             })
         })
 
