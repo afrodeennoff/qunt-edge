@@ -10,3 +10,6 @@
 ## 2026-02-18 - [Fix ReferenceError in Tests]
 **Learning:** Node.js test environments (Vitest) do not have navigator defined by default. Accessing it directly to mock onLine status throws a ReferenceError.
 **Action:** Used Object.defineProperty(global, 'navigator', ...) to ensure the object exists before patching properties in tests.
+## 2026-02-18 - [Fix Build Script ESM Compatibility]
+**Learning:** In projects with `"type": "module"`, executing TypeScript scripts via `ts-node` requires the `--esm` flag to correctly handle ES module resolution.
+**Action:** Updated `prebuild` script in `package.json` to use `ts-node --esm`.
