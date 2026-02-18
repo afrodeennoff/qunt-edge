@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table"
 import { Account, Group } from "@/lib/data-types"
 import { cn } from "@/lib/utils"
+import { toValidDate } from "@/lib/date-utils"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import { Progress } from "@/components/ui/progress"
 import { useAccountOrderStore } from "@/store/account-order-store"
@@ -54,11 +55,6 @@ interface AccountsTableViewProps {
   onSortingChange: OnChangeFn<SortingState>
 }
 
-function toValidDate(value: Date | string | null | undefined) {
-  if (!value) return null
-  const date = value instanceof Date ? value : new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date
-}
 
 function getAccountStartDate(account: Account) {
   const tradeDates = (account.trades ?? [])

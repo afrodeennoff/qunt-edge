@@ -1,4 +1,5 @@
 import type { Trade } from "@/prisma/generated/prisma"
+import { toValidDate } from "@/lib/date-utils"
 
 export interface ImportTradeDraft {
   id?: string
@@ -57,17 +58,11 @@ export function decimalToNumber<T extends number | null | undefined>(
   return fallback as any
 }
 
-export function toUtcDate(value: string | Date | null | undefined): Date | null {
-  if (!value) return null
-  const date = value instanceof Date ? value : new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date
-}
-
 export function toUtcIsoString(
   value: string | Date | null | undefined,
   fallback?: string
 ): string | undefined {
-  const date = toUtcDate(value)
+  const date = toValidDate(value)
   if (!date) return fallback
   return date.toISOString()
 }
