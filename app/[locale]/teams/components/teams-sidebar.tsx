@@ -18,9 +18,9 @@ export function TeamsSidebar() {
   const dashboardRoot = `${teamsRoot}/dashboard`
   const slug =
     teamsIndex !== -1 &&
-    segments[teamsIndex + 1] === 'dashboard' &&
-    segments[teamsIndex + 2] &&
-    segments[teamsIndex + 2] !== 'trader'
+      segments[teamsIndex + 1] === 'dashboard' &&
+      segments[teamsIndex + 2] &&
+      segments[teamsIndex + 2] !== 'trader'
       ? segments[teamsIndex + 2]
       : undefined
 
@@ -88,8 +88,11 @@ export function TeamsSidebar() {
   return (
     <UnifiedSidebar
       items={navItems}
-      user={user?.user_metadata}
-      styleVariant="minimal"
+      user={{
+        avatar_url: user?.user_metadata?.avatar_url,
+        email: user?.email,
+        full_name: user?.user_metadata?.full_name
+      }}
       showSubscription={false}
       timezone={{
         value: timezone,
