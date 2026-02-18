@@ -43,6 +43,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { format, Locale } from "date-fns"
 import { cn, calculateTradingDays } from "@/lib/utils"
 import { useData } from "@/context/data-provider"
+import { getAccountStartDate } from "@/lib/account-metrics"
 import { useI18n } from "@/locales/client"
 import { AccountTable } from './account-table'
 import { toast } from "sonner"
@@ -133,28 +134,6 @@ interface PayoutDialogProps {
 type SortOption = {
   id: string
   label: string
-}
-
-function toValidDate(value: Date | string | null | undefined) {
-  if (!value) return null
-  const date = value instanceof Date ? value : new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date
-}
-
-function getAccountStartDate(account: Account) {
-  const tradeDates = (account.trades ?? [])
-    .map((trade) => toValidDate(trade.entryDate))
-    .filter((date): date is Date => Boolean(date))
-    .sort((a, b) => a.getTime() - b.getTime())
-
-  if (tradeDates.length > 0) return tradeDates[0]
-
-  const dailyDates = (account.dailyMetrics ?? [])
-    .map((metric) => toValidDate(metric.date))
-    .filter((date): date is Date => Boolean(date))
-    .sort((a, b) => a.getTime() - b.getTime())
-
-  return dailyDates[0] ?? null
 }
 
 function getAccountBalance(account: Account) {
