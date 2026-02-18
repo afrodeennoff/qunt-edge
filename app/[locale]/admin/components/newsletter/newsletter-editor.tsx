@@ -17,6 +17,7 @@ import { extractYouTubeId } from "../../utils/youtube"
 import { fetchTranscriptServer } from "../../actions/youtube"
 import { AudioExtractor } from "./newsletter-audio-extractor"
 import { AudioSplitter } from "./newsletter-audio-splitter"
+import { TranscriptionResult } from "./types"
 
 export function NewsletterEditor() {
   const [loading, setLoading] = useState(false)
@@ -160,7 +161,7 @@ export function NewsletterEditor() {
                 toast.success(`Created ${segments.length} audio segments`)
                 console.log('Audio segments created:', segments)
               }}
-              onTranscriptionComplete={(transcriptions) => {
+              onTranscriptionComplete={(transcriptions: TranscriptionResult[]) => {
                 toast.success(`Transcription completed: ${transcriptions.length} segments`)
                 console.log('Transcriptions completed:', transcriptions)
                 // You can use these transcriptions to populate the description field
