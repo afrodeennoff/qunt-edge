@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = ["...", "nodejs_20", "openssl"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npx prisma generate", "npm run build"]
+
+[start]
+cmd = "npm run start:standalone"
+
+[variables]
+NEXT_STANDALONE = "1"
+NODE_ENV = "production"
+PORT = "3000"
+NODE_OPTIONS = "--max-old-space-size=4096"
