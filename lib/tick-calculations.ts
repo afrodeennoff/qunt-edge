@@ -8,6 +8,19 @@ export interface TickCalculation {
   tickSize: number
 }
 
+// Cache for sorted keys of tickDetails objects
+// WeakMap ensures that if the tickDetails object is garbage collected, the cache entry is also removed
+const sortedKeysCache = new WeakMap<object, string[]>()
+
+function getSortedKeys(tickDetails: Record<string, TickDetails>): string[] {
+  let keys = sortedKeysCache.get(tickDetails)
+  if (!keys) {
+    keys = Object.keys(tickDetails).sort((a, b) => b.length - a.length)
+    sortedKeysCache.set(tickDetails, keys)
+  }
+  return keys
+}
+
 export function calculateTicksAndPoints(
   trade: Trade,
   tickDetails: Record<string, TickDetails>
@@ -16,9 +29,8 @@ export function calculateTicksAndPoints(
   let tickValue = 1
   let tickSize = 0.01
 
-  // Find matching ticker from tick details
-  const matchingTicker = Object.keys(tickDetails)
-    .sort((a, b) => b.length - a.length)
+  // Find matching ticker from tick details using cached sorted keys
+  const matchingTicker = getSortedKeys(tickDetails)
     .find(ticker => trade.instrument.includes(ticker))
 
   if (matchingTicker) {
