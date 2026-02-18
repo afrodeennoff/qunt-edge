@@ -28,12 +28,6 @@
       ]
     }
   },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "nodenext",
-      "moduleResolution": "nodenext"
-    }
-  },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
