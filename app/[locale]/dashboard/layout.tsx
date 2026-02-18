@@ -27,13 +27,17 @@ export default async function DashboardLayout({
     redirect(`/${safeLocale}/authentication?next=${nextPath}`);
   }
 
+  const isAdmin =
+    user.id === process.env.ALLOWED_ADMIN_USER_ID ||
+    user.id === process.env.ADMIN_USER_ID;
+
   return (
     <DashboardProviders>
       <RithmicSyncNotifications />
       <Modals />
       <DashboardProvider>
         <div className="flex min-h-screen w-full bg-background selection:bg-primary/20 selection:text-primary">
-          <DashboardSidebar />
+          <DashboardSidebar isAdmin={isAdmin} />
           <SidebarInset className="flex-1 relative overflow-hidden">
             {/* Global Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
