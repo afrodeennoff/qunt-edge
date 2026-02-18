@@ -1725,3 +1725,16 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `RootLayout` reads cookie via `next/headers` and passes the boolean value.
 - **Key Files:** `app/[locale]/layout.tsx`, `components/providers/root-providers.tsx`, `AGENTS.md`
 - **Verification:** `npm run typecheck` (skipped due to env limitations). Manual code review confirms prop drilling is correct.
+
+### 2026-02-18: Sidebar Refactor & Dokpoly Deployment Optimization
+- **What changed:** Refactored the sidebar to use a unified premium shadcn design and optimized the project configuration for Dokpoly/Nixpacks deployment.
+- **What I want:** A clean, consistent sidebar with accurate route highlighting across all sections (Dashboard, Teams, Admin) and a stable Docker/Nixpacks build process.
+- **What I don't want:** Fragmented designs between different sidebars, broken active-link indicators, or container build failures due to missing dependencies or incorrect build commands.
+- **How we fixed that:**
+  - Unified all sidebars into a single `UnifiedSidebar` component with a premium shadcn aesthetic.
+  - Improved `useActiveLink` to handle locale prefixes, nested routes, and dashboard tab-specific highlighting.
+  - Standardized all icons to `size-4` and moved user settings to a dropdown in the footer.
+  - Created `nixpacks.toml` and updated `package.json` with standalone mode and Node 20 requirements.
+  - Added required `binaryTargets` to `prisma/schema.prisma` for Linux container compatibility.
+- **Key Files:** `components/ui/unified-sidebar.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `package.json`, `nixpacks.toml`, `prisma/schema.prisma`, `AGENTS.md`
+- **Verification:** Successfully pushed to `main` after resolving merge conflicts. Build process verified via nixpacks syntax check.
