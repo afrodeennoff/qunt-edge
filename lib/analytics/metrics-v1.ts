@@ -1,6 +1,7 @@
 import { differenceInDays, startOfDay } from 'date-fns'
 import { addMoney, netPnl, toDecimal, toMoneyNumber, type DecimalLike } from '@/lib/financial-math'
 import { ANALYTICS_METRIC_VERSION } from '@/lib/analytics/metric-definitions'
+import { safeDivide } from '@/lib/utils'
 
 export interface RiskMetricsV1 {
   metricVersion: typeof ANALYTICS_METRIC_VERSION
@@ -17,10 +18,6 @@ export interface RiskMetricsV1 {
   unrealizedPnl: number
   winningStreak: number
   losingStreak: number
-}
-
-function safeDivide(numerator: number, denominator: number): number {
-  return denominator === 0 ? 0 : numerator / denominator
 }
 
 export type RiskTradeLike = {
