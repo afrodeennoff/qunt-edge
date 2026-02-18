@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { useData } from "@/context/data-provider";
 import { useUserStore } from "@/store/user-store";
