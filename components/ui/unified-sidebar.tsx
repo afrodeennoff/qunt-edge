@@ -185,8 +185,16 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { isMobile, setOpenMobile } = useSidebar()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const { isMobile, openMobile, setOpenMobile } = useSidebar()
   const styles = SIDEBAR_STYLES[styleVariant]
+  const routeSignature = `${pathname ?? ""}?${searchParams.toString()}`
+
+  React.useEffect(() => {
+    if (!isMobile || !openMobile) return
+    setOpenMobile(false)
+  }, [isMobile, openMobile, routeSignature, setOpenMobile])
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
