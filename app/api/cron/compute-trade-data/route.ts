@@ -396,35 +396,42 @@ export async function GET(request: Request) {
     // Save the MAE/MFE data to database
     console.log(`Successfully processed ${allProcessedTrades.length} trades, saving to database...`);
 
-    const savedAnalytics = await Promise.allSettled(
-      allProcessedTrades.map(async (trade) => {
-        // Calculate additional metrics
-        const riskRewardRatio = trade.mae > 0 ? trade.mfe / trade.mae : 0;
-        const efficiency = trade.mfe > 0 ? (Math.abs(trade.closePrice - trade.entryPrice) / trade.mfe) * 100 : 0;
+    const BATCH_SIZE = 50;
+    const savedAnalytics: PromiseSettledResult<unknown>[] = [];
 
-        return prisma.tradeAnalytics.upsert({
-          where: { tradeId: trade.id },
-          update: {
-            mae: trade.mae,
-            mfe: trade.mfe,
-            entryPriceFromData: trade.entryPriceFromData,
-            priceDifference: trade.priceDifference,
-            riskRewardRatio,
-            efficiency,
-            updatedAt: new Date()
-          },
-          create: {
-            tradeId: trade.id,
-            mae: trade.mae,
-            mfe: trade.mfe,
-            entryPriceFromData: trade.entryPriceFromData,
-            priceDifference: trade.priceDifference,
-            riskRewardRatio,
-            efficiency
-          }
-        });
-      })
-    );
+    for (let i = 0; i < allProcessedTrades.length; i += BATCH_SIZE) {
+      const batch = allProcessedTrades.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.allSettled(
+        batch.map(async (trade) => {
+          // Calculate additional metrics
+          const riskRewardRatio = trade.mae > 0 ? trade.mfe / trade.mae : 0;
+          const efficiency = trade.mfe > 0 ? (Math.abs(trade.closePrice - trade.entryPrice) / trade.mfe) * 100 : 0;
+
+          return prisma.tradeAnalytics.upsert({
+            where: { tradeId: trade.id },
+            update: {
+              mae: trade.mae,
+              mfe: trade.mfe,
+              entryPriceFromData: trade.entryPriceFromData,
+              priceDifference: trade.priceDifference,
+              riskRewardRatio,
+              efficiency,
+              updatedAt: new Date()
+            },
+            create: {
+              tradeId: trade.id,
+              mae: trade.mae,
+              mfe: trade.mfe,
+              entryPriceFromData: trade.entryPriceFromData,
+              priceDifference: trade.priceDifference,
+              riskRewardRatio,
+              efficiency
+            }
+          });
+        })
+      );
+      savedAnalytics.push(...batchResults);
+    }
 
     const successfulSaves = savedAnalytics.filter(result => result.status === 'fulfilled').length;
     const failedSaves = savedAnalytics.filter(result => result.status === 'rejected').length;
