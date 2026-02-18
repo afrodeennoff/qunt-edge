@@ -73,8 +73,8 @@ interface Team {
   traderIds: string[]
   traders: { id: string; email: string }[]
   managers: { id: string; managerId: string; access: string; email: string }[]
-  createdAt: any
-  updatedAt: any
+  createdAt: Date | string
+  updatedAt: Date | string
   userAccess?: string
 }
 
@@ -625,7 +625,7 @@ export function TeamManagement({
     }
   }
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: Date | string) => {
     if (date instanceof Date) {
       return date.toLocaleDateString()
     }
