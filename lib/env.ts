@@ -7,6 +7,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_UI_V2_ENABLED: z.string().optional(),
   CRON_SECRET: z.string().min(1).optional(),
+  UNSUBSCRIBE_TOKEN_SECRET: z.string().min(32).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
   AI_BASE_URL: z.string().url().optional(),
   AI_MODEL: z.string().min(1).optional(),
