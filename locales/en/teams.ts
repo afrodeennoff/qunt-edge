@@ -341,6 +341,6 @@ const teams = {
     'Manager access controls',
     'Team reporting'
   ],
-}
+} as const;
 
-export default teams; 
+export default teams;

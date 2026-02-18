@@ -783,7 +783,7 @@ export function TeamManagement({
                         <AlertDialogHeader>
                           <AlertDialogTitle>{t('teams.management.deleteTeam')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {t('teams.management.deleteConfirm').replace('{name}', team.name)}
+                            {t('teams.management.deleteConfirm', { name: team.name })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -940,7 +940,7 @@ export function TeamManagement({
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col w-[95vw] sm:w-full">
           <DialogHeader className="shrink-0">
-            <DialogTitle>{t('teams.management.manageTitle').replace('{name}', selectedTeam?.name || '')}</DialogTitle>
+            <DialogTitle>{t('teams.management.manageTitle', { name: selectedTeam?.name || '' })}</DialogTitle>
             <DialogDescription>
               {t('teams.management.manageDescription')}
             </DialogDescription>
@@ -996,7 +996,7 @@ export function TeamManagement({
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>{t('teams.management.removeTrader')}</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    {t('teams.management.removeTraderConfirm').replace('{email}', trader.email)}
+                                    {t('teams.management.removeTraderConfirm', { email: trader.email })}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -1063,7 +1063,7 @@ export function TeamManagement({
                               <AlertDialogHeader>
                                 <AlertDialogTitle>{t('teams.management.cancelInvitation')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  {t('teams.management.cancelInvitationConfirm').replace('{email}', invitation.email)}
+                                  {t('teams.management.cancelInvitationConfirm', { email: invitation.email })}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -1128,7 +1128,7 @@ export function TeamManagement({
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>{t('teams.management.removeManager')}</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    {t('teams.management.removeManagerConfirm').replace('{email}', manager.email)}
+                                    {t('teams.management.removeManagerConfirm', { email: manager.email })}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

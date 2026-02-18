@@ -342,7 +342,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {(t as any)('teams.equity.tradeStats', { 
+                      {t('teams.equity.tradeStats', {
                         days: tradedDays, 
                         trades: user.statistics.totalTrades 
                       })}
