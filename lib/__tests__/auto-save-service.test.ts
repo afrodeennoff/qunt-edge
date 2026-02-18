@@ -315,6 +315,22 @@ describe('AutoSaveService', () => {
                 priority: 'normal',
             })
 
+            if (typeof window === 'undefined') {
+                Object.defineProperty(global, 'window', {
+                    value: {
+                        dispatchEvent: (event: Event) => {},
+                        addEventListener: (event: string, cb: any) => {},
+                        removeEventListener: (event: string, cb: any) => {},
+                    },
+                    writable: true
+                })
+            }
+
+            Object.defineProperty(navigator, 'onLine', {
+                writable: true,
+                value: true,
+            })
+
             const onlineEvent = new Event('online')
             window.dispatchEvent(onlineEvent)
 

@@ -114,7 +114,7 @@ class WidgetPersistenceManager {
 
       let processedLayout = layout
       if (this.config.enableEncryption) {
-        processedLayout = widgetEncryptionService.encryptLayoutData(layout)
+        processedLayout = await widgetEncryptionService.encryptLayoutData(layout)
       }
 
       const storageResult = await widgetStorageService.saveWithRetry(userId, processedLayout)
@@ -194,7 +194,7 @@ class WidgetPersistenceManager {
 
       if (this.config.enableEncryption) {
         try {
-          const decryptedLayout = widgetEncryptionService.decryptLayoutData(layout)
+          const decryptedLayout = await widgetEncryptionService.decryptLayoutData(layout)
           this.lastKnownLayout = decryptedLayout
           return decryptedLayout
         } catch (decryptError) {
