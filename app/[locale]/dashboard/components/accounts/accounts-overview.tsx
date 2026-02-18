@@ -977,7 +977,6 @@ export function AccountsOverview({
   }, [selectedAccountForTable])
 
   const handleAddPayout = async (payout: Payout) => {
-    console.log('handleAddPayout', payout)
     if (!selectedAccountForTable || !user) return
 
     try {
