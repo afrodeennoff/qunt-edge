@@ -3,6 +3,8 @@ import { logger } from '@/lib/logger'
 import { paymentService } from './payment-service'
 import { getSubscriptionDetails } from './subscription'
 import { whop } from '@/lib/whop'
+import { SubscriptionEventType } from '@/prisma/generated/prisma'
+import type { Prisma } from '@/prisma/generated/prisma'
 
 export interface SubscriptionDetails {
   userId: string
@@ -429,6 +431,10 @@ export class SubscriptionManager {
         },
       })
 
+      const toPauseIds: string[] = []
+      const toCancelIds: string[] = []
+      const eventsToCreate: Prisma.SubscriptionEventCreateManyInput[] = []
+
       for (const subscription of expiringSubscriptions) {
         try {
           if (!subscription.endDate) continue
@@ -438,18 +444,12 @@ export class SubscriptionManager {
           )
 
           if (now < gracePeriodEnd && GRACE_PERIOD_CONFIG.enabled) {
-            await prisma.subscription.update({
-              where: { id: subscription.id },
-              data: {
-                status: 'PAUSED',
-              },
-            })
-
-            await this.recordSubscriptionEvent({
+            toPauseIds.push(subscription.id)
+            eventsToCreate.push({
               userId: subscription.userId,
               email: subscription.email,
               subscriptionId: subscription.id,
-              eventType: 'GRACE_PERIOD_STARTED',
+              eventType: SubscriptionEventType.GRACE_PERIOD_STARTED,
               eventData: {
                 gracePeriodEndsAt: gracePeriodEnd,
               },
@@ -460,18 +460,12 @@ export class SubscriptionManager {
               gracePeriodEndsAt: gracePeriodEnd,
             })
           } else {
-            await prisma.subscription.update({
-              where: { id: subscription.id },
-              data: {
-                status: 'CANCELLED',
-              },
-            })
-
-            await this.recordSubscriptionEvent({
+            toCancelIds.push(subscription.id)
+            eventsToCreate.push({
               userId: subscription.userId,
               email: subscription.email,
               subscriptionId: subscription.id,
-              eventType: 'GRACE_PERIOD_ENDED',
+              eventType: SubscriptionEventType.GRACE_PERIOD_ENDED,
               eventData: {
                 reason: 'grace_period_expired',
               },
@@ -491,6 +485,36 @@ export class SubscriptionManager {
           errors++
         }
       }
+
+      const updates: Promise<any>[] = []
+
+      if (toPauseIds.length > 0) {
+        updates.push(
+          prisma.subscription.updateMany({
+            where: { id: { in: toPauseIds } },
+            data: { status: 'PAUSED' },
+          })
+        )
+      }
+
+      if (toCancelIds.length > 0) {
+        updates.push(
+          prisma.subscription.updateMany({
+            where: { id: { in: toCancelIds } },
+            data: { status: 'CANCELLED' },
+          })
+        )
+      }
+
+      if (eventsToCreate.length > 0) {
+        updates.push(
+          prisma.subscriptionEvent.createMany({
+            data: eventsToCreate,
+          })
+        )
+      }
+
+      await Promise.all(updates)
 
       logger.info('[SubscriptionManager] Grace period check completed', {
         processed,
