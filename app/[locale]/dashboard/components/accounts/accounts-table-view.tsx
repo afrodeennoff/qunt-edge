@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table"
 import { Account, Group } from "@/lib/data-types"
 import { cn } from "@/lib/utils"
+import { getAccountStartDate } from "@/lib/account-metrics"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import { Progress } from "@/components/ui/progress"
 import { useAccountOrderStore } from "@/store/account-order-store"
@@ -52,28 +53,6 @@ interface AccountsTableViewProps {
   onSelectAccount: (account: Account) => void
   sorting: SortingState
   onSortingChange: OnChangeFn<SortingState>
-}
-
-function toValidDate(value: Date | string | null | undefined) {
-  if (!value) return null
-  const date = value instanceof Date ? value : new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date
-}
-
-function getAccountStartDate(account: Account) {
-  const tradeDates = (account.trades ?? [])
-    .map((trade) => toValidDate(trade.entryDate))
-    .filter((date): date is Date => Boolean(date))
-    .sort((a, b) => a.getTime() - b.getTime())
-
-  if (tradeDates.length > 0) return tradeDates[0]
-
-  const dailyDates = (account.dailyMetrics ?? [])
-    .map((metric) => toValidDate(metric.date))
-    .filter((date): date is Date => Boolean(date))
-    .sort((a, b) => a.getTime() - b.getTime())
-
-  return dailyDates[0] ?? null
 }
 
 function isGroupRow(row: AccountRow): row is AccountGroupRow {

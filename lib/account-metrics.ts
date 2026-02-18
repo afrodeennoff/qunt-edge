@@ -3,6 +3,7 @@
 import { Prisma } from '@/prisma/generated/prisma'
 import type { Account, Trade } from '@/lib/data-types'
 import Decimal from 'decimal.js'
+import { toValidDate } from '@/lib/date-utils'
 
 export type AccountMetrics = {
   // Balance and progress
@@ -45,26 +46,36 @@ export type DailyMetric = {
   }
 }
 
-function toDate(d: string | Date | null | undefined): Date | null {
-  if (!d) return null
-  const dt = d instanceof Date ? d : new Date(d)
-  return isNaN(dt.getTime()) ? null : dt
+export function getAccountStartDate(account: Account): Date | null {
+  const tradeDates = (account.trades ?? [])
+    .map((trade) => toValidDate(trade.entryDate))
+    .filter((date): date is Date => Boolean(date))
+    .sort((a, b) => a.getTime() - b.getTime())
+
+  if (tradeDates.length > 0) return tradeDates[0]
+
+  const dailyDates = (account.dailyMetrics ?? [])
+    .map((metric) => toValidDate(metric.date))
+    .filter((date): date is Date => Boolean(date))
+    .sort((a, b) => a.getTime() - b.getTime())
+
+  return dailyDates[0] ?? null
 }
 
 export function computeAccountMetrics(
   account: Account,
   allTrades: Trade[]
 ): { balanceToDate: number; metrics: NonNullable<Account['metrics']>; dailyMetrics: NonNullable<Account['dailyMetrics']>; trades: Trade[]; aboveBuffer: number } {
-  const resetDate = toDate(account.resetDate)
+  const resetDate = toValidDate(account.resetDate)
   const relevantTrades = allTrades.filter(t => {
     if (t.accountNumber !== account.number) return false
-    const entryDate = toDate(t.entryDate)
+    const entryDate = toValidDate(t.entryDate)
     if (!entryDate) return false
     return !resetDate || entryDate >= resetDate
   })
 
   const sortedTrades = [...relevantTrades].sort((a, b) => {
-    return (toDate(a.entryDate)!.getTime()) - (toDate(b.entryDate)!.getTime())
+    return (toValidDate(a.entryDate)!.getTime()) - (toValidDate(b.entryDate)!.getTime())
   })
 
   // Apply buffer filtering if enabled (default to true)
@@ -75,7 +86,7 @@ export function computeAccountMetrics(
     // Build time-ordered event stream of trades and payouts (paid/validated)
     const validPayouts = (account.payouts || [])
       .filter(p => ['PAID', 'VALIDATED'].includes(p.status))
-      .map(p => ({ date: toDate(p.date)!, amount: p.amount }))
+      .map(p => ({ date: toValidDate(p.date)!, amount: p.amount }))
       .sort((a, b) => a.date.getTime() - b.date.getTime())
 
     type Event =
@@ -178,7 +189,7 @@ export function computeAccountMetrics(
   // Trading days metrics
   const dailyTrades: { [date: string]: Trade[] } = {}
   for (const trade of filteredTrades) {
-    const key = toDate(trade.entryDate)!.toISOString().split('T')[0]
+    const key = toValidDate(trade.entryDate)!.toISOString().split('T')[0]
     if (!dailyTrades[key]) dailyTrades[key] = []
     dailyTrades[key].push(trade)
   }
@@ -190,8 +201,8 @@ export function computeAccountMetrics(
 
   // Daily metrics (merge trade and payout dates)
   const allDates = new Set<string>()
-  filteredTrades.forEach(t => allDates.add(toDate(t.entryDate)!.toISOString().split('T')[0]))
-    ; (account.payouts || []).forEach(p => allDates.add(toDate(p.date)!.toISOString().split('T')[0]))
+  filteredTrades.forEach(t => allDates.add(toValidDate(t.entryDate)!.toISOString().split('T')[0]))
+    ; (account.payouts || []).forEach(p => allDates.add(toValidDate(p.date)!.toISOString().split('T')[0]))
 
   let dailyRunningBalance = new Prisma.Decimal(account.startingBalance || 0)
   const dailyMetrics: NonNullable<Account['dailyMetrics']> = Array.from(allDates)
@@ -204,7 +215,7 @@ export function computeAccountMetrics(
         ? true
         : dailyTradesPnL.lte(totalProfit.times(new Prisma.Decimal(account.consistencyPercentage || 30).div(100)))
 
-      const payout = (account.payouts || []).find(p => toDate(p.date)!.toISOString().split('T')[0] === date)
+      const payout = (account.payouts || []).find(p => toValidDate(p.date)!.toISOString().split('T')[0] === date)
       if (payout?.status === 'PAID') {
         dailyRunningBalance = dailyRunningBalance.minus(new Prisma.Decimal(payout.amount))
       }
@@ -218,7 +229,7 @@ export function computeAccountMetrics(
         payout: payout ? {
           id: payout.id,
           amount: new Prisma.Decimal(payout.amount).toNumber(),
-          date: toDate(payout.date)!,
+          date: toValidDate(payout.date)!,
           status: payout.status
         } : undefined
       }
