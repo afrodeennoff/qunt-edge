@@ -1,6 +1,6 @@
 'use client'
 
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area } from 'recharts'
+import { ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, TooltipProps, AreaChart, Area } from 'recharts'
 
 interface EquityCurveData {
   date: string
@@ -113,12 +113,15 @@ export function UserEquityChart({ equityCurve, userId, totalPnL, showDailyView =
   const chartData = showDailyView ? dailyData : equityCurve
   const xTicks = showDailyView ? getSmartDateTicks(dailyData) : getSmartTicks(equityCurve)
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string | number>) => {
     if (active && payload && payload.length) {
+      const data = payload[0].payload as DailyEquityData | EquityCurveData
+
       if (showDailyView) {
-        const dailyPnL = payload[0]?.payload?.dailyPnL || 0
-        const cumulativeValue = payload[0]?.payload?.cumulativePnL || 0
-        const tradeCount = payload[0]?.payload?.tradeCount || 0
+        const dailyData = data as DailyEquityData
+        const dailyPnL = dailyData.dailyPnL || 0
+        const cumulativeValue = dailyData.cumulativePnL || 0
+        const tradeCount = dailyData.tradeCount || 0
         
         // Format date for display
         const date = new Date(label)
@@ -169,14 +172,15 @@ export function UserEquityChart({ equityCurve, userId, totalPnL, showDailyView =
       } else {
         // Trade view tooltip
         const pnlValue = payload[0]?.value || 0
-        const cumulativeValue = payload[0]?.payload?.cumulativePnL || 0
+        const tradeData = data as EquityCurveData
+        const cumulativeValue = tradeData.cumulativePnL || 0
         
         return (
           <div className="rounded-lg border bg-background p-2 shadow-xs">
             <div className="grid gap-2">
               <div className="flex flex-col">
                 <span className="text-[0.70rem] uppercase text-muted-foreground">
-                  Trade #{payload[0]?.payload?.tradeNumber || 'N/A'}
+                  Trade #{tradeData.tradeNumber || 'N/A'}
                 </span>
                 <span className="font-bold text-muted-foreground">
                   {label}
