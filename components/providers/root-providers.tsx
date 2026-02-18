@@ -7,7 +7,13 @@ import { AuthTimeout } from "@/components/auth/auth-timeout";
 import { useEffect } from "react";
 import { QueryProvider } from "@/components/providers/query-provider";
 
-export function RootProviders({ children }: { children: React.ReactNode }) {
+export function RootProviders({
+    children,
+    defaultOpen = true,
+}: {
+    children: React.ReactNode
+    defaultOpen?: boolean
+}) {
     useEffect(() => {
         if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
             window.addEventListener("load", () => {
@@ -23,7 +29,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
         <QueryProvider>
             <TooltipProvider>
                 <ThemeProvider>
-                    <SidebarProvider>
+                    <SidebarProvider defaultOpen={defaultOpen}>
                         <AuthTimeout />
                         {children}
                     </SidebarProvider>
