@@ -481,6 +481,13 @@ export const DataProvider: React.FC<{
       const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
       let cachedTrades: Trade[] | null = null;
       if (userId && !isSharedView) {
+        let cachedTrades: Trade[] | null = null;
+        try {
+          cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
+        } catch (e) {
+          console.warn("[DataProvider] Failed to load trades from cache", e);
+        }
+
         // Try local cache first
         const cachedTrades = await withTimeout(
           getTradesCache(userId),
