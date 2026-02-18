@@ -479,6 +479,7 @@ export const DataProvider: React.FC<{
 
       // Step 2: Fetch trades (with caching server side)
       const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
+      let cachedTrades: Trade[] | null = null;
       if (userId && !isSharedView) {
         // Try local cache first
         const cachedTrades = await withTimeout(
