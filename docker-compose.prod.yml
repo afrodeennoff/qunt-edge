@@ -16,9 +16,6 @@ services:
     volumes:
       - next_cache:/app/.next/cache
 
-volumes:
-  next_cache:
-
   migrate:
     image: oven/bun:1
     container_name: deltalytix-migrate
@@ -30,3 +27,6 @@ volumes:
     volumes:
       - ./:/app
     command: sh -c "bun install --frozen-lockfile && bunx prisma migrate deploy"
+
+volumes:
+  next_cache:
