@@ -21,10 +21,9 @@ cmds = ["npm install"]
 cmds = ["npx prisma generate", "npm run build"]
 
 [start]
-cmd = "npm run start:standalone"
+cmd = "npm run start"
 
 [variables]
-NEXT_STANDALONE = "1"
 NODE_ENV = "production"
 PORT = "3000"
 NODE_OPTIONS = "--max-old-space-size=8192"
