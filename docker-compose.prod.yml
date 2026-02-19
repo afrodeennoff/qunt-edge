@@ -2,17 +2,22 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.bun
-    image: deltalytix:prod
-    container_name: deltalytix-app
+      dockerfile: Dockerfile
+    image: quntedge:prod
+    container_name: quntedge-app
     restart: unless-stopped
     env_file:
       - .env
     environment:
       NODE_ENV: production
-      ENV: container
+      NEXT_STANDALONE: "1"
     ports:
-      - "${APP_BIND_IP:-127.0.0.1}:${PORT:-3000}:3000"
+      - "3000:3000"
+    volumes:
+      - next_cache:/app/.next/cache
+
+volumes:
+  next_cache:
 
   migrate:
     image: oven/bun:1
