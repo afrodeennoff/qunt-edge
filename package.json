@@ -13,7 +13,7 @@
     "self-heal": "node scripts/self-heal.mjs",
     "prebuild": "npm run clean:build-artifacts && tsx scripts/generate-routes.ts",
     "db:sync": "node scripts/sync-stack.mjs",
-    "build": "next build",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 NEXT_DISABLE_FONT_DOWNLOADS=1 next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "start:standalone": "node .next/standalone/server.js",
     "lint": "eslint",

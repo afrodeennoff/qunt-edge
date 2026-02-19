@@ -1,5 +1,18 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "openssl"]
+nixPkgs = [
+  "nodejs_20",
+  "openssl",
+  "pkg-config",
+  "cairo",
+  "pango",
+  "libpng",
+  "libjpeg",
+  "giflib",
+  "librsvg",
+  "libtool",
+  "m4",
+  "gcc"
+]
 
 [phases.install]
 cmds = ["npm install"]
@@ -14,4 +27,5 @@ cmd = "npm run start:standalone"
 NEXT_STANDALONE = "1"
 NODE_ENV = "production"
 PORT = "3000"
-NODE_OPTIONS = "--max-old-space-size=4096"
+NODE_OPTIONS = "--max-old-space-size=8192"
+NEXT_DISABLE_FONT_DOWNLOADS = "1"
