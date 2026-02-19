@@ -480,25 +480,17 @@ export async function checkAndResetAccountsAction() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const accountsToReset = await prisma.account.findMany({
+  await prisma.account.updateMany({
     where: {
       userId,
       resetDate: {
         lte: today,
       },
     },
+    data: {
+      resetDate: null,
+    },
   })
-
-  for (const account of accountsToReset) {
-    await prisma.account.update({
-      where: {
-        id: account.id
-      },
-      data: {
-        resetDate: null,
-      }
-    })
-  }
 }
 
 
