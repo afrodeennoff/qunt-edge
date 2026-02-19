@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/+$/, '');
 const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
-const useStandaloneOutput = process.env.NEXT_STANDALONE === "1";
+const useStandaloneOutput =
+  process.env.NEXT_STANDALONE === "1" ||
+  process.env.NEXT_OUTPUT_STANDALONE === "true";
 const configuredBuildCpus = Number(process.env.NEXT_BUILD_CPUS ?? (process.env.VERCEL ? 4 : 1));
 const buildCpus = Number.isFinite(configuredBuildCpus) && configuredBuildCpus > 0
   ? configuredBuildCpus

@@ -25,6 +25,8 @@ RUN npm ci
 # 3. Builder Stage
 FROM base AS builder
 WORKDIR /app
+ENV NEXT_STANDALONE=1
+ENV NEXT_OUTPUT_STANDALONE=true
 
 # Install build dependencies for native modules during build
 RUN apt-get update && apt-get install -y \
