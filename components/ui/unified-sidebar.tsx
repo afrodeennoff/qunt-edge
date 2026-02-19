@@ -156,10 +156,10 @@ export function UnifiedSidebar({
       groups[group].push(item)
     })
 
-    // Move "Overview" or "Main" to top, "System" or "Settings" to bottom if they exist
+    // Move specific groups to top/bottom for consistent feel across different layouts
     const sortedOrder = order.sort((a, b) => {
-      const topGroups = ["Overview", "Trading", "Main"]
-      const bottomGroups = ["System", "Settings", "Admin"]
+      const topGroups = ["Overview", "Main", "Inventory", "Trading", "Team Overview", "Team Management", "Admin Panel"]
+      const bottomGroups = ["System", "Settings", "Support", "Admin"]
 
       const aIdxTop = topGroups.indexOf(a)
       const bIdxTop = topGroups.indexOf(b)
@@ -183,8 +183,8 @@ export function UnifiedSidebar({
   const initials = useMemo(() => getUserInitials(user), [user])
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground">
-      <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border/50">
+    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground pointer-events-auto">
+      <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border/50 relative z-20 pointer-events-auto">
         <div className="flex items-center gap-3 w-full overflow-hidden">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
             <Logo className="size-5 fill-current" />
@@ -201,10 +201,10 @@ export function UnifiedSidebar({
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="scrollbar-thin">
+      <SidebarContent className="scrollbar-thin relative z-10 pointer-events-auto">
         {groupedItems.order.map((groupName) => (
-          <SidebarGroup key={groupName} className="px-2 py-3">
-            <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2">
+          <SidebarGroup key={groupName} className="px-2 py-2 relative z-10 pointer-events-auto">
+            <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2 pointer-events-auto">
               {groupName}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -221,24 +221,24 @@ export function UnifiedSidebar({
                         isActive={itemIsActive}
                         tooltip={label}
                         disabled={isItemDisabled}
-                        className={cn(
-                          "transition-all duration-200",
-                          itemIsActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
-                        )}
                         onClick={!item.href ? () => {
                           item.action?.()
                           if (isMobile) setOpenMobile(false)
                         } : undefined}
+                        className={cn(
+                          "transition-all duration-200 pointer-events-auto relative z-10",
+                          itemIsActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                        )}
                       >
                         {item.href ? (
                           <Link
                             href={item.href}
-                            onClick={() => {
+                            onClick={(e) => {
                               if (isMobile) setOpenMobile(false)
                             }}
-                            className="flex items-center w-full"
+                            className="flex items-center w-full h-full pointer-events-auto"
                           >
                             <span className={cn("shrink-0", itemIsActive ? "text-primary" : "text-muted-foreground/60")}>
                               {item.icon}
@@ -272,14 +272,14 @@ export function UnifiedSidebar({
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-sidebar-border/50 bg-sidebar/50">
+      <SidebarFooter className="border-t border-sidebar-border/50 p-2 relative z-20 pointer-events-auto bg-sidebar/50">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground pointer-events-auto relative z-10"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user?.avatar_url} alt={displayName} />

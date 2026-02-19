@@ -119,9 +119,8 @@ export function DashboardHeader() {
         >
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
             <div className={cn("relative flex items-center justify-between gap-3 px-3 sm:px-6", isMobile ? "h-14" : "h-full")}>
-                {/* Left Side: Sidebar Toggle & Title */}
-                <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
-                    <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground h-9 w-9" />
+                <div className="flex items-center gap-3 relative z-10 pointer-events-auto">
+                    <SidebarTrigger className="h-9 w-9 text-muted-foreground hover:text-foreground" />
                     <div className="flex min-w-0 items-start gap-3">
                         <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">
@@ -147,7 +146,6 @@ export function DashboardHeader() {
                         ? "rounded-none border-0 bg-transparent p-0 shadow-none"
                         : "rounded-2xl border border-border/40 bg-muted/20 p-1 shadow-sm"
                 )}>
-
                     {/* Global Utilities Group */}
                     <div className={cn(
                         "flex shrink-0 items-center gap-1",
@@ -309,30 +307,32 @@ export function DashboardHeader() {
             </div>
 
             {/* Sub-Navigation: Filters (Preserved Mapping) */}
-            {isMobile ? (
-                hasActiveFilters && (
-                    <div className="relative px-3 pb-3 pt-1">
-                        <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
-                            <ActiveFilterTags showAccountNumbers={true} />
-                        </div>
-                    </div>
-                )
-            ) : (
-                <AnimatePresence>
-                    {hasActiveFilters && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="relative px-4 pb-3 pt-1 sm:px-8"
-                        >
+            {
+                isMobile ? (
+                    hasActiveFilters && (
+                        <div className="relative px-3 pb-3 pt-1">
                             <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
                                 <ActiveFilterTags showAccountNumbers={true} />
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            )}
+                        </div>
+                    )
+                ) : (
+                    <AnimatePresence>
+                        {hasActiveFilters && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="relative px-4 pb-3 pt-1 sm:px-8"
+                            >
+                                <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                                    <ActiveFilterTags showAccountNumbers={true} />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                )
+            }
         </header>
     );
 }

@@ -120,7 +120,7 @@ export function ConsentBanner() {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-9999 p-4 -m-4"
+        className="fixed bottom-0 left-0 right-0 z-[110] p-4 pointer-events-none"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         exit={{ y: 100 }}
@@ -129,7 +129,7 @@ export function ConsentBanner() {
           ease: [0.32, 0.72, 0, 1]
         }}
       >
-        <div className="bg-background/80 backdrop-blur-lg border-t border-border/50 p-4 shadow-lg">
+        <div className="bg-background/80 backdrop-blur-lg border-t border-border/50 p-4 shadow-lg pointer-events-auto">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">

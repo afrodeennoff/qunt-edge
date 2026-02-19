@@ -308,13 +308,13 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
               </Button>
             ) : (
               <Button asChild className="">
-                <Link href={`/${useCurrentLocale()}/authentication`}>{t('pricing.startBasic')}</Link>
+                <Link href={`/${locale}/authentication`}>{t('pricing.startBasic')}</Link>
               </Button>
             )}
 
             <p className="text-xs text-center text-muted-foreground">
               {t('terms.pricing.freePlanDisclaimer')}
-              <Link href={`/${useCurrentLocale()}/terms`} className="text-primary hover:underline">
+              <Link href={`/${locale}/terms`} className="text-primary hover:underline">
                 {t('terms.pricing.termsOfService')}
               </Link>
             </p>
@@ -532,7 +532,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
 
             <p className="text-xs text-center text-muted-foreground">
               {t('terms.pricing.disclaimer')}
-              <Link href={`/${useCurrentLocale()}/terms`} className="text-primary hover:underline">
+              <Link href={`/${locale}/terms`} className="text-primary hover:underline">
                 {t('terms.pricing.termsOfService')}
               </Link>
             </p>
