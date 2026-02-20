@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { LogOut, MoreHorizontal } from "lucide-react"
+import { LogOut, MoreHorizontal, Loader2 } from "lucide-react"
 
 import { Logo } from "@/components/logo"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -34,6 +34,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
 import { useNavigationLoading } from "@/hooks/use-navigation-loading"
+import { useNavigationHelper } from "@/lib/navigation-utils"
 
 export interface UnifiedSidebarItem {
   href?: string
@@ -139,6 +140,7 @@ export function UnifiedSidebar({
   const isActive = useActiveLink()
   const { isMobile, setOpenMobile } = useSidebar()
   const { isLoading } = useNavigationLoading()
+  const { isQueryParamOnly } = useNavigationHelper()
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -233,7 +235,9 @@ export function UnifiedSidebar({
                           <Link
                             href={item.href}
                             onClick={() => {
-                              if (isMobile) setOpenMobile(false)
+                              if (isMobile && !isQueryParamOnly(item.href)) {
+                                setOpenMobile(false)
+                              }
                             }}
                             className="flex items-center w-full h-full pointer-events-auto"
                           >
