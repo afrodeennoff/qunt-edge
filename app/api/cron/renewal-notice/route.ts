@@ -15,28 +15,6 @@ const getDateLocale = (language: string) => {
   return language === 'fr' ? fr : enUS
 }
 
-// Utility function to format payment frequency for display
-const getFrequencyDisplay = (frequency: string, language: string) => {
-  const frequencies = {
-    en: {
-      monthly: 'Monthly',
-      quarterly: 'Quarterly',
-      biannual: 'Bi-annual',
-      annual: 'Annual',
-      custom: 'Custom'
-    },
-    fr: {
-      monthly: 'Mensuel',
-      quarterly: 'Trimestriel',
-      biannual: 'Semestriel',
-      annual: 'Annuel',
-      custom: 'Personnalisé'
-    }
-  }
-
-  return frequencies[language as keyof typeof frequencies]?.[frequency as keyof typeof frequencies.en] || frequency
-}
-
 // Daily cron job handler - runs every day at 9 AM UTC
 export async function GET(req: Request) {
   if (!process.env.RESEND_API_KEY) {
@@ -132,7 +110,7 @@ export async function GET(req: Request) {
 
             const unsubscribeUrl = buildUnsubscribeUrl(userEmail, req)
 
-            const { data, error } = await resend.emails.send({
+            const { error } = await resend.emails.send({
               from: 'Qunt Edge Renewals <renewals@eu.updates.qunt-edge.vercel.app>',
               to: userEmail,
               subject: userLanguage === 'fr'

@@ -40,7 +40,7 @@ function getImageHosts(cdnUrl: string | undefined, supabaseUrl: string | undefin
   return Array.from(hosts);
 }
 
-export function createOptimizedNextConfig(_workspaceRoot: string): OptimizedNextConfigResult {
+export function createOptimizedNextConfig(): OptimizedNextConfigResult {
   const warnings: string[] = [];
   const cpus = parseBuildCpus(process.env.NEXT_BUILD_CPUS, warnings);
   const imageHosts = getImageHosts(process.env.NEXT_PUBLIC_CDN_URL, process.env.NEXT_PUBLIC_SUPABASE_URL, warnings);
