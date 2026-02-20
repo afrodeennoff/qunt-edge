@@ -195,6 +195,7 @@ model Account {
   paymentFrequency PaymentFrequency?
   renewalNotice    Int?
   nextPaymentDate  DateTime?
+  renewalNoticeLastSentAt DateTime?
 
   isRecursively     String?
   maxFundedAccounts Int?

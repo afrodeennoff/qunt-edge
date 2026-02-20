@@ -5,7 +5,7 @@ import MissingYouEmail from "@/components/emails/missing-data"
 import { render } from "@react-email/render"
 import { generateTradingAnalysis } from "./actions/analysis"
 import { getUserData, computeTradingStats } from "./actions/user-data"
-import { createUnsubscribeToken } from "@/lib/unsubscribe-token"
+import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 import { requireServiceAuth, toErrorResponse } from "@/server/authz"
 
 export async function POST(req: Request, props: { params: Promise<{ userid: string }> }) {
@@ -47,14 +47,7 @@ export async function POST(req: Request, props: { params: Promise<{ userid: stri
       user.language as 'fr' | 'en'
     )
 
-    // Ensure URL has protocol
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
-    const apiUrl = baseUrl.startsWith('http')
-      ? baseUrl
-      : `http://${baseUrl}`
-
-    const unsubscribeToken = createUnsubscribeToken(user.email)
-    const unsubscribeUrl = `${apiUrl}/api/email/unsubscribe?email=${encodeURIComponent(user.email)}&token=${encodeURIComponent(unsubscribeToken)}`
+    const unsubscribeUrl = buildUnsubscribeUrl(user.email, req)
 
     const weeklyStatsEmailHtml = await render(
       TraderStatsEmail({
