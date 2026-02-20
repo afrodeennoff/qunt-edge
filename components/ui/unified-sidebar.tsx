@@ -213,20 +213,21 @@ export function UnifiedSidebar({
               <SidebarMenu role="menu" aria-labelledby={`sidebar-group-${groupIndex}`}>
                 {groupedItems.groups[groupName].map((item, index) => {
                   const label = item.i18nKey ? translate(item.i18nKey) : item.label
+                  const href = item.href
                   const isItemDisabled = Boolean(item.disabled)
-                  const itemIsActive = !isItemDisabled && !!item.href && isActive(item.href, item.exact)
+                  const itemIsActive = !isItemDisabled && !!href && isActive(href, item.exact)
 
                   return (
                     <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
                       <SidebarMenuButton
-                        asChild={!!item.href}
+                        asChild={!!href}
                         isActive={itemIsActive}
                         tooltip={label}
                         disabled={isItemDisabled}
                         aria-label={label}
                         aria-current={itemIsActive ? "page" : undefined}
                         aria-disabled={isItemDisabled}
-                        onClick={!item.href ? () => {
+                        onClick={!href ? () => {
                           item.action?.()
                           if (isMobile) setOpenMobile(false)
                         } : undefined}
@@ -237,11 +238,11 @@ export function UnifiedSidebar({
                             : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
                         )}
                       >
-                        {item.href ? (
+                        {href ? (
                           <Link
-                            href={item.href}
+                            href={href}
                             onClick={() => {
-                              if (isMobile && !isQueryParamOnly(item.href)) {
+                              if (isMobile && !isQueryParamOnly(href)) {
                                 setOpenMobile(false)
                               }
                             }}
