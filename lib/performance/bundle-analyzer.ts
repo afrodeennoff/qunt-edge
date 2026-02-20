@@ -28,6 +28,19 @@ export class BundleAnalyzer {
 
   generateReport(): BundleReport {
     const metrics = Array.from(this.metrics.values());
+    if (metrics.length === 0) {
+      return {
+        timestamp: new Date().toISOString(),
+        metrics: [],
+        summary: {
+          totalSize: 0,
+          totalGzipped: 0,
+          largestChunk: 'N/A',
+          optimizationScore: 0,
+        },
+      };
+    }
+
     const totalSize = metrics.reduce((sum, m) => sum + m.size, 0);
     const totalGzipped = metrics.reduce((sum, m) => sum + m.gzipped, 0);
     const largestChunk = metrics.reduce((max, m) => 
@@ -93,6 +106,10 @@ export class BundleAnalyzer {
 
   getOptimizationRecommendations(): string[] {
     const recommendations: string[] = [];
+    if (this.metrics.size === 0) {
+      return ['No bundle metrics recorded yet. Run bundle analysis after a production build.'];
+    }
+
     const largeChunks = this.getLargeChunks(150 * 1024);
     
     if (largeChunks.length > 0) {

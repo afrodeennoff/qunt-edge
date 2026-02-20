@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { trackWebVitals, performanceMonitor } from '@/lib/performance/performance-monitor';
+import { trackWebVitals } from '@/lib/performance/performance-monitor';
 
 interface PerformanceObserverProps {
   enabled?: boolean;
@@ -22,36 +22,25 @@ export function PerformanceObserver({
       isInitialized = true;
 
       try {
-        const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
+        const webVitals = await import('web-vitals');
+        const handlers = [
+          webVitals.getCLS,
+          webVitals.getFCP,
+          webVitals.getLCP,
+          webVitals.getTTFB,
+          webVitals.getINP ?? webVitals.getFID,
+        ].filter((handler): handler is (cb: (metric: any) => void) => void => typeof handler === "function");
 
-        getCLS((metric) => {
+        const onVitalMetric = (metric: any) => {
           trackWebVitals(metric);
           onMetric?.(metric);
-        });
+        };
 
-        getFID((metric) => {
-          trackWebVitals(metric);
-          onMetric?.(metric);
-        });
-
-        getFCP((metric) => {
-          trackWebVitals(metric);
-          onMetric?.(metric);
-        });
-
-        getLCP((metric) => {
-          trackWebVitals(metric);
-          onMetric?.(metric);
-        });
-
-        getTTFB((metric) => {
-          trackWebVitals(metric);
-          onMetric?.(metric);
-        });
-
-        console.log('✅ Web Vitals monitoring initialized');
+        handlers.forEach((handler) => handler(onVitalMetric));
       } catch (error) {
-        console.error('Failed to initialize web vitals:', error);
+        if (process.env.NODE_ENV !== "production") {
+          console.warn('Web Vitals monitoring unavailable; skipping runtime observer.', error);
+        }
       }
     };
 

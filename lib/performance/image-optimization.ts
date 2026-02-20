@@ -40,12 +40,24 @@ export const optimizeImageUrl = (
   width: number,
   quality: number = 75
 ): string => {
-  if (url.startsWith('/')) return url;
-  
-  const urlObj = new URL(url);
-  urlObj.searchParams.set('w', width.toString());
-  urlObj.searchParams.set('q', quality.toString());
-  return urlObj.toString();
+  if (!url || url.startsWith('/') || url.startsWith('data:') || url.startsWith('blob:')) {
+    return url;
+  }
+
+  const safeWidth = Number.isFinite(width) && width > 0 ? Math.round(width) : 0;
+  const safeQuality = Number.isFinite(quality) && quality > 0 ? Math.round(quality) : 75;
+  if (safeWidth === 0) {
+    return url;
+  }
+
+  try {
+    const urlObj = new URL(url);
+    urlObj.searchParams.set('w', safeWidth.toString());
+    urlObj.searchParams.set('q', safeQuality.toString());
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
 };
 
 export const getCdnImageUrl = (
@@ -55,6 +67,21 @@ export const getCdnImageUrl = (
 ): string => {
   const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL;
   if (!cdnUrl) return path;
-  
-  return `${cdnUrl}${path}?w=${width}&q=${quality}`;
+
+  const safeWidth = Number.isFinite(width) && width > 0 ? Math.round(width) : 0;
+  const safeQuality = Number.isFinite(quality) && quality > 0 ? Math.round(quality) : 75;
+  if (safeWidth === 0) return path;
+
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const normalizedCdn = cdnUrl.replace(/\/+$/, '');
+
+  try {
+    const base = new URL(normalizedCdn);
+    const url = new URL(normalizedPath, base);
+    url.searchParams.set('w', safeWidth.toString());
+    url.searchParams.set('q', safeQuality.toString());
+    return url.toString();
+  } catch {
+    return path;
+  }
 };

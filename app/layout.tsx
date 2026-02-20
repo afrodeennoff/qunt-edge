@@ -4,34 +4,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import { headers } from "next/headers";
-import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
+import { getFontClassName } from "@/lib/performance/font-optimization";
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-ibm-mono",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  display: "swap",
-});
+const rootFontClass = getFontClassName("geist", "inter", "ibmPlexMono", "manrope");
+const bodyFontClass = getFontClassName("geist", "ibmPlexMono");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -139,7 +117,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} bg-background`}
+      className={`${rootFontClass} bg-background`}
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning
@@ -213,7 +191,7 @@ export default async function RootLayout({
 
       </head>
       <body
-        className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}
+        className={`${bodyFontClass} font-sans antialiased text-foreground`}
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />
