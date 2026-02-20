@@ -414,7 +414,7 @@ export default function WidgetCanvas() {
     })
   }, [layouts, activeLayout])
 
-  // Define handleOutsideClick before using it in useEffect
+  // Define handleOutsideClick with stable reference
   const handleOutsideClick = useCallback((e: MouseEvent) => {
     // Check if the click is on a widget or its children
     const isWidgetClick = (e.target as HTMLElement).closest('.react-grid-item')
@@ -427,7 +427,7 @@ export default function WidgetCanvas() {
     if (!isWidgetClick && !isContextMenuClick && !isCustomizationSwitchClick && !isDialogClick && !isDialogTriggerClick) {
       setIsCustomizing(false)
     }
-  }, [setIsCustomizing])
+  }, [])
 
   const flushPendingLayoutSave = useCallback(async () => {
     if (!pendingSaveRef.current) return

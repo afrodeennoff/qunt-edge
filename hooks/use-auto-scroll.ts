@@ -1,16 +1,72 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+
+const SCROLL_THRESHOLD = 150
+const BASE_SCROLL_SPEED = 15
+const MAX_SCROLL_SPEED = 30
+const SCROLL_INTERVAL = 32
+
+interface AutoScrollState {
+  isEnabled: boolean
+  isDragging: boolean
+  lastTouchY: number
+  scrollInterval: ReturnType<typeof setInterval> | null
+}
 
 export function useAutoScroll(isEnabled: boolean) {
+  const stateRef = useRef<AutoScrollState>({
+    isEnabled: false,
+    isDragging: false,
+    lastTouchY: 0,
+    scrollInterval: null,
+  })
+
+  const styleRef = useRef<HTMLStyleElement | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const isScrollingRef = useRef(false)
+
   useEffect(() => {
-    if (!isEnabled) return
+    if (!isEnabled) {
+      cleanup()
+      return
+    }
 
-    let scrollInterval: NodeJS.Timeout | null = null
-    let lastTouchY = 0
-    const scrollThreshold = 150 // px from top/bottom to start scrolling
-    const baseScrollSpeed = 15 // base scroll speed
-    const maxScrollSpeed = 30 // maximum scroll speed
+    stateRef.current.isEnabled = true
+    setup()
+    return cleanup
+  }, [isEnabled])
 
-    // Add style to prevent selection
+  const cleanup = () => {
+    const state = stateRef.current
+    
+    if (state.scrollInterval) {
+      clearInterval(state.scrollInterval)
+      state.scrollInterval = null
+    }
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+
+    if (styleRef.current) {
+      styleRef.current.remove()
+      styleRef.current = null
+    }
+
+    document.body.classList.remove('dragging')
+    document.removeEventListener('touchstart', handleTouchStart, { passive: true })
+    document.removeEventListener('touchmove', handleTouchMove, { passive: false } as any)
+    document.removeEventListener('touchend', handleTouchEnd, { passive: true })
+    document.removeEventListener('touchcancel', handleTouchEnd, { passive: true })
+    
+    state.isEnabled = false
+    state.isDragging = false
+    isScrollingRef.current = false
+  }
+
+  const setup = () => {
+    if (styleRef.current) return
+
     const style = document.createElement('style')
     style.textContent = `
       body.dragging {
@@ -30,75 +86,92 @@ export function useAutoScroll(isEnabled: boolean) {
       }
     `
     document.head.appendChild(style)
+    styleRef.current = style
 
-    function performScroll() {
-      const windowHeight = window.innerHeight
-      const scrollY = window.scrollY
-      const maxScroll = document.documentElement.scrollHeight - windowHeight
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: false } as any)
+    document.addEventListener('touchend', handleTouchEnd, { passive: true })
+    document.addEventListener('touchcancel', handleTouchEnd, { passive: true })
+  }
 
-      if (lastTouchY < scrollThreshold) {
-        // Scrolling up - speed increases as you get closer to the top
-        const factor = 1 - (lastTouchY / scrollThreshold)
-        const speed = Math.min(maxScrollSpeed, baseScrollSpeed + (maxScrollSpeed * factor))
-        const newScrollY = Math.max(0, scrollY - speed)
-        window.scrollTo({ top: newScrollY })
-      } else if (lastTouchY > windowHeight - scrollThreshold) {
-        // Scrolling down - speed increases as you get closer to the bottom
-        const factor = (lastTouchY - (windowHeight - scrollThreshold)) / scrollThreshold
-        const speed = Math.min(maxScrollSpeed, baseScrollSpeed + (maxScrollSpeed * factor))
-        const newScrollY = Math.min(maxScroll, scrollY + speed)
-        window.scrollTo({ top: newScrollY })
-      }
+  const performScroll = () => {
+    const state = stateRef.current
+    if (!state.isEnabled || !state.isDragging) return
+
+    const windowHeight = window.innerHeight
+    const scrollY = window.scrollY
+    const maxScroll = document.documentElement.scrollHeight - windowHeight
+    const lastTouchY = state.lastTouchY
+
+    let shouldScroll = false
+    let newScrollY = scrollY
+
+    if (lastTouchY < SCROLL_THRESHOLD) {
+      const factor = 1 - lastTouchY / SCROLL_THRESHOLD
+      const speed = Math.min(MAX_SCROLL_SPEED, BASE_SCROLL_SPEED + MAX_SCROLL_SPEED * factor)
+      newScrollY = Math.max(0, scrollY - speed)
+      shouldScroll = true
+    } else if (lastTouchY > windowHeight - SCROLL_THRESHOLD) {
+      const factor = (lastTouchY - (windowHeight - SCROLL_THRESHOLD)) / SCROLL_THRESHOLD
+      const speed = Math.min(MAX_SCROLL_SPEED, BASE_SCROLL_SPEED + MAX_SCROLL_SPEED * factor)
+      newScrollY = Math.min(maxScroll, scrollY + speed)
+      shouldScroll = true
     }
 
-    function handleTouchStart() {
-      document.body.classList.add('dragging')
+    if (shouldScroll && newScrollY !== scrollY) {
+      window.scrollTo({ top: newScrollY, behavior: 'instant' as any })
     }
 
-    function handleTouchMove(e: TouchEvent) {
-      // Prevent default to ensure smooth scrolling
-      e.preventDefault()
-
-      const touch = e.touches[0]
-      const touchY = touch.clientY
-      lastTouchY = touchY
-      const windowHeight = window.innerHeight
-
-      // Start scrolling interval if near edges and not already scrolling
-      if ((touchY < scrollThreshold || touchY > windowHeight - scrollThreshold) && !scrollInterval) {
-        scrollInterval = setInterval(performScroll, 16) // ~60fps
-      }
-      // Stop scrolling if not near edges
-      else if (touchY >= scrollThreshold && touchY <= windowHeight - scrollThreshold && scrollInterval) {
-        clearInterval(scrollInterval)
-        scrollInterval = null
-      }
+    if (shouldScroll) {
+      rafRef.current = requestAnimationFrame(performScroll)
+    } else {
+      isScrollingRef.current = false
     }
+  }
 
-    function handleTouchEnd() {
-      document.body.classList.remove('dragging')
-      if (scrollInterval) {
-        clearInterval(scrollInterval)
-        scrollInterval = null
-      }
+  const startScrolling = () => {
+    if (!isScrollingRef.current) {
+      isScrollingRef.current = true
+      rafRef.current = requestAnimationFrame(performScroll)
     }
+  }
 
-    // Add event listeners
-    document.addEventListener('touchstart', handleTouchStart)
-    document.addEventListener('touchmove', handleTouchMove, { passive: false })
-    document.addEventListener('touchend', handleTouchEnd)
-    document.addEventListener('touchcancel', handleTouchEnd)
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart)
-      document.removeEventListener('touchmove', handleTouchMove)
-      document.removeEventListener('touchend', handleTouchEnd)
-      document.removeEventListener('touchcancel', handleTouchEnd)
-      if (scrollInterval) {
-        clearInterval(scrollInterval)
-      }
-      // Clean up the style element
-      style.remove()
+  const stopScrolling = () => {
+    isScrollingRef.current = false
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
     }
-  }, [isEnabled])
-} 
+  }
+
+  const handleTouchStart = (e: TouchEvent) => {
+    if (!stateRef.current.isEnabled) return
+    stateRef.current.isDragging = true
+    document.body.classList.add('dragging')
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    const state = stateRef.current
+    if (!state.isEnabled || !state.isDragging) return
+
+    const touch = e.touches[0]
+    const touchY = touch.clientY
+    state.lastTouchY = touchY
+    const windowHeight = window.innerHeight
+
+    const isNearEdge = touchY < SCROLL_THRESHOLD || touchY > windowHeight - SCROLL_THRESHOLD
+
+    if (isNearEdge && !isScrollingRef.current) {
+      startScrolling()
+    } else if (!isNearEdge && isScrollingRef.current) {
+      stopScrolling()
+    }
+  }
+
+  const handleTouchEnd = () => {
+    const state = stateRef.current
+    state.isDragging = false
+    document.body.classList.remove('dragging')
+    stopScrolling()
+  }
+}

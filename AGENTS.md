@@ -36,6 +36,35 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-20: Unified Next.js Optimization System (Config Conflict Fix + Safety + Verification)
+- **What changed:** Replaced the split optimization setup with a single authoritative config path, fixed optimization build/type failures, expanded route/static/code-splitting strategy, and added verification tests/scripts.
+- **What I want:** One stable optimization implementation for code splitting, images, fonts, static generation, caching, and monitoring that works consistently across local/dev/prod without config drift.
+- **What I don't want:** Engineers swapping between `next.config.ts` and `next.config.optimized.ts`, invalid env values silently degrading builds, missing optional performance dependencies breaking builds, or hydration/caching regressions from optimization work.
+- **How we fixed that:**
+  - Added shared Next config builder in `lib/performance/next-config.ts` with:
+    - env validation and safe fallback for `NEXT_BUILD_CPUS`,
+    - robust URL validation for `NEXT_PUBLIC_CDN_URL` and Supabase image host extraction,
+    - consolidated image optimization/security settings and cache headers.
+  - Updated `next.config.ts` to consume shared builder and emit warning diagnostics.
+  - Removed stale `next.config.optimized.ts` to eliminate source-of-truth drift.
+  - Hardened optimization runtime helpers:
+    - `components/performance/performance-observer.tsx` now safely handles missing Web Vitals runtime with non-fatal fallback;
+    - added `types/web-vitals.d.ts` and `tsconfig.json` include update for declaration discovery;
+    - improved URL/error safety in `lib/performance/image-optimization.ts`;
+    - changed `lib/performance/isr-utils.ts` revalidation calls to fail-safe boolean behavior.
+  - Added static and splitting improvements:
+    - home route now explicitly static ISR (`app/[locale]/(home)/page.tsx`);
+    - deferred home sections now use `next/dynamic` split points (`DeferredHomeSections.tsx`);
+    - removed server cookie read from `app/[locale]/layout.tsx` and moved sidebar cookie sync to client-side mount logic in `components/ui/sidebar.tsx` to reduce dynamic forcing and hydration mismatch risk.
+  - Added optimization verification coverage:
+    - tests for config/env fallbacks, image URL safety, and ISR failure safety;
+    - scripts: `check:route-budgets`, `analyze:bundle`, `perf:verify`.
+- **Key Files:** `lib/performance/next-config.ts`, `next.config.ts`, `app/layout.tsx`, `app/[locale]/layout.tsx`, `app/[locale]/(home)/page.tsx`, `app/[locale]/(home)/components/DeferredHomeSections.tsx`, `components/ui/sidebar.tsx`, `components/performance/performance-observer.tsx`, `lib/performance/image-optimization.ts`, `lib/performance/isr-utils.ts`, `types/web-vitals.d.ts`, `tests/performance/next-config.test.ts`, `tests/performance/image-optimization.test.ts`, `tests/performance/isr-utils.test.ts`, `package.json`, `docs/PERFORMANCE_OPTIMIZATION_GUIDE.md`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> pending (to run after this change set).
+  - `npm test -- tests/performance/*.test.ts` -> pending.
+  - `npm run build` + `npm run check:route-budgets` + `npm run analyze:bundle` -> pending.
+
 ### 2026-02-17: Sidebar Redirect Stall Fix (Locale-Aware Dashboard Auth Redirect)
 - **What changed:** Fixed dashboard layout unauthenticated redirect to use locale-aware authentication path with a safe `next` target.
 - **What I want:** Unauthenticated users navigating dashboard routes should redirect once to the correct localized auth page, without mid-session redirect stalls/bounces.
