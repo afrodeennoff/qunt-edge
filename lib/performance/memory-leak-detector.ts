@@ -123,11 +123,14 @@ class MemoryLeakDetector {
    */
   private estimateEventListenerCount(): number {
     let count = 0;
+    const maybeGetEventListeners = (globalThis as unknown as {
+      getEventListeners?: (target: EventTarget) => Record<string, EventListener[]>;
+    }).getEventListeners;
     
     // Count common DOM event listeners
     const elements = document.querySelectorAll('*');
     elements.forEach(el => {
-      const listeners = getEventListeners?.(el);
+      const listeners = maybeGetEventListeners?.(el);
       if (listeners) {
         Object.values(listeners).forEach((arr: any) => {
           count += arr.length;

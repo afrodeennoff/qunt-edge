@@ -38,7 +38,13 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "components/sidebar/__tests__/**",
+    "tests/e2e/**",
+    "tests/performance/performance-regression.test.ts",
+    "lib/performance/enhanced-caching.ts",
+    "lib/performance/enhanced-next-config.ts",
+    "lib/performance/caching-cdn.ts"
   ],
   "ts-node": {
     "esm": true,

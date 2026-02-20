@@ -22,6 +22,11 @@ export function useAutoScroll(isEnabled: boolean) {
   const isScrollingRef = useRef(false)
 
   useEffect(() => {
+    const isGridDragTarget = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false
+      return Boolean(target.closest(".react-grid-item, .react-draggable, [data-grid]"))
+    }
+
     const stopScrolling = () => {
       isScrollingRef.current = false
       if (rafRef.current !== null) {
@@ -74,7 +79,8 @@ export function useAutoScroll(isEnabled: boolean) {
       rafRef.current = requestAnimationFrame(performScroll)
     }
 
-    const handleTouchStart = () => {
+    const handleTouchStart = (event: TouchEvent) => {
+      if (!isGridDragTarget(event.target)) return
       const state = stateRef.current
       if (!state.isEnabled) return
       state.isDragging = true

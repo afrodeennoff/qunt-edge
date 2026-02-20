@@ -89,7 +89,7 @@ function useActiveLink() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  return (href: string, exact = false, tabParam?: string) => {
+  return (href: string, exact = false) => {
     if (!pathname || !href) return false
 
     const normalizedPathname = stripLocalePrefix(pathname).replace(/\/$/, "") || "/"
@@ -176,7 +176,7 @@ export function UnifiedSidebar({
     })
 
     return { groups, order: sortedOrder }
-  }, [items.length, JSON.stringify(items.map(i => ({ href: i.href, label: i.label, group: i.group })))])
+  }, [items])
 
   const displayName = user?.full_name || user?.email?.split("@")[0] || "User"
   const initials = useMemo(() => getUserInitials(user), [user])
