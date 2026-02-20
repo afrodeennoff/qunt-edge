@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
+import { useNavigationLoading } from "@/hooks/use-navigation-loading"
 
 export interface UnifiedSidebarItem {
   href?: string
@@ -87,10 +88,9 @@ function useActiveLink() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  return (href: string, exact = false) => {
+  return (href: string, exact = false, tabParam?: string) => {
     if (!pathname || !href) return false
 
-    // Normalize paths by stripping locale and trailing slashes
     const normalizedPathname = stripLocalePrefix(pathname).replace(/\/$/, "") || "/"
     const [hrefPath, queryString] = href.split("?")
     const normalizedHrefPath = stripLocalePrefix(hrefPath).replace(/\/$/, "") || "/"
@@ -98,29 +98,28 @@ function useActiveLink() {
     const hrefParams = new URLSearchParams(queryString ?? "")
     const hrefTab = hrefParams.get("tab")
 
-    // Priority 1: Exact Tab Match for Dashboard
-    if (normalizedHrefPath === "/dashboard" && hrefTab) {
+    // Handle tab-based navigation (e.g., /dashboard?tab=widgets)
+    if (hrefTab) {
       const activeTab = searchParams.get("tab") || "widgets"
-      return normalizedPathname === "/dashboard" && activeTab === hrefTab
+      if (normalizedPathname === normalizedHrefPath && activeTab === hrefTab) {
+        return true
+      }
     }
 
-    // Priority 2: Dashboard Root (Defaults to widgets)
+    // Default tab handling for /dashboard
     if (normalizedHrefPath === "/dashboard" && !hrefTab) {
       const activeTab = searchParams.get("tab")
-      return normalizedPathname === "/dashboard" && (!activeTab || activeTab === "widgets")
+      if (normalizedPathname === "/dashboard" && (!activeTab || activeTab === "widgets")) {
+        return true
+      }
     }
 
-    // Priority 3: Teams Dashboard Exception (from HEAD)
-    if (normalizedHrefPath === "/teams/dashboard" && normalizedPathname.includes("/teams/dashboard")) {
-      return true
-    }
-
-    // Priority 4: Exact Match
+    // Exact match
     if (exact) {
       return normalizedPathname === normalizedHrefPath
     }
 
-    // Priority 5: Nested Routes (Teams, Admin, etc)
+    // Nested routes
     if (normalizedPathname === normalizedHrefPath) return true
     if (normalizedPathname.startsWith(`${normalizedHrefPath}/`)) return true
 
@@ -139,6 +138,7 @@ export function UnifiedSidebar({
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
   const { isMobile, setOpenMobile } = useSidebar()
+  const { isLoading } = useNavigationLoading()
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -174,7 +174,7 @@ export function UnifiedSidebar({
     })
 
     return { groups, order: sortedOrder }
-  }, [items])
+  }, [items.length, JSON.stringify(items.map(i => ({ href: i.href, label: i.label, group: i.group })))])
 
   const displayName = user?.full_name || user?.email?.split("@")[0] || "User"
   const initials = useMemo(() => getUserInitials(user), [user])
@@ -238,7 +238,11 @@ export function UnifiedSidebar({
                             className="flex items-center w-full h-full pointer-events-auto"
                           >
                             <span className={cn("shrink-0", itemIsActive ? "text-primary" : "text-muted-foreground/60")}>
-                              {item.icon}
+                              {isLoading && itemIsActive ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                item.icon
+                              )}
                             </span>
                             <span className="ml-3 truncate">{label}</span>
                           </Link>

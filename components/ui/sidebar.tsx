@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Z_INDEX } from "@/lib/config/z-index"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -27,15 +28,6 @@ const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 function getInitialSidebarOpen(defaultOpen: boolean) {
-  if (typeof document === "undefined") return defaultOpen
-  const cookie = document.cookie
-    .split("; ")
-    .find((entry) => entry.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
-
-  if (!cookie) return defaultOpen
-  const value = cookie.split("=")[1]
-  if (value === "true") return true
-  if (value === "false") return false
   return defaultOpen
 }
 
@@ -88,9 +80,16 @@ const SidebarProvider = React.forwardRef<
     const [_open, _setOpen] = React.useState(() => getInitialSidebarOpen(defaultOpen))
     const open = openProp ?? _open
     const openRef = React.useRef(open)
+    const isMobileRef = React.useRef(isMobile)
+    
     React.useEffect(() => {
       openRef.current = open
     }, [open])
+    
+    React.useEffect(() => {
+      isMobileRef.current = isMobile
+    }, [isMobile])
+    
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState =
@@ -101,18 +100,27 @@ const SidebarProvider = React.forwardRef<
           _setOpen(openState)
         }
 
-        // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        // Defer cookie write to prevent blocking main thread
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            try {
+              document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax`
+            } catch (e) {
+              console.debug('Could not write sidebar state cookie:', e)
+            }
+          }, 0)
+        })
       },
       [setOpenProp]
     )
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
+      const mobile = isMobileRef.current
+      return mobile
         ? setOpenMobile((open) => !open)
         : setOpen((open) => !open)
-    }, [isMobile, setOpen, setOpenMobile])
+    }, [setOpen, setOpenMobile])
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -252,7 +260,8 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "duration-200 fixed inset-y-0 z-100 hidden h-svh w-(--sidebar-width) transition-[left,right,width] ease-linear md:flex",
+            "duration-200 fixed inset-y-0 hidden h-svh w-(--sidebar-width) transition-[left,right,width] ease-linear md:flex",
+            `z-[${Z_INDEX.sidebar}]`,
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -262,6 +271,7 @@ const Sidebar = React.forwardRef<
               : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
             className
           )}
+          style={{ zIndex: Z_INDEX.sidebar }}
           {...props}
         >
           <div

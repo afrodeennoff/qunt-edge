@@ -1,13 +1,16 @@
+import { BREAKPOINTS } from './lib/config/breakpoints'
+import { Z_INDEX } from './lib/config/z-index'
+
 const config = {
 	darkMode: "class",
 	theme: {
 		screens: {
 			'xs': '320px',
 			'sm': '480px',
-			'md': '768px',
-			'lg': '1024px',
-			'xl': '1200px',
-			'2xl': '1440px',
+			'md': `${BREAKPOINTS.md}px`,
+			'lg': `${BREAKPOINTS.lg}px`,
+			'xl': `${BREAKPOINTS.xl}px`,
+			'2xl': `${BREAKPOINTS['2xl']}px`,
 			'3xl': '1920px',
 			'4xl': '2560px',
 		},
@@ -78,6 +81,9 @@ const config = {
 				'90': '90',
 				'100': '100',
 				'9999': '9999',
+				...Object.fromEntries(
+					Object.entries(Z_INDEX).map(([key, value]) => [key, String(value)])
+				),
 			},
 			colors: {
 				matte: {
