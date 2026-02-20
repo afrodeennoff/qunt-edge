@@ -1,23 +1,26 @@
 import { prisma } from '@/lib/prisma'
 import { MemberRole, Prisma } from '@/prisma/generated/prisma'
+import { ensureTeamMembership } from '@/server/team-membership'
 
 export async function createTeam(userId: string, name: string, organizationId?: string) {
   try {
-    const team = await prisma.team.create({
-      data: {
-        name,
-        userId,
-        organizationId,
-        traderIds: [],
-      }
-    })
+    const team = await prisma.$transaction(async (tx) => {
+      const createdTeam = await tx.team.create({
+        data: {
+          name,
+          userId,
+          organizationId,
+          traderIds: [userId],
+        }
+      })
 
-    await prisma.teamMember.create({
-      data: {
-        teamId: team.id,
+      await ensureTeamMembership(tx, {
+        teamId: createdTeam.id,
         userId,
         role: MemberRole.ADMIN,
-      }
+      })
+
+      return createdTeam
     })
 
     return { success: true, team }
@@ -196,12 +199,10 @@ export async function acceptInvitation(invitationId: string, userId: string) {
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.teamMember.create({
-        data: {
-          teamId: invitation.teamId,
-          userId,
-          role: invitation.role || MemberRole.TRADER,
-        }
+      await ensureTeamMembership(tx, {
+        teamId: invitation.teamId,
+        userId,
+        role: invitation.role || MemberRole.TRADER,
       })
 
       await tx.teamInvitation.update({
@@ -394,10 +395,10 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
 
     const bestMember = teamWithMembers.members.reduce((best: any, member: any) => {
       const memberPnl = member.user.accounts.reduce((sum: number, acc: any) => {
-        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
+        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
       }, 0)
       const bestPnl = best.user.accounts.reduce((sum: number, acc: any) => {
-        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
+        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
       }, 0)
       return memberPnl > bestPnl ? member : best
     }, teamWithMembers.members[0])
@@ -418,7 +419,7 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
         averageRr,
         bestMemberId: bestMember?.userId,
         bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
+          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
         }, 0) : 0
       },
       update: {
@@ -428,7 +429,7 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
         averageRr,
         bestMemberId: bestMember?.userId,
         bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + t.pnl, 0)
+          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
         }, 0) : 0
       }
     })

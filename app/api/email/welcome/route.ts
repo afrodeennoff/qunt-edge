@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 import WelcomeEmail from '@/components/emails/welcome'
 import { getLatestVideoFromPlaylist } from "@/app/[locale]/admin/actions/youtube"
 import crypto from 'crypto'
-import { createUnsubscribeToken } from "@/lib/unsubscribe-token"
+import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 import { z } from "zod"
 import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate"
 
@@ -85,8 +85,7 @@ export async function POST(req: Request) {
       }
     })
 
-    const unsubscribeToken = createUnsubscribeToken(record.email)
-    const unsubscribeUrl = `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(record.email)}&token=${encodeURIComponent(unsubscribeToken)}`
+    const unsubscribeUrl = buildUnsubscribeUrl(record.email, req)
 
     // Check user language preference from database
     const user = await prisma.user.findUnique({

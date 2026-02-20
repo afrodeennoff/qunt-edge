@@ -8,6 +8,8 @@ import { Resend } from 'resend'
 import { render } from '@react-email/render'
 import TeamInvitationEmail from '@/components/emails/team-invitation'
 import { getUserId } from '@/server/auth'
+import { MemberRole } from '@/prisma/generated/prisma'
+import { ensureTeamMembership, resolveTeamUserId } from '@/server/team-membership'
 
 export async function checkAdminStatus() {
   try {
@@ -25,12 +27,13 @@ export async function createTeam(name: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if a team with this name already exists for this user
     const existingTeam = await prisma.team.findFirst({
       where: {
         name: name.trim(),
-        userId: user.id,
+        userId: teamUserId,
       },
     })
 
@@ -38,19 +41,28 @@ export async function createTeam(name: string) {
       throw new Error('A team with this name already exists')
     }
 
-    // Create the team directly
-    const team = await prisma.team.create({
-      data: {
-        name: name.trim(),
-        userId: user.id,
-        traderIds: [user.id], // Add the creator as the first trader
-        managers: {
-          create: {
-            managerId: user.id,
-            access: 'admin', // Add the creator as admin manager
+    const team = await prisma.$transaction(async (tx) => {
+      const createdTeam = await tx.team.create({
+        data: {
+          name: name.trim(),
+          userId: teamUserId,
+          traderIds: [teamUserId],
+          managers: {
+            create: {
+              managerId: teamUserId,
+              access: 'admin',
+            }
           }
-        }
-      },
+        },
+      })
+
+      await ensureTeamMembership(tx, {
+        teamId: createdTeam.id,
+        userId: teamUserId,
+        role: MemberRole.ADMIN,
+      })
+
+      return createdTeam
     })
 
     revalidatePath('/dashboard/settings')
@@ -69,25 +81,14 @@ export async function joinTeam(teamId: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-    })
-
-    if (!team) {
-      throw new Error('Team not found')
-    }
-
-    // Add the user to the traderIds array if not already present
-    const updatedTraderIds = team.traderIds.includes(user.id)
-      ? team.traderIds
-      : [...team.traderIds, user.id]
-
-    await prisma.team.update({
-      where: { id: teamId },
-      data: {
-        traderIds: updatedTraderIds,
-      },
+    await prisma.$transaction(async (tx) => {
+      await ensureTeamMembership(tx, {
+        teamId,
+        userId: teamUserId,
+        role: MemberRole.TRADER,
+      })
     })
 
     revalidatePath('/dashboard/settings')
@@ -105,23 +106,31 @@ export async function leaveTeam(teamId: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     const team = await prisma.team.findUnique({
       where: { id: teamId },
+      select: { id: true, userId: true, traderIds: true },
     })
 
     if (!team) {
       throw new Error('Team not found')
     }
 
-    // Remove the user from the traderIds array
-    const updatedTraderIds = team.traderIds.filter(id => id !== user.id)
+    if (team.userId === teamUserId) {
+      throw new Error('Team owner cannot leave the team')
+    }
 
-    await prisma.team.update({
-      where: { id: teamId },
-      data: {
-        traderIds: updatedTraderIds,
-      },
+    await prisma.$transaction(async (tx) => {
+      const updatedTraderIds = team.traderIds.filter(id => id !== teamUserId)
+      await tx.team.update({
+        where: { id: teamId },
+        data: { traderIds: updatedTraderIds },
+      })
+
+      await tx.teamMember.deleteMany({
+        where: { teamId, userId: teamUserId },
+      })
     })
 
     revalidatePath('/dashboard/settings')
@@ -139,10 +148,11 @@ export async function getUserTeams() {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Get teams where the user is the owner
     const ownedTeams = await prisma.team.findMany({
-      where: { userId: user.id },
+      where: { userId: teamUserId },
       include: {
         managers: {
           select: {
@@ -158,10 +168,10 @@ export async function getUserTeams() {
     const joinedTeams = await prisma.team.findMany({
       where: {
         traderIds: {
-          has: user.id,
+          has: teamUserId,
         },
         userId: {
-          not: user.id, // Exclude teams where user is the owner
+          not: teamUserId, // Exclude teams where user is the owner
         },
       },
       include: {
@@ -234,6 +244,7 @@ export async function addManagerToTeam(teamId: string, managerEmail: string, acc
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if current user is owner or admin of this team
     const team = await prisma.team.findUnique({
@@ -245,12 +256,12 @@ export async function addManagerToTeam(teamId: string, managerEmail: string, acc
     }
 
     // Check if current user is owner or admin manager
-    const isOwner = team.userId === user.id
+    const isOwner = team.userId === teamUserId
     const isAdminManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -306,13 +317,14 @@ export async function removeManagerFromTeam(teamId: string, managerId: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if current user is admin of this team
     const currentUserManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -346,13 +358,14 @@ export async function updateManagerAccess(teamId: string, managerId: string, acc
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if current user is admin of this team
     const currentUserManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -389,10 +402,11 @@ export async function getUserTeamAccess() {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Get teams where user is a manager - much more efficient query!
     const managedTeams = await prisma.teamManager.findMany({
-      where: { managerId: user.id },
+      where: { managerId: teamUserId },
       include: {
         team: {
           include: {
@@ -457,6 +471,7 @@ export async function deleteTeam(teamId: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner of this team
     const team = await prisma.team.findUnique({
@@ -467,7 +482,7 @@ export async function deleteTeam(teamId: string) {
       throw new Error('Team not found')
     }
 
-    if (team.userId !== user.id) {
+    if (team.userId !== teamUserId) {
       throw new Error('Unauthorized: Only team owners can delete teams')
     }
 
@@ -492,6 +507,7 @@ export async function renameTeam(teamId: string, newName: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner of this team
     const team = await prisma.team.findUnique({
@@ -502,7 +518,7 @@ export async function renameTeam(teamId: string, newName: string) {
       throw new Error('Team not found')
     }
 
-    if (team.userId !== user.id) {
+    if (team.userId !== teamUserId) {
       throw new Error('Unauthorized: Only team owners can rename teams')
     }
 
@@ -510,7 +526,7 @@ export async function renameTeam(teamId: string, newName: string) {
     const existingTeam = await prisma.team.findFirst({
       where: {
         name: newName,
-        userId: user.id,
+        userId: teamUserId,
         id: { not: teamId }, // Exclude the current team
       },
     })
@@ -543,6 +559,7 @@ export async function addTraderToTeam(teamId: string, traderEmail: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner or admin of this team
     const team = await prisma.team.findUnique({
@@ -554,12 +571,12 @@ export async function addTraderToTeam(teamId: string, traderEmail: string) {
     }
 
     // Check if current user is owner or admin manager
-    const isOwner = team.userId === user.id
+    const isOwner = team.userId === teamUserId
     const isAdminManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -582,14 +599,12 @@ export async function addTraderToTeam(teamId: string, traderEmail: string) {
       throw new Error('Trader is already a member of this team')
     }
 
-    // Add trader to the team
-    await prisma.team.update({
-      where: { id: teamId },
-      data: {
-        traderIds: {
-          push: traderUser.id,
-        },
-      },
+    await prisma.$transaction(async (tx) => {
+      await ensureTeamMembership(tx, {
+        teamId,
+        userId: traderUser.id,
+        role: MemberRole.TRADER,
+      })
     })
 
     revalidatePath('/dashboard/settings')
@@ -608,6 +623,7 @@ export async function sendTeamInvitation(teamId: string, traderEmail: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner or admin of this team
     const team = await prisma.team.findUnique({
@@ -619,12 +635,12 @@ export async function sendTeamInvitation(teamId: string, traderEmail: string) {
     }
 
     // Check if current user is owner or admin manager
-    const isOwner = team.userId === user.id
+    const isOwner = team.userId === teamUserId
     const isAdminManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -667,12 +683,12 @@ export async function sendTeamInvitation(teamId: string, traderEmail: string) {
       update: {
         status: 'PENDING',
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        invitedBy: user.id,
+        invitedBy: teamUserId,
       },
       create: {
         teamId,
         email: traderEmail,
-        invitedBy: user.id,
+        invitedBy: teamUserId,
         status: 'PENDING',
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       },
@@ -680,7 +696,7 @@ export async function sendTeamInvitation(teamId: string, traderEmail: string) {
 
     // Get inviter information
     const inviter = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { id: teamUserId },
     })
 
     // Generate join URL
@@ -737,6 +753,7 @@ export async function getTeamInvitations(teamId: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner or admin of this team
     const team = await prisma.team.findUnique({
@@ -748,12 +765,12 @@ export async function getTeamInvitations(teamId: string) {
     }
 
     // Check if current user is owner or admin manager
-    const isOwner = team.userId === user.id
+    const isOwner = team.userId === teamUserId
     const isAdminManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -793,6 +810,7 @@ export async function removeTraderFromTeam(teamId: string, traderId: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner or admin of this team
     const team = await prisma.team.findUnique({
@@ -804,12 +822,12 @@ export async function removeTraderFromTeam(teamId: string, traderId: string) {
     }
 
     // Check if current user is owner or admin manager
-    const isOwner = team.userId === user.id
+    const isOwner = team.userId === teamUserId
     const isAdminManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -818,12 +836,17 @@ export async function removeTraderFromTeam(teamId: string, traderId: string) {
       throw new Error('Unauthorized: Only team owners and admin managers can remove traders')
     }
 
-    // Remove trader from the team
-    await prisma.team.update({
-      where: { id: teamId },
-      data: {
-        traderIds: team.traderIds.filter(id => id !== traderId),
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.team.update({
+        where: { id: teamId },
+        data: {
+          traderIds: team.traderIds.filter(id => id !== traderId),
+        },
+      })
+
+      await tx.teamMember.deleteMany({
+        where: { teamId, userId: traderId },
+      })
     })
 
     revalidatePath('/dashboard/settings')
@@ -842,6 +865,7 @@ export async function cancelTeamInvitation(teamId: string, invitationId: string)
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Check if user is the owner or admin of this team
     const team = await prisma.team.findUnique({
@@ -853,12 +877,12 @@ export async function cancelTeamInvitation(teamId: string, invitationId: string)
     }
 
     // Check if current user is owner or admin manager
-    const isOwner = team.userId === user.id
+    const isOwner = team.userId === teamUserId
     const isAdminManager = await prisma.teamManager.findUnique({
       where: {
         teamId_managerId: {
           teamId,
-          managerId: user.id,
+          managerId: teamUserId,
         }
       }
     })
@@ -949,6 +973,7 @@ export async function joinTeamByInvitation(invitationToken: string) {
     if (!user?.id) {
       throw new Error('Unauthorized')
     }
+    const teamUserId = await resolveTeamUserId(user.id)
 
     // Find the invitation by token
     const invitation = await prisma.teamInvitation.findUnique({
@@ -984,25 +1009,22 @@ export async function joinTeamByInvitation(invitationToken: string) {
     }
 
     // Check if user is already a member of this team
-    if (invitation.team.traderIds.includes(user.id)) {
+    if (invitation.team.traderIds.includes(teamUserId)) {
       throw new Error('You are already a member of this team')
     }
 
-    // Accept the invitation by updating its status and adding user to team
-    await prisma.$transaction([
-      // Update invitation status
-      prisma.teamInvitation.update({
+    await prisma.$transaction(async (tx) => {
+      await ensureTeamMembership(tx, {
+        teamId: invitation.teamId,
+        userId: teamUserId,
+        role: invitation.role ?? MemberRole.TRADER,
+      })
+
+      await tx.teamInvitation.update({
         where: { id: invitationToken },
         data: { status: 'ACCEPTED' }
-      }),
-      // Add user to team
-      prisma.team.update({
-        where: { id: invitation.teamId },
-        data: {
-          traderIds: [...invitation.team.traderIds, user.id]
-        }
       })
-    ])
+    })
 
     revalidatePath('/dashboard/settings')
     revalidatePath('/teams/dashboard')
