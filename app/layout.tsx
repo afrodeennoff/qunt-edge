@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Script from "next/script";
 import { headers } from "next/headers";
 import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
@@ -162,8 +161,10 @@ export default async function RootLayout({
         <meta name="robots" content="index, follow" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
-        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce}>
-          {`
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
             (function() {
               try {
                 var root = document.documentElement;
@@ -184,8 +185,9 @@ export default async function RootLayout({
                 // Fail silently to avoid blocking render
               }
             })();
-          `}
-        </Script>
+          `,
+          }}
+        />
 
         {/* PostHog Analytics */}
         {/*{process.env.NODE_ENV === "production" && (
