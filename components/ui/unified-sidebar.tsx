@@ -201,13 +201,16 @@ export function UnifiedSidebar({
       </SidebarHeader>
 
       <SidebarContent className="scrollbar-thin relative z-10 pointer-events-auto">
-        {groupedItems.order.map((groupName) => (
+        {groupedItems.order.map((groupName, groupIndex) => (
           <SidebarGroup key={groupName} className="px-2 py-2 relative z-10 pointer-events-auto">
-            <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2 pointer-events-auto">
+            <SidebarGroupLabel 
+              className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2 pointer-events-auto"
+              id={`sidebar-group-${groupIndex}`}
+            >
               {groupName}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu role="menu" aria-labelledby={`sidebar-group-${groupIndex}`}>
                 {groupedItems.groups[groupName].map((item, index) => {
                   const label = item.i18nKey ? translate(item.i18nKey) : item.label
                   const isItemDisabled = Boolean(item.disabled)
@@ -220,6 +223,9 @@ export function UnifiedSidebar({
                         isActive={itemIsActive}
                         tooltip={label}
                         disabled={isItemDisabled}
+                        aria-label={label}
+                        aria-current={itemIsActive ? "page" : undefined}
+                        aria-disabled={isItemDisabled}
                         onClick={!item.href ? () => {
                           item.action?.()
                           if (isMobile) setOpenMobile(false)
