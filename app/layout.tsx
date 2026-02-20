@@ -162,7 +162,7 @@ export default async function RootLayout({
         <meta name="robots" content="index, follow" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
-        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce}>
+        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce} suppressHydrationWarning>
           {`
             (function() {
               try {

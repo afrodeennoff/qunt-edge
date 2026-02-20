@@ -3,12 +3,10 @@
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { Globe, LogOut, MoreHorizontal } from "lucide-react"
+import { LogOut, MoreHorizontal } from "lucide-react"
 
 import { Logo } from "@/components/logo"
-import { SubscriptionBadge } from "@/components/subscription-badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,7 +132,6 @@ export function UnifiedSidebar({
   items,
   user,
   actions,
-  showSubscription = true,
   timezone,
   onLogout,
 }: UnifiedSidebarConfig) {
@@ -226,7 +223,7 @@ export function UnifiedSidebar({
                           if (isMobile) setOpenMobile(false)
                         } : undefined}
                         className={cn(
-                          "transition-all duration-200 pointer-events-auto relative z-10",
+                          "min-h-11 md:min-h-8 transition-all duration-200 pointer-events-auto relative z-10",
                           itemIsActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                             : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
@@ -235,7 +232,7 @@ export function UnifiedSidebar({
                         {item.href ? (
                           <Link
                             href={item.href}
-                            onClick={(e) => {
+                            onClick={() => {
                               if (isMobile) setOpenMobile(false)
                             }}
                             className="flex items-center w-full h-full pointer-events-auto"
@@ -279,6 +276,7 @@ export function UnifiedSidebar({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
+                  aria-label="Open user menu"
                   className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground pointer-events-auto relative z-10"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">

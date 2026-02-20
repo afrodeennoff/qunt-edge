@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Minus, Maximize2, GripVertical, Pencil, Settings } from 'lucide-react'
+import { Minus, Maximize2, GripVertical } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { useData } from '@/context/data-provider'
@@ -122,6 +122,14 @@ const generateResponsiveLayout = (widgets: Widget[]) => {
   }
   return layouts
 }
+
+const LAYOUT_SAVE_DEBOUNCE_MS = 250
+
+const createLayoutSignature = (widgets: Widget[]) =>
+  widgets
+    .map((widget) => `${widget.i}:${widget.x}:${widget.y}:${widget.w}:${widget.h}`)
+    .sort()
+    .join("|")
 
 function DeprecatedWidget({ onRemove }: { onRemove: () => void }) {
   const t = useI18n()
@@ -377,18 +385,12 @@ export default function WidgetCanvas() {
   const {
     isCustomizing,
     setIsCustomizing,
-    toggleCustomizing,
-    addWidget: contextAddWidget,
-    removeWidget: contextRemoveWidget,
-    changeWidgetSize: contextChangeWidgetSize,
-    removeAllWidgets: contextRemoveAllWidgets,
-    restoreDefaultLayout: contextRestoreDefaultLayout,
-    layouts: contextLayouts
   } = useDashboard()
-  const [isUserAction, setIsUserAction] = useState(false)
   const t = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const showDataDebug = searchParams.get("debugData") === "1"
+  const pendingSaveRef = useRef<DashboardLayoutWithWidgets | null>(null)
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Add this state to track if the layout change is from user interaction
   const activeLayout = useMemo(() => isMobile ? 'mobile' : 'desktop', [isMobile])
@@ -427,211 +429,75 @@ export default function WidgetCanvas() {
     }
   }, [setIsCustomizing])
 
+  const flushPendingLayoutSave = useCallback(async () => {
+    if (!pendingSaveRef.current) return
+
+    const pendingLayouts = pendingSaveRef.current
+    pendingSaveRef.current = null
+
+    try {
+      await saveDashboardLayout(toPrismaLayout(pendingLayouts))
+    } catch (error) {
+      console.error('Error saving dashboard layout:', error)
+    }
+  }, [saveDashboardLayout])
+
+  const queueLayoutSave = useCallback((nextLayouts: DashboardLayoutWithWidgets) => {
+    pendingSaveRef.current = nextLayouts
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      saveTimeoutRef.current = null
+      void flushPendingLayoutSave()
+    }, LAYOUT_SAVE_DEBOUNCE_MS)
+  }, [flushPendingLayoutSave])
+
   // Update handleLayoutChange with proper type handling and all dependencies
-  const handleLayoutChange = useCallback((layout: LayoutItem[], allLayouts: any) => {
+  const handleLayoutChange = useCallback((layout: LayoutItem[]) => {
     if (!user?.id || !isCustomizing || !setLayouts || !layouts) return;
 
     try {
-      // Keep the existing layouts for the non-active layout
-      const updatedLayouts = {
-        ...layouts,
-        [activeLayout]: layout.map(item => {
-          // Find the existing widget to preserve its type and size
-          const existingWidget = layouts[activeLayout].find(w => w.i === item.i);
-          if (!existingWidget) return null;
+      const updatedActiveLayout = layout.map(item => {
+        const existingWidget = layouts[activeLayout].find(w => w.i === item.i);
+        if (!existingWidget) return null;
 
-          // Create updated widget with proper type assertions
-          const updatedWidget = {
-            ...existingWidget,
-            x: isMobile ? 0 : item.x,
-            y: item.y,
-            w: isMobile ? 12 : item.w,
-            h: item.h,
-          };
+        return {
+          ...existingWidget,
+          x: isMobile ? 0 : item.x,
+          y: item.y,
+          w: isMobile ? 12 : item.w,
+          h: item.h,
+        };
+      }).filter((item): item is NonNullable<typeof item> => item !== null)
 
-          return updatedWidget;
-        }).filter((item): item is NonNullable<typeof item> => item !== null)
-      };
-
-      // Update the state first
-      setLayouts({
-        ...layouts,
-        desktop: updatedLayouts.desktop,
-        mobile: updatedLayouts.mobile,
-        updatedAt: new Date()
-      });
-
-      // Always save to database when layout changes
-      saveDashboardLayout(toPrismaLayout(updatedLayouts));
-
-      // Reset user action flag
-      if (isUserAction) {
-        setIsUserAction(false);
+      const currentSignature = createLayoutSignature(layouts[activeLayout] ?? [])
+      const nextSignature = createLayoutSignature(updatedActiveLayout)
+      if (currentSignature === nextSignature) {
+        return
       }
+
+      const updatedLayouts: DashboardLayoutWithWidgets = {
+        ...layouts,
+        [activeLayout]: updatedActiveLayout,
+        updatedAt: new Date()
+      }
+
+      setLayouts(updatedLayouts);
+      queueLayoutSave(updatedLayouts)
     } catch (error) {
       console.error('Error updating layout:', error);
       // Revert to previous layout on error
       setLayouts(layouts);
     }
-  }, [user?.id, isCustomizing, setLayouts, layouts, activeLayout, isMobile, isUserAction, saveDashboardLayout, setIsUserAction]);
-
-  // Define addWidget with all dependencies
-  const addWidget = useCallback(async (type: WidgetType, size: WidgetSize = 'medium') => {
-    if (!user?.id) {
-      console.error('Error adding widget missing user data:', { user })
-      return
-    }
-    if (!layouts) {
-      console.error('Error adding widget missing layouts:', { layouts })
-      return
-    }
-
-    const currentLayout = layouts[activeLayout]
-
-    // Prevent adding duplicate widget types
-    if (currentLayout.some(widget => widget.type === type)) {
-      toast.error(t('widgets.duplicate.title'), {
-        description: t('widgets.duplicate.description'),
-      })
-      return
-    }
-
-    // Determine default size based on widget type
-    const effectiveSize = size
-
-    const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
-
-    // Initialize variables for finding the best position
-    let bestX = 0
-    let bestY = 0
-    let lowestY = 0
-
-    // Find the lowest Y coordinate in the current layout
-    currentLayout.forEach(widget => {
-      const widgetBottom = widget.y + widget.h
-      if (widgetBottom > lowestY) {
-        lowestY = widgetBottom
-      }
-    })
-
-    // First, try to find gaps in existing rows
-    for (let y = 0; y <= lowestY; y++) {
-      // Create an array representing occupied spaces at this Y level
-      const rowOccupancy = new Array(12).fill(false)
-
-      // Mark occupied spaces
-      currentLayout.forEach(widget => {
-        if (y >= widget.y && y < widget.y + widget.h) {
-          for (let x = widget.x; x < widget.x + widget.w; x++) {
-            rowOccupancy[x] = true
-          }
-        }
-      })
-
-      // Look for a gap large enough for the new widget
-      for (let x = 0; x <= 12 - grid.w; x++) {
-        let hasSpace = true
-        for (let wx = 0; wx < grid.w; wx++) {
-          if (rowOccupancy[x + wx]) {
-            hasSpace = false
-            break
-          }
-        }
-
-        if (hasSpace) {
-          // Check if there's enough vertical space
-          let hasVerticalSpace = true
-          for (let wy = 0; wy < grid.h; wy++) {
-            currentLayout.forEach(widget => {
-              if (widget.x < x + grid.w &&
-                widget.x + widget.w > x &&
-                widget.y <= y + wy &&
-                widget.y + widget.h > y + wy) {
-                hasVerticalSpace = false
-              }
-            })
-          }
-
-          if (hasVerticalSpace) {
-            bestX = x
-            bestY = y
-            // Found a suitable gap, use it immediately
-            const newWidget: Widget = {
-              i: `widget${Date.now()}`,
-              type,
-              size: effectiveSize,
-              x: bestX,
-              y: bestY,
-              w: grid.w,
-              h: grid.h
-            }
-
-            const updatedWidgets = [...currentLayout, newWidget]
-
-            const newLayouts = {
-              ...layouts,
-              [activeLayout]: updatedWidgets,
-              updatedAt: new Date()
-            }
-
-            setLayouts(newLayouts)
-            toast.success(t('widgets.widgetAdded'), {
-              description: t('widgets.widgetAddedDescription'),
-            })
-            await saveDashboardLayout(toPrismaLayout(newLayouts))
-            return
-          }
-        }
-      }
-    }
-
-    // If no suitable gap was found, add to the bottom
-    const newWidget: Widget = {
-      i: `widget${Date.now()}`,
-      type,
-      size: effectiveSize,
-      x: 0,
-      y: lowestY,
-      w: grid.w,
-      h: grid.h
-    }
-
-    const updatedWidgets = [...currentLayout, newWidget]
-
-    const newLayouts = {
-      ...layouts,
-      [activeLayout]: updatedWidgets,
-      updatedAt: new Date()
-    }
-
-    setLayouts(newLayouts)
-
-    toast.success(t('widgets.widgetAdded'), {
-      description: t('widgets.widgetAddedDescription'),
-    })
-    await saveDashboardLayout(toPrismaLayout(newLayouts))
-
-  }, [user?.id, layouts, activeLayout, setLayouts, saveDashboardLayout, t, toast]);
+  }, [user?.id, isCustomizing, setLayouts, layouts, activeLayout, isMobile, queueLayoutSave]);
 
   // Define removeWidget with all dependencies
   const removeWidget = useCallback(async (i: string) => {
     if (!user?.id || !layouts) return
     const updatedWidgets = layouts[activeLayout].filter(widget => widget.i !== i)
-    const newLayouts = {
-      ...layouts,
-      [activeLayout]: updatedWidgets,
-      updatedAt: new Date()
-    }
-    setLayouts(newLayouts)
-    await saveDashboardLayout(toPrismaLayout(newLayouts))
-  }, [user?.id, layouts, activeLayout, setLayouts, saveDashboardLayout]);
-
-  // Define changeWidgetType with all dependencies
-  const changeWidgetType = useCallback(async (i: string, newType: WidgetType) => {
-    if (!user?.id || !layouts) return
-    const updatedWidgets = layouts[activeLayout].map(widget =>
-      widget.i === i ? { ...widget, type: newType } : widget
-    )
     const newLayouts = {
       ...layouts,
       [activeLayout]: updatedWidgets,
@@ -667,21 +533,6 @@ export default function WidgetCanvas() {
     setLayouts(newLayouts)
     await saveDashboardLayout(toPrismaLayout(newLayouts))
   }, [user?.id, layouts, activeLayout, setLayouts, saveDashboardLayout]);
-
-  // Define removeAllWidgets with all dependencies
-  const removeAllWidgets = useCallback(async () => {
-    if (!user?.id || !layouts) return
-
-    const newLayouts = {
-      ...layouts,
-      desktop: [],
-      mobile: [],
-      updatedAt: new Date()
-    }
-
-    setLayouts(newLayouts)
-    await saveDashboardLayout(toPrismaLayout(newLayouts))
-  }, [user?.id, layouts, setLayouts, saveDashboardLayout]);
 
   // Restore default layout for both desktop and mobile
   const restoreDefaultLayout = useCallback(async () => {
@@ -733,6 +584,21 @@ export default function WidgetCanvas() {
       return () => document.removeEventListener('click', handleOutsideClick)
     }
   }, [isCustomizing, handleOutsideClick]);
+
+  useEffect(() => {
+    if (!isCustomizing) {
+      void flushPendingLayoutSave()
+    }
+  }, [isCustomizing, flushPendingLayoutSave])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+      void flushPendingLayoutSave()
+    }
+  }, [flushPendingLayoutSave])
 
   // Add auto-scroll functionality for mobile
   useAutoScroll(isMobile && isCustomizing)
@@ -797,7 +663,9 @@ export default function WidgetCanvas() {
             isDraggable={isCustomizing}
             isResizable={false}
             draggableHandle=".drag-handle"
-            onDragStart={() => setIsUserAction(true)}
+            onDragStop={() => {
+              void flushPendingLayoutSave()
+            }}
             onLayoutChange={handleLayoutChange}
             margin={isMobile ? [6, 4] : [8, 8]}
             containerPadding={[0, 0]}
