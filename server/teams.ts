@@ -63,7 +63,10 @@ export async function getTeamById(teamId: string, userId: string) {
     const team = await prisma.team.findFirst({
       where: {
         id: teamId,
-        userId,
+        OR: [
+          { userId },
+          { members: { some: { userId } } },
+        ],
       },
       include: {
         members: {

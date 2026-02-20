@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 const SCROLL_THRESHOLD = 150
 const BASE_SCROLL_SPEED = 15
 const MAX_SCROLL_SPEED = 30
-const SCROLL_INTERVAL = 32
+const TOUCH_START_OPTIONS: AddEventListenerOptions = { passive: true }
+const TOUCH_MOVE_OPTIONS: AddEventListenerOptions = { passive: false }
 
 interface AutoScrollState {
   isEnabled: boolean
@@ -24,18 +25,38 @@ export function useAutoScroll(isEnabled: boolean) {
   const rafRef = useRef<number | null>(null)
   const isScrollingRef = useRef(false)
 
-  useEffect(() => {
-    if (!isEnabled) {
-      cleanup()
-      return
+  function handleTouchStart() {
+    if (!stateRef.current.isEnabled) return
+    stateRef.current.isDragging = true
+    document.body.classList.add('dragging')
+  }
+
+  function handleTouchMove(event: TouchEvent) {
+    const state = stateRef.current
+    if (!state.isEnabled || !state.isDragging) return
+
+    const touch = event.touches[0]
+    const touchY = touch.clientY
+    state.lastTouchY = touchY
+    const windowHeight = window.innerHeight
+
+    const isNearEdge = touchY < SCROLL_THRESHOLD || touchY > windowHeight - SCROLL_THRESHOLD
+
+    if (isNearEdge && !isScrollingRef.current) {
+      startScrolling()
+    } else if (!isNearEdge && isScrollingRef.current) {
+      stopScrolling()
     }
+  }
 
-    stateRef.current.isEnabled = true
-    setup()
-    return cleanup
-  }, [isEnabled])
+  function handleTouchEnd() {
+    const state = stateRef.current
+    state.isDragging = false
+    document.body.classList.remove('dragging')
+    stopScrolling()
+  }
 
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     const state = stateRef.current
     
     if (state.scrollInterval) {
@@ -54,17 +75,17 @@ export function useAutoScroll(isEnabled: boolean) {
     }
 
     document.body.classList.remove('dragging')
-    document.removeEventListener('touchstart', handleTouchStart, { passive: true })
-    document.removeEventListener('touchmove', handleTouchMove, { passive: false } as any)
-    document.removeEventListener('touchend', handleTouchEnd, { passive: true })
-    document.removeEventListener('touchcancel', handleTouchEnd, { passive: true })
+    document.removeEventListener('touchstart', handleTouchStart)
+    document.removeEventListener('touchmove', handleTouchMove)
+    document.removeEventListener('touchend', handleTouchEnd)
+    document.removeEventListener('touchcancel', handleTouchEnd)
     
     state.isEnabled = false
     state.isDragging = false
     isScrollingRef.current = false
-  }
+  }, [])
 
-  const setup = () => {
+  const setup = useCallback(() => {
     if (styleRef.current) return
 
     const style = document.createElement('style')
@@ -88,11 +109,11 @@ export function useAutoScroll(isEnabled: boolean) {
     document.head.appendChild(style)
     styleRef.current = style
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: true })
-    document.addEventListener('touchmove', handleTouchMove, { passive: false } as any)
-    document.addEventListener('touchend', handleTouchEnd, { passive: true })
-    document.addEventListener('touchcancel', handleTouchEnd, { passive: true })
-  }
+    document.addEventListener('touchstart', handleTouchStart, TOUCH_START_OPTIONS)
+    document.addEventListener('touchmove', handleTouchMove, TOUCH_MOVE_OPTIONS)
+    document.addEventListener('touchend', handleTouchEnd, TOUCH_START_OPTIONS)
+    document.addEventListener('touchcancel', handleTouchEnd, TOUCH_START_OPTIONS)
+  }, [])
 
   const performScroll = () => {
     const state = stateRef.current
@@ -144,34 +165,14 @@ export function useAutoScroll(isEnabled: boolean) {
     }
   }
 
-  const handleTouchStart = (e: TouchEvent) => {
-    if (!stateRef.current.isEnabled) return
-    stateRef.current.isDragging = true
-    document.body.classList.add('dragging')
-  }
-
-  const handleTouchMove = (e: TouchEvent) => {
-    const state = stateRef.current
-    if (!state.isEnabled || !state.isDragging) return
-
-    const touch = e.touches[0]
-    const touchY = touch.clientY
-    state.lastTouchY = touchY
-    const windowHeight = window.innerHeight
-
-    const isNearEdge = touchY < SCROLL_THRESHOLD || touchY > windowHeight - SCROLL_THRESHOLD
-
-    if (isNearEdge && !isScrollingRef.current) {
-      startScrolling()
-    } else if (!isNearEdge && isScrollingRef.current) {
-      stopScrolling()
+  useEffect(() => {
+    if (!isEnabled) {
+      cleanup()
+      return
     }
-  }
 
-  const handleTouchEnd = () => {
-    const state = stateRef.current
-    state.isDragging = false
-    document.body.classList.remove('dragging')
-    stopScrolling()
-  }
+    stateRef.current.isEnabled = true
+    setup()
+    return cleanup
+  }, [isEnabled, cleanup, setup])
 }

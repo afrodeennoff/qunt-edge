@@ -90,10 +90,6 @@ export async function GET(req: Request) {
       const notificationDate = startOfDay(subDays(account.nextPaymentDate, account.renewalNotice))
       if (!isEqual(notificationDate, today)) return false
 
-      if (account.renewalNoticeLastSentAt && isEqual(startOfDay(account.renewalNoticeLastSentAt), today)) {
-        return false
-      }
-
       return true
     })
 
@@ -167,10 +163,6 @@ export async function GET(req: Request) {
               console.log(`Renewal notice sent to ${userEmail} for account ${account.id}`)
               successCount++
 
-              await prisma.account.update({
-                where: { id: account.id },
-                data: { renewalNoticeLastSentAt: new Date() }
-              })
             }
           } catch (accountError) {
             console.error(`Error processing account ${account.id}:`, accountError)

@@ -10,8 +10,8 @@ interface EventListenerInfo {
 
 class EventListenerTracker {
   private listeners: Map<string, EventListenerInfo[]> = new Map()
-  private originalAddEventListener: typeof EventTarget.prototype.addEventListener
-  private originalRemoveEventListener: typeof EventTarget.prototype.removeEventListener
+  private originalAddEventListener: typeof EventTarget.prototype.addEventListener | null = null
+  private originalRemoveEventListener: typeof EventTarget.prototype.removeEventListener | null = null
   private isEnabled = false
 
   constructor() {
@@ -23,9 +23,13 @@ class EventListenerTracker {
 
   enable() {
     if (this.isEnabled || typeof window === 'undefined') return
+    if (!this.originalAddEventListener || !this.originalRemoveEventListener) return
     this.isEnabled = true
 
-    const self = this
+    const listeners = this.listeners
+    const getCurrentComponent = this.getCurrentComponent.bind(this)
+    const originalAddEventListener = this.originalAddEventListener
+    const originalRemoveEventListener = this.originalRemoveEventListener
 
     EventTarget.prototype.addEventListener = function(
       this: EventTarget,
@@ -33,7 +37,7 @@ class EventListenerTracker {
       listener: EventListenerOrEventListenerObject,
       options?: AddEventListenerOptions
     ) {
-      const component = self.getCurrentComponent()
+      const component = getCurrentComponent()
       const info: EventListenerInfo = {
         target: this.constructor.name,
         type,
@@ -43,12 +47,12 @@ class EventListenerTracker {
       }
 
       const key = `${component}-${this.constructor.name}-${type}`
-      if (!self.listeners.has(key)) {
-        self.listeners.set(key, [])
+      if (!listeners.has(key)) {
+        listeners.set(key, [])
       }
-      self.listeners.get(key)!.push(info)
+      listeners.get(key)!.push(info)
 
-      return self.originalAddEventListener.call(this, type, listener, options)
+      return originalAddEventListener.call(this, type, listener, options)
     }
 
     EventTarget.prototype.removeEventListener = function(
@@ -57,20 +61,20 @@ class EventListenerTracker {
       listener: EventListenerOrEventListenerObject,
       options?: EventListenerOptions
     ) {
-      const component = self.getCurrentComponent()
+      const component = getCurrentComponent()
       const key = `${component}-${this.constructor.name}-${type}`
       
-      const listeners = self.listeners.get(key)
-      if (listeners) {
-        const index = listeners.findIndex(
+      const activeListeners = listeners.get(key)
+      if (activeListeners) {
+        const index = activeListeners.findIndex(
           l => l.handler === listener.toString() && l.type === type
         )
         if (index !== -1) {
-          listeners.splice(index, 1)
+          activeListeners.splice(index, 1)
         }
       }
 
-      return self.originalRemoveEventListener.call(this, type, listener, options)
+      return originalRemoveEventListener.call(this, type, listener, options)
     }
   }
 
@@ -78,8 +82,12 @@ class EventListenerTracker {
     if (!this.isEnabled) return
     this.isEnabled = false
 
-    EventTarget.prototype.addEventListener = this.originalAddEventListener
-    EventTarget.prototype.removeEventListener = this.originalRemoveEventListener
+    if (this.originalAddEventListener) {
+      EventTarget.prototype.addEventListener = this.originalAddEventListener
+    }
+    if (this.originalRemoveEventListener) {
+      EventTarget.prototype.removeEventListener = this.originalRemoveEventListener
+    }
   }
 
   private getCurrentComponent(): string {
