@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTradovateSyncStore } from "@/store/tradovate-sync-store";
 import {
   handleTradovateCallback,
-  storeTradovateToken,
 } from "../components/import/tradovate/actions";
 import { useI18n } from "@/locales/client";
 import { useSyncContext } from "@/context/sync-context"
@@ -138,16 +137,13 @@ export default function ImportCallbackPage() {
         }
 
         // Validate all required fields exist and are strings
-        if (!result.accessToken || !result.refreshToken || !result.expiresAt) {
+        if (!result.success) {
           console.error("Missing required fields in OAuth result:", {
-            hasAccessToken: !!result.accessToken,
-            hasRefreshToken: !!result.refreshToken,
-            hasExpiresAt: !!result.expiresAt,
+            success: result.success,
+            expiresAt: result.expiresAt,
             result,
           });
-          setError(
-            "Invalid response from token exchange - missing required fields",
-          );
+          setError("Invalid response from token exchange");
           setStatus("error");
           return;
         }

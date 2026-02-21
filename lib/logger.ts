@@ -10,6 +10,55 @@ interface LogEntry {
   [key: string]: any;
 }
 
+const SENSITIVE_KEYS = new Set([
+  'token',
+  'accessToken',
+  'refreshToken',
+  'authorization',
+  'secret',
+  'password',
+  'apikey',
+  'apiKey',
+  'clientSecret',
+  'tokenCiphertext',
+  'tokenTag',
+  'tokenIv',
+])
+
+function redactValue(value: unknown): unknown {
+  if (typeof value === 'string') {
+    if (value.length <= 8) return '[REDACTED]'
+    return `${value.slice(0, 2)}***${value.slice(-2)}`
+  }
+  return '[REDACTED]'
+}
+
+function redactMeta(meta: Record<string, any>): Record<string, any> {
+  const output: Record<string, any> = {}
+  for (const [key, value] of Object.entries(meta)) {
+    const isSensitive = SENSITIVE_KEYS.has(key) || /token|secret|password|authorization/i.test(key)
+    if (isSensitive) {
+      output[key] = redactValue(value)
+      continue
+    }
+
+    if (Array.isArray(value)) {
+      output[key] = value.map((item) =>
+        item && typeof item === 'object' ? redactMeta(item as Record<string, any>) : item
+      )
+      continue
+    }
+
+    if (value && typeof value === 'object') {
+      output[key] = redactMeta(value as Record<string, any>)
+      continue
+    }
+
+    output[key] = value
+  }
+  return output
+}
+
 const levels: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
@@ -25,7 +74,7 @@ function log(level: LogLevel, message: string, meta: Record<string, any> = {}) {
     level,
     message,
     timestamp: new Date().toISOString(),
-    ...meta,
+    ...redactMeta(meta),
   };
 
   // In production, you might strip colors or format as JSON directly
