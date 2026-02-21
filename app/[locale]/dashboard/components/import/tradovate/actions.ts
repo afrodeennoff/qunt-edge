@@ -8,6 +8,7 @@ import crypto from 'crypto'
 import { generateDeterministicTradeId } from '@/lib/trade-id-utils'
 import { getTickDetails } from '@/server/tick-details'
 import { prisma } from '@/lib/prisma'
+import { withPrismaSchemaMismatchFallback } from '@/lib/prisma-guard'
 import { logger } from '@/lib/logger'
 import { authSecurityConfig } from '@/lib/security/auth-config'
 import { createOAuthState, consumeOAuthState } from '@/lib/security/oauth-state'
@@ -1272,9 +1273,15 @@ export async function removeTradovateToken(accountId?: string) {
       whereClause.accountId = accountId
     }
 
-    await prisma.synchronization.deleteMany({
-      where: whereClause
-    })
+    await withPrismaSchemaMismatchFallback<void>(
+      'sync:tradovate:delete',
+      async () => {
+        await prisma.synchronization.deleteMany({
+          where: whereClause
+        })
+      },
+      undefined
+    )
 
     return { success: true }
   } catch (error) {
@@ -1292,15 +1299,19 @@ export async function getTradovateSynchronizations() {
       return { error: 'User not authenticated' }
     }
 
-    const synchronizations = await prisma.synchronization.findMany({
-      where: {
-        userId: user.id,
-        service: 'tradovate'
-      },
-      orderBy: {
-        lastSyncedAt: 'desc'
-      }
-    })
+    const synchronizations = await withPrismaSchemaMismatchFallback(
+      'sync:tradovate:list',
+      () => prisma.synchronization.findMany({
+        where: {
+          userId: user.id,
+          service: 'tradovate'
+        },
+        orderBy: {
+          lastSyncedAt: 'desc'
+        }
+      }),
+      []
+    )
 
     return { synchronizations }
   } catch (error) {
