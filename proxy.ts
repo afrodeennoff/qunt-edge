@@ -4,7 +4,6 @@ import { createServerClient } from "@supabase/ssr"
 import { geolocation } from "@vercel/functions"
 import { User } from "@supabase/supabase-js"
 import { buildAppCsp, buildEmbedCsp, createNonce } from "@/lib/security/csp"
-import { authSecurityConfig } from "@/lib/security/auth-config"
 
 // Maintenance mode flag - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false
@@ -42,7 +41,7 @@ async function updateSession(request: NextRequest) {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn("[Proxy] Missing Supabase URL or anon key; skipping session refresh.")
-    return { response, user: null, error: new Error("Missing Supabase environment variables"), mfaLevel: null }
+    return { response, user: null, error: new Error("Missing Supabase environment variables") }
   }
 
   const supabase = createServerClient(
@@ -70,7 +69,6 @@ async function updateSession(request: NextRequest) {
 
   let user: User | null = null
   let error: unknown = null
-  let mfaLevel: string | null = null
 
   try {
     // Add timeout to prevent hanging requests
@@ -80,14 +78,6 @@ async function updateSession(request: NextRequest) {
     const result = (await Promise.race([authPromise, timeoutPromise])) as any
     user = result.data?.user || null
     error = result.error
-    if (user && !error) {
-      try {
-        const aalResult = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-        mfaLevel = aalResult.data?.currentLevel ?? null
-      } catch {
-        mfaLevel = null
-      }
-    }
   } catch (authError: any) {
     // Handle JSON parsing errors from Supabase API (when API returns HTML instead of JSON)
     if (
@@ -111,7 +101,7 @@ async function updateSession(request: NextRequest) {
   // Do not expose auth identity or auth error details via response headers.
   // Downstream code must derive identity from Supabase session server-side.
 
-  return { response, user, error, mfaLevel }
+  return { response, user, error }
 }
 
 function setCspHeader(response: NextResponse, csp: string, reportOnly: boolean) {
@@ -206,13 +196,11 @@ export default async function middleware(req: NextRequest) {
 
   let user: User | null = null
   let error: unknown = null
-  let mfaLevel: string | null = null
 
   if (shouldRunSessionCheck) {
-    const { response: authResponse, user: sessionUser, error: sessionError, mfaLevel: sessionMfaLevel } = await updateSession(req)
+    const { response: authResponse, user: sessionUser, error: sessionError } = await updateSession(req)
     user = sessionUser
     error = sessionError
-    mfaLevel = sessionMfaLevel
 
     // Merge responses - copy headers from auth response to i18n response
     authResponse.headers.forEach((value, key) => {
@@ -263,18 +251,6 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(authUrl)
   }
 
-  const requiresMfa =
-    authSecurityConfig.mfaEnforcement === "required_all" ||
-    (authSecurityConfig.mfaEnforcement === "required_admin" &&
-      Boolean(user?.id && (user.id === process.env.ADMIN_USER_ID || user.id === process.env.ALLOWED_ADMIN_USER_ID)))
-
-  if ((isDashboardRoute || isAdminRoute) && user && !error && requiresMfa && mfaLevel !== "aal2") {
-    const authUrl = new URL(`/${locale}/authentication`, req.url)
-    authUrl.searchParams.set("mfa_required", "1")
-    authUrl.searchParams.set("next", pathname + req.nextUrl.search)
-    return NextResponse.redirect(authUrl)
-  }
-
   // Maintenance mode check
   if (MAINTENANCE_MODE && !pathname.includes("/maintenance") && isDashboardRoute) {
     return NextResponse.redirect(new URL(`/${locale}/maintenance`, req.url))
@@ -313,7 +289,7 @@ export default async function middleware(req: NextRequest) {
     }
   } else if (isAuthRoute) {
     // Authenticated - redirect from auth to dashboard
-    if (user && !error && (!requiresMfa || mfaLevel === "aal2")) {
+    if (user && !error) {
       const nextParam = req.nextUrl.searchParams.get("next")
 
       let redirectPath = "/dashboard"
