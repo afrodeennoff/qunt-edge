@@ -138,9 +138,10 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { isMobile, setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile, state } = useSidebar()
   const { isLoading } = useNavigationLoading()
   const { isQueryParamOnly } = useNavigationHelper()
+  const isCollapsed = state === "collapsed"
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -183,9 +184,9 @@ export function UnifiedSidebar({
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground pointer-events-auto">
-      <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border/50 relative z-20 pointer-events-auto">
-        <div className="flex items-center gap-3 w-full overflow-hidden">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+      <SidebarHeader className="h-14 flex items-center border-b border-sidebar-border/50 relative z-20 pointer-events-auto px-4 transition-[padding] duration-200 group-data-[collapsible=icon]:px-2">
+        <div className={cn("flex items-center w-full overflow-hidden transition-all duration-200", isCollapsed ? "justify-center gap-0" : "gap-3")}>
+          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm", isCollapsed && "hidden")}>
             <Logo className="size-5 fill-current" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
@@ -196,7 +197,12 @@ export function UnifiedSidebar({
               Workspace
             </p>
           </div>
-          <SidebarTrigger className="hidden md:flex ml-auto h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors" />
+          <SidebarTrigger
+            className={cn(
+              "hidden md:flex h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors",
+              isCollapsed ? "ml-0" : "ml-auto"
+            )}
+          />
         </div>
       </SidebarHeader>
 
