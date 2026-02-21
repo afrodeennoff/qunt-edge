@@ -1,70 +1,43 @@
 'use client'
 
-import { css } from '@emotion/css'
+import { type RefObject, useEffect } from 'react'
 
 export const gpuAcceleratedStyles = {
-  transform: css`
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  `,
+  transform: 'will-change-transform translate-z-0 backface-hidden perspective-1000',
 
-  smoothTransition: (properties: string = 'all', duration: number = 300) => css`
-    transition: ${properties} ${duration}ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: ${properties};
-  `,
+  smoothTransition: (properties: string = 'all', duration: number = 300) =>
+    `transition-[${properties}] duration-[${duration}ms] ease-in-out`,
 
-  fadeAnimation: css`
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    animation: fadeIn 300ms ease-out forwards;
-  `,
+  fadeAnimation: 'animate-in fade-in slide-in-from-bottom-2 duration-300',
 
-  scaleAnimation: css`
-    @keyframes scaleIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    animation: scaleIn 200ms ease-out forwards;
-  `,
+  scaleAnimation: 'animate-in zoom-in-95 duration-200',
 
   slideAnimation: (direction: 'left' | 'right' | 'up' | 'down' = 'right') => {
     const transforms = {
-      left: 'translateX(-20px)',
-      right: 'translateX(20px)',
-      up: 'translateY(-20px)',
-      down: 'translateY(20px)'
+      left: 'slide-in-from-left-5',
+      right: 'slide-in-from-right-5',
+      up: 'slide-in-from-top-5',
+      down: 'slide-in-from-bottom-5'
     }
-    return css`
-      @keyframes slideIn {
-        from { opacity: 0; transform: ${transforms[direction]}; }
-        to { opacity: 1; transform: translate(0, 0); }
-      }
-      animation: slideIn 300ms ease-out forwards;
-    `
+    return `animate-in ${transforms[direction]} duration-300`
   }
 }
 
 export function createGPUAcceleratedStyle(
   properties: Record<string, string>
 ): string {
-  return css`
-    ${gpuAcceleratedStyles.transform}
-    ${Object.entries(properties)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(';')}
-  `
+  const inlineStyles = Object.entries(properties)
+    .map(([key, value]) => `${key}:${value}`)
+    .join(';')
+  return `${gpuAcceleratedStyles.transform};${inlineStyles}`
 }
 
 export function useGPUAcceleratedAnimation(
-  elementRef: React.RefObject<HTMLElement>,
+  elementRef: RefObject<HTMLElement | null>,
   animation: 'fade' | 'scale' | 'slide',
   direction?: 'left' | 'right' | 'up' | 'down'
 ) {
-  React.useEffect(() => {
+  useEffect(() => {
     const element = elementRef.current
     if (!element) return
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useEffect } from 'react'
+import { useCallback, useRef, useEffect, useState } from 'react'
 
 export class DOMOptimizer {
   private static instance: DOMOptimizer
@@ -150,7 +150,7 @@ export function batchDOMUpdates(updates: Array<() => void>) {
 
 export function useOptimizedElementSize() {
   const ref = useRef<HTMLElement>(null)
-  const [size, setSize] = React.useState({ width: 0, height: 0 })
+  const [size, setSize] = useState({ width: 0, height: 0 })
 
   const measureSize = useCallback(() => {
     if (ref.current) {

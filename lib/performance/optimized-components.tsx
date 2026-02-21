@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo, useMemo, forwardRef, Children, cloneElement, ReactElement } from 'react'
+import React, { memo, useMemo, forwardRef, useCallback } from 'react'
 import { usePerformanceOptimization } from './render-optimization'
 
 export interface OptimizedComponentProps {
@@ -31,7 +31,7 @@ export function withPerformanceOptimization<P extends object>(
 
   WrappedComponent.displayName = `Optimized(${Component.displayName || Component.name || 'Component'})`
   
-  return WrappedComponent
+  return WrappedComponent as unknown as React.ComponentType<P & OptimizedComponentProps>
 }
 
 export const OptimizedFragment = memo(({ children }: { children: React.ReactNode }) => {

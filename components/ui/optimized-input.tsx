@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef, useEffect, forwardRef } from 'react'
+import React, { useState, useCallback, useEffect, forwardRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { useDebouncedCallback } from '@/lib/performance/render-optimization'
 
@@ -14,7 +14,6 @@ export const OptimizedInput = forwardRef<HTMLInputElement, OptimizedInputProps>(
   ({ debounceMs = 300, onDebouncedChange, showLoadingIndicator = false, onChange, ...props }, ref) => {
     const [localValue, setLocalValue] = useState(props.value || props.defaultValue || '')
     const [isDebouncing, setIsDebouncing] = useState(false)
-    const timeoutRef = useRef<NodeJS.Timeout>()
 
     useEffect(() => {
       setLocalValue(props.value || props.defaultValue || '')
@@ -29,10 +28,6 @@ export const OptimizedInput = forwardRef<HTMLInputElement, OptimizedInputProps>(
       const value = e.target.value
       setLocalValue(value)
       setIsDebouncing(true)
-      
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
       
       onChange?.(e)
       debouncedOnChange(value)

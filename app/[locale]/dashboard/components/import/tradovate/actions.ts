@@ -779,10 +779,8 @@ export async function renewTradovateAccessToken(accessToken: string, environment
     }
 
     return {
-      accessToken: renewalData.accessToken,
+      success: true,
       expiresAt: renewalData.expirationTime,
-      // Note: renewAccessToken doesn't return a refresh token
-      // The access token is renewed in place
     };
   } catch (error) {
     logger.error('Failed to renew Tradovate token:', error);
@@ -852,10 +850,16 @@ export async function refreshTradovateToken(refreshToken: string): Promise<Trado
     // Calculate expiration time
     const expiresAt = formatDateForAPI(new Date(Date.now() + (tokens.expires_in * 1000)))
 
+    const storeResult = await storeTradovateToken(tokens.access_token, expiresAt, 'demo')
+    if (storeResult.error) {
+      logger.warn('Failed to store refreshed token in database', {
+        reason: storeResult.error,
+      })
+    }
+
     return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresAt
+      success: true,
+      expiresAt,
     }
   } catch (error) {
     logger.error('Failed to refresh Tradovate token:', error)
@@ -1219,7 +1223,11 @@ export async function getTradovateToken(accountId: string = 'default') {
       }
     })
 
-    const accessToken = syncData?.token || decryptToken(syncData ?? { tokenCiphertext: null, tokenIv: null, tokenTag: null })
+    if (!syncData) {
+      return { error: 'No Tradovate token found' }
+    }
+
+    const accessToken = syncData.token || decryptToken(syncData)
     if (!accessToken) {
       return { error: 'No Tradovate token found' }
     }

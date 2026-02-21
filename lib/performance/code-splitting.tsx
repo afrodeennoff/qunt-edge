@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, ComponentType, Suspense, ReactNode } from 'react'
+import React, { lazy, ComponentType, Suspense, ReactNode, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 
 interface LazyComponentOptions {
@@ -16,15 +16,16 @@ export function createLazyComponent<T extends object>(
 ): ComponentType<T> {
   const {
     fallback = <div className="animate-pulse bg-muted h-32 w-full" />,
-    ssr = false,
+    ssr: _ssr = false,
     loadingComponent,
     errorComponent
   } = options
 
   const LazyComponent = lazy(() => importFn())
+  const LoadingComponent = loadingComponent
 
   const WrappedComponent = (props: T) => (
-    <Suspense fallback={loadingComponent ? <loadingComponent /> : fallback}>
+    <Suspense fallback={LoadingComponent ? <LoadingComponent /> : fallback}>
       <ErrorBoundary errorComponent={errorComponent}>
         <LazyComponent {...props} />
       </ErrorBoundary>
@@ -41,14 +42,15 @@ export function createDynamicComponent<T extends object>(
   options: LazyComponentOptions = {}
 ): ComponentType<T> {
   const {
-    loading: loadingComponent,
+    loadingComponent,
     ssr = false
   } = options
+  const LoadingComponent = loadingComponent
 
   return dynamic(() => importFn(), {
     ssr,
-    loading: loadingComponent
-      ? () => <loadingComponent />
+    loading: LoadingComponent
+      ? () => <LoadingComponent />
       : () => <div className="animate-pulse bg-muted h-32 w-full" />
   }) as ComponentType<T>
 }
@@ -109,7 +111,7 @@ export function preloadComponent(key: string): Promise<ComponentType<any> | null
 }
 
 export function usePreloadComponents(keys: string[]) {
-  React.useEffect(() => {
+  useEffect(() => {
     const promises = keys.map(key => componentRegistry.preload(key))
     Promise.allSettled(promises)
   }, keys)
@@ -145,35 +147,33 @@ const chartChunks = {
 }
 
 const editorChunks = {
-  loadTipTap: () => import('@/components/tiptap-editor'),
-  loadMarkdownViewer: () => import('@/components/lazy/markdown-viewer')
+  loadTipTap: () => import('@/components/tiptap-editor')
 }
 
 const dataChunks = {
   loadTradeTable: () => import('@/app/[locale]/dashboard/components/tables/trade-table-review'),
-  loadAccountsTable: () => import('@/app/[locale]/dashboard/components/accounts/accounts-table-view'),
-  loadDataGrid: () => import('@/components/ui/data-table')
+  loadAccountsTable: () => import('@/app/[locale]/dashboard/components/accounts/accounts-table-view')
 }
 
 export function preloadCharts() {
-  return chunkPreloader.preload(chartChunks.loadCharts(), 'high')
+  return chunkPreloader.preload(chartChunks.loadCharts, 'high')
 }
 
 export function preloadEditor() {
-  return chunkPreloader.preload(editorChunks.loadTipTap(), 'low')
+  return chunkPreloader.preload(editorChunks.loadTipTap, 'low')
 }
 
 export function preloadDataComponents() {
   return chunkPreloader.preloadAll([
-    dataChunks.loadTradeTable(),
-    dataChunks.loadAccountsTable()
+    dataChunks.loadTradeTable,
+    dataChunks.loadAccountsTable
   ])
 }
 
 export async function preloadCriticalDashboardChunks() {
   await Promise.allSettled([
-    chunkPreloader.preload(chartChunks.loadEquityChart(), 'high'),
-    chunkPreloader.preload(chartChunks.loadPnLChart(), 'high')
+    chunkPreloader.preload(chartChunks.loadEquityChart, 'high'),
+    chunkPreloader.preload(chartChunks.loadPnLChart, 'high')
   ])
 }
 

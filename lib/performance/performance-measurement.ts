@@ -1,6 +1,6 @@
 'use client'
 
-import { performance } from 'perf_hooks'
+import { useCallback } from 'react'
 
 interface PerformanceSnapshot {
   timestamp: number
@@ -178,15 +178,15 @@ Improvements:
 export const performanceMeasurement = new PerformanceMeasurement()
 
 export function usePerformanceMeasurement() {
-  const measure = React.useCallback((label: string) => {
+  const measure = useCallback((label: string) => {
     return performanceMeasurement.startMeasurement(label)
   }, [])
 
-  const snapshot = React.useCallback(() => {
+  const snapshot = useCallback(() => {
     return performanceMeasurement.takeSnapshot()
   }, [])
 
-  const getReport = React.useCallback(() => {
+  const getReport = useCallback(() => {
     return performanceMeasurement.generateReport()
   }, [])
 
