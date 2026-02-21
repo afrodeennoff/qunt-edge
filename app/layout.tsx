@@ -8,21 +8,7 @@ import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
-function getSiteOrigin(): string {
-  const fallback = "https://qunt-edge.vercel.app";
-  const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL;
-  if (!configuredOrigin) return fallback;
-  try {
-    const normalized = configuredOrigin.startsWith("http")
-      ? configuredOrigin
-      : `https://${configuredOrigin}`;
-    return new URL(normalized).origin;
-  } catch {
-    return fallback;
-  }
-}
-
-const siteOrigin = getSiteOrigin();
+const siteOrigin = "https://qunt-edge.vercel.app";
 
 const geist = Geist({
   subsets: ["latin"],

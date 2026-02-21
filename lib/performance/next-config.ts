@@ -15,16 +15,8 @@ function parseBuildCpus(rawValue: string | undefined, warnings: string[]): numbe
   return Math.floor(parsedValue);
 }
 
-function getImageHosts(cdnUrl: string | undefined, supabaseUrl: string | undefined, warnings: string[]): string[] {
+function getImageHosts(supabaseUrl: string | undefined, warnings: string[]): string[] {
   const hosts = new Set<string>();
-
-  if (cdnUrl) {
-    try {
-      hosts.add(new URL(cdnUrl).hostname);
-    } catch {
-      warnings.push(`Invalid NEXT_PUBLIC_CDN_URL value \"${cdnUrl}\". Ignoring it.`);
-    }
-  }
 
   if (supabaseUrl) {
     try {
@@ -40,28 +32,14 @@ function getImageHosts(cdnUrl: string | undefined, supabaseUrl: string | undefin
   return Array.from(hosts);
 }
 
-function parseAssetPrefix(cdnUrl: string | undefined, warnings: string[]): string | undefined {
-  if (!cdnUrl) return undefined;
-  try {
-    const parsed = new URL(cdnUrl);
-    return parsed.origin;
-  } catch {
-    warnings.push(`Invalid NEXT_PUBLIC_CDN_URL value \"${cdnUrl}\". assetPrefix will be ignored.`);
-    return undefined;
-  }
-}
-
 export function createOptimizedNextConfig(): OptimizedNextConfigResult {
   const warnings: string[] = [];
   const cpus = parseBuildCpus(process.env.NEXT_BUILD_CPUS, warnings);
-  const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL;
-  const imageHosts = getImageHosts(cdnUrl, process.env.NEXT_PUBLIC_SUPABASE_URL, warnings);
-  const assetPrefix = parseAssetPrefix(cdnUrl, warnings);
+  const imageHosts = getImageHosts(process.env.NEXT_PUBLIC_SUPABASE_URL, warnings);
 
   const config: NextConfig = {
     poweredByHeader: false,
     reactStrictMode: true,
-    ...(assetPrefix ? { assetPrefix } : {}),
     turbopack: {
       root: process.cwd(),
     },
