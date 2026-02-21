@@ -75,8 +75,8 @@ class ComponentRegistry {
     }
 
     try {
-      const module = await importFn()
-      const component = module.default
+      const importedModule = await importFn()
+      const component = importedModule.default
       this.loadedComponents.set(key, component)
       return component
     } catch (error) {
@@ -114,7 +114,7 @@ export function usePreloadComponents(keys: string[]) {
   useEffect(() => {
     const promises = keys.map(key => componentRegistry.preload(key))
     Promise.allSettled(promises)
-  }, keys)
+  }, [keys])
 }
 
 export function createChunkPreloader() {

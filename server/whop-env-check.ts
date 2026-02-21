@@ -12,7 +12,7 @@ export function checkRequiredWhopEnv() {
     const missing = required.filter(key => !process.env[key]);
 
     if (missing.length > 0) {
-        logger.warn('[Whop] Missing required environment variables:', missing);
+        logger.warn('[Whop] Missing required environment variables:', { missing });
         return false;
     }
     return true;

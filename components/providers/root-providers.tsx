@@ -16,12 +16,15 @@ export function RootProviders({
 }) {
     useEffect(() => {
         if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-            window.addEventListener("load", () => {
+            const handleLoad = () => {
                 navigator.serviceWorker.register("/sw.js").then(
                     (registration) => console.log("SW registered:", registration.scope),
                     (err) => console.log("SW registration failed:", err)
                 );
-            });
+            };
+
+            window.addEventListener("load", handleLoad);
+            return () => window.removeEventListener("load", handleLoad);
         }
     }, []);
 

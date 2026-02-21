@@ -48,6 +48,9 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
   const config: NextConfig = {
     poweredByHeader: false,
     reactStrictMode: true,
+    turbopack: {
+      root: process.cwd(),
+    },
     experimental: {
       ...(cpus ? { cpus } : {}),
     },

@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
 import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
+import { requireServiceAuth, toErrorResponse } from "@/server/authz";
+import { logger, withLogContext } from "@/lib/logger";
 
 // PURPOSE:
 // - Compute MAE and MFE for all trades of the week
@@ -66,13 +68,6 @@ interface InstrumentData {
 // Databento API configuration
 const DATABENTO_API_KEY = process.env.DATABENTO_API_KEY;
 const DATABENTO_BASE_URL = 'https://hist.databento.com/v0';
-
-function isAuthorizedCronRequest(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return false
-  const authHeader = request.headers.get('authorization')
-  return authHeader === `Bearer ${cronSecret}`
-}
 
 // Databento symbol mapping for futures
 const FUTURES_SYMBOL_MAP: { [key: string]: string } = {
@@ -311,12 +306,28 @@ async function processInstrumentTrades(instrumentData: InstrumentData): Promise<
 }
 
 export async function GET(request: Request) {
-  try {
-    if (!isAuthorizedCronRequest(request)) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
+  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID()
+  return withLogContext(
+    {
+      requestId,
+      correlationId: requestId,
+      route: "/api/cron/compute-trade-data",
+      method: "GET",
+    },
+    async () => {
+      try {
+        requireServiceAuth(request.headers.get('authorization'), {
+          serviceName: 'cron-compute-trade-data',
+          requestId,
+        })
+      } catch (error) {
+        return toErrorResponse(error)
+      }
 
-    console.log('Starting MAE/MFE computation cron job');
+      try {
+        logger.info('[CronComputeTradeData] Starting run')
+
+        console.log('Starting MAE/MFE computation cron job');
 
     if (!DATABENTO_API_KEY) {
       throw new Error('DATABENTO_API_KEY environment variable is required');
@@ -437,46 +448,48 @@ export async function GET(request: Request) {
       console.warn(`Found ${priceDiscrepancies.length} trades with significant price discrepancies`);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Successfully computed MAE/MFE for ${allProcessedTrades.length} trades`,
-      processed: allProcessedTrades.length,
-      saved: successfulSaves,
-      failed: failedSaves,
-      instruments: Object.keys(instrumentGroups),
-      priceDiscrepancies: priceDiscrepancies.length,
-      data: allProcessedTrades.slice(0, 5), // Return first 5 as sample
-      summary: {
-        averageMAE: allProcessedTrades.reduce((sum, t) => sum + t.mae, 0) / allProcessedTrades.length,
-        averageMFE: allProcessedTrades.reduce((sum, t) => sum + t.mfe, 0) / allProcessedTrades.length,
-        maxMAE: Math.max(...allProcessedTrades.map(t => t.mae)),
-        maxMFE: Math.max(...allProcessedTrades.map(t => t.mfe)),
-        averageRiskReward: allProcessedTrades
-          .filter(t => t.mae > 0)
-          .reduce((sum, t) => sum + (t.mfe / t.mae), 0) / allProcessedTrades.filter(t => t.mae > 0).length || 0
-      }
-    }, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
+        return NextResponse.json({
+          success: true,
+          message: `Successfully computed MAE/MFE for ${allProcessedTrades.length} trades`,
+          processed: allProcessedTrades.length,
+          saved: successfulSaves,
+          failed: failedSaves,
+          instruments: Object.keys(instrumentGroups),
+          priceDiscrepancies: priceDiscrepancies.length,
+          data: allProcessedTrades.slice(0, 5), // Return first 5 as sample
+          summary: {
+            averageMAE: allProcessedTrades.reduce((sum, t) => sum + t.mae, 0) / allProcessedTrades.length,
+            averageMFE: allProcessedTrades.reduce((sum, t) => sum + t.mfe, 0) / allProcessedTrades.length,
+            maxMAE: Math.max(...allProcessedTrades.map(t => t.mae)),
+            maxMFE: Math.max(...allProcessedTrades.map(t => t.mfe)),
+            averageRiskReward: allProcessedTrades
+              .filter(t => t.mae > 0)
+              .reduce((sum, t) => sum + (t.mfe / t.mae), 0) / allProcessedTrades.filter(t => t.mae > 0).length || 0
+          }
+        }, {
+          status: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        });
 
-  } catch (error) {
-    console.error('Error in MAE/MFE computation:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-      processed: 0
-    }, {
-      status: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
-  }
+      } catch (error) {
+        logger.error("[CronComputeTradeData] Route failed", { error })
+        return NextResponse.json({
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error occurred',
+          processed: 0
+        }, {
+          status: 500,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        });
+      }
+    }
+  )
 }

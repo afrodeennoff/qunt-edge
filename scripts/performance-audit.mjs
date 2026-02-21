@@ -29,6 +29,7 @@ const colors = {
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
   cyan: '\x1b[36m',
+  white: '\x1b[37m',
 };
 
 function log(message, color = 'reset') {
@@ -185,8 +186,11 @@ function scanForMemoryLeaks() {
   logSection('💧 MEMORY LEAK DETECTION');
 
   try {
-    // Find all client components with useEffect
-    const { stdout } = execCommand('find app -name "*.tsx" -type f', { encoding: 'utf-8' });
+    const stdout = execCommand('find app -name "*.tsx" -type f', { encoding: 'utf-8' });
+    if (!stdout) {
+      log('No TSX files found for memory scan', 'yellow');
+      return;
+    }
     const files = stdout.split('\n').filter(Boolean);
 
     const issues = [];
@@ -267,7 +271,11 @@ function analyzeStaticGenerationOpportunities() {
   logSection('🔄 STATIC GENERATION OPPORTUNITIES');
 
   try {
-    const { stdout } = execCommand('find app -name "page.tsx" -type f', { encoding: 'utf-8' });
+    const stdout = execCommand('find app -name "page.tsx" -type f', { encoding: 'utf-8' });
+    if (!stdout) {
+      log('No page files found', 'yellow');
+      return;
+    }
     const pageFiles = stdout.split('\n').filter(Boolean);
 
     const staticCandidates = [];
@@ -339,7 +347,11 @@ function analyzeAPIRoutes() {
   logSection('🌐 API ROUTE CACHING ANALYSIS');
 
   try {
-    const { stdout } = execCommand('find app/api -name "route.ts" -o -name "route.js"', { encoding: 'utf-8' });
+    const stdout = execCommand('find app/api -name "route.ts" -o -name "route.js"', { encoding: 'utf-8' });
+    if (!stdout) {
+      log('No API routes found', 'yellow');
+      return;
+    }
     const routeFiles = stdout.split('\n').filter(Boolean);
 
     const cacheableRoutes = [];
@@ -393,28 +405,29 @@ function checkImageOptimization() {
   logSection('🖼️ IMAGE OPTIMIZATION CHECK');
 
   try {
-    // Find all uses of regular img tags
-    const { stdout } = execCommand('grep -r "<img" app --include="*.tsx" --include="*.jsx" | head -20', { 
+    const stdout = execCommand('grep -r "<img" app --include="*.tsx" --include="*.jsx" | head -20', {
       encoding: 'utf-8',
     });
 
-    if (stdout) {
-      const unoptimizedImages = stdout.split('\n').filter(Boolean);
-      
-      if (unoptimizedImages.length > 0) {
-        log('\nFound unoptimized <img> tags (should use next/image):', 'yellow');
-        unoptimizedImages.forEach(img => {
-          console.log(`  ${img.slice(0, 100)}`);
-        });
-        
-        auditResults.opportunities.push({
-          type: 'image-optimization',
-          description: `Replace ${unoptimizedImages.length} <img> tags with next/image`,
-          impact: 'medium',
-        });
-      } else {
-        log('\n✓ All images appear to use next/image', 'green');
-      }
+    if (!stdout) {
+      log('\n✓ No unoptimized images found', 'green');
+      return;
+    }
+
+    const unoptimizedImages = stdout.split('\n').filter(Boolean);
+    if (unoptimizedImages.length > 0) {
+      log('\nFound unoptimized <img> tags (should use next/image):', 'yellow');
+      unoptimizedImages.forEach(img => {
+        console.log(`  ${img.slice(0, 100)}`);
+      });
+
+      auditResults.opportunities.push({
+        type: 'image-optimization',
+        description: `Replace ${unoptimizedImages.length} <img> tags with next/image`,
+        impact: 'medium',
+      });
+    } else {
+      log('\n✓ All images appear to use next/image', 'green');
     }
   } catch (error) {
     log('\n✓ No unoptimized images found', 'green');

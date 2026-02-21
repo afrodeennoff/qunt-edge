@@ -1,0 +1,192 @@
+{
+  "timestamp": "2026-02-21T13:03:16.671Z",
+  "auditResults": {
+    "bundleSize": {
+      "totalDeps": 172,
+      "largeDeps": [
+        {
+          "name": "tailwind-merge",
+          "version": "^3.3.1",
+          "size": "972K"
+        },
+        {
+          "name": "d3",
+          "version": "^7.9.0",
+          "size": "868K"
+        },
+        {
+          "name": "sharp",
+          "version": "^0.33.5",
+          "size": "824K"
+        },
+        {
+          "name": "tailwindcss",
+          "version": "^4.1.16",
+          "size": "820K"
+        },
+        {
+          "name": "@tanstack/react-table",
+          "version": "^8.21.3",
+          "size": "776K"
+        },
+        {
+          "name": "react-dropzone",
+          "version": "^14.3.8",
+          "size": "704K"
+        },
+        {
+          "name": "@tiptap/extension-table",
+          "version": "^3.8.0",
+          "size": "640K"
+        },
+        {
+          "name": "gray-matter",
+          "version": "^4.0.3",
+          "size": "624K"
+        },
+        {
+          "name": "streamdown",
+          "version": "^2.0.1",
+          "size": "600K"
+        },
+        {
+          "name": "@tiptap/extension-text-style",
+          "version": "^3.8.0",
+          "size": "580K"
+        },
+        {
+          "name": "@vercel/analytics",
+          "version": "^1.5.0",
+          "size": "576K"
+        },
+        {
+          "name": "date-fns-tz",
+          "version": "^3.2.0",
+          "size": "572K"
+        },
+        {
+          "name": "@supabase/ssr",
+          "version": "0.8.0",
+          "size": "516K"
+        },
+        {
+          "name": "react-colorful",
+          "version": "^5.6.1",
+          "size": "488K"
+        },
+        {
+          "name": "@tiptap/y-tiptap",
+          "version": "^3.0.0",
+          "size": "448K"
+        },
+        {
+          "name": "react-zoom-pan-pinch",
+          "version": "^3.7.0",
+          "size": "448K"
+        },
+        {
+          "name": "@vercel/speed-insights",
+          "version": "^1.2.0",
+          "size": "432K"
+        },
+        {
+          "name": "postcss",
+          "version": "^8.5.6",
+          "size": "432K"
+        },
+        {
+          "name": "@radix-ui/react-select",
+          "version": "^2.2.6",
+          "size": "400K"
+        },
+        {
+          "name": "@supabase/supabase-js",
+          "version": "2.93.2",
+          "size": "400K"
+        }
+      ]
+    },
+    "routes": [],
+    "components": [],
+    "queries": [],
+    "images": [],
+    "memory": {
+      "issues": [
+        {
+          "file": "app/[locale]/admin/components/weekly-stats/weekly-recap-preview.tsx",
+          "issue": "Timer outside useEffect (potential leak)",
+          "code": "setTimeout(()"
+        },
+        {
+          "file": "app/[locale]/admin/components/weekly-stats/weekly-recap-preview.tsx",
+          "issue": "Timer outside useEffect (potential leak)",
+          "code": "setTimeout(()"
+        }
+      ],
+      "total": 2
+    },
+    "opportunities": [
+      {
+        "type": "code-splitting",
+        "description": "Consider dynamic importing d3 to reduce initial bundle",
+        "impact": "high"
+      },
+      {
+        "type": "code-splitting",
+        "description": "Consider dynamic importing recharts to reduce initial bundle",
+        "impact": "high"
+      },
+      {
+        "type": "code-splitting",
+        "description": "Consider dynamic importing framer-motion to reduce initial bundle",
+        "impact": "high"
+      },
+      {
+        "type": "code-splitting",
+        "description": "Consider dynamic importing pdf-lib to reduce initial bundle",
+        "impact": "high"
+      },
+      {
+        "type": "code-splitting",
+        "description": "Consider dynamic importing exceljs to reduce initial bundle",
+        "impact": "high"
+      },
+      {
+        "type": "webpack",
+        "description": "Consider adding webpack splitChunks configuration for better code splitting",
+        "impact": "medium"
+      },
+      {
+        "type": "compression",
+        "description": "Enable compression for responses",
+        "impact": "medium"
+      },
+      {
+        "type": "memory-leak",
+        "description": "Fix 2 potential memory leaks in components",
+        "impact": "high"
+      },
+      {
+        "type": "isr",
+        "description": "43 dynamic routes could use ISR with fallback",
+        "impact": "high"
+      },
+      {
+        "type": "api-caching",
+        "description": "Add caching to 1 API routes",
+        "impact": "medium"
+      },
+      {
+        "type": "image-optimization",
+        "description": "Replace 3 <img> tags with next/image",
+        "impact": "medium"
+      }
+    ]
+  },
+  "summary": {
+    "totalOpportunities": 11,
+    "highImpact": 7,
+    "mediumImpact": 4,
+    "memoryIssues": 2
+  }
+}

@@ -1,5 +1,22 @@
-import { BREAKPOINTS } from './lib/config/breakpoints'
-import { Z_INDEX } from './lib/config/z-index'
+const BREAKPOINTS = {
+	sm: 640,
+	md: 768,
+	lg: 1024,
+	xl: 1280,
+	'2xl': 1536,
+}
+
+const Z_INDEX = {
+	base: 0,
+	dropdown: 1000,
+	sticky: 1100,
+	sidebar: 1200,
+	overlay: 1300,
+	modal: 1400,
+	popover: 1500,
+	tooltip: 1600,
+	toast: 1700,
+}
 
 const config = {
 	darkMode: "class",

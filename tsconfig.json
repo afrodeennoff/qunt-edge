@@ -42,6 +42,7 @@
     "components/sidebar/__tests__/**",
     "tests/e2e/**",
     "tests/performance/performance-regression.test.ts",
+    "tests/performance/rendering-performance.test.tsx",
     "lib/performance/enhanced-caching.ts",
     "lib/performance/enhanced-next-config.ts",
     "lib/performance/caching-cdn.ts"

@@ -15,7 +15,6 @@ import {
   DashboardLayout as PrismaDashboardLayout,
   Subscription as PrismaSubscription,
   Tag,
-  Prisma,
   User as PrismaUser,
   FinancialEvent,
   Mood,
@@ -69,8 +68,6 @@ import { useMoodStore } from "@/store/mood-store";
 import { useSubscriptionStore } from "@/store/subscription-store";
 import { getSubscriptionData } from "@/server/billing";
 import { defaultLayouts } from "@/lib/default-layouts";
-import Decimal from "decimal.js";
-import { decimalToNumber } from "@/lib/trade-types";
 
 import {
   generateMockTrades
@@ -812,168 +809,113 @@ export const DataProvider: React.FC<{
   }, [trades, supabaseUser?.id]);
 
   const formattedTrades = useMemo(() => {
-    console.log("[DataProvider] computing formattedTrades, trades count:", trades?.length);
-    // Early return if no trades or if trades is not an array
-    if (!trades || !Array.isArray(trades) || trades.length === 0)
+    if (!Array.isArray(trades) || trades.length === 0) {
       return [];
+    }
 
-    // Get hidden accounts for filtering
-    const hiddenGroup = groups.find((g) => g.name === "Hidden Accounts");
-    const hiddenAccountNumbers = hiddenGroup
-      ? accounts
-        .filter((a) => a.groupId === hiddenGroup.id)
-        .map((a) => a.number)
-      : [];
+    const hiddenGroupId = groups.find((group) => group.name === "Hidden Accounts")?.id;
+    const hiddenAccountNumbers = hiddenGroupId
+      ? new Set(
+        accounts
+          .filter((account) => account.groupId === hiddenGroupId)
+          .map((account) => account.number)
+      )
+      : null;
 
-    // Apply all filters in a single pass
+    const accountByNumber = new Map(accounts.map((account) => [account.number, account]));
+    const instrumentFilterSet = instruments.length > 0 ? new Set(instruments) : null;
+    const accountFilterSet = accountNumbers.length > 0 ? new Set(accountNumbers) : null;
+    const tagFilterSet = tagFilter.tags.length > 0 ? new Set(tagFilter.tags) : null;
+
+    const fromDate = dateRange?.from ? startOfDay(dateRange.from) : null;
+    const toDate = dateRange?.to ? endOfDay(dateRange.to) : null;
+    const singleDayTimestamp =
+      fromDate && toDate && fromDate.getTime() === startOfDay(toDate).getTime()
+        ? fromDate.getTime()
+        : null;
+
+    const tickFilterValue = tickFilter?.value
+      ? Number(tickFilter.value.replace("+", ""))
+      : null;
+    const sortedTickers =
+      tickFilterValue !== null
+        ? Object.keys(tickDetails).sort((first, second) => second.length - first.length)
+        : [];
+
+    const timezoneName = timezone || "UTC";
+
     return trades
       .filter((trade) => {
-        // Skip trades from hidden accounts
-        if (hiddenAccountNumbers.includes(trade.accountNumber)) {
-          return false;
-        }
+        if (hiddenAccountNumbers?.has(trade.accountNumber)) return false;
 
-        // We should identify when accounts pass their buffer
-        // We can get the index of the first trade whihch is after the buffer date of its account
-        const tradeAccount = accounts.find(
-          (acc) => acc.number === trade.accountNumber
-        );
-
-        // Validate entry date
+        const tradeAccount = accountByNumber.get(trade.accountNumber);
         const rawDate = new Date(trade.entryDate);
         if (!isValid(rawDate)) return false;
 
-        // Convert to timezone without string re-parsing (browser-safe, including Safari).
-        let entryDate: Date;
+        let entryDate = rawDate;
         try {
-          entryDate = toZonedTime(rawDate, timezone || "UTC");
-        } catch (e) {
-          console.warn("[DataProvider] Date formatting failed, falling back to raw date", e);
+          entryDate = toZonedTime(rawDate, timezoneName);
+        } catch {
           entryDate = rawDate;
         }
 
         if (!isValid(entryDate)) return false;
 
-        // Filter trades before reset date if shouldConsiderTradesBeforeReset is false
         if (tradeAccount?.resetDate && tradeAccount.shouldConsiderTradesBeforeReset === false) {
           const resetDate = startOfDay(new Date(tradeAccount.resetDate));
-          const tradeDate = startOfDay(entryDate);
-          if (tradeDate < resetDate) {
-            return false;
-          }
+          if (startOfDay(entryDate) < resetDate) return false;
         }
 
-        // Instrument filter
-        if (instruments.length > 0 && !instruments.includes(trade.instrument)) {
+        if (instrumentFilterSet && !instrumentFilterSet.has(trade.instrument)) return false;
+        if (accountFilterSet && !accountFilterSet.has(trade.accountNumber)) return false;
+
+        if (fromDate && entryDate < fromDate) return false;
+        if (toDate && entryDate > toDate) return false;
+        if (singleDayTimestamp !== null && startOfDay(entryDate).getTime() !== singleDayTimestamp) {
           return false;
         }
 
-        // Account filter
-        if (
-          accountNumbers.length > 0 &&
-          !accountNumbers.includes(trade.accountNumber)
-        ) {
-          return false;
-        }
+        const tradePnl = Number(trade.pnl);
+        if (pnlRange.min !== undefined && tradePnl < pnlRange.min) return false;
+        if (pnlRange.max !== undefined && tradePnl > pnlRange.max) return false;
 
-        // Date range filter
-        if (dateRange?.from || dateRange?.to) {
-          const tradeDate = startOfDay(entryDate);
-
-          // Filter from date (keep all trades from this date forward)
-          if (dateRange?.from) {
-            const fromDate = startOfDay(dateRange.from);
-            if (entryDate < fromDate) {
-              return false;
-            }
-          }
-
-          // Filter to date (keep all trades up to this date)
-          if (dateRange?.to) {
-            const toDate = endOfDay(dateRange.to);
-            if (entryDate > toDate) {
-              return false;
-            }
-          }
-
-          // If both are set and it's a single day, ensure exact match
-          if (dateRange?.from && dateRange?.to) {
-            const fromDate = startOfDay(dateRange.from);
-            const toDate = endOfDay(dateRange.to);
-            if (fromDate.getTime() === startOfDay(toDate).getTime()) {
-              // Single day selection - already handled above, but ensure exact match
-              if (tradeDate.getTime() !== fromDate.getTime()) {
-                return false;
-              }
-            }
-          }
-        }
-
-        // PnL range filter
-        if (
-          (pnlRange.min !== undefined && new Decimal(trade.pnl).toNumber() < pnlRange.min) ||
-          (pnlRange.max !== undefined && new Decimal(trade.pnl).toNumber() > pnlRange.max)
-        ) {
-          return false;
-        }
-
-        // Tick filter
-        if (tickFilter?.value) {
-          // Fix ticker matching logic - sort by length descending to match longer tickers first
-          // This prevents "ES" from matching "MES" trades
-          const matchingTicker = Object.keys(tickDetails)
-            .sort((a, b) => b.length - a.length) // Sort by length descending
-            .find((ticker) => trade.instrument.includes(ticker));
-          const tickValue = matchingTicker
-            ? tickDetails[matchingTicker].tickValue
+        if (tickFilterValue !== null) {
+          const matchingTicker = sortedTickers.find((ticker) => trade.instrument.includes(ticker));
+          const rawTickValue = matchingTicker
+            ? Number(tickDetails[matchingTicker]?.tickValue)
             : 1;
-          const pnlPerContract = new Prisma.Decimal(trade.pnl).div(new Prisma.Decimal(trade.quantity)).toNumber();
-          const tradeTicks = Math.round(pnlPerContract / Number(tickValue));
-          const filterValue = tickFilter.value;
-          if (
-            filterValue &&
-            tradeTicks !== Number(filterValue.replace("+", ""))
-          ) {
-            return false;
-          }
+          const tickValue =
+            Number.isFinite(rawTickValue) && rawTickValue !== 0 ? rawTickValue : 1;
+
+          const quantity = Number(trade.quantity);
+          if (!Number.isFinite(quantity) || quantity === 0) return false;
+
+          const tradeTicks = Math.round((tradePnl / quantity) / tickValue);
+          if (tradeTicks !== tickFilterValue) return false;
         }
 
-        // Time range filter
-        if (
-          timeRange.range &&
-          getTimeRangeKey(Number(trade.timeInPosition)) !== timeRange.range
-        ) {
+        if (timeRange.range && getTimeRangeKey(Number(trade.timeInPosition)) !== timeRange.range) {
           return false;
         }
 
-        // Weekday filter
-        if (weekdayFilter?.days && weekdayFilter.days.length > 0) {
-          const dayOfWeek = entryDate.getDay();
-          if (!weekdayFilter.days.includes(dayOfWeek)) {
-            return false;
-          }
+        if (weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entryDate.getDay())) {
+          return false;
         }
 
-        // Hour filter
-        if (hourFilter?.hour !== null) {
-          const hour = entryDate.getHours();
-          if (hour !== hourFilter.hour) {
-            return false;
-          }
+        if (hourFilter.hour !== null && entryDate.getHours() !== hourFilter.hour) {
+          return false;
         }
 
-        // Tag filter
-        if (tagFilter.tags.length > 0) {
-          if (!Array.isArray(trade.tags) || !trade.tags.some((tag) => tagFilter.tags.includes(tag))) {
-            return false;
-          }
+        if (tagFilterSet) {
+          if (!Array.isArray(trade.tags)) return false;
+          if (!trade.tags.some((tag) => tagFilterSet.has(tag))) return false;
         }
 
         return true;
       })
       .sort(
-        (a, b) =>
-          new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
+        (first, second) =>
+          new Date(first.entryDate).getTime() - new Date(second.entryDate).getTime()
       );
   }, [
     trades,
@@ -981,16 +923,17 @@ export const DataProvider: React.FC<{
     accounts,
     instruments,
     accountNumbers,
-    dateRange,
-    pnlRange,
-    tickFilter,
+    dateRange?.from,
+    dateRange?.to,
+    pnlRange.min,
+    pnlRange.max,
+    tickFilter?.value,
     tickDetails,
-    timeRange,
-    weekdayFilter,
-    hourFilter,
-    tagFilter,
+    timeRange.range,
+    weekdayFilter.days,
+    hourFilter.hour,
+    tagFilter.tags,
     timezone,
-    isLoading,
   ]);
 
   const statistics = useMemo(() => {
@@ -1731,87 +1674,143 @@ export const DataProvider: React.FC<{
     [supabaseUser?.id, setDashboardLayout]
   );
 
-  const contextValue: DataContextType = {
-    isPlusUser,
-    isLoading,
-    isMobile,
-    isSharedView,
-    sharedParams,
-    setSharedParams,
-    refreshTrades: refreshAllData,
-    refreshTradesOnly,
-    refreshUserDataOnly,
-    refreshAllData,
-    changeIsFirstConnection,
-    isFirstConnection,
-    setIsFirstConnection,
+  const contextValue = useMemo<DataContextType>(
+    () => ({
+      isPlusUser,
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      setSharedParams,
+      refreshTrades: refreshAllData,
+      refreshTradesOnly,
+      refreshUserDataOnly,
+      refreshAllData,
+      changeIsFirstConnection,
+      isFirstConnection,
+      setIsFirstConnection,
 
-    // Formatted trades and filters
-    trades,
-    formattedTrades,
-    instruments,
-    setInstruments,
-    accountNumbers,
-    setAccountNumbers,
-    dateRange,
-    setDateRange,
-    tickRange,
-    setTickRange,
-    pnlRange,
-    setPnlRange,
+      // Formatted trades and filters
+      trades,
+      formattedTrades,
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
 
-    // Time range related
-    timeRange,
-    setTimeRange,
+      // Time range related
+      timeRange,
+      setTimeRange,
 
-    // Tick filter related
-    tickFilter,
-    setTickFilter,
+      // Tick filter related
+      tickFilter,
+      setTickFilter,
 
-    // Weekday filter related
-    weekdayFilter,
-    setWeekdayFilter,
+      // Weekday filter related
+      weekdayFilter,
+      setWeekdayFilter,
 
-    // Hour filter related
-    hourFilter,
-    setHourFilter,
+      // Hour filter related
+      hourFilter,
+      setHourFilter,
 
-    // Tag filter
-    tagFilter,
-    setTagFilter,
+      // Tag filter
+      tagFilter,
+      setTagFilter,
 
-    // Statistics and calendar
-    statistics,
-    calendarData,
-    accounts,
+      // Statistics and calendar
+      statistics,
+      calendarData,
+      accounts,
 
-    // Mutations
+      // Mutations
 
-    // Update trade
-    updateTrades,
-    deleteTrades,
-    groupTrades,
-    ungroupTrades,
+      // Update trade
+      updateTrades,
+      deleteTrades,
+      groupTrades,
+      ungroupTrades,
 
-    // Accounts
-    deleteAccount,
-    saveAccount,
+      // Accounts
+      deleteAccount,
+      saveAccount,
 
-    // Group functions
-    saveGroup,
-    renameGroup,
-    deleteGroup,
-    moveAccountToGroup,
-    moveAccountsToGroup,
+      // Group functions
+      saveGroup,
+      renameGroup,
+      deleteGroup,
+      moveAccountToGroup,
+      moveAccountsToGroup,
 
-    // Payout functions
-    deletePayout,
-    savePayout,
+      // Payout functions
+      deletePayout,
+      savePayout,
 
-    // Dashboard layout
-    saveDashboardLayout,
-    getTradeImages,
-  };
+      // Dashboard layout
+      saveDashboardLayout,
+      getTradeImages,
+    }),
+    [
+      isPlusUser,
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      setSharedParams,
+      refreshAllData,
+      refreshTradesOnly,
+      refreshUserDataOnly,
+      changeIsFirstConnection,
+      isFirstConnection,
+      setIsFirstConnection,
+      trades,
+      formattedTrades,
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
+      timeRange,
+      setTimeRange,
+      tickFilter,
+      setTickFilter,
+      weekdayFilter,
+      setWeekdayFilter,
+      hourFilter,
+      setHourFilter,
+      tagFilter,
+      setTagFilter,
+      statistics,
+      calendarData,
+      accounts,
+      updateTrades,
+      deleteTrades,
+      groupTrades,
+      ungroupTrades,
+      deleteAccount,
+      saveAccount,
+      saveGroup,
+      renameGroup,
+      deleteGroup,
+      moveAccountToGroup,
+      moveAccountsToGroup,
+      deletePayout,
+      savePayout,
+      saveDashboardLayout,
+      getTradeImages,
+    ]
+  );
 
   return (
     <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>

@@ -13,16 +13,13 @@ export function withPerformanceOptimization<P extends object>(
   componentName?: string
 ): React.ComponentType<P & OptimizedComponentProps> {
   const WrappedComponent = memo(
-    forwardRef<any, P & OptimizedComponentProps>((props, ref) => {
+    forwardRef<unknown, P & OptimizedComponentProps>((props, ref) => {
       const { enableMemo = true, disableOptimization = false, ...rest } = props
       const name = componentName || Component.displayName || Component.name || 'Component'
+      const { isLowPerformance } = usePerformanceOptimization(name)
 
-      if (!disableOptimization) {
-        const { isLowPerformance } = usePerformanceOptimization(name)
-        
-        if (isLowPerformance && !enableMemo) {
-          console.warn(`⚠️ Low performance mode active for ${name}`)
-        }
+      if (!disableOptimization && isLowPerformance && !enableMemo) {
+        console.warn(`⚠️ Low performance mode active for ${name}`)
       }
 
       return <Component ref={ref} {...(rest as P)} />
@@ -34,9 +31,13 @@ export function withPerformanceOptimization<P extends object>(
   return WrappedComponent as unknown as React.ComponentType<P & OptimizedComponentProps>
 }
 
-export const OptimizedFragment = memo(({ children }: { children: React.ReactNode }) => {
+const OptimizedFragmentBase = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
-})
+}
+
+OptimizedFragmentBase.displayName = 'OptimizedFragment'
+export const OptimizedFragment = memo(OptimizedFragmentBase)
+OptimizedFragment.displayName = 'OptimizedFragment'
 
 export function createMemoizedComponent<P extends object>(
   Component: React.ComponentType<P>,
@@ -49,11 +50,11 @@ export function createMemoizedComponent<P extends object>(
   return MemoizedComponent
 }
 
-export function useOptimizedCallback<T extends (...args: any[]) => any>(
+export function useOptimizedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   deps: React.DependencyList
 ): T {
-  return useMemo(() => callback, deps) as T
+  return useCallback(callback, deps) as T
 }
 
 export function useOptimizedMemo<T>(factory: () => T, deps: React.DependencyList): T {
