@@ -1,0 +1,21 @@
+
+> quntedge@0.3 check:route-budgets
+> node scripts/check-route-budgets.mjs
+
+[route-budgets] /_app: 0 KB (budget 300 KB)
+[route-budgets] [app] /[locale]/dashboard/behavior: 49.85 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/data: 49.63 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/strategies: 49.55 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/trader-profile: 49.14 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/settings: 49.13 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/billing: 48.93 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/import: 48.88 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard/reports: 48.84 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/dashboard: 48.34 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/teams/dashboard/trader/[slug]: 42.67 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/teams/manage: 39.04 KB (budget 300 KB)
+[route-budgets] [app] /[locale]/teams/dashboard/[slug]/traders: 37.82 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/teams/dashboard/[slug]/members: 37.77 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/teams/dashboard/[slug]/analytics: 37.45 KB (budget 80 KB)
+[route-budgets] [app] /[locale]/teams/dashboard/[slug]: 37.01 KB (budget 80 KB)
+[route-budgets] All page and app route budgets are within threshold.

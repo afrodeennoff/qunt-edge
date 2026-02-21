@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-02-21T13:11:50.197Z",
+  "build": {
+    "mode": "webpack",
+    "command": "npm run build",
+    "status": "pass"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 1651
+  },
+  "tests": {
+    "passed": 137,
+    "skipped": 46
+  },
+  "coverage": {
+    "statementsPercent": 1.76,
+    "branchesPercent": 42.65,
+    "functionsPercent": 17.2,
+    "linesPercent": 1.76
+  },
+  "dependencyAudit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 16,
+    "high": 24,
+    "critical": 0,
+    "total": 40
+  },
+  "apiLatency": {
+    "healthSequential": {
+      "count": 20,
+      "avgSeconds": 0.2912,
+      "p50Seconds": 0.174241,
+      "p95Seconds": 0.439779,
+      "maxSeconds": 1.760797
+    },
+    "healthConcurrency5": {
+      "count": 100,
+      "avgSeconds": 0.5051,
+      "p50Seconds": 0.445969,
+      "p95Seconds": 0.798332,
+      "maxSeconds": 1.513121
+    },
+    "healthConcurrency20": {
+      "count": 200,
+      "avgSeconds": 2.1179,
+      "p50Seconds": 2.040488,
+      "p95Seconds": 2.807921,
+      "maxSeconds": 3.915067
+    }
+  }
+}

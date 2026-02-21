@@ -36,6 +36,67 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-21: Dashboard Overlay Lazy-Loading + Performance Artifact Refresh
+- **What changed:** Moved dashboard overlay modules behind a client-only lazy wrapper and refreshed bundle/Lighthouse artifacts with explicit before/after route-manifest deltas.
+- **What I want:** Keep dashboard routes responsive by loading critical shell first and deferring non-critical overlay UI.
+- **What I don't want:** Always-on dashboard overlays increasing initial hydration payload and degrading route responsiveness.
+- **How we fixed that:**
+  - Added `DashboardClientOverlays` wrapper with dynamic client-only imports for:
+    - `Modals`
+    - `RithmicSyncNotifications`
+  - Updated dashboard layout to consume the wrapper instead of direct eager imports.
+  - Regenerated and documented performance artifacts:
+    - `docs/audits/artifacts/bundle-summary.json`
+    - Lighthouse HTML artifacts for `/en` and `/en/updates`
+  - Added documented performance budgets in `docs/PERFORMANCE_BUDGETS.md`.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-client-overlays.tsx`, `app/[locale]/dashboard/layout.tsx`, `docs/audits/artifacts/bundle-summary.json`, `docs/audits/performance-initiative-2026-02-21.md`, `docs/PERFORMANCE_BUDGETS.md`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0`.
+  - `npm run check:route-budgets` -> exits `0`.
+  - `npm run analyze:bundle` -> exits `0`.
+  - Dashboard app-route client manifests reduced by ~`2.5 KB` per route (`~5%`) from prior artifact snapshot.
+
+### 2026-02-21: Production Readiness Audit Hardening (Observability + Build Reliability + Security Consistency)
+- **What changed:** Hardened logging/monitoring primitives, standardized cron authorization checks, fixed failing performance audit tooling, restored smoke-test script coverage, and stabilized production build behavior.
+- **What I want:** Reliable, production-grade diagnostics and repeatable verification gates with consistent auth enforcement and deterministic build outcomes.
+- **What I don't want:** Leaky logs in non-production, inconsistent cron auth implementations, flaky production builds from Turbopack manifest races, or broken audit scripts that hide real bottlenecks.
+- **How we fixed that:**
+  - Upgraded logger infrastructure in `lib/logger.ts`:
+    - async context propagation via request/correlation IDs,
+    - redaction applied consistently in both development and production output,
+    - centralized in-process error-threshold alerting (`ERROR_ALERT_THRESHOLD`, `ERROR_ALERT_WINDOW_MS`).
+  - Standardized cron auth in high-risk routes:
+    - replaced ad-hoc bearer comparisons with `requireServiceAuth(...)` in:
+      - `app/api/cron/investing/route.ts`,
+      - `app/api/cron/compute-trade-data/route.ts`.
+  - Reduced sensitive data exposure in onboarding webhook:
+    - removed raw payload logging and switched to structured, low-sensitivity event logging in `app/api/email/welcome/route.ts`.
+  - Added health monitoring thresholds in `app/api/health/route.ts`:
+    - DB latency threshold alerts (`DB_LATENCY_ALERT_MS`),
+    - memory snapshot in response payload,
+    - structured degraded/down signaling.
+  - Fixed broken audit and verification tooling:
+    - repaired `scripts/performance-audit.mjs` command output handling and terminal color output,
+    - created missing `scripts/smoke-http.mjs` used by `npm run test:smoke`.
+  - Stabilized build pipeline:
+    - switched build command to webpack backend in `package.json` (`next build --webpack`) to avoid intermittent Turbopack manifest ENOENT failures during page-data collection.
+  - Quality cleanup for previously lint-blocking performance helpers:
+    - fixed rule-breaking patterns in:
+      - `lib/performance/code-splitting.tsx`,
+      - `lib/performance/optimized-components.tsx`.
+  - Added regression coverage:
+    - new `tests/logger.test.ts` validates redaction and request/correlation context injection.
+- **Key Files:** `lib/logger.ts`, `app/api/cron/investing/route.ts`, `app/api/cron/compute-trade-data/route.ts`, `app/api/email/welcome/route.ts`, `app/api/health/route.ts`, `scripts/performance-audit.mjs`, `scripts/smoke-http.mjs`, `package.json`, `lib/performance/code-splitting.tsx`, `lib/performance/optimized-components.tsx`, `tests/logger.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm test` -> exits `0` (`137 passed | 46 skipped`).
+  - `npm run lint -- --max-warnings=999999` -> exits `0` (`0` errors, warnings remain).
+  - `npm run build` -> exits `0` after webpack switch.
+  - `npm run check:route-budgets` -> exits `0` (dashboard routes now under budget thresholds).
+  - `npm run analyze:bundle` -> exits `0`.
+  - `SMOKE_BASE_URL=http://127.0.0.1:3001 npm run test:smoke` -> all checks pass.
+
 ### 2026-02-20: Unified Next.js Optimization System (Config Conflict Fix + Safety + Verification)
 - **What changed:** Replaced the split optimization setup with a single authoritative config path, fixed optimization build/type failures, expanded route/static/code-splitting strategy, and added verification tests/scripts.
 - **What I want:** One stable optimization implementation for code splitting, images, fonts, static generation, caching, and monitoring that works consistently across local/dev/prod without config drift.
