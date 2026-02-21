@@ -8,6 +8,10 @@ export function generateStaticParams() {
     return getStaticParams();
 }
 
+export const revalidate = 3600;
+export const dynamic = "force-static";
+export const dynamicParams = false;
+
 export const metadata: Metadata = {
     title: 'Qunt Edge | AI Trading Performance Platform',
     description: 'A modern execution intelligence platform for discretionary traders: unify data, diagnose behavior drift, and improve consistency with AI-led review.',

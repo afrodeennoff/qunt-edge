@@ -3,12 +3,10 @@
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { Globe, LogOut, MoreHorizontal } from "lucide-react"
+import { LogOut, MoreHorizontal, Loader2 } from "lucide-react"
 
 import { Logo } from "@/components/logo"
-import { SubscriptionBadge } from "@/components/subscription-badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +33,8 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/locales/client"
+import { useNavigationLoading } from "@/hooks/use-navigation-loading"
+import { useNavigationHelper } from "@/lib/navigation-utils"
 
 export interface UnifiedSidebarItem {
   href?: string
@@ -92,7 +92,6 @@ function useActiveLink() {
   return (href: string, exact = false) => {
     if (!pathname || !href) return false
 
-    // Normalize paths by stripping locale and trailing slashes
     const normalizedPathname = stripLocalePrefix(pathname).replace(/\/$/, "") || "/"
     const [hrefPath, queryString] = href.split("?")
     const normalizedHrefPath = stripLocalePrefix(hrefPath).replace(/\/$/, "") || "/"
@@ -100,29 +99,28 @@ function useActiveLink() {
     const hrefParams = new URLSearchParams(queryString ?? "")
     const hrefTab = hrefParams.get("tab")
 
-    // Priority 1: Exact Tab Match for Dashboard
-    if (normalizedHrefPath === "/dashboard" && hrefTab) {
+    // Handle tab-based navigation (e.g., /dashboard?tab=widgets)
+    if (hrefTab) {
       const activeTab = searchParams.get("tab") || "widgets"
-      return normalizedPathname === "/dashboard" && activeTab === hrefTab
+      if (normalizedPathname === normalizedHrefPath && activeTab === hrefTab) {
+        return true
+      }
     }
 
-    // Priority 2: Dashboard Root (Defaults to widgets)
+    // Default tab handling for /dashboard
     if (normalizedHrefPath === "/dashboard" && !hrefTab) {
       const activeTab = searchParams.get("tab")
-      return normalizedPathname === "/dashboard" && (!activeTab || activeTab === "widgets")
+      if (normalizedPathname === "/dashboard" && (!activeTab || activeTab === "widgets")) {
+        return true
+      }
     }
 
-    // Priority 3: Teams Dashboard Exception (from HEAD)
-    if (normalizedHrefPath === "/teams/dashboard" && normalizedPathname.includes("/teams/dashboard")) {
-      return true
-    }
-
-    // Priority 4: Exact Match
+    // Exact match
     if (exact) {
       return normalizedPathname === normalizedHrefPath
     }
 
-    // Priority 5: Nested Routes (Teams, Admin, etc)
+    // Nested routes
     if (normalizedPathname === normalizedHrefPath) return true
     if (normalizedPathname.startsWith(`${normalizedHrefPath}/`)) return true
 
@@ -134,7 +132,6 @@ export function UnifiedSidebar({
   items,
   user,
   actions,
-  showSubscription = true,
   timezone,
   onLogout,
 }: UnifiedSidebarConfig) {
@@ -142,6 +139,8 @@ export function UnifiedSidebar({
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
   const { isMobile, setOpenMobile } = useSidebar()
+  const { isLoading } = useNavigationLoading()
+  const { isQueryParamOnly } = useNavigationHelper()
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -156,10 +155,10 @@ export function UnifiedSidebar({
       groups[group].push(item)
     })
 
-    // Move "Overview" or "Main" to top, "System" or "Settings" to bottom if they exist
+    // Move specific groups to top/bottom for consistent feel across different layouts
     const sortedOrder = order.sort((a, b) => {
-      const topGroups = ["Overview", "Trading", "Main"]
-      const bottomGroups = ["System", "Settings", "Admin"]
+      const topGroups = ["Overview", "Main", "Inventory", "Trading", "Team Overview", "Team Management", "Admin Panel"]
+      const bottomGroups = ["System", "Settings", "Support", "Admin"]
 
       const aIdxTop = topGroups.indexOf(a)
       const bIdxTop = topGroups.indexOf(b)
@@ -183,8 +182,8 @@ export function UnifiedSidebar({
   const initials = useMemo(() => getUserInitials(user), [user])
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground">
-      <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border/50">
+    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground pointer-events-auto">
+      <SidebarHeader className="h-14 flex items-center px-4 border-b border-sidebar-border/50 relative z-20 pointer-events-auto">
         <div className="flex items-center gap-3 w-full overflow-hidden">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
             <Logo className="size-5 fill-current" />
@@ -201,47 +200,60 @@ export function UnifiedSidebar({
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="scrollbar-thin">
-        {groupedItems.order.map((groupName) => (
-          <SidebarGroup key={groupName} className="px-2 py-3">
-            <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2">
+      <SidebarContent className="scrollbar-thin relative z-10 pointer-events-auto">
+        {groupedItems.order.map((groupName, groupIndex) => (
+          <SidebarGroup key={groupName} className="px-2 py-2 relative z-10 pointer-events-auto">
+            <SidebarGroupLabel 
+              className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2 pointer-events-auto"
+              id={`sidebar-group-${groupIndex}`}
+            >
               {groupName}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu role="menu" aria-labelledby={`sidebar-group-${groupIndex}`}>
                 {groupedItems.groups[groupName].map((item, index) => {
                   const label = item.i18nKey ? translate(item.i18nKey) : item.label
+                  const href = item.href
                   const isItemDisabled = Boolean(item.disabled)
-                  const itemIsActive = !isItemDisabled && !!item.href && isActive(item.href, item.exact)
+                  const itemIsActive = !isItemDisabled && !!href && isActive(href, item.exact)
 
                   return (
                     <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
                       <SidebarMenuButton
-                        asChild={!!item.href}
+                        asChild={!!href}
                         isActive={itemIsActive}
                         tooltip={label}
                         disabled={isItemDisabled}
+                        aria-label={label}
+                        aria-current={itemIsActive ? "page" : undefined}
+                        aria-disabled={isItemDisabled}
+                        onClick={!href ? () => {
+                          item.action?.()
+                          if (isMobile) setOpenMobile(false)
+                        } : undefined}
                         className={cn(
-                          "transition-all duration-200",
+                          "min-h-11 md:min-h-8 transition-all duration-200 pointer-events-auto relative z-10",
                           itemIsActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                             : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
                         )}
-                        onClick={!item.href ? () => {
-                          item.action?.()
-                          if (isMobile) setOpenMobile(false)
-                        } : undefined}
                       >
-                        {item.href ? (
+                        {href ? (
                           <Link
-                            href={item.href}
+                            href={href}
                             onClick={() => {
-                              if (isMobile) setOpenMobile(false)
+                              if (isMobile && !isQueryParamOnly(href)) {
+                                setOpenMobile(false)
+                              }
                             }}
-                            className="flex items-center w-full"
+                            className="flex items-center w-full h-full pointer-events-auto"
                           >
                             <span className={cn("shrink-0", itemIsActive ? "text-primary" : "text-muted-foreground/60")}>
-                              {item.icon}
+                              {isLoading && itemIsActive ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                item.icon
+                              )}
                             </span>
                             <span className="ml-3 truncate">{label}</span>
                           </Link>
@@ -272,14 +284,15 @@ export function UnifiedSidebar({
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-sidebar-border/50 bg-sidebar/50">
+      <SidebarFooter className="border-t border-sidebar-border/50 p-2 relative z-20 pointer-events-auto bg-sidebar/50">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  aria-label="Open user menu"
+                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground pointer-events-auto relative z-10"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user?.avatar_url} alt={displayName} />

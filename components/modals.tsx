@@ -9,7 +9,8 @@ import ImportButton from '../app/[locale]/dashboard/components/import/import-but
 import { useI18n } from "@/locales/client"
 import { signOut } from '@/server/auth'
 import PricingPlans from '@/components/pricing-plans'
-import { redirect, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCurrentLocale } from '@/locales/client'
 import OnboardingModal from './onboarding-modal'
 import { AccountGroupBoard } from '@/app/[locale]/dashboard/components/filters/account-group-board'
 import { useModalStateStore } from '@/store/modal-state-store'
@@ -25,6 +26,8 @@ export default function Modals() {
   const [isTradesDialogOpen, setIsTradesDialogOpen] = useState(false)
   const t = useI18n()
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const locale = useCurrentLocale()
   const { accountGroupBoardOpen, setAccountGroupBoardOpen } = useModalStateStore()
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export default function Modals() {
 
   // Handle loading toast
   const loadingToastRef = useRef<string | number | null>(null)
-  
+
   useEffect(() => {
     if (isLoading && !loadingToastRef.current) {
       // Show loading toast
@@ -78,13 +81,13 @@ export default function Modals() {
       const currentTrades = useTradesStore.getState().trades
       const currentIsLoading = useUserStore.getState().isLoading
       const hasNoTrades = !currentTrades || currentTrades.length === 0
-      
-      console.log('Onboarding dismissed - checking trades:', { 
-        tradesCount: currentTrades?.length || 0, 
+
+      console.log('Onboarding dismissed - checking trades:', {
+        tradesCount: currentTrades?.length || 0,
         isLoading: currentIsLoading,
-        willOpen: hasNoTrades && !currentIsLoading 
+        willOpen: hasNoTrades && !currentIsLoading
       })
-      
+
       if (hasNoTrades && !currentIsLoading) {
         setIsTradesDialogOpen(true)
       }
@@ -98,7 +101,7 @@ export default function Modals() {
 
       {/* Tooltip Portal for Sheet */}
       <div id="sheet-tooltip-portal" className="fixed inset-0 pointer-events-none z-100" />
-      
+
       {/* Account Group Board */}
       <Sheet open={accountGroupBoardOpen} onOpenChange={setAccountGroupBoardOpen}>
         <SheetContent side="right" className="w-[90vw] sm:w-[800px] sm:max-w-[800px] overflow-y-auto">
@@ -109,11 +112,11 @@ export default function Modals() {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6">
-            <AccountGroupBoard/>
+            <AccountGroupBoard />
           </div>
         </SheetContent>
       </Sheet>
-      
+
 
       <Dialog open={isAlreadySubscribedOpen} onOpenChange={setIsAlreadySubscribedOpen}>
         <DialogContent>
@@ -127,9 +130,9 @@ export default function Modals() {
             <Button
               onClick={() => {
                 setTimeout(() => {
-                  redirect('/dashboard/billing')
+                  router.push(`/${locale}/dashboard/billing`)
                 }, 100)
-                  setIsAlreadySubscribedOpen(false)
+                setIsAlreadySubscribedOpen(false)
               }}
             >
               {t('modals.subscription.manage')}
@@ -151,8 +154,8 @@ export default function Modals() {
         </DialogContent>
       </Dialog>
 
-      <Dialog 
-        open={isPaywallOpen} 
+      <Dialog
+        open={isPaywallOpen}
         onOpenChange={handlePaywallClose}
       >
         <DialogContent className="sm:max-w-[1200px] w-full max-h-[90vh] overflow-y-auto">
@@ -162,14 +165,14 @@ export default function Modals() {
               {t('pricing.subscribeToAccess')}
             </DialogDescription>
           </DialogHeader>
-          
-          <PricingPlans 
-            isModal={true} 
-            onClose={() => setIsPaywallOpen(false)} 
+
+          <PricingPlans
+            isModal={true}
+            onClose={() => setIsPaywallOpen(false)}
           />
 
           <div className="mt-4 text-center">
-            <Button variant='link' onClick={async()=> await signOut()}>
+            <Button variant='link' onClick={async () => await signOut()}>
               {t('modals.changeAccount')}
             </Button>
           </div>

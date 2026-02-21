@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AIModelSidebar } from "@/components/sidebar/aimodel-sidebar";
+import { useCurrentLocale } from "@/locales/client";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/context/theme-provider";
 import { GlobalSyncButton } from "@/app/[locale]/dashboard/components/global-sync-button";
@@ -19,6 +20,7 @@ export default function RootLayout(
   } = props;
 
   const router = useRouter();
+  const locale = useCurrentLocale();
   useEffect(() => {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.slice(1)); // Remove the # and parse
@@ -30,7 +32,7 @@ export default function RootLayout(
       });
 
       // Clear the hash after showing the toast
-      router.replace('/authentication');
+      router.replace(`/${locale}/authentication`);
     }
   }, [router]);
 
@@ -46,7 +48,7 @@ export default function RootLayout(
             </div>
             <GlobalSyncButton />
           </header>
-          <main className="flex-1 overflow-y-auto p-6 relative z-10">
+          <main className="flex-1 overflow-y-auto p-6 relative z-0">
             {children}
           </main>
         </SidebarInset>

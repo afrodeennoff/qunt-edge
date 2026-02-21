@@ -119,9 +119,8 @@ export function DashboardHeader() {
         >
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
             <div className={cn("relative flex items-center justify-between gap-3 px-3 sm:px-6", isMobile ? "h-14" : "h-full")}>
-                {/* Left Side: Sidebar Toggle & Title */}
-                <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
-                    <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground h-9 w-9" />
+                <div className="flex items-center gap-3 relative z-10 pointer-events-auto">
+                    <SidebarTrigger className="h-11 w-11 md:h-9 md:w-9 text-muted-foreground hover:text-foreground" />
                     <div className="flex min-w-0 items-start gap-3">
                         <div className="mt-0.5 hidden h-7 w-px bg-border/40 sm:block" />
                         <div className="min-w-0">
@@ -142,12 +141,11 @@ export function DashboardHeader() {
 
                 {/* Right Side: Actions & Configuration */}
                 <div className={cn(
-                    "flex items-center gap-2",
+                    "flex min-w-0 items-center gap-2",
                     isMobile
                         ? "rounded-none border-0 bg-transparent p-0 shadow-none"
                         : "rounded-2xl border border-border/40 bg-muted/20 p-1 shadow-sm"
                 )}>
-
                     {/* Global Utilities Group */}
                     <div className={cn(
                         "flex shrink-0 items-center gap-1",
@@ -186,10 +184,12 @@ export function DashboardHeader() {
                         )}>
                             <button
                                 type="button"
+                                id="customize-mode"
+                                aria-label={isCustomizing ? t('widgets.done') : t('widgets.edit')}
                                 onClick={toggleCustomizing}
                                 className={cn(
-                                    "relative group flex h-8 items-center gap-2 rounded-lg transition-all duration-300",
-                                    isMobile ? "w-8 justify-center px-0" : "px-3",
+                                    "relative group flex items-center gap-2 rounded-lg transition-all duration-300",
+                                    isMobile ? "h-11 w-11 justify-center px-0" : "h-8 px-3",
                                     isCustomizing
                                         ? "bg-primary text-primary-foreground shadow-none"
                                         : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -227,6 +227,7 @@ export function DashboardHeader() {
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <button
+                                                    aria-label={t('widgets.restoreDefaults')}
                                                     className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     title={t('widgets.restoreDefaults')}
                                                 >
@@ -254,6 +255,7 @@ export function DashboardHeader() {
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <button
+                                                    aria-label={t('widgets.deleteAll')}
                                                     className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
                                                     title={t('widgets.deleteAll')}
                                                 >
@@ -284,13 +286,25 @@ export function DashboardHeader() {
                                         <button
                                             type="button"
                                             onClick={flushPendingSaves}
-                                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors animate-pulse"
+                                            aria-label="Save pending dashboard changes"
+                                            className={cn(
+                                                "flex items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors animate-pulse",
+                                                isMobile ? "h-11 w-11" : "h-8 w-8"
+                                            )}
                                             title="Save Changes"
                                         >
                                             <CloudUpload className="w-4 h-4" />
                                         </button>
                                     ) : (
-                                        <div className="flex h-8 w-8 items-center justify-center text-white/70" title="All changes saved">
+                                        <div
+                                            role="status"
+                                            aria-label="All changes saved"
+                                            className={cn(
+                                                "flex items-center justify-center text-white/70",
+                                                isMobile ? "h-11 w-11" : "h-8 w-8"
+                                            )}
+                                            title="All changes saved"
+                                        >
                                             <CheckCircle2 className="w-4 h-4 text-white" />
                                         </div>
                                     )}
@@ -309,30 +323,32 @@ export function DashboardHeader() {
             </div>
 
             {/* Sub-Navigation: Filters (Preserved Mapping) */}
-            {isMobile ? (
-                hasActiveFilters && (
-                    <div className="relative px-3 pb-3 pt-1">
-                        <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
-                            <ActiveFilterTags showAccountNumbers={true} />
-                        </div>
-                    </div>
-                )
-            ) : (
-                <AnimatePresence>
-                    {hasActiveFilters && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="relative px-4 pb-3 pt-1 sm:px-8"
-                        >
+            {
+                isMobile ? (
+                    hasActiveFilters && (
+                        <div className="relative px-3 pb-3 pt-1">
                             <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
                                 <ActiveFilterTags showAccountNumbers={true} />
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            )}
+                        </div>
+                    )
+                ) : (
+                    <AnimatePresence>
+                        {hasActiveFilters && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="relative px-4 pb-3 pt-1 sm:px-8"
+                            >
+                                <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                                    <ActiveFilterTags showAccountNumbers={true} />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                )
+            }
         </header>
     );
 }

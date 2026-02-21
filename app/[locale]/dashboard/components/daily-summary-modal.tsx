@@ -62,6 +62,17 @@ export function DailySummaryModal() {
 
     const theme = THEMES[currentTheme]
 
+    const toSafeNumber = (value: unknown): number => {
+        if (typeof value === 'number') return Number.isFinite(value) ? value : 0
+        if (typeof value === 'string') {
+            const normalized = value.replace(/,/g, '').trim()
+            if (!normalized) return 0
+            const parsed = Number(normalized)
+            return Number.isFinite(parsed) ? parsed : 0
+        }
+        return 0
+    }
+
     const totalAccountValue = useMemo(() => {
         return accounts?.reduce((sum: number, acc: Account) => sum + (acc.metrics?.currentBalance || 0), 0) || 100000
     }, [accounts])
@@ -84,7 +95,7 @@ export function DailySummaryModal() {
             return format(d, 'yyyy-MM-dd')
         })
 
-        const trendData = last7Days.map(dateStr => calendarData[dateStr]?.pnl || 0)
+        const trendData = last7Days.map(dateStr => toSafeNumber(calendarData[dateStr]?.pnl))
 
         // Calculate Streak
         let currentStreak = 0
@@ -92,26 +103,27 @@ export function DailySummaryModal() {
         const pastDates = sortedDates.filter(d => new Date(d) <= endOfDay(today))
 
         for (const dateStr of pastDates) {
-            const pnl = calendarData[dateStr]?.pnl || 0
+            const pnl = toSafeNumber(calendarData[dateStr]?.pnl)
             if (pnl > 0) currentStreak++
             else if (pnl < 0) break
         }
 
         Object.entries(calendarData).forEach(([dateStr, data]) => {
             const date = parseISO(dateStr)
+            const dayPnl = toSafeNumber(data.pnl)
+            const trades = Array.isArray(data.trades) ? data.trades : []
+            const tradeCount = toSafeNumber(data.tradeNumber) || trades.length
 
             if (isWithinInterval(date, { start: startDay, end })) {
-                daily.pnl += (data.pnl || 0)
-                daily.total += (data.tradeNumber || 0)
-                if (data.trades) {
-                    data.trades.forEach(t => {
-                        if (Number(t.pnl || 0) > 0) daily.wins++
-                    })
-                }
+                daily.pnl += dayPnl
+                daily.total += tradeCount
+                trades.forEach(t => {
+                    if (toSafeNumber(t.pnl) > 0) daily.wins++
+                })
             }
-            if (isWithinInterval(date, { start: startWeek, end })) weekly.pnl += (data.pnl || 0)
-            if (isWithinInterval(date, { start: startMonth, end })) monthly.pnl += (data.pnl || 0)
-            total.pnl += (data.pnl || 0)
+            if (isWithinInterval(date, { start: startWeek, end })) weekly.pnl += dayPnl
+            if (isWithinInterval(date, { start: startMonth, end })) monthly.pnl += dayPnl
+            total.pnl += dayPnl
         })
 
         const winRate = daily.total > 0 ? Math.round((daily.wins / daily.total) * 100) : 0
@@ -124,7 +136,7 @@ export function DailySummaryModal() {
                 : stats.total.pnl
 
     const totalGoalProgress = customTarget > 0
-        ? Math.min(Math.max((stats.total.pnl / customTarget) * 100, 0), 100)
+        ? Math.min(Math.max((toSafeNumber(stats.total.pnl) / customTarget) * 100, 0), 100)
         : 0
 
     const scoreVal = useMemo(() => {
@@ -134,7 +146,8 @@ export function DailySummaryModal() {
         return calculateTradingScore({ winRate: winRatio * 100, profitFactor: pf, totalTrades: overallStats.nbTrades })
     }, [overallStats])
 
-    const isPositive = heroPnL >= 0
+    const safeHeroPnL = toSafeNumber(heroPnL)
+    const isPositive = safeHeroPnL >= 0
 
     const handleDownload = async () => {
         if (!cardRef.current) return
@@ -213,7 +226,7 @@ export function DailySummaryModal() {
         return { mainStr, decimalPart, baseFontSize }
     }
 
-    const { mainStr, decimalPart, baseFontSize } = formatPnLWithScaling(heroPnL, displayMode)
+    const { mainStr, decimalPart, baseFontSize } = formatPnLWithScaling(safeHeroPnL, displayMode)
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -323,7 +336,9 @@ export function DailySummaryModal() {
                                         </div>
                                         <span className="text-[9px] text-white/60 uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Weekly</span>
                                         <div className={cn("text-xl font-bold tracking-tight", stats.weekly.pnl >= 0 ? "text-white" : "text-white/40")}>
-                                            {displayMode === 'currency' ? `$${stats.weekly.pnl.toLocaleString()}` : `${totalAccountValue > 0 ? ((stats.weekly.pnl / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
+                                            {displayMode === 'currency'
+                                                ? `$${toSafeNumber(stats.weekly.pnl).toLocaleString()}`
+                                                : `${totalAccountValue > 0 ? ((toSafeNumber(stats.weekly.pnl) / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
                                         </div>
                                     </motion.div>
 
@@ -341,7 +356,9 @@ export function DailySummaryModal() {
                                         </div>
                                         <span className="text-[9px] text-white/60 uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Monthly</span>
                                         <div className={cn("text-xl font-bold tracking-tight", stats.monthly.pnl >= 0 ? "text-white" : "text-white/40")}>
-                                            {displayMode === 'currency' ? `$${stats.monthly.pnl.toLocaleString()}` : `${totalAccountValue > 0 ? ((stats.monthly.pnl / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
+                                            {displayMode === 'currency'
+                                                ? `$${toSafeNumber(stats.monthly.pnl).toLocaleString()}`
+                                                : `${totalAccountValue > 0 ? ((toSafeNumber(stats.monthly.pnl) / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
                                         </div>
                                     </motion.div>
                                 </motion.div>
@@ -396,7 +413,7 @@ export function DailySummaryModal() {
                                         </span>
                                     )}
                                 </div>
-                                <span className={cn("text-sm font-bold", stats.total.pnl < 0 ? "text-white/40" : "text-white")}>{Math.round(totalGoalProgress)}%</span>
+                                <span className={cn("text-sm font-bold", toSafeNumber(stats.total.pnl) < 0 ? "text-white/40" : "text-white")}>{Math.round(totalGoalProgress)}%</span>
                             </div>
                             <div className="h-2.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-white/5 p-[1px] relative shadow-inner">
                                 <motion.div
@@ -404,7 +421,7 @@ export function DailySummaryModal() {
                                     animate={{ width: `${totalGoalProgress}%` }}
                                     className={cn(
                                         "h-full rounded-full relative transition-all duration-700 ease-out",
-                                        stats.total.pnl < 0
+                                        toSafeNumber(stats.total.pnl) < 0
                                             ? "bg-white/20 shadow-none"
                                             : "bg-gradient-to-r from-white/60 via-white to-white/80 shadow-none"
                                     )}

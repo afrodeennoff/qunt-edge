@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useCurrentLocale } from "@/locales/client";
 interface AuthenticationLayoutProps {
   children: React.ReactNode;
 }
@@ -11,6 +12,7 @@ export default function AuthenticationLayout({
   children
 }: AuthenticationLayoutProps) {
   const router = useRouter();
+  const locale = useCurrentLocale();
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -23,9 +25,9 @@ export default function AuthenticationLayout({
       });
 
       // Clear the hash after showing the toast
-      router.replace('/authentication');
+      router.replace(`/${locale}/authentication`);
     }
-  }, [router]);
+  }, [locale, router]);
 
   return children;
 }

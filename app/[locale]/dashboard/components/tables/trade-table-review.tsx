@@ -1156,7 +1156,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
         size: 200,
       },
     ],
-    [t, timezone, tags, expanded, tickDetails, showPoints, getAllTradeIds, areAllTradesSelected, selectedTrades],
+    [t, timezone, tags, expanded, tickDetails, showPoints, getAllTradeIds, areAllTradesSelected, selectedTrades, updateTrades],
   );
 
   // Filter columns based on config

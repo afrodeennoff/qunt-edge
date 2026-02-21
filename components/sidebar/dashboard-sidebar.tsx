@@ -31,13 +31,13 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
     const setTimezone = useUserStore(state => state.setTimezone)
     const resetUser = useUserStore(state => state.resetUser)
 
-    const handleLogout = async () => {
+    const handleLogout = React.useCallback(async () => {
         resetUser()
         const { signOut } = await import("@/server/auth")
         await signOut()
-    }
+    }, [resetUser])
 
-    const navItems: UnifiedSidebarItem[] = [
+    const navItems: UnifiedSidebarItem[] = React.useMemo(() => [
         {
             href: `/${locale}/dashboard`, // Matches widgets by default in our new mapping
             icon: <LayoutDashboard className="size-4" />,
@@ -129,9 +129,9 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             label: "Admin",
             group: "System"
         }] : []),
-    ]
+    ], [locale, refreshAllData, isAdmin])
 
-    const timezones = [
+    const timezones = React.useMemo(() => [
         'UTC',
         'Europe/Paris',
         'America/New_York',
@@ -140,7 +140,7 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
         'Asia/Tokyo',
         'Asia/Shanghai',
         'Australia/Sydney',
-    ]
+    ], [])
 
     return (
         <UnifiedSidebar

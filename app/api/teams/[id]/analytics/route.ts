@@ -33,6 +33,12 @@ export async function GET(
     const analytics = await getTeamAnalytics(teamId, period)
     return NextResponse.json(analytics, { status: 200 })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Team not found') {
+      return NextResponse.json(
+        { error: 'Team not found' },
+        { status: 404 }
+      )
+    }
     console.error('Error fetching team analytics:', error)
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },

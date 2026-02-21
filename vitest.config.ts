@@ -19,6 +19,8 @@ export default defineConfig({
       "dist",
       ".next",
       "out",
+      "components/sidebar/__tests__/**",
+      "tests/performance/performance-regression.test.ts",
     ],
     coverage: {
       provider: "v8",

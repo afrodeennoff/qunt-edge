@@ -1,104 +1,171 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+
+const SCROLL_THRESHOLD = 150
+const BASE_SCROLL_SPEED = 15
+const MAX_SCROLL_SPEED = 30
+
+interface AutoScrollState {
+  isEnabled: boolean
+  isDragging: boolean
+  lastTouchY: number
+}
 
 export function useAutoScroll(isEnabled: boolean) {
+  const stateRef = useRef<AutoScrollState>({
+    isEnabled: false,
+    isDragging: false,
+    lastTouchY: 0,
+  })
+
+  const styleRef = useRef<HTMLStyleElement | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const isScrollingRef = useRef(false)
+
   useEffect(() => {
-    if (!isEnabled) return
+    const isGridDragTarget = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false
+      return Boolean(target.closest(".react-grid-item, .react-draggable, [data-grid]"))
+    }
 
-    let scrollInterval: NodeJS.Timeout | null = null
-    let lastTouchY = 0
-    const scrollThreshold = 150 // px from top/bottom to start scrolling
-    const baseScrollSpeed = 15 // base scroll speed
-    const maxScrollSpeed = 30 // maximum scroll speed
-
-    // Add style to prevent selection
-    const style = document.createElement('style')
-    style.textContent = `
-      body.dragging {
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        touch-action: none !important;
-        -webkit-touch-callout: none !important;
-      }
-      body.dragging * {
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        -webkit-touch-callout: none !important;
-      }
-    `
-    document.head.appendChild(style)
-
-    function performScroll() {
-      const windowHeight = window.innerHeight
-      const scrollY = window.scrollY
-      const maxScroll = document.documentElement.scrollHeight - windowHeight
-
-      if (lastTouchY < scrollThreshold) {
-        // Scrolling up - speed increases as you get closer to the top
-        const factor = 1 - (lastTouchY / scrollThreshold)
-        const speed = Math.min(maxScrollSpeed, baseScrollSpeed + (maxScrollSpeed * factor))
-        const newScrollY = Math.max(0, scrollY - speed)
-        window.scrollTo({ top: newScrollY })
-      } else if (lastTouchY > windowHeight - scrollThreshold) {
-        // Scrolling down - speed increases as you get closer to the bottom
-        const factor = (lastTouchY - (windowHeight - scrollThreshold)) / scrollThreshold
-        const speed = Math.min(maxScrollSpeed, baseScrollSpeed + (maxScrollSpeed * factor))
-        const newScrollY = Math.min(maxScroll, scrollY + speed)
-        window.scrollTo({ top: newScrollY })
+    const stopScrolling = () => {
+      isScrollingRef.current = false
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
       }
     }
 
-    function handleTouchStart() {
+    const performScroll = () => {
+      const state = stateRef.current
+      if (!state.isEnabled || !state.isDragging) {
+        isScrollingRef.current = false
+        return
+      }
+
+      const windowHeight = window.innerHeight
+      const currentScrollY = window.scrollY
+      const maxScrollY = document.documentElement.scrollHeight - windowHeight
+      const touchY = state.lastTouchY
+
+      let shouldScroll = false
+      let nextScrollY = currentScrollY
+
+      if (touchY < SCROLL_THRESHOLD) {
+        const factor = 1 - touchY / SCROLL_THRESHOLD
+        const speed = Math.min(MAX_SCROLL_SPEED, BASE_SCROLL_SPEED + MAX_SCROLL_SPEED * factor)
+        nextScrollY = Math.max(0, currentScrollY - speed)
+        shouldScroll = true
+      } else if (touchY > windowHeight - SCROLL_THRESHOLD) {
+        const factor = (touchY - (windowHeight - SCROLL_THRESHOLD)) / SCROLL_THRESHOLD
+        const speed = Math.min(MAX_SCROLL_SPEED, BASE_SCROLL_SPEED + MAX_SCROLL_SPEED * factor)
+        nextScrollY = Math.min(maxScrollY, currentScrollY + speed)
+        shouldScroll = true
+      }
+
+      if (shouldScroll && nextScrollY !== currentScrollY) {
+        window.scrollTo({ top: nextScrollY, behavior: 'auto' })
+      }
+
+      if (shouldScroll) {
+        rafRef.current = requestAnimationFrame(performScroll)
+      } else {
+        isScrollingRef.current = false
+      }
+    }
+
+    const startScrolling = () => {
+      if (isScrollingRef.current) return
+      isScrollingRef.current = true
+      rafRef.current = requestAnimationFrame(performScroll)
+    }
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (!isGridDragTarget(event.target)) return
+      const state = stateRef.current
+      if (!state.isEnabled) return
+      state.isDragging = true
       document.body.classList.add('dragging')
     }
 
-    function handleTouchMove(e: TouchEvent) {
-      // Prevent default to ensure smooth scrolling
-      e.preventDefault()
+    const handleTouchMove = (event: TouchEvent) => {
+      const state = stateRef.current
+      if (!state.isEnabled || !state.isDragging) return
 
-      const touch = e.touches[0]
-      const touchY = touch.clientY
-      lastTouchY = touchY
+      const touch = event.touches[0]
+      if (!touch) return
+
+      state.lastTouchY = touch.clientY
       const windowHeight = window.innerHeight
+      const isNearEdge =
+        touch.clientY < SCROLL_THRESHOLD ||
+        touch.clientY > windowHeight - SCROLL_THRESHOLD
 
-      // Start scrolling interval if near edges and not already scrolling
-      if ((touchY < scrollThreshold || touchY > windowHeight - scrollThreshold) && !scrollInterval) {
-        scrollInterval = setInterval(performScroll, 16) // ~60fps
-      }
-      // Stop scrolling if not near edges
-      else if (touchY >= scrollThreshold && touchY <= windowHeight - scrollThreshold && scrollInterval) {
-        clearInterval(scrollInterval)
-        scrollInterval = null
+      if (isNearEdge) {
+        startScrolling()
+      } else {
+        stopScrolling()
       }
     }
 
-    function handleTouchEnd() {
+    const handleTouchEnd = () => {
+      const state = stateRef.current
+      state.isDragging = false
       document.body.classList.remove('dragging')
-      if (scrollInterval) {
-        clearInterval(scrollInterval)
-        scrollInterval = null
-      }
+      stopScrolling()
     }
 
-    // Add event listeners
-    document.addEventListener('touchstart', handleTouchStart)
-    document.addEventListener('touchmove', handleTouchMove, { passive: false })
-    document.addEventListener('touchend', handleTouchEnd)
-    document.addEventListener('touchcancel', handleTouchEnd)
+    const cleanup = () => {
+      stopScrolling()
+      if (styleRef.current) {
+        styleRef.current.remove()
+        styleRef.current = null
+      }
 
-    return () => {
+      document.body.classList.remove('dragging')
       document.removeEventListener('touchstart', handleTouchStart)
       document.removeEventListener('touchmove', handleTouchMove)
       document.removeEventListener('touchend', handleTouchEnd)
       document.removeEventListener('touchcancel', handleTouchEnd)
-      if (scrollInterval) {
-        clearInterval(scrollInterval)
-      }
-      // Clean up the style element
-      style.remove()
+
+      stateRef.current.isEnabled = false
+      stateRef.current.isDragging = false
     }
+
+    if (!isEnabled) {
+      cleanup()
+      return
+    }
+
+    stateRef.current.isEnabled = true
+
+    if (!styleRef.current) {
+      const style = document.createElement('style')
+      style.textContent = `
+        body.dragging {
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          touch-action: none !important;
+          -webkit-touch-callout: none !important;
+        }
+        body.dragging * {
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          -webkit-touch-callout: none !important;
+        }
+      `
+      document.head.appendChild(style)
+      styleRef.current = style
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd, { passive: true })
+    document.addEventListener('touchcancel', handleTouchEnd, { passive: true })
+
+    return cleanup
   }, [isEnabled])
-} 
+}

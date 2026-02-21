@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { createClient, type User } from "@supabase/supabase-js"
 import { render } from "@react-email/render"
 import { assertAdminAccess } from "@/server/authz"
+import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -96,7 +97,7 @@ export async function getDefaultTemplateProps(template: EmailTemplate): Promise<
         youtubeId: "ZBrIZpCh_7Q",
         introMessage: "Sample intro message",
         features: ["Feature 1", "Feature 2"],
-        unsubscribeUrl: "https://qunt-edge.vercel.app/api/email/unsubscribe?email=user%40example.com",
+        unsubscribeUrl: buildUnsubscribeUrl("user@example.com"),
       }
     case "renewal-notice":
       return {
@@ -108,7 +109,7 @@ export async function getDefaultTemplateProps(template: EmailTemplate): Promise<
         daysUntilRenewal: 7,
         paymentFrequency: "monthly",
         language: "en",
-        unsubscribeUrl: "https://qunt-edge.vercel.app/api/email/unsubscribe?email=user%40example.com",
+        unsubscribeUrl: buildUnsubscribeUrl("user@example.com"),
       }
     case "team-invitation":
       return {
@@ -335,7 +336,7 @@ export async function sendEmailsToUsers(
     for (const batch of batches) {
       try {
         const emailBatch = batch.map((user) => {
-          const unsubscribeUrl = `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(user.email)}`
+          const unsubscribeUrl = buildUnsubscribeUrl(user.email)
           const mergedProps: TemplateProps = {
             ...customProps,
             firstName: user.firstName,

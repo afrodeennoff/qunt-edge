@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className="absolute bottom-[-10%] right-[-10%] h-[45%] w-[45%] rounded-full bg-primary/8 blur-[120px] animate-pulse-slow" />
                 </div>
 
-                <div className="relative z-10 flex min-h-screen flex-col">
+                <div className="relative z-0 flex min-h-screen flex-col">
                     <header className="sticky top-0 z-40 h-16 border-b border-border/70 bg-background/95 backdrop-blur-md">
                         <div className="mx-auto flex h-full w-full max-w-[1600px] items-center px-4 sm:px-6 lg:px-8">
                             <div className="flex items-center gap-3">

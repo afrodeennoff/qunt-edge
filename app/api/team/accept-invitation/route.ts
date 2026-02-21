@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { createRouteClient } from "@/lib/supabase/route-client"
+import { MemberRole } from "@/prisma/generated/prisma"
+import { ensureTeamMembership, resolveTeamUserId } from "@/server/team-membership"
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
     // Find the invitation
     const invitation = await prisma.teamInvitation.findUnique({
       where: { id: invitationId },
-      include: { team: true }
+      include: { team: { select: { id: true } } }
     })
 
     if (!invitation) {
@@ -60,22 +62,21 @@ export async function POST(req: Request) {
       )
     }
 
-    // Add user to the team
-    const updatedTraderIds = [...invitation.team.traderIds, user.id]
+    const teamUserId = await resolveTeamUserId(user.id)
 
-    await prisma.team.update({
-      where: { id: invitation.teamId },
-      data: {
-        traderIds: updatedTraderIds,
-      },
-    })
+    await prisma.$transaction(async (tx) => {
+      await ensureTeamMembership(tx, {
+        teamId: invitation.teamId,
+        userId: teamUserId,
+        role: invitation.role ?? MemberRole.TRADER,
+      })
 
-    // Update invitation status
-    await prisma.teamInvitation.update({
-      where: { id: invitationId },
-      data: {
-        status: 'ACCEPTED',
-      },
+      await tx.teamInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: 'ACCEPTED',
+        },
+      })
     })
 
     return NextResponse.json(

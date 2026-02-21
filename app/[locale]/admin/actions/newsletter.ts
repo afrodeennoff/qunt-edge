@@ -7,6 +7,7 @@ import NewsletterEmail from '@/components/emails/new-feature'
 import { revalidatePath } from "next/cache"
 import { parse } from "csv-parse"
 import { render } from "@react-email/render"
+import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 
 interface SendNewsletterParams {
   subject: string
@@ -135,7 +136,7 @@ export async function sendNewsletter({
     for (const batch of batches) {
       try {
         const emailBatch = batch.map(({ email, firstName }) => {
-          const unsubscribeUrl = `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(email)}`
+          const unsubscribeUrl = buildUnsubscribeUrl(email)
 
           return {
             from: 'Qunt Edge <newsletter@eu.updates.qunt-edge.vercel.app>',
@@ -185,7 +186,7 @@ export async function sendTestNewsletter(email: string, firstName: string, param
     }
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    const unsubscribeUrl = `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(email)}`
+    const unsubscribeUrl = buildUnsubscribeUrl(email)
 
     await resend.emails.send({
       from: 'Qunt Edge <newsletter@eu.updates.qunt-edge.vercel.app>',
@@ -228,7 +229,7 @@ export async function renderEmailPreview(params: {
         features: params.features,
         email: "preview@example.com",
         firstName: params.firstName,
-        unsubscribeUrl: `https://qunt-edge.vercel.app/api/email/unsubscribe?email=${encodeURIComponent("preview@example.com")}`
+        unsubscribeUrl: buildUnsubscribeUrl("preview@example.com")
       })
     )
 

@@ -1,9 +1,11 @@
 'use server'
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { User } from '@supabase/supabase-js'
+import { authSecurityConfig } from '@/lib/security/auth-config'
+import { checkAuthGuard, recordAuthFailure, recordAuthSuccess } from '@/lib/security/auth-attempts'
 
 export async function getWebsiteURL() {
   let url =
@@ -42,6 +44,25 @@ function handleAuthError(error: any): never {
 
   // Re-throw other errors as-is
   throw error
+}
+
+const GENERIC_AUTH_ERROR = 'Invalid credentials or verification required'
+
+function getExternalAuthErrorMessage(errorMessage: string): string {
+  if (!authSecurityConfig.errorObfuscationEnabled) return errorMessage
+  return GENERIC_AUTH_ERROR
+}
+
+async function getRequestIp(): Promise<string> {
+  try {
+    const headerStore = await headers()
+    const forwardedFor = headerStore.get('x-forwarded-for')
+    const realIp = headerStore.get('x-real-ip')
+    const ip = (forwardedFor?.split(',')[0] || realIp || '').trim()
+    return ip || 'unknown'
+  } catch {
+    return 'unknown'
+  }
 }
 
 export async function createClient() {
@@ -149,7 +170,17 @@ async function signOutSilently() {
 }
 
 export async function signInWithEmail(email: string, next: string | null = null, locale?: string) {
+  const requestIp = await getRequestIp()
   try {
+    const guard = await checkAuthGuard({
+      email,
+      ip: requestIp,
+      actionType: 'magic_link_request',
+    })
+    if (!guard.allowed) {
+      throw new Error(`${GENERIC_AUTH_ERROR}|RETRY_AFTER=${guard.retryAfterSeconds}`)
+    }
+
     const supabase = await createClient()
     const websiteURL = await getWebsiteURL()
     const callbackParams = new URLSearchParams()
@@ -164,7 +195,21 @@ export async function signInWithEmail(email: string, next: string | null = null,
     if (error) {
       throw new Error(error.message)
     }
+    await recordAuthSuccess({
+      email,
+      ip: requestIp,
+      actionType: 'magic_link_request',
+    })
   } catch (error: any) {
+    await recordAuthFailure({
+      email,
+      ip: requestIp,
+      actionType: 'magic_link_request',
+      userId: null,
+    })
+    if (error instanceof Error) {
+      throw new Error(getExternalAuthErrorMessage(error.message))
+    }
     handleAuthError(error)
   }
 }
@@ -177,117 +222,21 @@ export async function signInWithPasswordAction(
   next: string | null = null,
   locale?: string
 ) {
+  const requestIp = await getRequestIp()
   try {
+    const guard = await checkAuthGuard({
+      email,
+      ip: requestIp,
+      actionType: 'password_login',
+    })
+    if (!guard.allowed) {
+      throw new Error(`${GENERIC_AUTH_ERROR}|RETRY_AFTER=${guard.retryAfterSeconds}`)
+    }
+
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
-    // If sign-in fails, try to create account (user might not exist)
     if (error) {
-      // Check if error indicates invalid credentials (could be user doesn't exist or wrong password)
-      if (error.message.includes('Invalid login credentials') ||
-        error.message.includes('invalid_credentials') ||
-        error.message.includes('Email not confirmed')) {
-
-        // Try to sign up - if user exists, this will fail and we'll know it's a wrong password
-        const websiteURL = await getWebsiteURL()
-        const callbackParams = new URLSearchParams()
-        if (next) callbackParams.set('next', next)
-        if (locale) callbackParams.set('locale', locale)
-
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${websiteURL}api/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ''}`,
-          },
-        })
-
-        if (signUpError) {
-          // Check if it's a password validation error (should be shown separately)
-          const isPasswordValidationError =
-            signUpError.message.toLowerCase().includes('password should contain') ||
-            signUpError.message.toLowerCase().includes('password must contain') ||
-            signUpError.message.toLowerCase().includes('password requirements') ||
-            signUpError.message.toLowerCase().includes('password is too short') ||
-            signUpError.message.toLowerCase().includes('password must be at least')
-
-          // If it's a password validation error, throw as-is so they can be displayed
-          if (isPasswordValidationError) {
-            throw new Error(signUpError.message)
-          }
-
-          // If sign up fails, it means user already exists
-          // Since sign-in also failed with "Invalid login credentials", it could mean:
-          // 1. User exists but has no password set (created via magic link) - needs to set password
-          // 2. User exists and has password - wrong password was provided
-
-          // Check if error indicates user already registered (not just any error)
-          const isUserAlreadyRegistered =
-            signUpError.message.toLowerCase().includes('user already registered') ||
-            signUpError.message.toLowerCase().includes('already registered') ||
-            signUpError.message.toLowerCase().includes('email address is already registered') ||
-            signUpError.message.toLowerCase().includes('user already exists')
-
-          if (isUserAlreadyRegistered) {
-            // User exists but password sign-in failed - likely no password set
-            // Send password reset email to allow them to set a password
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: `${websiteURL}api/auth/callback?type=recovery${callbackParams.toString() ? `&${callbackParams.toString()}` : ''}`,
-            })
-
-            if (resetError) {
-              // If reset fails, fall back to the original error message
-              throw new Error('ACCOUNT_EXISTS_NO_PASSWORD: This account exists but doesn\'t have a password set. A password reset email has been sent to your email address. Please check your inbox to set a password.')
-            }
-
-            // Successfully sent reset email
-            throw new Error('ACCOUNT_EXISTS_NO_PASSWORD: This account exists but doesn\'t have a password set. A password reset email has been sent to your email address. Please check your inbox to set a password.')
-          }
-
-          // For other sign-up errors, assume wrong password (user exists with password)
-          throw new Error('INVALID_CREDENTIALS: The password is incorrect. Please try again or use "Forgot password" to reset it.')
-        }
-
-        // Sign up succeeded
-        // If email confirmation is disabled, Supabase automatically signs the user in
-        // Check if user is already signed in (session exists)
-        if (signUpData.user && signUpData.session) {
-          // User is automatically signed in (email confirmation disabled)
-          try {
-            await ensureUserInDatabase(signUpData.user, locale)
-          } catch (e) {
-            // Non-fatal; still proceed
-            console.error('[signInWithPasswordAction] ensureUserInDatabase failed:', e)
-          }
-          return { success: true, next }
-        }
-
-        // If email confirmation is enabled, user needs to confirm email first
-        // Try to sign in - this will fail if email is not confirmed
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-        if (signInError) {
-          // If sign-in fails, it might be because email is not confirmed
-          if (signInError.message.includes('Email not confirmed') || signInError.message.includes('email_not_confirmed')) {
-            throw new Error('EMAIL_NOT_CONFIRMED: Please check your email and confirm your account before signing in.')
-          }
-          throw new Error(signInError.message)
-        }
-
-        // Continue with normal flow after successful sign-in
-        try {
-          const { data: { user } } = await supabase.auth.getUser()
-          if (user) {
-            await ensureUserInDatabase(user, locale)
-          }
-        } catch (e) {
-          // Non-fatal; still proceed
-          console.error('[signInWithPasswordAction] ensureUserInDatabase failed:', e)
-        }
-
-        return { success: true, next }
-      }
-
-      // For other errors, throw as-is
       throw new Error(error.message)
     }
 
@@ -303,8 +252,24 @@ export async function signInWithPasswordAction(
     }
 
     // Optionally handle redirect on the client; return success and let client route
+    const authUser = data.user ?? null
+    await recordAuthSuccess({
+      email,
+      ip: requestIp,
+      actionType: 'password_login',
+      userId: authUser?.id ?? null,
+    })
     return { success: true, next }
   } catch (error: any) {
+    await recordAuthFailure({
+      email,
+      ip: requestIp,
+      actionType: 'password_login',
+      userId: null,
+    })
+    if (error instanceof Error) {
+      throw new Error(getExternalAuthErrorMessage(error.message))
+    }
     handleAuthError(error)
   }
 }
@@ -535,7 +500,17 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
 }
 
 export async function verifyOtp(email: string, token: string, type: 'email' | 'signup' = 'email') {
+  const requestIp = await getRequestIp()
   try {
+    const guard = await checkAuthGuard({
+      email,
+      ip: requestIp,
+      actionType: 'otp_verify',
+    })
+    if (!guard.allowed) {
+      throw new Error(`${GENERIC_AUTH_ERROR}|RETRY_AFTER=${guard.retryAfterSeconds}`)
+    }
+
     const supabase = await createClient()
     const { data, error } = await supabase.auth.verifyOtp({
       email,
@@ -552,8 +527,24 @@ export async function verifyOtp(email: string, token: string, type: 'email' | 's
       throw new Error(error.message)
     }
 
+    await recordAuthSuccess({
+      email,
+      ip: requestIp,
+      actionType: 'otp_verify',
+      userId: data.user?.id ?? null,
+    })
+
     return data
   } catch (error: any) {
+    await recordAuthFailure({
+      email,
+      ip: requestIp,
+      actionType: 'otp_verify',
+      userId: null,
+    })
+    if (error instanceof Error) {
+      throw new Error(getExternalAuthErrorMessage(error.message))
+    }
     handleAuthError(error)
   }
 }

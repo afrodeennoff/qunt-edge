@@ -6,68 +6,13 @@ import { format, subDays, isEqual, startOfDay } from 'date-fns'
 import { enUS, fr } from 'date-fns/locale'
 import RenewalNoticeEmail from '@/components/emails/renewal-notice'
 import { requireServiceAuth, toErrorResponse } from '@/server/authz'
+import { buildUnsubscribeUrl } from '@/lib/unsubscribe-url'
 
 export const dynamic = 'force-dynamic'
 
 // Utility function to get date locale
 const getDateLocale = (language: string) => {
   return language === 'fr' ? fr : enUS
-}
-
-// Utility function to format payment frequency for display
-const getFrequencyDisplay = (frequency: string, language: string) => {
-  const frequencies = {
-    en: {
-      monthly: 'Monthly',
-      quarterly: 'Quarterly',
-      biannual: 'Bi-annual',
-      annual: 'Annual',
-      custom: 'Custom'
-    },
-    fr: {
-      monthly: 'Mensuel',
-      quarterly: 'Trimestriel',
-      biannual: 'Semestriel',
-      annual: 'Annuel',
-      custom: 'Personnalisé'
-    }
-  }
-
-  return frequencies[language as keyof typeof frequencies]?.[frequency as keyof typeof frequencies.en] || frequency
-}
-
-// Utility function to calculate next payment date based on frequency
-const calculateNextPaymentDate = (currentDate: Date, frequency: string): Date => {
-  const nextDate = new Date(currentDate)
-
-  switch (frequency) {
-    case 'MONTHLY':
-    case 'monthly': // Support legacy values during transition
-      nextDate.setMonth(nextDate.getMonth() + 1)
-      break
-    case 'QUARTERLY':
-    case 'quarterly':
-      nextDate.setMonth(nextDate.getMonth() + 3)
-      break
-    case 'BIANNUAL':
-    case 'biannual':
-      nextDate.setMonth(nextDate.getMonth() + 6)
-      break
-    case 'ANNUAL':
-    case 'annual':
-      nextDate.setFullYear(nextDate.getFullYear() + 1)
-      break
-    case 'CUSTOM':
-    case 'custom':
-      // For custom frequency, we don't auto-update (user needs to manually set)
-      return currentDate
-    default:
-      // Default to monthly if unknown frequency
-      nextDate.setMonth(nextDate.getMonth() + 1)
-      break
-  }
-
-  return nextDate
 }
 
 // Daily cron job handler - runs every day at 9 AM UTC
@@ -96,7 +41,7 @@ export async function GET(req: Request) {
         renewalNotice: {
           not: null,
           gt: 0
-        }
+        },
       },
       include: {
         user: {
@@ -121,7 +66,9 @@ export async function GET(req: Request) {
       if (!account.nextPaymentDate || !account.renewalNotice) return false
 
       const notificationDate = startOfDay(subDays(account.nextPaymentDate, account.renewalNotice))
-      return isEqual(notificationDate, today)
+      if (!isEqual(notificationDate, today)) return false
+
+      return true
     })
 
     if (accountsToNotify.length === 0) {
@@ -161,9 +108,9 @@ export async function GET(req: Request) {
             const propFirmName = account.propfirm || 'Unknown Prop Firm'
             const frequency = account.paymentFrequency || 'monthly'
 
-            const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/settings/notifications`
+            const unsubscribeUrl = buildUnsubscribeUrl(userEmail, req)
 
-            const { data, error } = await resend.emails.send({
+            const { error } = await resend.emails.send({
               from: 'Qunt Edge Renewals <renewals@eu.updates.qunt-edge.vercel.app>',
               to: userEmail,
               subject: userLanguage === 'fr'
@@ -194,21 +141,6 @@ export async function GET(req: Request) {
               console.log(`Renewal notice sent to ${userEmail} for account ${account.id}`)
               successCount++
 
-              // Update the nextPaymentDate to the next cycle (except for custom frequency)
-              try {
-                if (account.paymentFrequency !== 'CUSTOM' && account.nextPaymentDate) {
-                  const newNextPaymentDate = calculateNextPaymentDate(account.nextPaymentDate, account.paymentFrequency || 'MONTHLY')
-
-                  await prisma.account.update({
-                    where: { id: account.id },
-                    data: { nextPaymentDate: newNextPaymentDate }
-                  })
-
-                  console.log(`Updated nextPaymentDate for account ${account.id} from ${account.nextPaymentDate} to ${newNextPaymentDate}`)
-                }
-              } catch (updateError) {
-                console.warn(`Failed to update nextPaymentDate for account ${account.id}:`, updateError)
-              }
             }
           } catch (accountError) {
             console.error(`Error processing account ${account.id}:`, accountError)

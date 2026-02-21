@@ -56,8 +56,63 @@ model User {
   paymentMethods        PaymentMethod[]        @relation("UserPaymentMethods")
   usageMetrics          UsageMetric[]          @relation("UserUsageMetrics")
   aiRequestLogs         AiRequestLog[]         @relation("UserAiRequestLogs")
+  authAttempts          AuthAttempt[]          @relation("UserAuthAttempts")
+  oauthStates           OAuthState[]           @relation("UserOAuthStates")
+  recoveryCodes         RecoveryCode[]         @relation("UserRecoveryCodes")
 
   @@index([email])
+  @@schema("public")
+}
+
+model OAuthState {
+  id        String   @id @default(uuid())
+  userId    String
+  provider  String
+  stateHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation("UserOAuthStates", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, provider])
+  @@index([expiresAt])
+  @@schema("public")
+}
+
+model AuthAttempt {
+  id             String   @id @default(uuid())
+  userId         String?
+  emailHash      String
+  ipPrefix       String
+  actionType     String
+  failCount      Int      @default(0)
+  firstFailureAt DateTime?
+  lastFailureAt  DateTime?
+  lockedUntil    DateTime?
+  lastSuccessAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User? @relation("UserAuthAttempts", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([emailHash, ipPrefix, actionType])
+  @@index([lockedUntil])
+  @@index([emailHash])
+  @@schema("public")
+}
+
+model RecoveryCode {
+  id        String   @id @default(uuid())
+  userId    String
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation("UserRecoveryCodes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, codeHash])
+  @@index([userId])
   @@schema("public")
 }
 
@@ -195,6 +250,7 @@ model Account {
   paymentFrequency PaymentFrequency?
   renewalNotice    Int?
   nextPaymentDate  DateTime?
+  renewalNoticeLastSentAt DateTime?
 
   isRecursively     String?
   maxFundedAccounts Int?
@@ -333,6 +389,10 @@ model Synchronization {
   dailySyncTime DateTime?
 
   token          String?
+  tokenCiphertext String?
+  tokenIv        String?
+  tokenTag       String?
+  tokenKeyVersion String?
   tokenExpiresAt DateTime?
 
   createdAt DateTime @default(now())

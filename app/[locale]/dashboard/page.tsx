@@ -11,19 +11,18 @@ import { clearReferralCode } from "@/lib/referral-storage";
 
 export default function Home() {
   const searchParams = useSearchParams();
+  const success = searchParams.get("success");
+  const activeTab = searchParams.get("tab") || "widgets";
 
   // Clear referral code after successful subscription
   useEffect(() => {
-    const success = searchParams.get("success");
     if (success === "true") {
       clearReferralCode();
     }
-  }, [searchParams]);
-
-  const activeTab = searchParams.get("tab") || "widgets";
+  }, [success]);
 
   return (
-    <div className="relative w-full min-h-[calc(100dvh-64px)] px-2 pb-3 pt-2 sm:min-h-[calc(100vh-72px)] sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3">
+    <div className="relative w-full min-h-[calc(100dvh-64px)] overflow-x-hidden px-2 pb-3 pt-2 sm:min-h-[calc(100vh-72px)] sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3">
       <Tabs value={activeTab} className="w-full h-full relative z-10">
         <TabsContent
           value="table"
