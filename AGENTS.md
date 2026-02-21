@@ -57,6 +57,41 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run analyze:bundle` -> exits `0`.
   - Dashboard app-route client manifests reduced by ~`2.5 KB` per route (`~5%`) from prior artifact snapshot.
 
+### 2026-02-22: Dashboard Lag Refactor (State Slice Isolation + Table Virtualization)
+- **What changed:** Refactored dashboard data consumption into focused context slices, added selector hooks, migrated high-churn dashboard consumers off umbrella `useData()`, and introduced virtualized row rendering in trade table.
+- **What I want:** Dashboard interactions (tab switch, filter typing, table scroll) should avoid broad rerender cascades and stay responsive under larger trade sets.
+- **What I don't want:** Monolithic `useData()` subscriptions in high-frequency UI surfaces, or full table row rendering on every scroll/update.
+- **How we fixed that:**
+  - Added internal contexts in `context/data-provider.tsx`:
+    - `DashboardDataStateContext`
+    - `DashboardFiltersContext`
+    - `DashboardDerivedContext`
+    - `DashboardActionsContext`
+  - Added hooks:
+    - `useDashboardTrades()`
+    - `useDashboardFilters()`
+    - `useDashboardStats()`
+    - `useDashboardActions()`
+  - Preserved `useData()` as a compatibility facade.
+  - Migrated scoped high-churn consumers:
+    - `app/[locale]/dashboard/components/filters/*`
+    - `app/[locale]/dashboard/components/statistics/*`
+    - `app/[locale]/dashboard/components/tables/*`
+  - Added trade table render optimizations in `trade-table-review.tsx`:
+    - `useDeferredValue` for trade input stream,
+    - row-window virtualization for `>100` rows with spacer rows,
+    - requestAnimationFrame-throttled scroll state updates.
+- **Key Files:** `context/data-provider.tsx`, `app/[locale]/dashboard/components/filters/*`, `app/[locale]/dashboard/components/statistics/*`, `app/[locale]/dashboard/components/tables/trade-table-review.tsx`, `docs/audits/performance-initiative-2026-02-21.md`, `docs/PERFORMANCE_BUDGETS.md`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0`.
+  - `npm run analyze:bundle` -> exits `0`.
+  - `npm run check:route-budgets` -> exits `0`.
+  - Scoped usage migration result:
+    - `useData()` in `filters+statistics+tables`: `32 -> 0`.
+    - Slice-hook calls in `filters+statistics+tables`: `0 -> 39`.
+  - Lighthouse was blocked in this environment (`npx lighthouse` requires npm registry access; offline error `ENOTFOUND registry.npmjs.org`).
+
 ### 2026-02-21: Production Readiness Audit Hardening (Observability + Build Reliability + Security Consistency)
 - **What changed:** Hardened logging/monitoring primitives, standardized cron authorization checks, fixed failing performance audit tooling, restored smoke-test script coverage, and stabilized production build behavior.
 - **What I want:** Reliable, production-grade diagnostics and repeatable verification gates with consistent auth enforcement and deterministic build outcomes.

@@ -1,4 +1,4 @@
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { Clock } from "lucide-react"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
@@ -15,7 +15,7 @@ interface AveragePositionTimeCardProps {
 }
 
 export default function AveragePositionTimeCard({ size = 'medium' }: AveragePositionTimeCardProps) {
-  const { statistics: { averagePositionTime } } = useData()
+  const { statistics: { averagePositionTime } } = useDashboardStats()
   const t = useI18n()
 
   return (

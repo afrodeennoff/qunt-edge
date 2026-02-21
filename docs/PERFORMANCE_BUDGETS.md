@@ -24,6 +24,13 @@
 - Keep dashboard-family app-route client manifests below `80 KB`.
 - Investigate and block merges when dashboard-family routes exceed `60 KB` sustained trend.
 
+## Dashboard State Budgets
+
+- High-churn dashboard surfaces (`filters`, `statistics`, `tables`) must use slice hooks, not umbrella `useData()`.
+- Budget target in scoped surfaces:
+  - `useData()` usages: `0`
+  - Use `useDashboardFilters/useDashboardStats/useDashboardActions/useDashboardTrades` instead.
+
 ## Operational Policy
 
 - Every performance-related change must include:

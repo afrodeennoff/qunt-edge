@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 
 interface TradeCommentProps {
   tradeIds: string[]
@@ -24,7 +24,7 @@ interface TradeCommentProps {
 
 export function TradeComment({ tradeIds, comment: initialComment, onCommentChange }: TradeCommentProps) {
   const t = useI18n()
-  const { updateTrades } = useData()
+  const { updateTrades } = useDashboardActions()
   const [localComment, setLocalComment] = useState(initialComment || '')
   const [isUpdating, setIsUpdating] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)

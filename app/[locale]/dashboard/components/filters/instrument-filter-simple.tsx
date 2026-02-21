@@ -1,6 +1,6 @@
 "use client"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { useState, useEffect } from "react"
 import { Label } from "@/components/ui/label"
@@ -17,7 +17,7 @@ interface InstrumentFilterSimpleProps {
 
 export function InstrumentFilterSimple({ className }: InstrumentFilterSimpleProps) {
   const t = useI18n()
-  const { instruments, setInstruments } = useData()
+  const { instruments, setInstruments } = useDashboardFilters()
   const trades = useTradesStore(state => state.trades)
   const [searchTerm, setSearchTerm] = useState("")
   const [availableInstruments, setAvailableInstruments] = useState<string[]>([])

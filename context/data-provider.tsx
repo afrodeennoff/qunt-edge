@@ -106,24 +106,19 @@ import {
 } from "@/lib/data-types";
 
 // Combined Context Type
-interface DataContextType {
-  refreshTrades: () => Promise<void>;
-  refreshTradesOnly: (options?: { force?: boolean }) => Promise<void>;
-  refreshUserDataOnly: (options?: { force?: boolean; includeSubscription?: boolean }) => Promise<void>;
-  refreshAllData: (options?: { force?: boolean }) => Promise<void>;
-  isPlusUser: () => boolean;
+export interface DashboardDataState {
   isLoading: boolean;
   isMobile: boolean;
   isSharedView: boolean;
-  changeIsFirstConnection: (isFirstConnection: boolean) => void;
-  isFirstConnection: boolean;
-  setIsFirstConnection: (isFirstConnection: boolean) => void;
   sharedParams: SharedParams | null;
   setSharedParams: React.Dispatch<React.SetStateAction<SharedParams | null>>;
-
-  // Formatted trades and filters
+  isFirstConnection: boolean;
+  setIsFirstConnection: (isFirstConnection: boolean) => void;
   trades: Trade[];
-  formattedTrades: Trade[];
+  accounts: Account[];
+}
+
+export interface DashboardFiltersState {
   instruments: string[];
   setInstruments: React.Dispatch<React.SetStateAction<string[]>>;
   accountNumbers: string[];
@@ -144,11 +139,21 @@ interface DataContextType {
   setHourFilter: React.Dispatch<React.SetStateAction<HourFilter>>;
   tagFilter: TagFilter;
   setTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
+}
 
-  // Statistics and calendar
+export interface DashboardDerivedState {
+  formattedTrades: Trade[];
   statistics: StatisticsProps;
   calendarData: CalendarData;
-  accounts: Account[];
+}
+
+export interface DashboardActions {
+  refreshTrades: () => Promise<void>;
+  refreshTradesOnly: (options?: { force?: boolean }) => Promise<void>;
+  refreshUserDataOnly: (options?: { force?: boolean; includeSubscription?: boolean }) => Promise<void>;
+  refreshAllData: (options?: { force?: boolean }) => Promise<void>;
+  isPlusUser: () => boolean;
+  changeIsFirstConnection: (isFirstConnection: boolean) => void;
 
   // Mutations
   // Trades
@@ -188,7 +193,24 @@ interface DataContextType {
   // Dashboard layout
   saveDashboardLayout: (layout: PrismaDashboardLayout) => Promise<void>;
 }
+type DataContextType = DashboardDataState &
+  DashboardFiltersState &
+  DashboardDerivedState &
+  DashboardActions;
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
+const DashboardDataStateContext = createContext<DashboardDataState | undefined>(
+  undefined
+);
+const DashboardFiltersContext = createContext<DashboardFiltersState | undefined>(
+  undefined
+);
+const DashboardDerivedContext = createContext<DashboardDerivedState | undefined>(
+  undefined
+);
+const DashboardActionsContext = createContext<DashboardActions | undefined>(
+  undefined
+);
 
 // Add this hook before the UserDataProvider component
 function useIsMobileDetection() {
@@ -1674,130 +1696,122 @@ export const DataProvider: React.FC<{
     [supabaseUser?.id, setDashboardLayout]
   );
 
-  const contextValue = useMemo<DataContextType>(
+  const dataStateValue = useMemo<DashboardDataState>(
     () => ({
-      isPlusUser,
       isLoading,
       isMobile,
       isSharedView,
       sharedParams,
       setSharedParams,
+      isFirstConnection,
+      setIsFirstConnection,
+      trades,
+      accounts,
+    }),
+    [
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      setSharedParams,
+      isFirstConnection,
+      setIsFirstConnection,
+      trades,
+      accounts,
+    ]
+  );
+
+  const filtersValue = useMemo<DashboardFiltersState>(
+    () => ({
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
+      timeRange,
+      setTimeRange,
+      tickFilter,
+      setTickFilter,
+      weekdayFilter,
+      setWeekdayFilter,
+      hourFilter,
+      setHourFilter,
+      tagFilter,
+      setTagFilter,
+    }),
+    [
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
+      timeRange,
+      setTimeRange,
+      tickFilter,
+      setTickFilter,
+      weekdayFilter,
+      setWeekdayFilter,
+      hourFilter,
+      setHourFilter,
+      tagFilter,
+      setTagFilter,
+    ]
+  );
+
+  const derivedValue = useMemo<DashboardDerivedState>(
+    () => ({
+      formattedTrades,
+      statistics,
+      calendarData,
+    }),
+    [formattedTrades, statistics, calendarData]
+  );
+
+  const actionsValue = useMemo<DashboardActions>(
+    () => ({
+      isPlusUser,
       refreshTrades: refreshAllData,
       refreshTradesOnly,
       refreshUserDataOnly,
       refreshAllData,
       changeIsFirstConnection,
-      isFirstConnection,
-      setIsFirstConnection,
-
-      // Formatted trades and filters
-      trades,
-      formattedTrades,
-      instruments,
-      setInstruments,
-      accountNumbers,
-      setAccountNumbers,
-      dateRange,
-      setDateRange,
-      tickRange,
-      setTickRange,
-      pnlRange,
-      setPnlRange,
-
-      // Time range related
-      timeRange,
-      setTimeRange,
-
-      // Tick filter related
-      tickFilter,
-      setTickFilter,
-
-      // Weekday filter related
-      weekdayFilter,
-      setWeekdayFilter,
-
-      // Hour filter related
-      hourFilter,
-      setHourFilter,
-
-      // Tag filter
-      tagFilter,
-      setTagFilter,
-
-      // Statistics and calendar
-      statistics,
-      calendarData,
-      accounts,
-
-      // Mutations
-
-      // Update trade
       updateTrades,
       deleteTrades,
       groupTrades,
       ungroupTrades,
-
-      // Accounts
+      getTradeImages,
       deleteAccount,
       saveAccount,
-
-      // Group functions
       saveGroup,
       renameGroup,
       deleteGroup,
       moveAccountToGroup,
       moveAccountsToGroup,
-
-      // Payout functions
-      deletePayout,
       savePayout,
-
-      // Dashboard layout
+      deletePayout,
       saveDashboardLayout,
-      getTradeImages,
     }),
     [
       isPlusUser,
-      isLoading,
-      isMobile,
-      isSharedView,
-      sharedParams,
-      setSharedParams,
       refreshAllData,
       refreshTradesOnly,
       refreshUserDataOnly,
       changeIsFirstConnection,
-      isFirstConnection,
-      setIsFirstConnection,
-      trades,
-      formattedTrades,
-      instruments,
-      setInstruments,
-      accountNumbers,
-      setAccountNumbers,
-      dateRange,
-      setDateRange,
-      tickRange,
-      setTickRange,
-      pnlRange,
-      setPnlRange,
-      timeRange,
-      setTimeRange,
-      tickFilter,
-      setTickFilter,
-      weekdayFilter,
-      setWeekdayFilter,
-      hourFilter,
-      setHourFilter,
-      tagFilter,
-      setTagFilter,
-      statistics,
-      calendarData,
-      accounts,
       updateTrades,
       deleteTrades,
       groupTrades,
       ungroupTrades,
+      getTradeImages,
       deleteAccount,
       saveAccount,
       saveGroup,
@@ -1805,15 +1819,34 @@ export const DataProvider: React.FC<{
       deleteGroup,
       moveAccountToGroup,
       moveAccountsToGroup,
-      deletePayout,
       savePayout,
+      deletePayout,
       saveDashboardLayout,
-      getTradeImages,
     ]
   );
 
+  const contextValue = useMemo<DataContextType>(
+    () => ({
+      ...dataStateValue,
+      ...filtersValue,
+      ...derivedValue,
+      ...actionsValue,
+    }),
+    [dataStateValue, filtersValue, derivedValue, actionsValue]
+  );
+
   return (
-    <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
+    <DashboardDataStateContext.Provider value={dataStateValue}>
+      <DashboardFiltersContext.Provider value={filtersValue}>
+        <DashboardDerivedContext.Provider value={derivedValue}>
+          <DashboardActionsContext.Provider value={actionsValue}>
+            <DataContext.Provider value={contextValue}>
+              {children}
+            </DataContext.Provider>
+          </DashboardActionsContext.Provider>
+        </DashboardDerivedContext.Provider>
+      </DashboardFiltersContext.Provider>
+    </DashboardDataStateContext.Provider>
   );
 };
 
@@ -1821,6 +1854,38 @@ export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {
     throw new Error("useData must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardTrades = () => {
+  const context = useContext(DashboardDataStateContext);
+  if (!context) {
+    throw new Error("useDashboardTrades must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardFilters = () => {
+  const context = useContext(DashboardFiltersContext);
+  if (!context) {
+    throw new Error("useDashboardFilters must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardStats = () => {
+  const context = useContext(DashboardDerivedContext);
+  if (!context) {
+    throw new Error("useDashboardStats must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardActions = () => {
+  const context = useContext(DashboardActionsContext);
+  if (!context) {
+    throw new Error("useDashboardActions must be used within a DataProvider");
   }
   return context;
 };

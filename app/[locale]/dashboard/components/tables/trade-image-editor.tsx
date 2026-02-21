@@ -30,7 +30,7 @@ import { useI18n } from "@/locales/client";
 import { useUserStore } from "@/store/user-store";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase";
-import { useData } from "@/context/data-provider";
+import { useDashboardActions } from "@/context/data-provider";
 import {
   Carousel,
   CarouselContent,
@@ -92,7 +92,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   const [localImages, setLocalImages] = useState<{ imageBase64: string | null; imageBase64Second: string | null } | null>(null);
   const [resolvedImageUrls, setResolvedImageUrls] = useState<string[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
-  const { getTradeImages, updateTrades } = useData();
+  const { getTradeImages, updateTrades } = useDashboardActions();
 
   // Use hash-based upload hook
   const uploadProps = useHashUpload({

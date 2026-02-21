@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 
 interface TradeVideoUrlProps {
   tradeIds: string[]
@@ -24,7 +24,7 @@ interface TradeVideoUrlProps {
 
 export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlChange }: TradeVideoUrlProps) {
   const t = useI18n()
-  const { updateTrades } = useData()
+  const { updateTrades } = useDashboardActions()
   const [isOpen, setIsOpen] = useState(false)
   const [localUrl, setLocalUrl] = useState(initialVideoUrl || '')
   const [draftUrl, setDraftUrl] = useState(initialVideoUrl || '')

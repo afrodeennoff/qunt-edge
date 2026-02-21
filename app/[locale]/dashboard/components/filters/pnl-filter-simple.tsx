@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,7 @@ interface PnlFilterSimpleProps {
 
 export function PnlFilterSimple({ className }: PnlFilterSimpleProps) {
   const t = useI18n()
-  const { pnlRange, setPnlRange } = useData()
+  const { pnlRange, setPnlRange } = useDashboardFilters()
   const [customMin, setCustomMin] = useState<string>("")
   const [customMax, setCustomMax] = useState<string>("")
 

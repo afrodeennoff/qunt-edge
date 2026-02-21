@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useI18n } from '@/locales/client'
-import { useData } from '@/context/data-provider'
+import { useDashboardFilters, useDashboardActions } from '@/context/data-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -75,11 +75,8 @@ interface TagWidgetProps {
 
 export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetProps) {
   const t = useI18n()
-  const {
-    tagFilter,
-    setTagFilter,
-    updateTrades,
-  } = useData()
+  const { tagFilter, setTagFilter } = useDashboardFilters()
+  const { updateTrades } = useDashboardActions()
   const contextTrades = useTradesStore(state => state.trades)
   const tags = useUserStore(state => state.tags)
   const setTags = useUserStore(state => state.setTags)

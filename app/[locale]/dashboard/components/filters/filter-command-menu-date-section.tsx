@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { useParams } from "next/navigation"
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, isValid, getYear, getMonth, getDate, set } from "date-fns"
@@ -32,7 +32,7 @@ interface DateInputsState {
 }
 
 export function DateRangeSection({ searchValue }: DateRangeSectionProps) {
-  const { dateRange, setDateRange, weekdayFilter, setWeekdayFilter } = useData()
+  const { dateRange, setDateRange, weekdayFilter, setWeekdayFilter } = useDashboardFilters()
   const [fromCalendarOpen, setFromCalendarOpen] = useState(false)
   const [toCalendarOpen, setToCalendarOpen] = useState(false)
   const [uniqueDayCalendarOpen, setUniqueDayCalendarOpen] = useState(false)

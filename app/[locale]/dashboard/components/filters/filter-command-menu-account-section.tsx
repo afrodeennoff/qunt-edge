@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { CommandItem } from "@/components/ui/command"
 import { Settings, Trash2 } from "lucide-react"
 import { useI18n } from "@/locales/client"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters, useDashboardActions } from "@/context/data-provider"
 import { useTradesStore } from "../../../../../store/trades-store"
 import { useUserStore } from "../../../../../store/user-store"
 import { useModalStateStore } from "../../../../../store/modal-state-store"
@@ -27,7 +27,8 @@ interface AccountSectionProps {
 }
 
 export function AccountSection({ searchValue }: AccountSectionProps) {
-  const { accountNumbers = [], setAccountNumbers, deleteGroup } = useData()
+  const { accountNumbers = [], setAccountNumbers } = useDashboardFilters()
+  const { deleteGroup } = useDashboardActions()
   const groups = useUserStore(state => state.groups)
   const trades = useTradesStore(state => state.trades)
   const t = useI18n()
