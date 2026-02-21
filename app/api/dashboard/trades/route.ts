@@ -27,7 +27,11 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await getTradesAction(null, page, pageSize)
-    return NextResponse.json(result)
+    return NextResponse.json(result, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    })
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',

@@ -58,6 +58,9 @@ export async function GET(
           "Content-Type": contentType,
           "Cache-Control":
             "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+          "CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+          "Vercel-CDN-Cache-Control":
+            "public, s-maxage=86400, stale-while-revalidate=604800",
         },
       });
     } catch (err) {
@@ -69,5 +72,4 @@ export async function GET(
   const message = lastErrorMessage || "Failed to fetch thumbnail";
   return new Response(message, { status: 502 });
 }
-
 

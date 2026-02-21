@@ -28,7 +28,11 @@ export async function GET(request: Request) {
     }
 
     const accounts = await getAccountsAction()
-    return NextResponse.json(serializeWithDecimals(accounts))
+    return NextResponse.json(serializeWithDecimals(accounts), {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    })
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',
