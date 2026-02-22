@@ -8,6 +8,20 @@ import { buildAppCsp, buildEmbedCsp, createNonce } from "@/lib/security/csp"
 // Maintenance mode flag - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false
 
+// ── CORS Configuration ──────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = new Set([
+  'https://qunt-edge.vercel.app',
+  'https://www.qunt-edge.vercel.app',
+])
+if (process.env.NODE_ENV !== 'production') {
+  ALLOWED_ORIGINS.add('http://localhost:3000')
+  ALLOWED_ORIGINS.add('http://127.0.0.1:3000')
+}
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return true // same-origin requests have no Origin header
+  return ALLOWED_ORIGINS.has(origin)
+}
+
 // Use redirect strategy to ensure users are always on valid localized paths
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en", "fr", "de", "es", "it", "pt", "vi", "hi", "ja", "zh", "yo"],
@@ -115,18 +129,19 @@ function setCspHeader(response: NextResponse, csp: string, reportOnly: boolean) 
 
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
+  const origin = req.headers.get('origin')
   const locale = getLocale(pathname)
   const isDashboardRoute = pathname.includes("/dashboard")
   const isAdminRoute = pathname.includes("/admin")
   const isAuthRoute = pathname.includes("/authentication")
   const isEmbedRoute = pathname.includes("/embed")
+  const isApiRoute = pathname.startsWith("/api/")
   const isDev = process.env.NODE_ENV === "development"
   const cspEnabled = process.env.CSP_ENABLED !== "false"
   const cspReportOnly = process.env.CSP_REPORT_ONLY !== "false"
   const cspStrictMode = process.env.CSP_STRICT_MODE === "true"
   const isStaticAsset =
     pathname.startsWith("/_next/") ||
-    pathname.startsWith("/api/") ||
     pathname.startsWith("/videos/") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
@@ -139,6 +154,40 @@ export default async function middleware(req: NextRequest) {
   // More specific static asset exclusions - must be first!
   if (isStaticAsset) {
     return NextResponse.next()
+  }
+
+  // ── CORS handling for API routes ─────────────────────────────────────────
+  if (isApiRoute) {
+    // Preflight
+    if (req.method === 'OPTIONS') {
+      const headers = new Headers()
+      if (origin && isAllowedOrigin(origin)) {
+        headers.set('Access-Control-Allow-Origin', origin)
+      }
+      headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+      headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+      headers.set('Access-Control-Max-Age', '86400')
+      headers.set('Access-Control-Allow-Credentials', 'true')
+      return new NextResponse(null, { status: 204, headers })
+    }
+
+    // Reject cross-origin requests from disallowed origins
+    if (origin && !isAllowedOrigin(origin)) {
+      return NextResponse.json(
+        { error: 'Origin not allowed', code: 'CORS_REJECTED' },
+        { status: 403 }
+      )
+    }
+
+    // Let API routes pass through with security headers + optional CORS
+    const apiResponse = NextResponse.next()
+    applySecurityHeaders(apiResponse)
+    // Attach CORS header for allowed cross-origin API requests
+    if (origin && isAllowedOrigin(origin)) {
+      apiResponse.headers.set('Access-Control-Allow-Origin', origin)
+      apiResponse.headers.set('Access-Control-Allow-Credentials', 'true')
+    }
+    return apiResponse
   }
 
   // Apply i18n middleware first
@@ -356,6 +405,8 @@ export default async function middleware(req: NextRequest) {
     setCspHeader(response, appCsp, cspReportOnly)
   }
 
+  applySecurityHeaders(response)
+
   // Dashboard/auth HTML should never be browser-cached; stale documents force hard reload behavior.
   if (isDashboardRoute || isAuthRoute) {
     response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate")
@@ -367,6 +418,19 @@ export default async function middleware(req: NextRequest) {
   return response
 }
 
+// ── Security Headers ────────────────────────────────────────────────────────
+function applySecurityHeaders(response: NextResponse) {
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=63072000; includeSubDomains; preload'
+  )
+}
+
 export const config = {
   matcher: [
     /*
@@ -374,10 +438,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - api routes
      * - opengraph-image (Open Graph image generation)
      * - public files with extensions
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|twitter-image|icon|.*\\..*).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|twitter-image|icon|.*\\..*).*)",
   ],
 }

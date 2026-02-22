@@ -1,13 +1,14 @@
-# 1. Base Image
+# 1. Base Image – pin to a specific minor for reproducible builds
 FROM node:20-slim AS base
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 # 2. Dependencies Stage
 FROM base AS deps
 WORKDIR /app
 
 # Install build dependencies for native modules (canvas, etc.)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     make \
     g++ \
@@ -17,10 +18,11 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev \
-    pkg-config
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --ignore-scripts=false
 
 # 3. Builder Stage
 FROM base AS builder
@@ -76,5 +78,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD ["node", "-e", "fetch('http://localhost:3000/api/health').then(r=>{process.exit(r.ok?0:1)}).catch(()=>process.exit(1))"]
 
 CMD ["node", "server.js"]

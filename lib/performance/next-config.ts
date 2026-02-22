@@ -40,6 +40,8 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
   const config: NextConfig = {
     poweredByHeader: false,
     reactStrictMode: true,
+    output: 'standalone',
+    serverExternalPackages: ['crypto', 'pg'],
     turbopack: {
       root: process.cwd(),
     },
@@ -59,6 +61,28 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
       deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
       imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
       qualities: [50, 65, 75, 85],
+    },
+    async headers() {
+      return [
+        {
+          // Apply security headers to all non-API routes
+          source: '/((?!api/).*)',
+          headers: [
+            { key: 'X-Content-Type-Options', value: 'nosniff' },
+            { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+            { key: 'X-DNS-Prefetch-Control', value: 'on' },
+            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+            { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          ],
+        },
+        {
+          source: '/api/:path*',
+          headers: [
+            { key: 'X-Content-Type-Options', value: 'nosniff' },
+            { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
+          ],
+        },
+      ]
     },
   };
 
