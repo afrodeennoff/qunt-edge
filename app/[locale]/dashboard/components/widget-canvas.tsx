@@ -148,14 +148,14 @@ function DeprecatedWidget({ onRemove }: { onRemove: () => void }) {
   )
 }
 
-function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, currentType }: {
+const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomizing, size, currentType }: {
   children: React.ReactNode
   onRemove: () => void
   onChangeSize: (size: WidgetSize) => void
   isCustomizing: boolean
   size: WidgetSize
   currentType: WidgetType
-}) {
+}) => {
   const t = useI18n()
   const { isMobile } = useData()
   const uiV2Enabled = isUiV2Enabled()
@@ -375,7 +375,14 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
       )}
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isCustomizing === nextProps.isCustomizing &&
+    prevProps.size === nextProps.size &&
+    prevProps.currentType === nextProps.currentType &&
+    prevProps.children === nextProps.children
+  )
+})
 
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
@@ -427,7 +434,10 @@ export default function WidgetCanvas() {
     if (!isWidgetClick && !isContextMenuClick && !isCustomizationSwitchClick && !isDialogClick && !isDialogTriggerClick) {
       setIsCustomizing(false)
     }
-  }, [])
+  }, [setIsCustomizing])
+
+  const handleOutsideClickRef = useRef(handleOutsideClick)
+  handleOutsideClickRef.current = handleOutsideClick
 
   const flushPendingLayoutSave = useCallback(async () => {
     if (!pendingSaveRef.current) return
@@ -579,11 +589,14 @@ export default function WidgetCanvas() {
   }, [isMobile, removeWidget]);
 
   useEffect(() => {
-    if (isCustomizing) {
-      document.addEventListener('click', handleOutsideClick)
-      return () => document.removeEventListener('click', handleOutsideClick)
+    const handleClick = (e: MouseEvent) => {
+      handleOutsideClickRef.current(e)
     }
-  }, [isCustomizing, handleOutsideClick]);
+    if (isCustomizing) {
+      document.addEventListener('click', handleClick)
+      return () => document.removeEventListener('click', handleClick)
+    }
+  }, [isCustomizing]);
 
   useEffect(() => {
     if (!isCustomizing) {

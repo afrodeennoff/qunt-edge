@@ -1,11 +1,15 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const databaseUrl =
+const rawUrl =
+  process.env.DIRECT_URL ||
   process.env.DATABASE_URL ||
   process.env.POSTGRES_PRISMA_URL ||
   process.env.POSTGRES_URL ||
   "postgresql://postgres:postgres@localhost:5432/postgres";
+
+// Strip potential quotes that might have been added in .env or environmental overrides
+const databaseUrl = rawUrl.replace(/^"(.*)"$/, '$1');
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

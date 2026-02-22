@@ -1,55 +1,36 @@
+import DOMPurify from 'isomorphic-dompurify'
+
 /**
  * HTML Sanitization Utilities
- *
- * Uses isomorphic-dompurify (which is already in deps) for robust XSS prevention.
- * Falls back to regex-based stripping only in edge environments where DOMPurify
- * cannot initialize.
+ * 
+ * Uses isomorphic-dompurify for robust XSS prevention across both 
+ * Server and Client environments.
  */
 
-let purify: { sanitize: (html: string) => string } | null = null
-
-async function getPurify() {
-  if (purify) return purify
-  try {
-    const mod = await import('isomorphic-dompurify')
-    purify = mod.default ?? mod
-    return purify
-  } catch {
-    return null
-  }
-}
-
 /**
- * Strip dangerous HTML constructs.  Prefers DOMPurify for correctness.
+ * Sanitize HTML strings for safe rendering.
+ * Prefers DOMPurify for correctness, with localized defense-in-depth.
  */
 export function sanitizeHtml(html: string): string {
   if (!html) return ''
 
-  // Regex fallback – defense-in-depth even when DOMPurify is available
-  return html
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, '')
-    .replace(/\s+on[a-z]+\s*=\s*"[^"]*"/gi, '')
-    .replace(/\s+on[a-z]+\s*=\s*'[^']*'/gi, '')
-    .replace(/\s+on[a-z]+\s*=\s*[^\s>]+/gi, '')
-    .replace(/\s+(href|src)\s*=\s*"(?:\s*javascript:)[^"]*"/gi, '')
-    .replace(/\s+(href|src)\s*=\s*'(?:\s*javascript:)[^']*'/gi, '')
-    .replace(/\s+(href|src)\s*=\s*(?:\s*javascript:)[^\s>]+/gi, '')
-    .replace(/javascript:/gi, '')
+  // Use DOMPurify for the primary sanitization pass
+  // This is safe to run in both Node.js and Browser thanks to isomorphic-dompurify
+  return DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    ALLOWED_TAGS: [
+      'b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li',
+      'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'blockquote', 'code', 'pre'
+    ],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style']
+  })
 }
 
 /**
- * Async sanitizer that uses DOMPurify when available (recommended for rich text).
+ * Async sanitizer – kept for backward compatibility, now just calls sync version.
  */
 export async function sanitizeHtmlStrict(html: string): Promise<string> {
-  if (!html) return ''
-
-  const dp = await getPurify()
-  if (dp) {
-    return dp.sanitize(html)
-  }
-
-  // Fallback
   return sanitizeHtml(html)
 }
 
@@ -59,9 +40,10 @@ export async function sanitizeHtmlStrict(html: string): Promise<string> {
  */
 export function sanitizePlainText(input: string): string {
   if (!input) return ''
-  return input
-    .replace(/[<>]/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+=/gi, '')
-    .trim()
+
+  // For plain text, we want to strip ALL tags
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: []
+  }).trim()
 }
