@@ -141,6 +141,8 @@ export function UnifiedSidebar({
   const { isLoading } = useNavigationLoading()
   const { isQueryParamOnly } = useNavigationHelper()
   const isCollapsed = state === "collapsed"
+  const debugCache = process.env.NEXT_PUBLIC_CACHE_DEBUG === "true"
+  const pathname = usePathname()
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -246,7 +248,18 @@ export function UnifiedSidebar({
                         {href ? (
                           <Link
                             href={href}
+                            prefetch={false}
                             onClick={() => {
+                              if (debugCache) {
+                                console.info("[CacheDebug] sidebar navigation click", {
+                                  from: pathname,
+                                  to: href,
+                                  isQueryParamOnly: isQueryParamOnly(href),
+                                  hasServiceWorkerController: typeof navigator !== "undefined"
+                                    ? Boolean(navigator.serviceWorker?.controller)
+                                    : false,
+                                })
+                              }
                               if (isMobile && !isQueryParamOnly(href)) {
                                 setOpenMobile(false)
                               }

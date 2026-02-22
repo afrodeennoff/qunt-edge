@@ -36,6 +36,35 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-22: Dashboard Hard-Reload Cache Fix (SW Gating + No-Store + Prefetch Control)
+- **What changed:** Fixed dashboard route stale-update behavior that required hard reloads by tightening service-worker lifecycle, dashboard cache headers, and sidebar navigation fetch behavior.
+- **What I want:** Dashboard routes (especially `/en/dashboard/strategies`) should reflect updates on standard refresh/navigation without forcing hard reload.
+- **What I don't want:** Persistent stale dashboard shell state from old service-worker control, implicit browser document caching, or confusing repeated route prefetch requests in logs.
+- **How we fixed that:**
+  - Added service-worker kill switch in `components/providers/root-providers.tsx`:
+    - register SW only when `NEXT_PUBLIC_SW_ENABLED === "true"`,
+    - otherwise unregister existing service workers and clear `quntedge-static-*` caches on load.
+  - Added cache-debug lifecycle logging (`[CacheDebug]`) for:
+    - SW registration,
+    - SW controller changes,
+    - sidebar route clicks (when `NEXT_PUBLIC_CACHE_DEBUG === "true"`).
+  - Hardened middleware cache policy in `proxy.ts` for dashboard/auth routes:
+    - `Cache-Control: no-store, max-age=0, must-revalidate`,
+    - `Pragma: no-cache`,
+    - `Expires: 0`.
+  - Updated sidebar route links in `components/ui/unified-sidebar.tsx`:
+    - set `prefetch={false}` to stop aggressive route prefetch churn.
+  - Updated `public/sw.js` strategy:
+    - bumped cache namespace to `quntedge-static-v2`,
+    - excluded HTML/document navigation requests from SW caching,
+    - kept static asset caching with background revalidation.
+- **Key Files:** `components/providers/root-providers.tsx`, `components/ui/unified-sidebar.tsx`, `proxy.ts`, `public/sw.js`, `docs/audits/performance-initiative-2026-02-21.md`, `docs/PERFORMANCE_BUDGETS.md`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run build` -> exits `0`.
+  - `npm run check:route-budgets` -> exits `0`.
+  - `npm run analyze:bundle` -> exits `0`.
+
 ### 2026-02-21: Dashboard Overlay Lazy-Loading + Performance Artifact Refresh
 - **What changed:** Moved dashboard overlay modules behind a client-only lazy wrapper and refreshed bundle/Lighthouse artifacts with explicit before/after route-manifest deltas.
 - **What I want:** Keep dashboard routes responsive by loading critical shell first and deferring non-critical overlay UI.

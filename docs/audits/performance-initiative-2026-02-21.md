@@ -162,3 +162,63 @@ Average reduction across dashboard family routes: **-2.50 KB (-5.09%)**
 
 ### Lighthouse status
 - `npx lighthouse` could not run in this environment because npm registry access is blocked (`ENOTFOUND registry.npmjs.org`), so route-level Lighthouse deltas must be collected in a network-enabled run.
+
+## Dashboard Cache + Hard-Reload Fix (2026-02-22)
+
+### Root cause analysis
+1. **P1 - Service worker lifecycle was too broad**
+   - `components/providers/root-providers.tsx` registered `/sw.js` on every production load with no runtime kill-switch.
+   - Impact: previously installed service workers could continue controlling requests and stale cache state after deploys.
+2. **P1 - Dashboard document caching policy was not explicit**
+   - Dashboard/auth HTML responses did not force a strict no-store policy at middleware layer.
+   - Impact: browser/session cache could preserve stale route shells and require hard reload to reconcile.
+3. **P2 - Sidebar prefetch amplified noisy route fetches**
+   - Sidebar links prefetched automatically, causing repeated route GETs for adjacent dashboard pages in logs (for example `/trader-profile` while user is on `/strategies`).
+   - Impact: increased confusion during debugging and unnecessary route fetch traffic.
+
+### What changed
+- Added service-worker kill switch + cleanup:
+  - `NEXT_PUBLIC_SW_ENABLED === "true"` is now required to register `/sw.js`.
+  - When disabled, existing registrations and `quntedge-static-*` caches are automatically cleared.
+- Added cache-debug telemetry:
+  - `[CacheDebug]` logs on SW register/unregister/controller change.
+  - Optional sidebar navigation logs behind `NEXT_PUBLIC_CACHE_DEBUG === "true"`.
+- Hardened middleware cache policy for dashboard/auth:
+  - `Cache-Control: no-store, max-age=0, must-revalidate`
+  - `Pragma: no-cache`
+  - `Expires: 0`
+  - `x-dashboard-cache-policy: no-store`
+- Reduced unnecessary route prefetch churn by setting `prefetch={false}` on sidebar links.
+- Updated SW strategy (`public/sw.js`):
+  - bumped cache namespace (`quntedge-static-v2`),
+  - excluded HTML/document navigation requests from SW caching,
+  - retained static-asset caching with background revalidation.
+
+### Before / After (behavioral)
+| Area | Before | After | Why it helps |
+|---|---|---|---|
+| SW registration | Always on in production | Opt-in via `NEXT_PUBLIC_SW_ENABLED` | Prevents stale SW control by default |
+| Existing SW cleanup | None | Automatic unregister + cache clear when disabled | Removes sticky stale caches after deploy |
+| Dashboard HTML caching | Implicit | Forced `no-store` policy in middleware | Ensures fresh dashboard shell on normal refresh |
+| Sidebar route prefetch | Enabled | Disabled for sidebar links | Stops repeated background GET churn for non-clicked links |
+| Cache diagnostics | Minimal | `[CacheDebug]` lifecycle + nav logging | Makes hard-reload causes observable |
+
+### Verification (this change set)
+- `npm run typecheck` -> `0`
+- `npm run build` -> `0`
+- `npm run check:route-budgets` -> `0`
+- `npm run analyze:bundle` -> `0`
+
+### Follow-up production checks
+- Confirm response headers on:
+  - `/en/dashboard/strategies`
+  - `/en/dashboard/trader-profile`
+  include `Cache-Control: no-store, max-age=0, must-revalidate`.
+- In browser devtools:
+  - Application > Service Workers: no active SW when `NEXT_PUBLIC_SW_ENABLED=false`.
+  - Network: no repeated sidebar prefetch requests for non-clicked dashboard routes.
+
+## Changelog
+- `v2026.02.22-perf-initiative.3`
+  - Fixed dashboard hard-reload cache behavior via SW lifecycle gating, dashboard no-store middleware headers, and sidebar prefetch suppression.
+  - Added cache-debug logging hooks for SW lifecycle and sidebar route transitions.

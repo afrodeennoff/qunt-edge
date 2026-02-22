@@ -31,6 +31,19 @@
   - `useData()` usages: `0`
   - Use `useDashboardFilters/useDashboardStats/useDashboardActions/useDashboardTrades` instead.
 
+## Cache and Navigation Budgets
+
+- Dashboard/auth document responses must send:
+  - `Cache-Control: no-store, max-age=0, must-revalidate`
+  - `Pragma: no-cache`
+  - `Expires: 0`
+- Service worker is opt-in only:
+  - `NEXT_PUBLIC_SW_ENABLED` must be explicitly set to `"true"` to register `/sw.js`.
+- Sidebar dashboard navigation should avoid automatic prefetch churn:
+  - keep sidebar route links `prefetch={false}` unless a measured experiment proves benefit.
+- Enable cache diagnostics only when needed:
+  - `NEXT_PUBLIC_CACHE_DEBUG="true"` logs route + SW lifecycle events in browser console.
+
 ## Operational Policy
 
 - Every performance-related change must include:

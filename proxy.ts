@@ -356,6 +356,14 @@ export default async function middleware(req: NextRequest) {
     setCspHeader(response, appCsp, cspReportOnly)
   }
 
+  // Dashboard/auth HTML should never be browser-cached; stale documents force hard reload behavior.
+  if (isDashboardRoute || isAuthRoute) {
+    response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate")
+    response.headers.set("Pragma", "no-cache")
+    response.headers.set("Expires", "0")
+    response.headers.set("x-dashboard-cache-policy", "no-store")
+  }
+
   return response
 }
 
