@@ -27,6 +27,7 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
@@ -210,7 +211,7 @@ export function UnifiedSidebar({
       <SidebarContent className="scrollbar-thin relative z-10 pointer-events-auto">
         {groupedItems.order.map((groupName, groupIndex) => (
           <SidebarGroup key={groupName} className="px-2 py-2 relative z-10 pointer-events-auto">
-            <SidebarGroupLabel 
+            <SidebarGroupLabel
               className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2 pointer-events-auto"
               id={`sidebar-group-${groupIndex}`}
             >
@@ -377,6 +378,7 @@ export function UnifiedSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }
