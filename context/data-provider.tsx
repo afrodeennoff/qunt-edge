@@ -1696,8 +1696,8 @@ export const DataProvider: React.FC<{
       try {
         setDashboardLayout(layout as unknown as DashboardLayoutWithWidgets);
         await saveDashboardLayoutAction(layout);
-      } catch (error) {
-        console.error("Error saving dashboard layout:", error);
+      } catch (error: unknown) {
+        console.error("DashboardActions] Error saving dashboard layout:", error);
         throw error;
       }
     },

@@ -5,8 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  schemas   = ["public"]
+  provider = "postgresql"
+  schemas  = ["public"]
 }
 
 // ============================================================================
@@ -65,13 +65,13 @@ model User {
 }
 
 model OAuthState {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   provider  String
-  stateHash String   @unique
+  stateHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation("UserOAuthStates", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -81,18 +81,18 @@ model OAuthState {
 }
 
 model AuthAttempt {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   userId         String?
   emailHash      String
   ipPrefix       String
   actionType     String
-  failCount      Int      @default(0)
+  failCount      Int       @default(0)
   firstFailureAt DateTime?
   lastFailureAt  DateTime?
   lockedUntil    DateTime?
   lastSuccessAt  DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   user User? @relation("UserAuthAttempts", fields: [userId], references: [id], onDelete: SetNull)
 
@@ -103,11 +103,11 @@ model AuthAttempt {
 }
 
 model RecoveryCode {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   codeHash  String
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation("UserRecoveryCodes", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -133,12 +133,12 @@ model Referral {
 }
 
 model Subscription {
-  id       String  @id @unique @default(uuid())
-  email    String  @unique
-  plan     String
-  status   String  @default("ACTIVE")
+  id                String  @id @unique @default(uuid())
+  email             String  @unique
+  plan              String
+  status            String  @default("ACTIVE")
   cancelAtPeriodEnd Boolean @default(false)
-  interval String?
+  interval          String?
 
   userId      String    @unique
   endDate     DateTime?
@@ -210,22 +210,22 @@ model Account {
   accountSize     String?
   accountSizeName String?
 
-  startingBalance   Decimal   @default(0)
+  startingBalance   Decimal  @default(0)
   balanceRequired   Decimal?
-  drawdownThreshold Decimal   @default(0)
-  dailyLoss         Decimal   @default(0)
-  profitTarget      Decimal   @default(0)
-  buffer            Decimal   @default(0)
-  considerBuffer    Boolean @default(true)
+  drawdownThreshold Decimal  @default(0)
+  dailyLoss         Decimal  @default(0)
+  profitTarget      Decimal  @default(0)
+  buffer            Decimal  @default(0)
+  considerBuffer    Boolean  @default(true)
 
-  trailingDrawdown   Boolean @default(false)
+  trailingDrawdown   Boolean  @default(false)
   trailingStopProfit Decimal?
   trailing           String?
 
   isPerformance Boolean @default(false)
   evaluation    Boolean @default(true)
 
-  payoutCount   Int     @default(0)
+  payoutCount   Int      @default(0)
   minPayout     Decimal?
   maxPayout     String?
   profitSharing Decimal?
@@ -246,10 +246,10 @@ model Account {
   tradingNewsAllowed Boolean @default(true)
   rulesDailyLoss     String?
 
-  autoRenewal      Boolean           @default(false)
-  paymentFrequency PaymentFrequency?
-  renewalNotice    Int?
-  nextPaymentDate  DateTime?
+  autoRenewal             Boolean           @default(false)
+  paymentFrequency        PaymentFrequency?
+  renewalNotice           Int?
+  nextPaymentDate         DateTime?
   renewalNoticeLastSentAt DateTime?
 
   isRecursively     String?
@@ -273,6 +273,7 @@ model Account {
   @@index([number])
   @@index([groupId])
   @@index([nextPaymentDate])
+  @@index([userId, number]) // Performance scan index
   @@schema("public")
 }
 
@@ -343,7 +344,7 @@ model Payout {
   accountNumber String
 
   amount Decimal
-  status String @default("PENDING")
+  status String  @default("PENDING")
 
   date      DateTime
   createdAt DateTime @default(now())
@@ -388,12 +389,12 @@ model Synchronization {
   lastSyncedAt  DateTime
   dailySyncTime DateTime?
 
-  token          String?
+  token           String?
   tokenCiphertext String?
-  tokenIv        String?
-  tokenTag       String?
+  tokenIv         String?
+  tokenTag        String?
   tokenKeyVersion String?
-  tokenExpiresAt DateTime?
+  tokenExpiresAt  DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -403,6 +404,7 @@ model Synchronization {
   @@unique([userId, service, accountId])
   @@index([userId])
   @@index([service])
+  @@index([userId, accountId]) // Optimization for rapid synchronization checkups
   @@schema("public")
 }
 
@@ -411,7 +413,7 @@ model Synchronization {
 // ============================================================================
 
 model TickDetails {
-  id        String @id @unique @default(uuid())
+  id        String  @id @unique @default(uuid())
   ticker    String
   tickValue Decimal
   tickSize  Decimal
@@ -423,8 +425,8 @@ model TradeAnalytics {
   id      String @id @default(uuid())
   tradeId String @unique
 
-  mae                Decimal @default(0)
-  mfe                Decimal @default(0)
+  mae                Decimal  @default(0)
+  mfe                Decimal  @default(0)
   entryPriceFromData Decimal?
   priceDifference    Decimal?
   riskRewardRatio    Decimal?
@@ -682,10 +684,10 @@ model TeamAnalytics {
   teamId String
   period String @default("monthly")
 
-  totalPnl      Decimal @default(0)
-  totalTrades   Int     @default(0)
-  winRate       Decimal @default(0)
-  averageRr     Decimal @default(0)
+  totalPnl      Decimal  @default(0)
+  totalTrades   Int      @default(0)
+  winRate       Decimal  @default(0)
+  averageRr     Decimal  @default(0)
   bestMemberId  String?
   bestMemberPnl Decimal?
 
@@ -1172,7 +1174,7 @@ model AiRequestLog {
   totalTokens      Int?
 
   latencyMs      Int
-  toolCallsCount Int      @default(0)
+  toolCallsCount Int     @default(0)
   finishReason   String?
 
   success       Boolean
