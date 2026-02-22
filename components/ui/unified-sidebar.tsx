@@ -185,36 +185,28 @@ export function UnifiedSidebar({
   const initials = useMemo(() => getUserInitials(user), [user])
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar text-sidebar-foreground pointer-events-auto">
-      <SidebarHeader className="h-14 flex items-center border-b border-sidebar-border/50 relative z-20 pointer-events-auto px-4 transition-[padding] duration-200 group-data-[collapsible=icon]:px-2">
-        <div className={cn("flex items-center w-full overflow-hidden transition-all duration-200", isCollapsed ? "justify-center gap-0" : "gap-3")}>
-          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm", isCollapsed && "hidden")}>
-            <Logo className="size-5 fill-current" />
-          </div>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-bold tracking-tight text-sidebar-foreground uppercase">
-              Qunt Edge
-            </p>
-            <p className="truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
-              Workspace
-            </p>
-          </div>
-          <SidebarTrigger
-            className={cn(
-              "hidden md:flex h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors",
-              isCollapsed ? "ml-0" : "ml-auto"
-            )}
-          />
-        </div>
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar text-sidebar-foreground pointer-events-auto">
+      <SidebarHeader className="border-b border-sidebar-border/30 h-14 flex flex-col justify-center px-2 py-0">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" className="pointer-events-auto transition-colors group">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+                <Logo className="size-5 fill-current" />
+              </div>
+              <div className="flex flex-col gap-0.5 leading-none px-1 overflow-hidden">
+                <span className="truncate font-bold tracking-tight text-sm uppercase">Qunt Edge</span>
+                <span className="truncate text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-medium">Workspace</span>
+              </div>
+              <SidebarTrigger className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex h-6 w-6" />
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="scrollbar-thin relative z-10 pointer-events-auto">
+      <SidebarContent className="scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
         {groupedItems.order.map((groupName, groupIndex) => (
-          <SidebarGroup key={groupName} className="px-2 py-2 relative z-10 pointer-events-auto">
-            <SidebarGroupLabel
-              className="px-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 mb-2 pointer-events-auto"
-              id={`sidebar-group-${groupIndex}`}
-            >
+          <SidebarGroup key={groupName} className="px-2 py-2">
+            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/50 mb-1" id={`sidebar-group-${groupIndex}`}>
               {groupName}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -232,19 +224,11 @@ export function UnifiedSidebar({
                         isActive={itemIsActive}
                         tooltip={label}
                         disabled={isItemDisabled}
-                        aria-label={label}
-                        aria-current={itemIsActive ? "page" : undefined}
-                        aria-disabled={isItemDisabled}
                         onClick={!href ? () => {
                           item.action?.()
                           if (isMobile) setOpenMobile(false)
                         } : undefined}
-                        className={cn(
-                          "min-h-11 md:min-h-8 transition-all duration-200 pointer-events-auto relative z-10",
-                          itemIsActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
-                        )}
+                        className={cn("pointer-events-auto font-medium transition-colors", itemIsActive && "font-semibold shadow-sm")}
                       >
                         {href ? (
                           <Link
@@ -265,20 +249,18 @@ export function UnifiedSidebar({
                                 setOpenMobile(false)
                               }
                             }}
-                            className="flex items-center w-full h-full pointer-events-auto"
+                            className="flex items-center w-full"
                           >
-                            <span className={cn("shrink-0", itemIsActive ? "text-primary" : "text-muted-foreground/60")}>
-                              {isLoading && itemIsActive ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                item.icon
-                              )}
-                            </span>
+                            {isLoading && itemIsActive ? (
+                              <Loader2 className="h-4 w-4 animate-spin shrink-0 text-sidebar-primary" />
+                            ) : (
+                              <span className="shrink-0">{item.icon}</span>
+                            )}
                             <span className="ml-3 truncate">{label}</span>
                           </Link>
                         ) : (
                           <div className="flex items-center w-full">
-                            <span className="shrink-0 text-muted-foreground/60">{item.icon}</span>
+                            <span className="shrink-0">{item.icon}</span>
                             <span className="ml-3 truncate">{label}</span>
                           </div>
                         )}
@@ -297,80 +279,81 @@ export function UnifiedSidebar({
         ))}
 
         {actions && (
-          <SidebarGroup className="px-2 mt-auto border-t border-sidebar-border/30 pt-4 pb-2">
+          <SidebarGroup className="mt-auto pt-4 pb-2 border-t border-sidebar-border/30 px-2">
             <SidebarMenu>{actions}</SidebarMenu>
           </SidebarGroup>
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/50 p-2 relative z-20 pointer-events-auto bg-sidebar/50">
+      <SidebarFooter className="border-t border-sidebar-border/30 p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  aria-label="Open user menu"
-                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground pointer-events-auto relative z-10"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-full"
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
+                  <Avatar className="h-8 w-8 rounded-lg overflow-hidden border border-sidebar-border shadow-sm">
                     <AvatarImage src={user?.avatar_url} alt={displayName} />
-                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">
+                    <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xs font-semibold">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-2">
-                    <span className="truncate font-semibold text-sidebar-foreground">{displayName}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user?.email || "Free Plan"}</span>
+                  <div className="grid flex-1 text-left text-sm leading-tight ml-1.5">
+                    <span className="truncate font-semibold">{displayName}</span>
+                    <span className="truncate text-xs text-sidebar-foreground/60">{user?.email || "Free Plan"}</span>
                   </div>
-                  <MoreHorizontal className="ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                  <MoreHorizontal className="ml-auto size-4 text-sidebar-foreground/50" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                side="right"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl overflow-hidden shadow-lg border-sidebar-border"
+                side={isMobile ? "bottom" : "right"}
                 align="end"
-                sideOffset={4}
+                sideOffset={6}
               >
                 <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="h-8 w-8 rounded-lg">
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 text-left text-sm bg-sidebar-accent/50 dark:bg-sidebar-accent/10">
+                    <Avatar className="h-8 w-8 rounded-lg border border-sidebar-border shadow-sm">
                       <AvatarImage src={user?.avatar_url} alt={displayName} />
-                      <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">
+                      <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xs font-semibold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">{displayName}</span>
-                      <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                      <span className="truncate text-xs opacity-80">{user?.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {timezone && (
-                  <div className="px-2 py-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 mb-1">Timezone</p>
-                    <select
-                      value={timezone.value}
-                      onChange={(e) => timezone.onChange(e.target.value)}
-                      className="w-full bg-transparent text-xs p-1 focus:outline-none cursor-pointer border rounded-md border-border/50 hover:border-border transition-colors"
-                    >
-                      {timezone.options.map((tz) => (
-                        <option key={tz} value={tz} className="bg-sidebar">
-                          {tz}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="px-2 py-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-1 mb-1.5">Timezone</p>
+                    <div className="relative">
+                      <select
+                        value={timezone.value}
+                        onChange={(e) => timezone.onChange(e.target.value)}
+                        className="w-full bg-transparent text-sm p-1.5 focus:outline-none cursor-pointer border rounded-md border-sidebar-border/50 hover:bg-sidebar-accent/50 hover:border-sidebar-border transition-colors appearance-none"
+                      >
+                        {timezone.options.map((tz) => (
+                          <option key={tz} value={tz} className="bg-popover text-popover-foreground">
+                            {tz}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 )}
                 <DropdownMenuSeparator />
                 {onLogout && (
                   <DropdownMenuItem
                     onClick={onLogout}
-                    className="text-destructive focus:text-destructive cursor-pointer"
+                    className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer my-1 mx-1"
                   >
                     <LogOut className="mr-2 size-4" />
-                    <span>Log out</span>
+                    <span className="font-medium">Log out</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
