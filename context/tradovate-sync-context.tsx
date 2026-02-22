@@ -6,6 +6,12 @@ import { toast } from 'sonner'
 import { useI18n } from "@/locales/client"
 import { Synchronization } from '@/prisma/generated/prisma'
 
+interface TradovateSyncResult {
+  error: boolean;
+  message: string;
+  savedCount: number;
+}
+
 interface TradovateSyncContextType {
   // Core sync management
   performSyncForAccount: (accountId: string, options?: { skipToast?: boolean, skipRefresh?: boolean }) => Promise<{ success: boolean; message: string; savedCount?: number } | undefined>
@@ -39,9 +45,9 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
 
   // Normalize dates returned from API
   const normalizeSynchronization = useCallback(
-    (sync: any): Synchronization => ({
+    (sync: Synchronization): Synchronization => ({
       ...sync,
-      lastSyncedAt: sync?.lastSyncedAt ? new Date(sync.lastSyncedAt) : null,
+      lastSyncedAt: sync?.lastSyncedAt ? new Date(sync.lastSyncedAt) : new Date(0),
       tokenExpiresAt: sync?.tokenExpiresAt ? new Date(sync.tokenExpiresAt) : null,
       dailySyncTime: sync?.dailySyncTime ? new Date(sync.dailySyncTime) : null,
       createdAt: sync?.createdAt ? new Date(sync.createdAt) : new Date(),
@@ -168,10 +174,10 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
       const promise = runSync()
       toast.promise(promise, {
         loading: t('tradovateSync.sync.inProgress', { accountId }),
-        success: (res: any) => res.message,
+        success: (res: { message: string }) => res.message,
         error: (e) => t('tradovateSync.sync.syncFailed', { error: e instanceof Error ? e.message : t('tradovateSync.sync.unknownError') })
       })
-      const res: any = await promise
+      const res = await promise as TradovateSyncResult
       return { success: !res.error, message: res.message, savedCount: res.savedCount }
 
     } catch (error) {

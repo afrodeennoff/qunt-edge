@@ -1,10 +1,9 @@
-import type { Trade } from "@/lib/data-types"
+import { Trade, StatisticsProps, Account, CalendarData } from "@/lib/data-types"
 import Decimal from "decimal.js"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns"
 import { formatInTimeZone } from 'date-fns-tz'
-import { StatisticsProps, Account } from "@/lib/data-types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -129,8 +128,18 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
   return statistics;
 }
 
-export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
-  return trades.reduce((acc: any, trade: Trade) => {
+export function formatCalendarData(trades: Trade[], accounts: Account[] = []): CalendarData {
+  type CalendarAccumulator = {
+    [date: string]: {
+      pnl: Decimal;
+      tradeNumber: number;
+      longNumber: number;
+      shortNumber: number;
+      trades: Trade[];
+    };
+  };
+
+  const acc = trades.reduce((acc: CalendarAccumulator, trade: Trade) => {
     let date = '';
     try {
       const rawDate = trade.entryDate;
@@ -167,7 +176,18 @@ export function formatCalendarData(trades: Trade[], accounts: Account[] = []) {
     acc[date].shortNumber += isLong ? 0 : 1
     acc[date].trades.push(trade)
     return acc
-  }, {})
+  }, {} as CalendarAccumulator)
+
+  // Convert Decimals to numbers for frontend consumption
+  const finalResult: CalendarData = {};
+  Object.keys(acc).forEach(date => {
+    finalResult[date] = {
+      ...acc[date],
+      pnl: acc[date].pnl.toNumber()
+    };
+  });
+
+  return finalResult;
 }
 
 export function groupBy<T>(array: T[], key: keyof T): { [key: string]: T[] } {

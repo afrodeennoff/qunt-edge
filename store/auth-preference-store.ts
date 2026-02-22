@@ -22,12 +22,13 @@ export const useAuthPreferenceStore = create<AuthPreferenceState>()(
       name: "auth-preference-store",
       storage: createJSONStorage(() => localStorage),
       version: 2,
-      migrate: (persistedState: any, version) => {
+      migrate: (persistedState: unknown, version: number) => {
         // Coerce legacy 'signup' to 'magic'
-        if (persistedState && persistedState.lastAuthPreference === 'signup') {
-          return { ...persistedState, lastAuthPreference: 'magic' }
+        const state = persistedState as (AuthPreferenceState & { lastAuthPreference: string }) | null
+        if (state && (state.lastAuthPreference as string) === 'signup') {
+          return { ...state, lastAuthPreference: 'magic' }
         }
-        return persistedState as AuthPreferenceState
+        return state as AuthPreferenceState
       }
     }
   )
