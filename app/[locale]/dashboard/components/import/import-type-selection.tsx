@@ -44,9 +44,20 @@ export default function ImportTypeSelection({ selectedType, setSelectedType, set
   // Set default selection from store preference
   useEffect(() => {
     if (lastSelectedType && !selectedType) {
-      setSelectedType(lastSelectedType)
+      const preferredPlatform = platforms.find((platform) => platform.type === lastSelectedType)
+      if (preferredPlatform && !preferredPlatform.isDisabled && !preferredPlatform.isComingSoon) {
+        setSelectedType(lastSelectedType)
+      }
     }
   }, [setSelectedType, lastSelectedType, selectedType])
+
+  useEffect(() => {
+    if (!selectedType) return
+    const selectedPlatform = platforms.find((platform) => platform.type === selectedType)
+    if (selectedPlatform?.isDisabled || selectedPlatform?.isComingSoon) {
+      setSelectedType('')
+    }
+  }, [selectedType, setSelectedType])
 
   const getTranslatedCategory = (category: PlatformConfig['category']) => {
     switch (category) {
