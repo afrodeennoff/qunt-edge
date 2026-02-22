@@ -237,8 +237,6 @@ function useIsMobileDetection() {
   return isMobile;
 }
 
-const supabase = createClient();
-
 export const DataProvider: React.FC<{
   children: React.ReactNode;
   isSharedView?: boolean;
@@ -246,6 +244,7 @@ export const DataProvider: React.FC<{
     userId: string;
   };
 }> = ({ children, isSharedView = false, adminView = null }) => {
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const params = useParams();
   const isMobile = useIsMobileDetection();
@@ -632,6 +631,7 @@ export const DataProvider: React.FC<{
     fetchAllTrades,
     setIsLoading,
     withTimeout,
+    supabase,
   ]);
 
   // Load data on mount and when isSharedView changes
