@@ -75,6 +75,12 @@ if (migrationUrl) {
     );
     baselineAllMigrations();
     run("npx", ["prisma", "migrate", "deploy"], "Prisma migrations deployed after baseline");
+  } else if (deploy.output.includes("P3009") && deploy.output.includes("20260213091500_supabase_storage_scaling")) {
+    console.log(
+      "[sync-stack] Detected P3009 for supabase_storage_scaling. Repairing migration state...",
+    );
+    run("npx", ["prisma", "migrate", "resolve", "--applied", "20260213091500_supabase_storage_scaling"]);
+    run("npx", ["prisma", "migrate", "deploy"], "Prisma migrations deployed after repair");
   } else {
     process.exit(deploy.status);
   }
