@@ -143,3 +143,5 @@ The application is a Next.js App Router project (Tailwind v4, Supabase auth, Pri
 2. ✅ Added UNAUTHORIZED/FORBIDDEN to ApiErrorCode union
 3. ✅ Gated mock data behind development environment
 4. ✅ Removed `'use server'` from auth callback route handler
+5. ✅ Merged competing middleware files to resolve Next.js 16 build error and secure API routes with CORS + CSP.
+6. ✅ Fixed dead-code fallback bug in Prisma TLS connection pooler initialization.

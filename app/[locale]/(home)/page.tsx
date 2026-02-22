@@ -9,8 +9,8 @@ export function generateStaticParams() {
 }
 
 export const revalidate = 3600;
-export const dynamic = "force-static";
-export const dynamicParams = false;
+// export const dynamic = "force-static"; // Removed for webapp flexibility
+// export const dynamicParams = false;
 
 export const metadata: Metadata = {
     title: 'Qunt Edge | AI Trading Performance Platform',
