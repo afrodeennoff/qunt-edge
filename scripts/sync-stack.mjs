@@ -59,11 +59,11 @@ function baselineAllMigrations() {
 
 run("npx", ["prisma", "generate"], "Prisma client generated");
 
-const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
+const migrationUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
 
-if (databaseUrl) {
-  // Inject the database URL into process.env if it was found via fallbacks
-  process.env.DATABASE_URL = databaseUrl;
+if (migrationUrl) {
+  // Inject the direct connection URL into process.env so Prisma uses it for deployments (bypassing PgBouncer)
+  process.env.DATABASE_URL = migrationUrl;
 
   const deploy = runCapture("npx", ["prisma", "migrate", "deploy"]);
 
