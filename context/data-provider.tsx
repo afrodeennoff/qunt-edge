@@ -523,9 +523,13 @@ export const DataProvider: React.FC<{
           );
           console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
 
-          // Fallback to mock data if no real trades exist, regardless of environment (for demo purposes)
-          const tradesToUse = safeTrades.length > 0 ? safeTrades : generateMockTrades(userId || "demo-user");
-          console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0, ")");
+          // Only use mock data in development — never show fake data in production
+          const tradesToUse = safeTrades.length > 0
+            ? safeTrades
+            : process.env.NODE_ENV === 'development'
+              ? generateMockTrades(userId || "demo-user")
+              : [];
+          console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0 && tradesToUse.length > 0, ")");
           setTrades(sanitizeTradesForState(tradesToUse));
           if (tradesToUse.length > 0) {
             setTradesCache(userId, tradesToUse).catch(console.error);
@@ -608,10 +612,14 @@ export const DataProvider: React.FC<{
       }
     } catch (error) {
       console.error("[DataProvider] FATAL: Error loading data:", error);
-      // Fallback to mock data on fatal load error
-      const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
-      console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
-      setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
+      // Only fallback to mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
+        console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
+        setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
+      } else {
+        setTrades([]);
+      }
       setAccounts([]);
       setGroups([]);
     } finally {

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 
 export type ApiErrorCode =
   | 'BAD_REQUEST'
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
   | 'PAYLOAD_TOO_LARGE'
   | 'RATE_LIMITED'
   | 'VALIDATION_FAILED'

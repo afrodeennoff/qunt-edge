@@ -329,124 +329,124 @@ export async function GET(request: Request) {
 
         console.log('Starting MAE/MFE computation cron job');
 
-    if (!DATABENTO_API_KEY) {
-      throw new Error('DATABENTO_API_KEY environment variable is required');
-    }
-
-    // Get the date range for last week
-    const now = new Date();
-    const lastWeekStart = startOfWeek(subWeeks(now, 1));
-    const lastWeekEnd = endOfWeek(subWeeks(now, 1));
-
-    console.log(`Processing trades from ${format(lastWeekStart, 'yyyy-MM-dd')} to ${format(lastWeekEnd, 'yyyy-MM-dd')}`);
-
-    // Fetch all trades from last week
-    const trades = await prisma.trade.findMany({
-      where: {
-        entryDate: {
-          gte: lastWeekStart.toISOString(),
-          lte: lastWeekEnd.toISOString()
+        if (!DATABENTO_API_KEY) {
+          throw new Error('DATABENTO_API_KEY environment variable is required');
         }
-      },
-      orderBy: {
-        entryDate: 'asc'
-      }
-    });
 
-    console.log(`Found ${trades.length} trades to process`);
+        // Get the date range for last week
+        const now = new Date();
+        const lastWeekStart = startOfWeek(subWeeks(now, 1));
+        const lastWeekEnd = endOfWeek(subWeeks(now, 1));
 
-    if (trades.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: 'No trades found for the specified period',
-        processed: 0
-      });
-    }
+        console.log(`Processing trades from ${format(lastWeekStart, 'yyyy-MM-dd')} to ${format(lastWeekEnd, 'yyyy-MM-dd')}`);
 
-    // Group trades by instrument
-    const instrumentGroups = trades.reduce((acc, trade) => {
-      const instrument = trade.instrument;
-      if (!acc[instrument]) {
-        acc[instrument] = {
-          instrument,
-          trades: [],
-          earliestDate: new Date(trade.entryDate),
-          latestDate: new Date(trade.closeDate)
-        };
-      }
-
-      acc[instrument].trades.push(trade);
-
-      // Update date range
-      const entryDate = new Date(trade.entryDate);
-      const closeDate = new Date(trade.closeDate);
-
-      if (entryDate < acc[instrument].earliestDate) {
-        acc[instrument].earliestDate = entryDate;
-      }
-      if (closeDate > acc[instrument].latestDate) {
-        acc[instrument].latestDate = closeDate;
-      }
-
-      return acc;
-    }, {} as { [key: string]: InstrumentData });
-
-    console.log(`Processing ${Object.keys(instrumentGroups).length} unique instruments`);
-
-    // Process each instrument group
-    const allProcessedTrades: TradeWithMAEMFE[] = [];
-
-    for (const instrumentData of Object.values(instrumentGroups)) {
-      const processedTrades = await processInstrumentTrades(instrumentData);
-      allProcessedTrades.push(...processedTrades);
-
-      // Add a small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
-    // Save the MAE/MFE data to database
-    console.log(`Successfully processed ${allProcessedTrades.length} trades, saving to database...`);
-
-    const savedAnalytics = await Promise.allSettled(
-      allProcessedTrades.map(async (trade) => {
-        // Calculate additional metrics
-        const riskRewardRatio = trade.mae > 0 ? trade.mfe / trade.mae : 0;
-        const efficiency = trade.mfe > 0 ? (Math.abs(trade.closePrice - trade.entryPrice) / trade.mfe) * 100 : 0;
-
-        return prisma.tradeAnalytics.upsert({
-          where: { tradeId: trade.id },
-          update: {
-            mae: trade.mae,
-            mfe: trade.mfe,
-            entryPriceFromData: trade.entryPriceFromData,
-            priceDifference: trade.priceDifference,
-            riskRewardRatio,
-            efficiency,
-            updatedAt: new Date()
+        // Fetch all trades from last week
+        const trades = await prisma.trade.findMany({
+          where: {
+            entryDate: {
+              gte: lastWeekStart.toISOString(),
+              lte: lastWeekEnd.toISOString()
+            }
           },
-          create: {
-            tradeId: trade.id,
-            mae: trade.mae,
-            mfe: trade.mfe,
-            entryPriceFromData: trade.entryPriceFromData,
-            priceDifference: trade.priceDifference,
-            riskRewardRatio,
-            efficiency
+          orderBy: {
+            entryDate: 'asc'
           }
         });
-      })
-    );
 
-    const successfulSaves = savedAnalytics.filter(result => result.status === 'fulfilled').length;
-    const failedSaves = savedAnalytics.filter(result => result.status === 'rejected').length;
+        console.log(`Found ${trades.length} trades to process`);
 
-    console.log(`Saved ${successfulSaves} trade analytics, ${failedSaves} failed`);
+        if (trades.length === 0) {
+          return NextResponse.json({
+            success: true,
+            message: 'No trades found for the specified period',
+            processed: 0
+          });
+        }
 
-    // Example of potential data issues to log
-    const priceDiscrepancies = allProcessedTrades.filter(trade => trade.priceDifference > 0.5);
-    if (priceDiscrepancies.length > 0) {
-      console.warn(`Found ${priceDiscrepancies.length} trades with significant price discrepancies`);
-    }
+        // Group trades by instrument
+        const instrumentGroups = trades.reduce((acc, trade) => {
+          const instrument = trade.instrument;
+          if (!acc[instrument]) {
+            acc[instrument] = {
+              instrument,
+              trades: [],
+              earliestDate: new Date(trade.entryDate),
+              latestDate: new Date(trade.closeDate)
+            };
+          }
+
+          acc[instrument].trades.push(trade);
+
+          // Update date range
+          const entryDate = new Date(trade.entryDate);
+          const closeDate = new Date(trade.closeDate);
+
+          if (entryDate < acc[instrument].earliestDate) {
+            acc[instrument].earliestDate = entryDate;
+          }
+          if (closeDate > acc[instrument].latestDate) {
+            acc[instrument].latestDate = closeDate;
+          }
+
+          return acc;
+        }, {} as { [key: string]: InstrumentData });
+
+        console.log(`Processing ${Object.keys(instrumentGroups).length} unique instruments`);
+
+        // Process each instrument group
+        const allProcessedTrades: TradeWithMAEMFE[] = [];
+
+        for (const instrumentData of Object.values(instrumentGroups)) {
+          const processedTrades = await processInstrumentTrades(instrumentData);
+          allProcessedTrades.push(...processedTrades);
+
+          // Add a small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        // Save the MAE/MFE data to database
+        console.log(`Successfully processed ${allProcessedTrades.length} trades, saving to database...`);
+
+        const savedAnalytics = await Promise.allSettled(
+          allProcessedTrades.map(async (trade) => {
+            // Calculate additional metrics
+            const riskRewardRatio = trade.mae > 0 ? trade.mfe / trade.mae : 0;
+            const efficiency = trade.mfe > 0 ? (Math.abs(trade.closePrice - trade.entryPrice) / trade.mfe) * 100 : 0;
+
+            return prisma.tradeAnalytics.upsert({
+              where: { tradeId: trade.id },
+              update: {
+                mae: trade.mae,
+                mfe: trade.mfe,
+                entryPriceFromData: trade.entryPriceFromData,
+                priceDifference: trade.priceDifference,
+                riskRewardRatio,
+                efficiency,
+                updatedAt: new Date()
+              },
+              create: {
+                tradeId: trade.id,
+                mae: trade.mae,
+                mfe: trade.mfe,
+                entryPriceFromData: trade.entryPriceFromData,
+                priceDifference: trade.priceDifference,
+                riskRewardRatio,
+                efficiency
+              }
+            });
+          })
+        );
+
+        const successfulSaves = savedAnalytics.filter(result => result.status === 'fulfilled').length;
+        const failedSaves = savedAnalytics.filter(result => result.status === 'rejected').length;
+
+        console.log(`Saved ${successfulSaves} trade analytics, ${failedSaves} failed`);
+
+        // Example of potential data issues to log
+        const priceDiscrepancies = allProcessedTrades.filter(trade => trade.priceDifference > 0.5);
+        if (priceDiscrepancies.length > 0) {
+          console.warn(`Found ${priceDiscrepancies.length} trades with significant price discrepancies`);
+        }
 
         return NextResponse.json({
           success: true,
@@ -466,14 +466,7 @@ export async function GET(request: Request) {
               .filter(t => t.mae > 0)
               .reduce((sum, t) => sum + (t.mfe / t.mae), 0) / allProcessedTrades.filter(t => t.mae > 0).length || 0
           }
-        }, {
-          status: 200,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          },
-        });
+        })
 
       } catch (error) {
         logger.error("[CronComputeTradeData] Route failed", { error })
@@ -481,14 +474,7 @@ export async function GET(request: Request) {
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error occurred',
           processed: 0
-        }, {
-          status: 500,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          },
-        });
+        }, { status: 500 })
       }
     }
   )
