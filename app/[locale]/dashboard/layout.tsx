@@ -43,6 +43,13 @@ export default async function DashboardLayout({
               <div className="absolute inset-0 hidden bg-[radial-gradient(1200px_800px_at_0%_-20%,rgba(255,255,255,0.07),transparent_60%),radial-gradient(900px_600px_at_100%_0%,rgba(255,255,255,0.045),transparent_58%),linear-gradient(180deg,#050505_0%,#07070a_45%,#050505_100%)] md:block" />
               <div className="hidden md:block dashboard-mesh-layer" />
               <div className="hidden md:block dashboard-texture-layer" />
+
+              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60 mix-blend-screen">
+                <div className="absolute -top-[20%] -left-[10%] h-[1000px] w-[1000px] animate-[pulse_12s_ease-in-out_infinite] rounded-full bg-primary/5 blur-[150px]" />
+                <div className="absolute top-[30%] -right-[15%] h-[1200px] w-[1200px] animate-[pulse_18s_ease-in-out_infinite] rounded-full bg-emerald-500-[0.03] blur-[200px]" />
+                <div className="absolute -bottom-[20%] left-[20%] h-[900px] w-[900px] animate-[pulse_15s_ease-in-out_infinite] rounded-full bg-blue-500-[0.03] blur-[180px]" />
+              </div>
+
               <div className="hidden md:block absolute inset-y-0 left-0 w-px bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.22),transparent)]" />
             </div>
 
