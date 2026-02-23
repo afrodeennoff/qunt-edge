@@ -48,6 +48,7 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
   const config: NextConfig = {
     poweredByHeader: false,
     reactStrictMode: true,
+    serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
     experimental: {
       ...(cpus ? { cpus } : {}),
     },
