@@ -5,8 +5,7 @@ import { DashboardProvider } from "./dashboard-context";
 import { DashboardSidebar } from "@/components/sidebar/dashboard-sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { DashboardProviders } from "@/components/providers/dashboard-providers";
-import Modals from "@/components/modals";
-import { RithmicSyncNotifications } from "./components/import/rithmic/sync/rithmic-notifications";
+import { DashboardClientOverlays } from "./components/dashboard-client-overlays";
 
 export default async function DashboardLayout({
   children,
@@ -33,8 +32,7 @@ export default async function DashboardLayout({
 
   return (
     <DashboardProviders>
-      <RithmicSyncNotifications />
-      <Modals />
+      <DashboardClientOverlays />
       <DashboardProvider>
         <div className="flex min-h-screen w-full overflow-x-hidden bg-background selection:bg-primary/20 selection:text-primary">
           <DashboardSidebar isAdmin={isAdmin} />

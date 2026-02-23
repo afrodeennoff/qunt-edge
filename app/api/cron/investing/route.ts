@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { isValid } from 'date-fns'
 import { scrapeWithSandbox } from '@/lib/browser-sandbox'
+import { requireServiceAuth, toErrorResponse } from '@/server/authz'
+import { logger, withLogContext } from '@/lib/logger'
 
 interface InvestingEvent {
   time: string
@@ -19,13 +21,6 @@ interface InvestingEvent {
   date?: Date
   importance?: 'HIGH' | 'MEDIUM' | 'LOW'
   type?: string
-}
-
-function isAuthorizedCronRequest(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return false
-  const authHeader = request.headers.get('authorization')
-  return authHeader === `Bearer ${cronSecret}`
 }
 
 function mapImpactToImportance(impact: string): 'HIGH' | 'MEDIUM' | 'LOW' {
@@ -300,6 +295,7 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
       title: `${event.currency} - ${event.event}`,
       date: new Date(event.timestamp!), // We know timestamp exists because we filtered for it
       importance: mapImpactToImportance(event.impact),
+      eventId: event.eventId,
       type: 'ECONOMIC',
       sourceUrl: event.sourceUrl || '',
       country: event.country,
@@ -313,86 +309,103 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 }
 
 export async function GET(request: Request) {
-  try {
-    if (!isAuthorizedCronRequest(request)) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
+  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID()
+  return withLogContext(
+    {
+      requestId,
+      correlationId: requestId,
+      route: "/api/cron/investing",
+      method: "GET",
+    },
+    async () => {
+      try {
+        requireServiceAuth(request.headers.get('authorization'), {
+          serviceName: 'cron-investing',
+          requestId,
+        })
+      } catch (error) {
+        return toErrorResponse(error)
+      }
 
-    // Get the URL and search params
-    const { searchParams } = new URL(request.url)
-    const lang = (searchParams.get('lang') || 'fr') as 'fr' | 'en'
-    const shouldStoreInDb = searchParams.get('db') === 'true'
+      try {
+        logger.info('[CronInvesting] Starting run')
 
-    // Fetch events directly from Investing.com
-    const events = await fetchInvestingCalendarEvents(lang)
+        const { searchParams } = new URL(request.url)
+        const lang = (searchParams.get('lang') || 'fr') as 'fr' | 'en'
+        const shouldStoreInDb = searchParams.get('db') === 'true'
 
-    if (events.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'No events found',
-      }, { status: 404 })
-    }
+        const events = await fetchInvestingCalendarEvents(lang)
 
-    // If db=true, store events in database
-    if (shouldStoreInDb) {
-      console.log('Storing events in database...')
-      const storedEvents = await Promise.all(
-        events.map(async (event) => {
-          try {
-            return prisma.financialEvent.upsert({
-              where: {
-                title_date_lang_timezone: {
-                  title: event.title,
-                  date: event.date,
-                  lang: event.lang,
-                  timezone: event.timezone
-                }
-              },
-              update: {
-                importance: event.importance,
-                updatedAt: new Date()
-              },
-              create: {
-                title: event.title,
-                date: event.date,
-                importance: event.importance,
-                type: event.type,
-                sourceUrl: event.sourceUrl,
-                country: event.country,
-                lang: event.lang,
-                timezone: event.timezone
+        if (events.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'No events found',
+          }, { status: 404 })
+        }
+
+        if (shouldStoreInDb) {
+          logger.info('[CronInvesting] Storing events in database', { count: events.length })
+          const storedEvents = await Promise.all(
+            events.map(async (event) => {
+              try {
+                return prisma.financialEvent.upsert({
+                  where: {
+                    title_date_lang_timezone: {
+                      title: event.title,
+                      date: event.date,
+                      lang: event.lang,
+                      timezone: event.timezone
+                    }
+                  },
+                  update: {
+                    importance: event.importance,
+                    updatedAt: new Date()
+                  },
+                  create: {
+                    title: event.title,
+                    date: event.date,
+                    importance: event.importance,
+                    type: event.type,
+                    sourceUrl: event.sourceUrl,
+                    country: event.country,
+                    lang: event.lang,
+                    timezone: event.timezone
+                  }
+                })
+              } catch (error) {
+                logger.error("[CronInvesting] Failed to store event", {
+                  error,
+                  eventTitle: event.title,
+                })
+                return null
               }
             })
-          } catch (error) {
-            console.error(`Error processing event ${event.title}:`, error)
-            return null
-          }
+          )
+
+          return NextResponse.json({
+            success: true,
+            events: events,
+            count: events.length,
+            storedCount: storedEvents.filter(Boolean).length
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          events: events,
+          count: events.length
         })
-      )
-
-      return NextResponse.json({
-        success: true,
-        events: events,
-        count: events.length,
-        storedCount: storedEvents.filter(Boolean).length
-      })
+      } catch (error) {
+        logger.error("[CronInvesting] Route failed", { error })
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Failed to fetch events from Investing.com',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          },
+          { status: 500 }
+        )
+      }
     }
-
-    // If db=false or not specified, just return the events
-    return NextResponse.json({
-      success: true,
-      events: events,
-      count: events.length
-    })
-  } catch (error) {
-    console.error('Error in GET route:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch events from Investing.com',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
-  }
+  )
 }

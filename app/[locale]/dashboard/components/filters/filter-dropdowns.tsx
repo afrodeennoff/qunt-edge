@@ -7,7 +7,7 @@ import {
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { FilterItem } from "@/app/[locale]/dashboard/types/filter"
 import { useState, useEffect } from "react"
@@ -113,7 +113,7 @@ interface FilterDropdownsProps {
 }
 
 export function FilterDropdowns({ showAccountNumbers }: FilterDropdownsProps) {
-  const { instruments = [], setInstruments } = useData()
+  const { instruments = [], setInstruments } = useDashboardFilters()
   const trades = useTradesStore(state => state.trades)
   const [allItems, setAllItems] = useState<FilterItem[]>([])
 

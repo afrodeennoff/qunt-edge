@@ -29,15 +29,17 @@ export function PlatformTutorial({
     video.pause();
     video.currentTime = 0;
 
+    // Define playVideo outside the conditional to ensure it's accessible for cleanup
+    const playVideo = () => {
+      video.play().catch((error) => {
+        console.error("Video playback error:", error);
+      });
+    };
+
     // Handle new platform video
     if (selectedPlatform?.videoUrl) {
       // Load and play the new video
       video.load();
-      const playVideo = () => {
-        video.play().catch((error) => {
-          console.error("Video playback error:", error);
-        });
-      };
 
       // Play video when it's ready
       if (video.readyState >= 2) {
@@ -51,7 +53,7 @@ export function PlatformTutorial({
     return () => {
       if (video) {
         video.pause();
-        video.removeEventListener("loadeddata", () => {});
+        video.removeEventListener("loadeddata", playVideo);
       }
     };
   }, [selectedPlatform]);
@@ -105,11 +107,11 @@ export function PlatformTutorial({
           <p className="text-sm text-muted-foreground">
             {selectedPlatform.videoUrl
               ? t("import.type.tutorial.description", {
-                  platform: selectedPlatform.type.split("-").join(" "),
-                })
+                platform: selectedPlatform.type.split("-").join(" "),
+              })
               : t("import.type.tutorial.notAvailable", {
-                  platform: selectedPlatform.type.split("-").join(" "),
-                })}
+                platform: selectedPlatform.type.split("-").join(" "),
+              })}
           </p>
         </div>
       ) : null}

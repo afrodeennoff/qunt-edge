@@ -4,7 +4,7 @@ import { useState } from "react"
 import { CommandItem } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +14,7 @@ interface PnlSectionProps {
 
 export function PnlSection({ searchValue }: PnlSectionProps) {
   const t = useI18n()
-  const { pnlRange, setPnlRange } = useData()
+  const { pnlRange, setPnlRange } = useDashboardFilters()
   const [customMin, setCustomMin] = useState<string>("")
   const [customMax, setCustomMax] = useState<string>("")
   const [showCustomInputs, setShowCustomInputs] = useState(false)

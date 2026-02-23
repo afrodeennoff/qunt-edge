@@ -24,17 +24,26 @@ export async function GET(request: Request) {
       error: authError,
     } = await supabase.auth.getUser()
     if (authError || !user?.id) {
-      return apiError('UNAUTHORIZED', 'Authentication required', 401)
+      return apiError('UNAUTHORIZED', 'Authentication required', 401, undefined, {
+        "Cache-Control": "no-store, max-age=0",
+      })
     }
 
     const accounts = await getAccountsAction()
-    return NextResponse.json(serializeWithDecimals(accounts))
+    return NextResponse.json(serializeWithDecimals(accounts), {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    })
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',
       'Failed to fetch accounts',
       500,
       error instanceof Error ? error.message : undefined,
+      {
+        "Cache-Control": "no-store, max-age=0",
+      },
     )
   }
 }

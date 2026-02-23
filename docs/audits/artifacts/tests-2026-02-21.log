@@ -1,0 +1,707 @@
+
+> quntedge@0.3 test
+> vitest run --config vitest.config.ts
+
+
+ RUN  v2.1.9 /Users/timon/Downloads/final-qunt-edge-main
+
+ ✓ tests/tick-calculations.test.ts (13 tests) 6ms
+ ✓ tests/trader-var-action.test.ts (3 tests) 25ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should trigger save after debounce period
+[2026-02-21T12:52:46.806Z] INFO: [AutoSave] Layout saved successfully {"duration":1,"priority":"normal","retryCount":0,"requestId":"fc1cec03-c85c-4f9e-80a7-f834a758ae9a","correlationId":"fc1cec03-c85c-4f9e-80a7-f834a758ae9a"}
+
+ ✓ lib/widget-policy-engine/__tests__/property-based.test.ts (5 tests) 19ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should trigger save after debounce period
+[2026-02-21T12:52:46.854Z] INFO: [AutoSave] Service disposed {"requestId":"3d29819a-dc6e-4217-babd-7c09832adf2a","correlationId":"3d29819a-dc6e-4217-babd-7c09832adf2a"}
+
+ ✓ tests/analytics-metrics-v1.test.ts (10 tests) 10ms
+ ✓ lib/widget-policy-engine/__tests__/policy-engine.test.ts (14 tests) 162ms
+stdout | lib/widget-policy-engine/__tests__/integration.test.ts > Widget Policy Integration Tests > Error Handling Integration > should handle and log errors consistently
+[WidgetErrorHandler] Telemetry: {
+  type: 'widget_error',
+  code: 'WIDGET_018',
+  message: 'Test error',
+  riskLevel: 'low',
+  widgetId: 'test-widget',
+  correlationId: 'err_1771678366926_kytgy42bz'
+}
+
+ ✓ lib/widget-policy-engine/__tests__/integration.test.ts (7 tests) 16ms
+ ✓ tests/save-trades-action.test.ts (3 tests) 11ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should debounce rapid triggers
+[2026-02-21T12:52:46.955Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d449e461-26b3-4422-9f44-eeae6a13879a","correlationId":"d449e461-26b3-4422-9f44-eeae6a13879a"}
+
+ ✓ lib/__tests__/behavior-insights-confidence.test.ts (2 tests) 10ms
+ ↓ lib/__tests__/payment-flows.test.ts (46 tests | 46 skipped)
+stdout | lib/__tests__/payment-flows.test.ts
+[2026-02-21T12:52:47.001Z] WARN: [SecurityManager] Encryption key not configured {"requestId":"2107a3b6-3972-4ef1-bb8b-4e9ddae2b5c8","correlationId":"2107a3b6-3972-4ef1-bb8b-4e9ddae2b5c8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should debounce rapid triggers
+[2026-02-21T12:52:47.006Z] INFO: [AutoSave] Service disposed {"requestId":"014d1b9c-b4a5-4f10-a0ce-a96b20dd0072","correlationId":"014d1b9c-b4a5-4f10-a0ce-a96b20dd0072"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should execute high priority saves immediately
+[2026-02-21T12:52:47.108Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"high","retryCount":0,"requestId":"0acefa91-822a-4614-bc46-10c15334a1e6","correlationId":"0acefa91-822a-4614-bc46-10c15334a1e6"}
+
+ ✓ tests/account-metrics.test.ts (6 tests) 4ms
+ ✓ tests/lib/unsubscribe-token.test.ts (4 tests) 6ms
+ ✓ lib/__tests__/team-accept-invitation-route.test.ts (2 tests) 11ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should execute high priority saves immediately
+[2026-02-21T12:52:47.208Z] INFO: [AutoSave] Service disposed {"requestId":"d2cc73e6-4133-40fb-9416-de3196c41e61","correlationId":"d2cc73e6-4133-40fb-9416-de3196c41e61"}
+
+ ✓ lib/__tests__/authz.test.ts (3 tests) 9ms
+stdout | lib/__tests__/whop-webhook-route.test.ts > whop webhook route > returns 400 for invalid signatures
+[2026-02-21T12:52:47.299Z] ERROR: [Webhook] Signature verification failed {"requestId":"9f978a56-3e2f-4290-b4f9-de0aa14c9b09","error":"invalid signature","stack":"Error: invalid signature\n    at Object.<anonymous> (/Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/whop-webhook-route.test.ts:28:13)\n    at Object.mockCall (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/spy/dist/index.js:61:17)\n    at Object.spy [as unwrap] (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/tinyspy/dist/index.js:45:80)\n    at Module.POST (/Users/timon/Downloads/final-qunt-edge-main/app/api/whop/webhook/route.ts:15:31)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/whop-webhook-route.test.ts:31:22\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)","correlationId":"9f978a56-3e2f-4290-b4f9-de0aa14c9b09"}
+
+stdout | lib/__tests__/whop-webhook-route.test.ts > whop webhook route > returns 200 when webhook is processed
+[2026-02-21T12:52:47.309Z] INFO: [Webhook] Event received {"requestId":"2f77e037-f64f-4541-934b-ecb79f1bb5a7","eventType":"payment.succeeded","eventId":"evt_1","correlationId":"2f77e037-f64f-4541-934b-ecb79f1bb5a7"}
+
+ ✓ lib/__tests__/ibkr-ocr-route.test.ts (3 tests) 12ms
+ ✓ lib/__tests__/whop-webhook-route.test.ts (2 tests) 22ms
+ ✓ tests/var.test.ts (5 tests) 32ms
+ ✓ lib/__tests__/team-analytics-route.test.ts (2 tests) 8ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should prevent concurrent saves
+[2026-02-21T12:52:47.362Z] INFO: [AutoSave] Layout saved successfully {"duration":51,"priority":"high","retryCount":0,"requestId":"f56af3ed-a5a1-4c5b-83b1-9c86d67815a2","correlationId":"f56af3ed-a5a1-4c5b-83b1-9c86d67815a2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Basic Functionality > should prevent concurrent saves
+[2026-02-21T12:52:47.413Z] INFO: [AutoSave] Service disposed {"requestId":"615eaeb0-c96e-47a5-949b-7974277ee4c9","correlationId":"615eaeb0-c96e-47a5-949b-7974277ee4c9"}
+
+ ✓ tests/date-utils.test.ts (8 tests) 7ms
+ ✓ tests/lib/unsubscribe-url.test.ts (2 tests) 5ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should retry on network errors
+[2026-02-21T12:52:47.566Z] INFO: [AutoSave] Layout saved successfully {"duration":152,"priority":"normal","retryCount":0,"requestId":"99510749-e9b2-4d3c-a29b-f4d86530fd7f","correlationId":"99510749-e9b2-4d3c-a29b-f4d86530fd7f"}
+
+ ✓ tests/logger.test.ts (2 tests) 6ms
+ ✓ lib/__tests__/ai-policy.test.ts (2 tests) 3ms
+ ✓ tests/sidebar-trigger-contract.test.ts (2 tests) 4ms
+ ✓ tests/rate-limit.test.ts (1 test) 7ms
+stdout | lib/__tests__/webhook-service-retry.test.ts > webhook service retry behavior > retries retryable events and succeeds
+[2026-02-21T12:52:47.732Z] WARN: [WebhookService] Retrying webhook event {"eventId":"evt-1","eventType":"payment.succeeded","attempt":1,"delayMs":500,"reason":"temporary network timeout","requestId":"b0cba28a-d3e7-499a-aee7-cfa9faa17996","correlationId":"b0cba28a-d3e7-499a-aee7-cfa9faa17996"}
+
+ ✓ lib/__tests__/webhook-service-retry.test.ts (1 test) 6ms
+ ✓ tests/financial-math.test.ts (2 tests) 3ms
+ ✓ tests/smoke/env.test.ts (1 test) 5ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should retry on network errors
+[2026-02-21T12:52:48.068Z] INFO: [AutoSave] Service disposed {"requestId":"5205d6af-17cb-4623-8cc9-0f0fb881b8ad","correlationId":"5205d6af-17cb-4623-8cc9-0f0fb881b8ad"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should respect max retries limit
+[2026-02-21T12:52:48.423Z] ERROR: [AutoSave] Save failed {"error":{"name":"Error","message":"Network error","stack":"Error: Network error\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:112:48\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1271:3)"},"request":{"layout":{"desktop":[],"mobile":[],"userId":"test-user","id":"test-id","version":1,"checksum":null,"deviceId":null,"createdAt":{},"updatedAt":{}},"timestamp":1771678368068,"retryCount":0,"priority":"normal"},"requestId":"e0d254ea-b5bb-47af-819b-7ffb283dfc48","correlationId":"e0d254ea-b5bb-47af-819b-7ffb283dfc48"}
+
+ ✓ tests/sanitize.test.ts (3 tests) 893ms
+   ✓ sanitizeHtml > should remove script tags 881ms
+ ✓ tests/theme-provider.test.tsx (1 test) 30ms
+stderr | tests/error-boundaries.test.tsx > Error boundaries > renders app fallback and calls reset
+[App Error Boundary] Error: boom
+    at /Users/timon/Downloads/final-qunt-edge-main/tests/error-boundaries.test.tsx:31:37
+    at Proxy.process.env.NODE_ENV.exports.act (/Users/timon/Downloads/final-qunt-edge-main/node_modules/react/cjs/react.development.js:814:22)
+    at /Users/timon/Downloads/final-qunt-edge-main/tests/error-boundaries.test.tsx:30:11
+    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:146:14
+    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:11
+    at runWithTimeout (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:39:7)
+    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:17)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)
+
+stderr | tests/error-boundaries.test.tsx > Error boundaries > renders dashboard fallback and calls reset
+[Dashboard Error Boundary] Error: widget failed
+    at /Users/timon/Downloads/final-qunt-edge-main/tests/error-boundaries.test.tsx:55:43
+    at Proxy.process.env.NODE_ENV.exports.act (/Users/timon/Downloads/final-qunt-edge-main/node_modules/react/cjs/react.development.js:814:22)
+    at /Users/timon/Downloads/final-qunt-edge-main/tests/error-boundaries.test.tsx:54:11
+    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:146:14
+    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:11
+    at runWithTimeout (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:39:7)
+    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:17)
+    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runFiles (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1262:5)
+
+ ✓ tests/error-boundaries.test.tsx (2 tests) 29ms
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should respect max retries limit
+[2026-02-21T12:52:49.425Z] INFO: [AutoSave] Service disposed {"requestId":"c1a2c7d1-fe45-44bf-83c8-814fd1b07dd0","correlationId":"c1a2c7d1-fe45-44bf-83c8-814fd1b07dd0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should use exponential backoff
+[2026-02-21T12:52:50.931Z] ERROR: [AutoSave] Save failed {"error":{"name":"Error","message":"Network error","stack":"Error: Network error\n    at AutoSaveService.<anonymous> (/Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:135:39)\n    at AutoSaveService.mockCall (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/spy/dist/index.js:61:17)\n    at AutoSaveService.spy [as saveFunction] (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/tinyspy/dist/index.js:45:80)\n    at AutoSaveService.performSaveWithRetry (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:193:35)\n    at AutoSaveService.executeSave (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:146:22)\n    at AutoSaveService.flush (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:121:7)\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:146:13\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)"},"request":{"layout":{"desktop":[],"mobile":[],"userId":"test-user","id":"test-id","version":1,"checksum":null,"deviceId":null,"createdAt":{},"updatedAt":{}},"timestamp":1771678369426,"retryCount":0,"priority":"normal"},"requestId":"3b852ce1-13f2-4910-ac06-f661793b9bba","correlationId":"3b852ce1-13f2-4910-ac06-f661793b9bba"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should use exponential backoff
+Delays between retries: [ 100, 202, 401, 801 ]
+[2026-02-21T12:52:53.932Z] INFO: [AutoSave] Service disposed {"requestId":"67905b2c-00db-4ae4-a4c4-41463a757b5a","correlationId":"67905b2c-00db-4ae4-a4c4-41463a757b5a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should not retry non-retryable errors
+[2026-02-21T12:52:53.932Z] ERROR: [AutoSave] Save failed {"error":{"name":"Error","message":"Validation failed","stack":"Error: Validation failed\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:158:48\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1271:3)"},"request":{"layout":{"desktop":[],"mobile":[],"userId":"test-user","id":"test-id","version":1,"checksum":null,"deviceId":null,"createdAt":{},"updatedAt":{}},"timestamp":1771678373932,"retryCount":0,"priority":"normal"},"requestId":"3780f654-8459-45b0-8ffb-f9cf29d6dba1","correlationId":"3780f654-8459-45b0-8ffb-f9cf29d6dba1"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Retry Logic > should not retry non-retryable errors
+[2026-02-21T12:52:54.033Z] INFO: [AutoSave] Service disposed {"requestId":"5c4433d2-21bf-408f-b9bb-14b6b8443184","correlationId":"5c4433d2-21bf-408f-b9bb-14b6b8443184"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Event Handlers > should emit onStart event
+[2026-02-21T12:52:54.034Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d089f837-861b-4dcb-b4d2-49b98d5bc0b4","correlationId":"d089f837-861b-4dcb-b4d2-49b98d5bc0b4"}
+[2026-02-21T12:52:54.034Z] INFO: [AutoSave] Service disposed {"requestId":"8202014d-3c4c-4f43-9ce1-550d50a2eb0a","correlationId":"8202014d-3c4c-4f43-9ce1-550d50a2eb0a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Event Handlers > should emit onSuccess event with duration
+[2026-02-21T12:52:54.034Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"42844795-6070-4a81-b680-fb467354ed24","correlationId":"42844795-6070-4a81-b680-fb467354ed24"}
+[2026-02-21T12:52:54.037Z] INFO: [AutoSave] Service disposed {"requestId":"9f6307a9-b8a1-4ec8-b00c-01b3bb2b57df","correlationId":"9f6307a9-b8a1-4ec8-b00c-01b3bb2b57df"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Event Handlers > should emit onError event on failure
+[2026-02-21T12:52:54.037Z] ERROR: [AutoSave] Save failed {"error":{"name":"Error","message":"Save failed","stack":"Error: Save failed\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:210:27\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1271:3)"},"request":{"layout":{"desktop":[],"mobile":[],"userId":"test-user","id":"test-id","version":1,"checksum":null,"deviceId":null,"createdAt":{},"updatedAt":{}},"timestamp":1771678374037,"retryCount":0,"priority":"normal"},"requestId":"8e21a994-3b44-4159-a418-c9cd27cea8d7","correlationId":"8e21a994-3b44-4159-a418-c9cd27cea8d7"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Event Handlers > should emit onError event on failure
+[2026-02-21T12:52:54.089Z] INFO: [AutoSave] Service disposed {"requestId":"2a9f9036-cb51-4b1f-8852-f6c63ab004c5","correlationId":"2a9f9036-cb51-4b1f-8852-f6c63ab004c5"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Event Handlers > should emit onRetry event
+[2026-02-21T12:52:54.142Z] INFO: [AutoSave] Layout saved successfully {"duration":52,"priority":"normal","retryCount":0,"requestId":"4515acaf-bb14-426b-a985-f102bb89f3d1","correlationId":"4515acaf-bb14-426b-a985-f102bb89f3d1"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Event Handlers > should emit onRetry event
+[2026-02-21T12:52:54.344Z] INFO: [AutoSave] Service disposed {"requestId":"377cc1e1-903a-40b8-86a0-d1a286575e0c","correlationId":"377cc1e1-903a-40b8-86a0-d1a286575e0c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Offline Support > should enqueue saves when offline
+[2026-02-21T12:52:54.355Z] WARN: [AutoSave] Offline, queuing save request {"requestId":"d89dc9fb-7496-4c92-a9f2-a0bd267365c9","correlationId":"d89dc9fb-7496-4c92-a9f2-a0bd267365c9"}
+[2026-02-21T12:52:54.355Z] INFO: [AutoSave] Request enqueued {"queueSize":1,"priority":"normal","requestId":"08235d0a-493a-40c2-b949-1c95af75466f","correlationId":"08235d0a-493a-40c2-b949-1c95af75466f"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Offline Support > should enqueue saves when offline
+[2026-02-21T12:52:54.395Z] INFO: [AutoSave] Service disposed {"requestId":"c569e95b-1f19-4395-ac5d-5ac94fd1f4aa","correlationId":"c569e95b-1f19-4395-ac5d-5ac94fd1f4aa"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Offline Support > should process offline queue when connection restored
+[2026-02-21T12:52:54.396Z] INFO: [AutoSave] Request enqueued {"queueSize":2,"priority":"normal","requestId":"535f0f2f-1904-4958-b5cb-29e5b3b94dfb","correlationId":"535f0f2f-1904-4958-b5cb-29e5b3b94dfb"}
+[2026-02-21T12:52:54.396Z] INFO: [AutoSave] Connection restored {"requestId":"de02eda9-cc68-4842-a8b4-54ad4ef1eb50","correlationId":"de02eda9-cc68-4842-a8b4-54ad4ef1eb50"}
+[2026-02-21T12:52:54.396Z] INFO: [AutoSave] Processing offline queue {"count":2,"requestId":"56c2ed24-7d21-4584-b976-ec75da32c62c","correlationId":"56c2ed24-7d21-4584-b976-ec75da32c62c"}
+[2026-02-21T12:52:54.396Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"97a81011-068c-4672-8974-e9a524b20cb2","correlationId":"97a81011-068c-4672-8974-e9a524b20cb2"}
+[2026-02-21T12:52:54.396Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"6723cab2-bed6-4858-b68a-7d3dd4ef2b43","correlationId":"6723cab2-bed6-4858-b68a-7d3dd4ef2b43"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Offline Support > should process offline queue when connection restored
+[2026-02-21T12:52:54.496Z] INFO: [AutoSave] Service disposed {"requestId":"7827fe13-0189-4fd0-8f0c-dd414861265a","correlationId":"7827fe13-0189-4fd0-8f0c-dd414861265a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should correctly report pending saves
+[2026-02-21T12:52:54.597Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"7aa38ab2-5576-463d-becf-9656391ee859","correlationId":"7aa38ab2-5576-463d-becf-9656391ee859"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should correctly report pending saves
+[2026-02-21T12:52:54.717Z] INFO: [AutoSave] Service disposed {"requestId":"5b0bbe86-e3a6-4813-a572-a6aafffa8673","correlationId":"5b0bbe86-e3a6-4813-a572-a6aafffa8673"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should cancel pending saves
+[2026-02-21T12:52:54.718Z] INFO: [AutoSave] Service disposed {"requestId":"0c6aa524-ef93-4f4f-9f6d-7b12414a7c12","correlationId":"0c6aa524-ef93-4f4f-9f6d-7b12414a7c12"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should flush pending saves immediately
+[2026-02-21T12:52:54.718Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"60fd99e0-547e-4c58-81d4-acbd70129eab","correlationId":"60fd99e0-547e-4c58-81d4-acbd70129eab"}
+[2026-02-21T12:52:54.718Z] INFO: [AutoSave] Service disposed {"requestId":"171a34fb-c2db-4432-9a38-53c56bc44378","correlationId":"171a34fb-c2db-4432-9a38-53c56bc44378"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should track save history
+[2026-02-21T12:52:54.718Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"9a25ba4e-0e1f-4f33-a50d-3dd85d51f18a","correlationId":"9a25ba4e-0e1f-4f33-a50d-3dd85d51f18a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should track save history
+[2026-02-21T12:52:54.770Z] INFO: [AutoSave] Service disposed {"requestId":"024e9443-38e1-4c64-810c-c5c43059e2ab","correlationId":"024e9443-38e1-4c64-810c-c5c43059e2ab"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.770Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"4892fa8d-9a31-43e9-92a2-b35b2d24adb3","correlationId":"4892fa8d-9a31-43e9-92a2-b35b2d24adb3"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.782Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d95e6d92-f1ab-4381-b7ec-0d16f332a1cf","correlationId":"d95e6d92-f1ab-4381-b7ec-0d16f332a1cf"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.794Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"4899b3e7-e801-44d8-af8b-7bb83301200e","correlationId":"4899b3e7-e801-44d8-af8b-7bb83301200e"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.804Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"501f557c-d1bc-49e1-a2b4-ac7371728915","correlationId":"501f557c-d1bc-49e1-a2b4-ac7371728915"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.816Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"916b0e0a-9ae6-47aa-9ffb-144d719b0c3a","correlationId":"916b0e0a-9ae6-47aa-9ffb-144d719b0c3a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.825Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"31775f12-58da-4a4e-bf48-0afad6d11038","correlationId":"31775f12-58da-4a4e-bf48-0afad6d11038"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.837Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"50e7da8a-c040-4f7a-b795-e26ceae37234","correlationId":"50e7da8a-c040-4f7a-b795-e26ceae37234"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.848Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"161fb3ec-3b09-46a2-bd5f-538e182a5b26","correlationId":"161fb3ec-3b09-46a2-bd5f-538e182a5b26"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.860Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a0e195af-1d16-41d7-813f-a92e1c0eed17","correlationId":"a0e195af-1d16-41d7-813f-a92e1c0eed17"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.872Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"0b4ddfea-a1a1-4899-abc8-14b470729d38","correlationId":"0b4ddfea-a1a1-4899-abc8-14b470729d38"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.884Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"de6dbebf-2fed-4973-b7fd-402fd0acfcf6","correlationId":"de6dbebf-2fed-4973-b7fd-402fd0acfcf6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.895Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"75f0e58d-d388-4ad3-80dd-ab9ea297f85c","correlationId":"75f0e58d-d388-4ad3-80dd-ab9ea297f85c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.906Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"cefcc7a4-9d5a-41be-8fcc-1890c49430a3","correlationId":"cefcc7a4-9d5a-41be-8fcc-1890c49430a3"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.916Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"85950ecc-d30b-4bc7-9370-005fd7d28310","correlationId":"85950ecc-d30b-4bc7-9370-005fd7d28310"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.928Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3a11a0bd-5828-4763-801c-343fbea65bee","correlationId":"3a11a0bd-5828-4763-801c-343fbea65bee"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.939Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"f1d6adda-bb0c-4d06-89fb-13dfd505b95c","correlationId":"f1d6adda-bb0c-4d06-89fb-13dfd505b95c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.950Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d908fb3a-013c-4799-bce7-7fc83eb02d98","correlationId":"d908fb3a-013c-4799-bce7-7fc83eb02d98"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.961Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"ffe40fbd-f716-484a-96c9-b8aedc61eaf9","correlationId":"ffe40fbd-f716-484a-96c9-b8aedc61eaf9"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.971Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"6c3ada25-9c87-4d80-88a0-8572d079ebbd","correlationId":"6c3ada25-9c87-4d80-88a0-8572d079ebbd"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.983Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"22417173-c54d-41b7-8e3e-6bd96d81b413","correlationId":"22417173-c54d-41b7-8e3e-6bd96d81b413"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:54.993Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"5c4fa87f-3cac-4137-9d06-a6a1bc7ef282","correlationId":"5c4fa87f-3cac-4137-9d06-a6a1bc7ef282"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.005Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"328dd24a-3ccb-4236-997a-814cb55c9778","correlationId":"328dd24a-3ccb-4236-997a-814cb55c9778"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.016Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"9b27173a-1c38-432b-85a6-c1a413a765b9","correlationId":"9b27173a-1c38-432b-85a6-c1a413a765b9"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.028Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"bfadf6eb-5a47-4fb1-9715-f93ca5bad124","correlationId":"bfadf6eb-5a47-4fb1-9715-f93ca5bad124"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.038Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"2c71943d-44f9-4c6e-afbc-22e74b616560","correlationId":"2c71943d-44f9-4c6e-afbc-22e74b616560"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.050Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"9eaa0150-870a-4271-a992-0b5f0d354892","correlationId":"9eaa0150-870a-4271-a992-0b5f0d354892"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.061Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a4083368-e039-485c-88fe-4deb0003c71a","correlationId":"a4083368-e039-485c-88fe-4deb0003c71a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.073Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"8c94ab0a-52b8-4368-9886-b5e347c6dd79","correlationId":"8c94ab0a-52b8-4368-9886-b5e347c6dd79"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.083Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"8d5c8e8d-c967-4dae-8d30-ca9d0afba5ae","correlationId":"8d5c8e8d-c967-4dae-8d30-ca9d0afba5ae"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.095Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d7a468f6-c3f2-45fe-a2eb-f9775516aeb8","correlationId":"d7a468f6-c3f2-45fe-a2eb-f9775516aeb8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.107Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"bcc99950-f59d-482e-9072-fd1bdde59631","correlationId":"bcc99950-f59d-482e-9072-fd1bdde59631"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.118Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"fa97e5ff-541e-49b3-8d6d-396917e54a7c","correlationId":"fa97e5ff-541e-49b3-8d6d-396917e54a7c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.129Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"bed29921-28dc-45be-8aa1-8c07efa149b2","correlationId":"bed29921-28dc-45be-8aa1-8c07efa149b2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.141Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"5b226438-4f33-4560-bdeb-054b77eb7aff","correlationId":"5b226438-4f33-4560-bdeb-054b77eb7aff"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.151Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"abf76cbd-f08d-4a80-a0f4-129b856c1f9b","correlationId":"abf76cbd-f08d-4a80-a0f4-129b856c1f9b"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.162Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"ce07135c-fd6d-4f3d-83e3-85680b67f2e9","correlationId":"ce07135c-fd6d-4f3d-83e3-85680b67f2e9"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.173Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"f7ba68b2-fa4f-460d-aaf4-a64353c3fbd7","correlationId":"f7ba68b2-fa4f-460d-aaf4-a64353c3fbd7"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.185Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"bf0fceff-c4ab-4c07-abd3-3f8a672d96ba","correlationId":"bf0fceff-c4ab-4c07-abd3-3f8a672d96ba"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.195Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"c7099595-4f0d-43c8-af12-60fb099688e0","correlationId":"c7099595-4f0d-43c8-af12-60fb099688e0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.206Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"02970e4b-ebbf-47b5-a499-dc414d9d6434","correlationId":"02970e4b-ebbf-47b5-a499-dc414d9d6434"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.218Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"30396a11-a09b-44fd-b9de-a4274849d8a2","correlationId":"30396a11-a09b-44fd-b9de-a4274849d8a2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.230Z] INFO: [AutoSave] Layout saved successfully {"duration":1,"priority":"normal","retryCount":0,"requestId":"b156d03d-502b-4a8b-9cc0-56718ce0bbf0","correlationId":"b156d03d-502b-4a8b-9cc0-56718ce0bbf0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.240Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"96500a19-d2f3-4997-ae45-2020ebafed01","correlationId":"96500a19-d2f3-4997-ae45-2020ebafed01"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.252Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"c5286f6c-66bb-4573-8c2c-271530d2654b","correlationId":"c5286f6c-66bb-4573-8c2c-271530d2654b"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.263Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"f7bd6273-2f09-4a89-836d-81ea6cba486d","correlationId":"f7bd6273-2f09-4a89-836d-81ea6cba486d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.275Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"9e911e72-41ac-4b46-8b47-b96c17094765","correlationId":"9e911e72-41ac-4b46-8b47-b96c17094765"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.285Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"15095363-4176-4435-99a9-2e32df65d6b9","correlationId":"15095363-4176-4435-99a9-2e32df65d6b9"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.296Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"6775f5c8-13ca-4450-a207-bd8853a99ff1","correlationId":"6775f5c8-13ca-4450-a207-bd8853a99ff1"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.308Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"667e597f-922b-4fc4-b85c-92e806f11009","correlationId":"667e597f-922b-4fc4-b85c-92e806f11009"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.319Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"16097abb-30ee-4e67-8b2e-d081b7ffb3c2","correlationId":"16097abb-30ee-4e67-8b2e-d081b7ffb3c2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.330Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"b53e181f-8dab-4025-a102-325e48b0a456","correlationId":"b53e181f-8dab-4025-a102-325e48b0a456"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.342Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"5be8c63c-3e69-47a7-a262-3536d700aeb4","correlationId":"5be8c63c-3e69-47a7-a262-3536d700aeb4"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.352Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"e3652386-5170-43ce-bc36-7ce33147cba0","correlationId":"e3652386-5170-43ce-bc36-7ce33147cba0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.363Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"68efe169-2a04-4b85-97b1-49f1592b3bd0","correlationId":"68efe169-2a04-4b85-97b1-49f1592b3bd0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.374Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"336ab33e-2afd-4ea3-b26e-1ef782915e81","correlationId":"336ab33e-2afd-4ea3-b26e-1ef782915e81"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.386Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"85a65564-ba56-47be-9240-a02f7160a916","correlationId":"85a65564-ba56-47be-9240-a02f7160a916"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.397Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1a2826eb-1447-4ca8-a4fd-2422c086d6a8","correlationId":"1a2826eb-1447-4ca8-a4fd-2422c086d6a8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.409Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1a5f9fd7-4215-4875-8f11-285027b30d6f","correlationId":"1a5f9fd7-4215-4875-8f11-285027b30d6f"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.419Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"7ec3aa4d-ac46-4512-a608-5f88664d79d6","correlationId":"7ec3aa4d-ac46-4512-a608-5f88664d79d6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.431Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"e918a265-8455-4f6c-b5d8-416c74019680","correlationId":"e918a265-8455-4f6c-b5d8-416c74019680"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.442Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"98a0cdce-d5c4-4c39-bf29-c65013570939","correlationId":"98a0cdce-d5c4-4c39-bf29-c65013570939"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.454Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a670ed07-3f7b-4e8f-bc6b-1f05a0dc652e","correlationId":"a670ed07-3f7b-4e8f-bc6b-1f05a0dc652e"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.464Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1708d9b0-5136-4ede-b956-b1c72099a16f","correlationId":"1708d9b0-5136-4ede-b956-b1c72099a16f"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.475Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"32a286e0-dc15-49e9-be14-e3b26f4910cf","correlationId":"32a286e0-dc15-49e9-be14-e3b26f4910cf"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.487Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"b5c651d9-0389-4789-a755-1064bbbd8c3d","correlationId":"b5c651d9-0389-4789-a755-1064bbbd8c3d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.499Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"c275c2a0-6be2-4d09-97f4-1c46704e009e","correlationId":"c275c2a0-6be2-4d09-97f4-1c46704e009e"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.509Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"673dd541-cfad-4172-8b54-a679dde11a77","correlationId":"673dd541-cfad-4172-8b54-a679dde11a77"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.521Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d1fe2544-ea8a-47de-a65d-63537a7c2007","correlationId":"d1fe2544-ea8a-47de-a65d-63537a7c2007"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.533Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"35a4ffd6-2384-4694-8e6a-945debfae952","correlationId":"35a4ffd6-2384-4694-8e6a-945debfae952"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.543Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"ccec9eb8-9af2-4462-a42f-d2eb4f72828e","correlationId":"ccec9eb8-9af2-4462-a42f-d2eb4f72828e"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.555Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3b89ba07-b54a-42c7-8aea-372deb9c520f","correlationId":"3b89ba07-b54a-42c7-8aea-372deb9c520f"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.566Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"b6be08a6-10f9-4f23-8ddc-d83d5eb347e2","correlationId":"b6be08a6-10f9-4f23-8ddc-d83d5eb347e2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.577Z] INFO: [AutoSave] Layout saved successfully {"duration":1,"priority":"normal","retryCount":0,"requestId":"c2777194-753b-4c05-9e44-0f61ef283c91","correlationId":"c2777194-753b-4c05-9e44-0f61ef283c91"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.588Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"2580d9bc-d078-458c-b04a-68f079e776c4","correlationId":"2580d9bc-d078-458c-b04a-68f079e776c4"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.598Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"161f74ca-4e52-4465-8ec7-b64f6842a14e","correlationId":"161f74ca-4e52-4465-8ec7-b64f6842a14e"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.610Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d2c44daf-c02d-45bd-8acc-97448b46afe1","correlationId":"d2c44daf-c02d-45bd-8acc-97448b46afe1"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.620Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"79eed882-7a00-44b8-be33-b01e1b603d64","correlationId":"79eed882-7a00-44b8-be33-b01e1b603d64"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.631Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"e1308009-0e10-4296-9009-483ab2de42d6","correlationId":"e1308009-0e10-4296-9009-483ab2de42d6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.642Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a9b053b7-51b6-4d3e-8353-3c33e8c39fa7","correlationId":"a9b053b7-51b6-4d3e-8353-3c33e8c39fa7"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.653Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a6482d93-f324-49fb-abef-39463f29966c","correlationId":"a6482d93-f324-49fb-abef-39463f29966c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.663Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d99e5f1d-b9ce-4a9b-8a7b-ec01372fb6d6","correlationId":"d99e5f1d-b9ce-4a9b-8a7b-ec01372fb6d6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.675Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"680ae77e-4bfb-48e2-8bf7-ddfc9b3eb884","correlationId":"680ae77e-4bfb-48e2-8bf7-ddfc9b3eb884"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.687Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"01bd3587-c5e1-4114-a56c-47efd2fc9fce","correlationId":"01bd3587-c5e1-4114-a56c-47efd2fc9fce"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.698Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"e1fe91a8-f9bd-4b54-a8bd-b370a91066bd","correlationId":"e1fe91a8-f9bd-4b54-a8bd-b370a91066bd"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.708Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1fe000dc-3132-49da-8af6-9f5933db259b","correlationId":"1fe000dc-3132-49da-8af6-9f5933db259b"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.726Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1bcd6f61-9ff4-48c1-8624-9607d5bc50ba","correlationId":"1bcd6f61-9ff4-48c1-8624-9607d5bc50ba"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.738Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d9c6bf38-5bec-41da-bda5-25f2a4e89118","correlationId":"d9c6bf38-5bec-41da-bda5-25f2a4e89118"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.749Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"022487fc-0b11-4d67-ad12-236eef3b219d","correlationId":"022487fc-0b11-4d67-ad12-236eef3b219d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.759Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"78a055e7-8171-401c-98cc-a14bb9e2756f","correlationId":"78a055e7-8171-401c-98cc-a14bb9e2756f"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.771Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"9f237810-99f7-4e2e-9800-c64d609364f2","correlationId":"9f237810-99f7-4e2e-9800-c64d609364f2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.781Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"570a787a-9074-470e-8542-67ab2020c4e0","correlationId":"570a787a-9074-470e-8542-67ab2020c4e0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.793Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"ec0fb548-06a7-433e-929e-88b736c069c4","correlationId":"ec0fb548-06a7-433e-929e-88b736c069c4"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.804Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"35cc7ab7-36aa-41fc-aaa7-434be64681e8","correlationId":"35cc7ab7-36aa-41fc-aaa7-434be64681e8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.816Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"790a4197-4fd2-47d5-8f08-b35e1b1b1664","correlationId":"790a4197-4fd2-47d5-8f08-b35e1b1b1664"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.827Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d4f6494b-11a2-4661-a1ae-da9f5a47b581","correlationId":"d4f6494b-11a2-4661-a1ae-da9f5a47b581"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.838Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"4b2e5c3b-113a-49b8-a008-f9a1fea83d9b","correlationId":"4b2e5c3b-113a-49b8-a008-f9a1fea83d9b"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.849Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"b477ce74-4aa3-4009-a943-d27dc9522b3d","correlationId":"b477ce74-4aa3-4009-a943-d27dc9522b3d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.860Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"46a8154b-773a-4684-aad2-cf9dd911ddf2","correlationId":"46a8154b-773a-4684-aad2-cf9dd911ddf2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.872Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"613f8ad7-f300-46de-9bb8-6123b8315bc8","correlationId":"613f8ad7-f300-46de-9bb8-6123b8315bc8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.883Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"ea953def-cd6c-4be5-9f19-842ce4405eac","correlationId":"ea953def-cd6c-4be5-9f19-842ce4405eac"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.893Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d1dd81c4-0e49-4f17-b82f-e08306007391","correlationId":"d1dd81c4-0e49-4f17-b82f-e08306007391"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.904Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a1dddc45-65d6-4a95-93bd-1ef3f76bc042","correlationId":"a1dddc45-65d6-4a95-93bd-1ef3f76bc042"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.916Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3bb4a753-d1b4-4fd0-a317-ebaf89816e1c","correlationId":"3bb4a753-d1b4-4fd0-a317-ebaf89816e1c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.926Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"45f826dd-07f7-4a28-9fc0-5ed66eb5fa96","correlationId":"45f826dd-07f7-4a28-9fc0-5ed66eb5fa96"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.939Z] INFO: [AutoSave] Layout saved successfully {"duration":1,"priority":"normal","retryCount":0,"requestId":"d7564d6b-e3b2-417c-b8be-11c27c9822e6","correlationId":"d7564d6b-e3b2-417c-b8be-11c27c9822e6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.951Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"71469cbb-ffb6-435b-b0ba-8070293ee35d","correlationId":"71469cbb-ffb6-435b-b0ba-8070293ee35d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.963Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3aa9d2be-7529-408e-8458-028d7389bdf9","correlationId":"3aa9d2be-7529-408e-8458-028d7389bdf9"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.973Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1ffdf060-a6b1-4e9a-a208-fce91258e626","correlationId":"1ffdf060-a6b1-4e9a-a208-fce91258e626"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.985Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"74240fbf-ffaa-400c-ace2-c19ba6ff6547","correlationId":"74240fbf-ffaa-400c-ace2-c19ba6ff6547"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:55.995Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3f824ecf-1238-42be-a636-719fd302d413","correlationId":"3f824ecf-1238-42be-a636-719fd302d413"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.007Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"262be4c9-d001-4b3c-bc38-ed92effa865a","correlationId":"262be4c9-d001-4b3c-bc38-ed92effa865a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.017Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"75395aa0-77b0-4847-b816-d2760d72cc75","correlationId":"75395aa0-77b0-4847-b816-d2760d72cc75"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.028Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"252765e7-36b5-4c7b-b333-6d4a1a13dd3a","correlationId":"252765e7-36b5-4c7b-b333-6d4a1a13dd3a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.040Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"b45e942f-3e53-45b9-8f23-81ded34e4408","correlationId":"b45e942f-3e53-45b9-8f23-81ded34e4408"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.050Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"77ea7c61-351a-4c17-9f61-81a694d760eb","correlationId":"77ea7c61-351a-4c17-9f61-81a694d760eb"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.062Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a06b9574-4348-4bbc-b7ff-d277fb527e04","correlationId":"a06b9574-4348-4bbc-b7ff-d277fb527e04"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.073Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d58b7390-1455-4a14-900f-a6003c0f04b6","correlationId":"d58b7390-1455-4a14-900f-a6003c0f04b6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.083Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"140e6d5a-03e0-480c-8d0f-86d001ccd4b0","correlationId":"140e6d5a-03e0-480c-8d0f-86d001ccd4b0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.093Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"21fdd146-139d-46aa-ae8e-678a955950e7","correlationId":"21fdd146-139d-46aa-ae8e-678a955950e7"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.105Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"6ffe085f-08fd-4a91-86c8-96c212f53219","correlationId":"6ffe085f-08fd-4a91-86c8-96c212f53219"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.116Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"f5199611-9568-4dd9-b623-fe1dca9c7a4a","correlationId":"f5199611-9568-4dd9-b623-fe1dca9c7a4a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.126Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"8a3e0c99-d78b-4ac3-8f6e-d3733647b030","correlationId":"8a3e0c99-d78b-4ac3-8f6e-d3733647b030"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.137Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"54d32235-3de9-442b-828a-cc73ea59e4e6","correlationId":"54d32235-3de9-442b-828a-cc73ea59e4e6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.149Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3b7c06d7-f5d0-44c4-9578-c2c4ca78b166","correlationId":"3b7c06d7-f5d0-44c4-9578-c2c4ca78b166"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.160Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"78a39548-7893-4f4e-9129-c1b167ba4c16","correlationId":"78a39548-7893-4f4e-9129-c1b167ba4c16"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.171Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d51dc356-a0b3-405f-8be8-055d03153b46","correlationId":"d51dc356-a0b3-405f-8be8-055d03153b46"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.183Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"cf6d6f41-9c8f-461a-87ab-09c2918a397e","correlationId":"cf6d6f41-9c8f-461a-87ab-09c2918a397e"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.194Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"762e4bc4-a2c8-4f0e-b45c-75ea61e34af2","correlationId":"762e4bc4-a2c8-4f0e-b45c-75ea61e34af2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.204Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"6dc374f7-6454-42e7-9952-f28ff7897417","correlationId":"6dc374f7-6454-42e7-9952-f28ff7897417"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.216Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"ece72a91-4ef5-458c-a32b-5cbeb6f452c6","correlationId":"ece72a91-4ef5-458c-a32b-5cbeb6f452c6"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.226Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"51712a45-0979-4d39-86a3-a984a4f440ac","correlationId":"51712a45-0979-4d39-86a3-a984a4f440ac"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.238Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"7a9a38a1-cf11-452a-b61d-cfbd7b272cca","correlationId":"7a9a38a1-cf11-452a-b61d-cfbd7b272cca"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.249Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a514ac84-0243-42a9-879c-063629dbdc3d","correlationId":"a514ac84-0243-42a9-879c-063629dbdc3d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.260Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"0f989887-1ca3-425b-a26c-42a5cea2fa1c","correlationId":"0f989887-1ca3-425b-a26c-42a5cea2fa1c"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.271Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"6dbace38-edaa-4875-a343-7947dd9c36fc","correlationId":"6dbace38-edaa-4875-a343-7947dd9c36fc"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.283Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"f4da3176-2c11-4cde-9f69-0feab5e475d4","correlationId":"f4da3176-2c11-4cde-9f69-0feab5e475d4"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.294Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"e4b4ca44-16ce-48ba-9c25-864fe3e8bebf","correlationId":"e4b4ca44-16ce-48ba-9c25-864fe3e8bebf"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.305Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"d2739980-ec08-4ba8-8fb2-e87dfe94bd77","correlationId":"d2739980-ec08-4ba8-8fb2-e87dfe94bd77"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.317Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"7fc513e4-d454-4afd-a378-2f1a1f3358b8","correlationId":"7fc513e4-d454-4afd-a378-2f1a1f3358b8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.329Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"a814e222-2316-4e86-9f33-5744501821c8","correlationId":"a814e222-2316-4e86-9f33-5744501821c8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.340Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"5c30c776-8984-4ebc-9501-021838dff297","correlationId":"5c30c776-8984-4ebc-9501-021838dff297"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.351Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"1d41e7e3-ad6b-4d6d-87f0-509681146838","correlationId":"1d41e7e3-ad6b-4d6d-87f0-509681146838"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.362Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"e5ed11fa-c4b6-473d-9488-71195fcbcac2","correlationId":"e5ed11fa-c4b6-473d-9488-71195fcbcac2"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.372Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"3c490f54-de7b-44b5-9126-ec8cd183507a","correlationId":"3c490f54-de7b-44b5-9126-ec8cd183507a"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.384Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"61e347b6-4027-45b6-8952-48fa14b6a6ca","correlationId":"61e347b6-4027-45b6-8952-48fa14b6a6ca"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.394Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"89994cd1-3512-4a01-a026-c17b7bfe37cb","correlationId":"89994cd1-3512-4a01-a026-c17b7bfe37cb"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.405Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"24e85ea6-f11e-4db0-b895-358a5e6f7cd1","correlationId":"24e85ea6-f11e-4db0-b895-358a5e6f7cd1"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.416Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"4bb3d354-19a4-4d2e-87c1-123ea28a15dd","correlationId":"4bb3d354-19a4-4d2e-87c1-123ea28a15dd"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.427Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"c1fcacf4-535c-4bd0-b8d8-b29c0446d05f","correlationId":"c1fcacf4-535c-4bd0-b8d8-b29c0446d05f"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.438Z] INFO: [AutoSave] Layout saved successfully {"duration":0,"priority":"normal","retryCount":0,"requestId":"586ce0e2-eb46-4754-aec0-5883cf21d66d","correlationId":"586ce0e2-eb46-4754-aec0-5883cf21d66d"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Utility Methods > should limit save history size
+[2026-02-21T12:52:56.450Z] INFO: [AutoSave] Service disposed {"requestId":"b4a796a5-88da-4d32-860f-b6385be3cb44","correlationId":"b4a796a5-88da-4d32-860f-b6385be3cb44"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Edge Cases > should handle disposed service
+[2026-02-21T12:52:56.451Z] INFO: [AutoSave] Service disposed {"requestId":"15ba1ae3-2ea6-47d7-8ee9-24d479ed98a1","correlationId":"15ba1ae3-2ea6-47d7-8ee9-24d479ed98a1"}
+[2026-02-21T12:52:56.451Z] WARN: [AutoSave] Service disposed, ignoring save request {"requestId":"2c917cf0-ae67-4fab-a99c-7c06087e3491","correlationId":"2c917cf0-ae67-4fab-a99c-7c06087e3491"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Edge Cases > should handle null save function result
+[2026-02-21T12:52:59.456Z] ERROR: [AutoSave] Save failed {"error":{"name":"Error","message":"Save function returned an invalid response","stack":"Error: Save function returned an invalid response\n    at AutoSaveService.performSaveWithRetry (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:195:17)\n    at AutoSaveService.executeSave (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:146:22)\n    at AutoSaveService.flush (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:121:7)\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:402:13\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1262:5)"},"request":{"layout":{"desktop":[],"mobile":[],"userId":"test-user","id":"test-id","version":1,"checksum":null,"deviceId":null,"createdAt":{},"updatedAt":{}},"timestamp":1771678376451,"retryCount":0,"priority":"normal"},"requestId":"589e01a5-aa04-4c25-95c0-708e53a38965","correlationId":"589e01a5-aa04-4c25-95c0-708e53a38965"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Edge Cases > should handle null save function result
+[2026-02-21T12:52:59.557Z] INFO: [AutoSave] Service disposed {"requestId":"6f519569-1884-4096-8381-c76a2ee39c28","correlationId":"6f519569-1884-4096-8381-c76a2ee39c28"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Edge Cases > should handle malformed response
+[2026-02-21T12:53:02.559Z] ERROR: [AutoSave] Save failed {"error":{"name":"Error","message":"Unknown error","stack":"Error: Unknown error\n    at AutoSaveService.executeSave (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:167:15)\n    at AutoSaveService.flush (/Users/timon/Downloads/final-qunt-edge-main/lib/auto-save-service.ts:121:7)\n    at /Users/timon/Downloads/final-qunt-edge-main/lib/__tests__/auto-save-service.test.ts:419:13\n    at file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///Users/timon/Downloads/final-qunt-edge-main/node_modules/@vitest/runner/dist/index.js:1271:3)"},"request":{"layout":{"desktop":[],"mobile":[],"userId":"test-user","id":"test-id","version":1,"checksum":null,"deviceId":null,"createdAt":{},"updatedAt":{}},"timestamp":1771678379557,"retryCount":0,"priority":"normal"},"requestId":"4ed3bc92-063a-4ee0-b04c-a27dbc07d1a0","correlationId":"4ed3bc92-063a-4ee0-b04c-a27dbc07d1a0"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Edge Cases > should handle malformed response
+[2026-02-21T12:53:02.660Z] INFO: [AutoSave] Service disposed {"requestId":"26a7528a-3dda-4ac1-9231-92205b3e8493","correlationId":"26a7528a-3dda-4ac1-9231-92205b3e8493"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > AutoSaveService > Edge Cases > should handle concurrent disposal
+[2026-02-21T12:53:02.782Z] INFO: [AutoSave] Service disposed {"requestId":"91713a3a-a6a0-4bf5-85ce-ac0cb490d2bc","correlationId":"91713a3a-a6a0-4bf5-85ce-ac0cb490d2bc"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > OfflineQueueManager > should enqueue and dequeue requests
+[2026-02-21T12:53:02.833Z] INFO: [AutoSave] Offline queue cleared {"requestId":"224eca2d-eace-4d51-a5b0-094ee5422240","correlationId":"224eca2d-eace-4d51-a5b0-094ee5422240"}
+[2026-02-21T12:53:02.833Z] INFO: [AutoSave] Request enqueued {"queueSize":1,"priority":"normal","requestId":"00fab721-ab7f-4e9b-b670-8a4f73ac17e8","correlationId":"00fab721-ab7f-4e9b-b670-8a4f73ac17e8"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > OfflineQueueManager > should limit queue size
+[2026-02-21T12:53:02.834Z] INFO: [AutoSave] Offline queue cleared {"requestId":"1b1b6c8e-e540-47e4-ba94-2119ddbfd2d2","correlationId":"1b1b6c8e-e540-47e4-ba94-2119ddbfd2d2"}
+[2026-02-21T12:53:02.834Z] INFO: [AutoSave] Request enqueued {"queueSize":1,"priority":"normal","requestId":"89f7ccdb-e5c7-42c2-bb2c-6d8eea046208","correlationId":"89f7ccdb-e5c7-42c2-bb2c-6d8eea046208"}
+[2026-02-21T12:53:02.834Z] INFO: [AutoSave] Request enqueued {"queueSize":2,"priority":"normal","requestId":"1aff51a0-43fb-4244-976d-4e3467e86738","correlationId":"1aff51a0-43fb-4244-976d-4e3467e86738"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":3,"priority":"normal","requestId":"586af8d1-ae1f-410c-b336-38560caa64e7","correlationId":"586af8d1-ae1f-410c-b336-38560caa64e7"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":4,"priority":"normal","requestId":"c6c059ed-399d-4736-b88b-98a5de8413e9","correlationId":"c6c059ed-399d-4736-b88b-98a5de8413e9"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":5,"priority":"normal","requestId":"27baf09b-8646-4d3d-bcf0-9a42915c4d4e","correlationId":"27baf09b-8646-4d3d-bcf0-9a42915c4d4e"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":6,"priority":"normal","requestId":"a61bb93c-ceb1-459e-a1ee-5a96c70c96dd","correlationId":"a61bb93c-ceb1-459e-a1ee-5a96c70c96dd"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":7,"priority":"normal","requestId":"1582fc10-4b5b-418b-9824-0d7758deeb9c","correlationId":"1582fc10-4b5b-418b-9824-0d7758deeb9c"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":8,"priority":"normal","requestId":"837f2c47-1625-48ac-8078-d62e2b663d7d","correlationId":"837f2c47-1625-48ac-8078-d62e2b663d7d"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":9,"priority":"normal","requestId":"df997e29-4a7f-4247-841c-d67b909386c9","correlationId":"df997e29-4a7f-4247-841c-d67b909386c9"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":10,"priority":"normal","requestId":"30337aba-bfde-42ad-80bb-aa409a341eb2","correlationId":"30337aba-bfde-42ad-80bb-aa409a341eb2"}
+[2026-02-21T12:53:02.835Z] WARN: [AutoSave] Queue full, removed oldest request {"requestId":"6eff689a-d9f6-4988-8a68-50b8452d9cfb","correlationId":"6eff689a-d9f6-4988-8a68-50b8452d9cfb"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":10,"priority":"normal","requestId":"58f95b7d-0b02-4766-bc85-f3b4c8a53c0b","correlationId":"58f95b7d-0b02-4766-bc85-f3b4c8a53c0b"}
+[2026-02-21T12:53:02.835Z] WARN: [AutoSave] Queue full, removed oldest request {"requestId":"aaf78406-9bb4-4e0d-a14c-cf7f87377c95","correlationId":"aaf78406-9bb4-4e0d-a14c-cf7f87377c95"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":10,"priority":"normal","requestId":"67bf99d0-e408-423d-8d8b-159b317d0f0e","correlationId":"67bf99d0-e408-423d-8d8b-159b317d0f0e"}
+[2026-02-21T12:53:02.835Z] WARN: [AutoSave] Queue full, removed oldest request {"requestId":"6904816b-3316-45c9-b15a-64f2e6e06392","correlationId":"6904816b-3316-45c9-b15a-64f2e6e06392"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":10,"priority":"normal","requestId":"a4320658-a413-483b-9bb2-12a17d8e80b1","correlationId":"a4320658-a413-483b-9bb2-12a17d8e80b1"}
+[2026-02-21T12:53:02.835Z] WARN: [AutoSave] Queue full, removed oldest request {"requestId":"716dbcca-cac9-47ac-a08d-10af1bc51c1c","correlationId":"716dbcca-cac9-47ac-a08d-10af1bc51c1c"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":10,"priority":"normal","requestId":"2e617fea-3859-4cb3-b3ff-c678f1056885","correlationId":"2e617fea-3859-4cb3-b3ff-c678f1056885"}
+[2026-02-21T12:53:02.835Z] WARN: [AutoSave] Queue full, removed oldest request {"requestId":"92670bff-2e7f-4051-b4f2-0ec59521eb14","correlationId":"92670bff-2e7f-4051-b4f2-0ec59521eb14"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":10,"priority":"normal","requestId":"3e6dd41a-330b-4353-8b6b-1b0ab1db0c22","correlationId":"3e6dd41a-330b-4353-8b6b-1b0ab1db0c22"}
+
+stdout | lib/__tests__/auto-save-service.test.ts > OfflineQueueManager > should clear queue
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Offline queue cleared {"requestId":"3cd85743-2641-4e73-9188-d41980909c8a","correlationId":"3cd85743-2641-4e73-9188-d41980909c8a"}
+[2026-02-21T12:53:02.835Z] INFO: [AutoSave] Request enqueued {"queueSize":1,"priority":"normal","requestId":"245854f0-1030-43ba-8624-e23ae8830c05","correlationId":"245854f0-1030-43ba-8624-e23ae8830c05"}
+[2026-02-21T12:53:02.836Z] INFO: [AutoSave] Offline queue cleared {"requestId":"12826d39-1386-4112-94b3-de623c005388","correlationId":"12826d39-1386-4112-94b3-de623c005388"}
+
+ ✓ lib/__tests__/auto-save-service.test.ts (26 tests) 16135ms
+   ✓ AutoSaveService > Retry Logic > should retry on network errors 655ms
+   ✓ AutoSaveService > Retry Logic > should respect max retries limit 1357ms
+   ✓ AutoSaveService > Retry Logic > should use exponential backoff 4506ms
+   ✓ AutoSaveService > Utility Methods > should limit save history size 1680ms
+   ✓ AutoSaveService > Edge Cases > should handle null save function result 3106ms
+   ✓ AutoSaveService > Edge Cases > should handle malformed response 3103ms
+
+ Test Files  29 passed | 1 skipped (30)
+      Tests  137 passed | 46 skipped (183)
+   Start at  18:22:46
+   Duration  16.64s (transform 919ms, setup 486ms, collect 3.30s, tests 17.50s, environment 1.10s, prepare 2.70s)
+

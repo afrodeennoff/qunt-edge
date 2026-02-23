@@ -8,6 +8,8 @@ import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
+const siteOrigin = "https://qunt-edge.vercel.app";
+
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist",
@@ -49,12 +51,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Qunt Edge",
     description: "Next generation trading dashboard",
-    metadataBase: new URL("https://qunt-edge.vercel.app"),
+    metadataBase: new URL(siteOrigin),
     alternates: {
-      canonical: "https://qunt-edge.vercel.app",
+      canonical: siteOrigin,
       languages: {
-        "en-US": "https://qunt-edge.vercel.app",
-        "fr-FR": "https://qunt-edge.vercel.app/fr",
+        "en-US": siteOrigin,
+        "fr-FR": `${siteOrigin}/fr`,
       },
     },
     // ---------- OPEN GRAPH ----------
@@ -147,7 +149,7 @@ export default async function RootLayout({
     >
       <head>
         {/* Resource Hinting for Performance */}
-        <link rel="dns-prefetch" href="https://qunt-edge.vercel.app" />
+        <link rel="dns-prefetch" href={siteOrigin} />
 
         {/* Mobile-First Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />

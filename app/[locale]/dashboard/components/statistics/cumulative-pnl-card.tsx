@@ -1,4 +1,4 @@
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { TrendingUp, TrendingDown, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '../../types/dashboard'
@@ -15,7 +15,7 @@ interface CumulativePnlCardProps {
 }
 
 export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCardProps) {
-  const { statistics } = useData()
+  const { statistics } = useDashboardStats()
   const safeCumulativePnl = Number.isFinite(statistics.cumulativePnl) ? statistics.cumulativePnl : 0
   const safeCumulativeFees = Number.isFinite(statistics.cumulativeFees) ? statistics.cumulativeFees : 0
   const safeGrossWin = Number.isFinite(statistics.grossWin) ? statistics.grossWin : 0

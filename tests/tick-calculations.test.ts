@@ -5,7 +5,8 @@ import {
   calculateTicksAndPointsForTrades,
   calculateTicksAndPointsForGroupedTrade
 } from '../lib/tick-calculations'
-import type { Trade, TickDetails } from '@/prisma/generated/prisma'
+import { Trade } from '@/lib/data-types'
+import type { TickDetails } from '@/prisma/generated/prisma'
 
 // Mock data setup
 const mockTickDetails: Record<string, TickDetails> = {
@@ -65,17 +66,17 @@ describe('calculateTicksAndPoints', () => {
   })
 
   test('calculates correctly for partial match ES (not ESH)', () => {
-     // Instrument 'ESM24' matches 'ES' but not 'ESH'.
-     const trade = { ...baseTrade, instrument: 'ESM24', pnl: 50 } as any
-     // ES details: tickValue=12.5, tickSize=0.25
-     // ticks = 50 / 12.5 = 4
-     // points = 4 * 0.25 = 1.0
+    // Instrument 'ESM24' matches 'ES' but not 'ESH'.
+    const trade = { ...baseTrade, instrument: 'ESM24', pnl: 50 } as any
+    // ES details: tickValue=12.5, tickSize=0.25
+    // ticks = 50 / 12.5 = 4
+    // points = 4 * 0.25 = 1.0
 
-     const result = calculateTicksAndPoints(trade, mockTickDetails)
-     expect(result.ticks).toBe(4)
-     expect(result.points).toBe(1.0)
-     expect(result.tickValue).toBe(12.5)
-     expect(result.tickSize).toBe(0.25)
+    const result = calculateTicksAndPoints(trade, mockTickDetails)
+    expect(result.ticks).toBe(4)
+    expect(result.points).toBe(1.0)
+    expect(result.tickValue).toBe(12.5)
+    expect(result.tickSize).toBe(0.25)
   })
 
   test('handles unknown ticker gracefully', () => {

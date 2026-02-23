@@ -116,6 +116,7 @@ export function RithmicSyncNotifications() {
           }))
         }
       } else if (lastMessage.type === 'log' && lastMessage.level === 'info') {
+        if (!lastMessage.message) return
         // Parse progress from processing date messages
         const processingMatch = lastMessage.message.match(/Processing date (\d+) of (\d+): (\d+)/)
         if (processingMatch) {
@@ -153,6 +154,7 @@ export function RithmicSyncNotifications() {
           }
         }))
       } else if (lastMessage.type === 'progress') {
+        if (!lastMessage.message) return
         const progressMatch = lastMessage.message.match(/\[(.*?)\] Processing date (\d+)\/(\d+)(?:: (\d{8}))?/)
         if (progressMatch) {
           const [, accountId, current, total, date] = progressMatch

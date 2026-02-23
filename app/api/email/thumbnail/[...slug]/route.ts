@@ -26,7 +26,15 @@ export async function GET(
   const [videoId, requestedQuality] = slug;
 
   if (!videoId) {
-    return new Response("Missing video id", { status: 400 });
+    return NextResponse.json(
+      { error: "Missing video id" },
+      {
+        status: 400,
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
   }
 
   const qualitiesToTry: YouTubeQuality[] = isValidQuality(requestedQuality)
@@ -53,11 +61,14 @@ export async function GET(
       const contentType = res.headers.get("content-type") || "image/jpeg";
       const buffer = await res.arrayBuffer();
 
-      return new Response(buffer, {
+      return new NextResponse(buffer, {
         headers: {
           "Content-Type": contentType,
           "Cache-Control":
             "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+          "CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+          "Vercel-CDN-Cache-Control":
+            "public, s-maxage=86400, stale-while-revalidate=604800",
         },
       });
     } catch (err) {
@@ -67,7 +78,14 @@ export async function GET(
   }
 
   const message = lastErrorMessage || "Failed to fetch thumbnail";
-  return new Response(message, { status: 502 });
+  return NextResponse.json(
+    { error: message },
+    {
+      status: 502,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    }
+  );
 }
-
-
+import { NextResponse } from "next/server";

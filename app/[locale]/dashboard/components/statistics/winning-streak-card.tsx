@@ -1,4 +1,4 @@
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { Award, HelpCircle } from "lucide-react"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
@@ -14,7 +14,7 @@ interface WinningStreakCardProps {
 }
 
 export default function WinningStreakCard({ size = 'medium' }: WinningStreakCardProps) {
-  const { statistics: { winningStreak } } = useData()
+  const { statistics: { winningStreak } } = useDashboardStats()
   const t = useI18n()
 
   return (

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quntedge-static-v1';
+const CACHE_NAME = 'quntedge-static-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/manifest.json',
@@ -28,9 +28,15 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
+    const destination = request.destination;
 
     // Only cache same-origin GET requests for static assets
     if (request.method !== 'GET' || !url.origin.includes(self.location.origin)) {
+        return;
+    }
+
+    // Never cache HTML/documents; stale HTML is the common hard-reload root cause.
+    if (request.mode === 'navigate' || destination === 'document') {
         return;
     }
 
@@ -43,29 +49,44 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-
-            return fetch(request).then((response) => {
-                // Cache static assets (images, fonts, scripts)
-                if (
-                    response.ok &&
-                    (url.pathname.includes('/_next/static') ||
+    event.respondWith((async () => {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            event.waitUntil(
+                fetch(request).then((networkResponse) => {
+                    if (!networkResponse.ok) return;
+                    if (
+                        url.pathname.includes('/_next/static') ||
                         url.pathname.startsWith('/logos') ||
-                        url.pathname.startsWith('/videos'))
-                ) {
-                    const responseToCache = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(request, responseToCache);
-                    });
-                }
-                return response;
-            }).catch(() => {
-                // Offline fallback could go here
+                        url.pathname.startsWith('/videos')
+                    ) {
+                        caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse.clone()));
+                    }
+                }).catch(() => {
+                    // Best-effort revalidation.
+                })
+            );
+            return cachedResponse;
+        }
+
+        const response = await fetch(request);
+        if (
+            response.ok &&
+            (url.pathname.includes('/_next/static') ||
+                url.pathname.startsWith('/logos') ||
+                url.pathname.startsWith('/videos'))
+        ) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache);
             });
-        })
-    );
+        }
+        return response;
+    })());
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });

@@ -13,10 +13,10 @@ export function measureQueryPerformance<T>(
   queryFn: () => Promise<T>
 ): Promise<T> {
   const startTime = Date.now()
-  
+
   return queryFn().then(result => {
     const executionTime = Date.now() - startTime
-    
+
     queryMetrics.push({
       queryName,
       executionTime,
@@ -26,11 +26,11 @@ export function measureQueryPerformance<T>(
     if (queryMetrics.length > MAX_QUERY_METRICS) {
       queryMetrics.splice(0, queryMetrics.length - MAX_QUERY_METRICS)
     }
-    
+
     if (executionTime > 1000) {
       console.warn(`[Slow Query] ${queryName} took ${executionTime}ms`)
     }
-    
+
     return result
   })
 }
@@ -55,17 +55,17 @@ export async function executeOptimizedQuery<T>(
       return cached
     }
   }
-  
+
   const result = await measureQueryPerformance(queryName, queryFn)
-  
+
   if (cacheKey && cacheTtl) {
     await setCachedResult(cacheKey, result, cacheTtl)
   }
-  
+
   return result
 }
 
-const queryCache = new Map<string, { data: any; expiresAt: number }>()
+const queryCache = new Map<string, { data: unknown; expiresAt: number }>()
 const MAX_IN_MEMORY_CACHE_ENTRIES = 500
 const CACHE_SWEEP_INTERVAL_MS = 60_000
 
@@ -174,7 +174,7 @@ async function setUpstashRedisCachedResult<T>(key: string, data: T, ttlSeconds: 
   }
 }
 
-async function runUpstashRedisCommand(command: string[]): Promise<any> {
+async function runUpstashRedisCommand(command: string[]): Promise<unknown> {
   if (!upstashRedisUrl || !upstashRedisToken) return null
 
   const response = await fetch(upstashRedisUrl, {

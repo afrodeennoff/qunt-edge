@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ChevronsUpDown } from "lucide-react"
-import { useData } from '@/context/data-provider'
+import { useDashboardFilters } from '@/context/data-provider'
 import { useTradesStore } from '../../../../../store/trades-store'
 
 interface FilterItem {
@@ -28,7 +28,7 @@ const propfirmGroups: PropfirmGroup[] = [
 ]
 
 export default function NavbarFilters() {
-  const { accountNumbers, setAccountNumbers, instruments, setInstruments } = useData()
+  const { accountNumbers, setAccountNumbers, instruments, setInstruments } = useDashboardFilters()
   const trades = useTradesStore(state => state.trades)
   
   const [allItems, setAllItems] = useState<FilterItem[]>([])

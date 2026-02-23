@@ -268,6 +268,7 @@ export const platforms: PlatformConfig[] = [
       path: '/logos/rithmic.png',
       alt: 'Rithmic Logo'
     },
+    isDisabled: true,
     isRithmic: true,
     customComponent: RithmicSyncWrapper,
     steps: [
@@ -559,6 +560,7 @@ export const platforms: PlatformConfig[] = [
       path: '/logos/rithmic.png',
       alt: 'Rithmic Logo'
     },
+    isDisabled: true,
     isRithmic: true,
     skipHeaderSelection: true,
     processFile: processRithmicPerformance,
@@ -597,6 +599,7 @@ export const platforms: PlatformConfig[] = [
       path: '/logos/rithmic.png',
       alt: 'Rithmic Logo'
     },
+    isDisabled: true,
     isRithmic: true,
     skipHeaderSelection: true,
     processFile: processRithmicOrders,

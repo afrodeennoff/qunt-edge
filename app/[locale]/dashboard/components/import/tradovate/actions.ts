@@ -8,6 +8,7 @@ import crypto from 'crypto'
 import { generateDeterministicTradeId } from '@/lib/trade-id-utils'
 import { getTickDetails } from '@/server/tick-details'
 import { prisma } from '@/lib/prisma'
+import { withPrismaSchemaMismatchFallback } from '@/lib/prisma-guard'
 import { logger } from '@/lib/logger'
 import { authSecurityConfig } from '@/lib/security/auth-config'
 import { createOAuthState, consumeOAuthState } from '@/lib/security/oauth-state'
@@ -203,7 +204,7 @@ async function getFillFeesByIds(accessToken: string, fillIds: number[]): Promise
               const fee = await getFillFeeById(accessToken, fillId)
               return fee
             } catch (error) {
-              logger.warn(`Failed to fetch fill fee ${fillId}:`, error)
+              logger.warn(`Failed to fetch fill fee ${fillId}:`, { error })
               return null
             }
           })
@@ -212,14 +213,14 @@ async function getFillFeesByIds(accessToken: string, fillIds: number[]): Promise
           fees.push(...batchResults.filter(fee => fee !== null) as TradovateFillFee[])
         }
       } catch (batchError) {
-        logger.warn(`Batch fill fees request error, falling back to individual requests for batch:`, batchError)
+        logger.warn(`Batch fill fees request error, falling back to individual requests for batch:`, { batchError })
         // Fallback to individual requests for this batch
         const batchPromises = batch.map(async (fillId) => {
           try {
             const fee = await getFillFeeById(accessToken, fillId)
             return fee
           } catch (error) {
-            logger.warn(`Failed to fetch fill fee ${fillId}:`, error)
+            logger.warn(`Failed to fetch fill fee ${fillId}:`, { error })
             return null
           }
         })
@@ -236,7 +237,7 @@ async function getFillFeesByIds(accessToken: string, fillIds: number[]): Promise
 
     return fees
   } catch (error) {
-    logger.warn(`Error fetching fill fees:`, error)
+    logger.warn(`Error fetching fill fees:`, { error })
     return []
   }
 }
@@ -260,7 +261,7 @@ async function getFillFeeById(accessToken: string, fillId: number): Promise<Trad
 
     return await response.json()
   } catch (error) {
-    logger.warn(`Error fetching fill fee ${fillId}:`, error)
+    logger.warn(`Error fetching fill fee ${fillId}:`, { error })
     return null
   }
 }
@@ -328,7 +329,7 @@ async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<an
               const fill = await getFillById(accessToken, fillId)
               return fill
             } catch (error) {
-              logger.warn(`Failed to fetch fill ${fillId}:`, error)
+              logger.warn(`Failed to fetch fill ${fillId}:`, { error })
               return null
             }
           })
@@ -337,7 +338,7 @@ async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<an
           fills.push(...batchResults.filter(fill => fill !== null))
         }
       } catch (batchError) {
-        logger.warn(`Batch fills request error, falling back to individual requests for batch:`, batchError)
+        logger.warn(`Batch fills request error, falling back to individual requests for batch:`, { batchError })
         // Fallback to individual requests for this batch
         const batchPromises = batch.map(async (fillId) => {
           try {
@@ -345,7 +346,7 @@ async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<an
             // const fill = await getFillById(accessToken, fillId)
             return null
           } catch (error) {
-            logger.warn(`Failed to fetch fill ${fillId}:`, error)
+            logger.warn(`Failed to fetch fill ${fillId}:`, { error })
             return null
           }
         })
@@ -362,7 +363,7 @@ async function getFillsByIds(accessToken: string, fillIds: number[]): Promise<an
 
     return fills
   } catch (error) {
-    logger.warn(`Error fetching fills:`, error)
+    logger.warn(`Error fetching fills:`, { error })
     return []
   }
 }
@@ -386,7 +387,7 @@ async function getFillById(accessToken: string, fillId: number): Promise<any | n
 
     return await response.json()
   } catch (error) {
-    logger.warn(`Error fetching fill ${fillId}:`, error)
+    logger.warn(`Error fetching fill ${fillId}:`, { error })
     return null
   }
 }
@@ -431,7 +432,7 @@ async function getOrdersByIds(accessToken: string, orderIds: number[]): Promise<
               // const order = await getOrderById(accessToken, orderId)
               return null
             } catch (error) {
-              logger.warn(`Failed to fetch order ${orderId}:`, error)
+              logger.warn(`Failed to fetch order ${orderId}:`, { error })
               return null
             }
           })
@@ -440,14 +441,14 @@ async function getOrdersByIds(accessToken: string, orderIds: number[]): Promise<
           orders.push(...batchResults.filter(order => order !== null))
         }
       } catch (batchError) {
-        logger.warn(`Batch orders request error, falling back to individual requests for batch:`, batchError)
+        logger.warn(`Batch orders request error, falling back to individual requests for batch:`, { batchError })
         // Fallback to individual requests for this batch
         const batchPromises = batch.map(async (orderId) => {
           try {
             const order = await getOrderById(accessToken, orderId)
             return order
           } catch (error) {
-            logger.warn(`Failed to fetch order ${orderId}:`, error)
+            logger.warn(`Failed to fetch order ${orderId}:`, { error })
             return null
           }
         })
@@ -464,7 +465,7 @@ async function getOrdersByIds(accessToken: string, orderIds: number[]): Promise<
 
     return orders
   } catch (error) {
-    logger.warn(`Error fetching orders:`, error)
+    logger.warn(`Error fetching orders:`, { error })
     return []
   }
 }
@@ -488,7 +489,7 @@ async function getOrderById(accessToken: string, orderId: number): Promise<any |
 
     return await response.json()
   } catch (error) {
-    logger.warn(`Error fetching order ${orderId}:`, error)
+    logger.warn(`Error fetching order ${orderId}:`, { error })
     return null
   }
 }
@@ -716,7 +717,7 @@ export async function handleTradovateCallback(code: string, state: string): Prom
       accountId
     )
     if (storeResult.error) {
-      logger.warn('Failed to store token in database:', storeResult.error)
+      logger.warn('Failed to store token in database:', { error: storeResult.error })
       // Continue anyway - token is still valid for this session
     }
 
@@ -774,7 +775,7 @@ export async function renewTradovateAccessToken(accessToken: string, environment
     // Update database with new token
     const storeResult = await storeTradovateToken(renewalData.accessToken, renewalData.expirationTime, environment)
     if (storeResult.error) {
-      logger.warn('Failed to update token in database:', storeResult.error)
+      logger.warn('Failed to update token in database:', { error: storeResult.error })
       // Continue anyway - token is still valid for this session
     }
 
@@ -783,7 +784,7 @@ export async function renewTradovateAccessToken(accessToken: string, environment
       expiresAt: renewalData.expirationTime,
     };
   } catch (error) {
-    logger.error('Failed to renew Tradovate token:', error);
+    logger.error('Failed to renew Tradovate token:', { error });
     return { error: `Failed to renew token: ${error instanceof Error ? error.message : 'Unknown error'}` };
   }
 }
@@ -827,7 +828,7 @@ export async function refreshTradovateToken(refreshToken: string): Promise<Trado
     try {
       tokens = await tokenResponse.json()
     } catch (parseError) {
-      logger.error('Failed to parse refresh token response:', parseError)
+      logger.error('Failed to parse refresh token response:', { parseError })
       return { error: 'Invalid response format from Tradovate' }
     }
 
@@ -862,7 +863,7 @@ export async function refreshTradovateToken(refreshToken: string): Promise<Trado
       expiresAt,
     }
   } catch (error) {
-    logger.error('Failed to refresh Tradovate token:', error)
+    logger.error('Failed to refresh Tradovate token:', { error })
     return { error: `Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}` }
   }
 }
@@ -1006,7 +1007,7 @@ async function buildTradesFromFillPairs(
       // Get contract information
       const contract = contracts.get(buyFill.contractId)
       if (!contract) {
-        logger.warn(`Contract not found for fill pair ${fillPair.id}:`, buyFill.contractId)
+        logger.warn(`Contract not found for fill pair ${fillPair.id}:`, { contractId: buyFill.contractId })
         continue
       }
 
@@ -1133,7 +1134,7 @@ async function buildTradesFromFillPairs(
       logger.debug(`Created trade for ${contractSymbol}: ${side} ${fillPair.qty} @ ${entryPrice} -> ${exitPrice} = $${netPnl.toFixed(2)} (${formatDuration(durationSeconds)}) [Commission: $${totalCommission.toFixed(2)}]`)
 
     } catch (error) {
-      logger.error(`Error processing fill pair ${fillPair.id}:`, error)
+      logger.error(`Error processing fill pair ${fillPair.id}:`, { error })
     }
   }
 
@@ -1272,9 +1273,15 @@ export async function removeTradovateToken(accountId?: string) {
       whereClause.accountId = accountId
     }
 
-    await prisma.synchronization.deleteMany({
-      where: whereClause
-    })
+    await withPrismaSchemaMismatchFallback<void>(
+      'sync:tradovate:delete',
+      async () => {
+        await prisma.synchronization.deleteMany({
+          where: whereClause
+        })
+      },
+      undefined
+    )
 
     return { success: true }
   } catch (error) {
@@ -1292,15 +1299,19 @@ export async function getTradovateSynchronizations() {
       return { error: 'User not authenticated' }
     }
 
-    const synchronizations = await prisma.synchronization.findMany({
-      where: {
-        userId: user.id,
-        service: 'tradovate'
-      },
-      orderBy: {
-        lastSyncedAt: 'desc'
-      }
-    })
+    const synchronizations = await withPrismaSchemaMismatchFallback(
+      'sync:tradovate:list',
+      () => prisma.synchronization.findMany({
+        where: {
+          userId: user.id,
+          service: 'tradovate'
+        },
+        orderBy: {
+          lastSyncedAt: 'desc'
+        }
+      }),
+      []
+    )
 
     return { synchronizations }
   } catch (error) {
@@ -1408,7 +1419,7 @@ export async function testCustomTradovateToken(
       }
     }
   } catch (error) {
-    logger.error('Failed to test custom Tradovate token:', error)
+    logger.error('Failed to test custom Tradovate token:', { error })
     return { error: `Failed to test token: ${error instanceof Error ? error.message : 'Unknown error'}` }
   }
 }
@@ -1528,7 +1539,7 @@ export async function getTradovateTrades(
           logger.debug(`Contract ${contractId}: ${contract.name} (${contract.symbol})`)
         }
       } catch (error) {
-        logger.warn(`Failed to fetch contract ${contractId}:`, error)
+        logger.warn(`Failed to fetch contract ${contractId}:`, { error })
       }
     })
     await Promise.all(contractPromises)
@@ -1598,7 +1609,7 @@ export async function getTradovateTrades(
       ordersCount: fillPairs.length * 2
     }
   } catch (error) {
-    logger.error('Failed to get Tradovate trades:', error)
+    logger.error('Failed to get Tradovate trades:', { error })
     return { error: 'Failed to get trades' }
   }
 }

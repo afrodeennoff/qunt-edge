@@ -1,6 +1,6 @@
 'use client'
 
-import { useData } from '@/context/data-provider'
+import { useDashboardStats } from '@/context/data-provider'
 import { ArrowUpFromLine, ArrowDownFromLine, HelpCircle } from "lucide-react"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
@@ -17,7 +17,7 @@ interface LongShortPerformanceCardProps {
 
 export default function LongShortPerformanceCard({ size = 'medium' }: LongShortPerformanceCardProps) {
   void size
-  const { calendarData } = useData()
+  const { calendarData } = useDashboardStats()
   const t = useI18n()
 
   // Calculate long/short data

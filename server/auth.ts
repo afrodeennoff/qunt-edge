@@ -7,6 +7,19 @@ import { User } from '@supabase/supabase-js'
 import { authSecurityConfig } from '@/lib/security/auth-config'
 import { checkAuthGuard, recordAuthFailure, recordAuthSuccess } from '@/lib/security/auth-attempts'
 
+const PASSWORD_MIN_LENGTH = 8
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/
+
+function validatePasswordStrength(password: string): string | null {
+  if (!password || password.length < PASSWORD_MIN_LENGTH) {
+    return `Password must be at least ${PASSWORD_MIN_LENGTH} characters long`
+  }
+  if (!PASSWORD_REGEX.test(password)) {
+    return 'Password must contain at least one uppercase letter, one lowercase letter, and one digit'
+  }
+  return null // valid
+}
+
 export async function getWebsiteURL() {
   let url =
     process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
@@ -281,6 +294,11 @@ export async function signUpWithPasswordAction(
   next: string | null = null,
   locale?: string
 ) {
+  const passwordError = validatePasswordStrength(password)
+  if (passwordError) {
+    throw new Error(passwordError)
+  }
+
   try {
     const supabase = await createClient()
     const websiteURL = await getWebsiteURL()
@@ -316,6 +334,11 @@ export async function signUpWithPasswordAction(
 
 // Allow a logged-in user (e.g., magic link users) to set or change a password
 export async function setPasswordAction(newPassword: string) {
+  const passwordError = validatePasswordStrength(newPassword)
+  if (passwordError) {
+    throw new Error(passwordError)
+  }
+
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

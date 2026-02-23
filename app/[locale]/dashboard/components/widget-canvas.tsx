@@ -148,14 +148,14 @@ function DeprecatedWidget({ onRemove }: { onRemove: () => void }) {
   )
 }
 
-function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, currentType }: {
+const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomizing, size, currentType }: {
   children: React.ReactNode
   onRemove: () => void
   onChangeSize: (size: WidgetSize) => void
   isCustomizing: boolean
   size: WidgetSize
   currentType: WidgetType
-}) {
+}) => {
   const t = useI18n()
   const { isMobile } = useData()
   const uiV2Enabled = isUiV2Enabled()
@@ -375,7 +375,14 @@ function WidgetWrapper({ children, onRemove, onChangeSize, isCustomizing, size, 
       )}
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isCustomizing === nextProps.isCustomizing &&
+    prevProps.size === nextProps.size &&
+    prevProps.currentType === nextProps.currentType &&
+    prevProps.children === nextProps.children
+  )
+})
 
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
@@ -454,6 +461,9 @@ export default function WidgetCanvas() {
       void flushPendingLayoutSave()
     }, LAYOUT_SAVE_DEBOUNCE_MS)
   }, [flushPendingLayoutSave])
+
+  const handleOutsideClickRef = useRef(handleOutsideClick)
+  handleOutsideClickRef.current = handleOutsideClick
 
   // Update handleLayoutChange with proper type handling and all dependencies
   const handleLayoutChange = useCallback((layout: LayoutItem[]) => {
@@ -579,11 +589,14 @@ export default function WidgetCanvas() {
   }, [isMobile, removeWidget]);
 
   useEffect(() => {
-    if (isCustomizing) {
-      document.addEventListener('click', handleOutsideClick)
-      return () => document.removeEventListener('click', handleOutsideClick)
+    const handleClick = (e: MouseEvent) => {
+      handleOutsideClickRef.current(e)
     }
-  }, [isCustomizing, handleOutsideClick]);
+    if (isCustomizing) {
+      document.addEventListener('click', handleClick)
+      return () => document.removeEventListener('click', handleClick)
+    }
+  }, [isCustomizing]);
 
   useEffect(() => {
     if (!isCustomizing) {
@@ -599,6 +612,8 @@ export default function WidgetCanvas() {
       void flushPendingLayoutSave()
     }
   }, [flushPendingLayoutSave])
+
+
 
   // Add auto-scroll functionality for mobile
   useAutoScroll(isMobile && isCustomizing)

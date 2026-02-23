@@ -1,0 +1,178 @@
+[36m
+🔍 COMPREHENSIVE NEXT.JS PERFORMANCE AUDIT[0m
+[36mTarget: Qunt Edge Trading Analytics Platform[0m
+[36mStarted: 2026-02-21T13:03:15.098Z
+[0m
+
+================================================================================
+[36m📦 BUNDLE SIZE ANALYSIS[0m
+================================================================================
+[33m
+Top 20 Largest Dependencies:[0m
+┌─────────┬────────────────────────────────┬────────┬───────────┐
+│ (index) │ Package                        │ Size   │ Version   │
+├─────────┼────────────────────────────────┼────────┼───────────┤
+│ 0       │ 'tailwind-merge'               │ '972K' │ '^3.3.1'  │
+│ 1       │ 'd3'                           │ '868K' │ '^7.9.0'  │
+│ 2       │ 'sharp'                        │ '824K' │ '^0.33.5' │
+│ 3       │ 'tailwindcss'                  │ '820K' │ '^4.1.16' │
+│ 4       │ '@tanstack/react-table'        │ '776K' │ '^8.21.3' │
+│ 5       │ 'react-dropzone'               │ '704K' │ '^14.3.8' │
+│ 6       │ '@tiptap/extension-table'      │ '640K' │ '^3.8.0'  │
+│ 7       │ 'gray-matter'                  │ '624K' │ '^4.0.3'  │
+│ 8       │ 'streamdown'                   │ '600K' │ '^2.0.1'  │
+│ 9       │ '@tiptap/extension-text-style' │ '580K' │ '^3.8.0'  │
+│ 10      │ '@vercel/analytics'            │ '576K' │ '^1.5.0'  │
+│ 11      │ 'date-fns-tz'                  │ '572K' │ '^3.2.0'  │
+│ 12      │ '@supabase/ssr'                │ '516K' │ '0.8.0'   │
+│ 13      │ 'react-colorful'               │ '488K' │ '^5.6.1'  │
+│ 14      │ '@tiptap/y-tiptap'             │ '448K' │ '^3.0.0'  │
+│ 15      │ 'react-zoom-pan-pinch'         │ '448K' │ '^3.7.0'  │
+│ 16      │ '@vercel/speed-insights'       │ '432K' │ '^1.2.0'  │
+│ 17      │ 'postcss'                      │ '432K' │ '^8.5.6'  │
+│ 18      │ '@radix-ui/react-select'       │ '400K' │ '^2.2.6'  │
+│ 19      │ '@supabase/supabase-js'        │ '400K' │ '2.93.2'  │
+└─────────┴────────────────────────────────┴────────┴───────────┘
+
+================================================================================
+[36m⚙️ NEXT.JS CONFIGURATION ANALYSIS[0m
+================================================================================
+[32mConfiguration Features:[0m
+[33m  ✗ Image Optimization[0m
+[33m  ✗ Experimental Features[0m
+[33m  ✗ Webpack Configuration[0m
+[33m  ✗ Headers[0m
+[33m  ✗ Redirects[0m
+[33m  ✗ Rewrites[0m
+
+================================================================================
+[36m💧 MEMORY LEAK DETECTION[0m
+================================================================================
+[33m
+Found 2 potential memory leaks:[0m
+┌─────────┬───────────────────────────────────────────────────────────────────────┬────────────────────────────────────────────┬─────────────────┐
+│ (index) │ file                                                                  │ issue                                      │ code            │
+├─────────┼───────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┼─────────────────┤
+│ 0       │ 'app/[locale]/admin/components/weekly-stats/weekly-recap-preview.tsx' │ 'Timer outside useEffect (potential leak)' │ 'setTimeout(()' │
+│ 1       │ 'app/[locale]/admin/components/weekly-stats/weekly-recap-preview.tsx' │ 'Timer outside useEffect (potential leak)' │ 'setTimeout(()' │
+└─────────┴───────────────────────────────────────────────────────────────────────┴────────────────────────────────────────────┴─────────────────┘
+
+================================================================================
+[36m🔄 STATIC GENERATION OPPORTUNITIES[0m
+================================================================================
+[36m
+Dynamic Routes Analysis:[0m
+┌─────────┬──────────────────────────────────────────────────────────┬───────────────────┬───────────────────────┐
+│ (index) │ file                                                     │ hasGetStaticProps │ hasGetServerSideProps │
+├─────────┼──────────────────────────────────────────────────────────┼───────────────────┼───────────────────────┤
+│ 0       │ 'app/[locale]/embed/page.tsx'                            │ false             │ false                 │
+│ 1       │ 'app/[locale]/(home)/page.tsx'                           │ true              │ false                 │
+│ 2       │ 'app/[locale]/admin/weekly-recap/page.tsx'               │ false             │ false                 │
+│ 3       │ 'app/[locale]/admin/send-email/page.tsx'                 │ false             │ false                 │
+│ 4       │ 'app/[locale]/admin/welcome-email/page.tsx'              │ false             │ false                 │
+│ 5       │ 'app/[locale]/admin/page.tsx'                            │ false             │ false                 │
+│ 6       │ 'app/[locale]/admin/newsletter-builder/page.tsx'         │ false             │ false                 │
+│ 7       │ 'app/[locale]/shared/[slug]/page.tsx'                    │ false             │ false                 │
+│ 8       │ 'app/[locale]/dashboard/behavior/page.tsx'               │ false             │ false                 │
+│ 9       │ 'app/[locale]/dashboard/settings/page.tsx'               │ false             │ false                 │
+│ 10      │ 'app/[locale]/dashboard/strategies/page.tsx'             │ false             │ false                 │
+│ 11      │ 'app/[locale]/dashboard/trader-profile/page.tsx'         │ false             │ false                 │
+│ 12      │ 'app/[locale]/dashboard/import/page.tsx'                 │ false             │ false                 │
+│ 13      │ 'app/[locale]/dashboard/data/page.tsx'                   │ false             │ false                 │
+│ 14      │ 'app/[locale]/dashboard/page.tsx'                        │ false             │ false                 │
+│ 15      │ 'app/[locale]/dashboard/billing/page.tsx'                │ false             │ false                 │
+│ 16      │ 'app/[locale]/dashboard/reports/page.tsx'                │ false             │ false                 │
+│ 17      │ 'app/[locale]/[...not-found]/page.tsx'                   │ false             │ false                 │
+│ 18      │ 'app/[locale]/teams/join/page.tsx'                       │ false             │ false                 │
+│ 19      │ 'app/[locale]/teams/dashboard/trader/[slug]/page.tsx'    │ false             │ false                 │
+│ 20      │ 'app/[locale]/teams/dashboard/page.tsx'                  │ false             │ false                 │
+│ 21      │ 'app/[locale]/teams/dashboard/[slug]/traders/page.tsx'   │ false             │ false                 │
+│ 22      │ 'app/[locale]/teams/dashboard/[slug]/members/page.tsx'   │ false             │ false                 │
+│ 23      │ 'app/[locale]/teams/dashboard/[slug]/page.tsx'           │ false             │ false                 │
+│ 24      │ 'app/[locale]/teams/dashboard/[slug]/analytics/page.tsx' │ false             │ false                 │
+│ 25      │ 'app/[locale]/teams/(landing)/page.tsx'                  │ false             │ false                 │
+│ 26      │ 'app/[locale]/teams/manage/page.tsx'                     │ false             │ false                 │
+│ 27      │ 'app/[locale]/(landing)/referral/page.tsx'               │ false             │ false                 │
+│ 28      │ 'app/[locale]/(landing)/privacy/page.tsx'                │ false             │ false                 │
+│ 29      │ 'app/[locale]/(landing)/faq/page.tsx'                    │ false             │ false                 │
+│ 30      │ 'app/[locale]/(landing)/terms/page.tsx'                  │ false             │ false                 │
+│ 31      │ 'app/[locale]/(landing)/about/page.tsx'                  │ false             │ false                 │
+│ 32      │ 'app/[locale]/(landing)/docs/page.tsx'                   │ false             │ false                 │
+│ 33      │ 'app/[locale]/(landing)/updates/page.tsx'                │ false             │ false                 │
+│ 34      │ 'app/[locale]/(landing)/updates/[slug]/page.tsx'         │ true              │ false                 │
+│ 35      │ 'app/[locale]/(landing)/support/page.tsx'                │ false             │ false                 │
+│ 36      │ 'app/[locale]/(landing)/_updates/page.tsx'               │ false             │ false                 │
+│ 37      │ 'app/[locale]/(landing)/_updates/[slug]/page.tsx'        │ true              │ false                 │
+│ 38      │ 'app/[locale]/(landing)/maintenance/page.tsx'            │ false             │ false                 │
+│ 39      │ 'app/[locale]/(landing)/newsletter/page.tsx'             │ false             │ false                 │
+│ 40      │ 'app/[locale]/(landing)/community/post/[id]/page.tsx'    │ false             │ false                 │
+│ 41      │ 'app/[locale]/(landing)/community/page.tsx'              │ false             │ false                 │
+│ 42      │ 'app/[locale]/(landing)/disclaimers/page.tsx'            │ false             │ false                 │
+│ 43      │ 'app/[locale]/(landing)/pricing/page.tsx'                │ false             │ false                 │
+│ 44      │ 'app/[locale]/(landing)/propfirms/page.tsx'              │ false             │ false                 │
+│ 45      │ 'app/[locale]/(authentication)/authentication/page.tsx'  │ false             │ false                 │
+└─────────┴──────────────────────────────────────────────────────────┴───────────────────┴───────────────────────┘
+
+================================================================================
+[36m🌐 API ROUTE CACHING ANALYSIS[0m
+================================================================================
+[33m
+API routes that could benefit from caching:[0m
+┌─────────┬──────────────────┬────────────────────────────────────┐
+│ (index) │ route            │ recommendation                     │
+├─────────┼──────────────────┼────────────────────────────────────┤
+│ 0       │ 'app/api/health' │ 'Add revalidate() for ISR caching' │
+└─────────┴──────────────────┴────────────────────────────────────┘
+
+================================================================================
+[36m🖼️ IMAGE OPTIMIZATION CHECK[0m
+================================================================================
+[33m
+Found unoptimized <img> tags (should use next/image):[0m
+  app/[locale]/dashboard/components/chat/chat.tsx:                                  <img
+  app/[locale]/dashboard/components/chat/chat.tsx:                                    <img
+  app/[locale]/dashboard/components/chat/input.tsx:                  <img
+
+================================================================================
+[36m📊 PERFORMANCE AUDIT REPORT[0m
+================================================================================
+[32m
+Detailed report saved to: /Users/timon/Downloads/final-qunt-edge-main/.audit/performance-report-2026-02-21.json[0m
+[36m
+🎯 OPTIMIZATION OPPORTUNITIES SUMMARY:[0m
+┌─────────┬──────────────────────┬───────┬──────────┐
+│ (index) │ Type                 │ Count │ Priority │
+├─────────┼──────────────────────┼───────┼──────────┤
+│ 0       │ 'code-splitting'     │ 5     │ 'high'   │
+│ 1       │ 'webpack'            │ 1     │ 'medium' │
+│ 2       │ 'compression'        │ 1     │ 'medium' │
+│ 3       │ 'memory-leak'        │ 1     │ 'high'   │
+│ 4       │ 'isr'                │ 1     │ 'high'   │
+│ 5       │ 'api-caching'        │ 1     │ 'medium' │
+│ 6       │ 'image-optimization' │ 1     │ 'medium' │
+└─────────┴──────────────────────┴───────┴──────────┘
+[33m
+✅ HIGH PRIORITY ITEMS:[0m
+[33m  1. [code-splitting] Consider dynamic importing d3 to reduce initial bundle[0m
+[33m  2. [code-splitting] Consider dynamic importing recharts to reduce initial bundle[0m
+[33m  3. [code-splitting] Consider dynamic importing framer-motion to reduce initial bundle[0m
+[33m  4. [code-splitting] Consider dynamic importing pdf-lib to reduce initial bundle[0m
+[33m  5. [code-splitting] Consider dynamic importing exceljs to reduce initial bundle[0m
+[33m  6. [memory-leak] Fix 2 potential memory leaks in components[0m
+[33m  7. [isr] 43 dynamic routes could use ISR with fallback[0m
+[32m
+📈 EXPECTED IMPROVEMENTS:[0m
+[32m  • Server Response Time: 20-30% reduction[0m
+[32m  • Bundle Size: 15-25% reduction[0m
+[32m  • Memory Usage: 20-30% reduction[0m
+[32m  • Time to Interactive: 25-35% improvement[0m
+[32m  • Lighthouse Score: +15-25 points[0m
+
+================================================================================
+[36m✅ AUDIT COMPLETE[0m
+================================================================================
+[32mNext steps:[0m
+[37m  1. Review the detailed report JSON[0m
+[37m  2. Prioritize high-impact optimizations[0m
+[37m  3. Implement changes incrementally with testing[0m
+[37m  4. Re-run audit after each major optimization[0m

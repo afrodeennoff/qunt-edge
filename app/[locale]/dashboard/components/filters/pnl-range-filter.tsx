@@ -7,14 +7,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 
 export function PnlRangeFilter() {
   const t = useI18n()
-  const { pnlRange, setPnlRange } = useData()
+  const { pnlRange, setPnlRange } = useDashboardFilters()
   const [customMin, setCustomMin] = useState<string>("")
   const [customMax, setCustomMax] = useState<string>("")
   const [open, setOpen] = useState(false)

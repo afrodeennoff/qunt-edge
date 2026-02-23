@@ -242,7 +242,7 @@ export type GroupInput = (Omit<PrismaGroup, "accounts"> & {
 import { decimalToNumber } from "./trade-types";
 
 export function normalizeTradeForClient(trade: TradeInput | SerializedTrade): Trade {
-    const raw = trade as any;
+    const raw = trade as NonNullable<TradeInput & SerializedTrade>;
     return {
         ...raw,
         entryPrice: decimalToNumber(raw.entryPrice),
@@ -251,8 +251,8 @@ export function normalizeTradeForClient(trade: TradeInput | SerializedTrade): Tr
         commission: decimalToNumber(raw.commission, null),
         quantity: decimalToNumber(raw.quantity),
         timeInPosition: decimalToNumber(raw.timeInPosition, null),
-        entryDate: raw.entryDate instanceof Date ? raw.entryDate : new Date(raw.entryDate),
-        closeDate: raw.closeDate ? (raw.closeDate instanceof Date ? raw.closeDate : new Date(raw.closeDate)) : null,
+        entryDate: (raw.entryDate as unknown) instanceof Date ? (raw.entryDate as unknown as Date) : new Date(raw.entryDate as string),
+        closeDate: raw.closeDate ? ((raw.closeDate as unknown) instanceof Date ? (raw.closeDate as unknown as Date) : new Date(raw.closeDate as string)) : null,
         tags: Array.isArray(raw.tags) ? raw.tags : [],
         trades: Array.isArray(raw.trades) ? raw.trades.map(normalizeTradeForClient) : [],
     } as Trade;

@@ -1,0 +1,154 @@
+
+> quntedge@0.3 prebuild
+> npm run clean:build-artifacts && tsx scripts/generate-routes.ts
+
+
+> quntedge@0.3 clean:build-artifacts
+> node scripts/clean-build-artifacts.mjs
+
+[clean-build] removed tsconfig.tsbuildinfo
+[clean-build] removed .next
+Generated 41 routes
+
+> quntedge@0.3 build
+> NODE_OPTIONS=--max-old-space-size=8192 NEXT_DISABLE_FONT_DOWNLOADS=1 NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS:-4} next build --webpack
+
+▲ Next.js 16.1.6 (webpack)
+- Environments: .env.production.local, .env.local, .env
+- Experiments (use with caution):
+  · cpus: 4
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 44s
+  Running TypeScript ...
+  Collecting page data using 4 workers ...
+objc[93780]: Class GNotificationCenterDelegate is implemented in both /Users/timon/Downloads/final-qunt-edge-main/node_modules/canvas/build/Release/libgio-2.0.0.dylib (0x11ddc44c8) and /Users/timon/Downloads/final-qunt-edge-main/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.42.dylib (0x140259a28). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+  Generating static pages using 4 workers (0/86) ...
+  Generating static pages using 4 workers (21/86) 
+objc[93781]: Class GNotificationCenterDelegate is implemented in both /Users/timon/Downloads/final-qunt-edge-main/node_modules/canvas/build/Release/libgio-2.0.0.dylib (0x13a4884c8) and /Users/timon/Downloads/final-qunt-edge-main/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.42.dylib (0x13c88da28). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+  Generating static pages using 4 workers (42/86) 
+  Generating static pages using 4 workers (64/86) 
+✓ Generating static pages using 4 workers (86/86) in 16.0s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                                             Revalidate  Expire
+┌ ƒ /_not-found
+├ ● /[locale]                                                                   1h      1y
+│ ├ /en                                                                         1h      1y
+│ ├ /fr                                                                         1h      1y
+│ ├ /hi                                                                         1h      1y
+│ └ [+8 more paths]
+├ ƒ /[locale]/[...not-found]
+├ ƒ /[locale]/about
+├ ƒ /[locale]/admin
+├ ƒ /[locale]/admin/newsletter-builder
+├ ƒ /[locale]/admin/send-email
+├ ƒ /[locale]/admin/weekly-recap
+├ ƒ /[locale]/admin/welcome-email
+├ ƒ /[locale]/authentication
+├ ƒ /[locale]/community
+├ ƒ /[locale]/community/post/[id]
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/dashboard/behavior
+├ ƒ /[locale]/dashboard/billing
+├ ƒ /[locale]/dashboard/data
+├ ƒ /[locale]/dashboard/import
+├ ƒ /[locale]/dashboard/reports
+├ ƒ /[locale]/dashboard/settings
+├ ƒ /[locale]/dashboard/strategies
+├ ƒ /[locale]/dashboard/trader-profile
+├ ƒ /[locale]/disclaimers
+├ ƒ /[locale]/docs
+├ ƒ /[locale]/embed
+├ ƒ /[locale]/faq
+├ ƒ /[locale]/import
+├ ƒ /[locale]/maintenance
+├ ƒ /[locale]/newsletter
+├ ƒ /[locale]/pricing
+├ ƒ /[locale]/privacy
+├ ƒ /[locale]/propfirms
+├ ƒ /[locale]/referral
+├ ƒ /[locale]/shared/[slug]
+├ ƒ /[locale]/shared/[slug]/opengraph-image
+├ ƒ /[locale]/support
+├ ƒ /[locale]/teams
+├ ƒ /[locale]/teams/dashboard
+├ ƒ /[locale]/teams/dashboard/[slug]
+├ ƒ /[locale]/teams/dashboard/[slug]/analytics
+├ ƒ /[locale]/teams/dashboard/[slug]/members
+├ ƒ /[locale]/teams/dashboard/[slug]/traders
+├ ƒ /[locale]/teams/dashboard/trader/[slug]
+├ ƒ /[locale]/teams/join
+├ ƒ /[locale]/teams/manage
+├ ƒ /[locale]/terms
+├ ƒ /[locale]/updates
+├ ● /[locale]/updates/[slug]
+│ ├ /en/updates/accounts-table-sorting-grouping
+│ ├ /en/updates/propfirm-catalogue-statistics
+│ ├ /en/updates/manual-trade-entry
+│ └ [+14 more paths]
+├ ● /[locale]/updates/[slug]/opengraph-image-1uk6iz                             1h      1y
+│ ├ /en/updates/accounts-table-sorting-grouping/opengraph-image-1uk6iz          1h      1y
+│ ├ /en/updates/propfirm-catalogue-statistics/opengraph-image-1uk6iz            1h      1y
+│ ├ /en/updates/manual-trade-entry/opengraph-image-1uk6iz                       1h      1y
+│ └ [+14 more paths]
+├ ƒ /api
+├ ƒ /api/admin/reports
+├ ƒ /api/admin/subscriptions
+├ ƒ /api/ai/analysis/accounts
+├ ƒ /api/ai/analysis/global
+├ ƒ /api/ai/analysis/instrument
+├ ƒ /api/ai/analysis/time-of-day
+├ ƒ /api/ai/chat
+├ ƒ /api/ai/editor
+├ ƒ /api/ai/format-trades
+├ ƒ /api/ai/mappings
+├ ƒ /api/ai/search/date
+├ ƒ /api/ai/support
+├ ƒ /api/ai/transcribe
+├ ƒ /api/auth/callback
+├ ƒ /api/behavior/insights
+├ ƒ /api/cron
+├ ƒ /api/cron/compute-trade-data
+├ ƒ /api/cron/investing
+├ ƒ /api/cron/renew-tradovate-token
+├ ƒ /api/cron/renewal-notice
+├ ƒ /api/dashboard/accounts
+├ ƒ /api/dashboard/trades
+├ ƒ /api/email/format-name
+├ ƒ /api/email/thumbnail/[...slug]
+├ ƒ /api/email/unsubscribe
+├ ƒ /api/email/weekly-summary/[userid]
+├ ƒ /api/email/welcome
+├ ƒ /api/etp/v1/store
+├ ƒ /api/health
+├ ƒ /api/imports/ibkr/extract-orders
+├ ƒ /api/imports/ibkr/fifo-computation
+├ ƒ /api/imports/ibkr/ocr
+├ ƒ /api/og
+├ ƒ /api/referral
+├ ƒ /api/rithmic/synchronizations
+├ ƒ /api/team/accept-invitation
+├ ƒ /api/team/invite
+├ ƒ /api/teams/[id]/analytics
+├ ƒ /api/thor/store
+├ ƒ /api/trader-profile/benchmark
+├ ƒ /api/tradovate/sync
+├ ƒ /api/tradovate/synchronizations
+├ ƒ /api/whop/checkout
+├ ƒ /api/whop/checkout-team
+├ ƒ /api/whop/webhook
+├ ○ /icon
+├ ○ /icon.svg
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /twitter-image.png
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

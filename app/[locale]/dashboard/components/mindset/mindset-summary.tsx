@@ -1,4 +1,5 @@
 "use client"
+import parse from 'html-react-parser'
 
 import { useI18n } from "@/locales/client"
 import { format } from "date-fns"
@@ -19,6 +20,25 @@ import { useFinancialEventsStore } from "@/store/financial-events-store"
 import { sanitizeHtml } from "@/lib/sanitize"
 
 type ImpactLevel = "low" | "medium" | "high"
+
+/**
+ * JournalContent component handles safe HTML parsing and prevents hydration mismatch
+ * by ensuring the content is only rendered once mounted on the client.
+ */
+function JournalContent({ content }: { content: string }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    // Return sanitized plain text or just the skeleton during SSR/Hydration
+    return <div className="opacity-0">{content.replace(/<[^>]*>/g, '').slice(0, 100)}...</div>
+  }
+
+  return <>{parse(sanitizeHtml(content))}</>
+}
 
 interface MindsetSummaryProps {
   date: Date
@@ -121,8 +141,9 @@ export function MindsetSummary({
             <div
               key={journalContent}
               className="prose prose-sm dark:prose-invert max-w-none [&_.ProseMirror]:outline-hidden [&_.ProseMirror]:relative [&_.ProseMirror]:h-full"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(journalContent) }}
-            />
+            >
+              <JournalContent content={journalContent} />
+            </div>
           )}
         </div>
         <div className="space-y-2">

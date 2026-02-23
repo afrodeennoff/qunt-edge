@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Plus, Search, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/locales/client'
-import { useData } from '@/context/data-provider'
+import { useDashboardFilters, useDashboardActions } from '@/context/data-provider'
 import {
   Command,
   CommandEmpty,
@@ -31,7 +31,8 @@ interface TradeTagProps {
 
 export function TradeTag({ trade, tradeIds }: TradeTagProps) {
   const t = useI18n()
-  const { tagFilter, setTagFilter, updateTrades } = useData()
+  const { tagFilter, setTagFilter } = useDashboardFilters()
+  const { updateTrades } = useDashboardActions()
   const tags = useUserStore(state => state.tags)
   const setTags = useUserStore(state => state.setTags)
   const [isOpen, setIsOpen] = useState(false)

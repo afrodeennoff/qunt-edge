@@ -1,4 +1,3 @@
-'use server'
 import { createClient, ensureUserInDatabase, getWebsiteURL } from '@/server/auth'
 import { NextResponse } from 'next/server'
 // The client you created from the Server-Side Auth instructions
@@ -109,9 +108,9 @@ export async function GET(request: Request) {
       const errorMessage = error instanceof Error ? error.message : ''
       const originalErrorMessage =
         typeof error === 'object' &&
-        error !== null &&
-        'originalError' in error &&
-        typeof (error as { originalError?: { message?: string } }).originalError?.message === 'string'
+          error !== null &&
+          'originalError' in error &&
+          typeof (error as { originalError?: { message?: string } }).originalError?.message === 'string'
           ? (error as { originalError?: { message?: string } }).originalError?.message ?? ''
           : ''
 
