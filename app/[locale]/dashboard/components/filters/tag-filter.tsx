@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useI18n } from '@/locales/client'
-import { useData } from '@/context/data-provider'
+import { useDashboardFilters } from '@/context/data-provider'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -17,7 +17,7 @@ interface TagFilterProps {
 
 export function TagFilter({ className }: TagFilterProps) {
   const t = useI18n()
-  const { tagFilter, setTagFilter } = useData()
+  const { tagFilter, setTagFilter } = useDashboardFilters()
   const tags = useUserStore(state => state.tags)
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredTags, setFilteredTags] = useState<typeof tags>([])

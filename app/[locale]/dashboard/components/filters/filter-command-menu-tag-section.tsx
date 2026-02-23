@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover"
 import { HexColorPicker } from "react-colorful"
 import { useI18n } from "@/locales/client"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters, useDashboardActions } from "@/context/data-provider"
 import { useUserStore } from "../../../../../store/user-store"
 import { useTradesStore } from "../../../../../store/trades-store"
 import { createTagAction, deleteTagAction } from "@/server/tags"
@@ -29,7 +29,8 @@ interface TagFormData {
 }
 
 export function TagSection({ searchValue }: TagSectionProps) {
-  const { tagFilter, setTagFilter, updateTrades } = useData()
+  const { tagFilter, setTagFilter } = useDashboardFilters()
+  const { updateTrades } = useDashboardActions()
   const tags = useUserStore(state => state.tags)
   const setTags = useUserStore(state => state.setTags)
   const trades = useTradesStore(state => state.trades)

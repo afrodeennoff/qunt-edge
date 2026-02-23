@@ -1,4 +1,4 @@
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { Scale, HelpCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '../../types/dashboard'
@@ -16,7 +16,7 @@ interface ProfitFactorCardProps {
 
 export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardProps) {
   void size
-  const { statistics: { profitFactor } } = useData()
+  const { statistics: { profitFactor } } = useDashboardStats()
   const t = useI18n()
 
   const safeProfitFactor = Number.isFinite(profitFactor) ? profitFactor : 0

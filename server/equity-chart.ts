@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { formatInTimeZone } from 'date-fns-tz'
 import { eachDayOfInterval, startOfDay, endOfDay, isValid } from 'date-fns'
 import { Payout as PrismaPayout } from '@/prisma/generated/prisma'
+import { withPrismaSchemaMismatchFallback } from '@/lib/prisma-guard'
 
 // Types matching the component
 interface ChartDataPoint {
@@ -55,6 +56,12 @@ interface EquityChartResult {
   dateRange: { startDate: string, endDate: string }
 }
 
+const EMPTY_EQUITY_CHART_RESULT: EquityChartResult = {
+  chartData: [],
+  accountNumbers: [],
+  dateRange: { startDate: '', endDate: '' }
+}
+
 export async function getEquityChartDataAction(params: EquityChartParams): Promise<EquityChartResult> {
   console.log('getEquityChartDataAction params:', JSON.stringify(params, null, 2))
 
@@ -70,20 +77,29 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
 
   try {
     // Use a Prisma transaction to fetch all needed data in a single DB roundtrip
-    const [trades, accounts, groups] = await prisma.$transaction([
-      prisma.trade.findMany({
-        where: { userId },
-        orderBy: { entryDate: 'desc' }
-      }),
-      prisma.account.findMany({
-        where: { userId },
-        include: { payouts: true }
-      }),
-      prisma.group.findMany({
-        where: { userId },
-        include: { accounts: true }
-      }),
-    ])
+    const transactionResult = await withPrismaSchemaMismatchFallback(
+      'dashboard:equity-chart:transaction',
+      async () => {
+        const [trades, accounts, groups] = await prisma.$transaction([
+          prisma.trade.findMany({
+            where: { userId },
+            orderBy: { entryDate: 'desc' }
+          }),
+          prisma.account.findMany({
+            where: { userId },
+            include: { payouts: true }
+          }),
+          prisma.group.findMany({
+            where: { userId },
+            include: { accounts: true }
+          }),
+        ])
+
+        return { trades, accounts, groups }
+      },
+      { trades: [], accounts: [], groups: [] }
+    )
+    const { trades, accounts, groups } = transactionResult
 
     // Get hidden accounts for filtering
     const hiddenGroup = groups.find(g => g.name === "Hidden Accounts")
@@ -207,11 +223,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     console.log('Filtered trades count:', filteredTrades.length)
 
     if (!filteredTrades.length) {
-      return {
-        chartData: [],
-        accountNumbers: [],
-        dateRange: { startDate: '', endDate: '' }
-      }
+      return EMPTY_EQUITY_CHART_RESULT
     }
 
     // Get unique account numbers from filtered trades (for selector)
@@ -432,7 +444,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
 
   } catch (error) {
     console.error('[getEquityChartData] Error:', error)
-    throw new Error('Failed to fetch equity chart data')
+    return EMPTY_EQUITY_CHART_RESULT
   }
 }
 

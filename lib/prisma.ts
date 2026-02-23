@@ -109,7 +109,7 @@ const shouldRejectUnauthorized = (connectionString: string): boolean => {
   }
 
   // Secure-by-default fallback in production. Opt out explicitly with PGSSL_REJECT_UNAUTHORIZED=false.
-  return override ?? isProduction
+  return isProduction
 }
 
 // Runtime should prefer pooled DATABASE_URL (Supabase pooler).

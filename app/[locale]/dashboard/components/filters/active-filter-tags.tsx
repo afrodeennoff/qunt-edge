@@ -1,6 +1,6 @@
 import { X, ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { format } from "date-fns"
 import { fr } from 'date-fns/locale'
@@ -25,7 +25,7 @@ export function ActiveFilterTags({ showAccountNumbers }: { showAccountNumbers: b
     setPnlRange,
     setTagFilter,
     setWeekdayFilter
-  } = useData()
+  } = useDashboardFilters()
   const tags = useUserStore(state => state.tags)
   const t = useI18n()
   const params = useParams()

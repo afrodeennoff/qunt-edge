@@ -1,7 +1,7 @@
 "use client"
 
 import { Group } from "@/lib/data-types"
-import { useData } from "@/context/data-provider"
+import { useDashboardActions } from "@/context/data-provider"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -67,7 +67,7 @@ export function AccountGroupBoard() {
     deleteAccount,
     deleteGroup,
     refreshTradesOnly,
-  } = useData()
+  } = useDashboardActions()
 
   const [isCreating, setIsCreating] = useState(false)
   const [isMoving, setIsMoving] = useState(false)

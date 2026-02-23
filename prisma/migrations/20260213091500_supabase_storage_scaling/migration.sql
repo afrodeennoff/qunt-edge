@@ -49,4 +49,4 @@ create index if not exists idx_storage_objects_bucketid_name_prefix
   on storage.objects (bucket_id, name text_pattern_ops);
 
 create index if not exists idx_storage_objects_bucket_folder_name
-  on storage.objects (bucket_id, (storage.foldername(name))[1], name);
+  on storage.objects (bucket_id, ((storage.foldername(name))[1]), name);

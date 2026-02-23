@@ -8,7 +8,7 @@ import { useI18n } from "@/locales/client"
 import { useState, useEffect } from "react"
 import { Settings } from "lucide-react"
 import { useModalStateStore } from "../../../../../store/modal-state-store"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useTradesStore } from "../../../../../store/trades-store"
 import { useUserStore } from "../../../../../store/user-store"
 
@@ -29,7 +29,7 @@ interface TradeAccount {
 }
 
 export function AccountFilter({ showAccountNumbers, className }: AccountFilterProps) {
-  const { accountNumbers = [], setAccountNumbers} = useData()
+  const { accountNumbers = [], setAccountNumbers} = useDashboardFilters()
   const groups = useUserStore(state => state.groups)
   const trades = useTradesStore(state => state.trades)
   const [searchTerm, setSearchTerm] = useState("")

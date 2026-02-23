@@ -3,6 +3,16 @@ import { persist } from 'zustand/middleware'
 
 export type SyncInterval = 5 | 15 | 30 | 60
 
+export interface RithmicMessage {
+  type: string;
+  level?: 'info' | 'error' | 'warn' | 'debug';
+  message?: string;
+  account_id?: string;
+  all_complete?: boolean;
+  status?: string;
+  [key: string]: unknown;
+}
+
 interface AccountProgress {
   ordersProcessed: number
   daysProcessed: number
@@ -29,10 +39,10 @@ interface RithmicSyncState {
   setSyncInterval: (interval: SyncInterval) => void
 
   // Message handling
-  lastMessage: any
-  messageHistory: any[]
-  setLastMessage: (message: any) => void
-  addMessageToHistory: (message: any) => void
+  lastMessage: RithmicMessage | null
+  messageHistory: RithmicMessage[]
+  setLastMessage: (message: RithmicMessage) => void
+  addMessageToHistory: (message: RithmicMessage) => void
   clearMessageHistory: () => void
 
   // Progress tracking

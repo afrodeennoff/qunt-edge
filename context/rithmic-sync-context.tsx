@@ -12,7 +12,7 @@ import { getRithmicData, updateLastSyncTime } from "@/lib/rithmic-storage";
 import { useData } from "@/context/data-provider";
 import { toast } from "sonner";
 import { useI18n } from "@/locales/client";
-import { useRithmicSyncStore } from "@/store/rithmic-sync-store";
+import { useRithmicSyncStore, RithmicMessage } from "@/store/rithmic-sync-store";
 import { useTradesStore } from "@/store/trades-store";
 import { getUserId } from "@/server/auth";
 import { useUserStore } from "@/store/user-store";
@@ -47,7 +47,7 @@ interface RithmicSyncContextType {
   connectionStatus: string;
 
   // Message handling
-  handleMessage: (message: any) => void;
+  handleMessage: (message: RithmicMessage) => void;
 
   // Auto-sync functionality
   performSyncForCredential: (
@@ -127,7 +127,7 @@ export function RithmicSyncContextProvider({
   }, [ws, resetProcessingState, syncCheckInterval]);
 
   const handleMessage = useCallback(
-    (message: any) => {
+    (message: RithmicMessage) => {
       if (!message) return;
 
       setLastMessage(message);
@@ -135,6 +135,7 @@ export function RithmicSyncContextProvider({
 
       switch (message.type) {
         case "log":
+          if (!message.message) break;
           if (message.level === "info") {
             // Handle initial days count message
             if (
@@ -327,6 +328,7 @@ export function RithmicSyncContextProvider({
           break;
 
         case "progress":
+          if (!message.message) break;
           const progressMatch = message.message.match(
             /\[(.*?)\] Processing date (\d+)\/(\d+)(?:: (\d{8}))?/
           );

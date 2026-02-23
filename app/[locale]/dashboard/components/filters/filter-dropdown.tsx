@@ -16,7 +16,7 @@ import { useI18n } from "@/locales/client"
 import { PnlFilter } from "./pnl-filter"
 import { InstrumentFilter } from "./instrument-filter"
 import { AccountFilter } from "./account-filter"
-import { useData } from "@/context/data-provider"
+import { useDashboardTrades } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import {
@@ -30,7 +30,7 @@ import { useModalStateStore } from "../../../../../store/modal-state-store"
 
 export function FilterDropdown() {
   const t = useI18n()
-  const { isMobile } = useData()
+  const { isMobile } = useDashboardTrades()
   const [open, setOpen] = useState(false)
   const [accountFilterOpen, setAccountFilterOpen] = useState(false)
   const { accountGroupBoardOpen } = useModalStateStore()

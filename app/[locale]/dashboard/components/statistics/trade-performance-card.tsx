@@ -1,6 +1,6 @@
 'use client'
 
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { TrendingUp, TrendingDown, Minus, HelpCircle } from "lucide-react"
 import { WidgetSize } from '../../types/dashboard'
 import { useI18n } from '@/locales/client'
@@ -17,7 +17,7 @@ interface TradePerformanceCardProps {
 
 export default function TradePerformanceCard({ size = 'medium' }: TradePerformanceCardProps) {
   void size
-  const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
+  const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useDashboardStats()
   const t = useI18n()
 
   // Calculate rates

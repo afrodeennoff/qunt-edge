@@ -1,6 +1,6 @@
 "use client"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { useState, useEffect } from "react"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
@@ -11,7 +11,7 @@ import { useTradesStore } from "../../../../../store/trades-store"
 
 export function InstrumentFilter() {
   const t = useI18n()
-  const { instruments, setInstruments } = useData()
+  const { instruments, setInstruments } = useDashboardFilters()
   const trades = useTradesStore(state => state.trades)
   const [searchTerm, setSearchTerm] = useState("")
   const [availableInstruments, setAvailableInstruments] = useState<string[]>([])

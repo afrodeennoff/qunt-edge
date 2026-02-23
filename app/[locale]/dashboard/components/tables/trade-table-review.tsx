@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { useData } from "@/context/data-provider";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useDashboardFilters, useDashboardStats, useDashboardActions } from "@/context/data-provider";
 import {
   ColumnDef,
   flexRender,
@@ -103,7 +103,7 @@ import { BulkEditPanel } from "./bulk-edit-panel";
 // Custom Tags Header Component
 function TagsColumnHeader() {
   const t = useI18n();
-  const { tagFilter, setTagFilter } = useData();
+  const { tagFilter, setTagFilter } = useDashboardFilters();
   const tags = useUserStore((state) => state.tags);
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -282,7 +282,8 @@ interface TradeTableReviewProps {
 
 export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps) {
   const t = useI18n();
-  const { formattedTrades, updateTrades, deleteTrades } = useData();
+  const { formattedTrades } = useDashboardStats()
+  const { updateTrades, deleteTrades } = useDashboardActions();
   const tags = useUserStore((state) => state.tags);
   const timezone = useUserStore((state) => state.timezone);
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
@@ -323,6 +324,10 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [hasInitializedExpanded, setHasInitializedExpanded] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const tableViewportRef = useRef<HTMLDivElement>(null);
+  const scrollRafRef = useRef<number | null>(null);
+  const [viewportHeight, setViewportHeight] = useState(600);
+  const [scrollTop, setScrollTop] = useState(0);
 
 
   // Sync local state with store
@@ -401,7 +406,8 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
     setPageIndex(newPagination.pageIndex);
   };
 
-  const trades = contextTrades;
+  const deferredTrades = React.useDeferredValue(contextTrades);
+  const trades = tradesParam ?? deferredTrades;
 
   const handleGroupTrades = async () => {
     if (selectedTrades.length < 2) return;
@@ -1226,6 +1232,44 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
 
   // Visible columns are used for rendering header/body/footer so hidden columns don't create gaps
   const visibleColumns = table.getVisibleLeafColumns();
+  const tableRows = table.getRowModel().rows;
+  const shouldVirtualizeRows = tableRows.length > 100;
+  const estimatedRowHeight = 52;
+  const overscan = 10;
+  const startIndex = shouldVirtualizeRows
+    ? Math.max(0, Math.floor(scrollTop / estimatedRowHeight) - overscan)
+    : 0;
+  const endIndex = shouldVirtualizeRows
+    ? Math.min(
+      tableRows.length,
+      Math.ceil((scrollTop + viewportHeight) / estimatedRowHeight) + overscan
+    )
+    : tableRows.length;
+  const visibleRows = shouldVirtualizeRows
+    ? tableRows.slice(startIndex, endIndex)
+    : tableRows;
+  const topSpacerHeight = shouldVirtualizeRows ? startIndex * estimatedRowHeight : 0;
+  const bottomSpacerHeight = shouldVirtualizeRows
+    ? Math.max(0, (tableRows.length - endIndex) * estimatedRowHeight)
+    : 0;
+
+  useEffect(() => {
+    if (!tableViewportRef.current) return;
+    const viewport = tableViewportRef.current;
+    const updateHeight = () => setViewportHeight(viewport.clientHeight || 600);
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (scrollRafRef.current !== null) {
+        cancelAnimationFrame(scrollRafRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Card
@@ -1355,7 +1399,18 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           </div>
         </CardHeader>
       )}
-      <CardContent className="flex-1 min-h-0 overflow-auto p-0">
+      <CardContent
+        ref={tableViewportRef}
+        className="flex-1 min-h-0 overflow-auto p-0"
+        onScroll={(event) => {
+          const nextScrollTop = event.currentTarget.scrollTop;
+          if (scrollRafRef.current !== null) return;
+          scrollRafRef.current = requestAnimationFrame(() => {
+            setScrollTop(nextScrollTop);
+            scrollRafRef.current = null;
+          });
+        }}
+      >
         <div className="relative w-full min-w-fit">
           <table className="w-full border-separate border-spacing-0 caption-bottom text-sm">
             <thead className="sticky top-0 z-10 bg-muted/90 backdrop-blur-xs shadow-xs border-b [&_tr]:border-b">
@@ -1383,9 +1438,19 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
             </thead>
 
             <tbody className="bg-background [&_tr:last-child]:border-0">
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, rowIndex) => (
-                  <React.Fragment key={row.id}>
+              {tableRows?.length ? (
+                <>
+                  {topSpacerHeight > 0 && (
+                    <tr aria-hidden="true">
+                      <td colSpan={visibleColumns.length} style={{ height: topSpacerHeight }} />
+                    </tr>
+                  )}
+                  {visibleRows.map((row, visibleRowIndex) => {
+                    const rowIndex = shouldVirtualizeRows
+                      ? startIndex + visibleRowIndex
+                      : visibleRowIndex;
+                    return (
+                      <React.Fragment key={row.id}>
                     <tr
                       data-state={row.getIsSelected() && "selected"}
                       className={cn(
@@ -1417,8 +1482,15 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                         </td>
                       ))}
                     </tr>
-                  </React.Fragment>
-                ))
+                      </React.Fragment>
+                    );
+                  })}
+                  {bottomSpacerHeight > 0 && (
+                    <tr aria-hidden="true">
+                      <td colSpan={visibleColumns.length} style={{ height: bottomSpacerHeight }} />
+                    </tr>
+                  )}
+                </>
               ) : (
                 <tr>
                   <td

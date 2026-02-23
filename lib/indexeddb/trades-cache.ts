@@ -120,12 +120,12 @@ export const setTradesCache = (userId: string, trades: Trade[]) => setCache(STOR
 export const clearTradesCache = (userId: string) => clearStore(STORES.TRADES, userId)
 
 // Accounts
-export const getAccountsCache = (userId: string) => getCache<any[]>(STORES.ACCOUNTS, userId)
-export const setAccountsCache = (userId: string, accounts: any[]) => setCache(STORES.ACCOUNTS, userId, accounts)
+export const getAccountsCache = (userId: string) => getCache<Account[]>(STORES.ACCOUNTS, userId)
+export const setAccountsCache = (userId: string, accounts: Account[]) => setCache(STORES.ACCOUNTS, userId, accounts)
 
 // Groups
-export const getGroupsCache = (userId: string) => getCache<any[]>(STORES.GROUPS, userId)
-export const setGroupsCache = (userId: string, groups: any[]) => setCache(STORES.GROUPS, userId, groups)
+export const getGroupsCache = (userId: string) => getCache<Group[]>(STORES.GROUPS, userId)
+export const setGroupsCache = (userId: string, groups: Group[]) => setCache(STORES.GROUPS, userId, groups)
 
 // All User Data (Full Object)
 export interface FullUserDataCache {

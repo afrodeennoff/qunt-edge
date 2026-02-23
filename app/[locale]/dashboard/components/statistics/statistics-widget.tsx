@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { Clock, PiggyBank, Award, BarChart, Info } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn, calculateStatistics } from "@/lib/utils"
@@ -25,7 +25,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (.
 }
 
 export default function StatisticsWidget({ size = 'medium', dayData }: StatisticsWidgetProps) {
-  const dataContext = useData()
+  const dataContext = useDashboardStats()
   const [activeTooltip, setActiveTooltip] = React.useState<string | null>(null)
   const [isTouch, setIsTouch] = React.useState(false)
   const cardRef = React.useRef<HTMLDivElement>(null)

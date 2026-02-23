@@ -57,7 +57,7 @@ export function EtpSync({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void })
     return () => {
       if (video) {
         video.pause()
-        video.removeEventListener('loadeddata', () => {})
+        video.removeEventListener('loadeddata', playVideo)
       }
     }
   }, [])

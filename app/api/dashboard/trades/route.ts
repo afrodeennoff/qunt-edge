@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
       error: authError,
     } = await supabase.auth.getUser()
     if (authError || !user?.id) {
-      return apiError('UNAUTHORIZED', 'Authentication required', 401)
+      return apiError('UNAUTHORIZED', 'Authentication required', 401, undefined, {
+        "Cache-Control": "no-store, max-age=0",
+      })
     }
 
     const { searchParams } = new URL(request.url)
@@ -23,17 +25,26 @@ export async function GET(request: NextRequest) {
     const pageSize = Math.min(Math.max(pageSizeRaw, 1), MAX_PAGE_SIZE)
 
     if (!Number.isFinite(page) || page < 1) {
-      return apiError('BAD_REQUEST', 'Invalid page parameter', 400)
+      return apiError('BAD_REQUEST', 'Invalid page parameter', 400, undefined, {
+        "Cache-Control": "no-store, max-age=0",
+      })
     }
 
     const result = await getTradesAction(null, page, pageSize)
-    return NextResponse.json(result)
+    return NextResponse.json(result, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    })
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',
       'Failed to fetch trades',
       500,
       error instanceof Error ? error.message : undefined,
+      {
+        "Cache-Control": "no-store, max-age=0",
+      },
     )
   }
 }

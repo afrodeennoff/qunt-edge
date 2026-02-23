@@ -7,6 +7,7 @@ import crypto from 'crypto'
 import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 import { z } from "zod"
 import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate"
+import { logger, withLogContext } from "@/lib/logger"
 
 export const dynamic = 'force-dynamic'
 
@@ -35,97 +36,106 @@ function isAuthorizedWebhook(request: Request): boolean {
 }
 
 export async function POST(req: Request) {
-  if (!isAuthorizedWebhook(req)) {
-    return NextResponse.json({ error: 'Unauthorized webhook request' }, { status: 401 })
-  }
-
-  if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is missing')
-    return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
-  }
-  const resend = new Resend(process.env.RESEND_API_KEY)
-
-  const fifteenMinutesFromNow = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-
-  try {
-    const payload = await parseJson(req, welcomeWebhookSchema)
-
-    // Only process new user insertions
-    if (payload.type !== 'INSERT') {
-      return NextResponse.json(
-        { message: 'Ignored event type' },
-        { status: 200 }
-      )
-    }
-
-    const { record } = payload
-    console.log(record)
-
-    // Identify user based on email
-
-    // Get the user's first name or use default
-    const rawName = record.raw_user_meta_data?.name
-    const rawFullName = record.raw_user_meta_data?.full_name
-    const fullName =
-      (typeof rawName === "string" && rawName) ||
-      (typeof rawFullName === "string" && rawFullName) ||
-      ""
-    const firstName = fullName.split(' ')[0] || 'trader'
-    const lastName = fullName.split(' ')[1] || ''
-
-    // Add email to newsletter list
-    await prisma.newsletter.upsert({
-      where: { email: record.email },
-      update: { isActive: true },
-      create: {
-        email: record.email,
-        firstName: firstName,
-        lastName: lastName,
-        isActive: true
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
+  return withLogContext(
+    {
+      requestId,
+      correlationId: requestId,
+      route: "/api/email/welcome",
+      method: "POST",
+    },
+    async () => {
+      if (!isAuthorizedWebhook(req)) {
+        logger.warn("[WelcomeWebhook] Unauthorized webhook request")
+        return NextResponse.json({ error: 'Unauthorized webhook request' }, { status: 401 })
       }
-    })
 
-    const unsubscribeUrl = buildUnsubscribeUrl(record.email, req)
+      if (!process.env.RESEND_API_KEY) {
+        logger.error("[WelcomeWebhook] RESEND_API_KEY is missing")
+        return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
+      }
+      const resend = new Resend(process.env.RESEND_API_KEY)
 
-    // Check user language preference from database
-    const user = await prisma.user.findUnique({
-      where: { email: record.email }
-    })
-    const userLanguage = user?.language || 'en'
-    let youtubeId = 'ZBrIZpCh_7Q'
-    if (userLanguage === 'fr') {
-      youtubeId = await getLatestVideoFromPlaylist() || '_-VtBaOGctY'
+      const fifteenMinutesFromNow = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+      try {
+        const payload = await parseJson(req, welcomeWebhookSchema)
+
+        if (payload.type !== 'INSERT') {
+          return NextResponse.json(
+            { message: 'Ignored event type' },
+            { status: 200 }
+          )
+        }
+
+        const { record } = payload
+        const emailDomain = record.email.includes("@") ? record.email.split("@")[1] : "unknown"
+        logger.info("[WelcomeWebhook] Processing signup event", {
+          eventType: payload.type,
+          emailDomain,
+        })
+
+        const rawName = record.raw_user_meta_data?.name
+        const rawFullName = record.raw_user_meta_data?.full_name
+        const fullName =
+          (typeof rawName === "string" && rawName) ||
+          (typeof rawFullName === "string" && rawFullName) ||
+          ""
+        const firstName = fullName.split(' ')[0] || 'trader'
+        const lastName = fullName.split(' ')[1] || ''
+
+        await prisma.newsletter.upsert({
+          where: { email: record.email },
+          update: { isActive: true },
+          create: {
+            email: record.email,
+            firstName: firstName,
+            lastName: lastName,
+            isActive: true
+          }
+        })
+
+        const unsubscribeUrl = buildUnsubscribeUrl(record.email, req)
+
+        const user = await prisma.user.findUnique({
+          where: { email: record.email }
+        })
+        const userLanguage = user?.language || 'en'
+        let youtubeId = 'ZBrIZpCh_7Q'
+        if (userLanguage === 'fr') {
+          youtubeId = await getLatestVideoFromPlaylist() || '_-VtBaOGctY'
+        }
+
+        const { data, error } = await resend.emails.send({
+          from: 'Qunt Edge <welcome@eu.updates.qunt-edge.vercel.app>',
+          to: record.email,
+          subject: userLanguage === 'fr' ? 'Bienvenue sur Qunt Edge' : 'Welcome to Qunt Edge',
+          react: WelcomeEmail({ firstName, email: record.email, language: userLanguage, youtubeId: youtubeId || 'ZBrIZpCh_7Q' }),
+          replyTo: 'hugo.demenez@qunt-edge.vercel.app',
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+          },
+          scheduledAt: fifteenMinutesFromNow
+        })
+
+        if (error) {
+          logger.error("[WelcomeWebhook] Failed to send email", { error })
+          return NextResponse.json(
+            { error: 'Failed to send welcome email' },
+            { status: 500 }
+          )
+        }
+
+        logger.info("[WelcomeWebhook] Welcome email scheduled", { emailDomain })
+        return NextResponse.json(
+          { message: 'Successfully processed webhook and sent welcome email', data },
+          { status: 200 }
+        )
+      } catch (error) {
+        logger.error("[WelcomeWebhook] Request handling failed", { error })
+        return toValidationErrorResponse(error)
+      }
     }
-
-    // Use react prop instead of rendering to HTML
-    const { data, error } = await resend.emails.send({
-      from: 'Qunt Edge <welcome@eu.updates.qunt-edge.vercel.app>',
-      to: record.email,
-      subject: userLanguage === 'fr' ? 'Bienvenue sur Qunt Edge' : 'Welcome to Qunt Edge',
-      react: WelcomeEmail({ firstName, email: record.email, language: userLanguage, youtubeId: youtubeId || 'ZBrIZpCh_7Q' }),
-      replyTo: 'hugo.demenez@qunt-edge.vercel.app',
-      headers: {
-        'List-Unsubscribe': `<${unsubscribeUrl}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
-      },
-      scheduledAt: fifteenMinutesFromNow
-    })
-
-    if (error) {
-      console.error('Email error:', error)
-      return NextResponse.json(
-        { error: 'Failed to send welcome email' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(
-      { message: 'Successfully processed webhook and sent welcome email', data },
-      { status: 200 }
-    )
-
-  } catch (error) {
-    console.error('Webhook error:', error)
-    return toValidationErrorResponse(error)
-  }
+  )
 }
