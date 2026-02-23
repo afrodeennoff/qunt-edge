@@ -361,25 +361,25 @@ export default function TraderProfilePage() {
 
   const tradeCalendarDays = useMemo(() => {
     const byDay = new Map<string, Date>()
-    ;(filteredTrades || []).forEach((trade) => {
-      const date = new Date(trade.entryDate)
-      if (Number.isNaN(date.getTime())) return
-      const key = date.toISOString().slice(0, 10)
-      if (!byDay.has(key)) byDay.set(key, new Date(date.getFullYear(), date.getMonth(), date.getDate()))
-    })
+      ; (filteredTrades || []).forEach((trade) => {
+        const date = new Date(trade.entryDate)
+        if (Number.isNaN(date.getTime())) return
+        const key = date.toISOString().slice(0, 10)
+        if (!byDay.has(key)) byDay.set(key, new Date(date.getFullYear(), date.getMonth(), date.getDate()))
+      })
     return Array.from(byDay.values()).sort((a, b) => a.getTime() - b.getTime())
   }, [filteredTrades])
 
   const tradePnlByDay = useMemo(() => {
     const map = new Map<string, number>()
-    ;(filteredTrades || []).forEach((trade) => {
-      const date = new Date(trade.entryDate)
-      if (Number.isNaN(date.getTime())) return
-      const key = date.toISOString().slice(0, 10)
-      const prev = map.get(key) ?? 0
-      const net = Number(trade.pnl || 0) - Number(trade.commission || 0)
-      map.set(key, prev + net)
-    })
+      ; (filteredTrades || []).forEach((trade) => {
+        const date = new Date(trade.entryDate)
+        if (Number.isNaN(date.getTime())) return
+        const key = date.toISOString().slice(0, 10)
+        const prev = map.get(key) ?? 0
+        const net = Number(trade.pnl || 0) - Number(trade.commission || 0)
+        map.set(key, prev + net)
+      })
     return map
   }, [filteredTrades])
 
@@ -421,23 +421,24 @@ export default function TraderProfilePage() {
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-2.5 sm:p-3.5 lg:p-4">
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute -top-24 left-[-8%] h-72 w-72 rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute top-28 right-[-6%] h-80 w-80 rounded-full bg-white/[0.03] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60">
+        <div className="absolute -top-32 -left-16 h-[500px] w-[500px] animate-pulse rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute top-1/2 -right-32 h-[600px] w-[600px] -translate-y-1/2 animate-[pulse_6s_ease-in-out_infinite] rounded-full bg-emerald-500/10 blur-[150px]" />
+        <div className="absolute -bottom-32 left-1/3 h-[400px] w-[400px] animate-[pulse_8s_ease-in-out_infinite] rounded-full bg-blue-500/10 blur-[130px]" />
       </div>
 
       <div className="relative mx-auto grid w-full max-w-[1600px] gap-2.5 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-2.5">
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-            <div className="flex items-start gap-3.5">
-              <Avatar className="h-18 w-18 border border-white/20 bg-white/5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
+            <div className="flex items-start gap-4">
+              <Avatar className="h-20 w-20 border border-white/10 bg-white/5 shadow-xl ring-2 ring-white/5 transition-transform duration-500 hover:scale-105 hover:ring-primary/30">
                 <AvatarImage src={profileAvatar ?? undefined} alt={`${profileName} avatar`} />
-                <AvatarFallback className="bg-white/10 text-xs font-semibold text-fg-primary">
+                <AvatarFallback className="bg-white/10 text-sm font-semibold text-fg-primary">
                   {profileInitials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[2rem] font-semibold leading-tight text-fg-primary">{profileName}</p>
+                <p className="truncate text-[2.25rem] font-bold leading-tight bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">{profileName}</p>
                 <p className="mt-1 text-sm text-fg-muted">{activeAccountsCount} active accounts</p>
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">
@@ -454,17 +455,17 @@ export default function TraderProfilePage() {
               </div>
             </div>
             <div className="mt-3 grid gap-1.5 sm:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
                 <p className="mt-1 text-lg font-semibold text-fg-primary">{metrics.totalTrades}</p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Current Streak</p>
                 <p className="mt-1 text-lg font-semibold text-fg-primary">
                   {metrics.winningStreak > 0 ? `${metrics.winningStreak} wins` : "No winning streak"}
                 </p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Net PnL</p>
                 <p className="mt-1 text-lg font-semibold text-fg-primary">{formatSigned(metrics.netPnl)}</p>
               </div>
@@ -472,18 +473,18 @@ export default function TraderProfilePage() {
           </Card>
 
           <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-2">
-            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-2.5">
+            <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-2.5 shadow-xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Risk Reward</p>
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.riskReward)}</p>
             </Card>
-            <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-2.5">
+            <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-2.5 shadow-xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Max Drawdown</p>
               <p className="mt-1 text-2xl font-semibold text-fg-primary">{formatValue(metrics.drawdown)}</p>
             </Card>
           </div>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
-            <div className="mb-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
+            <div className="mb-2 rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-2.5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Date Filter</p>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -539,7 +540,7 @@ export default function TraderProfilePage() {
                 ) : null}
               </div>
             </div>
-            <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-1.5">
+            <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-1.5">
               <Calendar
                 mode="single"
                 selected={selectedCalendarDay ?? latestTradeDay}
@@ -615,7 +616,7 @@ export default function TraderProfilePage() {
                 </span>
               </div>
             </div>
-            <div className="mt-1.5 flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2">
+            <div className="mt-1.5 flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] px-3 py-2">
               <div className="min-w-0">
                 <p className="text-xs text-fg-muted">Selected Day</p>
                 <p className="truncate text-xs font-semibold text-fg-primary">
@@ -628,7 +629,7 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <div className="mb-2.5 flex items-center justify-between">
               <p className="text-sm font-semibold text-fg-primary">Trade Feed</p>
               <p className="text-xs text-fg-muted">
@@ -646,7 +647,7 @@ export default function TraderProfilePage() {
                   return (
                     <div
                       key={trade.id}
-                      className="flex items-center justify-between rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-3 py-2"
+                      className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] px-3 py-2"
                     >
                       <div className="flex items-center gap-2">
                         <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`} />
@@ -666,7 +667,7 @@ export default function TraderProfilePage() {
               )}
             </div>
             {closedTrades.length > tradesPerPage ? (
-              <div className="mt-3 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] px-1.5 py-1">
+              <div className="mt-3 rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] px-1.5 py-1">
                 <Pagination className="justify-end">
                   <PaginationContent>
                     <PaginationItem>
@@ -702,7 +703,7 @@ export default function TraderProfilePage() {
         </section>
 
         <aside className="mx-auto w-full max-w-[430px] space-y-2 xl:max-w-none">
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <div className="flex items-center justify-between text-sm text-fg-muted">
               <span className="inline-flex items-center gap-1">
                 Compare with: average user
@@ -710,7 +711,7 @@ export default function TraderProfilePage() {
               </span>
               <span className="text-[11px]">{isBenchmarkLoading ? "Loading..." : "Live"}</span>
             </div>
-            <div className="mt-2.5 rounded-xl border border-white/10 bg-[hsl(var(--qe-surface-2))] p-2.5">
+            <div className="mt-2.5 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-2.5">
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
@@ -726,18 +727,18 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Capital</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatCapitalCompact(totalCapitalAllAccounts)}</p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Withdraw</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatCapitalCompact(totalWithdrawAllAccounts)}</p>
               </div>
             </div>
-            <div className="mt-2 rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+            <div className="mt-2 rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-3">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Avg. Return</p>
               <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(Math.abs(metrics.avgReturn))}%</p>
             </div>
@@ -746,7 +747,7 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
             <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -759,7 +760,7 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <div className="flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Trades</p>
               <span className="inline-flex items-center rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-primary">
@@ -777,13 +778,13 @@ export default function TraderProfilePage() {
             </div>
           </Card>
 
-          <Card className="border border-white/10 bg-[hsl(var(--qe-surface-1))] p-3.5">
+          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Break Even Rate</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.breakEvenRate)}%</p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-[hsl(var(--qe-surface-2))] p-3">
+              <div className="rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Sum Gain</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.sumGain)}%</p>
               </div>

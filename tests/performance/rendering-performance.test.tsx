@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import React from 'react'
 import { performanceMeasurement } from '@/lib/performance/performance-measurement'
 import { renderOptimizationEngine } from '@/lib/performance/render-optimization'
 

@@ -383,6 +383,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
     prevProps.children === nextProps.children
   )
 })
+WidgetWrapper.displayName = "WidgetWrapper"
 
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)

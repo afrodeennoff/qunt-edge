@@ -33,7 +33,7 @@ export function createLazyComponent<T extends object>(
   )
 
   WrappedComponent.displayName = 'LazyComponent'
-  
+
   return WrappedComponent as ComponentType<T>
 }
 
@@ -75,8 +75,8 @@ class ComponentRegistry {
     }
 
     try {
-      const module = await importFn()
-      const component = module.default
+      const importedModule = await importFn()
+      const component = importedModule.default
       this.loadedComponents.set(key, component)
       return component
     } catch (error) {

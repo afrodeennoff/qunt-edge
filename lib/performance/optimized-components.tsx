@@ -19,7 +19,7 @@ export function withPerformanceOptimization<P extends object>(
 
       if (!disableOptimization) {
         const { isLowPerformance } = usePerformanceOptimization(name)
-        
+
         if (isLowPerformance && !enableMemo) {
           console.warn(`⚠️ Low performance mode active for ${name}`)
         }
@@ -30,22 +30,23 @@ export function withPerformanceOptimization<P extends object>(
   )
 
   WrappedComponent.displayName = `Optimized(${Component.displayName || Component.name || 'Component'})`
-  
+
   return WrappedComponent as unknown as React.ComponentType<P & OptimizedComponentProps>
 }
 
 export const OptimizedFragment = memo(({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 })
+OptimizedFragment.displayName = "OptimizedFragment"
 
 export function createMemoizedComponent<P extends object>(
   Component: React.ComponentType<P>,
   areEqual?: (prevProps: Readonly<P>, nextProps: Readonly<P>) => boolean
 ): React.ComponentType<P> {
   const MemoizedComponent = memo(Component, areEqual)
-  
+
   MemoizedComponent.displayName = `Memoized(${Component.displayName || Component.name || 'Component'})`
-  
+
   return MemoizedComponent
 }
 
