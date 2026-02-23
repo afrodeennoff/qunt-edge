@@ -1,9 +1,9 @@
-import DOMPurify from 'isomorphic-dompurify'
+import DOMPurify from 'dompurify'
 
 /**
  * HTML Sanitization Utilities
  * 
- * Uses isomorphic-dompurify for robust XSS prevention across both 
+ * Uses dompurify for robust XSS prevention across both 
  * Server and Client environments.
  */
 
@@ -14,8 +14,10 @@ import DOMPurify from 'isomorphic-dompurify'
 export function sanitizeHtml(html: string): string {
   if (!html) return ''
 
-  // Use DOMPurify for the primary sanitization pass
-  // This is safe to run in both Node.js and Browser thanks to isomorphic-dompurify
+  if (typeof window === 'undefined') {
+    return html;
+  }
+
   return DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true },
     ALLOWED_TAGS: [
@@ -40,6 +42,10 @@ export async function sanitizeHtmlStrict(html: string): Promise<string> {
  */
 export function sanitizePlainText(input: string): string {
   if (!input) return ''
+
+  if (typeof window === 'undefined') {
+    return input.replace(/<[^>]*>?/gm, '').trim();
+  }
 
   // For plain text, we want to strip ALL tags
   return DOMPurify.sanitize(input, {
