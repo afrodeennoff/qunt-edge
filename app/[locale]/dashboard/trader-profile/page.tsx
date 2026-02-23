@@ -433,7 +433,7 @@ export default function TraderProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[2.25rem] font-bold leading-tight bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">{profileName}</p>
+                <p className="truncate text-[2.25rem] font-bold leading-tight text-white">{profileName}</p>
                 <p className="mt-1 text-sm text-fg-muted">{activeAccountsCount} active accounts</p>
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">

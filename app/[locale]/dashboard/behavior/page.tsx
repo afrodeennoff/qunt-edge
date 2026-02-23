@@ -144,7 +144,7 @@ export default function DashboardBehaviorPage() {
 
   return (
     <div className="w-full space-y-6 p-3 sm:p-4 lg:p-6">
-      <Card className="rounded-3xl border border-border/60 bg-gradient-to-r from-white/10 via-white/10 to-white/5 shadow-sm backdrop-blur-sm">
+      <Card className="rounded-3xl border border-border/60 bg-card/75 shadow-sm backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-2">

@@ -421,11 +421,7 @@ export default function TraderProfilePage() {
 
   return (
     <div className="relative w-full min-h-[calc(100vh-72px)] overflow-hidden p-2.5 sm:p-3.5 lg:p-4">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60">
-        <div className="absolute -top-32 -left-16 h-[500px] w-[500px] animate-pulse rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute top-1/2 -right-32 h-[600px] w-[600px] -translate-y-1/2 animate-[pulse_6s_ease-in-out_infinite] rounded-full bg-emerald-500/10 blur-[150px]" />
-        <div className="absolute -bottom-32 left-1/3 h-[400px] w-[400px] animate-[pulse_8s_ease-in-out_infinite] rounded-full bg-blue-500/10 blur-[130px]" />
-      </div>
+      
 
       <div className="relative mx-auto grid w-full max-w-[1600px] gap-2.5 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-2.5">
@@ -438,7 +434,7 @@ export default function TraderProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[2.25rem] font-bold leading-tight bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">{profileName}</p>
+                <p className="truncate text-[2.25rem] font-bold leading-tight text-white">{profileName}</p>
                 <p className="mt-1 text-sm text-fg-muted">{activeAccountsCount} active accounts</p>
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-fg-primary">
