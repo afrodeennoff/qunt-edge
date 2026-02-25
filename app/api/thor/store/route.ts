@@ -4,6 +4,16 @@ import { saveTradesAction } from '@/server/database';
 import type { ImportTradeDraft } from '@/lib/trade-types';
 import { verifySecureToken } from '@/lib/api-auth';
 
+const MAX_THOR_BODY_BYTES = 3 * 1024 * 1024
+const MAX_THOR_TRADES = 5_000
+const MAX_PAGINATION_LIMIT = 500
+
+function normalizePositiveInt(value: string | null, fallback: number, max: number): number {
+  const parsed = Number.parseInt(value ?? '', 10)
+  if (!Number.isFinite(parsed) || parsed < 0) return fallback
+  return Math.min(parsed, max)
+}
+
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -70,6 +80,11 @@ interface ThorRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    const contentLength = Number(req.headers.get('content-length') || 0)
+    if (Number.isFinite(contentLength) && contentLength > MAX_THOR_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request payload is too large' }, { status: 413 })
+    }
+
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
@@ -81,6 +96,19 @@ export async function POST(req: NextRequest) {
     
     const user = auth.user!;
     const data: ThorRequest = await req.json();
+
+    const totalTrades = Array.isArray(data?.dates)
+      ? data.dates.reduce((sum, dateData) => sum + (Array.isArray(dateData?.trades) ? dateData.trades.length : 0), 0)
+      : 0
+    if (totalTrades === 0) {
+      return NextResponse.json({ error: 'Invalid payload: no trades provided' }, { status: 400 })
+    }
+    if (totalTrades > MAX_THOR_TRADES) {
+      return NextResponse.json(
+        { error: `Too many trades. Maximum is ${MAX_THOR_TRADES}.` },
+        { status: 413 }
+      )
+    }
     
     // Transform the data to match the Trade schema
     const trades: ImportTradeDraft[] = data.dates.flatMap(dateData => 
@@ -163,8 +191,8 @@ export async function GET(req: NextRequest) {
       }, { status: 400 });
     }
     
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 100;
-    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
+    const limit = normalizePositiveInt(searchParams.get('limit'), 100, MAX_PAGINATION_LIMIT);
+    const offset = normalizePositiveInt(searchParams.get('offset'), 0, 50_000);
     const fromDate = searchParams.get('from');
     const toDate = searchParams.get('to');
     

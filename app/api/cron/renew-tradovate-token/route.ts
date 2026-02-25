@@ -5,6 +5,15 @@ import { requireServiceAuth, toErrorResponse } from '@/server/authz';
 
 export const dynamic = 'force-dynamic';
 
+type SynchronizationRecord = {
+  id: string
+  userId: string
+  accountId: string
+  token: string | null
+  tokenExpiresAt: Date | null
+  dailySyncTime: Date | null
+}
+
 /**
  * Helper function to check if current time matches the configured daily sync time
  * @param dailySyncTime The configured sync time from database
@@ -108,7 +117,7 @@ export async function GET(request: NextRequest) {
  * 
  * @param synchronization The synchronization record containing user, environment, and token info.
  */
-async function renewUserToken(synchronization: any): Promise<boolean> {
+async function renewUserToken(synchronization: SynchronizationRecord): Promise<boolean> {
   try {
     // This app uses Tradovate demo endpoints for OAuth/sync flows.
     // `Synchronization` has no persisted `environment` field, so default to demo.
@@ -157,9 +166,13 @@ async function renewUserToken(synchronization: any): Promise<boolean> {
  * 
  * @param synchronization The synchronization record containing user, token, and account info.
  */
-async function performDailySync(synchronization: any): Promise<boolean> {
+async function performDailySync(synchronization: SynchronizationRecord): Promise<boolean> {
   try {
     console.log(`[CRON] Performing daily sync for account ${synchronization.accountId}`);
+    if (!synchronization.token) {
+      console.error(`[CRON] Cannot sync account ${synchronization.accountId}: missing access token`);
+      return false;
+    }
 
     // Dynamically import the getTradovateTrades action to avoid circular dependencies
     const { getTradovateTrades } = await import('@/app/[locale]/dashboard/components/import/tradovate/actions');

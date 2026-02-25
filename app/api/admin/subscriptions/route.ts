@@ -51,27 +51,54 @@ export async function GET(req: NextRequest) {
       prisma.subscription.count({ where }),
     ])
 
-    const subscriptionsWithStats = await Promise.all(
-      subscriptions.map(async (sub) => {
-        const [transactions, invoiceCount, refundCount] = await Promise.all([
-          prisma.paymentTransaction.aggregate({
-            where: { userId: sub.userId, status: 'COMPLETED' },
-            _sum: { amount: true },
-            _count: { id: true },
-          }),
-          prisma.invoice.count({ where: { userId: sub.userId } }),
-          prisma.refund.count({ where: { userId: sub.userId } }),
-        ])
+    const userIds = Array.from(new Set(subscriptions.map((sub) => sub.userId)))
 
-        return {
-          ...sub,
-          totalSpent: transactions._sum.amount || 0,
-          transactionCount: transactions._count,
-          invoiceCount,
-          refundCount,
-        }
-      })
+    const [transactionStats, invoiceStats, refundStats] = await Promise.all([
+      prisma.paymentTransaction.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: userIds },
+          status: 'COMPLETED',
+        },
+        _sum: { amount: true },
+        _count: { id: true },
+      }),
+      prisma.invoice.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: userIds },
+        },
+        _count: { id: true },
+      }),
+      prisma.refund.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: userIds },
+        },
+        _count: { id: true },
+      }),
+    ])
+
+    const transactionByUser = new Map(
+      transactionStats.map((row) => [row.userId, row])
     )
+    const invoicesByUser = new Map(
+      invoiceStats.map((row) => [row.userId, row._count.id])
+    )
+    const refundsByUser = new Map(
+      refundStats.map((row) => [row.userId, row._count.id])
+    )
+
+    const subscriptionsWithStats = subscriptions.map((sub) => {
+      const tx = transactionByUser.get(sub.userId)
+      return {
+        ...sub,
+        totalSpent: tx?._sum.amount || 0,
+        transactionCount: tx?._count.id || 0,
+        invoiceCount: invoicesByUser.get(sub.userId) || 0,
+        refundCount: refundsByUser.get(sub.userId) || 0,
+      }
+    })
 
     return NextResponse.json({
       subscriptions: subscriptionsWithStats,

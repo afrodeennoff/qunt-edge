@@ -15,6 +15,18 @@ const editorRateLimit = rateLimit({ limit: 15, window: 60_000, identifier: "ai-e
 
 type EditorAction = z.infer<typeof ActionSchema>;
 
+function isRateLimitError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const candidate = error as { statusCode?: number; type?: string }
+  return candidate.statusCode === 429 || candidate.type === 'rate_limit_exceeded'
+}
+
+function isProvider4xxError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const candidate = error as { statusCode?: number }
+  return typeof candidate.statusCode === 'number' && candidate.statusCode >= 400 && candidate.statusCode < 500
+}
+
 const getSystemPrompt = (action: EditorAction, locale: string, date: string) => {
   const baseContext = `You are an expert trading journal assistant embedded inside a rich text editor.
 
@@ -142,7 +154,7 @@ export async function POST(req: NextRequest) {
           toolCallsCount,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: (error as any)?.code ?? null,
+          errorCode: error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code ?? '') || null : null,
           sampleRate: 1,
         });
       },
@@ -163,7 +175,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if ((error as any)?.statusCode === 429 || (error as any)?.type === "rate_limit_exceeded") {
+    if (isRateLimitError(error)) {
       return new Response(
         JSON.stringify({
           error: "Rate limit exceeded",
@@ -181,7 +193,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if ((error as any)?.statusCode >= 400 && (error as any)?.statusCode < 500) {
+    if (isProvider4xxError(error)) {
       return new Response(
         JSON.stringify({
           error: "Service temporarily unavailable",
@@ -205,7 +217,7 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: (error as any)?.code ?? null,
+      errorCode: error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code ?? '') || null : null,
       sampleRate: 1,
     });
 

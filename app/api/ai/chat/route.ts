@@ -27,8 +27,18 @@ const MAX_CHAT_MESSAGES = 100;
 const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-chat" });
 
 type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
+type ChatMessagePart = { type?: string; text?: string }
+type ChatMessage = { role?: string; content?: unknown; parts?: ChatMessagePart[]; text?: string }
 
-function extractLastUserText(messages: any[]): string {
+function getErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null
+  if (!('code' in error)) return null
+  const value = (error as { code?: unknown }).code
+  if (value == null) return null
+  return String(value)
+}
+
+function extractLastUserText(messages: ChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
   if (!lastUserMessage) return "";
 
@@ -38,8 +48,8 @@ function extractLastUserText(messages: any[]): string {
 
   if (Array.isArray(lastUserMessage.parts)) {
     return lastUserMessage.parts
-      .filter((part: any) => part?.type === "text" && typeof part?.text === "string")
-      .map((part: any) => part.text)
+      .filter((part) => part?.type === "text" && typeof part?.text === "string")
+      .map((part) => part.text as string)
       .join(" ");
   }
 
@@ -108,7 +118,8 @@ function withToolGuards(tools: Record<string, any>, maxCallsPerTool = 2) {
 
   return Object.fromEntries(
     Object.entries(tools).map(([name, definition]) => {
-      if (!definition || typeof definition.execute !== "function") {
+      const execute = definition?.execute;
+      if (!definition || typeof execute !== "function") {
         return [name, definition];
       }
 
@@ -130,7 +141,7 @@ function withToolGuards(tools: Record<string, any>, maxCallsPerTool = 2) {
             callCount.set(name, currentCount);
             seenArgs.add(signature);
 
-            return definition.execute(args, context);
+            return execute(args, context);
           },
         },
       ];
@@ -189,7 +200,7 @@ export async function POST(req: NextRequest) {
     const previousWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
     const previousWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
 
-    const userMessages = messages.filter((msg: any) => msg.role === "user");
+    const userMessages = (messages as ChatMessage[]).filter((msg) => msg.role === "user");
     const isFirstMessage = userMessages.length === 1;
 
     const latestText = extractLastUserText(messages);
@@ -259,7 +270,7 @@ export async function POST(req: NextRequest) {
           latencyMs: Date.now() - startedAt,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: (error as any)?.code ?? null,
+          errorCode: getErrorCode(error),
           toolCallsCount,
           sampleRate: 1,
         });
@@ -299,7 +310,7 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: (error as any)?.code ?? null,
+      errorCode: getErrorCode(error),
       sampleRate: 1,
     });
 

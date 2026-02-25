@@ -17,7 +17,9 @@ function withLocalePrefix(locale: string, pathWithOptionalQuery: string): string
     return `/${locale}${normalized}`;
 }
 
-async function handleWhopTeamCheckout(user: any, websiteURL: string, locale: string, teamName?: string) {
+type CheckoutUser = { id: string; email?: string | null }
+
+async function handleWhopTeamCheckout(user: CheckoutUser, websiteURL: string, locale: string, teamName?: string) {
     const planId = process.env.NEXT_PUBLIC_WHOP_TEAM_PLAN_ID;
 
     if (!planId) {
