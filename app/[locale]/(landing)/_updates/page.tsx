@@ -3,7 +3,7 @@ import { getI18n } from '@/locales/server'
 import CompletedTimeline from '../components/completed-timeline'
 import { getAllPosts } from '@/lib/posts'
 import { getLatestVideoFromPlaylist } from '@/app/[locale]/admin/actions/youtube'
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell'
+import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell'
 
 interface PageProps {
   params: Promise<{
@@ -32,12 +32,6 @@ export default async function UpdatesPage(props: PageProps) {
 
   return (
     <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
-      <UnifiedPageHeader
-        eyebrow="Product"
-        title={t('updates.title')}
-        description={t('updates.description')}
-      />
-
       {/* Display latest weekly video for French locale */}
       {locale === 'fr' && latestVideoId && (
         <UnifiedSurface className="mb-8">

@@ -1,5 +1,37 @@
 # Route Redesign Todo (No-Gradient Unified Look)
 
+---
+
+# Home Hero Partner Row Tweak (NinjaTrader + Spacing)
+
+## Scope
+- Add NinjaTrader to the home hero partner row and tighten spacing beneath KPI proof cards.
+
+## Acceptance Criteria
+- [x] NinjaTrader appears in the partner row with branded `NINJA|TRADER` styling.
+- [x] Gap between KPI card block and partner row is reduced.
+- [x] Targeted verification command runs and is recorded.
+
+## Plan Checklist
+- [x] Update `app/[locale]/(home)/components/Hero.tsx` partner row content and spacing.
+- [x] Run targeted lint check on the touched file.
+- [x] Record outcomes and residual risk.
+
+## Current Step
+- Completed.
+
+## Progress Notes
+- 2026-02-25: Added `NINJA|TRADER` partner label (orange branded accent) to hero integrations row.
+- 2026-02-25: Reduced partner row top margin from `mt-12` to `mt-7` to close the visual gap below KPI cards.
+- 2026-02-25: Ran targeted lint on the touched file; command exited with `0`.
+
+## Completion Notes
+- Updated file: `app/[locale]/(home)/components/Hero.tsx`.
+- Verification evidence:
+  - `npx eslint app/[locale]/(home)/components/Hero.tsx` -> exit `0`.
+
+---
+
 ## Scope
 - Redesign requested routes to use one cohesive monochrome visual language aligned with the current site.
 - Remove gradient-driven visuals from those routes and shared landing shell.
@@ -33,6 +65,8 @@
 - 2026-02-25: Refined home page design system for stronger premium cohesion: hero surface polish, section rhythm improvements, pricing cards modernization, and comparison/CTA visual consistency.
 - 2026-02-25: Targeted verification passed: `npx eslint` on touched home components exited `0`.
 - 2026-02-25: Removed duplicate standalone Behavior page header and kept in-card `Behavior AI Hub` header for consistent hierarchy.
+- 2026-02-25: Removed standalone `UnifiedPageHeader` banner blocks across redesigned dashboard/landing/team pages to enforce single-header hierarchy and consistent no-gradient page structure.
+- 2026-02-25: Targeted lint verification on all touched redesign pages exits with `0` errors (`17` pre-existing warnings in support/settings/trader-profile).
 
 ## Completion Notes
 - Unified no-gradient redesign applied across requested routes; remaining verification blocker is pre-existing test typing failures.
@@ -285,3 +319,145 @@
 - Residual risk:
   - Route budgets still pass close to threshold (dashboard routes ~`78.7-79.0 KB` vs `80 KB` budget), so future feature additions can regress quickly without continued splitting.
   - Remaining `useData()` call sites in dashboard scope are debug/import-specific (`data-debug`, `tradovate-credentials-manager`) and may still fan out when enabled.
+
+---
+
+# End-to-End App Response Audit
+
+## Scope
+- Run an end-to-end audit of app response quality/reliability across core engineering gates and available runtime/smoke checks.
+
+## Acceptance Criteria
+- [x] Baseline context captured (scripts, current repo state, known blockers).
+- [x] Core verification gates executed with fresh outputs.
+- [x] Runtime response signals audited (smoke/perf checks available in repo).
+- [x] Findings, risks, and concrete next actions documented.
+
+## Plan Checklist
+- [x] Capture baseline and select audit commands.
+- [x] Run typecheck/lint/tests/build gates and collect outcomes.
+- [x] Run runtime/smoke/perf scripts relevant to response behavior.
+- [x] Summarize findings with severity, evidence, and remediation priorities.
+
+## Current Step
+- **Completed:** Full audit execution and findings summary recorded.
+
+## Progress Notes
+- 2026-02-25: Started user-requested end-to-end app response audit and recorded scope/criteria.
+- 2026-02-25: Baseline captured; script inventory confirmed (`typecheck`, `lint`, `test`, `build`, `check:route-budgets`, `analyze:bundle`, `perf:verify`, `test:smoke`).
+- 2026-02-25: Core gates run with fresh evidence:
+  - `npm run typecheck` -> exit `0`.
+  - `npm run lint` -> exit `0` with `1593` warnings (`0` errors).
+  - `npm test` -> exit `0` (`145 passed | 46 skipped`).
+  - `npm run build` -> exit `0` (with non-blocking warnings).
+- 2026-02-25: Runtime/response scripts run:
+  - `npm run check:route-budgets` -> exit `0` (dashboard routes remain near budget at ~`78.67-78.97 KB` of `80 KB`).
+  - `npm run analyze:bundle` -> exit `0` and artifact refreshed.
+  - `npm run perf:verify` -> exit `0`.
+  - `npm run test:smoke` -> exit `1` (`fetch failed` for all probes), reproducible even when server is up and direct `curl` to `http://127.0.0.1:3000/en` returns `200`, indicating environment/script probe mismatch.
+
+## Completion Notes
+- End-to-end audit outcome:
+  - Build/test/typecheck gates are healthy.
+  - Lint debt remains high (warnings-only).
+  - Dashboard response payload remains very close to route budget threshold.
+  - Smoke probe currently unreliable in this environment due Node `fetch` failures despite loopback `curl` success.
+- Residual risk:
+  - Budget headroom is minimal on dashboard routes, so small additions can push routes over target.
+  - Smoke script cannot currently be used as a trusted runtime gate without fixing probe transport behavior in this environment.
+
+---
+
+# Spacing Gap Audit (Vertical + Horizontal)
+
+## Scope
+- Audit spacing consistency across shared dashboard shells and high-traffic dashboard pages.
+- Fix vertical and horizontal layout gaps that cause inconsistent rhythm or compressed mobile layouts.
+
+## Acceptance Criteria
+- [x] Shared shell supports explicit spacing density to avoid per-page ad-hoc padding drift.
+- [x] Core dashboard pages use one consistent compact spacing profile.
+- [x] Horizontal compression issues on small screens are fixed in audited pages.
+- [x] Verification command(s) run and outcomes recorded.
+
+## Plan Checklist
+- [x] Add spacing-density support to shared shell.
+- [x] Migrate dashboard pages using ad-hoc `py-*` overrides to spacing density API.
+- [x] Fix responsive two-column grid gaps causing horizontal squeeze.
+- [x] Run targeted verification and capture evidence.
+
+## Current Step
+- **Completed:** Spacing gap audit and verification complete.
+
+## Progress Notes
+- 2026-02-25: Added `density` prop to `UnifiedPageShell` (`default | compact | spacious`) to standardize vertical spacing without repeated one-off classes.
+- 2026-02-25: Migrated dashboard pages to `density="compact"` (`reports`, `billing`, `data`, `settings`, `behavior`, `trader-profile`) to align vertical rhythm.
+- 2026-02-25: Balanced dashboard tab shell spacing by standardizing horizontal/vertical container padding in `dashboard-tab-shell.tsx`.
+- 2026-02-25: Fixed horizontal compression in settings profile form by changing `grid-cols-2` to responsive `sm:grid-cols-2`.
+- 2026-02-25: Fixed trader-profile mobile compression by making multiple `grid-cols-2` blocks responsive (`sm:grid-cols-2`) and slightly increasing section spacing for better balance.
+
+## Completion Notes
+- Files updated:
+  - `components/layout/unified-page-shell.tsx`
+  - `app/[locale]/dashboard/reports/page.tsx`
+  - `app/[locale]/dashboard/billing/page.tsx`
+  - `app/[locale]/dashboard/data/page.tsx`
+  - `app/[locale]/dashboard/settings/page.tsx`
+  - `app/[locale]/dashboard/behavior/page.tsx`
+  - `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`
+  - `app/[locale]/dashboard/trader-profile/page.tsx`
+  - `app/[locale]/dashboard/trader-profile/page-client.tsx`
+- Verification evidence:
+  - `npx eslint <touched files>` -> exit `0` with warnings only (`0` errors).
+  - `npm run typecheck` -> exit `0`.
+  - `npm run build` -> fails with pre-existing Next/Turbopack page-data manifest error (`ENOENT .next/server/pages-manifest.json`) in this environment; not introduced by spacing changes.
+
+---
+
+# Framer Motion + Smooth Scrolling Rollout
+
+## Scope
+- Implement app-wide Framer Motion enhancements and smooth scrolling behavior.
+- Apply reusable motion primitives broadly via shared layouts/providers.
+
+## Acceptance Criteria
+- [x] Global smooth-scrolling behavior is enabled with reduced-motion fallback.
+- [x] Route-level/page-level Framer transitions are active for localized routes.
+- [x] Shared motion primitives exist and are used in layout shells to spread motion coverage.
+- [x] Verification commands run and outcomes are recorded.
+
+## Plan Checklist
+- [x] Add smooth-scroll provider and global motion UI effects.
+- [x] Add locale-level route transition template using Framer Motion.
+- [x] Apply motion wrappers in landing/dashboard layout shells.
+- [x] Run typecheck and targeted lint; record evidence.
+
+## Current Step
+- **Completed:** Rollout implemented and verified.
+
+## Progress Notes
+- 2026-02-25: Started user-requested Framer Motion + smooth-scrolling rollout.
+- 2026-02-25: Confirmed Framer Motion dependency already installed and existing motion usage across app.
+- 2026-02-25: Added reusable motion primitives (`MotionPage`, `MotionSection`, `MotionStagger`, `MotionStaggerItem`) for consistent framer-driven transitions.
+- 2026-02-25: Added `SmoothScrollProvider` with reduced-motion fallback, same-page anchor smooth scrolling, and hash-route scroll handling.
+- 2026-02-25: Added global Framer `GlobalMotionEffects` scroll progress indicator.
+- 2026-02-25: Added `app/[locale]/template.tsx` route transition wrapper for localized subtree transitions.
+- 2026-02-25: Wired global motion/smooth-scroll layers into `RootProviders`.
+- 2026-02-25: Applied shared motion wrappers in marketing shell and dashboard layout content area.
+- 2026-02-25: Added CSS fallback `scroll-behavior: smooth` with reduced-motion override in `app/globals.css`.
+
+## Completion Notes
+- Files added:
+  - `components/motion/motion-primitives.tsx`
+  - `components/motion/smooth-scroll-provider.tsx`
+  - `components/motion/global-motion-effects.tsx`
+  - `app/[locale]/template.tsx`
+- Files updated:
+  - `components/providers/root-providers.tsx`
+  - `app/[locale]/(landing)/components/marketing-layout-shell.tsx`
+  - `app/[locale]/dashboard/layout.tsx`
+  - `app/globals.css`
+- Verification evidence:
+  - `npm run typecheck` -> exit `0`.
+  - `npx eslint <touched TS/TSX files>` -> exit `0` (no errors).
+  - `npx eslint app/globals.css` -> warning only: file ignored by ESLint config.

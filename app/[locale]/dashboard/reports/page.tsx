@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { AnalysisOverview } from "../components/analysis/analysis-overview"
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
+import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
 
 export default function DashboardReportsPage() {
   useEffect(() => {
@@ -10,12 +10,7 @@ export default function DashboardReportsPage() {
   }, [])
 
   return (
-    <UnifiedPageShell className="py-4 sm:py-6">
-      <UnifiedPageHeader
-        eyebrow="Dashboard"
-        title="Reports"
-        description="View your detailed trading analysis reports."
-      />
+    <UnifiedPageShell density="compact">
       <UnifiedSurface>
         <AnalysisOverview />
       </UnifiedSurface>

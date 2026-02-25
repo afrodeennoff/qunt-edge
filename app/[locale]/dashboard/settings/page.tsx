@@ -59,7 +59,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { LinkedAccounts } from "@/components/linked-accounts"
-import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
+import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 type Locale = 'en' | 'fr'
 
@@ -154,13 +154,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <UnifiedPageShell className="py-4 sm:py-6">
-      <UnifiedPageHeader
-        eyebrow="Dashboard"
-        title={t('dashboard.settings')}
-        description={t('dashboard.settings.description')}
-      />
-
+    <UnifiedPageShell density="compact">
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Profile Section */}
         <Card className="border-white/12 bg-black/45 shadow-sm">
@@ -193,7 +187,7 @@ export default function SettingsPage() {
             </div>
             <Separator />
             <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="firstName">First Name</Label>
                   <Input id="firstName" placeholder="Enter your first name" />

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useI18n } from '@/locales/client';
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
+import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
 
 function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -18,12 +18,6 @@ export default function TermsOfService() {
 
   return (
     <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
-      <UnifiedPageHeader
-        eyebrow="Legal"
-        title={t('terms.title')}
-        description="Terms governing access and usage of Qunt Edge services."
-      />
-
       <UnifiedSurface className="space-y-8">
         <LegalSection title={t('terms.sections.companyInfo.title')}>
           <p>{t('terms.sections.companyInfo.content')}</p>

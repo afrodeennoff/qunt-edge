@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataManagementCard } from "@/app/[locale]/dashboard/data/components/data-management/data-management-card"
 import { useEffect } from "react"
 import { TradeTableReview } from "../components/tables/trade-table-review"
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
+import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
 
 export default function DashboardPage() {
   useEffect(() => {
@@ -12,12 +12,7 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <UnifiedPageShell className="py-4 sm:py-6">
-      <UnifiedPageHeader
-        eyebrow="Dashboard"
-        title="Data Management"
-        description="Manage your broker accounts, prop firm integrations, and detailed trade logs."
-      />
+    <UnifiedPageShell density="compact">
       <div className="flex w-full flex-1 flex-col">
         <Tabs defaultValue="accounts" className="w-full space-y-4">
           <TabsList className="h-auto rounded-2xl border border-white/10 bg-black/40 p-1">

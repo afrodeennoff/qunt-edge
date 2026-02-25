@@ -5,6 +5,7 @@ type UnifiedPageShellProps = {
   children: ReactNode
   className?: string
   widthClassName?: string
+  density?: "default" | "compact" | "spacious"
 }
 
 type UnifiedPageHeaderProps = {
@@ -24,11 +25,20 @@ export function UnifiedPageShell({
   children,
   className,
   widthClassName = "max-w-7xl",
+  density = "default",
 }: UnifiedPageShellProps) {
+  const densityClasses =
+    density === "compact"
+      ? "py-4 sm:py-6 lg:py-8"
+      : density === "spacious"
+        ? "py-12 sm:py-16"
+        : "py-10 sm:py-12"
+
   return (
     <div
       className={cn(
-        "mx-auto w-full px-4 py-10 sm:px-6 lg:px-8",
+        "mx-auto w-full px-4 sm:px-6 lg:px-8",
+        densityClasses,
         "animate-in fade-in-0 duration-500",
         widthClassName,
         className,

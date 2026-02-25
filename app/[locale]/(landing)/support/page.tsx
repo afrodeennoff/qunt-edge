@@ -52,7 +52,7 @@ import { DefaultChatTransport, ToolUIPart, UIMessage } from 'ai';
 import { ClipboardCheckIcon } from '@/components/animated-icons/clipboard-check';
 import SupportForm from './components/support-form';
 import { toast } from 'sonner';
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
+import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
 type askForEmailFormToolInput = {
   summary: string;
 };
@@ -169,11 +169,6 @@ const ChatBotDemo = () => {
   ) as askForEmailFormToolUIPart | undefined;
   return (
     <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
-      <UnifiedPageHeader
-        eyebrow="Support"
-        title="Qunt Edge Support Assistant"
-        description={t('support.description')}
-      />
       <UnifiedSurface className="flex h-[calc(100vh-220px)] min-h-[680px] flex-col">
         {/* Discord Community Section */}
         <a

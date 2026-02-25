@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { setStaticParamsLocale } from "next-international/server";
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell";
+import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell";
 
 export const metadata: Metadata = {
     title: 'FAQ | Qunt Edge',
@@ -37,13 +37,11 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
 
     return (
         <UnifiedPageShell widthClassName="max-w-4xl" className="py-8">
-            <UnifiedPageHeader
-                eyebrow="Help Center"
-                title="Frequently Asked Questions"
-                description="Find answers to common questions about the platform and its features."
-            />
-
             <UnifiedSurface className="space-y-4">
+                <header className="mb-6">
+                    <h1 className="text-3xl font-semibold text-fg-primary">Frequently Asked Questions</h1>
+                    <p className="mt-1 text-fg-muted">Find answers to common questions about the platform and its features.</p>
+                </header>
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="mb-3 rounded-2xl border border-white/10 bg-black/35 px-4">

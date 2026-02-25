@@ -33,7 +33,7 @@ import {
   RadarChart,
   ResponsiveContainer,
 } from "recharts"
-import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
+import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 interface BenchmarkMetrics {
   riskReward: number
@@ -421,14 +421,9 @@ export default function TraderProfilePage() {
   }, [dateFilterPreset, customDateRange?.from, customDateRange?.to, closedTrades.length])
 
   return (
-    <UnifiedPageShell widthClassName="max-w-[1600px]" className="py-4 sm:py-6">
-      <UnifiedPageHeader
-        eyebrow="Dashboard"
-        title="Trader Profile"
-        description="Performance profile, behavior snapshot, and benchmark comparison in one view."
-      />
-      <div className="mx-auto grid w-full gap-2.5 xl:grid-cols-[1.35fr_1fr]">
-        <section className="space-y-2.5">
+    <UnifiedPageShell widthClassName="max-w-[1600px]" density="compact">
+      <div className="mx-auto grid w-full gap-3 sm:gap-4 xl:grid-cols-[1.35fr_1fr]">
+        <section className="space-y-3 sm:space-y-4">
           <Card className="border border-white/10 bg-black/40 p-3.5 shadow-sm">
             <div className="flex items-start gap-4">
               <Avatar className="h-20 w-20 border border-white/10 bg-white/5 shadow-xl ring-2 ring-white/5 transition-transform duration-500 hover:scale-105 hover:ring-primary/30">
@@ -728,7 +723,7 @@ export default function TraderProfilePage() {
           </Card>
 
           <Card className="border border-white/10 bg-black/40 p-3.5 shadow-sm">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-lg border border-white/10 bg-black/35 p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Total Capital</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatCapitalCompact(totalCapitalAllAccounts)}</p>
@@ -750,7 +745,7 @@ export default function TraderProfilePage() {
           <Card className="border border-white/10 bg-black/40 p-3.5 shadow-sm">
             <p className="text-[10px] uppercase tracking-wider text-fg-muted">Win Rate</p>
             <p className="mt-1 text-4xl font-semibold text-fg-primary">{formatValue(metrics.winRate)}%</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <div className="h-2 rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(8, metrics.winRate))}%` }} />
               </div>
@@ -768,7 +763,7 @@ export default function TraderProfilePage() {
               </span>
             </div>
             <p className="mt-1 text-4xl font-semibold text-fg-primary">{metrics.totalTrades}</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <div className="h-2 rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-white/35" style={{ width: `${Math.min(100, Math.max(8, metrics.totalTrades))}%` }} />
               </div>
@@ -779,7 +774,7 @@ export default function TraderProfilePage() {
           </Card>
 
           <Card className="border border-white/10 bg-black/40 p-3.5 shadow-sm">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-lg border border-white/10 bg-black/35 p-3">
                 <p className="text-[10px] uppercase tracking-wider text-fg-muted">Break Even Rate</p>
                 <p className="mt-1 text-3xl font-semibold text-fg-primary">{formatValue(metrics.breakEvenRate)}%</p>

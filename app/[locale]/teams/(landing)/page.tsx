@@ -17,7 +17,7 @@ import {
   Target,
   Globe,
 } from 'lucide-react'
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell'
+import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell'
 
 export default function TeamPage() {
   const t = useI18n()
@@ -53,12 +53,13 @@ export default function TeamPage() {
 
   return (
     <UnifiedPageShell className="py-8">
-      <UnifiedPageHeader
-        eyebrow="Teams"
-        title={t('teams.hero.title')}
-        description={t('teams.hero.description')}
-        actions={
-          <>
+      <UnifiedSurface className="mb-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold text-fg-primary">{t('teams.hero.title')}</h1>
+            <p className="mt-1 text-fg-muted">{t('teams.hero.description')}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
             <Link
               href="/authentication?next=teams/dashboard"
               className="inline-flex h-10 items-center rounded-xl border border-white/15 bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
@@ -73,11 +74,8 @@ export default function TeamPage() {
             >
               {t('teams.cta.secondary')}
             </button>
-          </>
-        }
-      />
-
-      <UnifiedSurface className="mb-6">
+          </div>
+        </div>
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
           <div className="grid gap-3 sm:grid-cols-3">
             {stats.map((stat) => (

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, Code, LineChart, GraduationCap } from "lucide-react"
-import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
+import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 export default function AboutPage() {
   const founderSkills = [
@@ -13,12 +13,6 @@ export default function AboutPage() {
 
   return (
     <UnifiedPageShell className="py-8">
-      <UnifiedPageHeader
-        eyebrow="Company"
-        title="About Qunt Edge"
-        description="Built by a trader-engineer to transform raw trade history into actionable execution intelligence."
-      />
-
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="border-white/10 bg-black/40">
           <CardHeader>

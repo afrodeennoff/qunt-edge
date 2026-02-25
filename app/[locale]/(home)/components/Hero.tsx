@@ -98,11 +98,14 @@ export default function Hero() {
             </Card>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">
+          <motion.div variants={fadeUp} className="mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">
             <span>Tradovate</span>
             <span>Rithmic</span>
             <span>IBKR</span>
             <span>CQG</span>
+            <span className="font-medium tracking-[0.15em] text-[#ff4d1a]/70" aria-label="NinjaTrader">
+              NINJA<span className="mx-1 align-baseline text-[#ff4d1a]/80">|</span>TRADER
+            </span>
             <span>CSV Import</span>
           </motion.div>
 

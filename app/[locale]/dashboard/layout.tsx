@@ -6,6 +6,7 @@ import { DashboardSidebar } from "@/components/sidebar/dashboard-sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { DashboardProviders } from "@/components/providers/dashboard-providers";
 import { DashboardClientOverlays } from "./components/dashboard-client-overlays";
+import { MotionPage } from "@/components/motion/motion-primitives";
 
 export default async function DashboardLayout({
   children,
@@ -57,7 +58,9 @@ export default async function DashboardLayout({
             <div className="relative z-0 flex h-svh min-h-0 flex-col">
               <DashboardHeader />
               <main className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain pb-safe">
-                {children}
+                <MotionPage className="min-h-full">
+                  {children}
+                </MotionPage>
               </main>
             </div>
           </SidebarInset>

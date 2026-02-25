@@ -260,8 +260,15 @@
   html {
     margin: 0;
     padding: 0;
+    scroll-behavior: smooth;
     scrollbar-gutter: stable;
     -ms-overflow-style: scrollbar;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 
   * {

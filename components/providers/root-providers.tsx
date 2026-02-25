@@ -7,6 +7,8 @@ import { AuthTimeout } from "@/components/auth/auth-timeout";
 import { useEffect } from "react";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { usePathname } from "next/navigation";
+import { SmoothScrollProvider } from "@/components/motion/smooth-scroll-provider";
+import { GlobalMotionEffects } from "@/components/motion/global-motion-effects";
 
 export function RootProviders({
     children,
@@ -81,10 +83,13 @@ export function RootProviders({
         <QueryProvider>
             <TooltipProvider>
                 <ThemeProvider>
-                    <SidebarProvider defaultOpen={defaultOpen}>
-                        <AuthTimeout />
-                        {children}
-                    </SidebarProvider>
+                    <SmoothScrollProvider>
+                        <GlobalMotionEffects />
+                        <SidebarProvider defaultOpen={defaultOpen}>
+                            <AuthTimeout />
+                            {children}
+                        </SidebarProvider>
+                    </SmoothScrollProvider>
                 </ThemeProvider>
             </TooltipProvider>
         </QueryProvider>

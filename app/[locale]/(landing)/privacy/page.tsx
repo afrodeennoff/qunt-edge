@@ -1,14 +1,8 @@
-import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
+import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
 
 export default function PrivacyPolicy() {
   return (
     <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
-      <UnifiedPageHeader
-        eyebrow="Legal"
-        title="Privacy Policy"
-        description="How we collect, use, and protect your account and trading data."
-      />
-
       <UnifiedSurface className="space-y-8 text-fg-muted">
         <section className="space-y-3">
           <h2 className="text-2xl font-semibold text-fg-primary">1. Introduction</h2>
