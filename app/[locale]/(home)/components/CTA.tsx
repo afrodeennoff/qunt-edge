@@ -26,7 +26,7 @@ export default function CTA() {
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link
             href={`/${locale}/authentication?next=dashboard`}
-            className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-full bg-[hsl(var(--brand-primary))] px-9 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))] [font-family:var(--home-copy)]"
+            className="inline-flex h-12 min-w-[230px] items-center justify-center rounded-2xl bg-[hsl(var(--brand-primary))] px-9 text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--brand-ink))] transition-all duration-300 hover:bg-[hsl(var(--brand-primary-strong))] [font-family:var(--home-copy)]"
           >
             Start My Performance Audit
           </Link>

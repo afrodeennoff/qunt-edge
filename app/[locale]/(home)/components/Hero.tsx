@@ -29,10 +29,10 @@ export default function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])
 
   return (
-    <section ref={ref} className="relative overflow-hidden px-4 pb-14 pt-28 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8">
+    <section ref={ref} className="relative overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8">
       <motion.div style={shouldAnimate ? { opacity } : undefined} className="pointer-events-none absolute inset-0">
-        <div className={cn("absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]", isMobile && "bg-[size:34px_34px]")} />
-        <div className={cn("absolute left-1/2 top-[-180px] h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary/20 blur-[90px]", isMobile && "top-[-120px] h-[300px] w-[300px] blur-[64px]")} />
+        <div className={cn("absolute inset-0 bg-grid-white/[0.02] bg-[size:48px_48px]", isMobile && "bg-[size:34px_34px]")} />
+        <div className="absolute inset-x-8 top-6 h-px bg-white/10 sm:inset-x-12" />
       </motion.div>
 
       <div className="relative z-10 mx-auto max-w-6xl">
@@ -50,7 +50,7 @@ export default function Hero() {
 
           <motion.h1
             variants={fadeUp}
-            className="mx-auto max-w-5xl text-center text-[clamp(2.45rem,10.2vw,7rem)] font-semibold leading-[0.92] tracking-[-0.03em] [font-family:var(--home-display)]"
+            className="mx-auto max-w-4xl text-center text-[clamp(2.55rem,10.2vw,6.6rem)] font-semibold leading-[0.92] tracking-[-0.032em] [font-family:var(--home-display)]"
           >
             Trade like the benchmark.
             <span className="mt-2 block text-[hsl(var(--brand-primary))]">
@@ -64,12 +64,12 @@ export default function Hero() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
-            <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-full text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg shadow-primary/25 sm:min-w-[200px] sm:w-auto [font-family:var(--home-copy)]">
+            <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-2xl text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg shadow-primary/20 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
               <Link href={`/${locale}/authentication?next=dashboard`}>
                 Start My Performance Audit
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-full border-white/10 bg-white/5 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm hover:bg-white/10 sm:min-w-[200px] sm:w-auto [font-family:var(--home-copy)]">
+            <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-2xl border-white/12 bg-black/40 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm hover:bg-black/60 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
               <Link href={`/${locale}/#pricing`}>
                 Compare Plans
                 <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -78,18 +78,18 @@ export default function Hero() {
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-16">
-            <Card className="border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
-              <CardContent className="p-6 sm:p-8">
-                <div className="grid gap-6 sm:grid-cols-3">
-                  <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+            <Card className="border-white/12 bg-black/45 shadow-xl backdrop-blur-md">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Session Grade Confidence</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">94%</p>
                   </div>
-                  <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Rule Adherence Uplift</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-fg-primary [font-family:var(--home-display)]">+37%</p>
                   </div>
-                  <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Impulse Trades Reduced</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-primary [font-family:var(--home-display)]">-42%</p>
                   </div>

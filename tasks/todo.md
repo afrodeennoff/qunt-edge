@@ -29,6 +29,9 @@
 - 2026-02-25: Rewrote homepage messaging for stronger trader-identity positioning across hero, problem framing, features, proof, and CTA sections.
 - 2026-02-25: Removed remaining homepage gradient text/overlay treatments from `Hero` and `HomeContent` for stricter no-gradient consistency.
 - 2026-02-25: Verification rerun after homepage rewrite: `npm run typecheck` fails with the same pre-existing `tests/performance/rendering-performance.test.tsx` issues.
+- 2026-02-25: Updated About page founder copy to direct personal profile messaging ("THE TRADER BEHIND TIMON|") with the user-provided text.
+- 2026-02-25: Refined home page design system for stronger premium cohesion: hero surface polish, section rhythm improvements, pricing cards modernization, and comparison/CTA visual consistency.
+- 2026-02-25: Targeted verification passed: `npx eslint` on touched home components exited `0`.
 
 ## Completion Notes
 - Unified no-gradient redesign applied across requested routes; remaining verification blocker is pre-existing test typing failures.
@@ -218,6 +221,44 @@
   - `app/[locale]/dashboard/components/charts/weekday-pnl.tsx`
   - `app/[locale]/dashboard/components/charts/tick-distribution.tsx`
   - `app/[locale]/dashboard/components/charts/pnl-time-bar-chart.tsx`
+
+---
+
+# GitHub Actions Failure Triage Todo
+
+## Scope
+- Inspect currently failing GitHub Actions checks and identify actionable root cause.
+- Provide a focused fix plan only (no implementation yet).
+
+## Acceptance Criteria
+- [x] Latest failing GitHub Actions runs identified with run/job links.
+- [x] Failed step(s) isolated to concrete workflow step names.
+- [x] Root-cause hypothesis stated with confidence and evidence limits.
+- [x] Focused fix plan proposed for approval.
+
+## Plan Checklist
+- [x] Verify GitHub CLI access/auth context.
+- [x] Collect failing workflow runs and failed jobs.
+- [x] Map failures to workflow YAML and pinpoint failing steps.
+- [x] Draft remediation plan with validation steps.
+
+## Current Step
+- **Completed:** Investigation complete; fix plan pending user approval.
+
+## Progress Notes
+- 2026-02-25: `gh` CLI unavailable in this environment (`command not found`), so triage used GitHub REST API endpoints.
+- 2026-02-25: No open PR found for local branch `codex/backend-full-hardening`; investigation focused on latest failing repository workflow runs.
+- 2026-02-25: Latest failures on `main` are:
+  - CI run `22307725077` (`validate` job).
+  - Widget Policy Compliance run `22307725110` (`Validate JSON Schemas` and downstream reporting jobs).
+- 2026-02-25: Failed steps for both primary failing jobs are `Install Dependencies` / `Install dependencies` (`npm ci` path).
+- 2026-02-25: Full action logs endpoint requires authenticated access (HTTP `403`) in current environment, so exact npm error line is unavailable here.
+
+## Completion Notes
+- High-confidence root cause: dependency installation failure at `npm ci` in both workflows, likely lockfile/dependency graph drift (consistent with prior lockfile-sync failure pattern already documented in this repo).
+- Verification evidence:
+  - `GET /actions/runs/<id>/jobs` shows failed jobs and failed install step names.
+  - Workflow files confirm `npm ci` at those step locations.
   - `app/[locale]/dashboard/components/charts/daily-tick-target.tsx`
   - `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`
   - `app/[locale]/dashboard/components/charts/contract-quantity.tsx`

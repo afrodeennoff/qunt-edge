@@ -35,19 +35,14 @@ export default function AboutPage() {
 
         <Card className="border-white/10 bg-black/40">
           <CardHeader>
-            <CardTitle className="text-2xl">The Founder&apos;s Story</CardTitle>
+            <CardTitle className="text-2xl">THE TRADER BEHIND TIMON|</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
-              With over 5 years of trading experience, our founder has mastered order book trading with a specific 
-              focus on volume profile. Combining a strong background in engineering, computer science, and financial 
-              markets, along with a master&apos;s degree in quantitative finance, he identified a gap in the market for 
-              a tool that could truly help traders understand and improve their performance.
+            <p className="mb-4 text-muted-foreground">
+              I&apos;m Timon - a futures trader and trading educator. After years of studying price action, market behavior, and trading psychology, I developed a structured approach focused on clarity, simplicity, and consistent execution.
             </p>
             <p className="text-muted-foreground">
-              This unique blend of skills and experience led to the creation of Qunt Edge - a platform that 
-              reflects the needs of serious traders looking to gain deeper insights into their trading patterns 
-              and performance.
+              This method is built to help traders avoid common mistakes, reduce noise, and progress with better decision-making and discipline. The focus is straightforward: strategy, execution, and mindset. No distractions. Just a process designed to support steady improvement over time.
             </p>
           </CardContent>
         </Card>

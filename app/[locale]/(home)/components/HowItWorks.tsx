@@ -23,6 +23,7 @@ export default function HowItWorks() {
         </div>
 
         <div className="relative grid gap-4 md:grid-cols-5">
+          <div className="pointer-events-none absolute left-[10%] right-[10%] top-6 hidden h-px bg-white/10 md:block" />
           {steps.map((step, i) => (
             <motion.article
               key={step.name}
@@ -30,7 +31,7 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.07, duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-              className="marketing-panel rounded-2xl p-5 text-center"
+              className="marketing-panel relative rounded-2xl p-5 text-center"
             >
               <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.8)] text-sm font-semibold text-[hsl(var(--brand-primary))] [font-family:var(--home-display)]">
                 0{i + 1}
