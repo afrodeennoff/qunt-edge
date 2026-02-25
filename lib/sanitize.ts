@@ -15,7 +15,10 @@ export function sanitizeHtml(html: string): string {
   if (!html) return ''
 
   if (typeof window === 'undefined') {
-    return html;
+    return html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, '')
+      .replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, '')
   }
 
   return DOMPurify.sanitize(html, {

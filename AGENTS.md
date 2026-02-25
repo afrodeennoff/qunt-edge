@@ -1892,3 +1892,45 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Added required `binaryTargets` to `prisma/schema.prisma` for Linux container compatibility.
 - **Key Files:** `components/ui/unified-sidebar.tsx`, `components/sidebar/dashboard-sidebar.tsx`, `package.json`, `nixpacks.toml`, `prisma/schema.prisma`, `AGENTS.md`
 - **Verification:** Successfully pushed to `main` after resolving merge conflicts. Build process verified via nixpacks syntax check.
+
+### 2026-02-25: Full Backend Hardening + Quality Remediation (P0-P3)
+- **What changed:** Completed the backend hardening plan across schema integrity, secure access controls, distributed rate-limiting, ingestion bounds, performance query paths, dependency remediation, and CI confidence fixes.
+- **What I want:** Ensure tenant-safe writes, enforce share/referral correctness under concurrency, reduce sensitive exposure and query overhead, and keep backend verification deterministic.
+- **What I don't want:** Cross-tenant overwrite risk, public/expired shared-link leakage, referral race duplicates, in-memory-only rate limiting in production, expensive N+1 admin queries, and flaky backend verification.
+- **How we fixed that:**
+  - **Data integrity + schema**
+    - Updated `Order` uniqueness from global `orderId` to scoped composite `@@unique([userId, orderId])`.
+    - Added `ReferralRedemption` relational model and removed array-based referral tracking.
+    - Added `TraderBenchmarkSnapshot` model for snapshot-first benchmark serving.
+    - Added migration `20260225170000_backend_hardening_core` with referral backfill and constraint transitions.
+  - **P0/P1 security-hardening**
+    - Enforced shared-read access guard (`isPublic` and non-expired) in shared data fetch path used by page + opengraph.
+    - Replaced weak slug generation with crypto-safe helper `createSecureSlug(...)` in shared/referral services.
+    - Hardened referral apply flow with transactional uniqueness semantics (`referredUserId` unique + `(referralId,referredUserId)` unique) and idempotent conflict handling.
+    - Hardened `/api/health` default response to public-safe minimal shape; detailed diagnostics require service auth or explicit public override.
+    - Confirmed distributed-capable limiter in `lib/rate-limit.ts` (Upstash production path + trusted IP extraction + memory fallback).
+  - **P2 performance/reliability**
+    - Removed admin subscription N+1 aggregate loop by batching transaction/invoice/refund groupBy queries by `userId`.
+    - Refactored benchmark endpoint to serve fresh `TraderBenchmarkSnapshot` first, recomputing/upserting only when stale/missing.
+    - Added strict ETP/THOR ingestion bounds: payload-size guards, max items, payload normalization, and pagination clamping.
+    - Fixed ETP upsert key to `userId_orderId` to prevent cross-tenant overwrites.
+  - **P3 quality/remediation**
+    - Stabilized AI route typing for `streamText` tool contracts while preserving tool guards.
+    - Fixed server-action export violations by moving shared visibility helper to `lib/security/shared-access.ts` and removing `use server` from referral service module used by API routes.
+    - Added/updated regression tests:
+      - `tests/api/etp-store-route.test.ts`
+      - `tests/server/shared-access.test.ts`
+      - updated `tests/performance/rendering-performance.test.tsx` for deterministic `requestAnimationFrame` behavior.
+    - Addressed baseline failing test contracts (`sanitize` SSR fallback and sidebar trigger contract) to restore CI test pass.
+  - **Dependency remediation**
+    - Upgraded direct deps: `ajv` and `jspdf`.
+    - Added minimatch overrides and lockfile refresh.
+    - Installed missing csstools parser/tokenizer packages required by current dependency graph.
+    - Residual audit findings remain transitive via Prisma tooling path and `markdown-it` (non-dev audit still reports moderate vulnerabilities).
+- **Key Files:** `prisma/schema.prisma`, `prisma/migrations/20260225170000_backend_hardening_core/migration.sql`, `app/api/etp/v1/store/route.ts`, `app/api/thor/store/route.ts`, `app/api/health/route.ts`, `app/api/admin/subscriptions/route.ts`, `app/api/trader-profile/benchmark/route.ts`, `server/referral.ts`, `server/shared.ts`, `lib/security/slug.ts`, `lib/security/shared-access.ts`, `tests/api/etp-store-route.test.ts`, `tests/server/shared-access.test.ts`, `package.json`, `package-lock.json`, `tasks/todo.md`, `tasks/lessons.md`, `AGENTS.md`
+- **Verification:**
+  - `npm run typecheck` -> exits `0`.
+  - `npm run lint -- app/api server lib` -> exits `0` with warnings only (`0` errors).
+  - `npm test` -> exits `0` (`145 passed`, `46 skipped`).
+  - `npm run build` -> exits `0`.
+  - `npm audit --omit=dev` -> fails with residual moderate transitive findings (Prisma toolchain + `markdown-it`), no safe non-breaking direct fix available in current lockstep.

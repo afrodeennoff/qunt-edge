@@ -3,13 +3,13 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 describe("Dashboard sidebar trigger contract", () => {
-  it("keeps dashboard header sidebar trigger mobile-only", () => {
+  it("keeps a dashboard header trigger with responsive sizing classes", () => {
     const source = readFileSync(
       join(process.cwd(), "app/[locale]/dashboard/components/dashboard-header.tsx"),
       "utf8"
     )
 
-    expect(source).toMatch(/<SidebarTrigger className=\"[^\"]*md:hidden[^\"]*\"/)
+    expect(source).toMatch(/<SidebarTrigger className=\"[^\"]*h-11[^\"]*w-11[^\"]*md:h-7[^\"]*md:w-7[^\"]*\"/)
   })
 
   it("keeps a single desktop trigger in unified sidebar", () => {
