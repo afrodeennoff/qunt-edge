@@ -32,6 +32,7 @@
 - 2026-02-25: Updated About page founder copy to direct personal profile messaging ("THE TRADER BEHIND TIMON|") with the user-provided text.
 - 2026-02-25: Refined home page design system for stronger premium cohesion: hero surface polish, section rhythm improvements, pricing cards modernization, and comparison/CTA visual consistency.
 - 2026-02-25: Targeted verification passed: `npx eslint` on touched home components exited `0`.
+- 2026-02-25: Removed duplicate standalone Behavior page header and kept in-card `Behavior AI Hub` header for consistent hierarchy.
 
 ## Completion Notes
 - Unified no-gradient redesign applied across requested routes; remaining verification blocker is pre-existing test typing failures.

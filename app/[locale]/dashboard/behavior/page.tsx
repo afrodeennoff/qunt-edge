@@ -22,7 +22,7 @@ import { MindsetWidget } from "../components/mindset/mindset-widget"
 import { AnalysisOverview } from "../components/analysis/analysis-overview"
 import ChatWidget from "../components/chat/chat"
 import type { BehaviorInsights } from "@/lib/behavior-insights"
-import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
+import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 export default function DashboardBehaviorPage() {
   const t = useI18n()
@@ -145,11 +145,6 @@ export default function DashboardBehaviorPage() {
 
   return (
     <UnifiedPageShell className="py-4 sm:py-6">
-      <UnifiedPageHeader
-        eyebrow="Dashboard"
-        title="Behavior AI Hub"
-        description={t("analysis.description")}
-      />
       <Card className="rounded-3xl border border-white/12 bg-black/45 shadow-sm backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
