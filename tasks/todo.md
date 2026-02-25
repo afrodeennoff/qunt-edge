@@ -1,3 +1,34 @@
+# End-to-End Reliability Audit + Fix Pass (Buttons/Flows)
+
+## Scope
+- Audit the app end to end for broken behavior (buttons, critical routes, runtime regressions).
+- Fix defects found during verification and re-run gates.
+
+## Acceptance Criteria
+- [ ] Core quality gates pass (`typecheck`, `test`, `build`).
+- [ ] Representative runtime/UI flow checks execute for key routes and interactions.
+- [ ] Any discovered defects are fixed and re-verified.
+- [ ] Findings, residual risk, and verification evidence are documented.
+
+## Plan Checklist
+- [x] Review existing lessons, scripts, and current repo context.
+- [ ] Run core verification gates and collect failures.
+- [ ] Execute runtime/UI interaction audit for critical user flows.
+- [ ] Fix discovered issues with minimal, scoped changes.
+- [ ] Re-run verification and document final evidence.
+
+## Current Step
+- **In Progress:** Run core verification gates and collect failures.
+
+## Progress Notes
+- 2026-02-25: Started user-requested end-to-end reliability audit with evidence-first workflow.
+- 2026-02-25: Loaded relevant skills: `playwright` (UI-flow audit) and `verification-before-completion` (fresh verification before claims).
+
+## Completion Notes
+- Pending.
+
+---
+
 # Route Redesign Todo (No-Gradient Unified Look)
 
 ---
