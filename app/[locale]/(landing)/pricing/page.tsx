@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import PricingPlans from "@/components/pricing-plans";
 import { useI18n } from "@/locales/client";
 import { getReferralCode } from "@/lib/referral-storage";
+import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell";
 
 export default function PricingPage() {
   const t = useI18n();
@@ -13,18 +14,15 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <div>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
-        <h1 className="text-4xl font-bold text-center mb-4">
-          {t("pricing.heading")}
-        </h1>
-        <p className="text-xl text-center text-gray-600 mb-12">
-          {t("pricing.subheading")}
-        </p>
-
+    <UnifiedPageShell className="py-12 sm:py-16">
+      <UnifiedPageHeader
+        eyebrow="Plans"
+        title={t("pricing.heading")}
+        description={t("pricing.subheading")}
+      />
+      <UnifiedSurface>
         <PricingPlans />
-      </main>
-
-    </div>
+      </UnifiedSurface>
+    </UnifiedPageShell>
   );
 }

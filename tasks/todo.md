@@ -1,39 +1,59 @@
-# Publication Readiness Audit Todo
+# Route Redesign Todo (No-Gradient Unified Look)
 
 ## Scope
-- Conduct comprehensive end-to-end audit across frontend, backend, database, API security, authz/authn, logging, dependencies, infra, and performance.
-- Collect evidence-backed findings with severity ratings, root cause, remediation steps, and launch recommendation.
+- Redesign requested routes to use one cohesive monochrome visual language aligned with the current site.
+- Remove gradient-driven visuals from those routes and shared landing shell.
 
 ## Acceptance Criteria
-- [x] Findings include severity, impacted area/files, root cause, remediation, and verification approach.
-- [x] Verification commands executed and results documented.
-- [x] Pre-launch checklist status mapped as pass/fail/partial with blockers.
-- [x] Final go/no-go recommendation delivered with rationale.
+- [ ] All requested routes share consistent page shell/header/surface treatment.
+- [ ] Explicit gradient usage is removed from requested routes and landing shell.
+- [ ] Dashboard route functionality remains intact (no behavior regressions).
+- [ ] Verification command(s) run and results recorded.
 
 ## Plan Checklist
-- [x] Create task artifacts (`tasks/todo.md`, `tasks/lessons.md`)
-- [x] Collect baseline project signals (scripts, routes, security-related files)
-- [x] Run automated checks (typecheck, tests, lint/build where feasible)
-- [x] Run dependency vulnerability scan (blocked by offline registry)
-- [x] Run static security sweeps (auth bypass, injection sinks, secret exposure, CSP/header posture)
-- [x] Review frontend architecture risks (rerender/memory/error-boundary/input handling)
-- [x] Review backend/API/auth/database/infra risks
-- [x] Draft prioritized remediation plan with estimates
-- [x] Produce final report and go/no-go recommendation
+- [x] Audit requested routes and map each to source files.
+- [ ] Implement shared no-gradient unified page components/utilities.
+- [ ] Refactor requested routes to use unified shell styles.
+- [ ] Run verification and record outcomes.
 
 ## Current Step
-- **Completed:** Audit and reporting complete.
+- **In Progress:** Implement shared no-gradient unified page components/utilities.
 
 ## Progress Notes
-- 2026-02-22: Initialized audit artifacts and baseline repository inventory.
-- 2026-02-22: Executed verification checks (`typecheck`, `test`, `lint`, `build`, route budgets, bundle analysis).
-- 2026-02-22: Identified Critical/High blockers (secrets in tracked env files, no-op auth guard, non-enforced CSP default, broken compliance CI workflow references).
-- 2026-02-22: Authored final artifacts:
-  - `docs/audits/publication-readiness-audit-2026-02-22.md`
-  - `docs/audits/publication-remediation-tracker-2026-02-22.md`
-  - `docs/audits/deployment-runbook-2026-02-22.md`
+- 2026-02-25: Mapped all requested routes to concrete page files in `app/[locale]/dashboard/*`, `app/[locale]/(landing)/*`, and `app/[locale]/teams/(landing)/page.tsx`.
+- 2026-02-25: Identified gradient sources: landing shell radial overlays and support-page Discord banner gradient block.
 
-## Final Review / Results
-- Staff-level review question: "Would this pass staff-engineer review for correctness, clarity, and maintainability?"
-  - Answer: Audit output is evidence-backed and actionable, with clear blockers and remediation sequence.
-- Final publication recommendation: **NO-GO** until all Critical + High findings are closed and re-verified.
+## Completion Notes
+- Pending.
+
+---
+
+# Deployment Hotfix Todo (Lockfile Sync for `npm ci`)
+
+## Scope
+- Resolve deployment failure where Nixpacks `npm ci` exits with lockfile sync errors.
+- Keep change scoped to dependency lockfile integrity and verification evidence.
+
+## Acceptance Criteria
+- [x] Lockfile is synchronized with current dependency graph.
+- [x] Local `npm ci` completes successfully.
+- [x] Results are recorded with concrete command evidence.
+
+## Plan Checklist
+- [x] Reproduce/analyze failure signal from deploy logs.
+- [x] Regenerate lockfile metadata without changing declared dependencies.
+- [x] Re-run `npm ci` to verify deploy parity.
+
+## Current Step
+- Completed.
+
+## Progress Notes
+- 2026-02-25: Confirmed deploy error signature: `npm ci` reported lockfile desync and missing entries for `@csstools/css-parser-algorithms` and `@csstools/css-tokenizer`.
+- 2026-02-25: Ran `npm install --package-lock-only --ignore-scripts` to resynchronize `package-lock.json`.
+- 2026-02-25: Verified with `npm ci` (including `postinstall` Prisma generation) and observed exit code `0`.
+
+## Completion Notes
+- Changed file: `package-lock.json` (lockfile metadata sync only).
+- Verification evidence:
+  - `npm install --package-lock-only --ignore-scripts` -> success.
+  - `npm ci` -> success (`added 1468 packages`, `prisma generate` completed).

@@ -59,6 +59,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { LinkedAccounts } from "@/components/linked-accounts"
+import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 type Locale = 'en' | 'fr'
 
@@ -153,11 +154,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-8 lg:px-6">
-      <div className="mb-8 rounded-3xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
-        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.settings')}</h1>
-        <p className="text-muted-foreground mt-2">{t('dashboard.settings.description')}</p>
-      </div>
+    <UnifiedPageShell className="py-4 sm:py-6">
+      <UnifiedPageHeader
+        eyebrow="Dashboard"
+        title={t('dashboard.settings')}
+        description={t('dashboard.settings.description')}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Profile Section */}
@@ -642,6 +644,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </UnifiedPageShell>
   )
 }

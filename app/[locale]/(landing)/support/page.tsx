@@ -52,6 +52,7 @@ import { DefaultChatTransport, ToolUIPart, UIMessage } from 'ai';
 import { ClipboardCheckIcon } from '@/components/animated-icons/clipboard-check';
 import SupportForm from './components/support-form';
 import { toast } from 'sonner';
+import { UnifiedPageHeader, UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
 type askForEmailFormToolInput = {
   summary: string;
 };
@@ -167,21 +168,26 @@ const ChatBotDemo = () => {
     (part) => part.type === 'tool-askForEmailForm',
   ) as askForEmailFormToolUIPart | undefined;
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full h-[calc(100vh-64px)]">
-      <div className="flex flex-col h-full">
+    <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
+      <UnifiedPageHeader
+        eyebrow="Support"
+        title="Qunt Edge Support Assistant"
+        description={t('support.description')}
+      />
+      <UnifiedSurface className="flex h-[calc(100vh-220px)] min-h-[680px] flex-col">
         {/* Discord Community Section */}
         <a
           href={process.env.NEXT_PUBLIC_DISCORD_INVITATION || '#'}
           target="_blank"
           rel="noreferrer"
-          className="mb-6 p-4 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 transition-colors duration-150 cursor-pointer block group"
+          className="mb-6 block cursor-pointer rounded-xl border border-white/10 bg-black/35 p-4 transition-colors duration-150 hover:border-white/20 hover:bg-black/50 group"
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-1">
+              <h3 className="mb-1 text-lg font-semibold text-fg-primary">
                 {t('support.joinDiscord')}
               </h3>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="text-sm text-fg-muted">
                 {t('support.discordDescription')}
               </p>
             </div>
@@ -397,8 +403,8 @@ const ChatBotDemo = () => {
             <PromptInputSubmit disabled={!input && !status} status={status} />
           </PromptInputToolbar>
         </PromptInput>
-      </div>
-    </div>
+      </UnifiedSurface>
+    </UnifiedPageShell>
   );
 };
 

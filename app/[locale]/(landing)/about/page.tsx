@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, Code, LineChart, GraduationCap } from "lucide-react"
+import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 export default function AboutPage() {
   const founderSkills = [
@@ -11,11 +12,15 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="px-4 py-12 bg-background text-foreground">
-      <h1 className="text-4xl font-bold text-center mb-8">About Qunt Edge</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="bg-card">
+    <UnifiedPageShell className="py-8">
+      <UnifiedPageHeader
+        eyebrow="Company"
+        title="About Qunt Edge"
+        description="Built by a trader-engineer to transform raw trade history into actionable execution intelligence."
+      />
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card className="border-white/10 bg-black/40">
           <CardHeader>
             <CardTitle className="text-2xl">Our Mission</CardTitle>
           </CardHeader>
@@ -28,7 +33,7 @@ export default function AboutPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="border-white/10 bg-black/40">
           <CardHeader>
             <CardTitle className="text-2xl">The Founder&apos;s Story</CardTitle>
           </CardHeader>
@@ -47,14 +52,14 @@ export default function AboutPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card md:col-span-2">
+        <Card className="border-white/10 bg-black/40 md:col-span-2">
           <CardHeader>
             <CardTitle className="text-2xl">Founder&apos;s Expertise</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {founderSkills.map((skill, index) => (
-                <Badge key={index} variant="secondary" className="text-sm py-1 px-2 flex items-center gap-1">
+                <Badge key={index} variant="secondary" className="border-white/15 bg-white/10 text-sm py-1 px-2 flex items-center gap-1">
                   {skill.icon}
                   {skill.name}
                 </Badge>
@@ -63,7 +68,7 @@ export default function AboutPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card md:col-span-2">
+        <Card className="border-white/10 bg-black/40 md:col-span-2">
           <CardHeader>
             <CardTitle className="text-2xl">Why Qunt Edge?</CardTitle>
           </CardHeader>
@@ -78,6 +83,6 @@ export default function AboutPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </UnifiedPageShell>
   )
 }

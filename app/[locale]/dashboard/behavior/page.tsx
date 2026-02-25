@@ -22,6 +22,7 @@ import { MindsetWidget } from "../components/mindset/mindset-widget"
 import { AnalysisOverview } from "../components/analysis/analysis-overview"
 import ChatWidget from "../components/chat/chat"
 import type { BehaviorInsights } from "@/lib/behavior-insights"
+import { UnifiedPageHeader, UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 export default function DashboardBehaviorPage() {
   const t = useI18n()
@@ -143,8 +144,13 @@ export default function DashboardBehaviorPage() {
   const recommendationList = insights?.recommendations ?? []
 
   return (
-    <div className="w-full space-y-6 p-3 sm:p-4 lg:p-6">
-      <Card className="rounded-3xl border border-border/60 bg-card/75 shadow-sm backdrop-blur-sm">
+    <UnifiedPageShell className="py-4 sm:py-6">
+      <UnifiedPageHeader
+        eyebrow="Dashboard"
+        title="Behavior AI Hub"
+        description={t("analysis.description")}
+      />
+      <Card className="rounded-3xl border border-white/10 bg-black/40 shadow-sm backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-2">
@@ -270,7 +276,7 @@ export default function DashboardBehaviorPage() {
       </Card>
 
       <Tabs defaultValue="insights" className="space-y-4">
-        <TabsList className="h-auto rounded-2xl border border-border/70 bg-card/70 p-1">
+        <TabsList className="h-auto rounded-2xl border border-white/10 bg-black/40 p-1">
           <TabsTrigger value="insights">Insights</TabsTrigger>
           <TabsTrigger value="workspace">Workspace</TabsTrigger>
         </TabsList>
@@ -443,6 +449,6 @@ export default function DashboardBehaviorPage() {
           </section>
         </TabsContent>
       </Tabs>
-    </div>
+    </UnifiedPageShell>
   )
 }
