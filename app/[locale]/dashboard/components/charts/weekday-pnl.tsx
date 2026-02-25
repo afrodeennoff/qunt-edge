@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -47,7 +47,8 @@ const chartConfig = {
 export default function WeekdayPNLChart({
   size = "medium",
 }: WeekdayPNLChartProps) {
-  const { calendarData, weekdayFilter, setWeekdayFilter } = useData();
+  const { calendarData } = useDashboardStats();
+  const { weekdayFilter, setWeekdayFilter } = useDashboardFilters();
   const [darkMode, setDarkMode] = React.useState(false);
   const [activeDay, setActiveDay] = React.useState<number | null>(null);
   const t = useI18n();

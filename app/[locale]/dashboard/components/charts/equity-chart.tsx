@@ -43,7 +43,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Info } from "lucide-react";
 
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats, useDashboardTrades } from "@/context/data-provider";
 import { useI18n } from "@/locales/client";
 import { useCurrentLocale } from "@/locales/client";
 import { useUserStore } from "@/store/user-store";
@@ -574,9 +574,9 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     weekdayFilter,
     hourFilter,
     tagFilter,
-    isSharedView,
-    formattedTrades,
-  } = useData();
+  } = useDashboardFilters();
+  const { isSharedView } = useDashboardTrades();
+  const { formattedTrades } = useDashboardStats();
   const accounts = useUserStore((state) => state.accounts);
   const timezone = useUserStore((state) => state.timezone);
   const {
@@ -629,16 +629,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       ) || [];
 
     if (validSelection.length === 0) {
-      console.log(
-        "[EquityChart] Resetting account selection to all available accounts"
-      );
       setSelectedAccountsToDisplay(availableAccountNumbers);
     } else if (
       validSelection.length !== config.selectedAccountsToDisplay?.length
     ) {
-      console.log(
-        "[EquityChart] Updating account selection to remove invalid accounts"
-      );
       setSelectedAccountsToDisplay(validSelection);
     }
   }, [
@@ -659,25 +653,13 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
 
   const computeClientSideData = React.useCallback(() => {
     if (!formattedTrades || formattedTrades.length === 0) {
-      console.log("[EquityChart] No formatted trades available");
       return {
         chartData: [],
         accountNumbers: [],
       };
     }
 
-    console.log(
-      "[EquityChart] Computing client-side data for",
-      formattedTrades.length,
-      "trades"
-    );
-
-    const sortedTrades = [...formattedTrades].sort(
-      (a, b) =>
-        new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
-    );
-
-    const dates = sortedTrades.map((t) =>
+    const dates = formattedTrades.map((t) =>
       formatInTimeZone(new Date(t.entryDate), timezone, "yyyy-MM-dd")
     );
     const startDate = dates.reduce((min, date) => (date < min ? date : min));
@@ -689,8 +671,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
 
     const allDates = eachDayOfInterval({ start, end });
 
-    const tradesMap = new Map<string, typeof sortedTrades>();
-    sortedTrades.forEach((trade) => {
+    const tradesMap = new Map<string, typeof formattedTrades>();
+    formattedTrades.forEach((trade) => {
       const dateKey = formatInTimeZone(
         new Date(trade.entryDate),
         timezone,
@@ -720,15 +702,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     });
 
     const uniqueAccountNumbers = Array.from(
-      new Set(sortedTrades.map((trade) => trade.accountNumber))
+      new Set(formattedTrades.map((trade) => trade.accountNumber))
     );
-
-    console.log(
-      "[EquityChart] Computed chart data:",
-      chartData.length,
-      "points"
-    );
-    console.log("[EquityChart] Sample data:", chartData.slice(0, 3));
 
     return {
       chartData,
@@ -740,16 +715,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
 
     if (isSharedView || isTeamView || isMock) {
-      console.log("[EquityChart] Using client-side computation (shared/team view or mock data)");
       setIsLoading(true);
       try {
         const { chartData: computedData, accountNumbers: accNumbers } =
           computeClientSideData();
-        console.log(
-          "[EquityChart] Setting chart data:",
-          computedData.length,
-          "points"
-        );
         setChartData(computedData);
         setAvailableAccountNumbers(accNumbers);
       } catch (error) {
@@ -765,7 +734,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return;
     }
 
-    console.log("[EquityChart] Fetching server-side data");
     const fetchChartData = async () => {
       setIsLoading(true);
       try {
@@ -890,16 +858,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     });
   }, [selectedAccounts, showIndividual, accountColorMap, isSharedView]);
   const hasData = chartData.length > 0;
-
-  React.useEffect(() => {
-    console.log("[EquityChart Render] isSharedView:", isSharedView);
-    console.log("[EquityChart Render] showIndividual:", showIndividual);
-    console.log("[EquityChart Render] chartData length:", chartData.length);
-    console.log(
-      "[EquityChart Render] First 3 data points:",
-      chartData.slice(0, 3)
-    );
-  }, [isSharedView, showIndividual, chartData]);
 
   return (
     <ChartSurface>

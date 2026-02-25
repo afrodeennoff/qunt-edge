@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -47,7 +47,8 @@ const formatCurrency = (value: number) =>
 export default function TimeOfDayTradeChart({
   size = "medium",
 }: TimeOfDayTradeChartProps) {
-  const { formattedTrades: trades, hourFilter, setHourFilter } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
+  const { hourFilter, setHourFilter } = useDashboardFilters();
   const timezone = useUserStore((state) => state.timezone);
   const [activeHour, setActiveHour] = React.useState<number | null>(null);
   const t = useI18n();

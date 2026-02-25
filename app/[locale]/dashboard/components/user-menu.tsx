@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useI18n, useChangeLocale, useCurrentLocale } from '@/locales/client'
 import { useTheme } from '@/context/theme-provider'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import { useUserStore } from '@/store/user-store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -61,7 +61,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
   const changeLocale = useChangeLocale()
   const currentLocale = useCurrentLocale()
   const { theme, setTheme, intensity, setIntensity } = useTheme()
-  const { refreshAllData } = useData()
+  const { refreshAllData } = useDashboardActions()
   const user = useUserStore(state => state.supabaseUser)
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
@@ -291,5 +291,4 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
     </div>
   )
 }
-
 

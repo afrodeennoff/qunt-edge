@@ -18,7 +18,7 @@ import { FilterCommandMenu } from './filters/filter-command-menu'
 import { useDashboard } from '../dashboard-context'
 import { AddWidgetSheet } from './add-widget-sheet'
 import { ShareButton } from './share-button'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions, useDashboardTrades } from '@/context/data-provider'
 import { cn } from '@/lib/utils'
 import { DailySummaryModal } from './daily-summary-modal'
 import { SidebarTrigger } from '@/components/ui/sidebar'
@@ -33,7 +33,8 @@ export default function Navbar() {
     autoSaveStatus,
     flushPendingSaves
   } = useDashboard()
-  const { refreshAllData, isPlusUser, isLoading } = useData()
+  const { refreshAllData, isPlusUser } = useDashboardActions()
+  const { isLoading } = useDashboardTrades()
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleRefresh = async () => {

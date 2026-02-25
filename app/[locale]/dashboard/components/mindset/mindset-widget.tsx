@@ -54,10 +54,12 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
   useEffect(() => {
     if (!api) return
 
-    // Handle carousel selection
-    api.on("select", () => {
+    const handleSelect = () => {
       setCurrent(api.selectedScrollSnap())
-    })
+    }
+
+    // Handle carousel selection
+    api.on("select", handleSelect)
 
     // Handle initial load and mood data
     if (moods) {
@@ -83,10 +85,7 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
         setJournalContent(mood?.journalContent ?? "")
         setIsEditing(true)
         api.scrollTo(1) // Summary is now index 1
-        return
-      }
-
-      if (mood) {
+      } else if (mood) {
         setEmotionValue(mood.emotionValue ?? 50)
         setSelectedNews(mood.selectedNews ?? [])
         setJournalContent(mood.journalContent ?? "")
@@ -97,6 +96,10 @@ export function MindsetWidget({ size }: MindsetWidgetProps) {
         setSelectedNews([])
         setJournalContent("")
       }
+    }
+
+    return () => {
+      api.off("select", handleSelect)
     }
   }, [api, selectedDate, moods])
 

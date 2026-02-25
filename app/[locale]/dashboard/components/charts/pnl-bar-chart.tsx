@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
@@ -108,7 +108,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
 };
 
 export default function PNLChart({ size = "medium" }: PNLChartProps) {
-  const { calendarData } = useData();
+  const { calendarData } = useDashboardStats();
   const t = useI18n();
   const locale = useCurrentLocale();
   const { timezone } = useUserStore();

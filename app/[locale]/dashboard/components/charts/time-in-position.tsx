@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -51,7 +51,7 @@ const formatTime = (minutes: number) => {
 export default function TimeInPositionChart({
   size = "medium",
 }: TimeInPositionChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const t = useI18n();
 
   const chartData = React.useMemo(() => {

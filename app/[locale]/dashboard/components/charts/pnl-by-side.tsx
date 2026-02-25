@@ -13,7 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -49,7 +49,7 @@ const formatWinRate = (wins: number, total: number) => {
 export default function PnLBySideChart({
   size = "medium",
 }: PnLBySideChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const [showAverage, setShowAverage] = React.useState(true);
   const t = useI18n();
 

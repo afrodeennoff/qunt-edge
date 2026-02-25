@@ -5,7 +5,7 @@ import { RefreshCw, CheckCircle2, AlertCircle, Clock, Settings2, ShieldCheck, Sh
 import { cn } from "@/lib/utils"
 import { useSyncContext } from "@/context/sync-context"
 import { useRithmicSyncStore } from "@/store/rithmic-sync-store"
-import { useData } from "@/context/data-provider"
+import { useDashboardActions } from "@/context/data-provider"
 import { toast } from "sonner"
 import { useScopedI18n } from "@/locales/client"
 import { getAllRithmicData } from "@/lib/rithmic-storage"
@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge"
 export function GlobalSyncButton() {
     const t = useScopedI18n('dashboard')
     const { rithmic, tradovate, manualSync } = useSyncContext()
-    const { refreshAllData } = useData()
+    const { refreshAllData } = useDashboardActions()
     const [isRefreshing, setIsRefreshing] = useState(false)
 
     // Rithmic state

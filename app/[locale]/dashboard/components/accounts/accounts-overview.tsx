@@ -42,7 +42,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { format, Locale } from "date-fns"
 import { cn, calculateTradingDays } from "@/lib/utils"
-import { useData } from "@/context/data-provider"
+import { useDashboardActions, useDashboardFilters } from "@/context/data-provider"
 import { getAccountStartDate } from "@/lib/account-metrics"
 import { useI18n } from "@/locales/client"
 import { AccountTable } from './account-table'
@@ -730,7 +730,8 @@ export function AccountsOverview({
   const isLoading = useUserStore(state => state.isLoading)
   const groups = useUserStore(state => state.groups)
   const accounts = useUserStore(state => state.accounts)
-  const { accountNumbers, setAccountNumbers, deletePayout, deleteAccount, saveAccount, savePayout } = useData()
+  const { accountNumbers, setAccountNumbers } = useDashboardFilters()
+  const { deletePayout, deleteAccount, saveAccount, savePayout } = useDashboardActions()
   const { getOrderedAccounts, reorderAccounts } = useAccountOrderStore()
   const t = useI18n()
   const params = useParams()

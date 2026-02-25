@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { useI18n } from "@/locales/client";
@@ -48,7 +48,7 @@ const chartConfig = {
 export default function ContractQuantityChart({
   size = "medium",
 }: ContractQuantityChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const t = useI18n();
 
   const chartData = React.useMemo(() => {

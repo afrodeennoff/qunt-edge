@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Minus, Maximize2, GripVertical } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions, useDashboardFilters, useDashboardStats, useDashboardTrades } from '@/context/data-provider'
 import { useI18n } from "@/locales/client"
 import { WIDGET_REGISTRY, getWidgetComponent } from '../config/widget-registry'
 import { useAutoScroll } from '../../../../hooks/use-auto-scroll'
@@ -157,7 +157,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
   currentType: WidgetType
 }) => {
   const t = useI18n()
-  const { isMobile } = useData()
+  const { isMobile } = useDashboardTrades()
   const uiV2Enabled = isUiV2Enabled()
   const widgetRef = useRef<HTMLDivElement>(null)
   const [isSizePopoverOpen, setIsSizePopoverOpen] = useState(false)
@@ -388,7 +388,10 @@ WidgetWrapper.displayName = "WidgetWrapper"
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
   const user = useUserStore(state => state.user)
-  const { saveDashboardLayout, trades, formattedTrades, instruments, accountNumbers, dateRange } = useData()
+  const { saveDashboardLayout } = useDashboardActions()
+  const { trades } = useDashboardTrades()
+  const { formattedTrades } = useDashboardStats()
+  const { instruments, accountNumbers, dateRange } = useDashboardFilters()
   const searchParams = useSearchParams()
   const {
     isCustomizing,
@@ -405,22 +408,17 @@ export default function WidgetCanvas() {
 
   // Move all memoized values up, out of conditional rendering paths
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), [])
+  const activeWidgets = useMemo(
+    () => (Array.isArray(layouts?.[activeLayout]) ? layouts[activeLayout] : []),
+    [layouts, activeLayout]
+  )
 
   const responsiveLayout = useMemo(() => {
     if (!layouts) return {}
-    return generateResponsiveLayout(layouts[activeLayout])
-  }, [layouts, activeLayout])
+    return generateResponsiveLayout(activeWidgets)
+  }, [layouts, activeWidgets])
 
-  const currentLayout = useMemo(() => {
-    if (!layouts?.[activeLayout]) return []
-    // Filter out duplicate widgets by type, keep only the first occurrence
-    const seenTypes = new Set()
-    return layouts[activeLayout].filter(widget => {
-      if (seenTypes.has(widget.type)) return false
-      seenTypes.add(widget.type)
-      return true
-    })
-  }, [layouts, activeLayout])
+  const currentLayout = activeWidgets
 
   // Define handleOutsideClick with stable reference
   const handleOutsideClick = useCallback((e: MouseEvent) => {
@@ -470,9 +468,11 @@ export default function WidgetCanvas() {
   const handleLayoutChange = useCallback((layout: LayoutItem[]) => {
     if (!user?.id || !isCustomizing || !setLayouts || !layouts) return;
 
+    const currentActiveLayout = Array.isArray(layouts[activeLayout]) ? layouts[activeLayout] : []
+
     try {
       const updatedActiveLayout = layout.map(item => {
-        const existingWidget = layouts[activeLayout].find(w => w.i === item.i);
+        const existingWidget = currentActiveLayout.find(w => w.i === item.i);
         if (!existingWidget) return null;
 
         return {
@@ -484,7 +484,7 @@ export default function WidgetCanvas() {
         };
       }).filter((item): item is NonNullable<typeof item> => item !== null)
 
-      const currentSignature = createLayoutSignature(layouts[activeLayout] ?? [])
+      const currentSignature = createLayoutSignature(currentActiveLayout)
       const nextSignature = createLayoutSignature(updatedActiveLayout)
       if (currentSignature === nextSignature) {
         return
@@ -508,7 +508,8 @@ export default function WidgetCanvas() {
   // Define removeWidget with all dependencies
   const removeWidget = useCallback(async (i: string) => {
     if (!user?.id || !layouts) return
-    const updatedWidgets = layouts[activeLayout].filter(widget => widget.i !== i)
+    const currentActiveLayout = Array.isArray(layouts[activeLayout]) ? layouts[activeLayout] : []
+    const updatedWidgets = currentActiveLayout.filter(widget => widget.i !== i)
     const newLayouts = {
       ...layouts,
       [activeLayout]: updatedWidgets,
@@ -523,7 +524,8 @@ export default function WidgetCanvas() {
     if (!user?.id || !layouts) return
 
     // Find the widget
-    const widget = layouts[activeLayout].find(w => w.i === i)
+    const currentActiveLayout = Array.isArray(layouts[activeLayout]) ? layouts[activeLayout] : []
+    const widget = currentActiveLayout.find(w => w.i === i)
     if (!widget) return
 
     // Prevent charts from being set to tiny size
@@ -533,7 +535,7 @@ export default function WidgetCanvas() {
     }
 
     const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
-    const updatedWidgets = layouts[activeLayout].map(widget =>
+    const updatedWidgets = currentActiveLayout.map(widget =>
       widget.i === i ? { ...widget, size: effectiveSize, ...grid } : widget
     )
     const newLayouts = {

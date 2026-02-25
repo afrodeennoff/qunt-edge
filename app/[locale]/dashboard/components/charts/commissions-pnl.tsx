@@ -11,7 +11,7 @@ import {
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -87,7 +87,7 @@ const formatCurrency = (value: number) =>
 export default function CommissionsPnLChart({
   size = "medium",
 }: CommissionsPnLChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const t = useI18n();
 
 

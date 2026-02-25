@@ -150,7 +150,7 @@ export default function DashboardBehaviorPage() {
         title="Behavior AI Hub"
         description={t("analysis.description")}
       />
-      <Card className="rounded-3xl border border-white/10 bg-black/40 shadow-sm backdrop-blur-sm">
+      <Card className="rounded-3xl border border-white/12 bg-black/45 shadow-sm backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-2">
@@ -252,19 +252,19 @@ export default function DashboardBehaviorPage() {
             ) : null}
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+            <div className="rounded-xl border border-white/10 bg-black/35 p-3">
               <p className="text-xs text-muted-foreground">Trades</p>
               <p className="text-lg font-semibold">{insights?.summary.tradeCount ?? 0}</p>
             </div>
-            <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+            <div className="rounded-xl border border-white/10 bg-black/35 p-3">
               <p className="text-xs text-muted-foreground">Win Rate</p>
               <p className="text-lg font-semibold">{insights?.summary.winRate ?? 0}%</p>
             </div>
-            <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+            <div className="rounded-xl border border-white/10 bg-black/35 p-3">
               <p className="text-xs text-muted-foreground">Stress Score</p>
               <p className="text-lg font-semibold">{insights?.summary.stressScore ?? 0}/100</p>
             </div>
-            <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+            <div className="rounded-xl border border-white/10 bg-black/35 p-3">
               <p className="text-xs text-muted-foreground">Discipline Streak</p>
               <p className="text-lg font-semibold">{insights?.summary.disciplineStreakDays ?? 0} days</p>
             </div>
@@ -283,7 +283,7 @@ export default function DashboardBehaviorPage() {
 
         <TabsContent value="insights" className="space-y-4">
           <section className="grid gap-4 lg:grid-cols-3">
-            <Card className="border-border/70 bg-card/75 lg:col-span-2">
+            <Card className="border-white/12 bg-black/45 lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-base">Behavior Health</CardTitle>
               </CardHeader>
@@ -307,7 +307,7 @@ export default function DashboardBehaviorPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-border/70 bg-card/75">
+            <Card className="border-white/12 bg-black/45">
               <CardHeader>
                 <CardTitle className="text-base">Live Prompt</CardTitle>
               </CardHeader>
@@ -324,14 +324,14 @@ export default function DashboardBehaviorPage() {
           </section>
 
           {(insights?.drivers?.length ?? 0) > 0 ? (
-            <section className="rounded-2xl border border-border/70 bg-card/75 p-4 md:p-6">
+            <section className="rounded-2xl border border-white/12 bg-black/45 p-4 md:p-6">
               <div className="mb-3 flex items-center gap-2">
                 <Gauge className="h-4 w-4 text-white" />
                 <h3 className="text-base font-semibold">Top Risk Drivers</h3>
               </div>
               <div className="grid gap-2 md:grid-cols-2">
                 {insights?.drivers.slice(0, 4).map((driver) => (
-                  <div key={driver.key} className="rounded-xl border border-border/70 bg-background/60 p-3">
+                  <div key={driver.key} className="rounded-xl border border-white/10 bg-black/35 p-3">
                     <p className="text-sm font-medium">{driver.key}</p>
                     <p className="text-xs text-muted-foreground">{driver.explanation}</p>
                     <Badge variant="secondary" className="mt-2">
@@ -344,20 +344,20 @@ export default function DashboardBehaviorPage() {
           ) : null}
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <Card className="border-border/70 bg-card/75">
+            <Card className="border-white/12 bg-black/45">
               <CardHeader>
                 <CardTitle className="text-base">Training & Reflection</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {trainingModules.map((module) => (
-                  <div key={module.title} className="rounded-xl border border-border/70 bg-background/60 p-3">
+                  <div key={module.title} className="rounded-xl border border-white/10 bg-black/35 p-3">
                     <p className="text-sm font-medium">{module.title}</p>
                     <p className="text-xs text-muted-foreground">{module.description}</p>
                     <Badge variant="secondary" className="mt-2">{module.metric}</Badge>
                   </div>
                 ))}
                 {reflectionModules.map((module) => (
-                  <div key={module.title} className="flex items-center justify-between rounded-xl border border-border/70 bg-background/60 p-3 text-sm">
+                  <div key={module.title} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/35 p-3 text-sm">
                     <span className="text-muted-foreground">{module.metric}</span>
                     <span className="font-medium">{module.value}</span>
                   </div>
@@ -365,13 +365,13 @@ export default function DashboardBehaviorPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-border/70 bg-card/75">
+            <Card className="border-white/12 bg-black/45">
               <CardHeader>
                 <CardTitle className="text-base">Achievements & Guidance</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {gamificationModules.map((module) => (
-                  <div key={module.badge} className="rounded-xl border border-border/70 bg-background/60 p-3">
+                  <div key={module.badge} className="rounded-xl border border-white/10 bg-black/35 p-3">
                     <p className="text-sm font-medium flex items-center gap-2">
                       {module.achieved ? (
                         <CircleCheck className="h-4 w-4 text-white" />
@@ -383,7 +383,7 @@ export default function DashboardBehaviorPage() {
                     <p className="text-xs text-muted-foreground">{module.detail}</p>
                   </div>
                 ))}
-                <div className="rounded-xl border border-border/70 bg-background/60 p-3">
+                <div className="rounded-xl border border-white/10 bg-black/35 p-3">
                   <p className="text-sm font-medium mb-1">Risk Guard</p>
                   <p className="text-xs text-muted-foreground">{insights?.prompts.riskGuard}</p>
                 </div>
@@ -392,7 +392,7 @@ export default function DashboardBehaviorPage() {
           </section>
 
           {recommendationList.length > 0 ? (
-            <section className="rounded-2xl border border-border/70 bg-card/75 p-4 md:p-6">
+            <section className="rounded-2xl border border-white/12 bg-black/45 p-4 md:p-6">
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-white" />
                 <h3 className="text-base font-semibold">AI Recommendations</h3>
@@ -400,7 +400,7 @@ export default function DashboardBehaviorPage() {
               <div className="space-y-2">
                 {insights?.recommendationsDetailed?.length ? (
                   insights.recommendationsDetailed.map((recommendation, index) => (
-                    <div key={`${recommendation.text}-${index}`} className="rounded-lg border border-border/60 p-3 bg-background/50">
+                    <div key={`${recommendation.text}-${index}`} className="rounded-lg border border-white/10 bg-black/35 p-3">
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm text-muted-foreground">{recommendation.text}</p>
                         <Badge
@@ -424,11 +424,11 @@ export default function DashboardBehaviorPage() {
         </TabsContent>
 
         <TabsContent value="workspace" className="space-y-4">
-          <section id="analysis-section" className="rounded-2xl border border-border/70 bg-card/75 p-4 md:p-6">
+          <section id="analysis-section" className="rounded-2xl border border-white/12 bg-black/45 p-4 md:p-6">
             <AnalysisOverview />
           </section>
 
-          <section id="coach-section" className="rounded-2xl border border-border/70 bg-card/75 p-4 md:p-6">
+          <section id="coach-section" className="rounded-2xl border border-white/12 bg-black/45 p-4 md:p-6">
             <div className="mb-4 flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">AI Trading Coach</h2>
@@ -438,7 +438,7 @@ export default function DashboardBehaviorPage() {
             </div>
           </section>
 
-          <section id="mindset-section" className="rounded-2xl border border-border/70 bg-card/75 p-4 md:p-6">
+          <section id="mindset-section" className="rounded-2xl border border-white/12 bg-black/45 p-4 md:p-6">
             <div className="mb-4 flex items-center gap-2">
               <MessageSquareText className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">Mindset & Journal</h2>

@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -61,7 +61,7 @@ const formatWinRate = (wins: number, total: number) => {
 export default function PnLPerContractChart({
   size = "medium",
 }: PnLPerContractChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const t = useI18n();
 
   const chartData = React.useMemo(() => {

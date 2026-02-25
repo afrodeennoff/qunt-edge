@@ -22,7 +22,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Account } from "@/lib/data-types"
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import { useUserStore } from '@/store/user-store'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
@@ -53,7 +53,7 @@ export function AccountConfigurator({
 }: AccountConfiguratorProps) {
   const t = useI18n()
   const params = useParams()
-  const { saveGroup } = useData()
+  const { saveGroup } = useDashboardActions()
   const groups = useUserStore(state => state.groups)
   const hiddenGroup = groups.find(group => group.name === HIDDEN_GROUP_NAME)
   const visibleGroups = groups.filter(group => group.name !== HIDDEN_GROUP_NAME)

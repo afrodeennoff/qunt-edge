@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useI18n } from "@/locales/client"
 import { WidgetShell } from "@/components/ui/widget-shell"
 import { Building2, Users, DollarSign } from "lucide-react"
@@ -12,6 +12,10 @@ export default function PropfirmCatalogueWidget() {
     const t = useI18n()
     const [stats, setStats] = useState<PropfirmCatalogueStats[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const sortedStats = useMemo(
+        () => [...stats].sort((a, b) => b.payouts.paidAmount - a.payouts.paidAmount),
+        [stats]
+    )
 
     useEffect(() => {
         async function fetchData() {
@@ -36,7 +40,7 @@ export default function PropfirmCatalogueWidget() {
         >
             <ScrollArea className="h-full">
                 <div className="flex flex-col gap-1 p-3">
-                    {stats.sort((a, b) => b.payouts.paidAmount - a.payouts.paidAmount).map((stat) => (
+                    {sortedStats.map((stat) => (
                         <div
                             key={stat.propfirmName}
                             className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors"

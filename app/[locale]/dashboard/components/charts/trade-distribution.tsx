@@ -3,7 +3,7 @@
 import * as React from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { ChartSurface } from "@/components/ui/chart-surface"
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { Info } from 'lucide-react'
@@ -37,7 +37,7 @@ interface TooltipProps {
 }
 
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
-  const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
+  const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useDashboardStats()
   const t = useI18n()
   const hasData = nbTrades > 0
 

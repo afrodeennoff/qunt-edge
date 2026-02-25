@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { calculateAdvancedMetrics } from "@/lib/advanced-metrics"
 import { ShieldAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -10,7 +10,7 @@ import { useI18n, useCurrentLocale } from "@/locales/client"
 import { WidgetShell } from "@/components/ui/widget-shell"
 
 export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' | 'small' | 'medium' | 'large' | 'small-long' | 'extra-large' }) {
-    const { formattedTrades: trades } = useData()
+    const { formattedTrades: trades } = useDashboardStats()
     const t = useI18n()
     const locale = useCurrentLocale()
 

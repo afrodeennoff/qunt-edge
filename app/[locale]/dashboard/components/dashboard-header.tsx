@@ -13,7 +13,7 @@ import { DailySummaryModal } from './daily-summary-modal';
 import { ShareButton } from './share-button';
 import { GlobalSyncButton } from './global-sync-button';
 import { useI18n } from '@/locales/client';
-import { useData } from '@/context/data-provider';
+import { useDashboardActions, useDashboardFilters } from '@/context/data-provider';
 import { ActiveFilterTags } from './filters/active-filter-tags';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -51,15 +51,15 @@ export function DashboardHeader() {
         restoreDefaultLayout
     } = useDashboard();
     const t = useI18n();
+    const { isPlusUser } = useDashboardActions();
     const {
-        isPlusUser,
         accountNumbers,
         instruments,
         dateRange,
         pnlRange,
         tagFilter,
         weekdayFilter,
-    } = useData();
+    } = useDashboardFilters();
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'widgets';
     const normalizedPathname = pathname.replace(/\/+$/, '') || '/';

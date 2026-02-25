@@ -13,7 +13,7 @@ import ImportTypeSelection, { ImportType } from "./import-type-selection";
 import FileUpload from "./file-upload";
 import HeaderSelection from "./header-selection";
 import AccountSelection from "./account-selection";
-import { useData } from "@/context/data-provider";
+import { useDashboardActions } from "@/context/data-provider";
 import ColumnMapping from "./column-mapping";
 import { useI18n } from "@/locales/client";
 import { ImportDialogHeader } from "./components/import-dialog-header";
@@ -69,7 +69,7 @@ export default function ImportButton() {
   const supabaseUser = useUserStore((state) => state.supabaseUser);
   const accounts = useUserStore((state) => state.accounts);
   const trades = useTradesStore((state) => state.trades);
-  const { refreshTradesOnly, refreshUserDataOnly } = useData();
+  const { refreshTradesOnly, refreshUserDataOnly } = useDashboardActions();
   const t = useI18n();
 
   const handleSave = useCallback(async () => {

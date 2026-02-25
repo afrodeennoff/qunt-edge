@@ -186,7 +186,7 @@
 - [x] Verify and document results.
 
 ## Current Step
-- **Completed:** Root-cause analysis + targeted subscription-scope fix pass.
+- **Completed:** Root-cause analysis + expanded dashboard subscription-scope migration.
 
 ## Progress Notes
 - 2026-02-25: Started runtime slowness investigation with focused plan and evidence-first workflow.
@@ -195,22 +195,51 @@
 - 2026-02-25: Confirmed broad context subscription in top-level dashboard chrome (`dashboard-header`, `navbar`, `global-sync-button`, `user-menu`) via `useData()`, causing rerenders from unrelated state changes.
 - 2026-02-25: Confirmed expensive equity chart client computation (`equity-chart.tsx`, `computeClientSideData`, lines `660-737`) re-sorts and rebuilds date series per dependency change.
 - 2026-02-25: Applied targeted rerender fan-out reduction by migrating high-level UI components from umbrella `useData()` to slice hooks (`useDashboardActions`, `useDashboardFilters`, `useDashboardTrades`).
-- 2026-02-25: Verification: targeted ESLint on touched files passed with warnings only (no errors).
-- 2026-02-25: Verification blocker: `npm run build` failed before route-budget checks due pre-existing Prisma schema relation error (`User.referralInvites` missing opposite relation on `ReferralRedemption`, `prisma/schema.prisma:63`), unrelated to performance subscription changes.
+- 2026-02-25: Extended migration across dashboard chart/widget hot paths (`formattedTrades` + filter consumers) to use slice hooks (`useDashboardStats`, `useDashboardFilters`, `useDashboardActions`, `useDashboardTrades`) instead of umbrella `useData()`.
+- 2026-02-25: Optimized equity chart client path by removing redundant in-component trade sorting and removing verbose render/computation logging in hot paths.
+- 2026-02-25: Build verification rerun now passes (`npm run build` exit `0`); Prisma relation blocker no longer reproduces.
+- 2026-02-25: Route/bundle verification rerun passes (`npm run check:route-budgets`, `npm run analyze:bundle`).
 
 ## Completion Notes
 - Root-cause summary:
   - Heavy trade derivation pipeline in `DataProvider` recomputes and sorts across full trade sets on many filter changes.
-  - Remaining `useData()` fan-out in dashboard shell/components causes broad rerender cascades.
-  - `EquityChart` client compute path redoes expensive date-bucketing work with verbose logging.
+  - Broad `useData()` fan-out in dashboard shell/components caused broad rerender cascades.
+  - `EquityChart` client compute path had redundant sort work plus verbose logging in render-sensitive flows.
 - Files updated for fix pass:
   - `app/[locale]/dashboard/components/dashboard-header.tsx`
   - `app/[locale]/dashboard/components/navbar.tsx`
   - `app/[locale]/dashboard/components/global-sync-button.tsx`
   - `app/[locale]/dashboard/components/user-menu.tsx`
+  - `app/[locale]/dashboard/components/widget-canvas.tsx`
+  - `app/[locale]/dashboard/components/charts/equity-chart.tsx`
+  - `app/[locale]/dashboard/components/charts/time-range-performance.tsx`
+  - `app/[locale]/dashboard/components/charts/pnl-bar-chart.tsx`
+  - `app/[locale]/dashboard/components/charts/trade-distribution.tsx`
+  - `app/[locale]/dashboard/components/charts/weekday-pnl.tsx`
+  - `app/[locale]/dashboard/components/charts/tick-distribution.tsx`
+  - `app/[locale]/dashboard/components/charts/pnl-time-bar-chart.tsx`
+  - `app/[locale]/dashboard/components/charts/daily-tick-target.tsx`
+  - `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`
+  - `app/[locale]/dashboard/components/charts/contract-quantity.tsx`
+  - `app/[locale]/dashboard/components/charts/pnl-by-side.tsx`
+  - `app/[locale]/dashboard/components/charts/commissions-pnl.tsx`
+  - `app/[locale]/dashboard/components/charts/pnl-per-contract.tsx`
+  - `app/[locale]/dashboard/components/charts/time-in-position.tsx`
+  - `app/[locale]/dashboard/components/widgets/risk-metrics-widget.tsx`
+  - `app/[locale]/dashboard/components/widgets/expectancy-widget.tsx`
+  - `app/[locale]/dashboard/components/widgets/trading-score-widget.tsx`
+  - `app/[locale]/dashboard/components/pnl-summary.tsx`
+  - `app/[locale]/dashboard/components/calendar/calendar-widget.tsx`
+  - `app/[locale]/dashboard/components/import/import-button.tsx`
+  - `app/[locale]/dashboard/components/accounts/account-configurator.tsx`
+  - `app/[locale]/dashboard/components/accounts/accounts-overview.tsx`
+  - `app/[locale]/dashboard/components/daily-summary-modal.tsx`
+  - `app/[locale]/dashboard/components/add-widget-sheet.tsx`
 - Verification evidence:
-  - `npx eslint <4 touched files>` -> exit `0`, warnings only.
-  - `npm run build` -> failed due existing Prisma schema relation validation error in `prisma/schema.prisma` (not introduced by this change set).
+  - `npx eslint <touched dashboard files>` -> exit `0`, warnings only (no errors).
+  - `npm run build` -> exit `0`.
+  - `npm run check:route-budgets` -> exit `0`.
+  - `npm run analyze:bundle` -> exit `0`.
 - Residual risk:
-  - Most dashboard visualizations still subscribe through `useData()` and remain vulnerable to rerender fan-out until migrated to slice hooks.
-  - Build-dependent budget verification remains blocked until Prisma schema relation issue is fixed.
+  - Route budgets still pass close to threshold (dashboard routes ~`78.7-79.0 KB` vs `80 KB` budget), so future feature additions can regress quickly without continued splitting.
+  - Remaining `useData()` call sites in dashboard scope are debug/import-specific (`data-debug`, `tradovate-credentials-manager`) and may still fan out when enabled.

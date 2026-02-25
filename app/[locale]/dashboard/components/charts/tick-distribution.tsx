@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
@@ -62,7 +62,8 @@ const formatCount = (value: number) => {
 export default function TickDistributionChart({
   size = "medium",
 }: TickDistributionProps) {
-  const { formattedTrades: trades, tickFilter, setTickFilter } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
+  const { tickFilter, setTickFilter } = useDashboardFilters();
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
   const t = useI18n();
 
