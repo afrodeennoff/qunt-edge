@@ -655,3 +655,13 @@
   - report-only CSP console warning.
   - hydration mismatch console error (`A tree hydrated but some attributes...`).
 - These runtime console issues are tracked as separate concerns from color-token normalization.
+
+## Hydration Mismatch Follow-up (2026-02-26)
+- Root cause confirmed from console trace: `init-theme` script nonce attribute drift (`server nonce empty` vs `client nonce populated`).
+- Fix applied in `/Users/timon/Downloads/final-qunt-edge-main/app/layout.tsx`:
+  - Replaced unconditional inline bootstrap script with nonce-gated rendering (`render only when request `x-nonce` is present`).
+  - Added `suppressHydrationWarning` on the nonce-bearing script node.
+- Verification:
+  - `npx eslint app/layout.tsx` -> exit `0`.
+  - `npm run typecheck` -> exit `0`.
+  - Playwright load `http://localhost:3001/en` after fresh dev restart -> hydration mismatch error no longer present; only existing CSP report-only warning remains.

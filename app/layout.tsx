@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Script from "next/script";
 import { headers } from "next/headers";
 import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
@@ -134,8 +133,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const headerNonce = (await headers()).get("x-nonce");
-  const nonce = headerNonce && headerNonce.trim().length > 0 ? headerNonce : undefined;
+  const requestNonce = (await headers()).get("x-nonce");
+  const nonce = requestNonce && requestNonce.trim().length > 0 ? requestNonce : null;
   const isProduction = process.env.NODE_ENV === "production";
   const uiVariant = getUiVariant();
 
@@ -165,8 +164,13 @@ export default async function RootLayout({
         <meta name="robots" content="index, follow" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
-        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce}>
-          {`
+        {nonce ? (
+          <script
+            id="init-theme"
+            nonce={nonce}
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: `
             (function() {
               try {
                 var root = document.documentElement;
@@ -187,8 +191,10 @@ export default async function RootLayout({
                 // Fail silently to avoid blocking render
               }
             })();
-          `}
-        </Script>
+          `,
+            }}
+          />
+        ) : null}
 
         {/* PostHog Analytics */}
         {/*{process.env.NODE_ENV === "production" && (
