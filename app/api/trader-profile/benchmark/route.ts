@@ -16,6 +16,23 @@ type BenchmarkSnapshotPayload = {
   computedAt: Date
 }
 
+function isMissingTraderBenchmarkSnapshotTable(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false
+  }
+
+  if (error.code !== "P2021") {
+    return false
+  }
+
+  const meta = error.meta as { table?: unknown } | undefined
+  const tableFromMeta = typeof meta?.table === "string" ? meta.table : ""
+  return (
+    tableFromMeta.includes("TraderBenchmarkSnapshot") ||
+    error.message.includes("TraderBenchmarkSnapshot")
+  )
+}
+
 async function computeBenchmarkSnapshot(): Promise<BenchmarkSnapshotPayload> {
   const benchmarkRows = await prisma.$queryRaw<Array<{
     risk_reward: number | Prisma.Decimal | null
@@ -135,9 +152,39 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const cachedSnapshot = await prisma.traderBenchmarkSnapshot.findUnique({
-      where: { id: 'global' },
-    })
+    let snapshotTableAvailable = true
+    let cachedSnapshot:
+      | {
+          riskReward: Prisma.Decimal
+          drawdown: Prisma.Decimal
+          winRate: Prisma.Decimal
+          avgReturn: Prisma.Decimal
+          sampleSize: number
+          computedAt: Date
+        }
+      | null = null
+
+    try {
+      cachedSnapshot = await prisma.traderBenchmarkSnapshot.findUnique({
+        where: { id: "global" },
+        select: {
+          riskReward: true,
+          drawdown: true,
+          winRate: true,
+          avgReturn: true,
+          sampleSize: true,
+          computedAt: true,
+        },
+      })
+    } catch (error) {
+      if (!isMissingTraderBenchmarkSnapshotTable(error)) {
+        throw error
+      }
+      snapshotTableAvailable = false
+      console.warn(
+        "[TraderBenchmarkAPI] TraderBenchmarkSnapshot table missing; serving computed benchmark without snapshot cache",
+      )
+    }
 
     if (
       cachedSnapshot &&
@@ -154,26 +201,37 @@ export async function GET() {
     }
 
     const computed = await computeBenchmarkSnapshot()
-    await prisma.traderBenchmarkSnapshot.upsert({
-      where: { id: 'global' },
-      update: {
-        riskReward: computed.riskReward,
-        drawdown: computed.drawdown,
-        winRate: computed.winRate,
-        avgReturn: computed.avgReturn,
-        sampleSize: computed.sampleSize,
-        computedAt: computed.computedAt,
-      },
-      create: {
-        id: 'global',
-        riskReward: computed.riskReward,
-        drawdown: computed.drawdown,
-        winRate: computed.winRate,
-        avgReturn: computed.avgReturn,
-        sampleSize: computed.sampleSize,
-        computedAt: computed.computedAt,
-      },
-    })
+    if (snapshotTableAvailable) {
+      try {
+        await prisma.traderBenchmarkSnapshot.upsert({
+          where: { id: "global" },
+          update: {
+            riskReward: computed.riskReward,
+            drawdown: computed.drawdown,
+            winRate: computed.winRate,
+            avgReturn: computed.avgReturn,
+            sampleSize: computed.sampleSize,
+            computedAt: computed.computedAt,
+          },
+          create: {
+            id: "global",
+            riskReward: computed.riskReward,
+            drawdown: computed.drawdown,
+            winRate: computed.winRate,
+            avgReturn: computed.avgReturn,
+            sampleSize: computed.sampleSize,
+            computedAt: computed.computedAt,
+          },
+        })
+      } catch (error) {
+        if (!isMissingTraderBenchmarkSnapshotTable(error)) {
+          throw error
+        }
+        console.warn(
+          "[TraderBenchmarkAPI] TraderBenchmarkSnapshot table missing during upsert; returning computed benchmark without snapshot cache",
+        )
+      }
+    }
 
     return responseFromSnapshot(computed)
   } catch (error) {

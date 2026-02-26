@@ -665,3 +665,36 @@
   - `npx eslint app/layout.tsx` -> exit `0`.
   - `npm run typecheck` -> exit `0`.
   - Playwright load `http://localhost:3001/en` after fresh dev restart -> hydration mismatch error no longer present; only existing CSP report-only warning remains.
+
+---
+
+# Trader Benchmark Snapshot Missing-Table Resilience (2026-02-26)
+
+## Scope
+- Fix `app/api/trader-profile/benchmark` hard failure when `public.TraderBenchmarkSnapshot` is absent in the connected database.
+
+## Acceptance Criteria
+- [x] `P2021` missing-table errors for `TraderBenchmarkSnapshot` no longer force a `500` response.
+- [x] Endpoint still returns computed benchmark payload when snapshot cache cannot be read/written.
+- [x] Verification commands executed and results recorded.
+
+## Plan Checklist
+- [x] Inspect benchmark route and migration/schema state for snapshot table usage.
+- [x] Implement guarded snapshot read/write behavior with missing-table detection.
+- [x] Run verification commands and record outcomes.
+
+## Current Step
+- Completed.
+
+## Progress Notes
+- 2026-02-26: Added `P2021`/table-specific guard logic for snapshot read (`findUnique`) and write (`upsert`) paths.
+- 2026-02-26: Endpoint now logs warning and serves computed benchmark when snapshot table is unavailable.
+
+## Completion Notes
+- Updated file:
+  - `app/api/trader-profile/benchmark/route.ts`
+- Verification evidence:
+  - `npx eslint app/api/trader-profile/benchmark/route.ts` -> exit `0` (1 pre-existing complexity warning, 0 errors).
+  - `npm run typecheck` -> exit `0`.
+- Residual risk:
+  - This is a resilience fix (degraded mode without snapshot cache). To restore cached benchmark behavior, apply migration `20260225170000_backend_hardening_core` (or create `public.TraderBenchmarkSnapshot`) in the target Supabase database.
