@@ -1,7 +1,7 @@
 import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
-import { format, parseISO, eachDayOfInterval, startOfDay, endOfDay } from 'date-fns';
+import { parseISO, eachDayOfInterval } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface ChartDataPoint {

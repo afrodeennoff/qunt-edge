@@ -1,6 +1,5 @@
 import { SerializedTrade } from "@/server/database";
 import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
-import { Prisma } from "@/prisma/generated/prisma";
 import Decimal from "decimal.js";
 import { tool } from "ai";
 import { z } from 'zod/v3';

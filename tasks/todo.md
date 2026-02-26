@@ -70,12 +70,18 @@
 - 2026-02-26: Hardened transcribe route with file size/type guards.
 - 2026-02-26: Fixed overall-metrics `averageLoss` calculation bug (losses were incorrectly computed from wins).
 - 2026-02-26: Standardized remaining analysis/search/format routes to shared AI policy/client (removed hardcoded model/provider routing).
+- 2026-02-26: Extended full-history helper to return truncation metadata (`truncated`, `fetchedPages`, `dataQualityWarning`) and propagated warnings through AI analytics tool outputs.
+- 2026-02-26: Normalized request validation/error envelopes in `chat`, `support`, `search/date`, `mappings`, and `format-trades` routes; added safer provider-failure classification.
+- 2026-02-26: Added defensive runtime checks for support/transcribe configuration and transcribe content-length precheck.
+- 2026-02-26: Removed verbose AI tool `console.log` traces from route/tool code paths.
+- 2026-02-26: Added targeted tests for AI helper and route contracts.
 
 ## Completion Notes
 - Verification evidence:
   - `npx eslint <touched AI files>` -> `0` errors (warnings remain, pre-existing complexity/unused-var style debt).
   - `npm run typecheck` -> `0`.
   - `npm test -- lib/__tests__/ai-policy.test.ts` -> `0` (`2/2` tests passed).
+  - `npm test -- lib/__tests__/ai-policy.test.ts lib/__tests__/get-all-trades.test.ts lib/__tests__/ai-support-route.test.ts lib/__tests__/ai-transcribe-route.test.ts` -> `0` (`7/7` tests passed).
 
 ---
 
@@ -620,3 +626,32 @@
   - `npm run typecheck` -> exit `0`.
   - `npx eslint <touched TS/TSX files>` -> exit `0` (no errors).
   - `npx eslint app/globals.css` -> warning only: file ignored by ESLint config.
+
+---
+
+# Color Contract Monochrome Pass (Verification Refresh)
+
+## Scope
+- Re-verify full repo quality gates after monochrome/token-only color contract refactor.
+- Run visual sanity sweep on key public/auth routes for obvious color/contrast mismatches.
+
+## Acceptance Criteria
+- [x] `check:color-contract` passes.
+- [x] `typecheck` passes.
+- [x] `lint` completes with no errors.
+- [x] `build` completes successfully.
+- [x] Visual route sweep completed and findings captured.
+
+## Progress Notes
+- 2026-02-26: `npm run check:color-contract` -> exit `0` (passed).
+- 2026-02-26: `npm run typecheck` -> exit `0` (passed).
+- 2026-02-26: `npm run lint` -> exit `0` with `1597` warnings, `0` errors.
+- 2026-02-26: `npm run build` -> exit `0` (production compile succeeds).
+- 2026-02-26: Playwright route sweep on `/en`, `/en/authentication`, `/en/pricing`, `/en/support`, and `/en/dashboard` (redirect to auth when unauthenticated).
+
+## Completion Notes
+- No obvious hue-based visual regressions detected in swept public/auth routes.
+- Recurring non-color issues still present during dev sweep:
+  - report-only CSP console warning.
+  - hydration mismatch console error (`A tree hydrated but some attributes...`).
+- These runtime console issues are tracked as separate concerns from color-token normalization.

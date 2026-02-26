@@ -1,5 +1,5 @@
 import { getFinancialEvents } from '@/server/financial-events';
-import { tool, type Tool } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod/v3';
 
 export const getFinancialNews = tool({

@@ -74,7 +74,7 @@ export const getWeekSummaryForDate = tool({
                 truncated: tradesResult.truncated,
                 dataQualityWarning: tradesResult.dataQualityWarning,
             };
-        } catch (error) {
+        } catch {
             throw new Error(`Invalid date format. Please use YYYY-MM-DD format (e.g., "2025-01-15")`);
         }
     },

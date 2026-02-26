@@ -27,10 +27,8 @@ const MAX_CHAT_MESSAGES = 100;
 const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-chat" });
 
 type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
-type ChatMessagePart = { type?: string; text?: string }
-type ChatMessage = { role: "user" | "assistant" | "system"; content?: unknown; parts?: ChatMessagePart[]; text?: string }
 const chatMessageSchema = z.object({
-  role: z.enum(["user", "assistant", "system"]),
+  role: z.string(),
   content: z.unknown().optional(),
   parts: z.array(
     z.object({
@@ -46,6 +44,8 @@ const chatRequestSchema = z.object({
   locale: z.string().optional().default("en"),
   timezone: z.string().optional().default("UTC"),
 });
+type ParsedChatRequest = z.infer<typeof chatRequestSchema>;
+type ParsedChatMessage = ParsedChatRequest["messages"][number];
 
 function getErrorCode(error: unknown): string | null {
   if (!error || typeof error !== 'object') return null
@@ -55,7 +55,7 @@ function getErrorCode(error: unknown): string | null {
   return String(value)
 }
 
-function extractLastUserText(messages: ChatMessage[]): string {
+function extractLastUserText(messages: ParsedChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
   if (!lastUserMessage) return "";
 
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
     const previousWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
     const previousWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
 
-    const userMessages = (messages as ChatMessage[]).filter((msg) => msg.role === "user");
+    const userMessages = messages.filter((msg) => msg.role === "user");
     const isFirstMessage = userMessages.length === 1;
 
     const latestText = extractLastUserText(messages);

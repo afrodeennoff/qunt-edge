@@ -3,7 +3,7 @@ import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalizati
 import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
-import { isSameDay, isToday } from "date-fns";
+import { isSameDay } from "date-fns";
 
 interface TradeSummary {
     accountNumber: string;

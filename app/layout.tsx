@@ -134,7 +134,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const headerNonce = (await headers()).get("x-nonce");
+  const nonce = headerNonce && headerNonce.trim().length > 0 ? headerNonce : undefined;
   const isProduction = process.env.NODE_ENV === "production";
   const uiVariant = getUiVariant();
 

@@ -1,21 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const streamTextMock = vi.fn();
-const convertToModelMessagesMock = vi.fn();
-const createOpenAIMock = vi.fn();
-const createRouteClientMock = vi.fn();
+const {
+  streamTextMock,
+  convertToModelMessagesMock,
+  createOpenAIMock,
+  createRouteClientMock,
+} = vi.hoisted(() => ({
+  streamTextMock: vi.fn(),
+  convertToModelMessagesMock: vi.fn(),
+  createOpenAIMock: vi.fn(() => () => "model"),
+  createRouteClientMock: vi.fn(),
+}));
 
 vi.mock("ai", () => ({
-  streamText: (...args: unknown[]) => streamTextMock(...args),
-  convertToModelMessages: (...args: unknown[]) => convertToModelMessagesMock(...args),
+  streamText: (arg: unknown) => streamTextMock(arg),
+  convertToModelMessages: (arg: unknown) => convertToModelMessagesMock(arg),
+  tool: (definition: unknown) => definition,
 }));
 
 vi.mock("@ai-sdk/openai", () => ({
-  createOpenAI: (...args: unknown[]) => createOpenAIMock(...args),
+  createOpenAI: () => createOpenAIMock(),
 }));
 
 vi.mock("@/lib/supabase/route-client", () => ({
-  createRouteClient: (...args: unknown[]) => createRouteClientMock(...args),
+  createRouteClient: (arg: unknown) => createRouteClientMock(arg),
 }));
 
 import { POST } from "@/app/api/ai/support/route";
@@ -31,7 +39,6 @@ describe("ai support route", () => {
       },
     });
 
-    createOpenAIMock.mockReturnValue(() => "model");
     convertToModelMessagesMock.mockResolvedValue([{ role: "user", content: "hello" }]);
   });
 

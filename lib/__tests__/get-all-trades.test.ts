@@ -1,15 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
-import type { PaginatedTrades } from "@/server/trades";
+import type { PaginatedTrades } from "@/server/database";
 
-const getTradesActionMock = vi.fn<
-  Promise<PaginatedTrades>,
-  [string | null?, number?, number?, boolean?]
->();
+const getTradesActionMock = vi.fn();
 
 vi.mock("@/server/database", () => ({
-  getTradesAction: (...args: [string | null?, number?, number?, boolean?]) =>
-    getTradesActionMock(...args),
+  getTradesAction: (...args: unknown[]) => getTradesActionMock(...args),
 }));
 
 function buildPage(total: number, page: number, hasMore: boolean): PaginatedTrades {
@@ -33,7 +29,7 @@ function buildPage(total: number, page: number, hasMore: boolean): PaginatedTrad
         groupId: null,
         userId: "u-1",
         videoUrl: null,
-      },
+      } as unknown as PaginatedTrades["trades"][number],
     ],
     metadata: {
       total,
