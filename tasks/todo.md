@@ -906,3 +906,31 @@
 - Verification evidence:
   - `npx eslint <touched files>` -> `0` errors (warnings only).
   - `npm run typecheck` -> exits `0`.
+- 2026-02-26: Restored Teams dashboard quick action nav row (`Manage Teams`, `View Teams Product Page`) in `/app/[locale]/teams/dashboard/page.tsx` while keeping duplicate hero headers removed.
+- 2026-02-26: Verification: `npx eslint app/[locale]/teams/dashboard/page.tsx` exits `0`.
+
+---
+
+# Dashboard Navbar Restoration (2026-02-26)
+
+## Scope
+- Restore legacy dashboard top navbar in `app/[locale]/dashboard/layout.tsx`.
+
+## Acceptance Criteria
+- [x] Dashboard layout renders `Navbar` instead of `DashboardHeader`.
+- [x] Targeted verification commands executed.
+
+## Plan Checklist
+- [x] Inspect dashboard layout/header wiring.
+- [x] Swap header component back to legacy `Navbar`.
+- [x] Run lint/typecheck and record results.
+
+## Current Step
+- Completed.
+
+## Completion Notes
+- Updated file:
+  - `app/[locale]/dashboard/layout.tsx`
+- Verification evidence:
+  - `npx eslint app/[locale]/dashboard/layout.tsx app/[locale]/dashboard/components/navbar.tsx` -> exit `0` (1 pre-existing complexity warning in `navbar.tsx`, 0 errors).
+  - `npm run typecheck` -> exit `0`.

@@ -20,3 +20,11 @@
 - mistake pattern: Focused first on individual page headers while leaving broader widget visual inconsistency unresolved.
 - prevention rule: For "overall design quality" feedback, prioritize shared primitives and global style contracts before touching individual feature pages.
 - early trigger signals: User language points to global dissatisfaction ("all widgets", "looks bad") rather than one broken route.
+- mistake pattern: Replaced a route implementation without preserving the dashboard shell, which removed navbar/navigation context.
+- prevention rule: When swapping page implementations, keep route-level layout wrappers (e.g., `UnifiedPageShell`) unless explicitly changing navigation architecture.
+- early trigger signals: New page file becomes a direct re-export of a client component and loses existing shell imports.
+
+## 2026-02-26
+- mistake pattern: Removed functional quick-navigation controls while removing duplicate visual headers.
+- prevention rule: Distinguish between decorative headers and functional navigation actions; remove only decorative duplicates.
+- early trigger signals: User reports "navbar removed" after a header cleanup pass.

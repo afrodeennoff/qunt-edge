@@ -1,5 +1,7 @@
 import { createClient } from "@/server/auth";
 import { redirect } from "next/navigation";
+import Navbar from "./components/navbar";
+import { DashboardProvider } from "./dashboard-context";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { DashboardProviders } from "@/components/providers/dashboard-providers";
 import dynamic from "next/dynamic";
@@ -41,9 +43,10 @@ export default async function DashboardLayout({
   return (
     <DashboardProviders>
       <DashboardClientOverlays />
-      <div className="flex min-h-screen w-full overflow-x-hidden bg-background selection:bg-primary/20 selection:text-primary">
-        <DashboardSidebar isAdmin={isAdmin} />
-        <SidebarInset className="flex-1 min-h-0 relative overflow-hidden">
+      <DashboardProvider>
+        <div className="flex min-h-screen w-full overflow-x-hidden bg-background selection:bg-primary/20 selection:text-primary">
+          <DashboardSidebar isAdmin={isAdmin} />
+          <SidebarInset className="flex-1 min-h-0 relative overflow-hidden">
             {/* Global Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
               <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--card))_42%,hsl(var(--background))_100%)] md:hidden" />
@@ -62,6 +65,7 @@ export default async function DashboardLayout({
 
             {/* Dashboard Content Container - Lower z-index to stay below Sidebar (z-30) */}
             <div className="relative z-0 flex h-svh min-h-0 flex-col">
+              <Navbar />
               <main className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain pb-safe">
                 <div className="min-h-full">
                   {children}
@@ -70,6 +74,7 @@ export default async function DashboardLayout({
             </div>
           </SidebarInset>
         </div>
+      </DashboardProvider>
     </DashboardProviders>
   );
 }
