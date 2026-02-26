@@ -21,7 +21,7 @@ export default async function NewsletterPage(
 
   return (
     <main className="min-h-[calc(100vh-4rem)] flex items-start">
-      <div className="container max-w-6xl w-full px-4 sm:px-6 py-6 sm:py-8 md:py-12">
+      <div className="w-full px-4 py-6 sm:px-6 sm:py-8 md:py-12 lg:px-8">
         <div className="mx-auto max-w-2xl space-y-6 sm:space-y-8">
           {isUnsubscribed && (
             <Card className="border-white/20 dark:border-white/20 bg-white/10 dark:bg-white/10">

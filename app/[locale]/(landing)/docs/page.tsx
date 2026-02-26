@@ -13,7 +13,7 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
     setStaticParamsLocale(locale);
 
     return (
-        <div className="max-w-7xl mx-auto py-20 sm:py-24 px-4 sm:px-6 lg:px-8">
+        <div className="w-full py-20 px-4 sm:px-6 sm:py-24 lg:px-8">
             <header className="mb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight text-white mb-4">Documentation</h1>
                 <p className="text-xl text-zinc-400">Everything you need to master the clinical intelligence layer.</p>

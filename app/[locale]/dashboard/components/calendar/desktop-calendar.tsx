@@ -303,6 +303,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   const weekStartsOnMonday = locale === 'fr'
   const WEEKDAYS = weekStartsOnMonday ? WEEKDAYS_MONDAY_START : WEEKDAYS_SUNDAY_START
   const [currentDate, setCurrentDate] = useState(new Date())
+  const isLoading = false
 
   // Memoize monthStart and monthEnd calculations
   const { monthStart, monthEnd } = React.useMemo(() => ({

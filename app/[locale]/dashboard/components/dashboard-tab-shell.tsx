@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import dynamic from "next/dynamic";
 
 import { clearReferralCode } from "@/lib/referral-storage";
+import { DashboardProvider } from "../dashboard-context";
 
 type DashboardTab = "widgets" | "table" | "accounts" | "chart";
 
@@ -50,7 +51,11 @@ export function DashboardTabShell({
       {activeTab === "table" ? <TradeTableReview /> : null}
       {activeTab === "accounts" ? <AccountsOverview size="large" surface="embedded" /> : null}
       {activeTab === "chart" ? <ChartTheFuturePanel /> : null}
-      {activeTab === "widgets" ? <WidgetCanvas /> : null}
+      {activeTab === "widgets" ? (
+        <DashboardProvider>
+          <WidgetCanvas />
+        </DashboardProvider>
+      ) : null}
     </div>
   );
 }

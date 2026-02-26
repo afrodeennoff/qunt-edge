@@ -33,7 +33,7 @@ export default async function PostPage(props: Props) {
   }
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
       <div className="space-y-8">
         <PostCard
           post={extendedPost}

@@ -168,7 +168,7 @@ const ChatBotDemo = () => {
     (part) => part.type === 'tool-askForEmailForm',
   ) as askForEmailFormToolUIPart | undefined;
   return (
-    <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
+    <UnifiedPageShell widthClassName="max-w-none" className="py-8">
       <UnifiedSurface className="flex h-[calc(100vh-220px)] min-h-[680px] flex-col">
         {/* Discord Community Section */}
         <a

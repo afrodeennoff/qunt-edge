@@ -32,7 +32,7 @@ export default function ReferralPage() {
 
   return (
     <div className="px-4 py-12 bg-background text-foreground">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         <Card className="mb-8 border-white/15 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white shadow-2xl">
           <CardContent className="p-6 md:p-10">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">

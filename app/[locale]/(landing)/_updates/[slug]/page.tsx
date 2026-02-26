@@ -183,7 +183,7 @@ export default async function Page({ params }: PageProps) {
       </Script>
 
       <article
-        className="max-w-4xl mx-auto px-4 pt-16 pb-16 sm:px-6 lg:px-8"
+        className="w-full px-4 pt-16 pb-16 sm:px-6 lg:px-8"
         itemScope
         itemType="https://schema.org/Article"
       >

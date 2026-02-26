@@ -139,7 +139,7 @@ export default function TeamJoinPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center h-64">
           <div className="flex items-center gap-3">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -152,7 +152,7 @@ export default function TeamJoinPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader className="text-center">
@@ -177,7 +177,7 @@ export default function TeamJoinPage() {
 
   if (!invitation) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader className="text-center">
@@ -207,7 +207,7 @@ export default function TeamJoinPage() {
   const canJoin = invitation.status === 'pending' && !isExpired
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight mb-2">{t('teams.join.title')}</h1>

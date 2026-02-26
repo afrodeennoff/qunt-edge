@@ -1,27 +1,28 @@
-# Dashboard Content Gap Removal (2026-02-26)
+# Entire App Gap Removal (2026-02-26)
 
 ## Scope
-- Remove unnecessary left/right gutters on authenticated workspace pages caused by shared page-shell and team-layout max-width constraints.
+- Remove route-level horizontal shell gaps across authenticated and public app surfaces by eliminating top-level max-width caps and constrained container wrappers.
 
 ## Acceptance Criteria
-- [x] Shared dashboard page shell defaults to full-width behavior.
-- [x] Explicit capped-width override in dashboard trader-profile route is removed.
-- [x] Teams workspace dashboard/manage layouts no longer cap content at `1600px`.
+- [x] Shared page shell defaults to full-width behavior.
+- [x] Remaining authenticated workspace width caps are removed.
+- [x] Public/marketing/auth/admin route wrappers no longer force centered max-width outer containers.
 - [x] Verification run on touched files and recorded.
 
 ## Plan Checklist
-- [x] Identify shared wrapper(s) introducing the side gap.
-- [x] Apply minimal layout changes to remove global dashboard gutter.
-- [x] Apply the same uncapped layout treatment to teams workspace shells.
+- [x] Identify route/layout wrappers introducing side gaps.
+- [x] Apply full-width shell defaults.
+- [x] Remove explicit max-width caps in dashboard/teams/public wrappers.
+- [x] Keep inner component/card sizing where needed for readability while removing outer container caps.
 - [x] Run targeted verification and record evidence.
 
 ## Current Step
-- **Completed:** Verification evidence captured and task closed.
+- **Completed:** App-wide gap-removal pass verified.
 
 ## Progress Notes
-- 2026-02-26: Confirmed `UnifiedPageShell` default `max-w-7xl` was creating centered gutters on dashboard pages.
-- 2026-02-26: Updated `UnifiedPageShell` default to `max-w-none` and removed `trader-profile` `max-w-[1600px]` override.
-- 2026-02-26: Removed `max-w-[1600px]` wrappers from teams dashboard/manage layout header and main content containers.
+- 2026-02-26: Switched `UnifiedPageShell` default width behavior to uncapped (`max-w-none`).
+- 2026-02-26: Removed explicit workspace caps from dashboard trader-profile and teams dashboard/manage layouts.
+- 2026-02-26: Removed top-level max-width wrappers from landing layout and key public pages (support, terms, faq, privacy, disclaimers, community, updates, docs, propfirms, referral, newsletter, community post, updates detail), plus auth/admin/team join/dashboard import wrappers.
 
 ## Completion Notes
 - Updated files:
@@ -29,11 +30,29 @@
   - `app/[locale]/dashboard/trader-profile/page.tsx`
   - `app/[locale]/teams/dashboard/layout.tsx`
   - `app/[locale]/teams/manage/layout.tsx`
+  - `app/[locale]/(landing)/layout.tsx`
+  - `app/[locale]/(authentication)/authentication/page.tsx`
+  - `app/[locale]/(landing)/support/page.tsx`
+  - `app/[locale]/(landing)/terms/terms-page-client.tsx`
+  - `app/[locale]/(landing)/faq/page.tsx`
+  - `app/[locale]/(landing)/privacy/page.tsx`
+  - `app/[locale]/(landing)/disclaimers/page.tsx`
+  - `app/[locale]/(landing)/community/page.tsx`
+  - `app/[locale]/(landing)/_updates/page.tsx`
+  - `app/[locale]/(landing)/propfirms/page.tsx`
+  - `app/[locale]/(landing)/docs/page.tsx`
+  - `app/[locale]/(landing)/referral/page.tsx`
+  - `app/[locale]/(landing)/community/post/[id]/page.tsx`
+  - `app/[locale]/(landing)/_updates/[slug]/page.tsx`
+  - `app/[locale]/(landing)/newsletter/page.tsx`
+  - `app/[locale]/admin/newsletter-builder/page.tsx`
+  - `app/[locale]/teams/join/page.tsx`
+  - `app/[locale]/dashboard/import/page.tsx`
 - Verification evidence:
-  - `npx eslint components/layout/unified-page-shell.tsx app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/teams/dashboard/layout.tsx app/[locale]/teams/manage/layout.tsx` -> exit `0` (`0` errors, `2` pre-existing complexity warnings in trader-profile page).
+  - `npx eslint <touched files>` -> exit `0` (`0` errors, warnings only; mostly pre-existing complexity/unused-var/react-hook warnings in support/propfirms/updates/import/teams-join files).
   - `npm run typecheck` -> exit `0`.
 - Residual risk:
-  - This fix removes width caps for authenticated workspace shells; if specific routes should remain constrained, they now need explicit per-route width overrides.
+  - Several flows intentionally keep inner `max-w-*` content cards for readability; those are no longer from outer shell caps but still render centered/narrow in specific pages by design.
 
 # AI Functions Audit (2026-02-26)
 
