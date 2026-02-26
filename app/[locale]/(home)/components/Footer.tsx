@@ -8,7 +8,7 @@ import { useCurrentLocale } from '@/locales/client';
 const Footer: React.FC = () => {
     const locale = useCurrentLocale();
     return (
-        <footer className="py-fluid-lg px-fluid-sm border-t border-white/5 bg-[#050505]">
+        <footer className="py-fluid-lg px-fluid-sm border-t border-white/5 bg-background">
             <div className="container-fluid flex flex-col md:flex-row justify-between items-center gap-fluid-sm">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-white rounded-sm flex items-center justify-center font-bold text-black text-xs">Q</div>

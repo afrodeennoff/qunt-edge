@@ -1,5 +1,7 @@
 import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
 
+export const revalidate = 3600;
+
 export default function PrivacyPolicy() {
   return (
     <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">

@@ -186,7 +186,7 @@ export function ConsentBanner() {
                   <DialogDescription className="text-sm text-gray-600 mt-2 leading-relaxed">
                     {/* @ts-ignore */}
                     {t('landing.consent.preferences.description')}{' '}
-                    <a href="#" className="text-blue-600 underline">{/* @ts-ignore */}{t('landing.consent.preferences.learnMore')}</a>.
+                    <a href="#" className="text-semantic-info underline">{/* @ts-ignore */}{t('landing.consent.preferences.learnMore')}</a>.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -274,7 +274,7 @@ export function ConsentBanner() {
                   <DrawerDescription className="text-sm text-gray-600 mt-2 leading-relaxed">
                     {/* @ts-ignore */}
                     {t('landing.consent.preferences.description')}{' '}
-                    <a href="#" className="text-blue-600 underline">{/* @ts-ignore */}{t('landing.consent.preferences.learnMore')}</a>.
+                    <a href="#" className="text-semantic-info underline">{/* @ts-ignore */}{t('landing.consent.preferences.learnMore')}</a>.
                   </DrawerDescription>
                 </DrawerHeader>
 

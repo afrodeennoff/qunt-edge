@@ -127,11 +127,11 @@ export default function TeamJoinPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />
+        return <AlertCircle className="h-5 w-5 text-semantic-warning" />
       case 'accepted':
         return <CheckCircle className="h-5 w-5 text-white" />
       case 'expired':
-        return <XCircle className="h-5 w-5 text-red-500" />
+        return <XCircle className="h-5 w-5 text-semantic-error" />
       default:
         return <AlertCircle className="h-5 w-5 text-muted-foreground" />
     }
@@ -156,7 +156,7 @@ export default function TeamJoinPage() {
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader className="text-center">
-              <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <XCircle className="h-12 w-12 text-semantic-error mx-auto mb-4" />
               <CardTitle className="text-xl">{t('teams.join.invalid.title')}</CardTitle>
               <CardDescription>
                 {error}
@@ -181,7 +181,7 @@ export default function TeamJoinPage() {
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader className="text-center">
-              <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <XCircle className="h-12 w-12 text-semantic-error mx-auto mb-4" />
               <CardTitle className="text-xl">{t('teams.join.notFound.title')}</CardTitle>
               <CardDescription>
                 {t('teams.join.notFound.description')}
@@ -272,7 +272,7 @@ export default function TeamJoinPage() {
                   <span className="text-muted-foreground">{t('teams.join.details.expiresOn')}</span>
                   <span className={cn(
                     "text-sm",
-                    isExpired ? "text-red-500" : "text-white"
+                    isExpired ? "text-semantic-error" : "text-white"
                   )}>
                     {formatDate(invitation.expiresAt)}
                   </span>

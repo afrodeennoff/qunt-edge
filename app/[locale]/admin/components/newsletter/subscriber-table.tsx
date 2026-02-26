@@ -293,7 +293,7 @@ export function SubscriberTable() {
                     {/* Summary */}
                     <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{lastInferenceResults.summary.totalProcessed}</div>
+                        <div className="text-2xl font-bold text-semantic-info">{lastInferenceResults.summary.totalProcessed}</div>
                         <div className="text-sm text-gray-600">Processed</div>
                       </div>
                       <div className="text-center">
@@ -301,11 +301,11 @@ export function SubscriberTable() {
                         <div className="text-sm text-gray-600">Updated</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-600">{lastInferenceResults.summary.totalSkipped}</div>
+                        <div className="text-2xl font-bold text-semantic-warning">{lastInferenceResults.summary.totalSkipped}</div>
                         <div className="text-sm text-gray-600">Skipped</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-red-600">{lastInferenceResults.summary.totalErrors}</div>
+                        <div className="text-2xl font-bold text-semantic-error">{lastInferenceResults.summary.totalErrors}</div>
                         <div className="text-sm text-gray-600">Errors</div>
                       </div>
                     </div>
@@ -330,7 +330,7 @@ export function SubscriberTable() {
                                   </div>
                                 )}
                                 {result.status === 'error' && (
-                                  <div className="text-sm text-red-600">
+                                  <div className="text-sm text-semantic-error">
                                     Error: {result.error}
                                   </div>
                                 )}
@@ -423,7 +423,7 @@ export function SubscriberTable() {
                     </TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        subscriber.isActive ? "bg-white/10 text-white" : "bg-red-100 text-red-800"
+                        subscriber.isActive ? "bg-white/10 text-white" : "bg-semantic-error-bg text-semantic-error"
                       }`}>
                         {subscriber.isActive ? "Active" : "Inactive"}
                       </span>

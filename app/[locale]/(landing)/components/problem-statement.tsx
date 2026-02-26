@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function ProblemStatement() {
   return (
-    <section id="problem" className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#040404] border-t border-white/5 relative">
+    <section id="problem" className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-background border-t border-white/5 relative">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-24 items-start">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -13,13 +13,13 @@ export default function ProblemStatement() {
           transition={{ duration: 0.8 }}
           className="sticky top-20 lg:top-32"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-red-500/20 bg-red-500/5 mb-6 sm:mb-8">
-             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-             <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-red-400">System Failure Detected</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-white/20 bg-white/5 mb-6 sm:mb-8">
+             <div className="w-1.5 h-1.5 rounded-full bg-white/60 animate-pulse"></div>
+             <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-fg-secondary">System Failure Detected</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 tracking-tighter leading-[0.95] text-white">
             PnL is a <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white/80 to-white/40">Lagging Indicator.</span>
+            <span className="text-white/80">Lagging Indicator.</span>
           </h2>
           <div className="space-y-6 sm:space-y-8 text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg font-light">
             <p>
@@ -62,10 +62,10 @@ export default function ProblemStatement() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group relative p-1 rounded-xl bg-gradient-to-b from-white/5 to-transparent hover:from-white/20 transition-all duration-500"
+              className="group relative p-1 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-500"
             >
-              <div className="bg-[#080808] p-4 sm:p-6 rounded-lg h-full border border-white/5 relative overflow-hidden group-hover:border-white/20 transition-colors">
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 text-[8px] sm:text-[9px] font-mono text-zinc-700 group-hover:text-red-400 transition-colors">
+              <div className="bg-card p-4 sm:p-6 rounded-lg h-full border border-white/5 relative overflow-hidden group-hover:border-white/20 transition-colors">
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 text-[8px] sm:text-[9px] font-mono text-zinc-700 group-hover:text-fg-primary transition-colors">
                       {item.code}
                   </div>
                   <div className="flex items-start gap-4 sm:gap-6">

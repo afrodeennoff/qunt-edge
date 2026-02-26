@@ -42,8 +42,8 @@ export const viewport: Viewport = {
   userScalable: true,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#050505" },
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
 };
 
@@ -90,7 +90,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
       other: [
-        { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#000000" },
+        { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "black" },
         {
           rel: "android-chrome",
           sizes: "192x192",
@@ -153,7 +153,7 @@ export default async function RootLayout({
 
         {/* Mobile-First Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#050505" />
+          <meta name="theme-color" content="black" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

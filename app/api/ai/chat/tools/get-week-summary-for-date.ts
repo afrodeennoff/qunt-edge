@@ -1,6 +1,6 @@
 import { groupBy } from "@/lib/utils";
 import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalization";
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { startOfWeek, endOfWeek, format, parseISO } from "date-fns";
@@ -52,10 +52,10 @@ export const getWeekSummaryForDate = tool({
             const weekStart = startOfWeek(inputDate, { weekStartsOn: 1 });
             const weekEnd = endOfWeek(inputDate, { weekStartsOn: 1 });
 
-            console.log(`[getWeekSummaryForDate] Input date: ${date}, Week: ${format(weekStart, 'yyyy-MM-dd')} to ${format(weekEnd, 'yyyy-MM-dd')}`);
 
-            const paginatedTrades = await getTradesAction();
-            const filteredTrades = normalizeTrades(paginatedTrades.trades).filter(trade => {
+            const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+            const filteredTrades = normalizeTrades(allTrades).filter(trade => {
                 const tradeDate = trade.entryDate;
                 return tradeDate >= weekStart && tradeDate <= weekEnd;
             });
@@ -70,7 +70,9 @@ export const getWeekSummaryForDate = tool({
                     endFormatted: format(weekEnd, 'yyyy-MM-dd')
                 },
                 isCurrentWeek: format(weekStart, 'yyyy-MM-dd') === format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
-                summary: generateTradeSummary(filteredTrades)
+                summary: generateTradeSummary(filteredTrades),
+                truncated: tradesResult.truncated,
+                dataQualityWarning: tradesResult.dataQualityWarning,
             };
         } catch (error) {
             throw new Error(`Invalid date format. Please use YYYY-MM-DD format (e.g., "2025-01-15")`);

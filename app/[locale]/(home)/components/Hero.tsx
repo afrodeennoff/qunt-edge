@@ -103,6 +103,7 @@ export default function Hero() {
             <span>Rithmic</span>
             <span>IBKR</span>
             <span>CQG</span>
+            {/* brand-color-exception: external partner trademark color */}
             <span className="font-medium tracking-[0.15em] text-[#ff4d1a]/70" aria-label="NinjaTrader">
               NINJA<span className="mx-1 align-baseline text-[#ff4d1a]/80">|</span>TRADER
             </span>

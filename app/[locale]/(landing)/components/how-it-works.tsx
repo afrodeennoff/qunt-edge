@@ -12,7 +12,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#050505] relative overflow-hidden border-t border-white/5">
+    <section id="how-it-works" className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 sm:mb-20 relative z-10">
           <motion.h2
@@ -57,7 +57,7 @@ export default function HowItWorks() {
               className="relative group z-10"
             >
               <div className="flex justify-center mb-6 sm:mb-8 relative">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#0a0a0a] border border-white/10 flex items-center justify-center relative z-10 group-hover:border-white/50 transition-colors shadow-2xl">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-card border border-white/10 flex items-center justify-center relative z-10 group-hover:border-white/50 transition-colors shadow-2xl">
                       <span className="text-zinc-500 font-mono text-xs sm:text-sm font-bold group-hover:text-white">0{i+1}</span>
                   </div>
               </div>

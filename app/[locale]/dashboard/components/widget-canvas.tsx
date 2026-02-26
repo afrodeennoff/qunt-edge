@@ -204,10 +204,10 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
       </div>
       {isCustomizing && (
         <>
-          <div className="absolute inset-0 rounded-xl border border-white/25 border-dashed shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" />
-          <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),rgba(0,0,0,0.74)_62%)] opacity-100 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 rounded-xl border border-white/25 border-dashed shadow-[inset_0_0_0_1px_hsl(var(--foreground)/0.08)]" />
+          <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_top,hsl(var(--foreground)/0.18),hsl(var(--background)/0.74)_62%)] opacity-100 backdrop-blur-[2px]" />
           <div className="absolute inset-0 flex items-center justify-center opacity-100 drag-handle cursor-grab active:cursor-grabbing">
-            <div className="flex flex-col items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-4 py-3 text-white/85 backdrop-blur-md">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-4 py-3 text-foreground/85 backdrop-blur-md">
               <GripVertical className="h-6 w-4" />
               <p className="text-sm font-medium">{t('widgets.dragToMove')}</p>
             </div>
@@ -218,12 +218,12 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-8 rounded-full border-white/25 bg-black/55 text-white hover:bg-black/75 hover:border-white/40 backdrop-blur-md"
+                  className="h-8 w-8 rounded-full border-white/25 bg-black/55 text-foreground hover:bg-black/75 hover:border-white/40 backdrop-blur-md"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 border-white/15 bg-black/85 p-2 text-white backdrop-blur-xl">
+              <PopoverContent className="w-56 border-white/15 bg-black/85 p-2 text-foreground backdrop-blur-xl">
                 <div className="flex flex-col gap-1">
                   {isMobile ? (
                     <>
@@ -352,7 +352,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
                 <Button
                   variant="destructive"
                   size="icon"
-                  className="h-8 w-8 rounded-full border border-white/20 bg-red-500/80 text-white hover:bg-red-500"
+                  className="h-8 w-8 rounded-full border border-white/20 bg-semantic-error-bg/80 text-foreground hover:bg-semantic-error-bg"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
@@ -639,11 +639,11 @@ export default function WidgetCanvas() {
   if (currentLayout.length === 0) {
     return (
       <div className="relative mt-0 w-full min-h-screen">
-        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-black/90 p-6 text-white shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)]">
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-card/90 p-6 text-foreground shadow-2xl">
           <div className="text-sm font-semibold tracking-tight">
             {(t as any)("widgets.emptyLayoutTitle") ?? "No widgets on your dashboard."}
           </div>
-          <div className="mt-2 text-sm text-white/60 leading-relaxed">
+          <div className="mt-2 text-sm text-foreground/60 leading-relaxed">
             {(t as any)("widgets.emptyLayoutDescription") ?? "Restore the default layout to show charts and stats, or switch to Edit mode to add widgets."}
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -656,7 +656,7 @@ export default function WidgetCanvas() {
             <Button
               variant="outline"
               onClick={() => setIsCustomizing(true)}
-              className="border-white/15 bg-transparent text-white hover:bg-white/5 hover:text-white"
+              className="border-white/15 bg-transparent text-foreground hover:bg-white/5 hover:text-foreground"
             >
               {(t as any)("widgets.edit") ?? "Edit"}
             </Button>
@@ -720,14 +720,14 @@ export default function WidgetCanvas() {
                     <div className={cn(
                       "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
                       isCustomizing
-                        ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_rgba(0,0,0,0.95)]"
+                        ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_hsl(var(--background)/0.95)]"
                         : "bg-black/95 hover:border-white/20"
                     )}>
                       {showDataDebug && !isCustomizing && (
-                        <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white/80 backdrop-blur-sm">
+                        <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
                           T:{trades.length} F:{formattedTrades.length}
                           {(instruments.length > 0 || accountNumbers.length > 0 || Boolean(dateRange?.from || dateRange?.to)) && (
-                            <span className="ml-2 text-white/40">filtered</span>
+                            <span className="ml-2 text-foreground/40">filtered</span>
                           )}
                         </div>
                       )}

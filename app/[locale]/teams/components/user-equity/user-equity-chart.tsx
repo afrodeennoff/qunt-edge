@@ -112,6 +112,7 @@ export function UserEquityChart({ equityCurve, userId, totalPnL, showDailyView =
   const dailyData = groupTradesByDay(equityCurve)
   const chartData = showDailyView ? dailyData : equityCurve
   const xTicks = showDailyView ? getSmartDateTicks(dailyData) : getSmartTicks(equityCurve)
+  const trendColor = totalPnL >= 0 ? "hsl(var(--chart-positive))" : "hsl(var(--chart-negative))"
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -215,8 +216,8 @@ export function UserEquityChart({ equityCurve, userId, totalPnL, showDailyView =
         >
           <defs>
             <linearGradient id={`color-${userId.replace(/[^a-zA-Z0-9-_]/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={totalPnL >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={totalPnL >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0}/>
+              <stop offset="5%" stopColor={trendColor} stopOpacity={0.32}/>
+              <stop offset="95%" stopColor={trendColor} stopOpacity={0}/>
             </linearGradient>
           </defs>
           <CartesianGrid 
@@ -261,13 +262,13 @@ export function UserEquityChart({ equityCurve, userId, totalPnL, showDailyView =
           <Area
             type="monotone"
             dataKey="cumulativePnL"
-            stroke={totalPnL >= 0 ? "#10b981" : "#ef4444"}
+            stroke={trendColor}
             fillOpacity={1}
             fill={`url(#color-${userId})`}
             strokeWidth={2}
             dot={false}
             isAnimationActive={false}
-            activeDot={{ r: 3, style: { fill: totalPnL >= 0 ? "#10b981" : "#ef4444" } }}
+            activeDot={{ r: 3, style: { fill: trendColor } }}
             connectNulls={false}
           />
         </AreaChart>

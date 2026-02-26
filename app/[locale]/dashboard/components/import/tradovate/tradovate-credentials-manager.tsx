@@ -309,8 +309,8 @@ export function TradovateCredentialsManager() {
                   <span
                     className={`px-2 py-1 rounded text-xs ${
                       false
-                      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                      ? "bg-semantic-error-bg text-semantic-error dark:bg-semantic-error-bg dark:text-semantic-error"
+                        : "bg-semantic-info-bg text-semantic-info dark:bg-semantic-info-bg dark:text-semantic-info"
                     }`}
                   >
                     {t("tradovateSync.multiAccount.environmentDemo")}
@@ -331,7 +331,7 @@ export function TradovateCredentialsManager() {
                   <span
                     className={`px-2 py-1 rounded text-xs ${
                       isExpired
-                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        ? "bg-semantic-error-bg text-semantic-error dark:bg-semantic-error-bg dark:text-semantic-error"
                         : "bg-white/10 text-white dark:bg-white/10 dark:text-white"
                     }`}
                   >

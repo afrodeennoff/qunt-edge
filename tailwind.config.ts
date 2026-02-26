@@ -1,5 +1,22 @@
-import { BREAKPOINTS } from './lib/config/breakpoints'
-import { Z_INDEX } from './lib/config/z-index'
+const BREAKPOINTS = {
+	sm: 640,
+	md: 768,
+	lg: 1024,
+	xl: 1280,
+	'2xl': 1536,
+} as const
+
+const Z_INDEX = {
+	base: 0,
+	dropdown: 1000,
+	sticky: 1100,
+	sidebar: 1200,
+	overlay: 1300,
+	modal: 1400,
+	popover: 1500,
+	tooltip: 1600,
+	toast: 1700,
+} as const
 
 const config = {
 	darkMode: "class",
@@ -127,6 +144,24 @@ const config = {
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
+				},
+				semantic: {
+					success: 'hsl(var(--semantic-success))',
+					'success-fg': 'hsl(var(--semantic-success-fg))',
+					'success-bg': 'hsl(var(--semantic-success-bg))',
+					'success-border': 'hsl(var(--semantic-success-border))',
+					warning: 'hsl(var(--semantic-warning))',
+					'warning-fg': 'hsl(var(--semantic-warning-fg))',
+					'warning-bg': 'hsl(var(--semantic-warning-bg))',
+					'warning-border': 'hsl(var(--semantic-warning-border))',
+					error: 'hsl(var(--semantic-error))',
+					'error-fg': 'hsl(var(--semantic-error-fg))',
+					'error-bg': 'hsl(var(--semantic-error-bg))',
+					'error-border': 'hsl(var(--semantic-error-border))',
+					info: 'hsl(var(--semantic-info))',
+					'info-fg': 'hsl(var(--semantic-info-fg))',
+					'info-bg': 'hsl(var(--semantic-info-bg))',
+					'info-border': 'hsl(var(--semantic-info-border))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',

@@ -75,14 +75,14 @@ const formatCurrency = (value: number) =>
 
 function getChartColorByIndex(index: number): string {
   const paletteVars = [
-    "rgba(255,255,255,0.8)",
-    "rgba(255,255,255,0.6)",
-    "rgba(255,255,255,0.4)",
-    "rgba(255,255,255,0.2)",
-    "rgba(255,255,255,0.7)",
-    "rgba(255,255,255,0.5)",
-    "rgba(255,255,255,0.3)",
-    "rgba(255,255,255,0.1)",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / )",
   ];
   return paletteVars[index % paletteVars.length];
 }
@@ -111,22 +111,22 @@ const getPayoutColors = (status: string) => {
   switch (status) {
     case "PENDING":
       return {
-        fg: "rgba(255,255,255,0.4)",
-        bg: "rgba(255,255,255,0.05)",
+        fg: "hsl(var(--foreground) / )",
+        bg: "hsl(var(--foreground) / )",
       };
     case "VALIDATED":
-      return { fg: "white", bg: "rgba(255,255,255,0.1)" };
+      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / )" };
     case "REFUSED":
       return {
-        fg: "rgba(255,255,255,0.2)",
-        bg: "rgba(255,255,255,0.02)",
+        fg: "hsl(var(--foreground) / )",
+        bg: "hsl(var(--foreground) / )",
       };
     case "PAID":
-      return { fg: "white", bg: "rgba(255,255,255,0.2)" };
+      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / )" };
     default:
       return {
-        fg: "rgba(255,255,255,0.4)",
-        bg: "rgba(255,255,255,0.05)",
+        fg: "hsl(var(--foreground) / )",
+        bg: "hsl(var(--foreground) / )",
       };
   }
 };
@@ -152,9 +152,9 @@ const renderDot = (props: any) => {
           cx={cx}
           cy={cy}
           r={5}
-          fill="white"
+          fill="hsl(var(--foreground))"
           fillOpacity={0.2}
-          stroke="white"
+          stroke="hsl(var(--foreground))"
           strokeOpacity={0.1}
           strokeWidth={1}
         />
@@ -796,7 +796,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return {
         equity: {
           label: "Total Equity",
-          color: "white",
+          color: "hsl(var(--foreground))",
         },
       } as ChartConfig;
     }
@@ -829,8 +829,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           strokeWidth={2}
           dot={renderDot}
           isAnimationActive={false}
-          activeDot={{ r: 3, style: { fill: "white" } }}
-          stroke="white"
+          activeDot={{ r: 3, style: { fill: "hsl(var(--foreground))" } }}
+          stroke="hsl(var(--foreground))"
           connectNulls={false}
         />
       );
@@ -968,7 +968,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                     />
                     <ReferenceLine
                       y={0}
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeDasharray="3 3"
                       strokeOpacity={0.1}
                     />

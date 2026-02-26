@@ -64,7 +64,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
     const getIcon = (type: SmartInsight['type']) => {
         switch (type) {
             case 'risk': return <AlertTriangle className="h-4 w-4 text-destructive" />
-            case 'opportunity': return <Lightbulb className="h-4 w-4 text-orange-500" />
+            case 'opportunity': return <Lightbulb className="h-4 w-4 text-semantic-warning" />
             case 'achievement': return <CheckCircle2 className="h-4 w-4 text-primary" />
             default: return <TrendingUp className="h-4 w-4 text-primary" />
         }
@@ -136,7 +136,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                             <div className="flex items-center gap-2">
                                                 <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/50 border border-border",
                                                     insight.type === 'risk' && "bg-destructive/10 border-destructive/20",
-                                                    insight.type === 'opportunity' && "bg-orange-500/10 border-orange-500/20",
+                                                    insight.type === 'opportunity' && "bg-semantic-warning-bg/10 border-semantic-warning-border/20",
                                                 )}>
                                                     {getIcon(insight.type)}
                                                 </div>

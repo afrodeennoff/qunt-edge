@@ -136,7 +136,7 @@ export function SubscriptionBadge({ className }: { className?: string }) {
               className={cn(
                 "px-2 py-0.5 text-xs whitespace-nowrap cursor-help transition-colors",
                 badge.variant === 'active' && "bg-primary text-primary-foreground hover:bg-primary/90",
-                badge.variant === 'trial' && "bg-blue-500 text-white dark:bg-blue-400 hover:bg-blue-600 dark:hover:bg-blue-500",
+                badge.variant === 'trial' && "bg-semantic-info-bg text-white dark:bg-semantic-info-bg hover:bg-semantic-info-bg dark:hover:bg-semantic-info-bg",
                 badge.variant === 'expiring' && "bg-destructive text-destructive-foreground hover:bg-destructive/90",
                 badge.variant === 'expired' && "bg-destructive/80 text-destructive-foreground hover:bg-destructive/70",
                 badge.variant === 'normal' && "bg-secondary text-secondary-foreground hover:bg-secondary/80",

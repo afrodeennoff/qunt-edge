@@ -22,10 +22,10 @@ type Theme = {
 }
 
 const THEMES: Record<string, Theme> = {
-    obsidian: { name: 'Obsidian', primary: 'text-white', glow: 'rgba(255,255,255,0.2)', bgAccent: 'bg-white/10', pattern: 'radial-gradient(circle at 1.5px 1.5px, rgba(255,255,255,0.05) 1px, transparent 0)' },
-    graphite: { name: 'Graphite', primary: 'text-white/80', glow: 'rgba(255,255,255,0.15)', bgAccent: 'bg-white/5', pattern: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)' },
-    silver: { name: 'Silver', primary: 'text-white/90', glow: 'rgba(255,255,255,0.25)', bgAccent: 'bg-white/15', pattern: 'radial-gradient(rgba(255,255,255,0.05) 2px, transparent 0)' },
-    ghost: { name: 'Ghost', primary: 'text-white/60', glow: 'rgba(255,255,255,0.1)', bgAccent: 'bg-white/5', pattern: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 0, transparent 50%)' }
+    obsidian: { name: 'Obsidian', primary: 'text-white', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/10', pattern: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--foreground) / ) 1px, transparent 0)' },
+    graphite: { name: 'Graphite', primary: 'text-white/80', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/5', pattern: 'linear-gradient(hsl(var(--foreground) / ) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / ) 1px, transparent 1px)' },
+    silver: { name: 'Silver', primary: 'text-white/90', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/15', pattern: 'radial-gradient(hsl(var(--foreground) / ) 2px, transparent 0)' },
+    ghost: { name: 'Ghost', primary: 'text-white/60', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/5', pattern: 'repeating-linear-gradient(45deg, hsl(var(--foreground) / ) 0, hsl(var(--foreground) / ) 1px, transparent 0, transparent 50%)' }
 }
 
 export function DailySummaryModal() {

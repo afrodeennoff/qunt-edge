@@ -52,13 +52,14 @@ export const colorTokens = {
     success: '0 0% 100%',
   },
   semantic: {
-    error: '0 0% 40%',
+    success: { fg: '0 0% 98%', bg: '0 0% 100% / 0.08', border: '0 0% 100% / 0.2' },
+    warning: { fg: '0 0% 90%', bg: '0 0% 100% / 0.06', border: '0 0% 100% / 0.16' },
+    error: { fg: '0 0% 82%', bg: '0 0% 100% / 0.05', border: '0 0% 100% / 0.14' },
+    info: { fg: '0 0% 92%', bg: '0 0% 100% / 0.07', border: '0 0% 100% / 0.18' },
+    // Back-compat aliases
     errorBg: '0 0% 40% / 0.1',
-    warning: '0 0% 60%',
     warningBg: '0 0% 60% / 0.1',
-    success: '0 0% 100%',
     successBg: '0 0% 100% / 0.1',
-    info: '0 0% 90%',
     infoBg: '0 0% 90% / 0.1',
   },
   chart: {
@@ -104,7 +105,7 @@ export function getBorderColor(state: 'default' | 'hover' | 'focus' | 'error' = 
     default: colorTokens.border.default,
     hover: '255 255 255 / 0.1',
     focus: colorTokens.border.focus,
-    error: colorTokens.border.error,
+    error: colorTokens.semantic.error.border,
   };
   return `hsl(${colors[state]})`;
 }

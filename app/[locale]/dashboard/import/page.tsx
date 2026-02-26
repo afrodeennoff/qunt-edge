@@ -211,7 +211,7 @@ export default function ImportCallbackPage() {
             {status === "success" && (
               <CheckCircle className="h-5 w-5 text-white" />
             )}
-            {status === "error" && <XCircle className="h-5 w-5 text-red-600" />}
+            {status === "error" && <XCircle className="h-5 w-5 text-semantic-error" />}
             {t("tradovateSync.callback.title")}
           </CardTitle>
           <CardDescription>

@@ -1,4 +1,5 @@
-import { getTradesAction, SerializedTrade } from "@/server/database";
+import { SerializedTrade } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { Prisma } from "@/prisma/generated/prisma";
 import Decimal from "decimal.js";
 import { tool } from "ai";
@@ -62,7 +63,7 @@ function calculateOverallMetrics(trades: SerializedTrade[]): OverallMetrics {
   const losses = trades.filter(t => new Decimal(t.pnl).lt(0));
 
   const averageWin = wins.length > 0 ? wins.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(wins.length) : new Decimal(0);
-  const averageLoss = losses.length > 0 ? wins.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(losses.length).abs() : new Decimal(0);
+  const averageLoss = losses.length > 0 ? losses.reduce((sum, t) => sum.plus(new Decimal(t.pnl)), new Decimal(0)).div(losses.length).abs() : new Decimal(0);
 
   const profitFactor = averageLoss.gt(0) ? averageWin.div(averageLoss).toNumber() : 0;
 
@@ -142,10 +143,10 @@ export const getOverallPerformanceMetrics = tool({
     endDate: z.string().optional().describe('Optional end date to filter trades (format: 2025-01-14T14:33:01.000Z)')
   }),
   execute: async ({ startDate, endDate }: { startDate?: string, endDate?: string }) => {
-    console.log(`[getOverallPerformanceMetrics] startDate: ${startDate}, endDate: ${endDate}`);
 
-    const paginatedTrades = await getTradesAction();
-    let trades = paginatedTrades.trades;
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+    let trades = allTrades;
 
     // Filter trades by date range if provided
     if (startDate || endDate) {

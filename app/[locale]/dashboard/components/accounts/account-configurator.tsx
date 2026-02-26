@@ -880,7 +880,7 @@ export function AccountConfigurator({
                     </p>
                   )}
                   {(pendingChanges?.paymentFrequency || account.paymentFrequency) === 'CUSTOM' && (
-                    <p className="text-xs text-orange-600">
+                    <p className="text-xs text-semantic-warning">
                       {t('propFirm.configurator.fields.customFrequencyWarning')}
                     </p>
                   )}

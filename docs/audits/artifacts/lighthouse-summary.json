@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-02-26T12:28:55.637Z",
+  "baseUrl": "http://localhost:3000",
+  "thresholds": {
+    "desktopScoreMin": 0,
+    "mobileScoreMin": 0,
+    "desktopTbtMaxMs": 999999,
+    "mobileTbtMaxMs": 999999,
+    "desktopLcpMaxMs": 999999,
+    "mobileLcpMaxMs": 999999,
+    "mobileClsMax": 0.1
+  },
+  "results": [
+    {
+      "url": "http://localhost:3000/en",
+      "mode": "mobile",
+      "score": 0.54,
+      "tbt": 3761.2953000000016,
+      "lcp": 3191.0235000000002,
+      "cls": 0,
+      "failures": []
+    },
+    {
+      "url": "http://localhost:3000/en",
+      "mode": "desktop",
+      "score": 0.68,
+      "tbt": 733.029,
+      "lcp": 1540.826,
+      "cls": 0.0000029616495928552666,
+      "failures": []
+    },
+    {
+      "url": "http://localhost:3000/en/pricing",
+      "mode": "mobile",
+      "score": 0.44,
+      "tbt": 3544.999999999999,
+      "lcp": 10002.847000000003,
+      "cls": 0.000018181603304252466,
+      "failures": []
+    },
+    {
+      "url": "http://localhost:3000/en/pricing",
+      "mode": "desktop",
+      "score": 0.7,
+      "tbt": 764,
+      "lcp": 1267.8780000000002,
+      "cls": 0.0000029616495928552666,
+      "failures": []
+    }
+  ]
+}

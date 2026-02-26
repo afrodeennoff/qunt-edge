@@ -599,11 +599,11 @@ export function TeamManagement({
 
   const getStatusIndicator = (access: string, isOwner: boolean) => {
     if (isOwner) {
-      return 'bg-yellow-500' // Gold for owner
+      return 'bg-semantic-warning-bg' // Gold for owner
     }
     switch (access) {
       case 'admin':
-        return 'bg-blue-500' // Blue for admin
+        return 'bg-semantic-info-bg' // Blue for admin
       case 'viewer':
         return 'bg-white/10' // Green for viewer
       default:

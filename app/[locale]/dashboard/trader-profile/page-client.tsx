@@ -547,8 +547,8 @@ export default function TraderProfilePage() {
                   negative: negativePnlDays,
                 }}
                 modifiersClassNames={{
-                  positive: "bg-emerald-400/20 text-emerald-100",
-                  negative: "bg-rose-400/20 text-rose-100",
+                  positive: "bg-semantic-success-bg/20 text-semantic-success",
+                  negative: "bg-semantic-error-bg text-semantic-error",
                 }}
                 className="w-full p-0"
                 classNames={{
@@ -578,7 +578,7 @@ export default function TraderProfilePage() {
                     const pnl = tradePnlByDay.get(key) ?? 0
                     const hasTrade = tradePnlByDay.has(key)
                     const tint =
-                      pnl > 0 ? "text-emerald-200" : pnl < 0 ? "text-rose-200" : hasTrade ? "text-fg-primary" : "text-fg-muted"
+                      pnl > 0 ? "text-semantic-success" : pnl < 0 ? "text-semantic-error" : hasTrade ? "text-fg-primary" : "text-fg-muted"
 
                     return (
                       <button
@@ -599,11 +599,11 @@ export default function TraderProfilePage() {
               />
               <div className="mt-2 flex flex-wrap items-center gap-2 px-1 text-[11px] text-fg-muted">
                 <span className="inline-flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400/50" />
+                  <span className="h-2 w-2 rounded-full bg-semantic-success-bg/50" />
                   Profit
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-rose-400/50" />
+                  <span className="h-2 w-2 rounded-full bg-semantic-error-border" />
                   Loss
                 </span>
                 <span className="inline-flex items-center gap-1">
@@ -619,7 +619,7 @@ export default function TraderProfilePage() {
                   {selectedCalendarDay ? format(selectedCalendarDay, "EEE, MMM d") : latestTradeDay ? format(latestTradeDay, "EEE, MMM d") : "—"}
                 </p>
               </div>
-              <p className={`text-sm font-semibold ${selectedPnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+              <p className={`text-sm font-semibold ${selectedPnl >= 0 ? "text-semantic-success" : "text-semantic-error"}`}>
                 {formatSigned(selectedPnl)}
               </p>
             </div>
@@ -646,7 +646,7 @@ export default function TraderProfilePage() {
                       className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.01] backdrop-blur-sm shadow-inner transition-colors duration-300 hover:bg-white/[0.03] px-3 py-2"
                     >
                       <div className="flex items-center gap-2">
-                        <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`} />
+                        <CircleDot className={`h-3.5 w-3.5 ${pnl >= 0 ? "text-semantic-success" : "text-semantic-error"}`} />
                         <div>
                           <p className="text-sm font-semibold text-fg-primary">{trade.instrument || "N/A"}</p>
                           <p className="text-[11px] text-fg-muted">
@@ -654,7 +654,7 @@ export default function TraderProfilePage() {
                           </p>
                         </div>
                       </div>
-                      <p className={`text-sm font-semibold ${pnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                      <p className={`text-sm font-semibold ${pnl >= 0 ? "text-semantic-success" : "text-semantic-error"}`}>
                         {formatSigned(pnl)}
                       </p>
                     </div>

@@ -262,7 +262,7 @@ export default function WeekdayPNLChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="pnl"
@@ -273,13 +273,13 @@ export default function WeekdayPNLChart({
                   {weekdayData.map((entry) => (
                     <Cell
                       key={`cell-${entry.day}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
                           : (entry.pnl >= 0 ? 0.98 : 0.22)
                       }
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3

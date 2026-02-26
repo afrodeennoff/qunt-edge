@@ -1,4 +1,5 @@
-import { getTradesAction, SerializedTrade } from "@/server/database";
+import { SerializedTrade } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { Prisma } from "@/prisma/generated/prisma";
 import Decimal from "decimal.js";
 import { tool } from "ai";
@@ -184,10 +185,10 @@ export const getPerformanceTrends = tool({
     endDate: z.string().optional().describe('Optional end date to filter trades (format: 2025-01-14T14:33:01.000Z)')
   }),
   execute: async ({ startDate, endDate }: { startDate?: string, endDate?: string }) => {
-    console.log(`[getPerformanceTrends] startDate: ${startDate}, endDate: ${endDate}`);
 
-    const paginatedTrades = await getTradesAction();
-    let trades = paginatedTrades.trades;
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+    let trades = allTrades;
 
     // Filter trades by date range if provided
     if (startDate || endDate) {

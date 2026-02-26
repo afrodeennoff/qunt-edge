@@ -1,6 +1,6 @@
 import { groupBy } from "@/lib/utils";
 import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalization";
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { isSameDay, isToday } from "date-fns";
@@ -44,9 +44,9 @@ export const getDayData = tool({
         date: z.string().datetime()
     }),
     execute: async ({ date }) => {
-      console.log("Called tool getDayData for day", date)
-        const paginatedTrades = await getTradesAction();
-        const filteredTrades = normalizeTrades(paginatedTrades.trades).filter(trade => {
+        const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+        const filteredTrades = normalizeTrades(allTrades).filter(trade => {
             const tradeDate = trade.entryDate;
             return isSameDay(tradeDate, new Date(date));
         })

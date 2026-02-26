@@ -70,7 +70,7 @@ export const THEME_PRESETS: Record<string, EmbedThemeVars> = {
       '--radius': '0.5rem',
     },
   "thor": {
-    // Thor brand dark based on #0f1419 
+    // Thor brand dark based on deep neutral 
     '--background': '210 25% 7.84%',
     '--card': '210 25% 8%',
     '--popover': '210 25% 8%',

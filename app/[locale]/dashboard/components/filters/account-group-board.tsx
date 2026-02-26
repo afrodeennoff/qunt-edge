@@ -45,9 +45,15 @@ const paletteFromSeed = (seed: string) => {
     acc = ((acc << 5) - acc) + char.charCodeAt(0)
     return acc & acc
   }, 0)
-  const hue = Math.abs(hash) % 360
-  const base = `hsl(${hue}, 70%, 52%)`
-  return { base }
+  const levels = [
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+    "hsl(var(--chart-5))",
+    "hsl(var(--chart-6))",
+    "hsl(var(--chart-7))",
+  ]
+  return { base: levels[Math.abs(hash) % levels.length] }
 }
 
 export function AccountGroupBoard() {
@@ -832,4 +838,3 @@ export function AccountGroupBoard() {
     </div>
   )
 }
-

@@ -11,6 +11,8 @@ interface PageProps {
   }>
 }
 
+export const revalidate = 1800;
+
 export default async function UpdatesPage(props: PageProps) {
   const params = await props.params;
 

@@ -192,7 +192,7 @@ function TagsColumnHeader() {
                           />
                           <div
                             className="w-3 h-3 rounded-full shrink-0"
-                            style={{ backgroundColor: tag.color || "#CBD5E1" }}
+                            style={{ backgroundColor: tag.color || "hsl(var(--muted-foreground))" }}
                           />
                           <label
                             htmlFor={`tag-filter-${tag.id}`}
@@ -956,7 +956,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           return (
             <div className="text-right font-medium">
               <span
-                className={cn(pnl >= 0 ? "text-emerald-400 font-bold" : "text-muted-foreground")}
+                className={cn(pnl >= 0 ? "text-semantic-success font-bold" : "text-muted-foreground")}
               >
                 {pnl.toFixed(2)}
               </span>
@@ -1517,7 +1517,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                 </tr>
               )}
             </tbody>
-            <tfoot className="sticky bottom-0 z-10 bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+            <tfoot className="sticky bottom-0 z-10 bg-background/90 backdrop-blur-md border-t border-border shadow-md">
               <tr className="border-b transition-colors">
                 {visibleColumns.map((column, index) => {
                   const columnId = column.id || (column as any).accessorKey;
@@ -1571,7 +1571,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                       >
                         <span
                           className={cn(
-                            totals.totalPnl >= 0 ? "text-emerald-400" : "text-muted-foreground"
+                            totals.totalPnl >= 0 ? "text-semantic-success" : "text-muted-foreground"
                           )}
                         >
                           {totals.totalPnl.toFixed(2)}

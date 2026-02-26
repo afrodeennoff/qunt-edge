@@ -3,7 +3,7 @@ import React from 'react';
 
 export default function Loading() {
     return (
-        <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center z-50">
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center z-50">
             <div className="relative w-16 h-16 mb-8">
                 <div className="absolute inset-0 border-t-2 border-white/20 rounded-full animate-spin"></div>
                 <div className="absolute inset-2 border-r-2 border-zinc-700 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>

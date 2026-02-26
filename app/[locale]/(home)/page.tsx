@@ -8,7 +8,7 @@ export function generateStaticParams() {
     return getStaticParams();
 }
 
-export const revalidate = 3600;
+export const revalidate = 180;
 // export const dynamic = "force-static"; // Removed for webapp flexibility
 // export const dynamicParams = false;
 

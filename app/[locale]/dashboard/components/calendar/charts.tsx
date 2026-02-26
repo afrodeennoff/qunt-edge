@@ -41,11 +41,11 @@ type DistributionChartPoint = {
 const chartConfig = {
   pnl: {
     label: "P&L Distribution",
-    color: "white",
+    color: "hsl(var(--foreground))",
   },
   equity: {
     label: "Equity Variation",
-    color: "rgba(255,255,255,0.4)",
+    color: "hsl(var(--foreground) / )",
   },
 } satisfies ChartConfig
 
@@ -140,12 +140,12 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
 
   // Generate colors based on theme
   const colors = [
-    'rgba(255,255,255,1)',
-    'rgba(255,255,255,0.8)',
-    'rgba(255,255,255,0.6)',
-    'rgba(255,255,255,0.4)',
-    'rgba(255,255,255,0.2)',
-    'rgba(255,255,255,0.1)'
+    'hsl(var(--foreground) / )',
+    'hsl(var(--foreground) / )',
+    'hsl(var(--foreground) / )',
+    'hsl(var(--foreground) / )',
+    'hsl(var(--foreground) / )',
+    'hsl(var(--foreground) / )'
   ]
 
   const renderEquityTooltip = React.useCallback(({ active, payload }: any) => {
@@ -259,7 +259,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   {equityChartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.pnl >= 0 ? 'white' : 'rgba(255,255,255,0.3)'}
+                      fill={entry.pnl >= 0 ? 'hsl(var(--foreground))' : 'hsl(var(--foreground) / )'}
                       className="transition-all duration-300 ease-in-out hover:opacity-70"
                     />
                   ))}
@@ -347,7 +347,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.value >= 0 ? colors[index % colors.length] : `rgba(255,255,255,0.2)`}
+                      fill={entry.value >= 0 ? colors[index % colors.length] : `hsl(var(--foreground) / )`}
                       className="transition-all duration-300 ease-in-out hover:opacity-80"
                     />
                   ))}

@@ -85,7 +85,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        className="text-semantic-error hover:text-semantic-error hover:bg-semantic-error-bg"
                                         onClick={() => handleCancel(sub.user.email)} // Assuming userId logic inside action handles lookup, but standard uses userId. 
                                     // Wait, our action takes userId, but table has sub.user.email? 
                                     // Let's check schema. Subscription has userId.

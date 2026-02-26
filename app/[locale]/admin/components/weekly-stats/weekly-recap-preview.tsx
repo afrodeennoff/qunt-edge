@@ -294,7 +294,7 @@ export function WeeklyRecapPreview() {
               ) : error ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center p-6">
-                    <div className="text-red-500 mb-2">{error}</div>
+                    <div className="text-semantic-error mb-2">{error}</div>
                     <p className="text-sm text-muted-foreground">
                       Please check your trading data and try again.
                     </p>

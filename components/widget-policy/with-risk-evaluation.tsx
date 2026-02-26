@@ -39,14 +39,14 @@ interface RiskConsentProps {
 
 function RiskBlock({ result, onRetry }: RiskBlockProps) {
   return (
-    <div className="flex items-center justify-center p-6 bg-red-500/10 border border-red-500/50 rounded-lg">
+    <div className="flex items-center justify-center p-6 bg-semantic-error-bg/10 border border-semantic-error-border/50 rounded-lg">
       <div className="text-center max-w-md">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 mb-4">
-          <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-semantic-error-bg/20 mb-4">
+          <svg className="w-6 h-6 text-semantic-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-red-500 mb-2">Action Blocked</h3>
+        <h3 className="text-lg font-semibold text-semantic-error mb-2">Action Blocked</h3>
         <p className="text-sm text-muted-foreground mb-4">{result.justification}</p>
         
         {result.mitigations.length > 0 && (
@@ -73,14 +73,14 @@ function RiskBlock({ result, onRetry }: RiskBlockProps) {
 
 function RiskConsent({ result, onConsent, onDeny }: RiskConsentProps) {
   return (
-    <div className="flex items-center justify-center p-6 bg-amber-500/10 border border-amber-500/50 rounded-lg">
+    <div className="flex items-center justify-center p-6 bg-semantic-warning-bg/10 border border-semantic-warning-border/50 rounded-lg">
       <div className="text-center max-w-md">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 mb-4">
-          <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-semantic-warning-bg/20 mb-4">
+          <svg className="w-6 h-6 text-semantic-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-amber-500 mb-2">Confirmation Required</h3>
+        <h3 className="text-lg font-semibold text-semantic-warning mb-2">Confirmation Required</h3>
         <p className="text-sm text-muted-foreground mb-4">{result.justification}</p>
         
         {result.mitigations.length > 0 && (

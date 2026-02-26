@@ -179,7 +179,7 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
             <button
               onClick={togglePlayPause}
               disabled={isLoading}
-              className="p-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-full transition-colors disabled:opacity-50"
+              className="p-2 bg-semantic-info-bg hover:bg-semantic-info-bg dark:bg-semantic-info-bg dark:hover:bg-semantic-info-bg text-white rounded-full transition-colors disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

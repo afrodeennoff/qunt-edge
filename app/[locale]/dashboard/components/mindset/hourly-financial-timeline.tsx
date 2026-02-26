@@ -28,7 +28,7 @@ const SESSIONS: Session[] = [
     name: "Tokyo Session",
     startHour: 0,
     endHour: 8,
-    color: "bg-red-500/20 border-red-500"
+    color: "bg-semantic-error-bg/20 border-semantic-error-border"
   },
   {
     name: "London Session",
@@ -447,11 +447,11 @@ function FinancialEventCard({ event, onClick, timezone, dateLocale, expanded = f
   const getImportanceColorClass = (importance: string) => {
     switch (importance) {
       case "HIGH":
-        return "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400"
+        return "bg-semantic-error-bg border-semantic-error-border text-semantic-error dark:bg-semantic-error-bg/30 dark:border-semantic-error-border dark:text-semantic-error"
       case "MEDIUM":
-        return "bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-800 dark:text-yellow-400"
+        return "bg-semantic-warning-bg border-semantic-warning-border text-semantic-warning dark:bg-semantic-warning-bg/30 dark:border-semantic-warning-border dark:text-semantic-warning"
       case "LOW":
-        return "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400"
+        return "bg-semantic-info-bg border-semantic-info-border text-semantic-info dark:bg-semantic-info-bg/30 dark:border-semantic-info-border dark:text-semantic-info"
       default:
         return "bg-gray-100 border-gray-300 text-gray-800 dark:bg-gray-800/30 dark:border-gray-700 dark:text-gray-300"
     }
@@ -553,7 +553,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
             "border-l-4 rounded-r-md p-2 cursor-pointer transition-colors hover:opacity-90",
             trade.totalPnL > 0 
               ? "bg-white/10 border-white/25 text-white dark:bg-white/5 dark:border-white/20 dark:text-white"
-              : "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400"
+              : "bg-semantic-error-bg border-semantic-error-border text-semantic-error dark:bg-semantic-error-bg/30 dark:border-semantic-error-border dark:text-semantic-error"
           )}
         >
           <div className="font-medium text-sm">
@@ -586,7 +586,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
             <DollarSign className="h-4 w-4" />
             <span className={cn(
               "font-medium",
-              trade.totalPnL > 0 ? "text-white" : "text-red-500"
+              trade.totalPnL > 0 ? "text-white" : "text-semantic-error"
             )}>
               {trade.totalPnL.toFixed(2)}
             </span>
@@ -612,7 +612,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
                   </TableCell>
                   <TableCell className={cn(
                     "text-right",
-                    t.pnl > 0 ? "text-white" : "text-red-500"
+                    t.pnl > 0 ? "text-white" : "text-semantic-error"
                   )}>
                     {t.pnl.toFixed(2)}
                   </TableCell>
@@ -621,7 +621,7 @@ function TradeCard({ trade, onClick, timezone, dateLocale, expanded = false, dat
                   </TableCell>
                   <TableCell className={cn(
                     "text-right font-medium",
-                    (t.pnl - t.commission) > 0 ? "text-white" : "text-red-500"
+                    (t.pnl - t.commission) > 0 ? "text-white" : "text-semantic-error"
                   )}>
                     {(t.pnl - t.commission).toFixed(2)}
                   </TableCell>

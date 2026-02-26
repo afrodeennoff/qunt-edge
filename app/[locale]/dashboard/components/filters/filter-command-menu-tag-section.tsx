@@ -28,6 +28,9 @@ interface TagFormData {
   color: string
 }
 
+// Hex is intentionally used because HexColorPicker requires hex input.
+const DEFAULT_TAG_COLOR = '#A3A3A3'
+
 export function TagSection({ searchValue }: TagSectionProps) {
   const { tagFilter, setTagFilter } = useDashboardFilters()
   const { updateTrades } = useDashboardActions()
@@ -40,7 +43,7 @@ export function TagSection({ searchValue }: TagSectionProps) {
   const [formData, setFormData] = useState<TagFormData>({
     name: '',
     description: null,
-    color: '#CBD5E1'
+    color: DEFAULT_TAG_COLOR
   })
   const [isLoading, setIsLoading] = useState(false)
   const [tagToDelete, setTagToDelete] = useState<typeof tags[0] | null>(null)
@@ -113,7 +116,7 @@ export function TagSection({ searchValue }: TagSectionProps) {
       setTags([...tags, newTag.tag])
 
       // Reset form and close popover
-      setFormData({ name: '', description: null, color: '#CBD5E1' })
+      setFormData({ name: '', description: null, color: DEFAULT_TAG_COLOR })
       setIsAddPopoverOpen(false)
 
       toast.success(t('widgets.tags.success'), {
@@ -300,7 +303,7 @@ export function TagSection({ searchValue }: TagSectionProps) {
               />
               <div
                 className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: tag.color || '#CBD5E1' }}
+                style={{ backgroundColor: tag.color || DEFAULT_TAG_COLOR }}
               />
               <span className="text-sm break-all pr-2 flex-1">
                 {tag.name}
@@ -378,4 +381,3 @@ export function TagSection({ searchValue }: TagSectionProps) {
     </>
   )
 }
-

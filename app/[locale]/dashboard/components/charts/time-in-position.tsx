@@ -214,7 +214,7 @@ export default function TimeInPositionChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="avgTimeInPosition"
@@ -225,7 +225,7 @@ export default function TimeInPositionChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={entry.tradeCount > 0 ? 0.9 : 0.15}
                       className={cn(
                         "hover:fill-opacity-100 transition-all duration-300",

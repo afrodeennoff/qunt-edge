@@ -352,7 +352,7 @@ export default function TraderStatsEmail({
   const isPositivePerformance = overallPnL > 0;
 
   // Helper function to determine PnL color
-  const getPnLColor = (pnl: number) => pnl >= 0 ? 'text-white' : 'text-red-600';
+  const getPnLColor = (pnl: number) => pnl >= 0 ? 'text-white' : 'text-semantic-error';
 
   // Helper function to format PnL with sign
   const formatPnLWithSign = (pnl: number) => {
@@ -536,7 +536,7 @@ export default function TraderStatsEmail({
                           <Text className="text-sm text-gray-600">{t.wins}</Text>
                         </td>
                         <td className="w-1/2 text-center">
-                          <Text className="text-2xl font-bold text-red-600 mb-2">
+                          <Text className="text-2xl font-bold text-semantic-error mb-2">
                             {winLossStats.losses}
                           </Text>
                           <Text className="text-sm text-gray-600">{t.losses}</Text>
@@ -561,7 +561,7 @@ export default function TraderStatsEmail({
               ) : (
                 <>
                   {/* Growth Mindset Section for Negative Performance */}
-                  <Section className="bg-blue-50 rounded-lg p-6 mb-8">
+                  <Section className="bg-semantic-info-bg rounded-lg p-6 mb-8">
                     <Heading className="text-xl font-semibold text-gray-900 mb-3">
                       {t.insightsTitle}
                     </Heading>

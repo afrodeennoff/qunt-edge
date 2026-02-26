@@ -7,8 +7,12 @@ const BUILD_MANIFEST_PATH = path.join(NEXT_DIR, "build-manifest.json");
 const APP_BUILD_MANIFEST_PATH = path.join(NEXT_DIR, "app-build-manifest.json");
 const APP_SERVER_DIR = path.join(NEXT_DIR, "server", "app");
 const DEFAULT_ROUTE_BUDGET_KB = Number(process.env.ROUTE_BUDGET_KB ?? 300);
-const HIGH_PRIORITY_ROUTE_BUDGET_KB = Number(process.env.HIGH_PRIORITY_ROUTE_BUDGET_KB ?? 80);
-const HIGH_PRIORITY_ROUTES = ["/[locale]/(home)", "/[locale]/dashboard"];
+const HOME_ROUTE_BUDGET_KB = Number(process.env.HOME_ROUTE_BUDGET_KB ?? 80);
+const DASHBOARD_ROUTE_BUDGET_KB = Number(process.env.DASHBOARD_ROUTE_BUDGET_KB ?? 80);
+const EXPLICIT_ROUTE_BUDGETS = [
+  { matcher: "/[locale]/(home)", budgetKb: HOME_ROUTE_BUDGET_KB },
+  { matcher: "/[locale]/dashboard", budgetKb: DASHBOARD_ROUTE_BUDGET_KB },
+];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -60,16 +64,23 @@ const fileSizes = new Map(
 const violations = [];
 const results = [];
 
+function resolveBudgetKb(route) {
+  for (const entry of EXPLICIT_ROUTE_BUDGETS) {
+    if (route === entry.matcher || route.startsWith(`${entry.matcher}/`)) {
+      return entry.budgetKb;
+    }
+  }
+
+  if (route.includes("/dashboard")) return DASHBOARD_ROUTE_BUDGET_KB;
+  if (route.includes("/(home)")) return HOME_ROUTE_BUDGET_KB;
+  return DEFAULT_ROUTE_BUDGET_KB;
+}
+
 for (const [route, files] of Object.entries(pages)) {
   const routeFiles = Array.isArray(files) ? files : [];
   const bytes = routeFiles.reduce((sum, file) => sum + (fileSizes.get(file) ?? 0), 0);
   const kb = toKb(bytes);
-  const isHighPriority = HIGH_PRIORITY_ROUTES.some(
-    (target) => route === target || route.includes("/dashboard") || route.includes("/(home)")
-  );
-  const budgetKb = isHighPriority
-    ? HIGH_PRIORITY_ROUTE_BUDGET_KB
-    : DEFAULT_ROUTE_BUDGET_KB;
+  const budgetKb = resolveBudgetKb(route);
 
   const withinBudget = kb <= budgetKb;
   results.push({ route, kb, budgetKb, withinBudget });
@@ -127,30 +138,14 @@ if (fs.existsSync(APP_SERVER_DIR)) {
     .sort((a, b) => b.kb - a.kb)
     .slice(0, 15)
     .forEach((entry) => {
-      const isHighPriority = HIGH_PRIORITY_ROUTES.some(
-        (target) =>
-          entry.route === target ||
-          entry.route.includes("/dashboard") ||
-          entry.route.includes("/(home)")
-      );
-      const budgetKb = isHighPriority
-        ? HIGH_PRIORITY_ROUTE_BUDGET_KB
-        : DEFAULT_ROUTE_BUDGET_KB;
+      const budgetKb = resolveBudgetKb(entry.route);
       console.log(
         `[route-budgets] [app] ${entry.route}: ${entry.kb} KB (budget ${budgetKb} KB)`
       );
     });
 
   appRoutes.forEach((entry) => {
-    const isHighPriority = HIGH_PRIORITY_ROUTES.some(
-      (target) =>
-        entry.route === target ||
-        entry.route.includes("/dashboard") ||
-        entry.route.includes("/(home)")
-    );
-    const budgetKb = isHighPriority
-      ? HIGH_PRIORITY_ROUTE_BUDGET_KB
-      : DEFAULT_ROUTE_BUDGET_KB;
+    const budgetKb = resolveBudgetKb(entry.route);
     if (entry.kb > budgetKb) {
       violations.push({ route: entry.route, kb: entry.kb, budgetKb });
     }

@@ -32,6 +32,28 @@ const I18nMiddleware = createI18nMiddleware({
 const LOCALES = ["en", "fr", "de", "es", "it", "pt", "vi", "hi", "ja", "zh", "yo"] as const
 const LOCALE_SET = new Set<string>(LOCALES)
 const STATIC_FILE_REGEX = /\.[^/]+$/
+const PUBLIC_DOCUMENT_PATH_PREFIXES = [
+  "/",
+  "/about",
+  "/pricing",
+  "/updates",
+  "/faq",
+  "/docs",
+  "/terms",
+  "/privacy",
+  "/support",
+  "/community",
+  "/propfirms",
+  "/referral",
+  "/newsletter",
+  "/disclaimers",
+]
+const PRIVATE_DOCUMENT_PATH_PREFIXES = [
+  "/dashboard",
+  "/authentication",
+  "/admin",
+]
+const PUBLIC_READ_API_PATH_PREFIXES = ["/api/health", "/api"]
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   const cookieHeader = request.headers.get("cookie")
@@ -46,6 +68,38 @@ function isRootOrLocaleRootPath(pathname: string): boolean {
 function getLocale(pathname: string): string {
   const firstSegment = pathname.split('/')[1]
   return LOCALE_SET.has(firstSegment) ? firstSegment : 'en'
+}
+
+function normalizePathWithoutLocale(pathname: string): string {
+  const segment = pathname.split("/")[1]
+  if (!segment || !LOCALE_SET.has(segment)) return pathname
+  const normalized = pathname.replace(new RegExp(`^/${segment}(?=/|$)`), "")
+  return normalized || "/"
+}
+
+function pathMatchesPrefix(pathname: string, prefix: string): boolean {
+  if (prefix === "/") return pathname === "/"
+  return pathname === prefix || pathname.startsWith(`${prefix}/`)
+}
+
+function isPrivateDocumentRoute(pathname: string): boolean {
+  const normalizedPath = normalizePathWithoutLocale(pathname)
+  return PRIVATE_DOCUMENT_PATH_PREFIXES.some((prefix) =>
+    pathMatchesPrefix(normalizedPath, prefix)
+  )
+}
+
+function isPublicDocumentRoute(pathname: string): boolean {
+  const normalizedPath = normalizePathWithoutLocale(pathname)
+  return PUBLIC_DOCUMENT_PATH_PREFIXES.some((prefix) =>
+    pathMatchesPrefix(normalizedPath, prefix)
+  )
+}
+
+function isPublicReadApiRoute(pathname: string): boolean {
+  return PUBLIC_READ_API_PATH_PREFIXES.some((prefix) =>
+    pathMatchesPrefix(pathname, prefix)
+  )
 }
 
 async function updateSession(request: NextRequest) {
@@ -182,6 +236,14 @@ export default async function middleware(req: NextRequest) {
     // Let API routes pass through with security headers + optional CORS
     const apiResponse = NextResponse.next()
     applySecurityHeaders(apiResponse)
+    if (req.method === "GET" && isPublicReadApiRoute(pathname)) {
+      apiResponse.headers.set(
+        "Cache-Control",
+        "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+      )
+    } else {
+      apiResponse.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate")
+    }
     // Attach CORS header for allowed cross-origin API requests
     if (origin && isAllowedOrigin(origin)) {
       apiResponse.headers.set('Access-Control-Allow-Origin', origin)
@@ -407,12 +469,17 @@ export default async function middleware(req: NextRequest) {
 
   applySecurityHeaders(response)
 
-  // Dashboard/auth HTML should never be browser-cached; stale documents force hard reload behavior.
-  if (isDashboardRoute || isAuthRoute) {
+  // Route-class cache policy split:
+  // - private documents: strict no-store
+  // - public documents: revalidated public cacheability
+  if (isPrivateDocumentRoute(pathname)) {
     response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate")
     response.headers.set("Pragma", "no-cache")
     response.headers.set("Expires", "0")
-    response.headers.set("x-dashboard-cache-policy", "no-store")
+    response.headers.set("x-dashboard-cache-policy", "private-no-store")
+  } else if (isPublicDocumentRoute(pathname)) {
+    response.headers.set("Cache-Control", "public, max-age=0, must-revalidate")
+    response.headers.set("x-dashboard-cache-policy", "public-revalidate")
   }
 
   return response

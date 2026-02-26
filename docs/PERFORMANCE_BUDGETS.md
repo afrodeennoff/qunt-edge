@@ -2,19 +2,23 @@
 
 ## Route Payload Budgets
 
-- High-priority app routes (`/dashboard`, home): `<= 80 KB` client manifest.
-- Default app/page routes: `<= 300 KB`.
+- Home route (`/[locale]/(home)`): `<= 80 KB` app client-reference manifest.
+- Dashboard-family routes (`/[locale]/dashboard*`): `<= 80 KB` app client-reference manifest.
+- Default app/page routes: `<= 300 KB` combined client payload.
 - Enforcement command: `npm run check:route-budgets`.
 
 ## Core Web Vitals Budgets
 
-- LCP: `< 2.5s`
+- Desktop LCP (`/en`): `< 1.8s`
+- Mobile simulated LCP (`/en`): `< 3.5s`
 - FID/INP proxy target: `< 100ms` interaction delay
 - CLS: `< 0.1`
 
 ## Interactivity Budgets
 
-- TBT: `< 200ms`
+- Desktop TBT (`/en`): `< 200ms`
+- Mobile simulated TBT (`/en`): `< 1200ms`
+- Dashboard desktop initial TBT: `< 300ms`
 - TTI: `< 3.0s` on core landing routes
 - Interaction response: `< 500ms` under typical user actions
 
@@ -33,10 +37,12 @@
 
 ## Cache and Navigation Budgets
 
-- Dashboard/auth document responses must send:
+- Private documents (`dashboard`, `authentication`, `admin`) must send:
   - `Cache-Control: no-store, max-age=0, must-revalidate`
   - `Pragma: no-cache`
   - `Expires: 0`
+- Public documents (`/en`, pricing, updates, faq, docs, terms, privacy, etc.) must send:
+  - `Cache-Control: public, max-age=0, must-revalidate`
 - Service worker is opt-in only:
   - `NEXT_PUBLIC_SW_ENABLED` must be explicitly set to `"true"` to register `/sw.js`.
 - Sidebar dashboard navigation should avoid automatic prefetch churn:
@@ -49,4 +55,5 @@
 - Every performance-related change must include:
   - Updated `docs/audits/artifacts/bundle-summary.json`
   - `npm run check:route-budgets` result
-  - Lighthouse artifact for affected public route(s)
+  - `npm run perf:headers` result
+  - `npm run perf:lighthouse` artifacts for affected route(s)

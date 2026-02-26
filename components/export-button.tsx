@@ -323,7 +323,7 @@ export default function TradeExportDialog({ trades, open: externalOpen, onOpenCh
                             {trade.commission?.toFixed(2) || '0.00'}
                           </TableCell>
                           <TableCell className="text-right">
-                            <span className={Number(trade.pnl) >= 0 ? "text-white" : "text-red-500"}>
+                            <span className={Number(trade.pnl) >= 0 ? "text-white" : "text-semantic-error"}>
                               {trade.pnl.toFixed(2)}
                             </span>
                           </TableCell>

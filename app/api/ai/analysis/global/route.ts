@@ -1,15 +1,12 @@
-import { streamText } from "ai";
+import { streamText, stepCountIs } from "ai";
 import { NextRequest } from "next/server";
 import { z } from 'zod/v3';
-import { createOpenAI } from "@ai-sdk/openai";
 import { apiError } from "@/lib/api-response";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 import { createRouteClient } from "@/lib/supabase/route-client";
-
-const customOpenai = createOpenAI({
-  baseURL: "https://api.z.ai/api/paas/v4",
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { getAiLanguageModel } from "@/lib/ai/client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 
 // Analysis Tools
 import { generateAnalysisComponent } from "../accounts/generate-analysis-component";
@@ -80,6 +77,10 @@ You are analyzing overall trading performance across all accounts and instrument
 }
 
 export async function POST(req: NextRequest) {
+  const policy = getAiPolicy("analysis");
+  const startedAt = Date.now();
+  let toolCallsCount = 0;
+
   try {
     const supabase = createRouteClient(req);
     const {
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
     const validatedData = analysisSchema.parse({ username, locale, timezone });
 
     const result = streamText({
-      model: customOpenai("gpt-4o-mini"),
+      model: getAiLanguageModel("analysis"),
       system: getGlobalAnalysisPrompt(validatedData.locale),
       tools: {
         generateAnalysisComponent,
@@ -120,7 +121,40 @@ export async function POST(req: NextRequest) {
           role: "user",
           content: `Analyze my global trading performance and provide detailed insights in ${validatedData.locale} language. Use the generateAnalysisComponent tool to create structured analysis components.`
         }
-      ]
+      ],
+      temperature: policy.temperature,
+      stopWhen: stepCountIs(policy.maxSteps),
+      onStepFinish: (step) => {
+        toolCallsCount += step.toolCalls?.length ?? 0;
+      },
+      onFinish: (finalResult) => {
+        void logAiRequest({
+          route: "/api/ai/analysis/global",
+          feature: "analysis",
+          model: policy.model,
+          provider: policy.provider,
+          usage: extractUsage(finalResult.usage),
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          finishReason: finalResult.finishReason ?? null,
+          success: true,
+          sampleRate: policy.logSampleRate,
+        });
+      },
+      onError: ({ error }) => {
+        void logAiRequest({
+          route: "/api/ai/analysis/global",
+          feature: "analysis",
+          model: policy.model,
+          provider: policy.provider,
+          latencyMs: Date.now() - startedAt,
+          toolCallsCount,
+          success: false,
+          errorCategory: categorizeAiError(error),
+          errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
+          sampleRate: 1,
+        });
+      },
     });
 
     return result.toUIMessageStreamResponse();
@@ -131,6 +165,17 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
       });
     }
+    void logAiRequest({
+      route: "/api/ai/analysis/global",
+      feature: "analysis",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
+      sampleRate: 1,
+    });
     console.error("Error in global analysis route:", error);
     return new Response(JSON.stringify({ error: "Failed to process global analysis" }), {
       status: 500,

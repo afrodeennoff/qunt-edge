@@ -58,7 +58,7 @@ export function EmailPreviewLoading({ stage }: EmailPreviewLoadingProps) {
 
         <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
           <motion.div
-            className="absolute top-0 left-0 h-full bg-blue-500"
+            className="absolute top-0 left-0 h-full bg-semantic-info-bg"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}

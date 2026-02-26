@@ -11,7 +11,7 @@ export default function Qualification() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="p-16 bg-[#080808]"
+            className="p-16 bg-card"
           >
             <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-white mb-10 mono">Ideal Candidate</h3>
             <ul className="space-y-6">

@@ -36,6 +36,9 @@ interface DayTagSelectorProps {
   onApplyTagToAll: (tag: string) => Promise<void>
 }
 
+// Hex is intentionally used because tag creation flow and picker pipeline rely on hex values.
+const DEFAULT_TAG_COLOR = '#A3A3A3'
+
 export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelectorProps) {
   const t = useI18n()
   const tags = useUserStore(state => state.tags)
@@ -97,7 +100,7 @@ export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelector
         const newTag = await createTagAction({
           name: trimmedTag,
           description: '',
-          color: '#CBD5E1'
+          color: DEFAULT_TAG_COLOR
         })
         setTags([...tags, newTag.tag])
       }
@@ -186,7 +189,7 @@ export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelector
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full shrink-0"
-                              style={{ backgroundColor: tag.color || '#CBD5E1' }}
+                              style={{ backgroundColor: tag.color || DEFAULT_TAG_COLOR }}
                             />
                             <span>{tag.name}</span>
                             {tag.description && (
@@ -237,7 +240,7 @@ export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelector
                       !isComplete && "opacity-70 hover:opacity-100"
                     )}
                     style={{
-                      backgroundColor: metadata?.color || '#CBD5E1',
+                      backgroundColor: metadata?.color || DEFAULT_TAG_COLOR,
                       color: metadata?.color ? getContrastColor(metadata.color) : 'inherit'
                     }}
                     onClick={() => !isComplete && handleApplyToAll(tag)}
@@ -328,7 +331,7 @@ export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelector
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-3 h-3 rounded-full shrink-0"
-                              style={{ backgroundColor: tag.color || '#CBD5E1' }}
+                              style={{ backgroundColor: tag.color || DEFAULT_TAG_COLOR }}
                             />
                             <span>{tag.name}</span>
                             {tag.description && (
@@ -376,5 +379,5 @@ function getContrastColor(hexColor: string): string {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   
   // Return black or white based on luminance
-  return luminance > 0.5 ? '#000000' : '#FFFFFF'
+  return luminance > 0.5 ? 'hsl(var(--background))' : 'hsl(var(--foreground))'
 }

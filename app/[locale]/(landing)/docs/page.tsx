@@ -6,6 +6,7 @@ export const metadata: Metadata = {
     title: 'Documentation | Qunt Edge',
     description: 'Comprehensive guides and API references for the Qunt Edge clinical intelligence layer.',
 };
+export const revalidate = 1800;
 
 export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;

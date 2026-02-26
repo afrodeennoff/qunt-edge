@@ -29,6 +29,12 @@ const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-cha
 type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
 type ChatMessagePart = { type?: string; text?: string }
 type ChatMessage = { role?: string; content?: unknown; parts?: ChatMessagePart[]; text?: string }
+const chatRequestSchema = z.object({
+  messages: z.array(z.custom<ChatMessage>()).min(1, "messages are required"),
+  username: z.string().optional(),
+  locale: z.string().optional().default("en"),
+  timezone: z.string().optional().default("UTC"),
+});
 
 function getErrorCode(error: unknown): string | null {
   if (!error || typeof error !== 'object') return null
@@ -180,11 +186,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const { messages, username, locale, timezone } = await req.json();
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return apiError("BAD_REQUEST", "No messages provided", 400);
-    }
+    const body = await req.json();
+    const { messages, username, locale, timezone } = chatRequestSchema.parse(body);
 
     if (messages.length > MAX_CHAT_MESSAGES) {
       return apiError(
@@ -223,6 +226,8 @@ export async function POST(req: NextRequest) {
       toolPolicy.requiresTool
         ? `\n\nINTENT CLASSIFICATION: ${intent}\nRULE: You must call at least one relevant tool before giving the final response.`
         : `\n\nINTENT CLASSIFICATION: ${intent}\nRULE: Use tools only when they improve factual accuracy.`;
+    const dataQualityPrompt =
+      `\n\nDATA QUALITY RULE: If a tool output contains 'dataQualityWarning' or 'truncated: true', clearly disclose that the analysis may be incomplete.`;
 
     const availableTools = withToolGuards({
       getJournalEntries,
@@ -252,7 +257,7 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       model: getAiLanguageModel("chat"),
       messages: convertedMessages,
-      system: `${systemPrompt}${intentPrompt}`,
+      system: `${systemPrompt}${intentPrompt}${dataQualityPrompt}`,
       temperature: policy.temperature,
       stopWhen: stepCountIs(policy.maxSteps),
       tools: scopedTools,

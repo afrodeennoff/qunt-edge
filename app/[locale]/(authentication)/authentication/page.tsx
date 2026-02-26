@@ -30,15 +30,15 @@ export default function AuthenticationPage() {
   ]
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#040404] text-zinc-100">
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-28 top-[-8rem] h-[40rem] w-[40rem] rounded-full bg-white/[0.08] blur-3xl" />
         <div className="absolute -right-36 bottom-[-10rem] h-[42rem] w-[42rem] rounded-full bg-white/[0.05] blur-3xl" />
-        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:30px_30px]" />
+        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(hsl(var(--foreground) / 0.035)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground) / 0.03)_1px,transparent_1px)] [background-size:30px_30px]" />
       </div>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1540px] items-center justify-center px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
-        <div className="w-full overflow-hidden rounded-[32px] border border-white/10 bg-black/35 shadow-[0_24px_80px_-38px_rgba(255,255,255,0.28)] backdrop-blur-xl">
+        <div className="w-full overflow-hidden rounded-[32px] border border-white/10 bg-card/70 shadow-[0_24px_80px_-38px_hsl(var(--foreground) / 0.28)] backdrop-blur-xl">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(500px,620px)]">
         <section className="p-6 sm:p-8 lg:border-r lg:border-white/10 lg:p-10">
           <div className="flex items-center justify-between">
@@ -84,7 +84,7 @@ export default function AuthenticationPage() {
                       <point.icon className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-zinc-100">{point.title}</p>
+                      <p className="text-sm font-semibold text-foreground">{point.title}</p>
                       <p className="mt-1 text-xs text-zinc-400">{point.description}</p>
                     </div>
                   </div>

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     title: 'FAQ | Qunt Edge',
     description: 'Frequently asked questions about Qunt Edge trading analytics and behavioral intelligence.',
 };
+export const revalidate = 1800;
 
 export default async function FAQPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;

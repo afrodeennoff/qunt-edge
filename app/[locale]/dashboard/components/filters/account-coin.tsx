@@ -80,19 +80,26 @@ export function AccountCoin({
     }
   }
 
-  // Generate color based on account number
+  // Keep account accents deterministic but monochrome.
   const getColorPalette = (seed: string) => {
     const hash = seed.split("").reduce((acc, char) => {
       acc = ((acc << 5) - acc) + char.charCodeAt(0)
       return acc & acc
     }, 0)
-    const hue = Math.abs(hash) % 360
-    const base = `hsl(${hue}, 70%, 52%)`
+    const level = Math.abs(hash) % 6
+    const bases = [
+      "hsl(var(--chart-2))",
+      "hsl(var(--chart-3))",
+      "hsl(var(--chart-4))",
+      "hsl(var(--chart-5))",
+      "hsl(var(--chart-6))",
+      "hsl(var(--chart-7))",
+    ]
     return {
-      base,
-      bg: `hsla(${hue}, 70%, 52%, 0.1)`,
-      border: `hsla(${hue}, 70%, 52%, 0.25)`,
-      text: `hsl(${hue}, 55%, 30%)`,
+      base: bases[level],
+      bg: "hsl(var(--muted) / 0.35)",
+      border: "hsl(var(--border) / 0.85)",
+      text: "hsl(var(--foreground))",
     }
   }
 

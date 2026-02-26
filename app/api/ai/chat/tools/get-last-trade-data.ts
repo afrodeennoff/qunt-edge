@@ -1,5 +1,5 @@
 import { parsePositionTime } from "@/lib/utils";
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -18,9 +18,9 @@ export const getLastTradesData = tool({
         accountNumber: z.string().describe('Account number, default to most traded account'),
     }),
     execute: async ({ number, startDate, endDate, accountNumber }) => {
-        console.log(`Getting last ${number} trade(s)`)
-        const paginatedTrades = await getTradesAction();
-        let trades = paginatedTrades.trades;
+        const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+        let trades = allTrades;
         if (accountNumber) {
             trades = trades.filter(trade => trade.accountNumber === accountNumber);
         }
@@ -32,9 +32,14 @@ export const getLastTradesData = tool({
         }
         trades = trades.sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime());
         trades = trades.slice(0, number);
-        return trades.map(trade => ({
+        const items = trades.map(trade => ({
             ...trade,
             timeInPosition: parsePositionTime(Number(trade.timeInPosition))
         }));
+        return {
+            items,
+            truncated: tradesResult.truncated,
+            dataQualityWarning: tradesResult.dataQualityWarning,
+        };
     }
 })

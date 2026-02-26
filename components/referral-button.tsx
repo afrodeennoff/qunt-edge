@@ -97,9 +97,9 @@ export default function ReferralButton({ variant = 'sidebar' }: { variant?: 'nav
   }
 
   const getTierIcon = (level: number) => {
-    if (level >= 3) return <Trophy className="h-4 w-4 text-yellow-500" />
-    if (level >= 2) return <Sparkles className="h-4 w-4 text-purple-500" />
-    if (level >= 1) return <Gift className="h-4 w-4 text-blue-500" />
+    if (level >= 3) return <Trophy className="h-4 w-4 text-semantic-warning" />
+    if (level >= 2) return <Sparkles className="h-4 w-4 text-semantic-info" />
+    if (level >= 1) return <Gift className="h-4 w-4 text-semantic-info" />
     return <Gift className="h-4 w-4 text-muted-foreground" />
   }
 

@@ -98,7 +98,7 @@ const CommentNotificationEmail = ({
 
               <Section className="text-center mb-8">
                 <Button
-                  className="bg-blue-600 text-white text-sm px-6 py-2.5 rounded-md font-medium box-border border-2 border-blue-600"
+                  className="bg-semantic-info-bg text-white text-sm px-6 py-2.5 rounded-md font-medium box-border border-2 border-semantic-info-border"
                   href={postUrl}
                 >
                   {i18n.viewComment} →

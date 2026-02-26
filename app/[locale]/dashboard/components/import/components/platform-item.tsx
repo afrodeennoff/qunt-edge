@@ -71,18 +71,18 @@ export function PlatformItem({
                 <Badge variant="secondary" className="ml-2 transition-transform duration-200 hover:scale-105">
                   {t('import.type.badge.maintenance')}
                 </Badge>
-                <AlertTriangle className="h-4 w-4 text-yellow-500 animate-pulse" />
+                <AlertTriangle className="h-4 w-4 text-semantic-warning animate-pulse" />
               </>
             )}
             {platform.isComingSoon && !platform.isDisabled && (
               <>
-                <Badge variant="secondary" className="ml-2 transition-transform duration-200 hover:scale-105 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">
+                <Badge variant="secondary" className="ml-2 transition-transform duration-200 hover:scale-105 bg-semantic-info-bg/10 text-semantic-info hover:bg-semantic-info-bg/20">
                   {t('import.type.badge.comingSoon')}
                 </Badge>
               </>
             )}
             {!platform.isDisabled && platform.isRithmic && isWeekend && (
-              <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-500/20 gap-1.5 ml-2">
+              <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-semantic-warning-bg/15 text-semantic-warning dark:text-semantic-warning hover:bg-semantic-warning-bg/20 gap-1.5 ml-2">
                 <AlertTriangle className="h-3 w-3" />
                 {t('import.type.rithmicWeekendWarning')}
               </div>

@@ -346,7 +346,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
           <div className="relative group">
             <button
               onClick={handleOpenGallery}
-              className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-ring"
               aria-label="View image"
             >
               {isLoadingImages ? (
@@ -431,7 +431,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
         ) : (
           <button
             onClick={handleUploadClick}
-            className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-muted hover:bg-muted/80 transition-colors"
+            className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-ring bg-muted hover:bg-muted/80 transition-colors"
             aria-label="Upload image"
           >
             <Upload className="h-4 w-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -443,7 +443,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
             <HoverCardTrigger asChild>
               <button
                 onClick={handleUploadClick}
-                className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-muted hover:bg-muted/80 transition-colors"
+                className="relative w-10 h-10 overflow-hidden rounded focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-ring bg-muted hover:bg-muted/80 transition-colors"
                 aria-label="Upload second image"
               >
                 <Upload className="h-4 w-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />

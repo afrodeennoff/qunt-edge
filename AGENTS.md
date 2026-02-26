@@ -1934,3 +1934,55 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm test` -> exits `0` (`145 passed`, `46 skipped`).
   - `npm run build` -> exits `0`.
   - `npm audit --omit=dev` -> fails with residual moderate transitive findings (Prisma toolchain + `markdown-it`), no safe non-breaking direct fix available in current lockstep.
+
+### 2026-02-26: Lightning Performance Program (Cache Split + Render Matrix + CI Gates)
+- **What changed:** Implemented a Vercel-style performance baseline across middleware cache policies, public-route revalidation, performance automation scripts, CI gates, and reporting templates.
+- **What I want:** Public marketing/docs surfaces should be cacheable and precomputed while private/auth/dashboard surfaces stay strict no-store, with automated regression detection for route payload and Lighthouse thresholds.
+- **What I don't want:** Over-broad no-store on public routes, accidental caching of private responses, or performance regressions landing without CI visibility.
+- **How we fixed that:**
+  - Added route-class cache policy helpers in `proxy.ts`:
+    - `isPrivateDocumentRoute(...)`
+    - `isPublicDocumentRoute(...)`
+    - `isPublicReadApiRoute(...)`
+  - Enforced cache split:
+    - private docs -> `no-store, max-age=0, must-revalidate` (+ pragma/expires)
+    - public docs -> `public, max-age=0, must-revalidate`
+    - API default -> private no-store; explicit allowlist for public read cache.
+  - Added explicit revalidation for key public surfaces:
+    - `app/[locale]/(home)/page.tsx`
+    - `app/[locale]/(landing)/pricing/page.tsx` (with server wrapper + client component split)
+    - `app/[locale]/(landing)/_updates/page.tsx`
+    - `app/[locale]/(landing)/_updates/[slug]/page.tsx`
+    - `app/[locale]/(landing)/about/page.tsx`
+    - `app/[locale]/(landing)/faq/page.tsx`
+    - `app/[locale]/(landing)/docs/page.tsx`
+    - `app/[locale]/(landing)/privacy/page.tsx`
+  - Added performance tooling:
+    - `scripts/perf-lighthouse.mjs`
+    - `scripts/perf-header-check.mjs`
+    - `scripts/perf-baseline.mjs`
+    - new npm scripts: `perf:lighthouse`, `perf:headers`, `perf:baseline`, `perf:ci`.
+  - Hardened budget governance:
+    - updated `scripts/check-route-budgets.mjs` with explicit home/dashboard budget map.
+    - updated `scripts/analyze-bundle.mjs` to emit budget metadata + route budget status.
+  - Extended CI in `.github/workflows/ci.yml`:
+    - route budget check, bundle analysis, production server spin-up, header cache validation, Lighthouse gate, artifact upload.
+  - Added planning/report docs:
+    - `docs/perf-execution-plan.md`
+    - `docs/perf-route-tracker.md`
+    - `docs/audits/performance-weekly-report.md`
+    - baseline section in `docs/audits/performance-initiative-2026-02-21.md`.
+- **Key Files:** `proxy.ts`, `app/[locale]/(home)/page.tsx`, `app/[locale]/(landing)/pricing/*`, `app/[locale]/(landing)/_updates/*`, `scripts/perf-*.mjs`, `scripts/check-route-budgets.mjs`, `scripts/analyze-bundle.mjs`, `.github/workflows/ci.yml`, `docs/PERFORMANCE_BUDGETS.md`, `docs/audits/performance-initiative-2026-02-21.md`, `AGENTS.md`
+- **Verification:** `npm run typecheck`, `npm run build`, `npm run check:route-budgets`, `npm run analyze:bundle`, `npm run perf:headers`, `npm run perf:lighthouse`, `npm run perf:baseline`.
+
+### 2026-02-26: Monochrome Color Contract (Token-Only UI Colors)
+- **What changed:** Established an app-wide color usage contract for monochrome token usage and added enforcement tooling.
+- **What I want:** UI colors should come from CSS tokens/semantic aliases; no ad-hoc hue classes or literal color values in app UI code.
+- **What I don't want:** Reintroduction of `blue/red/emerald/...` Tailwind hues, raw hex/rgb/hsl literals in UI, or undocumented brand-color exceptions.
+- **How we fixed that:**
+  - Added semantic neutral token aliases in theme config (`semantic.success|warning|error|info`, fg/bg/border variants).
+  - Introduced brand exception annotation convention: `brand-color-exception`.
+  - Added guard script `scripts/check-color-contract.mjs` to detect forbidden hue utilities and color literals with explicit allowlist support.
+  - Kept external partner branding as the only allowed literal-color exception.
+- **Key Files:** `styles/tokens.css`, `app/globals.css`, `tailwind.config.ts`, `lib/color-tokens.ts`, `scripts/check-color-contract.mjs`, `package.json`, `AGENTS.md`
+- **Verification:** Run `npm run check:color-contract` and review violations output + allowlist deltas.

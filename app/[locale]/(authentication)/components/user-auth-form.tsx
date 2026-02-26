@@ -613,7 +613,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     <span className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase tracking-[0.14em]">
-                    <span className="bg-[#0b1322] px-2 text-zinc-500">
+                    <span className="bg-card px-2 text-zinc-500">
                         {t('auth.continueWith')}
                     </span>
                 </div>

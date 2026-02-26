@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge"
 import { BookOpen, Code, LineChart, GraduationCap } from "lucide-react"
 import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
+export const revalidate = 1800
+
 export default function AboutPage() {
   const founderSkills = [
     { name: "Order Book Trading", icon: <BookOpen className="w-4 h-4" /> },

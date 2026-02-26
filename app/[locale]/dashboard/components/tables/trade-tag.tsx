@@ -57,7 +57,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
         const newTag = await createTagAction({
           name: trimmedTag,
           description: '',
-          color: 'rgba(255,255,255,0.15)'
+          color: 'hsl(var(--foreground) / )'
         })
         if (newTag?.tag) {
           setTags([...tags, newTag.tag])
@@ -105,8 +105,8 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
               key={index}
               className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/5 h-auto max-w-[150px] transition-all hover:border-white/20"
               style={{
-                backgroundColor: metadata?.color || 'rgba(255,255,255,0.1)',
-                color: 'white'
+                backgroundColor: metadata?.color || 'hsl(var(--foreground) / )',
+                color: 'hsl(var(--foreground))'
               }}
             >
               {tag}
@@ -185,7 +185,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
                         <div className="flex items-center gap-2">
                           <div
                             className="w-3 h-3 rounded-full shrink-0 border border-white/10"
-                            style={{ backgroundColor: tag.color || 'rgba(255,255,255,0.1)' }}
+                            style={{ backgroundColor: tag.color || 'hsl(var(--foreground) / )' }}
                           />
                           <span>{tag.name}</span>
                           {tag.description && (
@@ -226,5 +226,5 @@ function getContrastColor(hexColor: string): string {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
 
   // Return black or white based on luminance
-  return luminance > 0.5 ? '#000000' : '#FFFFFF'
+  return luminance > 0.5 ? 'hsl(var(--background))' : 'hsl(var(--foreground))'
 }

@@ -23,12 +23,17 @@
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "loadtest:k6": "k6 run scripts/loadtest/k6-smoke.js",
     "check:route-budgets": "node scripts/check-route-budgets.mjs",
+    "check:color-contract": "node scripts/check-color-contract.mjs",
     "analyze:bundle": "node scripts/analyze-bundle.mjs",
     "perf:verify": "npm run check:route-budgets && npm run analyze:bundle",
     "postinstall": "prisma generate",
     "test:payment": "vitest run --config vitest.payment.config.ts",
     "test:payment:ui": "vitest --config vitest.payment.config.ts --ui",
-    "test:payment:coverage": "vitest --config vitest.payment.config.ts --coverage"
+    "test:payment:coverage": "vitest --config vitest.payment.config.ts --coverage",
+    "perf:lighthouse": "node scripts/perf-lighthouse.mjs",
+    "perf:headers": "node scripts/perf-header-check.mjs",
+    "perf:baseline": "node scripts/perf-baseline.mjs",
+    "perf:ci": "npm run check:route-budgets && npm run analyze:bundle && npm run perf:headers && npm run perf:lighthouse"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.10",

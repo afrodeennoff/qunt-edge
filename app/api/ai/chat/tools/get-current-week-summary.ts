@@ -1,6 +1,6 @@
 import { groupBy } from "@/lib/utils";
 import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalization";
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { startOfWeek, endOfWeek, format } from "date-fns";
@@ -46,10 +46,10 @@ export const getCurrentWeekSummary = tool({
         const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
         const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
-        console.log(`[getCurrentWeekSummary] Current week: ${format(currentWeekStart, 'yyyy-MM-dd')} to ${format(currentWeekEnd, 'yyyy-MM-dd')}`);
 
-        const paginatedTrades = await getTradesAction();
-        const filteredTrades = normalizeTrades(paginatedTrades.trades).filter(trade => {
+        const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+        const filteredTrades = normalizeTrades(allTrades).filter(trade => {
             const tradeDate = trade.entryDate;
             return tradeDate >= currentWeekStart && tradeDate <= currentWeekEnd;
         });
@@ -60,7 +60,9 @@ export const getCurrentWeekSummary = tool({
                 start: currentWeekStart.toISOString(),
                 end: currentWeekEnd.toISOString()
             },
-            summary: generateTradeSummary(filteredTrades)
+            summary: generateTradeSummary(filteredTrades),
+            truncated: tradesResult.truncated,
+            dataQualityWarning: tradesResult.dataQualityWarning,
         };
     },
 }) 
