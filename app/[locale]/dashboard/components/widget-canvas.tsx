@@ -205,7 +205,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
       {isCustomizing && (
         <>
           <div className="absolute inset-0 rounded-xl border border-white/25 border-dashed shadow-[inset_0_0_0_1px_hsl(var(--foreground)/0.08)]" />
-          <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_top,hsl(var(--foreground)/0.18),hsl(var(--background)/0.74)_62%)] opacity-100 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 rounded-xl bg-black/40 opacity-100 backdrop-blur-[2px]" />
           <div className="absolute inset-0 flex items-center justify-center opacity-100 drag-handle cursor-grab active:cursor-grabbing">
             <div className="flex flex-col items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-4 py-3 text-foreground/85 backdrop-blur-md">
               <GripVertical className="h-6 w-4" />
@@ -718,10 +718,10 @@ export default function WidgetCanvas() {
                     currentType={widget.type}
                   >
                     <div className={cn(
-                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
+                      "h-full w-full rounded-xl transition-all duration-300 group/widget overflow-hidden relative border border-white/10 bg-black/85",
                       isCustomizing
-                        ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_hsl(var(--background)/0.95)]"
-                        : "bg-black/95 hover:border-white/20"
+                        ? "border-white/35 shadow-[0_12px_26px_-20px_hsl(var(--background)/0.9)]"
+                        : "hover:border-white/20"
                     )}>
                       {showDataDebug && !isCustomizing && (
                         <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
@@ -731,7 +731,6 @@ export default function WidgetCanvas() {
                           )}
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
                       <div className="relative h-full w-full">
                         {renderWidget(widget)}
                       </div>

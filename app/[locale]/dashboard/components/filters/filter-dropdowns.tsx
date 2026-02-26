@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useDashboardFilters } from "@/context/data-provider"
 import { useI18n } from "@/locales/client"
 import { FilterItem } from "@/app/[locale]/dashboard/types/filter"
-import { useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { PnlRangeFilter } from "./pnl-range-filter"
 import { AccountFilter } from "./account-filter"
@@ -19,7 +19,6 @@ import { useTradesStore } from "../../../../../store/trades-store"
 interface FilterDropdownProps {
   type: 'instrument'
   items: FilterItem[]
-  selectedItems: string[]
   onSelect: (value: string) => void
   onSelectAll: () => void
   isItemDisabled: (item: FilterItem) => boolean
@@ -30,7 +29,6 @@ interface FilterDropdownProps {
 function FilterDropdown({ 
   type, 
   items, 
-  selectedItems, 
   onSelect, 
   onSelectAll,
   isItemDisabled,
@@ -115,17 +113,13 @@ interface FilterDropdownsProps {
 export function FilterDropdowns({ showAccountNumbers }: FilterDropdownsProps) {
   const { instruments = [], setInstruments } = useDashboardFilters()
   const trades = useTradesStore(state => state.trades)
-  const [allItems, setAllItems] = useState<FilterItem[]>([])
-
-  useEffect(() => {
-    if (!trades?.length) return
-
-    const uniqueInstruments = Array.from(new Set(trades.map(trade => trade.instrument)))
-    
-    setAllItems(
-      uniqueInstruments.map(instrument => ({ type: 'instrument' as const, value: instrument }))
-    )
-  }, [trades])
+  const allItems = useMemo<FilterItem[]>(
+    () =>
+      Array.from(new Set((trades ?? []).map((trade) => trade.instrument).filter(Boolean))).map(
+        (instrument) => ({ type: 'instrument' as const, value: instrument })
+      ),
+    [trades]
+  )
 
   const handleSelectAll = (type: 'instrument') => {
     const itemsOfType = allItems.filter(item => item.type === type)
@@ -174,7 +168,6 @@ export function FilterDropdowns({ showAccountNumbers }: FilterDropdownsProps) {
       <FilterDropdown
         type="instrument"
         items={allItems.filter(item => item.type === 'instrument')}
-        selectedItems={instruments}
         onSelect={(value) => handleSelect('instrument', value)}
         onSelectAll={() => handleSelectAll('instrument')}
         isItemDisabled={isItemDisabled}

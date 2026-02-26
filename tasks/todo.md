@@ -1,4 +1,80 @@
+# Dashboard Content Gap Removal (2026-02-26)
+
+## Scope
+- Remove unnecessary left/right gutters on authenticated workspace pages caused by shared page-shell and team-layout max-width constraints.
+
+## Acceptance Criteria
+- [x] Shared dashboard page shell defaults to full-width behavior.
+- [x] Explicit capped-width override in dashboard trader-profile route is removed.
+- [x] Teams workspace dashboard/manage layouts no longer cap content at `1600px`.
+- [x] Verification run on touched files and recorded.
+
+## Plan Checklist
+- [x] Identify shared wrapper(s) introducing the side gap.
+- [x] Apply minimal layout changes to remove global dashboard gutter.
+- [x] Apply the same uncapped layout treatment to teams workspace shells.
+- [x] Run targeted verification and record evidence.
+
+## Current Step
+- **Completed:** Verification evidence captured and task closed.
+
+## Progress Notes
+- 2026-02-26: Confirmed `UnifiedPageShell` default `max-w-7xl` was creating centered gutters on dashboard pages.
+- 2026-02-26: Updated `UnifiedPageShell` default to `max-w-none` and removed `trader-profile` `max-w-[1600px]` override.
+- 2026-02-26: Removed `max-w-[1600px]` wrappers from teams dashboard/manage layout header and main content containers.
+
+## Completion Notes
+- Updated files:
+  - `components/layout/unified-page-shell.tsx`
+  - `app/[locale]/dashboard/trader-profile/page.tsx`
+  - `app/[locale]/teams/dashboard/layout.tsx`
+  - `app/[locale]/teams/manage/layout.tsx`
+- Verification evidence:
+  - `npx eslint components/layout/unified-page-shell.tsx app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/teams/dashboard/layout.tsx app/[locale]/teams/manage/layout.tsx` -> exit `0` (`0` errors, `2` pre-existing complexity warnings in trader-profile page).
+  - `npm run typecheck` -> exit `0`.
+- Residual risk:
+  - This fix removes width caps for authenticated workspace shells; if specific routes should remain constrained, they now need explicit per-route width overrides.
+
 # AI Functions Audit (2026-02-26)
+
+# Entire App Gap Audit (2026-02-26)
+
+## Scope
+- Audit the full application for quality gaps across correctness, performance budgets, reliability, and test/lint coverage.
+
+## Acceptance Criteria
+- [x] Baseline verification commands executed.
+- [x] Concrete, evidence-backed gaps captured with file/line references.
+- [x] Residual risks documented.
+
+## Plan Checklist
+- [x] Collect baseline repo state and prior lessons/todo context.
+- [x] Run `typecheck`, `test`, `build`, and performance budget checks.
+- [x] Analyze lint debt shape and identify highest-risk warning classes.
+- [x] Inspect representative source files for root-cause validation.
+- [x] Document prioritized findings and verification evidence.
+
+## Current Step
+- **Completed:** App-wide gap audit evidence collection and reporting.
+
+## Progress Notes
+- 2026-02-26: Verified green core gates (`npm run typecheck`, `npm test`, `npm run build`).
+- 2026-02-26: Detected dashboard route budget regressions (`npm run check:route-budgets`).
+- 2026-02-26: Quantified lint debt (`1589` warnings) and extracted highest-risk rule categories.
+- 2026-02-26: Validated source-level correctness gaps in smart-insights action links and placeholder insight logic.
+
+## Completion Notes
+- Verification evidence:
+  - `npm run typecheck` -> exit `0`.
+  - `npm test` -> exit `0` (`150 passed | 46 skipped`).
+  - `npm run build` -> exit `0`.
+  - `npm run check:route-budgets` -> exit `1` (dashboard routes over 80 KB budget).
+  - `npm run analyze:bundle` -> exit `0` (artifact updated at `docs/audits/artifacts/bundle-summary.json`).
+  - `npm run lint -- --max-warnings=999999` -> exit `0` with `1589` warnings (`0` errors).
+- Residual risk:
+  - Dashboard route manifest size overages can regress interaction performance on low-end clients.
+  - Smart-insight action routes include dead/nonexistent destinations and placeholder logic.
+  - Payment integration tests are gated off by default env flag and do not run in standard CI/local test executions.
 
 # App-Wide Color Contract Remediation (2026-02-26)
 
@@ -737,4 +813,77 @@
 - Verification evidence:
   - `npx eslint app/[locale]/dashboard/components/charts/equity-chart.tsx` -> `0` errors.
   - `rg --files app/[locale]/dashboard/components -g "*.ts" -g "*.tsx" | xargs npx eslint --max-warnings=999999` -> `0` errors (`672` warnings remain).
+  - `npm run typecheck` -> exits `0`.
+
+# Reports + Behavior Page Revival (2026-02-26)
+
+## Scope
+- Turn `/dashboard/reports` and `/dashboard/behavior` into clearly functional, non-placeholder experiences.
+
+## Acceptance Criteria
+- [x] `/reports` shows actionable overview metrics and real analysis status.
+- [x] Reports cache clear action is functional (not a no-op).
+- [x] `/behavior` uses the optimized client implementation with safer loading behavior.
+- [x] Targeted verification run and recorded.
+
+## Plan Checklist
+- [x] Inspect route files and shared analysis components for dead logic.
+- [x] Implement reports UX and analysis-status wiring.
+- [x] Replace behavior route implementation with maintained optimized client page.
+- [x] Run targeted type validation for touched routes/components.
+
+## Current Step
+- **Completed:** Verification evidence captured.
+
+## Progress Notes
+- 2026-02-26: Replaced dead `Clear Cache` no-op in analysis overview with actual store reset action.
+- 2026-02-26: Connected analysis header badge to real loading/data/last-updated state.
+- 2026-02-26: Added reports top-level summary cards and quick action jump-to-analysis.
+- 2026-02-26: Switched `/behavior` route to the optimized `page-client` implementation.
+
+## Completion Notes
+- Verification evidence:
+  - `npm run typecheck` -> exit `0`.
+  - `npx eslint <touched files>` -> exit `0` with `1` pre-existing complexity warning in reports page (`complexity`).
+
+---
+
+# Widget Visual Flow Overhaul (30+ Widgets)
+
+## Scope
+- Improve visual flow and color consistency across dashboard widgets using shared UI primitives and global widget styles.
+
+## Acceptance Criteria
+- [x] Shared widget shells/charts use one cohesive monochrome system.
+- [x] Widget loading and edit overlays avoid gradient-heavy styling.
+- [x] Equity widget remains load-safe after visual refactor.
+- [x] Verification passes with zero errors.
+
+## Plan Checklist
+- [x] Audit shared widget primitives and CSS hooks.
+- [x] Apply cross-cutting design updates in shared components/CSS.
+- [x] Verify with lint/typecheck and record outcomes.
+
+## Current Step
+- **Completed:** Shared visual system patch + verification.
+
+## Progress Notes
+- 2026-02-26: Updated `ChartSurface` spacing/typography/header rhythm for tighter and cleaner widget hierarchy.
+- 2026-02-26: Updated `WidgetShell` framing/colors for consistent panel treatment and stronger contrast.
+- 2026-02-26: Updated `ChartContainer` styling to remove extra panel layering and simplify chart framing.
+- 2026-02-26: Updated lazy widget loading shell to non-gradient monochrome surface.
+- 2026-02-26: Updated `WidgetCanvas` frame and customize overlay to cleaner non-gradient styling.
+- 2026-02-26: Tuned global widget CSS (`[data-widget-shell]`, `[data-chart-surface]`) for unified borders, spacing, hover behavior, and legend/header rhythm.
+
+## Completion Notes
+- Updated files:
+  - `components/ui/chart-surface.tsx`
+  - `components/ui/widget-shell.tsx`
+  - `components/ui/chart.tsx`
+  - `app/[locale]/dashboard/components/lazy-widget.tsx`
+  - `app/[locale]/dashboard/components/widget-canvas.tsx`
+  - `app/[locale]/dashboard/components/charts/equity-chart.tsx`
+  - `app/globals.css`
+- Verification evidence:
+  - `npx eslint <touched files>` -> `0` errors (warnings only).
   - `npm run typecheck` -> exits `0`.

@@ -72,23 +72,23 @@ export function ChartSurface({
   return (
     <div
       data-chart-surface="v2"
-      className={cn("h-full flex flex-col bg-transparent", className)}
+      className={cn("h-full flex flex-col overflow-hidden rounded-xl bg-transparent", className)}
     >
       {hasHeader && (
         <div
           className={cn(
-            "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
-            isSmall ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
+            "flex shrink-0 items-center border-b border-white/10",
+            isSmall ? "h-10 px-2.5" : "h-12 px-3.5",
             headerClassName
           )}
         >
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex items-center gap-2">
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="min-w-0 flex items-center gap-1.5">
               {title ? (
                 <span
                   className={cn(
-                    "line-clamp-1 font-bold tracking-tight text-fg-primary",
-                    isSmall ? "text-sm" : "text-base"
+                    "line-clamp-1 text-fg-primary",
+                    isSmall ? "text-[13px] font-semibold" : "text-sm font-semibold"
                   )}
                 >
                   {title}
@@ -96,7 +96,7 @@ export function ChartSurface({
               ) : null}
               {info}
               {subtitle ? (
-                <span className="hidden text-xs text-fg-muted sm:inline">{subtitle}</span>
+                <span className="hidden text-[11px] text-fg-muted sm:inline">{subtitle}</span>
               ) : null}
             </div>
             {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -106,7 +106,7 @@ export function ChartSurface({
       <div
         className={cn(
           "flex flex-col flex-1 min-h-0",
-          shouldPadBody ? (isSmall ? "p-1" : "p-2 sm:p-3") : "p-0",
+          shouldPadBody ? (isSmall ? "p-1.5" : "p-2.5 sm:p-3") : "p-0",
           bodyClassName
         )}
       >

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
-import { getI18n } from "@/locales/server";
 import { setStaticParamsLocale } from "next-international/server";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: 'Documentation | Qunt Edge',
@@ -11,7 +11,6 @@ export const revalidate = 1800;
 export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     setStaticParamsLocale(locale);
-    const t = await getI18n();
 
     return (
         <div className="max-w-7xl mx-auto py-20 sm:py-24 px-4 sm:px-6 lg:px-8">
@@ -47,7 +46,7 @@ export default async function DocsPage({ params }: { params: Promise<{ locale: s
             </div>
 
             <footer className="mt-24 pt-8 border-t border-white/5 text-center">
-                <p className="text-zinc-500 text-sm">Need immediate help? Visit our <a href="/support" className="text-white hover:underline">Support Center</a> or join our <a href="https://discord.gg/efHDc43M" className="text-white hover:underline">Discord</a>.</p>
+                <p className="text-zinc-500 text-sm">Need immediate help? Visit our <Link href={`/${locale}/support`} className="text-white hover:underline">Support Center</Link> or join our <a href="https://discord.gg/efHDc43M" className="text-white hover:underline">Discord</a>.</p>
             </footer>
         </div>
     );

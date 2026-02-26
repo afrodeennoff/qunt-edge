@@ -412,10 +412,11 @@
   [data-widget-shell="v2"] {
     position: relative;
     overflow: hidden;
-    border-radius: 0.95rem;
-    border: 1px solid hsl(var(--foreground) / 0.12);
-    background: hsl(var(--precision-panel) / 0.96);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.03);
+    border-radius: 0.85rem;
+    border: 1px solid hsl(var(--foreground) / 0.13);
+    background: hsl(var(--precision-panel) / 0.985);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.02);
+    transition: border-color 180ms ease, background-color 180ms ease;
   }
 
   [data-widget-shell="true"]::before {
@@ -442,9 +443,9 @@
   [data-chart-surface="v2"] {
     position: relative;
     overflow: hidden;
-    border-color: hsl(var(--foreground) / 0.12);
-    background: hsl(var(--precision-panel) / 0.96);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.03);
+    border-color: hsl(var(--foreground) / 0.1);
+    background: hsl(var(--precision-panel) / 0.985);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.02);
   }
 
   [data-chart-surface="modern"]::before {
@@ -469,20 +470,25 @@
   /* Dashboard-only spacing normalization for ChartSurface headers */
   [data-widget-shell="true"] [data-chart-surface="modern"]>div:first-child:not(.flex-1),
   [data-widget-shell="v2"] [data-chart-surface="v2"]>div:first-child:not(.flex-1) {
-    height: 3rem !important;
-    min-height: 3rem;
-    padding: 0.65rem 0.85rem !important;
+    height: 2.95rem !important;
+    min-height: 2.95rem;
+    padding: 0.55rem 0.85rem !important;
   }
 
   [data-widget-shell="true"] [data-chart-surface="modern"]>div:nth-child(2),
   [data-widget-shell="v2"] [data-chart-surface="v2"]>div:nth-child(2) {
-    padding: 0.5rem 0.75rem !important;
+    padding: 0.6rem 0.8rem !important;
   }
 
   [data-chart-surface="modern"] .recharts-legend-wrapper,
   [data-chart-surface="v2"] .recharts-legend-wrapper {
-    padding-top: 0.35rem !important;
+    padding-top: 0.45rem !important;
     padding-bottom: 0 !important;
+  }
+
+  [data-widget-shell="true"]:hover,
+  [data-widget-shell="v2"]:hover {
+    border-color: hsl(var(--foreground) / 0.22);
   }
 
   img {

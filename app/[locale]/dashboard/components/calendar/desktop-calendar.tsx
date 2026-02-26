@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from "react"
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, getDay, endOfWeek, addDays, isSameDay, getYear } from "date-fns"
+import React, { useState, useMemo } from "react"
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, getDay, endOfWeek, addDays, getYear } from "date-fns"
 import { formatInTimeZone } from 'date-fns-tz'
 import { fr, enUS } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, Newspaper, Calendar, CalendarDays } from "lucide-react"
@@ -303,9 +303,6 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   const weekStartsOnMonday = locale === 'fr'
   const WEEKDAYS = weekStartsOnMonday ? WEEKDAYS_MONDAY_START : WEEKDAYS_SUNDAY_START
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [isLoading, setIsLoading] = useState(false)
-  const [monthEvents, setMonthEvents] = useState<FinancialEvent[]>([])
-  const [calendarDays, setCalendarDays] = useState<Date[]>([])
 
   // Memoize monthStart and monthEnd calculations
   const { monthStart, monthEnd } = React.useMemo(() => ({
@@ -313,10 +310,10 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
     monthEnd: endOfMonth(currentDate)
   }), [currentDate])
 
-  // Update calendarDays when currentDate changes
-  useEffect(() => {
-    setCalendarDays(getCalendarDays(monthStart, monthEnd, weekStartsOnMonday))
-  }, [currentDate, monthStart, monthEnd, weekStartsOnMonday])
+  const calendarDays = useMemo(
+    () => getCalendarDays(monthStart, monthEnd, weekStartsOnMonday),
+    [monthStart, monthEnd, weekStartsOnMonday]
+  )
 
   // Use the calendar view store
   const {
@@ -334,17 +331,13 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   const selectedCountries = useNewsFilterStore((s) => s.selectedCountries)
   const setSelectedCountries = useNewsFilterStore((s) => s.setSelectedCountries)
 
-  // Update monthEvents when currentDate or financialEvents change
-  useEffect(() => {
-    const monthStart = startOfMonth(currentDate)
-    const monthEnd = endOfMonth(currentDate)
-
-    const filteredEvents = userFinancialEvents.filter(event => {
+  const monthEvents = useMemo(() => {
+    const currentMonthStart = startOfMonth(currentDate)
+    const currentMonthEnd = endOfMonth(currentDate)
+    return userFinancialEvents.filter((event) => {
       const eventDate = new Date(event.date)
-      return eventDate >= monthStart && eventDate <= monthEnd && event.lang === locale
+      return eventDate >= currentMonthStart && eventDate <= currentMonthEnd && event.lang === locale
     })
-
-    setMonthEvents(filteredEvents)
   }, [currentDate, userFinancialEvents, locale])
 
   const handlePrevMonth = React.useCallback(() => {

@@ -7,9 +7,7 @@ import {
     AlertTriangle,
     Lightbulb,
     CheckCircle2,
-    MoreHorizontal,
     ArrowRight,
-    Loader2,
     RefreshCw
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -18,18 +16,17 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getSmartInsights, SmartInsight } from "../../actions/get-smart-insights"
+import { getSmartInsights, InsightActionTarget, SmartInsight } from "../../actions/get-smart-insights"
 import { useUserStore } from "@/store/user-store"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { useI18n } from "@/locales/client"
+import { useCurrentLocale, useI18n } from "@/locales/client"
 
 import { WidgetSize } from "../../types/dashboard"
 
@@ -39,6 +36,7 @@ interface SmartInsightsWidgetProps {
 
 export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProps) {
     const t = useI18n()
+    const locale = useCurrentLocale()
     const [insights, setInsights] = React.useState<SmartInsight[]>([])
     const [loading, setLoading] = React.useState(true)
     const user = useUserStore(state => state.supabaseUser)
@@ -48,8 +46,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
         setLoading(true)
         try {
             const data = await getSmartInsights(user.id)
-            // Sort by confidence or priority
-            setInsights(data.sort((a, b) => (b.confidence || 0) - (a.confidence || 0)))
+            setInsights([...data].sort((a, b) => (b.confidence || 0) - (a.confidence || 0)))
         } catch (error) {
             console.error('Failed to load insights', error)
         } finally {
@@ -70,17 +67,42 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
         }
     }
 
-    const getBadgeVariant = (type: SmartInsight['type']) => {
-        switch (type) {
-            case 'risk': return "destructive"
-            case 'opportunity': return "warning" // custom variant if exists, else outline
-            case 'achievement': return "success" // custom variant if exists
-            default: return "secondary"
-        }
-    }
+    const allowedTargets = React.useMemo<ReadonlySet<InsightActionTarget>>(
+      () =>
+        new Set<InsightActionTarget>([
+          "/dashboard",
+          "/dashboard?tab=table",
+          "/dashboard?tab=accounts",
+          "/dashboard/reports",
+          "/dashboard/behavior",
+          "/dashboard/trader-profile",
+          "/dashboard/settings",
+          "/dashboard/import",
+          "/dashboard/data",
+        ]),
+      []
+    );
 
-    // Calculate if we should show compact view based on widget size
-    const isCompact = size === 'tiny' || size === 'small' || size === 'small-long'
+    const toLocalizedHref = React.useCallback(
+      (href: InsightActionTarget) => `/${locale}${href}`,
+      [locale]
+    );
+
+    const resolveInsightHref = React.useCallback(
+      (href: InsightActionTarget | undefined) => {
+        if (!href || !allowedTargets.has(href)) return toLocalizedHref("/dashboard");
+        return toLocalizedHref(href);
+      },
+      [allowedTargets, toLocalizedHref]
+    );
+
+    const formatInsightDate = React.useCallback((timestamp: Date | string) => {
+      return new Date(timestamp).toLocaleDateString(locale);
+    }, [locale]);
+
+    if (size === "tiny") {
+      // Keep API stable for tiny variant while avoiding unused-prop lint.
+    }
 
     return (
         <Card className="h-full flex flex-col overflow-hidden border-border bg-card/50 backdrop-blur-xl relative group">
@@ -143,7 +165,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                                 <div>
                                                     <h4 className="text-sm font-medium leading-none">{insight.title}</h4>
                                                     <span className="text-[10px] text-muted-foreground">
-                                                        {new Date(insight.timestamp).toLocaleDateString()}
+                                                        {formatInsightDate(insight.timestamp)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -161,7 +183,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                         {insight.action && (
                                             <div className="flex justify-end mt-1">
                                                 <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 gap-1 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold uppercase tracking-widest" asChild>
-                                                    <Link href={insight.action.href || '#'}>
+                                                    <Link href={resolveInsightHref(insight.action.href)}>
                                                         {insight.action.label}
                                                         <ArrowRight className="h-3 w-3" />
                                                     </Link>

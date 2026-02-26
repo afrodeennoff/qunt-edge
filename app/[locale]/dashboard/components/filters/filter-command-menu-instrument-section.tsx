@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useMemo } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CommandItem } from "@/components/ui/command"
 import { useI18n } from "@/locales/client"
@@ -15,16 +15,11 @@ export function InstrumentSection({ searchValue }: InstrumentSectionProps) {
   const { instruments = [], setInstruments } = useDashboardFilters()
   const trades = useTradesStore(state => state.trades)
   const t = useI18n()
-  const [availableInstruments, setAvailableInstruments] = useState<string[]>([])
-
-  useEffect(() => {
-    if (trades && trades.length > 0) {
-      const uniqueInstruments = Array.from(
-        new Set(trades.map(trade => trade.instrument || '').filter(Boolean))
-      )
-      setAvailableInstruments(uniqueInstruments)
-    }
-  }, [trades])
+  const availableInstruments = useMemo(
+    () =>
+      Array.from(new Set((trades ?? []).map((trade) => trade.instrument || '').filter(Boolean))),
+    [trades]
+  )
 
   // Filter instruments based on search term
   const filteredInstruments = searchValue
@@ -38,9 +33,7 @@ export function InstrumentSection({ searchValue }: InstrumentSectionProps) {
       instruments.includes(instrument)
     )
     
-    setInstruments(prev =>
-      allSelected ? [] : [...availableInstruments]
-    )
+    setInstruments(allSelected ? [] : [...availableInstruments])
   }
 
   const handleSelect = (instrument: string) => {
@@ -95,4 +88,3 @@ export function InstrumentSection({ searchValue }: InstrumentSectionProps) {
     </>
   )
 }
-

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
@@ -17,26 +17,22 @@ interface AccountCardProps {
 
 export function AccountCard({ account, onClick, size = 'large' }: AccountCardProps) {
   const t = useI18n()
-  const [daysUntilNextPayment, setDaysUntilNextPayment] = useState<number | null>(null)
+  const [currentTime, setCurrentTime] = useState(() => Date.now())
 
   useEffect(() => {
-    const nextPaymentDate = account.nextPaymentDate
-    if (!nextPaymentDate) {
-      setDaysUntilNextPayment(null)
-      return
-    }
-
-    const updateDaysUntilNextPayment = () => {
-      const remainingDays = Math.floor(
-        (new Date(nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-      )
-      setDaysUntilNextPayment(remainingDays)
-    }
-
-    updateDaysUntilNextPayment()
-    const intervalId = setInterval(updateDaysUntilNextPayment, 60 * 60 * 1000)
+    if (!account.nextPaymentDate) return
+    const intervalId = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 60 * 60 * 1000)
     return () => clearInterval(intervalId)
   }, [account.nextPaymentDate])
+
+  const daysUntilNextPayment = useMemo(() => {
+    if (!account.nextPaymentDate) return null
+    return Math.floor(
+      (new Date(account.nextPaymentDate).getTime() - currentTime) / (1000 * 60 * 60 * 24)
+    )
+  }, [account.nextPaymentDate, currentTime])
 
   // Extract metrics from account (computed server-side)
   const metrics = account.metrics
