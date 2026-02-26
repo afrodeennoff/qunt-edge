@@ -75,14 +75,14 @@ const formatCurrency = (value: number) =>
 
 function getChartColorByIndex(index: number): string {
   const paletteVars = [
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
-    "hsl(var(--foreground) / )",
+    "hsl(var(--foreground) / 0.95)",
+    "hsl(var(--foreground) / 0.85)",
+    "hsl(var(--foreground) / 0.75)",
+    "hsl(var(--foreground) / 0.65)",
+    "hsl(var(--foreground) / 0.55)",
+    "hsl(var(--foreground) / 0.45)",
+    "hsl(var(--foreground) / 0.35)",
+    "hsl(var(--foreground) / 0.25)",
   ];
   return paletteVars[index % paletteVars.length];
 }
@@ -111,22 +111,22 @@ const getPayoutColors = (status: string) => {
   switch (status) {
     case "PENDING":
       return {
-        fg: "hsl(var(--foreground) / )",
-        bg: "hsl(var(--foreground) / )",
+        fg: "hsl(var(--foreground) / 0.75)",
+        bg: "hsl(var(--foreground) / 0.08)",
       };
     case "VALIDATED":
-      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / )" };
+      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / 0.1)" };
     case "REFUSED":
       return {
-        fg: "hsl(var(--foreground) / )",
-        bg: "hsl(var(--foreground) / )",
+        fg: "hsl(var(--foreground) / 0.6)",
+        bg: "hsl(var(--foreground) / 0.08)",
       };
     case "PAID":
-      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / )" };
+      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / 0.12)" };
     default:
       return {
-        fg: "hsl(var(--foreground) / )",
-        bg: "hsl(var(--foreground) / )",
+        fg: "hsl(var(--foreground) / 0.75)",
+        bg: "hsl(var(--foreground) / 0.08)",
       };
   }
 };
@@ -712,7 +712,12 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [formattedTrades, timezone]);
 
   React.useEffect(() => {
-    const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
+    const firstTradeId = formattedTrades?.[0]?.id;
+    const isMock =
+      formattedTrades?.length > 0 &&
+      (typeof firstTradeId === "string"
+        ? firstTradeId.startsWith("mock-")
+        : false);
 
     if (isSharedView || isTeamView || isMock) {
       setIsLoading(true);

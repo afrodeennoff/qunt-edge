@@ -232,6 +232,10 @@
 - 2026-02-25: Removed duplicate standalone Behavior page header and kept in-card `Behavior AI Hub` header for consistent hierarchy.
 - 2026-02-25: Removed standalone `UnifiedPageHeader` banner blocks across redesigned dashboard/landing/team pages to enforce single-header hierarchy and consistent no-gradient page structure.
 - 2026-02-25: Targeted lint verification on all touched redesign pages exits with `0` errors (`17` pre-existing warnings in support/settings/trader-profile).
+- 2026-02-26: Removed remaining duplicate top header block from `/teams/dashboard` (`Choose a Team Workspace`) so the page keeps a single primary heading (`Team Management` section).
+- 2026-02-26: Verification: `npx eslint app/[locale]/teams/dashboard/page.tsx` exits `0`.
+- 2026-02-26: Removed additional top "Next Step" card from `/teams/dashboard/page.tsx` to eliminate secondary heading block above `TeamManagement`.
+- 2026-02-26: Re-verified `/teams/dashboard/page.tsx` with ESLint after cleanup (`0` errors).
 
 ## Completion Notes
 - Unified no-gradient redesign applied across requested routes; remaining verification blocker is pre-existing test typing failures.
@@ -698,3 +702,39 @@
   - `npm run typecheck` -> exit `0`.
 - Residual risk:
   - This is a resilience fix (degraded mode without snapshot cache). To restore cached benchmark behavior, apply migration `20260225170000_backend_hardening_core` (or create `public.TraderBenchmarkSnapshot`) in the target Supabase database.
+
+---
+
+# Widget Reliability Audit Todo (Equity + 30+ Widgets)
+
+## Scope
+- Fix the equity widget load failure.
+- Audit all dashboard widgets/components and ensure verification shows zero errors.
+
+## Acceptance Criteria
+- [x] Equity widget load path has no runtime type crash on mixed/non-string trade IDs.
+- [x] Widget rendering styles do not use invalid color tokens that can break chart styling.
+- [x] Broad widget/component lint run completes with zero errors.
+- [x] Typecheck completes with zero errors.
+
+## Plan Checklist
+- [x] Diagnose equity widget failure and identify concrete root cause.
+- [x] Patch equity chart load logic with type-safe mock detection and valid color tokens.
+- [x] Run broad widget audit checks and record outcomes.
+
+## Current Step
+- **Completed:** Equity fix + widget audit verification.
+
+## Progress Notes
+- 2026-02-26: Identified equity crash risk in `/app/[locale]/dashboard/components/charts/equity-chart.tsx` where `formattedTrades[0].id.startsWith("mock-")` could throw when `id` is non-string.
+- 2026-02-26: Replaced unsafe ID check with a type-safe guard.
+- 2026-02-26: Replaced invalid CSS color tokens (`hsl(var(--foreground) / )`) with valid alpha-based tokens for account/payout rendering consistency.
+- 2026-02-26: Audited dashboard widget/component surface (`92` TS/TSX files under `/app/[locale]/dashboard/components`).
+
+## Completion Notes
+- Updated file:
+  - `app/[locale]/dashboard/components/charts/equity-chart.tsx`
+- Verification evidence:
+  - `npx eslint app/[locale]/dashboard/components/charts/equity-chart.tsx` -> `0` errors.
+  - `rg --files app/[locale]/dashboard/components -g "*.ts" -g "*.tsx" | xargs npx eslint --max-warnings=999999` -> `0` errors (`672` warnings remain).
+  - `npm run typecheck` -> exits `0`.
