@@ -30,6 +30,10 @@ const SUPPORT_MODEL_ALLOWLIST = new Set([
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
+    }
+
     const supabase = createRouteClient(req)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user?.id) {

@@ -18,11 +18,6 @@ const ALLOWED_AUDIO_TYPES = new Set([
   'audio/aac',
 ])
 
-const openai = new OpenAI({
-  baseURL: 'https://api.z.ai/api/paas/v4',
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 export async function POST(request: NextRequest) {
   try {
     if (!process.env.OPENAI_API_KEY) {
@@ -94,6 +89,11 @@ export async function POST(request: NextRequest) {
     // Create a File object for OpenAI API
     const audioForWhisper = new File([audioBlob], audioFile.name, {
       type: audioFile.type,
+    })
+
+    const openai = new OpenAI({
+      baseURL: 'https://api.z.ai/api/paas/v4',
+      apiKey: process.env.OPENAI_API_KEY,
     })
 
     // Transcribe using OpenAI Whisper

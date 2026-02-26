@@ -49,6 +49,9 @@ export const getTradesSummary = tool({
     const allTrades = tradesResult.trades;
     const start = new Date(startDate);
     const end = new Date(endDate);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new Error("Invalid startDate or endDate format");
+    }
     const filteredTrades = allTrades.filter(trade => {
       const tradeDate = new Date(trade.entryDate);
       return tradeDate >= start && tradeDate <= end;

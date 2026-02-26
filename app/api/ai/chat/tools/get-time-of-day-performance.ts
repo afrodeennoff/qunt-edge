@@ -272,6 +272,11 @@ export const getTimeOfDayPerformance = tool({
       });
     }
 
-    return analyzeTimeOfDay(trades, timezone);
+    const analysis = analyzeTimeOfDay(trades, timezone);
+    return {
+      ...analysis,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

@@ -50,7 +50,9 @@ export const getCurrentDayData = tool({
         })
 
         return {
-            summary: generateTradeSummary(filteredTrades)
+            summary: generateTradeSummary(filteredTrades),
+            truncated: tradesResult.truncated,
+            dataQualityWarning: tradesResult.dataQualityWarning,
         };
     },
 }) 

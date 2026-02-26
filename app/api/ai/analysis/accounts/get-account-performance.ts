@@ -239,6 +239,7 @@ export const getAccountPerformance = tool({
     minTrades: z.number().optional().describe('Minimum number of trades required to include an account in analysis')
   }),
   execute: async ({ startDate, endDate, minTrades = 1 }: { startDate?: string, endDate?: string, minTrades?: number }) => {
+    const safeMinTrades = Math.min(1000, Math.max(1, Math.floor(minTrades)));
 
     const tradesResult = await getAllTradesForAi();
     const allTrades = tradesResult.trades;
@@ -263,8 +264,12 @@ export const getAccountPerformance = tool({
     const analysis = analyzeAccounts(trades);
     
     // Filter out accounts with fewer than minTrades
-    analysis.accounts = analysis.accounts.filter(account => account.totalTrades >= minTrades);
+    analysis.accounts = analysis.accounts.filter(account => account.totalTrades >= safeMinTrades);
     
-    return analysis;
+    return {
+      ...analysis,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

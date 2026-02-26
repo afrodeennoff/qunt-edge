@@ -94,7 +94,6 @@ function requestHeaders(target, method = 'HEAD') {
 const failures = [];
 
 for (const check of checks) {
-  // eslint-disable-next-line no-await-in-loop
   const response = await requestHeaders(check.route, check.method);
   const cacheControl = String(response.headers['cache-control'] ?? '').toLowerCase();
   const policyHeader = String(response.headers['x-dashboard-cache-policy'] ?? '').toLowerCase();

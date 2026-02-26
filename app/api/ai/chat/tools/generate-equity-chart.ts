@@ -166,9 +166,11 @@ export const generateEquityChart = tool({
       showIndividual,
       timezone,
       totalTrades: trades.length,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
       message: `Generated equity chart with ${chartData.length} data points for ${limitedAccountNumbers.length} account(s)`
     };
-    
+
     return result;
   },
 })

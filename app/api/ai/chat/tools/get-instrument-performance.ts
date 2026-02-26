@@ -263,6 +263,7 @@ export const getInstrumentPerformance = tool({
     minTrades: z.number().optional().describe('Minimum number of trades required to include an instrument in analysis')
   }),
   execute: async ({ startDate, endDate, minTrades = 1 }: { startDate?: string, endDate?: string, minTrades?: number }) => {
+    const safeMinTrades = Math.min(1000, Math.max(1, Math.floor(minTrades)));
 
     const tradesResult = await getAllTradesForAi();
     const allTrades = tradesResult.trades;
@@ -281,8 +282,12 @@ export const getInstrumentPerformance = tool({
     const analysis = analyzeInstruments(trades);
 
     // Filter out instruments with fewer than minTrades
-    analysis.instruments = analysis.instruments.filter(instrument => instrument.totalTrades >= minTrades);
+    analysis.instruments = analysis.instruments.filter(instrument => instrument.totalTrades >= safeMinTrades);
 
-    return analysis;
+    return {
+      ...analysis,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

@@ -13,6 +13,14 @@ export const getTradesDetails = tool({
         side: z.string().describe('Side').optional(),
     }),
     execute: async ({ instrument, startDate, endDate, accountNumber, side }: { instrument?: string, startDate?: string, endDate?: string, accountNumber?: string, side?: string }) => {
+        const parsedStart = startDate ? new Date(startDate) : null;
+        const parsedEnd = endDate ? new Date(endDate) : null;
+        if (parsedStart && Number.isNaN(parsedStart.getTime())) {
+            throw new Error("Invalid startDate format");
+        }
+        if (parsedEnd && Number.isNaN(parsedEnd.getTime())) {
+            throw new Error("Invalid endDate format");
+        }
         const tradesResult = await getAllTradesForAi();
     const allTrades = tradesResult.trades;
         let trades = allTrades;
@@ -23,10 +31,10 @@ export const getTradesDetails = tool({
             trades = trades.filter(trade => trade.instrument === instrument);
         }
         if (startDate) {
-            trades = trades.filter(trade => trade.entryDate >= startDate);
+            trades = trades.filter(trade => new Date(trade.entryDate) >= (parsedStart as Date));
         }
         if (endDate) {
-            trades = trades.filter(trade => trade.entryDate <= endDate);
+            trades = trades.filter(trade => new Date(trade.entryDate) <= (parsedEnd as Date));
         }
         if (side) {
             trades = trades.filter(trade => trade.side === side);

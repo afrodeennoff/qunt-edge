@@ -50,10 +50,7 @@ export async function POST(req: NextRequest) {
     const { query, locale = "en", timezone } = requestSchema.parse(body);
 
     if (!query.trim()) {
-      return new Response(JSON.stringify({ error: "Query is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiError("VALIDATION_FAILED", "Query is required", 400);
     }
 
     // Get current date context

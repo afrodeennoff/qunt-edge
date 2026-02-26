@@ -158,6 +158,11 @@ export const getOverallPerformanceMetrics = tool({
       });
     }
 
-    return calculateOverallMetrics(trades as SerializedTrade[]);
+    const metrics = calculateOverallMetrics(trades as SerializedTrade[]);
+    return {
+      ...metrics,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

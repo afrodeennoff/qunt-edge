@@ -99,23 +99,29 @@
 - [x] Run verification and record final evidence.
 
 ## Current Step
-- Completed.
+- **Completed:** final hardening pass (header matrix + runtime deferral + baseline percentiles).
 
 ## Progress Notes
 - 2026-02-26: Applied proxy route-class matchers for public/private document cache handling.
 - 2026-02-26: Added explicit public-route revalidation (home, pricing, updates, faq/docs/about/privacy).
 - 2026-02-26: Added performance scripts and CI gate integration (headers + Lighthouse + artifacts).
 - 2026-02-26: Added `docs/perf-execution-plan.md`, `docs/perf-route-tracker.md`, and weekly report template.
+- 2026-02-26: Expanded `perf:headers` to route-class matrix coverage (public/private docs + public/private APIs) with strict status/header assertions.
+- 2026-02-26: Extended `perf:baseline` output to include `p50/p95` TTFB and total latency.
+- 2026-02-26: Reduced runtime churn in `RootProviders` (service-worker lifecycle effect now runs once; global motion wrappers skipped on private surfaces).
+- 2026-02-26: Deferred dashboard overlay mount to idle time and gated home deferred sections by viewport intersection.
 
 ## Completion Notes
 - Verification evidence:
-  - `npm run typecheck` -> `0`.
+  - `npm run typecheck` -> **failed** (`app/api/ai/chat/route.ts` type mismatch, pre-existing and outside this perf scope).
+  - `npx eslint` on touched perf/runtime files -> `0` errors (`proxy.ts` complexity/any warnings pre-existing).
+  - `node --check scripts/perf-lighthouse.mjs scripts/perf-header-check.mjs scripts/perf-baseline.mjs` -> `0`.
   - `npm run perf:baseline` -> `0` (artifact generated).
   - `npm run perf:headers` -> `0` in non-strict local mode (strict mode enforced in CI via `PERF_HEADER_STRICT=true`).
   - `npm run perf:lighthouse` -> `0` with temporary permissive thresholds during local script verification (artifacts generated).
-  - `node --check scripts/perf-lighthouse.mjs scripts/perf-header-check.mjs scripts/perf-baseline.mjs` -> `0`.
 - Blockers/residual risk:
   - `npm run build` failed in this environment due external DNS restriction to `fonts.googleapis.com` (pre-existing environment/network issue).
+  - Production-domain baseline/header checks were blocked in this environment (`ENOTFOUND qunt-edge.vercel.app`).
   - Because production build could not complete, `npm run check:route-budgets` and `npm run analyze:bundle` could not run against fresh manifests in this session.
 
 ---

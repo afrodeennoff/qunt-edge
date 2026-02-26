@@ -200,6 +200,11 @@ export const getPerformanceTrends = tool({
       });
     }
 
-    return analyzeTrends(trades as SerializedTrade[]);
+    const trends = analyzeTrends(trades as SerializedTrade[]);
+    return {
+      ...trends,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 });

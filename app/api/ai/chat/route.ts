@@ -28,9 +28,20 @@ const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-cha
 
 type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
 type ChatMessagePart = { type?: string; text?: string }
-type ChatMessage = { role?: string; content?: unknown; parts?: ChatMessagePart[]; text?: string }
+type ChatMessage = { role: "user" | "assistant" | "system"; content?: unknown; parts?: ChatMessagePart[]; text?: string }
+const chatMessageSchema = z.object({
+  role: z.enum(["user", "assistant", "system"]),
+  content: z.unknown().optional(),
+  parts: z.array(
+    z.object({
+      type: z.string().optional(),
+      text: z.string().optional(),
+    }),
+  ).optional(),
+  text: z.string().optional(),
+})
 const chatRequestSchema = z.object({
-  messages: z.array(z.custom<ChatMessage>()).min(1, "messages are required"),
+  messages: z.array(chatMessageSchema).min(1, "messages are required"),
   username: z.string().optional(),
   locale: z.string().optional().default("en"),
   timezone: z.string().optional().default("UTC"),
@@ -210,7 +221,9 @@ export async function POST(req: NextRequest) {
     const intent = classifyIntent(latestText);
     const toolPolicy = getToolingPolicy(intent);
 
-    const convertedMessages = await convertToModelMessages(messages);
+    const convertedMessages = await convertToModelMessages(
+      messages as Parameters<typeof convertToModelMessages>[0],
+    );
     const systemPrompt = buildSystemPrompt({
       locale,
       username,
