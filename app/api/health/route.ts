@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger, withLogContext } from '@/lib/logger'
+import { requireServiceAuth } from '@/server/authz'
 
 const DB_LATENCY_ALERT_MS = Number.parseInt(process.env.DB_LATENCY_ALERT_MS || "250", 10)
+const EXPOSE_HEALTH_DETAILS_PUBLICLY = process.env.HEALTH_DETAILS_PUBLIC === 'true'
 
 
 async function checkDatabase(): Promise<{ ok: boolean; latencyMs: number; error?: string }> {
@@ -19,7 +21,7 @@ async function checkDatabase(): Promise<{ ok: boolean; latencyMs: number; error?
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const requestId = crypto.randomUUID()
   return withLogContext(
     {
@@ -41,22 +43,36 @@ export async function GET() {
       }
 
       const status = !db.ok ? "down" : alerts.length > 0 ? "degraded" : "ok"
-      const memory = process.memoryUsage()
-
-      const body = {
+      const body: Record<string, unknown> = {
         status,
         timestamp: new Date().toISOString(),
         requestId,
-        checks: {
-          database: db,
-        },
-        alerts,
-        uptimeSeconds: Math.floor(process.uptime()),
-        memory: {
+      }
+
+      let canViewDetailedDiagnostics = EXPOSE_HEALTH_DETAILS_PUBLICLY
+      if (!canViewDetailedDiagnostics) {
+        try {
+          requireServiceAuth(request.headers.get('authorization'), {
+            serviceName: 'healthcheck',
+            secretEnvKey: 'HEALTHCHECK_SECRET',
+            requestId,
+          })
+          canViewDetailedDiagnostics = true
+        } catch {
+          canViewDetailedDiagnostics = false
+        }
+      }
+
+      if (canViewDetailedDiagnostics) {
+        const memory = process.memoryUsage()
+        body.checks = { database: db }
+        body.alerts = alerts
+        body.uptimeSeconds = Math.floor(process.uptime())
+        body.memory = {
           rssMb: Number((memory.rss / 1024 / 1024).toFixed(2)),
           heapUsedMb: Number((memory.heapUsed / 1024 / 1024).toFixed(2)),
           heapTotalMb: Number((memory.heapTotal / 1024 / 1024).toFixed(2)),
-        },
+        }
       }
 
       if (alerts.length > 0) {

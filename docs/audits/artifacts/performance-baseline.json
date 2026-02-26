@@ -1,0 +1,199 @@
+{
+  "generatedAt": "2026-02-26T12:28:00.540Z",
+  "baseUrl": "http://localhost:3000",
+  "runs": 5,
+  "routes": [
+    {
+      "url": "http://localhost:3000/en",
+      "runs": [
+        {
+          "run": 1,
+          "ttfb": 8.212028,
+          "total": 8.215704,
+          "size": 192469,
+          "code": 200
+        },
+        {
+          "run": 2,
+          "ttfb": 0.331484,
+          "total": 0.334026,
+          "size": 192346,
+          "code": 200
+        },
+        {
+          "run": 3,
+          "ttfb": 0.367099,
+          "total": 0.370667,
+          "size": 192339,
+          "code": 200
+        },
+        {
+          "run": 4,
+          "ttfb": 0.376915,
+          "total": 0.382012,
+          "size": 192339,
+          "code": 200
+        },
+        {
+          "run": 5,
+          "ttfb": 0.61159,
+          "total": 0.614085,
+          "size": 192340,
+          "code": 200
+        }
+      ],
+      "summary": {
+        "ttfbMedian": 0.376915,
+        "totalMedian": 0.382012,
+        "statusCodes": [
+          200
+        ],
+        "sizeBytes": 192469
+      }
+    },
+    {
+      "url": "http://localhost:3000/en/pricing",
+      "runs": [
+        {
+          "run": 1,
+          "ttfb": 0.454768,
+          "total": 0.456653,
+          "size": 116076,
+          "code": 200
+        },
+        {
+          "run": 2,
+          "ttfb": 0.82566,
+          "total": 0.841409,
+          "size": 116098,
+          "code": 200
+        },
+        {
+          "run": 3,
+          "ttfb": 0.606349,
+          "total": 0.609151,
+          "size": 116077,
+          "code": 200
+        },
+        {
+          "run": 4,
+          "ttfb": 0.350723,
+          "total": 0.354308,
+          "size": 116081,
+          "code": 200
+        },
+        {
+          "run": 5,
+          "ttfb": 0.34164,
+          "total": 0.345042,
+          "size": 116095,
+          "code": 200
+        }
+      ],
+      "summary": {
+        "ttfbMedian": 0.454768,
+        "totalMedian": 0.456653,
+        "statusCodes": [
+          200
+        ],
+        "sizeBytes": 116076
+      }
+    },
+    {
+      "url": "http://localhost:3000/en/updates",
+      "runs": [
+        {
+          "run": 1,
+          "ttfb": 0.347078,
+          "total": 0.350148,
+          "size": 123332,
+          "code": 200
+        },
+        {
+          "run": 2,
+          "ttfb": 0.516749,
+          "total": 0.518213,
+          "size": 123333,
+          "code": 200
+        },
+        {
+          "run": 3,
+          "ttfb": 0.270845,
+          "total": 0.272369,
+          "size": 123324,
+          "code": 200
+        },
+        {
+          "run": 4,
+          "ttfb": 0.269657,
+          "total": 0.271245,
+          "size": 123334,
+          "code": 200
+        },
+        {
+          "run": 5,
+          "ttfb": 0.268013,
+          "total": 0.269545,
+          "size": 123328,
+          "code": 200
+        }
+      ],
+      "summary": {
+        "ttfbMedian": 0.270845,
+        "totalMedian": 0.272369,
+        "statusCodes": [
+          200
+        ],
+        "sizeBytes": 123332
+      }
+    },
+    {
+      "url": "http://localhost:3000/en/dashboard",
+      "runs": [
+        {
+          "run": 1,
+          "ttfb": 0.002152,
+          "total": 0.002193,
+          "size": 41,
+          "code": 307
+        },
+        {
+          "run": 2,
+          "ttfb": 0.001879,
+          "total": 0.00191,
+          "size": 41,
+          "code": 307
+        },
+        {
+          "run": 3,
+          "ttfb": 0.001935,
+          "total": 0.001964,
+          "size": 41,
+          "code": 307
+        },
+        {
+          "run": 4,
+          "ttfb": 0.001921,
+          "total": 0.001952,
+          "size": 41,
+          "code": 307
+        },
+        {
+          "run": 5,
+          "ttfb": 0.001994,
+          "total": 0.002027,
+          "size": 41,
+          "code": 307
+        }
+      ],
+      "summary": {
+        "ttfbMedian": 0.001935,
+        "totalMedian": 0.001964,
+        "statusCodes": [
+          307
+        ],
+        "sizeBytes": 41
+      }
+    }
+  ]
+}

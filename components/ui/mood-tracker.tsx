@@ -78,38 +78,16 @@ interface TrackerProps extends React.HTMLAttributes<HTMLDivElement> {
   valueIndex?: number | null
 }
 
-// Pre-computed color arrays for performance
-const COLOR_MAPS = {
-  red: ["bg-red-100", "bg-red-200", "bg-red-300", "bg-red-400", "bg-red-500", "bg-red-600", "bg-red-700"],
-  orange: [
-    "bg-orange-100",
-    "bg-orange-200",
-    "bg-orange-300",
-    "bg-orange-400",
-    "bg-orange-500",
-    "bg-orange-600",
-    "bg-orange-700",
-  ],
-  yellow: [
-    "bg-yellow-100",
-    "bg-yellow-200",
-    "bg-yellow-300",
-    "bg-yellow-400",
-    "bg-yellow-500",
-    "bg-yellow-600",
-    "bg-yellow-700",
-  ],
-  lime: ["bg-lime-100", "bg-lime-200", "bg-lime-300", "bg-lime-400", "bg-lime-500", "bg-lime-600", "bg-lime-700"],
-  green: [
-    "bg-white/10",
-    "bg-white/10",
-    "bg-white/10",
-    "bg-white/10",
-    "bg-white/10",
-    "bg-white/10",
-    "bg-white/10",
-  ],
-} as const
+// Grayscale progression for strict monochrome mode.
+const COLOR_SCALE = [
+  "bg-[hsl(var(--chart-8))]",
+  "bg-[hsl(var(--chart-7))]",
+  "bg-[hsl(var(--chart-6))]",
+  "bg-[hsl(var(--chart-5))]",
+  "bg-[hsl(var(--chart-4))]",
+  "bg-[hsl(var(--chart-3))]",
+  "bg-[hsl(var(--chart-2))]",
+] as const
 
 const Tracker = React.forwardRef<HTMLDivElement, TrackerProps>(
   (
@@ -129,17 +107,6 @@ const Tracker = React.forwardRef<HTMLDivElement, TrackerProps>(
       }
     }, [valueIndex])
 
-    // Fast color computation using pre-computed maps
-    const getColorForIndex = React.useCallback((index: number, totalBlocks: number) => {
-      const ratio = index / (totalBlocks - 1)
-
-      if (ratio <= 0.2) return "red"
-      if (ratio <= 0.4) return "orange"
-      if (ratio <= 0.6) return "yellow"
-      if (ratio <= 0.8) return "lime"
-      return "green"
-    }, [])
-
     const getBlockColor = React.useCallback(
       (blockIndex: number, activeIndex: number | null, totalBlocks: number) => {
         if (activeIndex === null) {
@@ -147,18 +114,14 @@ const Tracker = React.forwardRef<HTMLDivElement, TrackerProps>(
         }
 
         if (blockIndex > activeIndex) {
-          return "bg-blue-300" // Highlighted blocks
+          return "bg-[hsl(var(--chart-1)/0.22)]"
         }
 
-        // Get base color for the active index
-        const baseColor = getColorForIndex(activeIndex, totalBlocks)
-        const colorMap = COLOR_MAPS[baseColor]
-
-        // Calculate intensity based on position (0 to 6 for array index)
-        const intensity = Math.floor((blockIndex / activeIndex) * 6)
-        return colorMap[Math.min(intensity, 6)]
+        const safeIndex = activeIndex <= 0 ? 0 : activeIndex
+        const intensity = Math.floor((blockIndex / safeIndex) * 6)
+        return COLOR_SCALE[Math.min(intensity, 6)]
       },
-      [defaultBackgroundColor, getColorForIndex],
+      [defaultBackgroundColor],
     )
 
     const handleClick = (index: number) => {

@@ -1,12 +1,12 @@
 'use server'
 
-import { Trade as PrismaTrade, Prisma, PrismaClient, Group, TickDetails } from '@/prisma/generated/prisma'
+import { TickDetails } from '@/prisma/generated/prisma'
 import { normalizeTradesForClient, Trade } from '@/lib/data-types'
-import { endOfDay, startOfDay } from 'date-fns'
-import { parseISO, isValid } from 'date-fns'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { GroupWithAccounts } from './groups'
+import { createSecureSlug } from '@/lib/security/slug'
+import { isSharedAccessible } from '@/lib/security/shared-access'
 
 export interface SharedParams {
   userId: string
@@ -40,14 +40,14 @@ export async function createShared(data: SharedParams): Promise<string> {
 
 
     // Generate a unique slug
-    let slug = generateSlug()
+    let slug = createSecureSlug(12)
     let attempts = 0
     const maxAttempts = 5
 
     // Keep trying to find a unique slug
     while (attempts < maxAttempts) {
       try {
-        const sharedTrades = await prisma.shared.create({
+        await prisma.shared.create({
           data: {
             userId: data.userId,
             title: data.title,
@@ -68,9 +68,9 @@ export async function createShared(data: SharedParams): Promise<string> {
         revalidatePath('/shared/[slug]', 'page')
         return slug
       } catch (error) {
-        if ((error as any)?.code === 'P2002') {
+        if ((error as { code?: string })?.code === 'P2002') {
           // P2002 is Prisma's error code for unique constraint violation
-          slug = generateSlug()
+          slug = createSecureSlug(12)
           attempts++
           continue
         }
@@ -88,8 +88,6 @@ export async function createShared(data: SharedParams): Promise<string> {
   }
 }
 
-import { unstable_cache } from 'next/cache'
-
 export async function getShared(slug: string): Promise<{ params: SharedParams, trades: Trade[], groups: GroupWithAccounts[] } | null> {
   if (!slug) return null
 
@@ -97,10 +95,18 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   const getCachedShared = unstable_cache(
     async (slug: string) => {
       console.log(`[Cache MISS] Fetching shared data for slug: ${slug}`)
-      const shared = await prisma.shared.findUnique({
-        where: { slug },
+      const shared = await prisma.shared.findFirst({
+        where: {
+          slug,
+          isPublic: true,
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: new Date() } },
+          ],
+        },
       })
 
+      if (!isSharedAccessible(shared)) return null
       if (!shared) return null
 
       // Parse the date range
@@ -192,6 +198,7 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
     const result = await getCachedShared(slug)
 
     if (!result) return null
+    if (!isSharedAccessible({ isPublic: result.params.isPublic, expiresAt: result.params.expiresAt ?? null })) return null
 
     // Background update of view count to not block response
     prisma.shared.update({
@@ -201,7 +208,7 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
 
     return {
       ...result,
-      trades: normalizeTradesForClient(result.trades as any)
+      trades: normalizeTradesForClient(result.trades as unknown as Trade[])
     }
   } catch (error) {
     console.error('[getShared] Error:', error)
@@ -243,13 +250,3 @@ export async function deleteShared(slug: string, userId: string) {
     throw error
   }
 }
-
-// Helper function to generate a unique slug
-function generateSlug(length = 10): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  let result = ''
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
-} 

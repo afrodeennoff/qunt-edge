@@ -90,7 +90,7 @@ export function AudioExtractor({ onAudioExtracted }: AudioExtractorProps) {
 
   return (
     <div className="p-4 bg-white dark:bg-black">
-      {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-400">{error}</div>}
+      {error && <div className="mb-4 p-3 bg-semantic-error-bg dark:bg-semantic-error-bg/20 border border-semantic-error-border dark:border-semantic-error-border rounded-md text-semantic-error dark:text-semantic-error">{error}</div>}
       
       <div className="relative">
       <input
@@ -99,14 +99,14 @@ export function AudioExtractor({ onAudioExtracted }: AudioExtractorProps) {
         accept="video/*"
         onChange={handleFileChange}
         disabled={isLoading}
-          className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/20 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/30"
+          className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-semantic-info-bg dark:file:bg-semantic-info-bg/20 file:text-semantic-info dark:file:text-semantic-info hover:file:bg-semantic-info-bg dark:hover:file:bg-semantic-info-bg/30"
         />
         <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
       </div>
       
       {isLoading && (
         <div className="mt-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400"></div>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-semantic-info-border dark:border-semantic-info-border"></div>
           <span>Extracting audio...</span>
         </div>
       )}

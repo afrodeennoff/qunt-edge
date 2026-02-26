@@ -241,7 +241,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
               <Filter className="h-4 w-4" />
               {t('teams.equity.filters')}
               {hasActiveFilters && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-semantic-info-bg rounded-full"></div>
               )}
             </Button>
           </div>
@@ -352,7 +352,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                     <div className={`px-2 py-1 rounded text-xs font-medium ${
                       user.statistics.totalPnL >= 0 
                         ? 'bg-white/10 text-white' 
-                        : 'bg-red-100 text-red-800'
+                        : 'bg-semantic-error-bg text-semantic-error'
                     }`}>
                       {user.statistics.totalPnL >= 0 ? '+' : ''}{user.statistics.totalPnL.toFixed(2)}
                     </div>
@@ -401,11 +401,11 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.losses')}:</span>
-                      <span className="font-medium text-red-600">{user.statistics.losingTrades}</span>
+                      <span className="font-medium text-semantic-error">{user.statistics.losingTrades}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.avgLoss')}:</span>
-                      <span className="font-medium text-red-600">
+                      <span className="font-medium text-semantic-error">
                         {user.statistics.averageLoss.toFixed(2)}
                       </span>
                     </div>
@@ -417,7 +417,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.maxDD')}:</span>
-                      <span className="font-medium text-red-600">
+                      <span className="font-medium text-semantic-error">
                         {user.statistics.maxDrawdown.toFixed(2)}
                       </span>
                     </div>

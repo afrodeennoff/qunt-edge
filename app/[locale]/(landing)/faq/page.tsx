@@ -1,17 +1,17 @@
 import { Metadata } from 'next';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { getI18n } from "@/locales/server";
 import { setStaticParamsLocale } from "next-international/server";
+import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell";
 
 export const metadata: Metadata = {
     title: 'FAQ | Qunt Edge',
     description: 'Frequently asked questions about Qunt Edge trading analytics and behavioral intelligence.',
 };
+export const revalidate = 1800;
 
 export default async function FAQPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     setStaticParamsLocale(locale);
-    const t = await getI18n();
 
     const faqs = [
         {
@@ -37,37 +37,36 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
     ];
 
     return (
-        <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <header className="mb-16 text-center">
-                <h1 className="text-4xl font-extrabold tracking-tight text-white mb-4">Frequently Asked Questions</h1>
-                <p className="text-xl text-zinc-400">Find answers to common questions about the platform and its features.</p>
-            </header>
-
-            <div className="space-y-4">
+        <UnifiedPageShell widthClassName="max-w-4xl" className="py-8">
+            <UnifiedSurface className="space-y-4">
+                <header className="mb-6">
+                    <h1 className="text-3xl font-semibold text-fg-primary">Frequently Asked Questions</h1>
+                    <p className="mt-1 text-fg-muted">Find answers to common questions about the platform and its features.</p>
+                </header>
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
-                        <AccordionItem key={index} value={`item-${index}`} className="border-white/5 mb-4 px-4 rounded-2xl bg-zinc-900/30">
-                            <AccordionTrigger className="text-left text-white hover:text-white hover:no-underline font-semibold py-6">
+                        <AccordionItem key={index} value={`item-${index}`} className="mb-3 rounded-2xl border border-white/10 bg-black/35 px-4">
+                            <AccordionTrigger className="text-left font-semibold text-fg-primary hover:no-underline">
                                 {faq.question}
                             </AccordionTrigger>
-                            <AccordionContent className="text-zinc-400 leading-relaxed pb-6 pt-2">
+                            <AccordionContent className="pb-6 pt-2 leading-relaxed text-fg-muted">
                                 {faq.answer}
                             </AccordionContent>
                         </AccordionItem>
                     ))}
                 </Accordion>
-            </div>
+            </UnifiedSurface>
 
-            <div className="mt-24 p-8 rounded-3xl bg-white/5 border border-white/10 text-center">
-                <h2 className="text-xl font-bold text-white mb-2">Still have questions?</h2>
-                <p className="text-zinc-400 mb-6 font-light">We're here to help you elevate your trading execution.</p>
+            <UnifiedSurface className="mt-6 text-center">
+                <h2 className="mb-2 text-xl font-semibold text-fg-primary">Still have questions?</h2>
+                <p className="mb-5 text-fg-muted">We&apos;re here to help you elevate your trading execution.</p>
                 <a
-                    href="/support"
-                    className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white transition-all hover:scale-105"
+                    href={`/${locale}/support`}
+                    className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white px-8 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors hover:bg-zinc-200"
                 >
                     Contact Support
                 </a>
-            </div>
-        </div>
+            </UnifiedSurface>
+        </UnifiedPageShell>
     );
 }

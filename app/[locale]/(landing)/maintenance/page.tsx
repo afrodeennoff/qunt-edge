@@ -11,7 +11,7 @@ export default async function MaintenancePage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-yellow-500" />
+            <AlertCircle className="h-5 w-5 text-semantic-warning" />
             {t('maintenance.title')}
           </CardTitle>
           <CardDescription>

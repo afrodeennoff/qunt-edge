@@ -1,5 +1,5 @@
 import { parsePositionTime } from "@/lib/utils";
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -18,23 +18,37 @@ export const getLastTradesData = tool({
         accountNumber: z.string().describe('Account number, default to most traded account'),
     }),
     execute: async ({ number, startDate, endDate, accountNumber }) => {
-        console.log(`Getting last ${number} trade(s)`)
-        const paginatedTrades = await getTradesAction();
-        let trades = paginatedTrades.trades;
+        const safeNumber = Math.min(50, Math.max(1, Math.floor(number)));
+        const parsedStart = startDate ? new Date(startDate) : null;
+        const parsedEnd = endDate ? new Date(endDate) : null;
+        if (parsedStart && Number.isNaN(parsedStart.getTime())) {
+            throw new Error("Invalid startDate format");
+        }
+        if (parsedEnd && Number.isNaN(parsedEnd.getTime())) {
+            throw new Error("Invalid endDate format");
+        }
+        const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+        let trades = allTrades;
         if (accountNumber) {
             trades = trades.filter(trade => trade.accountNumber === accountNumber);
         }
         if (startDate) {
-            trades = trades.filter(trade => trade.entryDate >= startDate);
+            trades = trades.filter(trade => new Date(trade.entryDate) >= (parsedStart as Date));
         }
         if (endDate) {
-            trades = trades.filter(trade => trade.entryDate <= endDate);
+            trades = trades.filter(trade => new Date(trade.entryDate) <= (parsedEnd as Date));
         }
         trades = trades.sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime());
-        trades = trades.slice(0, number);
-        return trades.map(trade => ({
+        trades = trades.slice(0, safeNumber);
+        const items = trades.map(trade => ({
             ...trade,
             timeInPosition: parsePositionTime(Number(trade.timeInPosition))
         }));
+        return {
+            items,
+            truncated: tradesResult.truncated,
+            dataQualityWarning: tradesResult.dataQualityWarning,
+        };
     }
 })

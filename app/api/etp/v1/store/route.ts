@@ -2,6 +2,53 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifySecureToken } from '@/lib/api-auth'
 
+const MAX_ETP_BODY_BYTES = 2 * 1024 * 1024
+const MAX_ETP_ORDERS = 2_000
+const MAX_PAGINATION_LIMIT = 500
+
+type ETPOrderPayload = {
+  AccountId: string
+  OrderId: string
+  OrderAction: string
+  Quantity: number
+  AverageFilledPrice: number
+  IsOpeningOrder: boolean
+  Time: string
+  Instrument: {
+    Symbol: string
+    Type: string
+  }
+}
+
+function normalizePositiveInt(value: string | null, fallback: number, max: number): number {
+  const parsed = Number.parseInt(value ?? '', 10)
+  if (!Number.isFinite(parsed) || parsed < 0) return fallback
+  return Math.min(parsed, max)
+}
+
+function validateOrderPayload(order: unknown): order is ETPOrderPayload {
+  if (!order || typeof order !== 'object') return false
+  const candidate = order as Partial<ETPOrderPayload>
+  return Boolean(
+    typeof candidate.AccountId === 'string' &&
+    typeof candidate.OrderId === 'string' &&
+    typeof candidate.OrderAction === 'string' &&
+    typeof candidate.Quantity === 'number' &&
+    Number.isFinite(candidate.Quantity) &&
+    typeof candidate.AverageFilledPrice === 'number' &&
+    Number.isFinite(candidate.AverageFilledPrice) &&
+    typeof candidate.IsOpeningOrder === 'boolean' &&
+    typeof candidate.Time === 'string' &&
+    candidate.Instrument &&
+    typeof candidate.Instrument.Symbol === 'string' &&
+    typeof candidate.Instrument.Type === 'string'
+  )
+}
+
+function sanitizeOrders(orders: unknown[]): ETPOrderPayload[] {
+  return orders.filter(validateOrderPayload)
+}
+
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -45,6 +92,14 @@ async function authenticateRequest(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const contentLength = Number(req.headers.get('content-length') || 0)
+    if (Number.isFinite(contentLength) && contentLength > MAX_ETP_BODY_BYTES) {
+      return NextResponse.json(
+        { error: 'Request payload is too large' },
+        { status: 413 }
+      )
+    }
+
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
@@ -58,18 +113,41 @@ export async function POST(req: NextRequest) {
     
     // Parse the request body
     const body = await req.json();
-    const { orders } = body;
-    
-    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+    const orders = Array.isArray(body?.orders) ? body.orders : null
+
+    if (!orders || orders.length === 0) {
       return NextResponse.json({ error: 'Invalid orders data' }, { status: 400 });
+    }
+
+    if (orders.length > MAX_ETP_ORDERS) {
+      return NextResponse.json(
+        { error: `Too many orders. Maximum is ${MAX_ETP_ORDERS}.` },
+        { status: 413 }
+      )
+    }
+
+    const sanitizedOrders = sanitizeOrders(orders)
+    if (sanitizedOrders.length !== orders.length) {
+      return NextResponse.json(
+        { error: 'Invalid order payload format' },
+        { status: 400 }
+      )
     }
     
     // Process and store each order
     const createdOrders = await Promise.all(
-      orders.map(async (order) => {
+      sanitizedOrders.map(async (order) => {
+        const orderTime = new Date(order.Time)
+        if (Number.isNaN(orderTime.getTime())) {
+          throw new Error(`Invalid order timestamp: ${order.Time}`)
+        }
+
         return prisma.order.upsert({
           where: {
-            orderId: order.OrderId
+            userId_orderId: {
+              userId: user.id,
+              orderId: order.OrderId,
+            },
           },
           update: {
             accountId: order.AccountId,
@@ -78,7 +156,7 @@ export async function POST(req: NextRequest) {
             quantity: order.Quantity,
             averageFilledPrice: order.AverageFilledPrice,
             isOpeningOrder: order.IsOpeningOrder,
-            time: new Date(order.Time),
+            time: orderTime,
             symbol: order.Instrument.Symbol,
             instrumentType: order.Instrument.Type
           },
@@ -89,7 +167,7 @@ export async function POST(req: NextRequest) {
             quantity: order.Quantity,
             averageFilledPrice: order.AverageFilledPrice,
             isOpeningOrder: order.IsOpeningOrder,
-            time: new Date(order.Time),
+            time: orderTime,
             symbol: order.Instrument.Symbol,
             instrumentType: order.Instrument.Type,
             userId: user.id
@@ -127,8 +205,8 @@ export async function GET(req: NextRequest) {
     // Get query parameters
     const searchParams = req.nextUrl.searchParams;
     const accountId = searchParams.get('accountId');
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 100;
-    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
+    const limit = normalizePositiveInt(searchParams.get('limit'), 100, MAX_PAGINATION_LIMIT);
+    const offset = normalizePositiveInt(searchParams.get('offset'), 0, 50_000);
     const fromDate = searchParams.get('from');
     const toDate = searchParams.get('to');
     

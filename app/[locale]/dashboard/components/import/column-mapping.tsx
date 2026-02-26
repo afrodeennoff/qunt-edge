@@ -175,12 +175,12 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
     <div className="h-full flex flex-col">
       <div className="mb-4">
         {getRemainingFieldsToMap().length > 0 && (
-          <div className="flex-none bg-yellow-100/50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 text-yellow-700 dark:text-yellow-200 p-4 rounded-r mb-4" role="alert">
+          <div className="flex-none bg-semantic-warning-bg/50 dark:bg-semantic-warning-bg/20 border-l-4 border-semantic-warning-border dark:border-semantic-warning-border text-semantic-warning dark:text-semantic-warning p-4 rounded-r mb-4" role="alert">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <SparklesIcon className="h-6 w-6 text-yellow-500 dark:text-yellow-400 animate-pulse" />
-                  <div className="absolute -inset-1 bg-yellow-200 dark:bg-yellow-800 rounded-full blur-xs opacity-50 animate-ping" />
+                  <SparklesIcon className="h-6 w-6 text-semantic-warning dark:text-semantic-warning animate-pulse" />
+                  <div className="absolute -inset-1 bg-semantic-warning-bg dark:bg-semantic-warning-bg rounded-full blur-xs opacity-50 animate-ping" />
                 </div>
                 <div>
                   <p className="font-bold">Unmapped Fields</p>
@@ -191,7 +191,7 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
                 variant="outline"
                 size="sm"
                 onClick={requestAIMapping}
-                className="flex items-center gap-2 bg-white/50 dark:bg-yellow-900/30 hover:bg-white/80 dark:hover:bg-yellow-900/50 text-yellow-700 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700 transition-colors"
+                className="flex items-center gap-2 bg-white/50 dark:bg-semantic-warning-bg/30 hover:bg-white/80 dark:hover:bg-semantic-warning-bg/50 text-semantic-warning dark:text-semantic-warning border-semantic-warning-border dark:border-semantic-warning-border transition-colors"
               >
                 <RefreshCwIcon className={cn("h-4 w-4", isLoading && "animate-spin")} />
                 Use AI for mapping
@@ -207,7 +207,7 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      {columnConfig[field].required ? <AlertTriangleIcon className="h-4 w-4 ml-1 text-red-500 inline" /> : <InfoIcon className="h-4 w-4 ml-1 text-yellow-500 inline" />}
+                      {columnConfig[field].required ? <AlertTriangleIcon className="h-4 w-4 ml-1 text-semantic-error inline" /> : <InfoIcon className="h-4 w-4 ml-1 text-semantic-warning inline" />}
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{columnConfig[field].required ? "Required field" : "Optional field"}</p>
@@ -274,7 +274,7 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
                             >
                               {column}
                               {columnConfig[column].required && (
-                                <span className="ml-1 text-yellow-500">*</span>
+                                <span className="ml-1 text-semantic-warning">*</span>
                               )}
                               {isAlreadyMapped && (
                                 <span className="ml-2 text-xs text-muted-foreground">(already mapped)</span>
@@ -302,7 +302,7 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
           </TableBody>
         </Table>
       </div>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+      {error && <p className="text-semantic-error mt-2">{error}</p>}
     </div>
   )
 }

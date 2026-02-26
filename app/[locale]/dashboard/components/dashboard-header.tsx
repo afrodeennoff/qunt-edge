@@ -13,7 +13,7 @@ import { DailySummaryModal } from './daily-summary-modal';
 import { ShareButton } from './share-button';
 import { GlobalSyncButton } from './global-sync-button';
 import { useI18n } from '@/locales/client';
-import { useData } from '@/context/data-provider';
+import { useDashboardActions, useDashboardFilters } from '@/context/data-provider';
 import { ActiveFilterTags } from './filters/active-filter-tags';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -51,15 +51,15 @@ export function DashboardHeader() {
         restoreDefaultLayout
     } = useDashboard();
     const t = useI18n();
+    const { isPlusUser } = useDashboardActions();
     const {
-        isPlusUser,
         accountNumbers,
         instruments,
         dateRange,
         pnlRange,
         tagFilter,
         weekdayFilter,
-    } = useData();
+    } = useDashboardFilters();
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'widgets';
     const normalizedPathname = pathname.replace(/\/+$/, '') || '/';
@@ -117,7 +117,7 @@ export function DashboardHeader() {
             )}
             data-dashboard-header="true"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--foreground) / ),transparent_25%,transparent_75%,hsl(var(--foreground) / ))]" />
             <div className={cn("relative flex items-center justify-between gap-3 px-3 sm:px-6", isMobile ? "h-14" : "h-full")}>
                 <div className="flex items-center gap-3 relative z-10 pointer-events-auto">
                     <SidebarTrigger className="h-11 w-11 md:h-7 md:w-7 text-muted-foreground hover:text-foreground" />

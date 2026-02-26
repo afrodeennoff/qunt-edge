@@ -209,7 +209,8 @@ describe('PolicyEngine', () => {
       const second = await engineWithCache.evaluateRisk(testContext, testManifest)
       const duration2 = Date.now() - startTime2
 
-      expect(duration2).toBeLessThanOrEqual(duration1)
+      // Wall-clock timing can jitter by 1-2ms on CI even on cache hits.
+      expect(duration2).toBeLessThanOrEqual(duration1 + 5)
       expect(second.timestamp).toEqual(first.timestamp)
     })
 

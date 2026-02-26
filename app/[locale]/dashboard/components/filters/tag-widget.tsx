@@ -73,6 +73,9 @@ interface TagWidgetProps {
   onTagSelectionChange?: (selectedTags: string[]) => void
 }
 
+// Hex is intentionally used here because HexColorPicker requires hex input.
+const DEFAULT_TAG_COLOR = '#A3A3A3'
+
 export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetProps) {
   const t = useI18n()
   const { tagFilter, setTagFilter } = useDashboardFilters()
@@ -85,7 +88,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
   const [formData, setFormData] = useState<TagFormData>({
     name: '',
     description: null,
-    color: '#CBD5E1'
+    color: DEFAULT_TAG_COLOR
   })
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -208,7 +211,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
       }
 
       setEditingTag(null)
-      setFormData({ name: '', description: null, color: '#CBD5E1' })
+      setFormData({ name: '', description: null, color: DEFAULT_TAG_COLOR })
     } catch (error) {
       console.error('Failed to save tag:', error)
       toast.error(t('widgets.tags.error'), {
@@ -269,7 +272,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
     setFormData({
       name: tag.name,
       description: tag.description ?? null,
-      color: tag.color || '#CBD5E1'
+      color: tag.color || DEFAULT_TAG_COLOR
     })
     setIsAddDialogOpen(true)
   }
@@ -476,7 +479,7 @@ export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetPr
                             "rounded-full shrink-0",
                             size === 'small' ? "w-2.5 h-2.5" : "w-3 h-3"
                           )}
-                          style={{ backgroundColor: tag.color || '#CBD5E1' }}
+                          style={{ backgroundColor: tag.color || DEFAULT_TAG_COLOR }}
                         />
                         <label
                           htmlFor={`tag-${tag.id}`}

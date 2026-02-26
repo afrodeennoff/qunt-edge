@@ -1,4 +1,4 @@
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
 import { z } from 'zod/v3';
@@ -263,10 +263,11 @@ export const getInstrumentPerformance = tool({
     minTrades: z.number().optional().describe('Minimum number of trades required to include an instrument in analysis')
   }),
   execute: async ({ startDate, endDate, minTrades = 1 }: { startDate?: string, endDate?: string, minTrades?: number }) => {
-    console.log(`[getInstrumentPerformance] startDate: ${startDate}, endDate: ${endDate}, minTrades: ${minTrades}`);
+    const safeMinTrades = Math.min(1000, Math.max(1, Math.floor(minTrades)));
 
-    const paginatedTrades = await getTradesAction();
-    let trades = normalizeTrades(paginatedTrades.trades);
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+    let trades = normalizeTrades(allTrades);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
@@ -281,8 +282,12 @@ export const getInstrumentPerformance = tool({
     const analysis = analyzeInstruments(trades);
 
     // Filter out instruments with fewer than minTrades
-    analysis.instruments = analysis.instruments.filter(instrument => instrument.totalTrades >= minTrades);
+    analysis.instruments = analysis.instruments.filter(instrument => instrument.totalTrades >= safeMinTrades);
 
-    return analysis;
+    return {
+      ...analysis,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

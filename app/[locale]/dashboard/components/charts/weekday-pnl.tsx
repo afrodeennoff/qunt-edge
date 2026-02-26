@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -47,7 +47,8 @@ const chartConfig = {
 export default function WeekdayPNLChart({
   size = "medium",
 }: WeekdayPNLChartProps) {
-  const { calendarData, weekdayFilter, setWeekdayFilter } = useData();
+  const { calendarData } = useDashboardStats();
+  const { weekdayFilter, setWeekdayFilter } = useDashboardFilters();
   const [darkMode, setDarkMode] = React.useState(false);
   const [activeDay, setActiveDay] = React.useState<number | null>(null);
   const t = useI18n();
@@ -261,7 +262,7 @@ export default function WeekdayPNLChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="pnl"
@@ -272,13 +273,13 @@ export default function WeekdayPNLChart({
                   {weekdayData.map((entry) => (
                     <Cell
                       key={`cell-${entry.day}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3
                           : (entry.pnl >= 0 ? 0.98 : 0.22)
                       }
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={
                         weekdayFilter.days && weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entry.day)
                           ? 0.3

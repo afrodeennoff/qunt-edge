@@ -76,7 +76,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
               status === "live" && "bg-white",
               status === "synced" && "bg-zinc-300",
               status === "idle" && "bg-slate-500",
-              status === "error" && "bg-rose-500"
+              status === "error" && "bg-semantic-error-bg"
             )} />
             <span className="text-[10px] font-semibold uppercase leading-none tracking-widest text-muted-foreground">
               {status}

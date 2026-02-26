@@ -370,7 +370,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                                     account.riskLevel === "high"
                                       ? "text-destructive border-destructive/30"
                                       : account.riskLevel === "medium"
-                                        ? "text-orange-500 border-orange-500/30"
+                                        ? "text-semantic-warning border-semantic-warning-border/30"
                                         : "text-foreground border-border"
                                   }
                                 >
@@ -581,7 +581,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                             </Card>
 
                             <Card className="p-6 border-border/40 bg-background/30 backdrop-blur-sm">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-orange-500">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-semantic-warning">
                                 {t("analysis.improvements")}
                               </h4>
                               <ul className="space-y-2">
@@ -593,7 +593,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                                       key={index}
                                       className="text-sm text-muted-foreground flex items-start gap-2"
                                     >
-                                      <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                                      <AlertCircle className="h-4 w-4 text-semantic-warning mt-0.5 shrink-0" />
                                       {improvement}
                                     </li>
                                   ),
@@ -604,7 +604,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
 
                           {/* Recommendations */}
                           <Card className="p-6 border-border/40 bg-background/30 backdrop-blur-sm">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-blue-500">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3 text-semantic-info">
                               {t("analysis.recommendations")}
                             </h4>
                             <ul className="space-y-2">
@@ -616,7 +616,7 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
                                     key={index}
                                     className="text-sm text-muted-foreground flex items-start gap-2"
                                   >
-                                    <Play className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                                    <Play className="h-4 w-4 text-semantic-info mt-0.5 shrink-0" />
                                     {recommendation}
                                   </li>
                                 ),
@@ -642,8 +642,8 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
               )}
 
             {analysisToolCall.state === "output-error" && (
-              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-600 dark:text-red-400">
+              <div className="p-4 rounded-lg bg-semantic-error-bg dark:bg-semantic-error-bg/20 border border-semantic-error-border dark:border-semantic-error-border">
+                <p className="text-sm text-semantic-error dark:text-semantic-error">
                   {t("analysis.errorGeneric")}
                 </p>
               </div>

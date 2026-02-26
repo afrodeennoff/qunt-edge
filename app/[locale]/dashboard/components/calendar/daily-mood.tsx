@@ -113,7 +113,7 @@ export function DailyMood({ dayData, isWeekly = false, selectedDate }: DailyMood
                 <Button
                   variant="ghost"
                   size="lg"
-                  className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'bad' ? 'text-red-500' : ''}`}
+                  className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'bad' ? 'text-semantic-error' : ''}`}
                   onClick={() => handleMoodSelect('bad')}
                   disabled={isLoading !== null}
                 >
@@ -123,7 +123,7 @@ export function DailyMood({ dayData, isWeekly = false, selectedDate }: DailyMood
                 <Button
                   variant="ghost"
                   size="lg"
-                  className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'okay' ? 'text-yellow-500' : ''}`}
+                  className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'okay' ? 'text-semantic-warning' : ''}`}
                   onClick={() => handleMoodSelect('okay')}
                   disabled={isLoading !== null}
                 >
@@ -171,7 +171,7 @@ export function DailyMood({ dayData, isWeekly = false, selectedDate }: DailyMood
               <Button
                 variant="ghost"
                 size="lg"
-                className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'bad' ? 'text-red-500' : ''}`}
+                className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'bad' ? 'text-semantic-error' : ''}`}
                 onClick={() => handleMoodSelect('bad')}
                 disabled={isLoading !== null}
               >
@@ -181,7 +181,7 @@ export function DailyMood({ dayData, isWeekly = false, selectedDate }: DailyMood
               <Button
                 variant="ghost"
                 size="lg"
-                className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'okay' ? 'text-yellow-500' : ''}`}
+                className={`flex flex-col items-center h-auto py-2 px-4 ${selectedMood === 'okay' ? 'text-semantic-warning' : ''}`}
                 onClick={() => handleMoodSelect('okay')}
                 disabled={isLoading !== null}
               >

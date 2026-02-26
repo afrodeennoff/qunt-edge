@@ -96,8 +96,8 @@ export function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
   const getMoodButtonStyle = (moodType: 'bad' | 'okay' | 'great') => {
     if (selectedMood === moodType) {
       switch (moodType) {
-        case 'bad': return 'text-red-500'
-        case 'okay': return 'text-yellow-500'
+        case 'bad': return 'text-semantic-error'
+        case 'okay': return 'text-semantic-warning'
         case 'great': return 'text-white'
       }
     }
@@ -115,7 +115,7 @@ export function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-6 w-6 p-0 hover:text-red-500 ${getMoodButtonStyle('bad')}`}
+                  className={`h-6 w-6 p-0 hover:text-semantic-error ${getMoodButtonStyle('bad')}`}
                   onClick={() => handleMoodSelect('bad')}
                   disabled={isLoading !== null}
                 >
@@ -134,7 +134,7 @@ export function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-6 w-6 p-0 hover:text-yellow-500 ${getMoodButtonStyle('okay')}`}
+                  className={`h-6 w-6 p-0 hover:text-semantic-warning ${getMoodButtonStyle('okay')}`}
                   onClick={() => handleMoodSelect('okay')}
                   disabled={isLoading !== null}
                 >

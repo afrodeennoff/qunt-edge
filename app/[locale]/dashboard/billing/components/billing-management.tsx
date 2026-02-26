@@ -135,7 +135,7 @@ export default function BillingManagement() {
                     {t('billing.status.active')}
                   </span>
                 ) : subscription?.cancel_at_period_end ? (
-                  <span className="text-yellow-500 dark:text-yellow-400 inline-flex items-center gap-1">
+                  <span className="text-semantic-warning dark:text-semantic-warning inline-flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
                     {t('billing.scheduledToCancel')}
                   </span>

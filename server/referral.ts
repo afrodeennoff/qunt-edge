@@ -1,6 +1,5 @@
-'use server'
-
 import { prisma } from '@/lib/prisma'
+import { createSecureSlug } from '@/lib/security/slug'
 
 export type ReferralTier = {
   level: number
@@ -8,29 +7,61 @@ export type ReferralTier = {
   count: number
 }
 
-// Helper function to generate a unique referral slug
-function generateReferralSlug(length = 6): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  let result = ''
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
+export class ReferralAlreadyAppliedError extends Error {
+  constructor(message = 'Referral already applied') {
+    super(message)
+    this.name = 'ReferralAlreadyAppliedError'
   }
-  return result
+}
+
+async function getReferralWithRedemptions(referralId: string) {
+  return prisma.referral.findUnique({
+    where: { id: referralId },
+    include: {
+      redemptions: {
+        include: {
+          referredUser: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+    },
+  })
 }
 
 // Get or create a referral for a user
 export async function getOrCreateReferral(userId: string) {
   try {
-    // Try to get existing referral
     let referral = await prisma.referral.findUnique({
       where: { userId },
+      include: {
+        redemptions: {
+          include: {
+            referredUser: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
     })
 
     // If no referral exists, create one
     if (!referral) {
-      let slug = generateReferralSlug()
+      let slug = createSecureSlug(8)
       let attempts = 0
-      const maxAttempts = 5
+      const maxAttempts = 8
 
       // Keep trying to find a unique slug
       while (attempts < maxAttempts) {
@@ -40,12 +71,28 @@ export async function getOrCreateReferral(userId: string) {
               userId,
               slug,
             },
+            include: {
+              redemptions: {
+                include: {
+                  referredUser: {
+                    select: {
+                      id: true,
+                      email: true,
+                    },
+                  },
+                },
+                orderBy: {
+                  createdAt: 'desc',
+                },
+              },
+            },
           })
           break
-        } catch (error: any) {
-          if (error?.code === 'P2002') {
+        } catch (error: unknown) {
+          const prismaError = error as { code?: string }
+          if (prismaError?.code === 'P2002') {
             // P2002 is Prisma's error code for unique constraint violation
-            slug = generateReferralSlug()
+            slug = createSecureSlug(8)
             attempts++
             continue
           }
@@ -68,31 +115,41 @@ export async function getOrCreateReferral(userId: string) {
 // Add a referred user to a referral
 export async function addReferredUser(referralId: string, referredUserId: string) {
   try {
-    const referral = await prisma.referral.findUnique({
-      where: { id: referralId },
-    })
+    const referral = await prisma.$transaction(async (tx) => {
+      const existingReferral = await tx.referral.findUnique({
+        where: { id: referralId },
+      })
 
-    if (!referral) {
-      throw new Error('Referral not found')
-    }
+      if (!existingReferral) {
+        throw new Error('Referral not found')
+      }
 
-    // Check if user is already in the list
-    if (referral.referredUserIds.includes(referredUserId)) {
-      return referral
-    }
+      const existingRedemption = await tx.referralRedemption.findUnique({
+        where: { referredUserId },
+      })
 
-    // Add the user to the list
-    const updatedReferral = await prisma.referral.update({
-      where: { id: referralId },
-      data: {
-        referredUserIds: {
-          push: referredUserId,
+      if (existingRedemption) {
+        if (existingRedemption.referralId === referralId) {
+          return getReferralWithRedemptions(referralId)
+        }
+        throw new ReferralAlreadyAppliedError('User has already applied another referral code')
+      }
+
+      await tx.referralRedemption.create({
+        data: {
+          referralId,
+          referredUserId,
         },
-      },
+      })
+
+      return getReferralWithRedemptions(referralId)
     })
 
-    return updatedReferral
+    return referral
   } catch (error) {
+    if (error instanceof ReferralAlreadyAppliedError) {
+      throw error
+    }
     console.error('Error adding referred user:', error)
     throw error
   }
@@ -108,6 +165,11 @@ export async function getReferralBySlug(slug: string) {
           select: {
             id: true,
             email: true,
+          },
+        },
+        redemptions: {
+          select: {
+            referredUserId: true,
           },
         },
       },
@@ -170,4 +232,3 @@ export async function getNextTier(count: number): Promise<{ count: number; rewar
     }
   }
 }
-

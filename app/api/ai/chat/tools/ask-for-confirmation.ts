@@ -7,7 +7,6 @@ export const askForConfirmation = tool({
         message: z.string().describe('The message to ask for confirmation. Explaining what next actions are'),
     }),
     execute: async ({ message }: { message: string }) => {
-        console.log(`[askForConfirmation] message: ${message}`)
         return {
             message: message,
             state: 'call'

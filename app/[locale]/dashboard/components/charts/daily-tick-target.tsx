@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/locales/client"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider"
 import { useDailyTickTargetStore } from "@/store/daily-tick-target-store"
 import { useTickDetailsStore } from "@/store/tick-details-store"
 import { useEffect, useState } from "react"
@@ -35,7 +35,8 @@ interface DailyTickTargetProps {
 }
 
 export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTargetProps) {
-  const { formattedTrades: trades, dateRange } = useData()
+  const { formattedTrades: trades } = useDashboardStats()
+  const { dateRange } = useDashboardFilters()
   const t = useI18n()
   const tickDetails = useTickDetailsStore(state => state.tickDetails)
   const [targetValue, setTargetValue] = useState('')

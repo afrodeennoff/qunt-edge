@@ -8,13 +8,13 @@ export function generateStaticParams() {
     return getStaticParams();
 }
 
-export const revalidate = 3600;
+export const revalidate = 180;
 // export const dynamic = "force-static"; // Removed for webapp flexibility
 // export const dynamicParams = false;
 
 export const metadata: Metadata = {
-    title: 'Qunt Edge | AI Trading Performance Platform',
-    description: 'A modern execution intelligence platform for discretionary traders: unify data, diagnose behavior drift, and improve consistency with AI-led review.',
+    title: 'Qunt Edge | Trade Like A Pro, Review Like A Desk',
+    description: 'Qunt Edge helps serious discretionary traders audit decision quality, catch behavior drift, and sharpen execution with AI-backed performance reviews.',
 };
 
 export default async function HomePage({

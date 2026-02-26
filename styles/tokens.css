@@ -133,6 +133,22 @@
     --color-success-bg: var(--accent-neutral) / 0.1;
     --color-info: 0 0% 80%;
     --color-info-bg: 0 0% 80% / 0.1;
+    --semantic-success: 0 0% 98%;
+    --semantic-success-fg: 0 0% 8%;
+    --semantic-success-bg: 0 0% 100% / 0.08;
+    --semantic-success-border: 0 0% 100% / 0.2;
+    --semantic-warning: 0 0% 90%;
+    --semantic-warning-fg: 0 0% 10%;
+    --semantic-warning-bg: 0 0% 100% / 0.06;
+    --semantic-warning-border: 0 0% 100% / 0.16;
+    --semantic-error: 0 0% 82%;
+    --semantic-error-fg: 0 0% 10%;
+    --semantic-error-bg: 0 0% 100% / 0.05;
+    --semantic-error-border: 0 0% 100% / 0.14;
+    --semantic-info: 0 0% 92%;
+    --semantic-info-fg: 0 0% 10%;
+    --semantic-info-bg: 0 0% 100% / 0.07;
+    --semantic-info-border: 0 0% 100% / 0.18;
 
     /* ===== CHART COLORS ===== */
     --chart-positive: 0 0% 100%;

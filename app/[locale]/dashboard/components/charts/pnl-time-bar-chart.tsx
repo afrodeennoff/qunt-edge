@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -37,7 +37,7 @@ interface TimeOfDayTradeChartProps {
 const chartConfig = {
   avgPnl: {
     label: "Average P/L",
-    color: "white",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -47,7 +47,8 @@ const formatCurrency = (value: number) =>
 export default function TimeOfDayTradeChart({
   size = "medium",
 }: TimeOfDayTradeChartProps) {
-  const { formattedTrades: trades, hourFilter, setHourFilter } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
+  const { hourFilter, setHourFilter } = useDashboardFilters();
   const timezone = useUserStore((state) => state.timezone);
   const [activeHour, setActiveHour] = React.useState<number | null>(null);
   const t = useI18n();
@@ -233,7 +234,7 @@ export default function TimeOfDayTradeChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="avgPnl"
@@ -244,7 +245,7 @@ export default function TimeOfDayTradeChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.hour}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={
                         hourFilter.hour === entry.hour
                           ? 1
@@ -252,7 +253,7 @@ export default function TimeOfDayTradeChart({
                             ? 0.15
                             : (entry.avgPnl >= 0 ? 0.98 : 0.22)
                       }
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={
                         hourFilter.hour === entry.hour
                           ? 0.8

@@ -59,15 +59,15 @@ interface PostComment {
 }
 
 const typeColors: Record<PostType, string> = {
-  [PostType.FEATURE_REQUEST]: 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100',
-  [PostType.BUG_REPORT]: 'bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100',
+  [PostType.FEATURE_REQUEST]: 'bg-semantic-info-bg text-semantic-info dark:bg-semantic-info-bg dark:text-semantic-info',
+  [PostType.BUG_REPORT]: 'bg-semantic-error-bg text-semantic-error dark:bg-semantic-error-bg dark:text-semantic-error',
   [PostType.DISCUSSION]: 'bg-white text-white dark:bg-white dark:text-white',
 }
 
 const statusColors: Record<PostStatus, string> = {
   [PostStatus.OPEN]: 'bg-white text-white dark:bg-white dark:text-white',
-  [PostStatus.IN_PROGRESS]: 'bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100',
-  [PostStatus.COMPLETED]: 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100',
+  [PostStatus.IN_PROGRESS]: 'bg-semantic-warning-bg text-semantic-warning dark:bg-semantic-warning-bg dark:text-semantic-warning',
+  [PostStatus.COMPLETED]: 'bg-semantic-info-bg text-semantic-info dark:bg-semantic-info-bg dark:text-semantic-info',
   [PostStatus.CLOSED]: 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100',
 }
 
@@ -290,7 +290,7 @@ export function PostCard({ post, isExpanded = false, isAuthor }: Props) {
                       </DropdownMenuSub>
                     )}
                     <DropdownMenuItem
-                      className="text-red-600"
+                      className="text-semantic-error"
                       onClick={handleDelete}
                     >
                       {t('community.post.delete')}

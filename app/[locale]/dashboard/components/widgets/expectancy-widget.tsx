@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { calculateAdvancedMetrics } from "@/lib/advanced-metrics"
 import { Target } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -10,7 +10,7 @@ import { useI18n } from "@/locales/client"
 import { WidgetShell } from "@/components/ui/widget-shell"
 
 export default function ExpectancyWidget({ size }: { size?: string }) {
-    const { formattedTrades: trades } = useData()
+    const { formattedTrades: trades } = useDashboardStats()
     const t = useI18n()
 
     const { expectancy } = React.useMemo(() => calculateAdvancedMetrics(trades as any), [trades])

@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, Code, LineChart, GraduationCap } from "lucide-react"
+import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
+
+export const revalidate = 1800
 
 export default function AboutPage() {
   const founderSkills = [
@@ -11,11 +14,9 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="px-4 py-12 bg-background text-foreground">
-      <h1 className="text-4xl font-bold text-center mb-8">About Qunt Edge</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="bg-card">
+    <UnifiedPageShell className="py-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card className="border-white/10 bg-black/40">
           <CardHeader>
             <CardTitle className="text-2xl">Our Mission</CardTitle>
           </CardHeader>
@@ -28,33 +29,28 @@ export default function AboutPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="border-white/10 bg-black/40">
           <CardHeader>
-            <CardTitle className="text-2xl">The Founder&apos;s Story</CardTitle>
+            <CardTitle className="text-2xl">THE TRADER BEHIND TIMON|</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
-              With over 5 years of trading experience, our founder has mastered order book trading with a specific 
-              focus on volume profile. Combining a strong background in engineering, computer science, and financial 
-              markets, along with a master&apos;s degree in quantitative finance, he identified a gap in the market for 
-              a tool that could truly help traders understand and improve their performance.
+            <p className="mb-4 text-muted-foreground">
+              I&apos;m Timon - a futures trader and trading educator. After years of studying price action, market behavior, and trading psychology, I developed a structured approach focused on clarity, simplicity, and consistent execution.
             </p>
             <p className="text-muted-foreground">
-              This unique blend of skills and experience led to the creation of Qunt Edge - a platform that 
-              reflects the needs of serious traders looking to gain deeper insights into their trading patterns 
-              and performance.
+              This method is built to help traders avoid common mistakes, reduce noise, and progress with better decision-making and discipline. The focus is straightforward: strategy, execution, and mindset. No distractions. Just a process designed to support steady improvement over time.
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-card md:col-span-2">
+        <Card className="border-white/10 bg-black/40 md:col-span-2">
           <CardHeader>
             <CardTitle className="text-2xl">Founder&apos;s Expertise</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {founderSkills.map((skill, index) => (
-                <Badge key={index} variant="secondary" className="text-sm py-1 px-2 flex items-center gap-1">
+                <Badge key={index} variant="secondary" className="border-white/15 bg-white/10 text-sm py-1 px-2 flex items-center gap-1">
                   {skill.icon}
                   {skill.name}
                 </Badge>
@@ -63,7 +59,7 @@ export default function AboutPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card md:col-span-2">
+        <Card className="border-white/10 bg-black/40 md:col-span-2">
           <CardHeader>
             <CardTitle className="text-2xl">Why Qunt Edge?</CardTitle>
           </CardHeader>
@@ -78,6 +74,6 @@ export default function AboutPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </UnifiedPageShell>
   )
 }

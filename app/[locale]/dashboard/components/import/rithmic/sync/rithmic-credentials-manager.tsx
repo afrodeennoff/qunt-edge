@@ -424,7 +424,7 @@ export function RithmicCredentialsManager({
                         )}
                         {!hasLocalCredentials && (
                           <AlertTriangle
-                            className="h-4 w-4 text-yellow-500"
+                            className="h-4 w-4 text-semantic-warning"
                             aria-label={t("rithmic.missingCredentialsWarning")}
                           />
                         )}
@@ -518,7 +518,7 @@ export function RithmicCredentialsManager({
                         </div>
                       ) : (
                         <div className="flex flex-col items-center gap-3">
-                          <div className="flex items-start gap-2 text-xs text-yellow-600 dark:text-yellow-400 max-w-md">
+                          <div className="flex items-start gap-2 text-xs text-semantic-warning dark:text-semantic-warning max-w-md">
                             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                             <span className="text-left">
                               {t("rithmic.missingCredentialsWarning")}

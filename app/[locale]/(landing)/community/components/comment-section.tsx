@@ -126,7 +126,7 @@ function CommentComponent({
                     {t('community.comments.edit')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="text-red-600"
+                    className="text-semantic-error"
                     onClick={handleDelete}
                   >
                     {t('community.comments.delete')}

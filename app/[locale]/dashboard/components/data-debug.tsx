@@ -68,13 +68,13 @@ export function DataDebug() {
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
                             <span className="text-white/40 uppercase font-black tracking-tighter">Environment</span>
-                            <span className={cn("font-mono", process.env.NODE_ENV === 'development' ? "text-green-400" : "text-amber-400")}>
+                            <span className={cn("font-mono", process.env.NODE_ENV === 'development' ? "text-semantic-success" : "text-semantic-warning")}>
                                 {process.env.NODE_ENV}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
                             <span className="text-white/40 uppercase font-black tracking-tighter">Data Logic</span>
-                            <span className={cn("font-mono px-1.5 py-0.5 rounded text-[8px]", isMock ? "bg-amber-500/10 text-amber-500" : "bg-green-500/10 text-green-500")}>
+                            <span className={cn("font-mono px-1.5 py-0.5 rounded text-[8px]", isMock ? "bg-semantic-warning-bg/10 text-semantic-warning" : "bg-semantic-success-bg/10 text-semantic-success")}>
                                 {isMock ? "MOCK (Fallback)" : "LIVE (Synced)"}
                             </span>
                         </div>
@@ -101,7 +101,7 @@ export function DataDebug() {
                             variant="outline"
                             size="sm"
                             onClick={handleClearCache}
-                            className="h-8 text-[9px] font-bold uppercase tracking-widest border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-500"
+                            className="h-8 text-[9px] font-bold uppercase tracking-widest border-semantic-error-border/20 bg-semantic-error-bg/5 hover:bg-semantic-error-bg/10 text-semantic-error"
                         >
                             <HardDrive className="h-3 w-3 mr-2" />
                             Reset Cache

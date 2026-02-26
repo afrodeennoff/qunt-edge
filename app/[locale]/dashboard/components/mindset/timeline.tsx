@@ -43,9 +43,9 @@ export function Timeline({ onSelectDate, selectedDate, moodHistory, className, o
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const getEmotionColor = (value: number) => {
-    if (value < 20) return 'bg-red-500'
-    if (value < 40) return 'bg-orange-500'
-    if (value < 60) return 'bg-yellow-500'
+    if (value < 20) return 'bg-semantic-error-bg'
+    if (value < 40) return 'bg-semantic-warning-bg'
+    if (value < 60) return 'bg-semantic-warning-bg'
     if (value < 80) return 'bg-white/80'
     return 'bg-white'
   }

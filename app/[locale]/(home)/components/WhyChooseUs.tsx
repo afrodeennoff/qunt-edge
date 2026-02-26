@@ -6,30 +6,30 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { CheckCircle2, Clock3, LineChart, ShieldCheck, Sparkles, Users2 } from 'lucide-react'
 
 const proofStats = [
-  { label: 'Time To First Insight', value: '< 7 min', note: 'from account sync to first diagnostic signal' },
-  { label: 'Drift Detection Latency', value: 'In Session', note: 'alerts before behavior slippage compounds' },
-  { label: 'Review Coverage', value: '100%', note: 'every execution, note, and context event is tracked' },
+  { label: 'Time To First Diagnostic', value: '< 7 min', note: 'from first sync to actionable process signal' },
+  { label: 'Drift Detection Speed', value: 'In Session', note: 'warnings before slippage becomes habit' },
+  { label: 'Execution Coverage', value: '100%', note: 'every fill, note, and context event is tracked' },
 ]
 
 const reasons = [
   {
-    title: 'Process Before Outcome',
-    description: 'We prioritize decision quality and rule adherence before discussing PnL or confidence swings.',
+    title: 'Decision Quality First',
+    description: 'We prioritize rule quality and execution discipline before discussing outcome swings.',
     icon: ShieldCheck,
   },
   {
-    title: 'Built For Traders And Desks',
-    description: 'Solo traders and managers share one source of truth with role-specific visibility and controls.',
+    title: 'Built For Competitors',
+    description: 'Solo traders and desks run on one source of truth with role-specific visibility.',
     icon: Users2,
   },
   {
-    title: 'Weekly Feedback Momentum',
-    description: 'AI review packets convert recurring mistakes into measurable, week-over-week improvements.',
+    title: 'Weekly Performance Momentum',
+    description: 'AI reviews convert recurring mistakes into measurable, week-over-week progress.',
     icon: Clock3,
   },
   {
-    title: 'Signal-Rich Journal Intelligence',
-    description: 'Structured notes and trade context become concrete intervention plans, not vague reminders.',
+    title: 'Journal Intelligence',
+    description: 'Structured notes and context become concrete intervention plans, not vague reminders.',
     icon: LineChart,
   },
 ]
@@ -55,12 +55,11 @@ export default function WhyChooseUs() {
             Why Traders Choose Us
           </Badge>
           <h2 className="mt-3 text-[clamp(2rem,4.9vw,3.55rem)] font-semibold leading-[0.92] tracking-[-0.028em] [font-family:var(--home-display)]">
-            Why serious traders
-            <span className="block text-[hsl(var(--brand-primary))]">choose Qunt Edge over generic journals</span>
+            Why high-standard traders
+            <span className="block text-[hsl(var(--brand-primary))]">choose Qunt Edge over basic journals</span>
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-[15px] leading-[1.78] text-[hsl(var(--mk-text-muted))] sm:text-base [font-family:var(--home-copy)]">
-            Qunt Edge combines execution analytics, journaling, and AI coaching in one workflow so every week ends with a
-            clearer process than the week before.
+            Qunt Edge merges execution analytics, journaling, and AI coaching into one weekly cadence so your process gets sharper, not noisier.
           </p>
         </motion.div>
 

@@ -367,7 +367,7 @@ export default function RithmicOrderProcessor({ csvData, headers, processedTrade
       <div className="flex-1 overflow-auto">
         <div className="space-y-4 p-6">
           {incompleteTrades.length > 0 && (
-            <div className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r" role="alert">
+            <div className="flex-none bg-semantic-warning-bg border-l-4 border-semantic-warning-border text-semantic-warning p-4 rounded-r" role="alert">
               <p className="font-bold">Incomplete Trades Detected</p>
               <p>{`${incompleteTrades.length} trade(s) were not completed and have been removed from the analysis.`}</p>
               <ul className="list-disc list-inside mt-2">
@@ -447,13 +447,13 @@ export default function RithmicOrderProcessor({ csvData, headers, processedTrade
           <div className="flex justify-between px-2 py-4">
             <div>
               <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
+              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-semantic-error'}`}>
                 {totalPnL.toFixed(2)}
               </p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2">Total Commission</h3>
-              <p className="text-xl font-bold text-blue-600">
+              <p className="text-xl font-bold text-semantic-info">
                 {totalCommission.toFixed(2)}
               </p>
             </div>

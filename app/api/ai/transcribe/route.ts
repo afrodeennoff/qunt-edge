@@ -4,13 +4,29 @@ import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
 import { createRouteClient } from '@/lib/supabase/route-client'
 
 const transcribeRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: 'ai-transcribe' })
+const MAX_AUDIO_BYTES = 25 * 1024 * 1024
+const ALLOWED_AUDIO_TYPES = new Set([
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/webm',
+  'audio/mp4',
+  'audio/ogg',
+  'audio/flac',
+  'audio/x-m4a',
+  'audio/aac',
+])
 
 export async function POST(request: NextRequest) {
-  const openai = new OpenAI({
-    baseURL: "https://api.z.ai/api/paas/v4",
-    apiKey: process.env.OPENAI_API_KEY,
-  })
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: 'Service unavailable', message: 'Transcription service is not configured' },
+        { status: 503 }
+      )
+    }
+
     const supabase = createRouteClient(request)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user?.id) {
@@ -26,6 +42,15 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    const lengthHeader = request.headers.get('content-length')
+    const contentLength = lengthHeader ? Number(lengthHeader) : 0
+    if (Number.isFinite(contentLength) && contentLength > MAX_AUDIO_BYTES) {
+      return NextResponse.json(
+        { error: `Audio file exceeds ${Math.round(MAX_AUDIO_BYTES / (1024 * 1024))}MB limit` },
+        { status: 413 }
+      )
+    }
+
     const formData = await request.formData()
     const audioFile = formData.get('audio') as File
 
@@ -36,6 +61,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (audioFile.size <= 0) {
+      return NextResponse.json(
+        { error: 'Audio file is empty' },
+        { status: 400 }
+      )
+    }
+
+    if (audioFile.size > MAX_AUDIO_BYTES) {
+      return NextResponse.json(
+        { error: `Audio file exceeds ${Math.round(MAX_AUDIO_BYTES / (1024 * 1024))}MB limit` },
+        { status: 413 }
+      )
+    }
+
+    if (!ALLOWED_AUDIO_TYPES.has(audioFile.type)) {
+      return NextResponse.json(
+        { error: 'Unsupported audio format' },
+        { status: 415 }
+      )
+    }
+
     // Convert File to the format expected by OpenAI
     const audioBuffer = await audioFile.arrayBuffer()
     const audioBlob = new Blob([audioBuffer], { type: audioFile.type })
@@ -43,6 +89,11 @@ export async function POST(request: NextRequest) {
     // Create a File object for OpenAI API
     const audioForWhisper = new File([audioBlob], audioFile.name, {
       type: audioFile.type,
+    })
+
+    const openai = new OpenAI({
+      baseURL: 'https://api.z.ai/api/paas/v4',
+      apiKey: process.env.OPENAI_API_KEY,
     })
 
     // Transcribe using OpenAI Whisper

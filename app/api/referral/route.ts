@@ -6,10 +6,10 @@ import {
   addReferredUser,
   getReferralTier,
   getNextTier,
+  ReferralAlreadyAppliedError,
 } from '@/server/referral'
-import { prisma } from '@/lib/prisma'
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const userId = await getDatabaseUserId()
 
@@ -22,25 +22,13 @@ export async function GET(req: NextRequest) {
 
     // Get or create referral for the user
     const referral = await getOrCreateReferral(userId)
-    const count = referral.referredUserIds.length
+    const count = referral.redemptions.length
     const tier = await getReferralTier(count)
     const nextTier = await getNextTier(count)
 
-    // Get referred users details
-    const referredUsers = await prisma.user.findMany({
-      where: {
-        id: {
-          in: referral.referredUserIds,
-        },
-      },
-      select: {
-        id: true,
-        email: true,
-      },
-      orderBy: {
-        email: 'asc',
-      },
-    })
+    const referredUsers = referral.redemptions
+      .map((redemption) => redemption.referredUser)
+      .sort((a, b) => a.email.localeCompare(b.email))
 
     return NextResponse.json({
       success: true,
@@ -103,15 +91,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if user is already referred
-    if (referral.referredUserIds.includes(userId)) {
-      return NextResponse.json(
-        { error: 'You have already been referred' },
-        { status: 400 }
-      )
-    }
-
-    // Add user to referral list
     await addReferredUser(referral.id, userId)
 
     return NextResponse.json({
@@ -119,6 +98,12 @@ export async function POST(req: NextRequest) {
       message: 'Referral code applied successfully',
     })
   } catch (error) {
+    if (error instanceof ReferralAlreadyAppliedError) {
+      return NextResponse.json(
+        { error: 'You have already been referred' },
+        { status: 400 }
+      )
+    }
     console.error('[referral/POST] Error:', error)
     return NextResponse.json(
       { error: 'Failed to apply referral code' },

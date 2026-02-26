@@ -14,6 +14,10 @@ const mappingsRateLimit = rateLimit({ limit: 20, window: 60_000, identifier: "ai
 
 const MappingOnlySchema = mappingSchema.omit({ quality: true });
 type MappingOnly = z.infer<typeof MappingOnlySchema>;
+const mappingsRequestSchema = z.object({
+  fieldColumns: z.array(z.string()).min(1, "fieldColumns is required"),
+  firstRows: z.array(z.record(z.string(), z.string())).min(1, "firstRows is required"),
+});
 
 type MappingQuality = {
   score: number;
@@ -281,14 +285,8 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { fieldColumns, firstRows } = typeof body === "string" ? JSON.parse(body) : body;
-
-    if (!Array.isArray(fieldColumns) || !Array.isArray(firstRows)) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
+    const { fieldColumns, firstRows } = mappingsRequestSchema.parse(parsedBody);
 
     const firstPrompt = buildPrompt(fieldColumns, firstRows);
     const firstPass = await requestMapping(firstPrompt, policy.temperature);
@@ -344,7 +342,11 @@ export async function POST(req: NextRequest) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return apiError("VALIDATION_FAILED", "Invalid mappings request payload", 400, error.errors);
+    }
+
     console.error("Error in mappings route:", error);
 
     void logAiRequest({
@@ -355,13 +357,19 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: (error as any)?.code ?? null,
+      errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
       sampleRate: 1,
     });
 
-    return new Response(JSON.stringify({ error: "Failed to generate mappings" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const err = error as { statusCode?: number; type?: string };
+    if (err?.statusCode === 429 || err?.type === "rate_limit_exceeded") {
+      return apiError("RATE_LIMITED", "AI service is temporarily busy. Please try again.", 429);
+    }
+
+    if (typeof err?.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 500) {
+      return apiError("SERVICE_UNAVAILABLE", "AI service is temporarily unavailable.", 503);
+    }
+
+    return apiError("INTERNAL_ERROR", "Failed to generate mappings", 500);
   }
 }

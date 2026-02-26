@@ -27,6 +27,7 @@ model User {
   thorTokenHash      String?          @unique
   thorTokenExpiresAt DateTime?
   referral           Referral?        @relation("UserReferral")
+  referralRedemption ReferralRedemption? @relation("UserReferralRedemption")
   subscription       Subscription?    @relation("UserSubscription")
   dashboardLayout    DashboardLayout? @relation("UserDashboardLayout")
 
@@ -120,15 +121,30 @@ model Referral {
   id              String   @id @default(uuid())
   userId          String   @unique
   slug            String   @unique
-  referredUserIds String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user User @relation("UserReferral", fields: [userId], references: [id], onDelete: Cascade)
+  redemptions ReferralRedemption[] @relation("ReferralOwner")
 
   @@index([userId])
   @@index([slug])
+  @@schema("public")
+}
+
+model ReferralRedemption {
+  id             String   @id @default(uuid())
+  referralId     String
+  referredUserId String   @unique
+  createdAt      DateTime @default(now())
+
+  referral     Referral @relation("ReferralOwner", fields: [referralId], references: [id], onDelete: Cascade)
+  referredUser User     @relation("UserReferralRedemption", fields: [referredUserId], references: [id], onDelete: Cascade)
+
+  @@unique([referralId, referredUserId])
+  @@index([referralId])
+  @@index([referredUserId])
   @@schema("public")
 }
 
@@ -360,7 +376,7 @@ model Payout {
 model Order {
   id        String @id @default(uuid())
   accountId String
-  orderId   String @unique
+  orderId   String
   userId    String
 
   symbol         String
@@ -378,7 +394,9 @@ model Order {
   user User @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([accountId])
+  @@index([orderId])
   @@index([userId])
+  @@unique([userId, orderId])
   @@schema("public")
 }
 
@@ -441,6 +459,19 @@ model TradeAnalytics {
 
   @@index([tradeId])
   @@index([computedAt])
+  @@schema("public")
+}
+
+model TraderBenchmarkSnapshot {
+  id         String   @id @default("global")
+  riskReward Decimal  @default(0)
+  drawdown   Decimal  @default(0)
+  winRate    Decimal  @default(0)
+  avgReturn  Decimal  @default(0)
+  sampleSize Int      @default(0)
+  computedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@schema("public")
 }
 

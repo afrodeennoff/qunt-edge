@@ -12,9 +12,9 @@ export default function ReferralPage() {
   const affiliateUrl = "https://whop.com/quantedge-solutions/affiliates"
 
   const tiers = [
-    { count: 1, reward: t('referral.landing.tier1Reward'), icon: <Gift className="w-5 h-5 text-blue-500" /> },
-    { count: 3, reward: t('referral.landing.tier2Reward'), icon: <Sparkles className="w-5 h-5 text-purple-500" /> },
-    { count: 5, reward: t('referral.landing.tier3Reward'), icon: <Trophy className="w-5 h-5 text-yellow-500" /> },
+    { count: 1, reward: t('referral.landing.tier1Reward'), icon: <Gift className="w-5 h-5 text-semantic-info" /> },
+    { count: 3, reward: t('referral.landing.tier2Reward'), icon: <Sparkles className="w-5 h-5 text-semantic-info" /> },
+    { count: 5, reward: t('referral.landing.tier3Reward'), icon: <Trophy className="w-5 h-5 text-semantic-warning" /> },
   ]
 
   const requirements = [
@@ -26,7 +26,7 @@ export default function ReferralPage() {
     {
       title: t('referral.landing.requirement2Title'),
       description: t('referral.landing.requirement2Description'),
-      icon: <AlertCircle className="w-5 h-5 text-amber-500" />,
+      icon: <AlertCircle className="w-5 h-5 text-semantic-warning" />,
     },
   ]
 

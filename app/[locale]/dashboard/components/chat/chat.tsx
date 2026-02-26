@@ -343,7 +343,7 @@ export default function ChatWidget({ size = "large" }: ChatWidgetProps) {
   }, [setMessages, setStoredMessages, setIsStarted]);
 
   return (
-    <Card className="h-full flex flex-col bg-[#050505] border-none shadow-none relative overflow-clip">
+    <Card className="h-full flex flex-col bg-background border-none shadow-none relative overflow-clip">
       <ChatHeader
         title="AI Assistant"
         onReset={handleReset}

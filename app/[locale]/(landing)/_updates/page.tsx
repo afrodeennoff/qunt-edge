@@ -3,12 +3,15 @@ import { getI18n } from '@/locales/server'
 import CompletedTimeline from '../components/completed-timeline'
 import { getAllPosts } from '@/lib/posts'
 import { getLatestVideoFromPlaylist } from '@/app/[locale]/admin/actions/youtube'
+import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell'
 
 interface PageProps {
   params: Promise<{
     locale: string
   }>
 }
+
+export const revalidate = 1800;
 
 export default async function UpdatesPage(props: PageProps) {
   const params = await props.params;
@@ -30,34 +33,29 @@ export default async function UpdatesPage(props: PageProps) {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">{t('updates.title')}</h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-12">
-          {t('updates.description')}
-        </p>
-
-        {/* Display latest weekly video for French locale */}
-        {locale === 'fr' && latestVideoId && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
+    <UnifiedPageShell widthClassName="max-w-5xl" className="py-8">
+      {/* Display latest weekly video for French locale */}
+      {locale === 'fr' && latestVideoId && (
+        <UnifiedSurface className="mb-8">
+          <h2 className="mb-6 text-2xl font-semibold text-fg-primary">
               {t('updates.weeklyVideo')}
-            </h2>
-            <div className="rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 shadow-lg">
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${latestVideoId}`}
-                  title="Dernière vidéo de la semaine"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+          </h2>
+          <div className="overflow-hidden rounded-xl border border-white/10 bg-black/30">
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute left-0 top-0 h-full w-full"
+                src={`https://www.youtube.com/embed/${latestVideoId}`}
+                title="Dernière vidéo de la semaine"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
           </div>
-        )}
+        </UnifiedSurface>
+      )}
 
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">{t('updates.completed')}</h2>
+      <UnifiedSurface>
+        <h2 className="mb-6 text-2xl font-semibold text-fg-primary">{t('updates.completed')}</h2>
         <CompletedTimeline milestones={completedPosts.map(post => ({
           id: post.meta.slug,
           title: post.meta.title,
@@ -67,7 +65,7 @@ export default async function UpdatesPage(props: PageProps) {
           image: post.meta.image,
           youtubeVideoId: post.meta.youtubeVideoId
         }))} locale={locale} />
-      </div>
-    </div>
+      </UnifiedSurface>
+    </UnifiedPageShell>
   )
 }

@@ -1,4 +1,3 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { NextRequest } from "next/server";
 import { tradeSchema } from "./schema";
@@ -6,11 +5,9 @@ import { z } from 'zod/v3';
 import { apiError } from "@/lib/api-response";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 import { createRouteClient } from "@/lib/supabase/route-client";
-
-const customOpenai = createOpenAI({
-  baseURL: "https://api.z.ai/api/paas/v4",
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { getAiLanguageModel } from "@/lib/ai/client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { categorizeAiError, logAiRequest } from "@/lib/ai/telemetry";
 
 export const maxDuration = 30;
 const MAX_FORMAT_BODY_BYTES = 512 * 1024;
@@ -22,6 +19,9 @@ const requestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const policy = getAiPolicy("mappings");
+  const startedAt = Date.now();
+
   try {
     const supabase = createRouteClient(req);
     const {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { headers, rows } = requestSchema.parse(body);
 
     const result = streamObject({
-      model: customOpenai("gpt-4o-mini-2024-07-18"),
+      model: getAiLanguageModel("mappings"),
       schema: tradeSchema,
       output: 'array',
       system:`
@@ -137,14 +137,48 @@ export async function POST(req: NextRequest) {
       Rows:
       ${rows.map((row: string[]) => row.join(", ")).join("\n")}
     `,
-    temperature: 0.1,
-  });
+      temperature: policy.temperature,
+    });
 
-  return result.toTextStreamResponse();
-  } catch (error) {
+    void logAiRequest({
+      route: "/api/ai/format-trades",
+      feature: "mappings",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: true,
+      finishReason: "stream_started",
+      sampleRate: policy.logSampleRate,
+    });
+
+    return result.toTextStreamResponse();
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return apiError("VALIDATION_FAILED", "Invalid request format", 400, error.errors);
     }
-    return apiError("BAD_REQUEST", "Invalid request format", 400);
+
+    const err = error as { statusCode?: number; type?: string; code?: unknown };
+
+    void logAiRequest({
+      route: "/api/ai/format-trades",
+      feature: "mappings",
+      model: policy.model,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: err.code != null ? String(err.code) : null,
+      sampleRate: 1,
+    });
+
+    if (err?.statusCode === 429 || err?.type === "rate_limit_exceeded") {
+      return apiError("RATE_LIMITED", "AI service is temporarily busy. Please try again.", 429);
+    }
+
+    if (typeof err?.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 500) {
+      return apiError("SERVICE_UNAVAILABLE", "AI service is temporarily unavailable.", 503);
+    }
+
+    return apiError("INTERNAL_ERROR", "Failed to format trades", 500);
   }
 }

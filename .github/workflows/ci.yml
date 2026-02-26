@@ -16,6 +16,14 @@ concurrency:
 env:
   NODE_VERSION: 20
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+  PERF_BASE_URL: http://127.0.0.1:3000
+  LIGHTHOUSE_DESKTOP_MIN: 0.9
+  LIGHTHOUSE_MOBILE_MIN: 0.75
+  LIGHTHOUSE_TBT_MAX_MS: 1200
+  LIGHTHOUSE_DESKTOP_TBT_MAX_MS: 200
+  LIGHTHOUSE_DESKTOP_LCP_MAX_MS: 1800
+  LIGHTHOUSE_MOBILE_LCP_MAX_MS: 3500
+  PERF_HEADER_STRICT: 'true'
 
 jobs:
   validate:
@@ -75,6 +83,52 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Route Budget Check
+        run: npm run check:route-budgets
+
+      - name: Bundle Analysis
+        run: npm run analyze:bundle
+
+      - name: Start production server
+        run: |
+          npm run start > /tmp/qunt-start.log 2>&1 &
+          echo $! > /tmp/qunt-start.pid
+          for i in {1..40}; do
+            if curl -sSf $PERF_BASE_URL/en >/dev/null; then
+              echo "Server ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Server did not become ready in time"
+          tail -n 200 /tmp/qunt-start.log || true
+          exit 1
+
+      - name: Header Cache Policy Check
+        run: npm run perf:headers
+
+      - name: Lighthouse Performance Gate
+        run: npm run perf:lighthouse
+
+      - name: Stop production server
+        if: always()
+        run: |
+          if [ -f /tmp/qunt-start.pid ]; then
+            kill "$(cat /tmp/qunt-start.pid)" || true
+          fi
+          pkill -f "next start" || true
+
+      - name: Upload Performance Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-artifacts
+          path: |
+            docs/audits/artifacts/bundle-summary.json
+            docs/audits/artifacts/lighthouse-*.json
+            docs/audits/artifacts/lighthouse-summary.json
+            /tmp/qunt-start.log
 
       - name: Security Audit Report
         run: npm audit --json > npm-audit-report.json || true

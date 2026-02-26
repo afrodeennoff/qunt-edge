@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats, useDashboardTrades } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -73,7 +73,8 @@ const formatWinRate = (wins: number, total: number) => {
 export default function PnLPerContractDailyChart({
   size = "medium",
 }: PnLPerContractDailyChartProps) {
-  const { formattedTrades: trades, isLoading } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
+  const { isLoading } = useDashboardTrades();
   const { timezone } = useUserStore();
   const { config, setSelectedInstrument } = usePnLPerContractDailyStore();
   const t = useI18n();
@@ -324,18 +325,18 @@ export default function PnLPerContractDailyChart({
                         tick={false}
                         domain={[domainMin, domainMax]}
                       />
-                      <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+                      <ReferenceLine y={0} stroke="hsl(var(--foreground) / )" />
                       <Bar
                         dataKey="averagePnl"
                         radius={[2, 2, 2, 2]}
                         maxBarSize={size === "small" ? 25 : 40}
                         className="transition-none"
-                        fill="rgba(255,255,255,0.05)"
+                        fill="hsl(var(--foreground) / )"
                       >
                         {loadingMockData.map((_, index) => (
                           <Cell
                             key={`skeleton-cell-${index}`}
-                            fill="rgba(255,255,255,0.05)"
+                            fill="hsl(var(--foreground) / )"
                           />
                         ))}
                       </Bar>
@@ -392,10 +393,10 @@ export default function PnLPerContractDailyChart({
                     Math.max(maxPnL * 1.1, 0),
                   ]}
                 />
-                <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+                <ReferenceLine y={0} stroke="hsl(var(--foreground) / )" />
                 <Tooltip
                   content={renderTooltip}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="averagePnl"
@@ -406,8 +407,8 @@ export default function PnLPerContractDailyChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.averagePnl >= 0 ? "white" : "white"}
-                      stroke={entry.averagePnl >= 0 ? "white" : "white"}
+                      fill={entry.averagePnl >= 0 ? "hsl(var(--foreground))" : "hsl(var(--foreground))"}
+                      stroke={entry.averagePnl >= 0 ? "hsl(var(--foreground))" : "hsl(var(--foreground))"}
                       strokeOpacity={entry.averagePnl >= 0 ? 0.42 : 0.06}
                       fillOpacity={entry.averagePnl >= 0 ? 0.98 : 0.22}
                       className={cn(

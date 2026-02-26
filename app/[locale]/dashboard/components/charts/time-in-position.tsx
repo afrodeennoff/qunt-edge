@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { Trade } from "@/lib/data-types";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -51,7 +51,7 @@ const formatTime = (minutes: number) => {
 export default function TimeInPositionChart({
   size = "medium",
 }: TimeInPositionChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const t = useI18n();
 
   const chartData = React.useMemo(() => {
@@ -214,7 +214,7 @@ export default function TimeInPositionChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="avgTimeInPosition"
@@ -225,7 +225,7 @@ export default function TimeInPositionChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={entry.tradeCount > 0 ? 0.9 : 0.15}
                       className={cn(
                         "hover:fill-opacity-100 transition-all duration-300",

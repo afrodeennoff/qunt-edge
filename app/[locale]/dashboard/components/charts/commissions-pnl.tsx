@@ -11,7 +11,7 @@ import {
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -73,11 +73,11 @@ function CommissionsTooltip({
 const chartConfig = {
   pnl: {
     label: "Net P/L",
-    color: "white",
+    color: "hsl(var(--foreground))",
   },
   commissions: {
     label: "Commissions",
-    color: "rgba(255,255,255,0.2)",
+    color: "hsl(var(--foreground) / )",
   },
 } satisfies ChartConfig;
 
@@ -87,7 +87,7 @@ const formatCurrency = (value: number) =>
 export default function CommissionsPnLChart({
   size = "medium",
 }: CommissionsPnLChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const t = useI18n();
 
 
@@ -186,13 +186,13 @@ export default function CommissionsPnLChart({
                       nameKey="name"
                       startAngle={90}
                       endAngle={-270}
-                      stroke="rgba(0,0,0,0)"
+                      stroke="transparent"
                       strokeWidth={1}
                     >
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.name === t("commissions.legend.netPnl") ? "white" : "rgba(255,255,255,0.2)"}
+                          fill={entry.name === t("commissions.legend.netPnl") ? "hsl(var(--foreground))" : "hsl(var(--foreground) / )"}
                           fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
                           className={cn(
                             "transition-all duration-300 ease-in-out hover:fill-opacity-100",
@@ -203,7 +203,7 @@ export default function CommissionsPnLChart({
                     </Pie>
                     <Tooltip
                       content={<CommissionsTooltip />}
-                      cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                      cursor={{ fill: 'hsl(var(--foreground) / )' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>

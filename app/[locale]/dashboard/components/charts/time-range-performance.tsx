@@ -4,7 +4,7 @@ import * as React from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartSurface } from "@/components/ui/chart-surface"
-import { useData } from "@/context/data-provider"
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { Info } from 'lucide-react'
 import {
@@ -52,7 +52,8 @@ function getTimeRangeLabel(range: string): string {
 }
 
 export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRangePerformanceChartProps) {
-  const { formattedTrades: trades, timeRange, setTimeRange } = useData()
+  const { formattedTrades: trades } = useDashboardStats()
+  const { timeRange, setTimeRange } = useDashboardFilters()
   const t = useI18n()
   const [activeRange, setActiveRange] = React.useState<string | null>(null)
 
@@ -108,8 +109,8 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
   }, [activeRange, timeRange.range, setTimeRange])
 
   function getColorByWinRate(winRate: number): string {
-    if (winRate === 0) return "rgba(255,255,255,0.2)"
-    return "white"
+    if (winRate === 0) return "hsl(var(--foreground) / )"
+    return "hsl(var(--foreground))"
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -282,7 +283,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="avgPnl"
@@ -293,9 +294,9 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.range}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={timeRange.range === entry.range ? 1 : (timeRange.range ? 0.3 : (entry.avgPnl >= 0 ? 0.98 : 0.22))}
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={timeRange.range === entry.range ? 1 : (entry.avgPnl >= 0 ? 0.42 : 0.06)}
                       className={cn(
                         "hover:opacity-100",

@@ -15,7 +15,7 @@ export function SegmentedControl({ options, value, onChange, className }: Segmen
     : []
 
   return (
-    <div className={cn("inline-flex rounded-md border border-white/10 bg-black/25 p-0.5", className)}>
+    <div className={cn("inline-flex rounded-md border border-border/70 bg-card/60 p-0.5", className)}>
       {normalized.map((option) => (
         <button
           key={option.value}
@@ -23,7 +23,7 @@ export function SegmentedControl({ options, value, onChange, className }: Segmen
           onClick={() => onChange(option.value)}
           className={cn(
             "rounded px-2 py-1 text-[11px] font-semibold transition-colors",
-            value === option.value ? "bg-cyan-400/20 text-cyan-200" : "text-slate-400 hover:text-slate-200",
+            value === option.value ? "bg-primary/20 text-foreground" : "text-muted-foreground hover:text-foreground",
           )}
         >
           {option.label}

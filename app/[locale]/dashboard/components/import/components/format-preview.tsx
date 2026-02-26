@@ -592,11 +592,11 @@ export function FormatPreview({
             <Tooltip>
               <TooltipTrigger>
                 <div className="flex items-center gap-1">
-                  <span className={pnl >= 0 ? "text-white" : "text-red-600"}>
+                  <span className={pnl >= 0 ? "text-white" : "text-semantic-error"}>
                     ${pnl.toFixed(2)}
                   </span>
                   {isMismatch && (
-                    <span className="text-orange-500 text-xs" title="PnL value doesn't match original data">
+                    <span className="text-semantic-warning text-xs" title="PnL value doesn't match original data">
                       ⚠️
                     </span>
                   )}
@@ -607,7 +607,7 @@ export function FormatPreview({
                   <div className="space-y-1">
                     <p>Original: {originalData}</p>
                     {isMismatch && (
-                      <p className="text-orange-500 text-sm">
+                      <p className="text-semantic-warning text-sm">
                         ⚠️ Mismatch detected! Expected: ${originalPnl?.toFixed(2)}, Got: ${pnl.toFixed(2)}
                       </p>
                     )}
@@ -711,7 +711,7 @@ export function FormatPreview({
   if (error) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-red-500">{error}</div>
+        <div className="text-semantic-error">{error}</div>
       </div>
     );
   }
@@ -776,7 +776,7 @@ export function FormatPreview({
             onClick={resetProcessing}
             disabled={isProcessing}
             variant="outline"
-            className="border-red-200 text-red-600 hover:bg-red-50"
+            className="border-semantic-error-border text-semantic-error hover:bg-semantic-error-bg"
         >
           {t('import.processing.reset')}
           </Button>
@@ -886,7 +886,7 @@ export function FormatPreview({
                       {t('trade-table.footer.totalPnl')}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      <span className={totals.totalPnl >= 0 ? "text-white" : "text-red-600"}>
+                      <span className={totals.totalPnl >= 0 ? "text-white" : "text-semantic-error"}>
                         ${totals.totalPnl.toFixed(2)}
                       </span>
                     </TableCell>
@@ -900,7 +900,7 @@ export function FormatPreview({
                       {t('trade-table.footer.netPnl')}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      <span className={totals.netPnl >= 0 ? "text-white" : "text-red-600"}>
+                      <span className={totals.netPnl >= 0 ? "text-white" : "text-semantic-error"}>
                         ${totals.netPnl.toFixed(2)}
                       </span>
                     </TableCell>

@@ -27,17 +27,17 @@ export function AIBorder({ children, className, success = false }: AIBorderProps
         "border-2 transition-colors duration-500",
         success
           ? "border-white/20 shadow-none"
-          : "border-blue-500 shadow-none",
+          : "border-border shadow-none",
         "w-full h-full",
         className,
       )}
     >
       {/* Content container */}
-      <div className="relative bg-gray-950 z-10 w-full h-full">
+      <div className="relative bg-background z-10 w-full h-full">
         {/* Scanner effect overlay - Only show when not in success state */}
         {!success && (
           <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
-            <div className="absolute left-0 right-0 h-[3px] bg-linear-to-r from-transparent via-blue-400 to-transparent opacity-80 animate-scanner-smooth" />
+            <div className="absolute left-0 right-0 h-[3px] bg-linear-to-r from-transparent via-white/50 to-transparent opacity-80 animate-scanner-smooth" />
           </div>
         )}
 
@@ -50,7 +50,7 @@ export function AIBorder({ children, className, success = false }: AIBorderProps
 
 
             {/* Success sweep effect */}
-            <div className="absolute inset-0 bg-linear-to-r from-transparent via-green-400/20 to-transparent animate-success-sweep" />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent animate-success-sweep" />
           </div>
         )}
 
@@ -72,7 +72,7 @@ export function AIBorder({ children, className, success = false }: AIBorderProps
             "absolute inset-[-2px] rounded-lg opacity-60",
             success
               ? "bg-linear-to-r from-white/80 to-white animate-glow-success"
-              : "bg-linear-to-r from-blue-600 to-purple-600 animate-glow-subtle",
+              : "bg-linear-to-r from-white/50 to-white/20 animate-glow-subtle",
           )}
         />
       </div>
@@ -81,7 +81,7 @@ export function AIBorder({ children, className, success = false }: AIBorderProps
       <div
         className={cn(
           "absolute top-0 right-0 w-2 h-2 rounded-full m-1",
-          success ? "bg-white/10 animate-pulse" : "bg-blue-500 animate-pulse",
+          success ? "bg-white/10 animate-pulse" : "bg-white/40 animate-pulse",
         )}
       />
     </div>

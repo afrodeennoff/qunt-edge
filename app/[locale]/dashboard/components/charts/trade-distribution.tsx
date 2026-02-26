@@ -3,7 +3,7 @@
 import * as React from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { ChartSurface } from "@/components/ui/chart-surface"
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { Info } from 'lucide-react'
@@ -37,7 +37,7 @@ interface TooltipProps {
 }
 
 export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
-  const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useData()
+  const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useDashboardStats()
   const t = useI18n()
   const hasData = nbTrades > 0
 
@@ -54,9 +54,9 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: '#f1f1f2', count: nbWin, total: nbTrades },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: '#4d4f56', count: nbBe, total: nbTrades },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: '#767982', count: nbLoss, total: nbTrades },
+      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'hsl(var(--chart-1))', count: nbWin, total: nbTrades },
+      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'hsl(var(--chart-5))', count: nbBe, total: nbTrades },
+      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'hsl(var(--chart-6))', count: nbLoss, total: nbTrades },
     ]
   }, [nbWin, nbLoss, nbBe, nbTrades, t])
 
@@ -157,16 +157,16 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                       dataKey="value"
                       startAngle={90}
                       endAngle={-270}
-                      stroke="rgba(0,0,0,0)"
+                      stroke="transparent"
                     >
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={entry.color}
-                          fillOpacity={entry.color === '#f1f1f2' ? 0.95 : 1}
+                          fillOpacity={entry.color === 'hsl(var(--chart-1))' ? 0.95 : 1}
                           className={cn(
                             "transition-all duration-300 ease-in-out hover:fill-opacity-100",
-                            entry.color === "#f1f1f2" ? "chart-positive-emphasis" : "chart-negative-muted"
+                            entry.color === "hsl(var(--chart-1))" ? "chart-positive-emphasis" : "chart-negative-muted"
                           )}
                         />
                       ))}

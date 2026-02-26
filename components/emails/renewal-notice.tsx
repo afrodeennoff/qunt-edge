@@ -150,7 +150,7 @@ export default function RenewalNoticeEmail({
                   
                   <div className="flex justify-between">
                     <Text className="text-gray-600 margin-0">{t.daysRemaining}:</Text>
-                    <Text className={`font-medium margin-0 ${daysUntilRenewal <= 3 ? 'text-red-600' : 'text-orange-600'}`}>
+                    <Text className={`font-medium margin-0 ${daysUntilRenewal <= 3 ? 'text-semantic-error' : 'text-semantic-warning'}`}>
                       {daysUntilRenewal} {daysUntilRenewal === 1 ? 'day' : 'days'}
                     </Text>
                   </div>
@@ -168,15 +168,15 @@ export default function RenewalNoticeEmail({
                 
                 <Button
                   href={dashboardUrl}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium text-center block w-fit"
+                  className="bg-semantic-info-bg hover:bg-semantic-info-bg text-white px-6 py-3 rounded-lg font-medium text-center block w-fit"
                 >
                   {t.manageAccountButton}
                 </Button>
               </Section>
 
               {/* Auto-renewal Notice */}
-              <Section className="bg-blue-50 rounded-lg p-4 mb-6">
-                <Text className="text-blue-800 margin-0 text-sm leading-5">
+              <Section className="bg-semantic-info-bg rounded-lg p-4 mb-6">
+                <Text className="text-semantic-info margin-0 text-sm leading-5">
                   ℹ️ {t.autoRenewalNote}
                 </Text>
               </Section>

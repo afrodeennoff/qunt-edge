@@ -1,6 +1,6 @@
 "use client"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { LucideIcon, TrendingDown, TrendingUp, Target, Zap } from "lucide-react"
@@ -19,7 +19,7 @@ type PnLSummaryProps = {
 }
 
 export function PnLSummary({ className }: PnLSummaryProps) {
-  const { calendarData, statistics } = useData()
+  const { calendarData, statistics } = useDashboardStats()
 
   const stats = useMemo(() => {
     const now = new Date()

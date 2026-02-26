@@ -191,7 +191,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
           <Button
             onClick={transcribeAllSegments}
             disabled={isTranscribing}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white"
+            className="bg-semantic-info-bg hover:bg-semantic-info-bg dark:bg-semantic-info-bg dark:hover:bg-semantic-info-bg text-white"
           >
             {isTranscribing ? (
               <>

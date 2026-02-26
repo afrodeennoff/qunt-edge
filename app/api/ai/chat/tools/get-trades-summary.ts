@@ -1,6 +1,6 @@
 import { groupBy } from "@/lib/utils";
-import { getTradesAction, SerializedTrade } from "@/server/database";
-import { Prisma } from "@/prisma/generated/prisma";
+import { SerializedTrade } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import Decimal from "decimal.js";
 import { tool } from "ai";
 import { z } from 'zod/v3';
@@ -45,14 +45,22 @@ export const getTradesSummary = tool({
     endDate: z.string().describe('Date string in format 2025-01-14T14:33:01.000Z')
   }),
   execute: async ({ startDate, endDate }: { startDate: string, endDate: string }) => {
-    console.log(`[getTradeSummary] startDate: ${startDate}, endDate: ${endDate}`)
-    const paginatedTrades = await getTradesAction();
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const filteredTrades = paginatedTrades.trades.filter(trade => {
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new Error("Invalid startDate or endDate format");
+    }
+    const filteredTrades = allTrades.filter(trade => {
       const tradeDate = new Date(trade.entryDate);
       return tradeDate >= start && tradeDate <= end;
     });
-    return generateTradeSummary(filteredTrades as SerializedTrade[]);
+    const summary = generateTradeSummary(filteredTrades as SerializedTrade[]);
+    return {
+      items: summary,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   },
 })

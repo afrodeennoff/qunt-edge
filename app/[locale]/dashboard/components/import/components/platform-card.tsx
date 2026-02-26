@@ -95,7 +95,7 @@ export function PlatformCard({
                 {platform.isDisabled && (
                     <Badge
                         variant="secondary"
-                        className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20"
+                        className="bg-semantic-warning-bg/10 text-semantic-warning hover:bg-semantic-warning-bg/20"
                     >
                         {t("import.type.badge.maintenance")}
                     </Badge>
@@ -103,7 +103,7 @@ export function PlatformCard({
                 {platform.isComingSoon && !platform.isDisabled && (
                     <Badge
                         variant="secondary"
-                        className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                        className="bg-semantic-info-bg/10 text-semantic-info hover:bg-semantic-info-bg/20"
                     >
                         {t("import.type.badge.comingSoon")}
                     </Badge>
@@ -111,7 +111,7 @@ export function PlatformCard({
                 {!platform.isDisabled && platform.isRithmic && isWeekend && (
                     <Badge
                         variant="outline"
-                        className="border-yellow-500/30 bg-yellow-500/5 text-yellow-600"
+                        className="border-semantic-warning-border/30 bg-semantic-warning-bg/5 text-semantic-warning"
                     >
                         <AlertTriangle className="mr-1 h-3 w-3" />
                         Weekend

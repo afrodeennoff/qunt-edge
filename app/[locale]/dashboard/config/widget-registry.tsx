@@ -353,11 +353,11 @@ function CreateChatPreview() {
 function createSmartInsightsPreview() {
   return (
     <Card className="h-[300px] flex flex-col relative overflow-hidden bg-black/40 border-white/5">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -z-10" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-semantic-info-bg/5 rounded-full blur-3xl -z-10" />
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
         <div className="space-y-1">
           <div className="text-sm font-medium flex items-center gap-2">
-            <Brain className="h-4 w-4 text-blue-400" />
+            <Brain className="h-4 w-4 text-semantic-info" />
             Smart Insights
           </div>
           <div className="text-xs text-muted-foreground">
@@ -367,8 +367,8 @@ function createSmartInsightsPreview() {
       </CardHeader>
       <CardContent className="flex-1 p-4 space-y-3">
         <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3">
-          <div className="h-8 w-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-            <Brain className="h-4 w-4 text-blue-500" />
+          <div className="h-8 w-8 rounded-full bg-semantic-info-bg/10 border border-semantic-info-border/20 flex items-center justify-center">
+            <Brain className="h-4 w-4 text-semantic-info" />
           </div>
           <div className="space-y-2 flex-1">
             <div className="h-4 w-24 bg-white/10 rounded" />
@@ -376,8 +376,8 @@ function createSmartInsightsPreview() {
           </div>
         </div>
         <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3 opacity-60">
-          <div className="h-8 w-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <div className="h-4 w-4 rounded-sm bg-red-500/50" />
+          <div className="h-8 w-8 rounded-full bg-semantic-error-bg/10 border border-semantic-error-border/20 flex items-center justify-center">
+            <div className="h-4 w-4 rounded-sm bg-semantic-error-bg/50" />
           </div>
           <div className="space-y-2 flex-1">
             <div className="h-4 w-16 bg-white/10 rounded" />

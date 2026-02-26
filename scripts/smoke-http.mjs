@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process"
 
 const baseUrl = process.env.SMOKE_BASE_URL || "http://127.0.0.1:3000"
 const timeoutMs = Number.parseInt(process.env.SMOKE_TIMEOUT_MS || "8000", 10)
@@ -23,13 +24,63 @@ async function fetchWithTimeout(url) {
   }
 }
 
+function fetchViaCurl(url) {
+  const startedAt = Date.now()
+  const result = spawnSync(
+    "curl",
+    [
+      "--silent",
+      "--show-error",
+      "--max-time",
+      String(Math.ceil(timeoutMs / 1000)),
+      "--output",
+      "-",
+      "--write-out",
+      "\n%{http_code}",
+      url,
+    ],
+    { encoding: "utf8" },
+  )
+
+  if (result.status !== 0) {
+    const stderr = result.stderr?.trim() || "curl failed"
+    throw new Error(stderr)
+  }
+
+  const output = result.stdout || ""
+  const newlineIndex = output.lastIndexOf("\n")
+  const body = newlineIndex >= 0 ? output.slice(0, newlineIndex) : output
+  const statusText = newlineIndex >= 0 ? output.slice(newlineIndex + 1).trim() : "0"
+  const status = Number.parseInt(statusText, 10) || 0
+
+  return {
+    ok: status >= 200 && status < 400,
+    status,
+    latencyMs: Date.now() - startedAt,
+    text: body,
+  }
+}
+
 async function run() {
   const results = []
 
   for (const check of checks) {
     const url = `${baseUrl}${check.path}`
     try {
-      const result = await fetchWithTimeout(url)
+      let result
+      try {
+        result = await fetchWithTimeout(url)
+      } catch (error) {
+        const code =
+          error instanceof Error && "cause" in error && error.cause && typeof error.cause === "object"
+            ? error.cause.code
+            : undefined
+        if (code === "EPERM" || code === "EACCES") {
+          result = fetchViaCurl(url)
+        } else {
+          throw error
+        }
+      }
       let passed = result.ok
       let reason = ""
 

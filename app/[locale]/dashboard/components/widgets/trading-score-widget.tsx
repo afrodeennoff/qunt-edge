@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { useData } from "@/context/data-provider"
+import { useDashboardStats } from "@/context/data-provider"
 import { calculateTradingScore, deriveScoreMetricsFromTrades, getScoreLabel } from "@/lib/score-calculator"
 import { Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -9,7 +9,7 @@ import { useI18n } from "@/locales/client"
 import { WidgetShell } from "@/components/ui/widget-shell"
 
 export default function TradingScoreWidget({ size }: { size?: string }) {
-    const { formattedTrades: trades } = useData()
+    const { formattedTrades: trades } = useDashboardStats()
     const t = useI18n()
 
     const metrics = React.useMemo(() => {

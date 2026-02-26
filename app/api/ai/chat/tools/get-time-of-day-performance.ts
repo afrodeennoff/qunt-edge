@@ -1,4 +1,4 @@
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
 import { z } from 'zod/v3';
@@ -257,10 +257,10 @@ export const getTimeOfDayPerformance = tool({
     timezone: z.string().optional().describe('Timezone for time analysis (e.g., UTC, EST, PST)')
   }),
   execute: async ({ startDate, endDate, timezone = 'UTC' }: { startDate?: string, endDate?: string, timezone?: string }) => {
-    console.log(`[getTimeOfDayPerformance] startDate: ${startDate}, endDate: ${endDate}, timezone: ${timezone}`);
 
-    const paginatedTrades = await getTradesAction();
-    let trades = normalizeTrades(paginatedTrades.trades);
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+    let trades = normalizeTrades(allTrades);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
@@ -272,6 +272,11 @@ export const getTimeOfDayPerformance = tool({
       });
     }
 
-    return analyzeTimeOfDay(trades, timezone);
+    const analysis = analyzeTimeOfDay(trades, timezone);
+    return {
+      ...analysis,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

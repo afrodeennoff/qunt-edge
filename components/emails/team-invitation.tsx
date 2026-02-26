@@ -80,7 +80,7 @@ export default function TeamInvitationEmail({
               </Text>
 
               {/* Team Information */}
-              <Section className="bg-blue-50 rounded-lg p-4 mb-6">
+              <Section className="bg-semantic-info-bg rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <Text className="text-sm text-gray-600 mb-1">{t.teamName}</Text>

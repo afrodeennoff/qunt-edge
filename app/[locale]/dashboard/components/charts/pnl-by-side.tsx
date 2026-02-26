@@ -13,7 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -49,7 +49,7 @@ const formatWinRate = (wins: number, total: number) => {
 export default function PnLBySideChart({
   size = "medium",
 }: PnLBySideChartProps) {
-  const { formattedTrades: trades } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
   const [showAverage, setShowAverage] = React.useState(true);
   const t = useI18n();
 
@@ -230,10 +230,10 @@ export default function PnLBySideChart({
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                   domain={[Math.min(minPnL * 1.1, 0), Math.max(maxPnL * 1.1, 0)]}
                 />
-                <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+                <ReferenceLine y={0} stroke="hsl(var(--foreground) / )" />
                 <Tooltip
                   content={renderTooltip}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="pnl"
@@ -244,9 +244,9 @@ export default function PnLBySideChart({
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={entry.pnl >= 0 ? 0.98 : 0.22}
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={entry.pnl >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
                       className={cn(

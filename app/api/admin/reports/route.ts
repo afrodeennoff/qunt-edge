@@ -3,6 +3,15 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { assertAdminAccess, toErrorResponse } from '@/server/authz'
 
+type DateFilter = { gte?: Date; lte?: Date }
+
+function buildDateFilter(startDate: string | null, endDate: string | null): DateFilter {
+  const dateFilter: DateFilter = {}
+  if (startDate) dateFilter.gte = new Date(startDate)
+  if (endDate) dateFilter.lte = new Date(endDate)
+  return dateFilter
+}
+
 export async function GET(req: NextRequest) {
   const requestId = crypto.randomUUID()
   try {
@@ -13,13 +22,7 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
 
-    const dateFilter: { gte?: Date; lte?: Date } = {}
-    if (startDate) {
-      dateFilter.gte = new Date(startDate)
-    }
-    if (endDate) {
-      dateFilter.lte = new Date(endDate)
-    }
+    const dateFilter = buildDateFilter(startDate, endDate)
 
     switch (reportType) {
       case 'overview':
@@ -44,7 +47,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-async function generateOverviewReport(dateFilter: any) {
+async function generateOverviewReport(dateFilter: DateFilter) {
   const [
     totalRevenue,
     activeSubscriptions,
@@ -112,7 +115,7 @@ async function generateOverviewReport(dateFilter: any) {
   })
 }
 
-async function generateRevenueReport(dateFilter: any) {
+async function generateRevenueReport(dateFilter: DateFilter) {
   const transactions = await prisma.paymentTransaction.findMany({
     where: {
       status: 'COMPLETED',
@@ -153,7 +156,7 @@ async function generateRevenueReport(dateFilter: any) {
   })
 }
 
-async function generateChurnReport(dateFilter: any) {
+async function generateChurnReport(dateFilter: DateFilter) {
   const cancelledSubs = await prisma.subscription.findMany({
     where: {
       status: 'CANCELLED',
@@ -209,7 +212,7 @@ async function generateChurnReport(dateFilter: any) {
   })
 }
 
-async function generateSubscriptionReport(dateFilter: any) {
+async function generateSubscriptionReport(dateFilter: DateFilter) {
   const subscriptions = await prisma.subscription.findMany({
     where: {
       createdAt: dateFilter,
@@ -251,7 +254,7 @@ async function generateSubscriptionReport(dateFilter: any) {
   })
 }
 
-async function generateTransactionReport(dateFilter: any) {
+async function generateTransactionReport(dateFilter: DateFilter) {
   const transactions = await prisma.paymentTransaction.findMany({
     where: {
       createdAt: dateFilter,

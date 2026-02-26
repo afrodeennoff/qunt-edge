@@ -1,7 +1,7 @@
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
-import { format, parseISO, eachDayOfInterval, startOfDay, endOfDay } from 'date-fns';
+import { parseISO, eachDayOfInterval } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface ChartDataPoint {
@@ -35,10 +35,10 @@ export const generateEquityChart = tool({
     timezone = 'UTC',
     maxAccounts = 8 
   }) => {
-    console.log(`[generateEquityChart] TOOL CALLED - accountNumbers: ${accountNumbers}, startDate: ${startDate}, endDate: ${endDate}, showIndividual: ${showIndividual}, timezone: ${timezone}`)
 
-    const paginatedTrades = await getTradesAction();
-    let trades = paginatedTrades.trades;
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+    let trades = allTrades;
     
     // Filter by account numbers if specified
     if (accountNumbers.length > 0) {
@@ -166,10 +166,11 @@ export const generateEquityChart = tool({
       showIndividual,
       timezone,
       totalTrades: trades.length,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
       message: `Generated equity chart with ${chartData.length} data points for ${limitedAccountNumbers.length} account(s)`
     };
-    
-    console.log(`[generateEquityChart] RETURNING RESULT:`, JSON.stringify(result, null, 2));
+
     return result;
   },
 })

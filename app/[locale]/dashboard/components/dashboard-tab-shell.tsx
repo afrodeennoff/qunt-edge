@@ -46,7 +46,7 @@ export function DashboardTabShell({
   }, [checkoutSuccess]);
 
   return (
-    <div className="relative w-full min-h-[calc(100dvh-64px)] px-2 pb-3 pt-2 sm:min-h-[calc(100vh-72px)] sm:px-4 sm:pb-5 sm:pt-2 lg:px-6 lg:pb-6 lg:pt-3">
+    <div className="relative w-full min-h-[calc(100dvh-64px)] px-3 py-3 sm:min-h-[calc(100vh-72px)] sm:px-4 sm:py-4 lg:px-6 lg:py-5 xl:px-8">
       {activeTab === "table" ? <TradeTableReview /> : null}
       {activeTab === "accounts" ? <AccountsOverview size="large" surface="embedded" /> : null}
       {activeTab === "chart" ? <ChartTheFuturePanel /> : null}

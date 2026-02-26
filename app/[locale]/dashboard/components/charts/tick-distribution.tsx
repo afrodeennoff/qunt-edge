@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
@@ -48,7 +48,7 @@ interface TooltipProps {
 const chartConfig = {
   count: {
     label: "Count",
-    color: "white",
+    color: "hsl(var(--foreground))",
   },
 } satisfies ChartConfig;
 
@@ -62,7 +62,8 @@ const formatCount = (value: number) => {
 export default function TickDistributionChart({
   size = "medium",
 }: TickDistributionProps) {
-  const { formattedTrades: trades, tickFilter, setTickFilter } = useData();
+  const { formattedTrades: trades } = useDashboardStats();
+  const { tickFilter, setTickFilter } = useDashboardFilters();
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
   const t = useI18n();
 
@@ -248,7 +249,7 @@ export default function TickDistributionChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="count"
@@ -260,7 +261,7 @@ export default function TickDistributionChart({
                   {chartData.map((entry) => (
                     <Cell
                       key={`cell-${entry.ticks}`}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fillOpacity={
                         tickFilter.value === entry.ticks
                           ? 1
@@ -268,7 +269,7 @@ export default function TickDistributionChart({
                             ? 0.1
                             : parseInt(entry.ticks) >= 0 ? 0.98 : 0.22
                       }
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={parseInt(entry.ticks) >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
                       className={cn(

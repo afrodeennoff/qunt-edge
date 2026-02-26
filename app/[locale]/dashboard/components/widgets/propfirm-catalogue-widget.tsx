@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useI18n } from "@/locales/client"
 import { WidgetShell } from "@/components/ui/widget-shell"
 import { Building2, Users, DollarSign } from "lucide-react"
@@ -12,6 +12,10 @@ export default function PropfirmCatalogueWidget() {
     const t = useI18n()
     const [stats, setStats] = useState<PropfirmCatalogueStats[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const sortedStats = useMemo(
+        () => [...stats].sort((a, b) => b.payouts.paidAmount - a.payouts.paidAmount),
+        [stats]
+    )
 
     useEffect(() => {
         async function fetchData() {
@@ -36,7 +40,7 @@ export default function PropfirmCatalogueWidget() {
         >
             <ScrollArea className="h-full">
                 <div className="flex flex-col gap-1 p-3">
-                    {stats.sort((a, b) => b.payouts.paidAmount - a.payouts.paidAmount).map((stat) => (
+                    {sortedStats.map((stat) => (
                         <div
                             key={stat.propfirmName}
                             className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors"
@@ -49,8 +53,8 @@ export default function PropfirmCatalogueWidget() {
                                         <span>{stat.accountsCount}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                                        <DollarSign className="w-3 h-3 opacity-50 text-emerald-500/70" />
-                                        <span className="text-emerald-500/70 font-medium">{stat.payouts.paidCount} Payouts</span>
+                                        <DollarSign className="w-3 h-3 opacity-50 text-semantic-success/70" />
+                                        <span className="text-semantic-success/70 font-medium">{stat.payouts.paidCount} Payouts</span>
                                     </div>
                                 </div>
                             </div>
@@ -60,7 +64,7 @@ export default function PropfirmCatalogueWidget() {
                                         ? `${(stat.payouts.paidAmount / 1000).toFixed(1)}k`
                                         : stat.payouts.paidAmount.toLocaleString()}
                                 </div>
-                                <div className="text-[9px] font-semibold text-emerald-500/80 uppercase tracking-wider">
+                                <div className="text-[9px] font-semibold text-semantic-success/80 uppercase tracking-wider">
                                     Paid
                                 </div>
                             </div>

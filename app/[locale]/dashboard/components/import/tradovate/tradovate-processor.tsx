@@ -254,7 +254,7 @@ export default function TradovateProcessor({ headers, csvData, processedTrades, 
             <div className="flex-1 overflow-auto">
                 <div className="space-y-4 p-6">
                     {showCommissionPrompt && (
-                        <div className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r" role="alert">
+                        <div className="flex-none bg-semantic-warning-bg border-l-4 border-semantic-warning-border text-semantic-warning p-4 rounded-r" role="alert">
                             <p className="font-bold">{t('import.commission.title')}</p>
                             <p>{t('import.commission.description')}</p>
                             <p className="mt-2 text-sm">{t('import.commission.help')}</p>
@@ -282,7 +282,7 @@ export default function TradovateProcessor({ headers, csvData, processedTrades, 
                         </div>
                     )}
                     {processedTrades.length === 0 && (
-                        <div className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r" role="alert">
+                        <div className="flex-none bg-semantic-warning-bg border-l-4 border-semantic-warning-border text-semantic-warning p-4 rounded-r" role="alert">
                             <p className="font-bold">{t('import.error.duplicateTrades')}</p>
                             <p>{t('import.error.duplicateTradesDescription')}</p>
                         </div>
@@ -314,7 +314,7 @@ export default function TradovateProcessor({ headers, csvData, processedTrades, 
                                         <TableCell>{trade.closePrice || '-'}</TableCell>
                                         <TableCell>{trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}</TableCell>
                                         <TableCell>{trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}</TableCell>
-                                        <TableCell className={trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-red-600'}>
+                                        <TableCell className={trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-semantic-error'}>
                                             {trade.pnl?.toFixed(2)}
                                         </TableCell>
                                         <TableCell>{`${Math.floor((trade.timeInPosition || 0) / 60)}m ${Math.floor((trade.timeInPosition || 0) % 60)}s`}</TableCell>
@@ -327,13 +327,13 @@ export default function TradovateProcessor({ headers, csvData, processedTrades, 
                     <div className="flex justify-between px-2 py-4">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-                            <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
+                            <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-semantic-error'}`}>
                                 {totalPnL.toFixed(2)}
                             </p>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total Commission</h3>
-                            <p className="text-xl font-bold text-blue-600">
+                            <p className="text-xl font-bold text-semantic-info">
                                 {totalCommission.toFixed(2)}
                             </p>
                         </div>

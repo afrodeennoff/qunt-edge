@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Script from "next/script";
 import { headers } from "next/headers";
 import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
@@ -42,8 +41,8 @@ export const viewport: Viewport = {
   userScalable: true,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#050505" },
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
 };
 
@@ -90,7 +89,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
       other: [
-        { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#000000" },
+        { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "black" },
         {
           rel: "android-chrome",
           sizes: "192x192",
@@ -134,7 +133,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const requestNonce = (await headers()).get("x-nonce");
+  const nonce = requestNonce && requestNonce.trim().length > 0 ? requestNonce : null;
   const isProduction = process.env.NODE_ENV === "production";
   const uiVariant = getUiVariant();
 
@@ -153,7 +153,7 @@ export default async function RootLayout({
 
         {/* Mobile-First Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#050505" />
+          <meta name="theme-color" content="black" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -164,8 +164,13 @@ export default async function RootLayout({
         <meta name="robots" content="index, follow" />
 
         {/* Apply stored theme before paint to avoid blank flash */}
-        <Script id="init-theme" strategy="beforeInteractive" nonce={nonce}>
-          {`
+        {nonce ? (
+          <script
+            id="init-theme"
+            nonce={nonce}
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: `
             (function() {
               try {
                 var root = document.documentElement;
@@ -186,8 +191,10 @@ export default async function RootLayout({
                 // Fail silently to avoid blocking render
               }
             })();
-          `}
-        </Script>
+          `,
+            }}
+          />
+        ) : null}
 
         {/* PostHog Analytics */}
         {/*{process.env.NODE_ENV === "production" && (

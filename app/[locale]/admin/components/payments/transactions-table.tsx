@@ -86,7 +86,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        className="text-semantic-error hover:text-semantic-error hover:bg-semantic-error-bg"
                                         onClick={() => handleRefund(txn.id)}
                                         disabled={isRefunding === txn.id}
                                     >

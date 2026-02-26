@@ -1,4 +1,4 @@
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -13,9 +13,17 @@ export const getTradesDetails = tool({
         side: z.string().describe('Side').optional(),
     }),
     execute: async ({ instrument, startDate, endDate, accountNumber, side }: { instrument?: string, startDate?: string, endDate?: string, accountNumber?: string, side?: string }) => {
-        console.log(`[getTradeDetails] instrument: ${instrument}, startDate: ${startDate}, endDate: ${endDate}, accountNumber: ${accountNumber}, side: ${side}`)
-        const paginatedTrades = await getTradesAction();
-        let trades = paginatedTrades.trades;
+        const parsedStart = startDate ? new Date(startDate) : null;
+        const parsedEnd = endDate ? new Date(endDate) : null;
+        if (parsedStart && Number.isNaN(parsedStart.getTime())) {
+            throw new Error("Invalid startDate format");
+        }
+        if (parsedEnd && Number.isNaN(parsedEnd.getTime())) {
+            throw new Error("Invalid endDate format");
+        }
+        const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+        let trades = allTrades;
         if (accountNumber) {
             trades = trades.filter(trade => trade.accountNumber === accountNumber);
         }
@@ -23,15 +31,15 @@ export const getTradesDetails = tool({
             trades = trades.filter(trade => trade.instrument === instrument);
         }
         if (startDate) {
-            trades = trades.filter(trade => trade.entryDate >= startDate);
+            trades = trades.filter(trade => new Date(trade.entryDate) >= (parsedStart as Date));
         }
         if (endDate) {
-            trades = trades.filter(trade => trade.entryDate <= endDate);
+            trades = trades.filter(trade => new Date(trade.entryDate) <= (parsedEnd as Date));
         }
         if (side) {
             trades = trades.filter(trade => trade.side === side);
         }
-        return trades.slice(0, 10).map(trade => ({
+        const items = trades.slice(0, 10).map(trade => ({
             accountNumber: trade.accountNumber,
             instrument: trade.instrument,
             entryDate: trade.entryDate,
@@ -44,5 +52,10 @@ export const getTradesDetails = tool({
             closePrice: trade.closePrice,
             images: [trade.imageBase64, trade.imageBase64Second],
         }));
+        return {
+            items,
+            truncated: tradesResult.truncated,
+            dataQualityWarning: tradesResult.dataQualityWarning,
+        };
     }
 })

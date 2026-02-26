@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { useData } from "@/context/data-provider";
+import { useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { WidgetSize } from "@/app/[locale]/dashboard/types/dashboard";
 import { Info } from "lucide-react";
@@ -66,8 +66,8 @@ const formatCurrency = (value: number) => {
   return `${value < 0 ? "-" : ""}$${absValue.toFixed(0)}`;
 };
 
-const positiveColor = "white";
-const negativeColor = "rgba(255,255,255,0.15)";
+const positiveColor = "hsl(var(--foreground))";
+const negativeColor = "hsl(var(--foreground) / )";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   const t = useI18n();
@@ -108,7 +108,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
 };
 
 export default function PNLChart({ size = "medium" }: PNLChartProps) {
-  const { calendarData } = useData();
+  const { calendarData } = useDashboardStats();
   const t = useI18n();
   const locale = useCurrentLocale();
   const { timezone } = useUserStore();
@@ -225,7 +225,7 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
                 />
                 <Bar
                   dataKey="pnl"
@@ -238,7 +238,7 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
                       key={`cell-${index}`}
                       fill={entry.pnl >= 0 ? positiveColor : negativeColor}
                       fillOpacity={entry.pnl >= 0 ? 0.98 : 0.24}
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeOpacity={entry.pnl >= 0 ? 0.42 : 0.06}
                       strokeWidth={1}
                       className={cn(

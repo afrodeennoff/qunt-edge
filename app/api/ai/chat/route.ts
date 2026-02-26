@@ -27,8 +27,35 @@ const MAX_CHAT_MESSAGES = 100;
 const chatRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-chat" });
 
 type ChatIntent = "analytics_data" | "coaching" | "news_context" | "general";
+const chatMessageSchema = z.object({
+  role: z.string(),
+  content: z.unknown().optional(),
+  parts: z.array(
+    z.object({
+      type: z.string().optional(),
+      text: z.string().optional(),
+    }),
+  ).optional(),
+  text: z.string().optional(),
+})
+const chatRequestSchema = z.object({
+  messages: z.array(chatMessageSchema).min(1, "messages are required"),
+  username: z.string().optional(),
+  locale: z.string().optional().default("en"),
+  timezone: z.string().optional().default("UTC"),
+});
+type ParsedChatRequest = z.infer<typeof chatRequestSchema>;
+type ParsedChatMessage = ParsedChatRequest["messages"][number];
 
-function extractLastUserText(messages: any[]): string {
+function getErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null
+  if (!('code' in error)) return null
+  const value = (error as { code?: unknown }).code
+  if (value == null) return null
+  return String(value)
+}
+
+function extractLastUserText(messages: ParsedChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
   if (!lastUserMessage) return "";
 
@@ -38,8 +65,8 @@ function extractLastUserText(messages: any[]): string {
 
   if (Array.isArray(lastUserMessage.parts)) {
     return lastUserMessage.parts
-      .filter((part: any) => part?.type === "text" && typeof part?.text === "string")
-      .map((part: any) => part.text)
+      .filter((part) => part?.type === "text" && typeof part?.text === "string")
+      .map((part) => part.text as string)
       .join(" ");
   }
 
@@ -108,7 +135,8 @@ function withToolGuards(tools: Record<string, any>, maxCallsPerTool = 2) {
 
   return Object.fromEntries(
     Object.entries(tools).map(([name, definition]) => {
-      if (!definition || typeof definition.execute !== "function") {
+      const execute = definition?.execute;
+      if (!definition || typeof execute !== "function") {
         return [name, definition];
       }
 
@@ -130,7 +158,7 @@ function withToolGuards(tools: Record<string, any>, maxCallsPerTool = 2) {
             callCount.set(name, currentCount);
             seenArgs.add(signature);
 
-            return definition.execute(args, context);
+            return execute(args, context);
           },
         },
       ];
@@ -169,11 +197,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const { messages, username, locale, timezone } = await req.json();
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return apiError("BAD_REQUEST", "No messages provided", 400);
-    }
+    const body = await req.json();
+    const { messages, username, locale, timezone } = chatRequestSchema.parse(body);
 
     if (messages.length > MAX_CHAT_MESSAGES) {
       return apiError(
@@ -189,14 +214,16 @@ export async function POST(req: NextRequest) {
     const previousWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
     const previousWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
 
-    const userMessages = messages.filter((msg: any) => msg.role === "user");
+    const userMessages = messages.filter((msg) => msg.role === "user");
     const isFirstMessage = userMessages.length === 1;
 
     const latestText = extractLastUserText(messages);
     const intent = classifyIntent(latestText);
     const toolPolicy = getToolingPolicy(intent);
 
-    const convertedMessages = await convertToModelMessages(messages);
+    const convertedMessages = await convertToModelMessages(
+      messages as Parameters<typeof convertToModelMessages>[0],
+    );
     const systemPrompt = buildSystemPrompt({
       locale,
       username,
@@ -212,6 +239,8 @@ export async function POST(req: NextRequest) {
       toolPolicy.requiresTool
         ? `\n\nINTENT CLASSIFICATION: ${intent}\nRULE: You must call at least one relevant tool before giving the final response.`
         : `\n\nINTENT CLASSIFICATION: ${intent}\nRULE: Use tools only when they improve factual accuracy.`;
+    const dataQualityPrompt =
+      `\n\nDATA QUALITY RULE: If a tool output contains 'dataQualityWarning' or 'truncated: true', clearly disclose that the analysis may be incomplete.`;
 
     const availableTools = withToolGuards({
       getJournalEntries,
@@ -241,7 +270,7 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       model: getAiLanguageModel("chat"),
       messages: convertedMessages,
-      system: `${systemPrompt}${intentPrompt}`,
+      system: `${systemPrompt}${intentPrompt}${dataQualityPrompt}`,
       temperature: policy.temperature,
       stopWhen: stepCountIs(policy.maxSteps),
       tools: scopedTools,
@@ -259,7 +288,7 @@ export async function POST(req: NextRequest) {
           latencyMs: Date.now() - startedAt,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: (error as any)?.code ?? null,
+          errorCode: getErrorCode(error),
           toolCallsCount,
           sampleRate: 1,
         });
@@ -299,7 +328,7 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: (error as any)?.code ?? null,
+      errorCode: getErrorCode(error),
       sampleRate: 1,
     });
 

@@ -127,7 +127,7 @@ export default function FtmoProcessor({ headers, csvData, processedTrades, setPr
             <div className="flex-1 overflow-auto">
                 <div className="space-y-4 p-6">
                     {processedTrades.length === 0 && (
-                        <div className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r" role="alert">
+                        <div className="flex-none bg-semantic-warning-bg border-l-4 border-semantic-warning-border text-semantic-warning p-4 rounded-r" role="alert">
                             <p className="font-bold">{t('import.error.duplicateTrades')}</p>
                             <p>{t('import.error.duplicateTradesDescription')}</p>
                         </div>
@@ -163,12 +163,12 @@ export default function FtmoProcessor({ headers, csvData, processedTrades, setPr
                                         <TableCell>{trade.closePrice || '-'}</TableCell>
                                         <TableCell>{trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}</TableCell>
                                         <TableCell>{trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}</TableCell>
-                                        <TableCell className={trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-red-600'}>
+                                        <TableCell className={trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-semantic-error'}>
                                             {trade.pnl?.toFixed(2)}
                                         </TableCell>
                                         <TableCell>{formatDuration(trade.timeInPosition || 0)}</TableCell>
                                         <TableCell>${(trade as any).commissionOnly?.toFixed(2) || '0.00'}</TableCell>
-                                        <TableCell className={(trade as any).swap >= 0 ? 'text-white' : 'text-red-600'}>
+                                        <TableCell className={(trade as any).swap >= 0 ? 'text-white' : 'text-semantic-error'}>
                                             ${(trade as any).swap?.toFixed(2) || '0.00'}
                                         </TableCell>
                                         <TableCell className="font-semibold">${trade.commission?.toFixed(2) || '0.00'}</TableCell>
@@ -180,25 +180,25 @@ export default function FtmoProcessor({ headers, csvData, processedTrades, setPr
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-2 py-4">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-                            <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
+                            <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-semantic-error'}`}>
                                 ${totalPnL.toFixed(2)}
                             </p>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total Commission</h3>
-                            <p className="text-xl font-bold text-blue-600">
+                            <p className="text-xl font-bold text-semantic-info">
                                 ${totalCommission.toFixed(2)}
                             </p>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total Swap</h3>
-                            <p className="text-xl font-bold text-orange-600">
+                            <p className="text-xl font-bold text-semantic-warning">
                                 ${totalSwap.toFixed(2)}
                             </p>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Total Cost</h3>
-                            <p className="text-xl font-bold text-purple-600">
+                            <p className="text-xl font-bold text-semantic-info">
                                 ${totalCost.toFixed(2)}
                             </p>
                         </div>

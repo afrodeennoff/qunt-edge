@@ -120,7 +120,7 @@ export function RithmicSyncFeedback({ totalAccounts }: RithmicSyncFeedbackProps)
                   <div className={cn(
                     "text-xs mt-1 truncate",
                     latestMessage.message?.toLowerCase().includes('error') ? 
-                      "text-red-500" : 
+                      "text-semantic-error" : 
                       "text-muted-foreground"
                   )}>
                     {latestMessage.message}

@@ -43,7 +43,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Info } from "lucide-react";
 
-import { useData } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardStats, useDashboardTrades } from "@/context/data-provider";
 import { useI18n } from "@/locales/client";
 import { useCurrentLocale } from "@/locales/client";
 import { useUserStore } from "@/store/user-store";
@@ -75,14 +75,14 @@ const formatCurrency = (value: number) =>
 
 function getChartColorByIndex(index: number): string {
   const paletteVars = [
-    "rgba(255,255,255,0.8)",
-    "rgba(255,255,255,0.6)",
-    "rgba(255,255,255,0.4)",
-    "rgba(255,255,255,0.2)",
-    "rgba(255,255,255,0.7)",
-    "rgba(255,255,255,0.5)",
-    "rgba(255,255,255,0.3)",
-    "rgba(255,255,255,0.1)",
+    "hsl(var(--foreground) / 0.95)",
+    "hsl(var(--foreground) / 0.85)",
+    "hsl(var(--foreground) / 0.75)",
+    "hsl(var(--foreground) / 0.65)",
+    "hsl(var(--foreground) / 0.55)",
+    "hsl(var(--foreground) / 0.45)",
+    "hsl(var(--foreground) / 0.35)",
+    "hsl(var(--foreground) / 0.25)",
   ];
   return paletteVars[index % paletteVars.length];
 }
@@ -111,22 +111,22 @@ const getPayoutColors = (status: string) => {
   switch (status) {
     case "PENDING":
       return {
-        fg: "rgba(255,255,255,0.4)",
-        bg: "rgba(255,255,255,0.05)",
+        fg: "hsl(var(--foreground) / 0.75)",
+        bg: "hsl(var(--foreground) / 0.08)",
       };
     case "VALIDATED":
-      return { fg: "white", bg: "rgba(255,255,255,0.1)" };
+      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / 0.1)" };
     case "REFUSED":
       return {
-        fg: "rgba(255,255,255,0.2)",
-        bg: "rgba(255,255,255,0.02)",
+        fg: "hsl(var(--foreground) / 0.6)",
+        bg: "hsl(var(--foreground) / 0.08)",
       };
     case "PAID":
-      return { fg: "white", bg: "rgba(255,255,255,0.2)" };
+      return { fg: "hsl(var(--foreground))", bg: "hsl(var(--foreground) / 0.12)" };
     default:
       return {
-        fg: "rgba(255,255,255,0.4)",
-        bg: "rgba(255,255,255,0.05)",
+        fg: "hsl(var(--foreground) / 0.75)",
+        bg: "hsl(var(--foreground) / 0.08)",
       };
   }
 };
@@ -152,9 +152,9 @@ const renderDot = (props: any) => {
           cx={cx}
           cy={cy}
           r={5}
-          fill="white"
+          fill="hsl(var(--foreground))"
           fillOpacity={0.2}
-          stroke="white"
+          stroke="hsl(var(--foreground))"
           strokeOpacity={0.1}
           strokeWidth={1}
         />
@@ -574,9 +574,9 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     weekdayFilter,
     hourFilter,
     tagFilter,
-    isSharedView,
-    formattedTrades,
-  } = useData();
+  } = useDashboardFilters();
+  const { isSharedView } = useDashboardTrades();
+  const { formattedTrades } = useDashboardStats();
   const accounts = useUserStore((state) => state.accounts);
   const timezone = useUserStore((state) => state.timezone);
   const {
@@ -629,16 +629,10 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       ) || [];
 
     if (validSelection.length === 0) {
-      console.log(
-        "[EquityChart] Resetting account selection to all available accounts"
-      );
       setSelectedAccountsToDisplay(availableAccountNumbers);
     } else if (
       validSelection.length !== config.selectedAccountsToDisplay?.length
     ) {
-      console.log(
-        "[EquityChart] Updating account selection to remove invalid accounts"
-      );
       setSelectedAccountsToDisplay(validSelection);
     }
   }, [
@@ -659,25 +653,13 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
 
   const computeClientSideData = React.useCallback(() => {
     if (!formattedTrades || formattedTrades.length === 0) {
-      console.log("[EquityChart] No formatted trades available");
       return {
         chartData: [],
         accountNumbers: [],
       };
     }
 
-    console.log(
-      "[EquityChart] Computing client-side data for",
-      formattedTrades.length,
-      "trades"
-    );
-
-    const sortedTrades = [...formattedTrades].sort(
-      (a, b) =>
-        new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
-    );
-
-    const dates = sortedTrades.map((t) =>
+    const dates = formattedTrades.map((t) =>
       formatInTimeZone(new Date(t.entryDate), timezone, "yyyy-MM-dd")
     );
     const startDate = dates.reduce((min, date) => (date < min ? date : min));
@@ -689,8 +671,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
 
     const allDates = eachDayOfInterval({ start, end });
 
-    const tradesMap = new Map<string, typeof sortedTrades>();
-    sortedTrades.forEach((trade) => {
+    const tradesMap = new Map<string, typeof formattedTrades>();
+    formattedTrades.forEach((trade) => {
       const dateKey = formatInTimeZone(
         new Date(trade.entryDate),
         timezone,
@@ -720,15 +702,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     });
 
     const uniqueAccountNumbers = Array.from(
-      new Set(sortedTrades.map((trade) => trade.accountNumber))
+      new Set(formattedTrades.map((trade) => trade.accountNumber))
     );
-
-    console.log(
-      "[EquityChart] Computed chart data:",
-      chartData.length,
-      "points"
-    );
-    console.log("[EquityChart] Sample data:", chartData.slice(0, 3));
 
     return {
       chartData,
@@ -737,19 +712,18 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
   }, [formattedTrades, timezone]);
 
   React.useEffect(() => {
-    const isMock = formattedTrades?.length > 0 && formattedTrades[0].id.startsWith("mock-");
+    const firstTradeId = formattedTrades?.[0]?.id;
+    const isMock =
+      formattedTrades?.length > 0 &&
+      (typeof firstTradeId === "string"
+        ? firstTradeId.startsWith("mock-")
+        : false);
 
     if (isSharedView || isTeamView || isMock) {
-      console.log("[EquityChart] Using client-side computation (shared/team view or mock data)");
       setIsLoading(true);
       try {
         const { chartData: computedData, accountNumbers: accNumbers } =
           computeClientSideData();
-        console.log(
-          "[EquityChart] Setting chart data:",
-          computedData.length,
-          "points"
-        );
         setChartData(computedData);
         setAvailableAccountNumbers(accNumbers);
       } catch (error) {
@@ -765,7 +739,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return;
     }
 
-    console.log("[EquityChart] Fetching server-side data");
     const fetchChartData = async () => {
       setIsLoading(true);
       try {
@@ -828,7 +801,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       return {
         equity: {
           label: "Total Equity",
-          color: "white",
+          color: "hsl(var(--foreground))",
         },
       } as ChartConfig;
     }
@@ -861,8 +834,8 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           strokeWidth={2}
           dot={renderDot}
           isAnimationActive={false}
-          activeDot={{ r: 3, style: { fill: "white" } }}
-          stroke="white"
+          activeDot={{ r: 3, style: { fill: "hsl(var(--foreground))" } }}
+          stroke="hsl(var(--foreground))"
           connectNulls={false}
         />
       );
@@ -890,16 +863,6 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     });
   }, [selectedAccounts, showIndividual, accountColorMap, isSharedView]);
   const hasData = chartData.length > 0;
-
-  React.useEffect(() => {
-    console.log("[EquityChart Render] isSharedView:", isSharedView);
-    console.log("[EquityChart Render] showIndividual:", showIndividual);
-    console.log("[EquityChart Render] chartData length:", chartData.length);
-    console.log(
-      "[EquityChart Render] First 3 data points:",
-      chartData.slice(0, 3)
-    );
-  }, [isSharedView, showIndividual, chartData]);
 
   return (
     <ChartSurface>
@@ -1010,7 +973,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                     />
                     <ReferenceLine
                       y={0}
-                      stroke="white"
+                      stroke="hsl(var(--foreground))"
                       strokeDasharray="3 3"
                       strokeOpacity={0.1}
                     />

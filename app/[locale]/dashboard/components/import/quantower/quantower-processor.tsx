@@ -573,7 +573,7 @@ export default function QuantowerOrderProcessor({ csvData, headers, processedTra
       <div className="flex-1 overflow-auto">
         <div className="space-y-4 p-6">
           {incompleteTrades.length > 0 && (
-            <div className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r" role="alert">
+            <div className="flex-none bg-semantic-warning-bg border-l-4 border-semantic-warning-border text-semantic-warning p-4 rounded-r" role="alert">
               <p className="font-bold">Incomplete Trades Detected</p>
               <p>{`${incompleteTrades.length} trade(s) were not completed and have been removed from the analysis.`}</p>
               <ul className="list-disc list-inside mt-2">
@@ -587,7 +587,7 @@ export default function QuantowerOrderProcessor({ csvData, headers, processedTra
           )}
           
           {unknownSymbols.length > 0 && (
-            <div className="flex-none bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r" role="alert">
+            <div className="flex-none bg-semantic-warning-bg border-l-4 border-semantic-warning-border text-semantic-warning p-4 rounded-r" role="alert">
               <h3 className="font-bold">Unknown Contract Specifications</h3>
               <div className="grid grid-cols-3 gap-4 mt-4">
                 {unknownSymbols.map((symbol) => (
@@ -644,7 +644,7 @@ export default function QuantowerOrderProcessor({ csvData, headers, processedTra
                     <TableCell>{trade.closePrice || '-'}</TableCell>
                     <TableCell>{trade.entryDate ? new Date(trade.entryDate).toLocaleString() : '-'}</TableCell>
                     <TableCell>{trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}</TableCell>
-                    <TableCell className={(trade.pnl || 0) >= 0 ? 'text-white' : 'text-red-600'}>
+                    <TableCell className={(trade.pnl || 0) >= 0 ? 'text-white' : 'text-semantic-error'}>
                       {(trade.pnl || 0).toFixed(2)}
                     </TableCell>
                     <TableCell>{trade.timeInPosition ? `${Math.floor(trade.timeInPosition / 60)}m ${Math.floor(trade.timeInPosition % 60)}s` : '-'}</TableCell>
@@ -658,13 +658,13 @@ export default function QuantowerOrderProcessor({ csvData, headers, processedTra
           <div className="flex justify-between px-2 py-4">
             <div>
               <h3 className="text-lg font-semibold mb-2">Total PnL</h3>
-              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-red-600'}`}>
+              <p className={`text-xl font-bold ${totalPnL >= 0 ? 'text-white' : 'text-semantic-error'}`}>
                 {totalPnL.toFixed(2)}
               </p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2">Total Commission</h3>
-              <p className="text-xl font-bold text-blue-600">
+              <p className="text-xl font-bold text-semantic-info">
                 {totalCommission.toFixed(2)}
               </p>
             </div>

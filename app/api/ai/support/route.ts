@@ -2,8 +2,11 @@ import { convertToModelMessages, streamText, UIMessage } from "ai";
 import { NextRequest } from "next/server";
 import { askForEmailForm } from "./tools/ask-for-email-form";
 import { createOpenAI } from "@ai-sdk/openai";
+import { z } from "zod/v3";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
 import { createRouteClient } from "@/lib/supabase/route-client";
+import { getAiPolicy } from "@/lib/ai/policy";
+import { apiError } from "@/lib/api-response";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -13,9 +16,24 @@ const customOpenai = createOpenAI({
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 const supportRateLimit = rateLimit({ limit: 12, window: 60_000, identifier: "ai-support" });
+const requestSchema = z.object({
+  messages: z.array(z.custom<UIMessage>()).min(1),
+  model: z.string().optional(),
+  webSearch: z.boolean().optional().default(false),
+});
+
+const SUPPORT_MODEL_ALLOWLIST = new Set([
+  "glm-4.7-flash",
+  "gpt-4o-mini",
+  "gpt-4.1-mini",
+]);
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
+    }
+
     const supabase = createRouteClient(req)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user?.id) {
@@ -34,25 +52,22 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const {
-      messages,
-      model,
-      webSearch,
-    }: {
-      messages: UIMessage[];
-      model: string;
-      webSearch: boolean;
-    } = await req.json();
+    const body = await req.json();
+    const { messages, model, webSearch } = requestSchema.parse(body);
+    const policy = getAiPolicy("chat");
+    const selectedModel = model && SUPPORT_MODEL_ALLOWLIST.has(model) ? model : policy.model;
+    const webSearchModel = process.env.AI_SUPPORT_WEBSEARCH_MODEL;
+    const webSearchFallback = webSearch && !webSearchModel;
 
     // Remove first message if it's assistant message
-    if (messages[0].role === "assistant") {
+    if (messages.length > 0 && messages[0].role === "assistant") {
       messages.shift();
     }
 
     const modelMessages = await convertToModelMessages(messages);
     const result = streamText({
-      model: webSearch ? "perplexity/sonar" : customOpenai(model),
-      system: `You are an AI chatbot support assistant for Qunt Edge, a trading journaling platform. Your role is to gather information and direct users to the appropriate support channels.
+      model: webSearch && webSearchModel ? customOpenai(webSearchModel) : customOpenai(selectedModel),
+      system: `${webSearchFallback ? "[WEB_SEARCH_FALLBACK_ACTIVE] Web search is unavailable for this environment; answer without external browsing.\n\n" : ""}You are an AI chatbot support assistant for Qunt Edge, a trading journaling platform. Your role is to gather information and direct users to the appropriate support channels.
 
 ## CRITICAL LIMITATIONS
 - **NO DOCUMENTATION ACCESS**: You do not have access to Qunt Edge documentation, user guides, or specific feature information
@@ -126,20 +141,23 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
         askForEmailForm,
       },
       temperature: 0.3,
-      onStepFinish: (step) => {
-        console.log("Step finished:", JSON.stringify(step, null, 2));
-      },
     });
 
     return result.toUIMessageStreamResponse({
       sendSources: true,
-      sendReasoning: true,
+      sendReasoning: false,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return apiError("VALIDATION_FAILED", "Invalid support request payload", 400, error.errors);
+    }
+
+    const err = error as { statusCode?: number; type?: string };
+
     console.error("Support API Error:", error);
 
     // Handle rate limit errors specifically
-    if (error?.statusCode === 429 || error?.type === "rate_limit_exceeded") {
+    if (err?.statusCode === 429 || err?.type === "rate_limit_exceeded") {
       return new Response(
         JSON.stringify({
           error: "Rate limit exceeded",
@@ -159,7 +177,7 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
     }
 
     // Handle other AI/API errors
-    if (error?.statusCode >= 400 && error?.statusCode < 500) {
+    if (typeof err?.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 500) {
       return new Response(
         JSON.stringify({
           error: "Service temporarily unavailable",

@@ -7,6 +7,8 @@ import { AuthTimeout } from "@/components/auth/auth-timeout";
 import { useEffect } from "react";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { usePathname } from "next/navigation";
+import { SmoothScrollProvider } from "@/components/motion/smooth-scroll-provider";
+import { GlobalMotionEffects } from "@/components/motion/global-motion-effects";
 
 export function RootProviders({
     children,
@@ -16,6 +18,10 @@ export function RootProviders({
     defaultOpen?: boolean
 }) {
     const pathname = usePathname();
+    const isPrivateSurface =
+        pathname?.includes("/dashboard") ||
+        pathname?.includes("/authentication") ||
+        pathname?.includes("/admin");
 
     useEffect(() => {
         if (!("serviceWorker" in navigator) || process.env.NODE_ENV !== "production") {
@@ -23,6 +29,7 @@ export function RootProviders({
         }
 
         const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED === "true";
+        const cacheDebugEnabled = process.env.NEXT_PUBLIC_CACHE_DEBUG === "true";
         const logPrefix = "[CacheDebug]";
 
         const unregisterAllServiceWorkers = async () => {
@@ -34,40 +41,50 @@ export function RootProviders({
                     .filter((key) => key.startsWith("quntedge-static-"))
                     .map((key) => caches.delete(key))
             );
-            console.info(`${logPrefix} service worker disabled; existing registrations cleared.`);
+            if (cacheDebugEnabled) {
+                console.info(`${logPrefix} service worker disabled; existing registrations cleared.`);
+            }
         };
 
         const registerServiceWorker = async () => {
             const registration = await navigator.serviceWorker.register("/sw.js");
             const navigationEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-            console.info(`${logPrefix} service worker registered`, {
-                scope: registration.scope,
-                pathname,
-                navigationType: navigationEntry?.type ?? "unknown",
-                hasController: Boolean(navigator.serviceWorker.controller),
-            });
+            if (cacheDebugEnabled) {
+                console.info(`${logPrefix} service worker registered`, {
+                    scope: registration.scope,
+                    pathname: window.location.pathname,
+                    navigationType: navigationEntry?.type ?? "unknown",
+                    hasController: Boolean(navigator.serviceWorker.controller),
+                });
+            }
         };
 
         const handleLoad = () => {
             if (swEnabled) {
                 registerServiceWorker().catch((error) => {
-                    console.error(`${logPrefix} service worker registration failed`, error);
+                    if (cacheDebugEnabled) {
+                        console.error(`${logPrefix} service worker registration failed`, error);
+                    }
                 });
                 return;
             }
 
             unregisterAllServiceWorkers().catch((error) => {
-                console.error(`${logPrefix} failed to clear service workers`, error);
+                if (cacheDebugEnabled) {
+                    console.error(`${logPrefix} failed to clear service workers`, error);
+                }
             });
         };
 
         window.addEventListener("load", handleLoad);
 
         const handleControllerChange = () => {
-            console.info(`${logPrefix} service worker controller changed`, {
-                pathname,
-                hasController: Boolean(navigator.serviceWorker.controller),
-            });
+            if (cacheDebugEnabled) {
+                console.info(`${logPrefix} service worker controller changed`, {
+                    pathname: window.location.pathname,
+                    hasController: Boolean(navigator.serviceWorker.controller),
+                });
+            }
         };
         navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
 
@@ -75,16 +92,34 @@ export function RootProviders({
             window.removeEventListener("load", handleLoad);
             navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
         };
-    }, [pathname]);
+    }, []);
+
+    const appTree = (
+        <>
+            {!isPrivateSurface ? (
+                <>
+                    <SmoothScrollProvider>
+                        <GlobalMotionEffects />
+                        <SidebarProvider defaultOpen={defaultOpen}>
+                            <AuthTimeout />
+                            {children}
+                        </SidebarProvider>
+                    </SmoothScrollProvider>
+                </>
+            ) : (
+                <SidebarProvider defaultOpen={defaultOpen}>
+                    <AuthTimeout />
+                    {children}
+                </SidebarProvider>
+            )}
+        </>
+    );
 
     return (
         <QueryProvider>
             <TooltipProvider>
                 <ThemeProvider>
-                    <SidebarProvider defaultOpen={defaultOpen}>
-                        <AuthTimeout />
-                        {children}
-                    </SidebarProvider>
+                    {appTree}
                 </ThemeProvider>
             </TooltipProvider>
         </QueryProvider>

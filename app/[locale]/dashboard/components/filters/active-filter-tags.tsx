@@ -135,7 +135,7 @@ export function ActiveFilterTags({ showAccountNumbers }: { showAccountNumbers: b
   // Get tag color by name
   const getTagColor = (tagName: string) => {
     const tag = tags?.find(t => t.name === tagName)
-    return tag?.color || '#CBD5E1'
+    return tag?.color || 'hsl(var(--muted-foreground))'
   }
 
   // Format date range for display

@@ -1,4 +1,4 @@
-import { getTradesAction } from "@/server/database";
+import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import { getGroupsAction } from "@/server/groups";
 import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
@@ -239,10 +239,11 @@ export const getAccountPerformance = tool({
     minTrades: z.number().optional().describe('Minimum number of trades required to include an account in analysis')
   }),
   execute: async ({ startDate, endDate, minTrades = 1 }: { startDate?: string, endDate?: string, minTrades?: number }) => {
-    console.log(`[getAccountPerformance] startDate: ${startDate}, endDate: ${endDate}, minTrades: ${minTrades}`);
+    const safeMinTrades = Math.min(1000, Math.max(1, Math.floor(minTrades)));
 
-    const paginatedTrades = await getTradesAction();
-    let trades = normalizeTrades(paginatedTrades.trades);
+    const tradesResult = await getAllTradesForAi();
+    const allTrades = tradesResult.trades;
+    let trades = normalizeTrades(allTrades);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
@@ -263,8 +264,12 @@ export const getAccountPerformance = tool({
     const analysis = analyzeAccounts(trades);
     
     // Filter out accounts with fewer than minTrades
-    analysis.accounts = analysis.accounts.filter(account => account.totalTrades >= minTrades);
+    analysis.accounts = analysis.accounts.filter(account => account.totalTrades >= safeMinTrades);
     
-    return analysis;
+    return {
+      ...analysis,
+      truncated: tradesResult.truncated,
+      dataQualityWarning: tradesResult.dataQualityWarning,
+    };
   }
 }); 

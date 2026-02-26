@@ -41,19 +41,19 @@ export function ImportanceFilter({ value, onValueChange, className }: Importance
     const hoverIndex = hoverLevel ? IMPACT_LEVELS.indexOf(hoverLevel) : -1
     
     // If this level is selected, show full yellow
-    if (isSelected) return "text-yellow-500"
+    if (isSelected) return "text-semantic-warning"
     
     // If a higher level is selected, show lighter yellow for lower levels
     const hasHigherSelected = IMPACT_LEVELS.some((l, i) => 
       i > levelIndex && value.includes(l)
     )
-    if (hasHigherSelected) return "text-yellow-300"
+    if (hasHigherSelected) return "text-semantic-warning"
     
     // If hovering over a higher level, show lighter yellow for lower levels
     if (hoverLevel && levelIndex <= hoverIndex) {
       // Calculate opacity based on distance from hovered level
       const distance = hoverIndex - levelIndex
-      return distance === 0 ? "text-yellow-300" : "text-yellow-200"
+      return distance === 0 ? "text-semantic-warning" : "text-semantic-warning"
     }
     
     // Default gray
@@ -114,7 +114,7 @@ export function ImportanceFilter({ value, onValueChange, className }: Importance
                   "relative p-1 rounded-full transition-all duration-200",
                   (value.includes(level) || hoverLevel === level) && "scale-110",
                   "focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-primary",
-                  "hover:bg-yellow-50 dark:hover:bg-yellow-950/20",
+                  "hover:bg-semantic-warning-bg dark:hover:bg-semantic-warning-bg/20",
                 )}
                 onClick={() => handleClick(level)}
                 onMouseEnter={() => setHoverLevel(level)}
