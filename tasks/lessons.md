@@ -28,3 +28,19 @@
 - mistake pattern: Removed functional quick-navigation controls while removing duplicate visual headers.
 - prevention rule: Distinguish between decorative headers and functional navigation actions; remove only decorative duplicates.
 - early trigger signals: User reports "navbar removed" after a header cleanup pass.
+
+## 2026-02-26
+- mistake pattern: Assumed the user-reported UI regression was tied to the most recent backend fix before immediately validating the currently rendered dashboard layout wiring.
+- prevention rule: For UI-regression reports, first verify active branch + target layout/component wiring + running process state before attributing cause to recent API or backend changes.
+- early trigger signals: User reports a visible UI element missing (navbar/sidebar/header), working tree is clean, and recent commits include unrelated backend work.
+- mistake pattern: Removed visible dashboard navigation (navbar) while refactoring route wiring for `/dashboard/behavior`.
+- prevention rule: Before finalizing any route swap/refactor, verify shell invariants: navbar visible, sidebar visible, and route mounted inside the expected layout wrapper.
+- early trigger signals: User reports "navbar missing" immediately after a page-level refactor; diff shows shell wrapper removal or direct component re-export.
+- mistake pattern: Removed established dashboard navbar/header while chasing performance budget improvements.
+- prevention rule: Treat navigation shell as non-negotiable product contract; optimize around it (lazy-load internals, split non-critical modules) instead of removing shared navigation components.
+- early trigger signals: Any performance change proposal touches `app/[locale]/dashboard/layout.tsx` and removes `DashboardHeader`/`DashboardProvider` or equivalent shell components.
+
+## 2026-02-26
+- mistake pattern: Treated quick action controls as visual header duplication and removed them.
+- prevention rule: During header deduplication, preserve all functional CTAs/navigation rows and only remove purely informational duplicates.
+- early trigger signals: Cleanup diff removes `Link`/`Button` action rows from dashboard pages while user request mentions headers only.
