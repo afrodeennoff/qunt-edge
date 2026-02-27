@@ -45,7 +45,7 @@ const chartConfig = {
   },
   equity: {
     label: "Equity Variation",
-    color: "hsl(var(--foreground) / )",
+    color: "hsl(var(--foreground) / 0.35)",
   },
 } satisfies ChartConfig
 
@@ -140,12 +140,12 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
 
   // Generate colors based on theme
   const colors = [
-    'hsl(var(--foreground) / )',
-    'hsl(var(--foreground) / )',
-    'hsl(var(--foreground) / )',
-    'hsl(var(--foreground) / )',
-    'hsl(var(--foreground) / )',
-    'hsl(var(--foreground) / )'
+    'hsl(var(--foreground) / 0.35)',
+    'hsl(var(--foreground) / 0.35)',
+    'hsl(var(--foreground) / 0.35)',
+    'hsl(var(--foreground) / 0.35)',
+    'hsl(var(--foreground) / 0.35)',
+    'hsl(var(--foreground) / 0.35)'
   ]
 
   const renderEquityTooltip = React.useCallback(({ active, payload }: any) => {
@@ -259,7 +259,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   {equityChartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.pnl >= 0 ? 'hsl(var(--foreground))' : 'hsl(var(--foreground) / )'}
+                      fill={entry.pnl >= 0 ? 'hsl(var(--foreground))' : 'hsl(var(--foreground) / 0.35)'}
                       className="transition-all duration-300 ease-in-out hover:opacity-70"
                     />
                   ))}
@@ -347,7 +347,7 @@ export function Charts({ dayData, isWeekly = false }: ChartsProps) {
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.value >= 0 ? colors[index % colors.length] : `hsl(var(--foreground) / )`}
+                      fill={entry.value >= 0 ? colors[index % colors.length] : `hsl(var(--foreground) / 0.35)`}
                       className="transition-all duration-300 ease-in-out hover:opacity-80"
                     />
                   ))}

@@ -109,7 +109,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
   }, [activeRange, timeRange.range, setTimeRange])
 
   function getColorByWinRate(winRate: number): string {
-    if (winRate === 0) return "hsl(var(--foreground) / )"
+    if (winRate === 0) return "hsl(var(--foreground) / 0.35)"
     return "hsl(var(--foreground))"
   }
 
@@ -283,7 +283,7 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                 />
                 <Bar
                   dataKey="avgPnl"

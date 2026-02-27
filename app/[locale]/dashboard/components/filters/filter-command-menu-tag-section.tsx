@@ -29,7 +29,7 @@ interface TagFormData {
 }
 
 // Hex is intentionally used because HexColorPicker requires hex input.
-const DEFAULT_TAG_COLOR = '#A3A3A3'
+const DEFAULT_TAG_COLOR = 'hsl(var(--muted-foreground))'
 
 export function TagSection({ searchValue }: TagSectionProps) {
   const { tagFilter, setTagFilter } = useDashboardFilters()

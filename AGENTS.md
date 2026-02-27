@@ -36,6 +36,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-02-27: Non-Dashboard Spacing Balance Alignment (Landing/Teams Only)
+- **What changed:** Applied a balanced container width policy for public non-dashboard routes while explicitly keeping dashboard spacing untouched.
+- **What I want:** `/en` public pages (for example `/en/propfirms`, `/en/teams`, `/en/pricing`, `/en/support`) should have consistent, premium side spacing similar to the home-page visual rhythm.
+- **What I don't want:** Dashboard layout spacing changes when the user requests public-page spacing only.
+- **How we fixed that:**
+  - Kept dashboard shell defaults unchanged.
+  - Applied `widthClassName="max-w-[1280px]"` to landing/teams pages using `UnifiedPageShell`.
+  - Constrained `/app/[locale]/(landing)/propfirms/page.tsx` outer container to `max-w-[1280px]` for consistent side gaps.
+  - Preserved existing page content and behavior; only adjusted outer container width.
+- **Key Files:** `app/[locale]/(landing)/about/page.tsx`, `app/[locale]/(landing)/community/page.tsx`, `app/[locale]/(landing)/disclaimers/page.tsx`, `app/[locale]/(landing)/faq/page.tsx`, `app/[locale]/(landing)/_updates/page.tsx`, `app/[locale]/(landing)/privacy/page.tsx`, `app/[locale]/(landing)/support/page.tsx`, `app/[locale]/(landing)/terms/terms-page-client.tsx`, `app/[locale]/(landing)/pricing/pricing-page-client.tsx`, `app/[locale]/(landing)/propfirms/page.tsx`, `app/[locale]/teams/(landing)/page.tsx`, `AGENTS.md`
+- **Verification:**
+  - `rg -n "<UnifiedPageShell" app/[locale]/(landing) app/[locale]/teams/(landing)` confirms targeted pages now use `max-w-[1280px]`.
+  - `npx eslint <touched landing files>` exits with warnings only (`0` errors).
+
 ### 2026-02-22: Dashboard Hard-Reload Cache Fix (SW Gating + No-Store + Prefetch Control)
 - **What changed:** Fixed dashboard route stale-update behavior that required hard reloads by tightening service-worker lifecycle, dashboard cache headers, and sidebar navigation fetch behavior.
 - **What I want:** Dashboard routes (especially `/en/dashboard/strategies`) should reflect updates on standard refresh/navigation without forcing hard reload.

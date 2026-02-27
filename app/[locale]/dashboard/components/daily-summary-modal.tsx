@@ -22,10 +22,10 @@ type Theme = {
 }
 
 const THEMES: Record<string, Theme> = {
-    obsidian: { name: 'Obsidian', primary: 'text-white', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/10', pattern: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--foreground) / ) 1px, transparent 0)' },
-    graphite: { name: 'Graphite', primary: 'text-white/80', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/5', pattern: 'linear-gradient(hsl(var(--foreground) / ) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / ) 1px, transparent 1px)' },
-    silver: { name: 'Silver', primary: 'text-white/90', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/15', pattern: 'radial-gradient(hsl(var(--foreground) / ) 2px, transparent 0)' },
-    ghost: { name: 'Ghost', primary: 'text-white/60', glow: 'hsl(var(--foreground) / )', bgAccent: 'bg-white/5', pattern: 'repeating-linear-gradient(45deg, hsl(var(--foreground) / ) 0, hsl(var(--foreground) / ) 1px, transparent 0, transparent 50%)' }
+    obsidian: { name: 'Obsidian', primary: 'text-white', glow: 'hsl(var(--foreground) / 0.35)', bgAccent: 'bg-white/10', pattern: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--foreground) / 0.35) 1px, transparent 0)' },
+    graphite: { name: 'Graphite', primary: 'text-white/80', glow: 'hsl(var(--foreground) / 0.35)', bgAccent: 'bg-white/5', pattern: 'linear-gradient(hsl(var(--foreground) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / 0.35) 1px, transparent 1px)' },
+    silver: { name: 'Silver', primary: 'text-white/90', glow: 'hsl(var(--foreground) / 0.35)', bgAccent: 'bg-white/15', pattern: 'radial-gradient(hsl(var(--foreground) / 0.35) 2px, transparent 0)' },
+    ghost: { name: 'Ghost', primary: 'text-white/60', glow: 'hsl(var(--foreground) / 0.35)', bgAccent: 'bg-white/5', pattern: 'repeating-linear-gradient(45deg, hsl(var(--foreground) / 0.35) 0, hsl(var(--foreground) / 0.35) 1px, transparent 0, transparent 50%)' }
 }
 
 export function DailySummaryModal() {
@@ -155,7 +155,7 @@ export function DailySummaryModal() {
         setIsExporting(true)
         try {
             const canvas = await html2canvas(cardRef.current, {
-                backgroundColor: "#0a0a0a",
+                backgroundColor: "hsl(var(--background))",
                 scale: 2,
                 logging: false,
                 useCORS: true,
@@ -179,7 +179,7 @@ export function DailySummaryModal() {
         setIsExporting(true)
         try {
             const canvas = await html2canvas(cardRef.current, {
-                backgroundColor: "#0a0a0a",
+                backgroundColor: "hsl(var(--background))",
                 scale: 2,
                 logging: false,
                 useCORS: true
@@ -243,7 +243,7 @@ export function DailySummaryModal() {
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-full aspect-[7/4] bg-[#050505] text-white rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative flex flex-col"
+                    className="w-full aspect-[7/4] bg-background text-white rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative flex flex-col"
                     ref={cardRef}
                 >
                     {/* Refined Background Mesh */}

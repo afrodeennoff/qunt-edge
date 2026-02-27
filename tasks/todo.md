@@ -1,3 +1,68 @@
+<<<<<<< Updated upstream
+=======
+# Calendar Widget Redesign (PnL Calendar) (2026-02-28)
+
+# Mobile Optimization End-to-End Audit (2026-02-28)
+
+## Scope
+- Audit mobile optimization end to end across critical public and dashboard flows.
+- Validate mobile viewport UX/performance/stability and fix any in-scope regressions.
+
+## Acceptance Criteria
+- [ ] Mobile-focused verification gates run with recorded outcomes.
+- [ ] Critical routes/flows pass manual E2E checks in a mobile viewport.
+- [ ] Any discovered in-scope issues are fixed and re-verified.
+- [ ] Findings, residual risk, and evidence are documented.
+
+## Plan Checklist
+- [x] Review prior lessons/task context and define audit plan.
+- [ ] Run static/build verification gates relevant to mobile behavior.
+- [ ] Execute mobile viewport E2E checks on critical routes.
+- [ ] Implement minimal scoped fixes for discovered issues.
+- [ ] Re-run verification and document final evidence.
+
+## Current Step
+- **In progress:** static/build verification gates for mobile audit.
+
+## Progress Notes
+- 2026-02-28: Started user-requested mobile optimization end-to-end audit.
+- 2026-02-28: Loaded `verification-before-completion` and `playwright` skill instructions for evidence-first verification and browser flow checks.
+
+## Completion Notes
+- Pending.
+
+## Scope
+- Completely redesign dashboard calendar widgets to a stronger PnL-first calendar UI.
+- Preserve all existing behavior (navigation, view mode, filters, daily/weekly modals, data sourcing).
+
+## Acceptance Criteria
+- [x] Desktop calendar visual redesign implemented with PnL-focused hierarchy.
+- [x] Mobile calendar visual redesign implemented with matching PnL style.
+- [x] No behavior/API/data-flow changes.
+- [x] Verification (`npm run typecheck`) passes.
+
+## Plan Checklist
+- [x] Audit current desktop/mobile calendar widget implementations.
+- [x] Redesign desktop calendar surface/header/day-cell visuals.
+- [x] Redesign mobile calendar surface/header/day-cell visuals.
+- [x] Run verification and document evidence.
+
+## Current Step
+- **Completed:** redesign + verification documented.
+
+## Progress Notes
+- 2026-02-28: Began user-requested full calendar widget redesign to “PnL calendar” style.
+- 2026-02-28: Implemented desktop redesign in `app/[locale]/dashboard/components/calendar/desktop-calendar.tsx` (new PnL-focused header KPIs, upgraded day-cell visual hierarchy, redesigned weekly total rail, updated toggle/footer styling).
+- 2026-02-28: Implemented mobile redesign in `app/[locale]/dashboard/components/calendar/mobile-calendar.tsx` (PnL-focused month header, card-style day cells, compact per-day PnL meter, improved contrast and readability).
+- 2026-02-28: Added intensity-based PnL heat overlays and magnitude bars per day cell (desktop + mobile) so larger profit/loss days stand out visually.
+- 2026-02-28: Preserved existing interactions and logic paths (date navigation, modal opening, calendar data mapping, timezone behavior).
+
+## Completion Notes
+- Verification evidence:
+  - `npm run typecheck` -> exit `0`.
+  - Key output: route type generation succeeded and `tsc --noEmit` completed (re-run after heatmap-intensity pass also exit `0`).
+
+>>>>>>> Stashed changes
 # AI Functions Audit (2026-02-26)
 
 # App-Wide Color Contract Remediation (2026-02-26)

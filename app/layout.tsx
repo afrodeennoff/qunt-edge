@@ -110,6 +110,8 @@ export default async function RootLayout({
   const requestNonce = (await headers()).get("x-nonce");
   const nonce = requestNonce && requestNonce.trim().length > 0 ? requestNonce : null;
   const isProduction = process.env.NODE_ENV === "production";
+  const isVercelRuntime = process.env.VERCEL === "1";
+  const enableVercelInsights = isProduction && isVercelRuntime;
   const uiVariant = getUiVariant();
 
   return (
@@ -206,8 +208,8 @@ export default async function RootLayout({
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />
-        {isProduction ? <SpeedInsights /> : null}
-        {isProduction ? <Analytics /> : null}
+        {enableVercelInsights ? <SpeedInsights /> : null}
+        {enableVercelInsights ? <Analytics /> : null}
         {children}
       </body>
     </html>

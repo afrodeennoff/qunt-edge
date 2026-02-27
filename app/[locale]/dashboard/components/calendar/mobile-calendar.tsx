@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, getDay, addDays } from "date-fns"
 import { formatInTimeZone, toDate } from 'date-fns-tz'
 import { fr, enUS } from 'date-fns/locale'
@@ -139,39 +139,58 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
   }
 
   const maxPnl = getMaxPnl()
+  const monthStats = useMemo(() => {
+    let activeDays = 0
+    let wins = 0
+    let losses = 0
+    Object.values(calendarData).forEach((dayData) => {
+      if (!dayData) return
+      if (dayData.tradeNumber > 0) activeDays += 1
+      if (dayData.pnl > 0) wins += 1
+      if (dayData.pnl < 0) losses += 1
+    })
+    return { activeDays, wins, losses }
+  }, [calendarData])
 
   return (
-    <Card className="h-full flex flex-col">
-      <div className="flex flex-row items-center justify-between space-y-0 border-b shrink-0 p-3 sm:p-4 h-[56px]">
-        <div className="flex items-center gap-3">
-          <CardTitle className="text-xl font-semibold truncate capitalize">
-            {formatInTimeZone(currentDate, timezone, 'MMMM yyyy', { locale: dateLocale })}
-          </CardTitle>
-          <span className={cn(
-            "text-sm font-semibold truncate",
-            monthlyTotal >= 0 ? "text-white" : "text-white/40"
-          )}>
-            ${formatCurrency(monthlyTotal)}
-          </span>
+    <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/65 backdrop-blur-xl">
+      <div className="shrink-0 border-b border-border/60 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <CardTitle className="truncate text-base font-semibold capitalize">
+              {formatInTimeZone(currentDate, timezone, 'MMMM yyyy', { locale: dateLocale })}
+            </CardTitle>
+            <div className={cn(
+              "mt-1 text-lg font-black tracking-tight",
+              monthlyTotal >= 0 ? "text-semantic-success" : "text-semantic-error"
+            )}>
+              {formatCurrency(monthlyTotal)}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-8 w-8 border-border/60 bg-background/70">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-8 w-8 border-border/60 bg-background/70">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-7 w-7 sm:h-8 sm:w-8">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-7 w-7 sm:h-8 sm:w-8">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="mt-2 flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="rounded-md border border-border/50 bg-background/50 px-1.5 py-0.5">Days {monthStats.activeDays}</span>
+          <span className="rounded-md border border-semantic-success-border/40 bg-semantic-success-bg/10 px-1.5 py-0.5 text-semantic-success">W {monthStats.wins}</span>
+          <span className="rounded-md border border-semantic-error-border/40 bg-semantic-error-bg/10 px-1.5 py-0.5 text-semantic-error">L {monthStats.losses}</span>
         </div>
       </div>
-      <div className="flex-1 min-h-0 p-1.5 sm:p-4">
-        <div className="grid grid-cols-7 gap-x-px mb-1">
+      <div className="flex-1 min-h-0 p-2">
+        <div className="mb-2 grid grid-cols-7 gap-1">
           {weekdayHeaders.map((day) => (
-            <div key={day.key} className="text-center font-medium text-[9px] sm:text-[11px] text-muted-foreground">
+            <div key={day.key} className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
               {day.label}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 auto-rows-fr gap-px h-[calc(100%-20px)]">
+        <div className="grid h-[calc(100%-30px)] grid-cols-7 auto-rows-fr gap-1">
           {calendarDayStrings.map((dateString) => { // Iterate over date strings
             const dayData = calendarData[dateString] // Direct lookup using the string key
 
@@ -191,66 +210,64 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
               dateInTZ.getMonth() === currentMonth &&
               dateInTZ.getFullYear() === currentYear
 
-            // contribution calculation uses dayData which is already correct
-            const contribution = dayData && monthlyTotal !== 0
-              ? Math.abs(dayData.pnl / monthlyTotal)
-              : 0
-            const strokeDasharray = contribution > 0
-              ? `${contribution * 100} ${100 - (contribution * 100)}`
-              : "0 100"
+            const intensity = maxPnl > 0 ? Math.min(Math.abs(dayData?.pnl ?? 0) / maxPnl, 1) : 0
+            const dayPnl = dayData?.pnl ?? 0
 
             return (
               <div
                 key={dateString} // Key is the timezone-correct date string
                 className={cn(
-                  "relative flex items-center justify-center",
-                  !isCurrentMonthDay && "opacity-30" // Fade based on timezone-correct check
+                  "relative flex cursor-pointer flex-col justify-between rounded-lg border p-1 transition-all",
+                  dayData ? "border-border/50" : "border-border/40 bg-background/50",
+                  dayPnl > 0 && "border-semantic-success-border/40",
+                  dayPnl < 0 && "border-semantic-error-border/40",
+                  isDateStringToday(dateString, timezone) && "border-primary/70 bg-primary/10",
+                  !isCurrentMonthDay && "opacity-45"
                 )}
                 onClick={() => setSelectedDate(dateInTZ)} // Pass the Date object parsed in the target timezone
               >
-                {dayData && (
-                  <svg
-                    className="absolute w-10 h-10 -rotate-90"
-                    viewBox="0 0 36 36"
-                  >
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="16"
-                      fill="none"
-                      className="stroke-current opacity-10"
-                      strokeWidth="2.5"
-                    />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="16"
-                      fill="none"
-                      className={cn(
-                        "stroke-current transition-all",
-                        dayData.pnl >= 0 ? "text-white" : "text-white/20"
-                      )}
-                      strokeWidth="2.5"
-                      strokeDasharray={strokeDasharray}
-                      strokeDashoffset="0"
-                    />
-                  </svg>
-                )}
+                <div
+                  className={cn(
+                    "pointer-events-none absolute inset-0 rounded-lg",
+                    dayPnl > 0 && "bg-semantic-success/20",
+                    dayPnl < 0 && "bg-semantic-error/20"
+                  )}
+                  style={{ opacity: intensity * 0.8 }}
+                />
                 <div className={cn(
-                  "w-8 h-8 flex items-center justify-center rounded-full z-10",
-                  // Check today using the date string and timezone
-                  isDateStringToday(dateString, timezone) && "bg-white text-black",
-                  // Style based on PnL, ensuring not to override 'today' style
-                  dayData && dayData.pnl !== 0 && !isDateStringToday(dateString, timezone) && (
-                    dayData.pnl > 0
-                      ? "text-white"
-                      : "text-white/40"
-                  )
+                  "inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/40 bg-background/60 text-xs font-semibold",
+                  dayPnl > 0 && "text-semantic-success",
+                  dayPnl < 0 && "text-semantic-error"
                 )}>
-                  <span className="text-lg font-semibold">
+                  <span>
                     {/* Display the day number from the date parsed in the target timezone */}
                     {format(dateInTZ, 'd')}
                   </span>
+                </div>
+                <div className="mt-1 text-center">
+                  {dayData ? (
+                    <>
+                      <div
+                        className={cn(
+                          "truncate text-[10px] font-bold",
+                          dayPnl >= 0 ? "text-semantic-success" : "text-semantic-error"
+                        )}
+                      >
+                        {formatCurrency(dayPnl)}
+                      </div>
+                      <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted/40">
+                        <div
+                          className={cn(
+                            "h-full rounded-full",
+                            dayPnl >= 0 ? "bg-semantic-success/80" : "bg-semantic-error/80"
+                          )}
+                          style={{ width: `${Math.max(8, Math.round(intensity * 100))}%` }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="truncate text-[10px] text-muted-foreground/60">-</div>
+                  )}
                 </div>
               </div>
             )

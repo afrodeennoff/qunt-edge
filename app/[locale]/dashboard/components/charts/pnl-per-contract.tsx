@@ -233,10 +233,10 @@ export default function PnLPerContractChart({
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                   domain={[Math.min(minPnL * 1.1, 0), Math.max(maxPnL * 1.1, 0)]}
                 />
-                <ReferenceLine y={0} stroke="hsl(var(--foreground) / )" />
+                <ReferenceLine y={0} stroke="hsl(var(--foreground) / 0.35)" />
                 <Tooltip
                   content={renderTooltip}
-                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                 />
                 <Bar
                   dataKey="averagePnl"

@@ -77,7 +77,7 @@ const chartConfig = {
   },
   commissions: {
     label: "Commissions",
-    color: "hsl(var(--foreground) / )",
+    color: "hsl(var(--foreground) / 0.35)",
   },
 } satisfies ChartConfig;
 
@@ -192,7 +192,7 @@ export default function CommissionsPnLChart({
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.name === t("commissions.legend.netPnl") ? "hsl(var(--foreground))" : "hsl(var(--foreground) / )"}
+                          fill={entry.name === t("commissions.legend.netPnl") ? "hsl(var(--foreground))" : "hsl(var(--foreground) / 0.35)"}
                           fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
                           className={cn(
                             "transition-all duration-300 ease-in-out hover:fill-opacity-100",
@@ -203,7 +203,7 @@ export default function CommissionsPnLChart({
                     </Pie>
                     <Tooltip
                       content={<CommissionsTooltip />}
-                      cursor={{ fill: 'hsl(var(--foreground) / )' }}
+                      cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>

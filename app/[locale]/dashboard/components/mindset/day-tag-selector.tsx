@@ -37,7 +37,7 @@ interface DayTagSelectorProps {
 }
 
 // Hex is intentionally used because tag creation flow and picker pipeline rely on hex values.
-const DEFAULT_TAG_COLOR = '#A3A3A3'
+const DEFAULT_TAG_COLOR = 'hsl(var(--muted-foreground))'
 
 export function DayTagSelector({ trades, date, onApplyTagToAll }: DayTagSelectorProps) {
   const t = useI18n()
