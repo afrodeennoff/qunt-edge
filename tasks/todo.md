@@ -738,3 +738,46 @@
   - `npx eslint app/[locale]/dashboard/components/charts/equity-chart.tsx` -> `0` errors.
   - `rg --files app/[locale]/dashboard/components -g "*.ts" -g "*.tsx" | xargs npx eslint --max-warnings=999999` -> `0` errors (`672` warnings remain).
   - `npm run typecheck` -> exits `0`.
+
+---
+
+# App-Wide Gap Regression Audit + Fix (2026-02-27)
+
+## Scope
+- Audit and close horizontal gap regressions across dashboard, auth, and landing pages.
+
+## Acceptance Criteria
+- [x] Shared page shell defaults to full-width (no implicit `max-w` cap).
+- [x] Dashboard behavior and sibling dashboard routes no longer inherit capped shell width.
+- [x] Auth and key landing support/legal/community/updates pages remove top-level width caps.
+- [x] Verification run and residual risks documented.
+
+## Plan Checklist
+- [x] Audit top-level page wrappers and shared shell defaults.
+- [x] Remove width-cap regressions in shared shell and affected top-level pages.
+- [x] Run lint/typecheck/build and route audit checks; record results.
+
+## Current Step
+- **Completed:** Gap regressions fixed and verified.
+
+## Completion Notes
+- Updated files:
+  - `components/layout/unified-page-shell.tsx`
+  - `app/[locale]/dashboard/trader-profile/page.tsx`
+  - `app/[locale]/(authentication)/authentication/page.tsx`
+  - `app/[locale]/(landing)/community/page.tsx`
+  - `app/[locale]/(landing)/support/page.tsx`
+  - `app/[locale]/(landing)/disclaimers/page.tsx`
+  - `app/[locale]/(landing)/faq/page.tsx`
+  - `app/[locale]/(landing)/_updates/page.tsx`
+  - `app/[locale]/(landing)/privacy/page.tsx`
+  - `app/[locale]/(landing)/terms/terms-page-client.tsx`
+- Verification evidence:
+  - `rg -n 'widthClassName="max-w' app/[locale] -g 'page.tsx' -g 'page-client.tsx'` -> no matches.
+  - `npx eslint <touched files>` -> exit `0` (`0` errors, warnings only; pre-existing complexity/unused-var/any debt).
+  - `npm run typecheck` -> exit `0`.
+  - `npm run build` -> exit `0`.
+  - `npm run check:route-budgets` -> exit `1` (dashboard bundle budget overages around `88.48–88.77 KB` vs `80 KB` target).
+  - `npm run analyze:bundle` -> exit `0` (artifact updated with same budget overages).
+- Residual risk:
+  - Dashboard bundle budget remains above threshold and should be handled in a dedicated perf/code-splitting pass; this is separate from layout gap closure.
