@@ -12,6 +12,7 @@ import {
     Sheet,
     SheetContent,
     SheetTrigger,
+    SheetDescription,
     SheetTitle,
 } from "@/components/ui/sheet";
 
@@ -119,6 +120,9 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                         <SheetContent side="right" className="w-[300px] bg-background/95 backdrop-blur-xl border-border/40 p-0 flex flex-col justify-between">
                             <div className="flex flex-col h-full pt-16 px-6 pb-8">
                                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                                <SheetDescription className="sr-only">
+                                    Primary site navigation and account access actions.
+                                </SheetDescription>
                                 <div className="flex flex-col gap-6 mb-8 flex-1">
                                     {links.map((link, i) => (
                                         <Link
