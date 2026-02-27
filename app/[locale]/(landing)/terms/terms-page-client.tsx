@@ -17,7 +17,7 @@ export function TermsPageClient() {
   const t = useI18n();
 
   return (
-    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
+    <UnifiedPageShell className="py-8">
       <UnifiedSurface className="space-y-8">
         <LegalSection title={t('terms.sections.companyInfo.title')}>
           <p>{t('terms.sections.companyInfo.content')}</p>

@@ -4,7 +4,7 @@ export const revalidate = 3600;
 
 export default function PrivacyPolicy() {
   return (
-    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
+    <UnifiedPageShell className="py-8">
       <UnifiedSurface className="space-y-8 text-fg-muted">
         <section className="space-y-3">
           <h2 className="text-2xl font-semibold text-fg-primary">1. Introduction</h2>

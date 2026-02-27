@@ -10,7 +10,7 @@ export default function DisclaimersPage() {
 DISCLAIMER: Futures and forex trading contain substantial risk and is not for every investor. An investor could potentially lose all or more than the initial investment. Risk capital is money that can be lost without jeopardizing ones' financial security or lifestyle. Only risk capital should be used for trading, and only those with sufficient risk capital should consider trading. Past performance is not necessarily indicative of future results.`
 
   return (
-    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
+    <UnifiedPageShell className="py-8">
       <div className="space-y-6">
         <Card className="border-white/10 bg-black/40">
           <CardHeader>

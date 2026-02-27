@@ -15,7 +15,7 @@ export default async function CommunityPage() {
   const t = await getI18n()
   const posts = await getPosts()
   return (
-    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
+    <UnifiedPageShell className="py-8">
       <UnifiedSurface>
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
