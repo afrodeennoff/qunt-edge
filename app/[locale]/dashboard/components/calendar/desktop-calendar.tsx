@@ -613,20 +613,20 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 p-2 sm:p-3">
+      <CardContent className="flex-1 min-h-0 p-0">
         {viewMode === 'daily' ? (
           <>
-            <div className="mb-2 grid grid-cols-8 gap-1">
+            <div className="mb-0 grid grid-cols-8 gap-0">
               {WEEKDAYS.map((day) => (
-                <div key={day} className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+                <div key={day} className="py-1 text-center text-[9px] font-medium text-muted-foreground sm:text-[11px]">
                   {translateWeekday(t, day)}
                 </div>
               ))}
-              <div className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+              <div className="py-1 text-center text-[9px] font-medium text-muted-foreground sm:text-[11px]">
                 {t('calendar.weekdays.weekly')}
               </div>
             </div>
-            <div className="grid h-[calc(100%-30px)] auto-rows-fr grid-cols-8 gap-1">
+            <div className="grid h-[calc(100%-18px)] auto-rows-fr grid-cols-8 gap-0">
               {calendarDays.map((date, index) => {
                 const dateString = format(date, 'yyyy-MM-dd')
                 const dayData = calendarData[dateString]
@@ -645,15 +645,15 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                   <React.Fragment key={dateString}>
                     <div
                       className={cn(
-                        "group relative h-full cursor-pointer overflow-hidden rounded-lg border p-2 transition-all duration-200",
-                        "hover:-translate-y-[1px] hover:shadow-md",
-                        !dayData && "bg-card/80 border-border/50",
-                        dayPnl > 0 && "bg-semantic-success-bg/10 border-semantic-success-border/30",
-                        dayPnl < 0 && "bg-semantic-error-bg/10 border-semantic-error-border/30",
+                        "group relative h-full cursor-pointer overflow-hidden rounded-none p-0.5 transition-all duration-150",
+                        "ring-1 ring-border hover:ring-white hover:z-10",
+                        dayPnl > 0 && "bg-semantic-success-bg/10",
+                        dayPnl < 0 && "bg-semantic-error-bg/10",
+                        !dayData && "bg-card",
                         !isCurrentMonth && "opacity-45",
-                        isToday(date) && "border-primary/70 bg-primary/10 shadow-[0_0_0_1px_hsl(var(--primary)/0.3)_inset]",
-                        index === 0 && "rounded-tl-xl",
-                        index === 35 && "rounded-bl-xl",
+                        isToday(date) && "ring-white bg-primary/10 z-10",
+                        index === 0 && "rounded-tl-lg",
+                        index === 35 && "rounded-bl-lg",
                       )}
                       onClick={() => {
                         setSelectedDate(date)
@@ -661,7 +661,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                     >
                       <div
                         className={cn(
-                          "pointer-events-none absolute inset-0 rounded-lg transition-opacity",
+                          "pointer-events-none absolute inset-0 rounded-none transition-opacity",
                           dayPnl > 0 && "bg-semantic-success/20",
                           dayPnl < 0 && "bg-semantic-error/20"
                         )}
@@ -680,7 +680,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           {dateRenewals.length > 0 && <RenewalBadge renewals={dateRenewals} />}
                         </div>
                       </div>
-                      <div className="mt-2 flex flex-1 flex-col justify-end gap-1">
+                      <div className="mt-1 flex flex-1 flex-col justify-end gap-0.5">
                         {dayData ? (
                           <div className={cn(
                             "truncate text-center text-[11px] font-bold",
@@ -705,7 +705,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         </div>
                         {dayData && (
                           <>
-                            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-background/60">
+                            <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-background/60">
                               <div
                                 className={cn(
                                   "h-full rounded-full",
@@ -735,10 +735,10 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                       return (
                         <div
                           className={cn(
-                            "flex h-full cursor-pointer items-center justify-center rounded-lg border border-border/50 bg-background/70 px-1 transition-all",
-                            "hover:bg-secondary/50 hover:border-primary/40",
-                            index === 6 && "rounded-tr-xl",
-                            index === 41 && "rounded-br-xl"
+                            "h-full flex items-center justify-center rounded-none cursor-pointer",
+                            "ring-1 ring-border hover:ring-primary hover:z-10",
+                            index === 6 && "rounded-tr-lg",
+                            index === 41 && "rounded-br-lg"
                           )}
                           onClick={() => setSelectedWeekDate(date)}
                         >
