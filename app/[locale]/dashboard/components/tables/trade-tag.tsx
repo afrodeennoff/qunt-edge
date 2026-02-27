@@ -57,7 +57,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
         const newTag = await createTagAction({
           name: trimmedTag,
           description: '',
-          color: 'hsl(var(--foreground) / )'
+          color: 'hsl(var(--foreground) / 0.35)'
         })
         if (newTag?.tag) {
           setTags([...tags, newTag.tag])
@@ -105,7 +105,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
               key={index}
               className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/5 h-auto max-w-[150px] transition-all hover:border-white/20"
               style={{
-                backgroundColor: metadata?.color || 'hsl(var(--foreground) / )',
+                backgroundColor: metadata?.color || 'hsl(var(--foreground) / 0.35)',
                 color: 'hsl(var(--foreground))'
               }}
             >
@@ -185,7 +185,7 @@ export function TradeTag({ trade, tradeIds }: TradeTagProps) {
                         <div className="flex items-center gap-2">
                           <div
                             className="w-3 h-3 rounded-full shrink-0 border border-white/10"
-                            style={{ backgroundColor: tag.color || 'hsl(var(--foreground) / )' }}
+                            style={{ backgroundColor: tag.color || 'hsl(var(--foreground) / 0.35)' }}
                           />
                           <span>{tag.name}</span>
                           {tag.description && (

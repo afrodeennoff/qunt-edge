@@ -117,7 +117,7 @@ export function DashboardHeader() {
             )}
             data-dashboard-header="true"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--foreground) / ),transparent_25%,transparent_75%,hsl(var(--foreground) / ))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--foreground) / 0.35),transparent_25%,transparent_75%,hsl(var(--foreground) / 0.35))]" />
             <div className={cn("relative flex items-center justify-between gap-3 px-3 sm:px-6", isMobile ? "h-14" : "h-full")}>
                 <div className="flex items-center gap-3 relative z-10 pointer-events-auto">
                     <SidebarTrigger className="h-11 w-11 md:h-7 md:w-7 text-muted-foreground hover:text-foreground" />

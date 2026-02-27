@@ -234,7 +234,7 @@ export default function TimeOfDayTradeChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                 />
                 <Bar
                   dataKey="avgPnl"

@@ -325,18 +325,18 @@ export default function PnLPerContractDailyChart({
                         tick={false}
                         domain={[domainMin, domainMax]}
                       />
-                      <ReferenceLine y={0} stroke="hsl(var(--foreground) / )" />
+                      <ReferenceLine y={0} stroke="hsl(var(--foreground) / 0.35)" />
                       <Bar
                         dataKey="averagePnl"
                         radius={[2, 2, 2, 2]}
                         maxBarSize={size === "small" ? 25 : 40}
                         className="transition-none"
-                        fill="hsl(var(--foreground) / )"
+                        fill="hsl(var(--foreground) / 0.35)"
                       >
                         {loadingMockData.map((_, index) => (
                           <Cell
                             key={`skeleton-cell-${index}`}
-                            fill="hsl(var(--foreground) / )"
+                            fill="hsl(var(--foreground) / 0.35)"
                           />
                         ))}
                       </Bar>
@@ -393,10 +393,10 @@ export default function PnLPerContractDailyChart({
                     Math.max(maxPnL * 1.1, 0),
                   ]}
                 />
-                <ReferenceLine y={0} stroke="hsl(var(--foreground) / )" />
+                <ReferenceLine y={0} stroke="hsl(var(--foreground) / 0.35)" />
                 <Tooltip
                   content={renderTooltip}
-                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                 />
                 <Bar
                   dataKey="averagePnl"

@@ -20,3 +20,8 @@
 - mistake pattern: Fixed a user-reported visual gap on one route first, while equivalent width-cap regressions still existed in sibling routes.
 - prevention rule: For layout-gap reports, audit all top-level route shells and shared wrapper defaults before closing the task.
 - early trigger signals: User asks for "all pages" or shares screenshots with the same side-gap pattern after an initial single-page fix.
+
+## 2026-02-27
+- mistake pattern: Over-corrected layout gaps by switching shared shells to near full-width, reducing intended visual breathing room.
+- prevention rule: When user asks to remove side gaps, match the established reference layout width (home-page container) instead of forcing full-width globally.
+- early trigger signals: User says "too wide", "reduce more", or asks to match spacing "like home page" after a full-width change.

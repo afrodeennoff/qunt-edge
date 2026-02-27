@@ -498,80 +498,123 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
     }, 0)
   }, [timezone])
 
+  const periodStats = useMemo(() => {
+    const isDailyView = viewMode === 'daily'
+    let activeDays = 0
+    let winningDays = 0
+    let losingDays = 0
+    let totalTrades = 0
+
+    Object.entries(calendarData).forEach(([dateString, dayData]) => {
+      const date = new Date(dateString)
+      const isInPeriod = isDailyView
+        ? isSameMonth(date, currentDate)
+        : getYear(date) === getYear(currentDate)
+
+      if (!isInPeriod || !dayData) return
+
+      if (dayData.tradeNumber > 0) {
+        activeDays += 1
+        totalTrades += dayData.tradeNumber
+      }
+      if (dayData.pnl > 0) winningDays += 1
+      if (dayData.pnl < 0) losingDays += 1
+    })
+
+    return { activeDays, winningDays, losingDays, totalTrades }
+  }, [calendarData, currentDate, viewMode])
+
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/65 backdrop-blur-xl">
       <CardHeader
-        className="flex flex-row items-center justify-between space-y-0 border-b shrink-0 p-3 sm:p-4 h-[56px]"
+        className="shrink-0 border-b border-border/60 px-4 py-3 sm:px-5 sm:py-4"
       >
-        <div className="flex items-center gap-3">
-          <CardTitle className="text-base sm:text-lg font-semibold truncate capitalize">
-            {viewMode === 'daily'
-              ? formatInTimeZone(currentDate, timezone, 'MMMM yyyy', { locale: dateLocale })
-              : formatInTimeZone(currentDate, timezone, 'yyyy', { locale: dateLocale })}
-          </CardTitle>
-          <div className={cn(
-            "text-sm sm:text-base font-semibold truncate",
-            (viewMode === 'daily' ? monthlyTotal : yearTotal) >= 0
-              ? "text-white font-bold"
-              : "text-white/40"
-          )}>
-            {formatCurrency(viewMode === 'daily' ? monthlyTotal : yearTotal)}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1">
+            <div className="flex items-center gap-2">
+              <CardTitle className="truncate text-base font-semibold capitalize sm:text-lg">
+                {viewMode === 'daily'
+                  ? formatInTimeZone(currentDate, timezone, 'MMMM yyyy', { locale: dateLocale })
+                  : formatInTimeZone(currentDate, timezone, 'yyyy', { locale: dateLocale })}
+              </CardTitle>
+              <span className="rounded-md border border-border/60 bg-secondary/40 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {viewMode === 'daily' ? 'PnL Month' : 'PnL Year'}
+              </span>
+            </div>
+            <div className={cn(
+              "text-xl font-black tracking-tight sm:text-2xl",
+              (viewMode === 'daily' ? monthlyTotal : yearTotal) >= 0
+                ? "text-semantic-success"
+                : "text-semantic-error"
+            )}>
+              {formatCurrency(viewMode === 'daily' ? monthlyTotal : yearTotal)}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1">
+                Active Days: {periodStats.activeDays}
+              </span>
+              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1">
+                Trades: {periodStats.totalTrades}
+              </span>
+              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1 text-semantic-success">
+                Wins: {periodStats.winningDays}
+              </span>
+              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1 text-semantic-error">
+                Losses: {periodStats.losingDays}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Impact Level Filter */}
-          <div className={cn("flex items-center gap-2", hideFiltersOnMobile && "max-sm:hidden")}>
-            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-              {t('calendar.importanceFilter.title')}
-            </span>
-            <ImportanceFilter
-              value={impactLevels}
-              onValueChange={setImpactLevels}
-              className="h-8"
-            />
-          </div>
-          <CountryFilter
-            countries={countries}
-            value={selectedCountries}
-            onValueChange={setSelectedCountries}
-            className={cn("h-8", hideFiltersOnMobile && "max-sm:hidden")}
-          />
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => viewMode === 'daily' ? handlePrevMonth() : setCurrentDate(new Date(getYear(currentDate) - 1, 0, 1))}
-              className="h-7 w-7 sm:h-8 sm:w-8"
-              aria-label={viewMode === 'daily' ? "Previous month" : "Previous year"}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => viewMode === 'daily' ? handleNextMonth() : setCurrentDate(new Date(getYear(currentDate) + 1, 0, 1))}
-              className="h-7 w-7 sm:h-8 sm:w-8"
-              aria-label={viewMode === 'daily' ? "Next month" : "Next year"}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => viewMode === 'daily' ? handlePrevMonth() : setCurrentDate(new Date(getYear(currentDate) - 1, 0, 1))}
+                className="h-8 w-8 border-border/60 bg-background/70 hover:bg-secondary/50"
+                aria-label={viewMode === 'daily' ? "Previous month" : "Previous year"}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => viewMode === 'daily' ? handleNextMonth() : setCurrentDate(new Date(getYear(currentDate) + 1, 0, 1))}
+                className="h-8 w-8 border-border/60 bg-background/70 hover:bg-secondary/50"
+                aria-label={viewMode === 'daily' ? "Next month" : "Next year"}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className={cn("flex items-center gap-2", hideFiltersOnMobile && "max-sm:hidden")}>
+              <ImportanceFilter
+                value={impactLevels}
+                onValueChange={setImpactLevels}
+                className="h-8"
+              />
+              <CountryFilter
+                countries={countries}
+                value={selectedCountries}
+                onValueChange={setSelectedCountries}
+                className={cn("h-8", hideFiltersOnMobile && "max-sm:hidden")}
+              />
+            </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 p-1.5 sm:p-4">
+      <CardContent className="flex-1 min-h-0 p-2 sm:p-3">
         {viewMode === 'daily' ? (
           <>
-            <div className="grid grid-cols-8 gap-x-px mb-1">
+            <div className="mb-2 grid grid-cols-8 gap-1">
               {WEEKDAYS.map((day) => (
-                <div key={day} className="text-center font-medium text-[9px] sm:text-[11px] text-muted-foreground">
+                <div key={day} className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
                   {translateWeekday(t, day)}
                 </div>
               ))}
-              <div className="text-center font-medium text-[9px] sm:text-[11px] text-muted-foreground">
+              <div className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
                 {t('calendar.weekdays.weekly')}
               </div>
             </div>
-            <div className="grid grid-cols-8 auto-rows-fr rounded-lg h-[calc(100%-20px)]">
+            <div className="grid h-[calc(100%-30px)] auto-rows-fr grid-cols-8 gap-1">
               {calendarDays.map((date, index) => {
                 const dateString = format(date, 'yyyy-MM-dd')
                 const dayData = calendarData[dateString]
@@ -583,59 +626,56 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                 const calculations = dayCalculations.get(dateString) || { maxProfit: 0, maxDrawdown: 0 }
                 const maxProfit = calculations.maxProfit
                 const maxDrawdown = calculations.maxDrawdown
+                const dayPnl = dayData?.pnl ?? 0
 
                 return (
                   <React.Fragment key={dateString}>
                     <div
                       className={cn(
-                        "h-full flex flex-col cursor-pointer transition-all rounded-none p-1",
-                        "ring-1 ring-border hover:ring-white hover:z-10",
-                        dayData && dayData.pnl >= 0
-                          ? "bg-white/[0.03]"
-                          : dayData && dayData.pnl < 0
-                            ? "bg-white/[0.01]"
-                            : "bg-card",
-                        !isCurrentMonth && "",
-                        isToday(date) && "ring-white bg-white/10 z-10",
-                        index === 0 && "rounded-tl-lg",
-                        index === 35 && "rounded-bl-lg",
+                        "group relative h-full cursor-pointer overflow-hidden rounded-lg border p-2 transition-all duration-200",
+                        "hover:-translate-y-[1px] hover:shadow-md",
+                        !dayData && "bg-card/80 border-border/50",
+                        dayPnl > 0 && "bg-semantic-success-bg/10 border-semantic-success-border/30",
+                        dayPnl < 0 && "bg-semantic-error-bg/10 border-semantic-error-border/30",
+                        !isCurrentMonth && "opacity-45",
+                        isToday(date) && "border-primary/70 bg-primary/10 shadow-[0_0_0_1px_hsl(var(--primary)/0.3)_inset]",
+                        index === 0 && "rounded-tl-xl",
+                        index === 35 && "rounded-bl-xl",
                       )}
                       onClick={() => {
                         setSelectedDate(date)
                       }}
                     >
-                      <div className="flex justify-between items-start gap-0.5">
+                      <div className="flex items-start justify-between gap-1">
                         <span className={cn(
-                          "text-[9px] sm:text-[11px] font-medium min-w-[14px] text-center",
+                          "min-w-[18px] rounded-md border border-border/40 bg-background/65 px-1 py-0.5 text-center text-[10px] font-semibold",
                           isToday(date) && "text-primary font-semibold",
-                          !isCurrentMonth && "opacity-50"
+                          !isCurrentMonth && "opacity-60"
                         )}>
                           {format(date, 'd')}
                         </span>
-                        <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-col gap-1">
                           {dateEvents.length > 0 && <EventBadge events={dateEvents} impactLevels={impactLevels} />}
                           {dateRenewals.length > 0 && <RenewalBadge renewals={dateRenewals} />}
                         </div>
                       </div>
-                      <div className="flex-1 flex flex-col justify-end gap-0.5">
+                      <div className="mt-2 flex flex-1 flex-col justify-end gap-1">
                         {dayData ? (
                           <div className={cn(
-                            "text-[9px] sm:text-[11px] font-semibold truncate text-center",
-                            dayData.pnl >= 0
-                              ? "text-white font-bold"
-                              : "text-white/40",
-                            !isCurrentMonth && "opacity-50"
+                            "truncate text-center text-[11px] font-bold",
+                            dayData.pnl >= 0 ? "text-semantic-success" : "text-semantic-error",
+                            !isCurrentMonth && "opacity-60"
                           )}>
                             {formatCurrency(dayData.pnl)}
                           </div>
                         ) : (
                           <div className={cn(
-                            "text-[9px] sm:text-[11px] font-semibold invisible text-center",
+                            "invisible text-center text-[11px] font-semibold",
                             !isCurrentMonth && "opacity-50"
                           )}>$0</div>
                         )}
                         <div className={cn(
-                          "text-[7px] sm:text-[9px] text-muted-foreground truncate text-center",
+                          "truncate text-center text-[8px] font-medium uppercase tracking-wider text-muted-foreground",
                           !isCurrentMonth && "opacity-50"
                         )}>
                           {dayData
@@ -645,13 +685,13 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         {dayData && (
                           <>
                             <div className={cn(
-                              "text-[7px] sm:text-[9px] text-white/60 truncate text-center",
+                              "truncate text-center text-[8px] text-muted-foreground",
                               !isCurrentMonth && "opacity-50"
                             )}>
                               {t('calendar.maxProfit')}: {formatCurrency(maxProfit)}
                             </div>
                             <div className={cn(
-                              "text-[7px] sm:text-[9px] text-white/30 truncate text-center",
+                              "truncate text-center text-[8px] text-muted-foreground/80",
                               !isCurrentMonth && "opacity-50"
                             )}>
                               {t('calendar.maxDD')}: -{formatCurrency(maxDrawdown)}
@@ -665,18 +705,18 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                       return (
                         <div
                           className={cn(
-                            "h-full flex items-center justify-center rounded-none cursor-pointer",
-                            "ring-1 ring-border hover:ring-primary hover:z-10",
-                            index === 6 && "rounded-tr-lg",
-                            index === 41 && "rounded-br-lg"
+                            "flex h-full cursor-pointer items-center justify-center rounded-lg border border-border/50 bg-background/70 px-1 transition-all",
+                            "hover:bg-secondary/50 hover:border-primary/40",
+                            index === 6 && "rounded-tr-xl",
+                            index === 41 && "rounded-br-xl"
                           )}
                           onClick={() => setSelectedWeekDate(date)}
                         >
                           <div className={cn(
-                            "text-[9px] sm:text-[11px] font-semibold truncate px-0.5",
+                            "truncate px-1 text-[10px] font-bold",
                             weeklyTotal >= 0
-                              ? "text-white font-bold"
-                              : "text-white/40"
+                              ? "text-semantic-success"
+                              : "text-semantic-error"
                           )}>
                             {formatCurrency(weeklyTotal)}
                           </div>
@@ -713,32 +753,32 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
         calendarData={calendarData}
         isLoading={isLoading}
       />
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end border-t border-border/60 bg-background/30 px-3 py-2">
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 border rounded-md p-0.5 bg-muted">
+        <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-secondary/30 p-1">
           <Button
             variant={viewMode === 'daily' ? 'default' : 'ghost'}
             size="sm"
             className={cn(
-              "h-7 px-2 transition-colors",
+              "h-7 px-3 transition-colors",
               viewMode === 'daily' && "bg-primary text-primary-foreground shadow-sm font-semibold"
             )}
             onClick={() => setViewMode('daily')}
           >
             <Calendar className="h-4 w-4 mr-1" />
-            <span className="text-xs">{t('calendar.viewMode.daily')}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider">{t('calendar.viewMode.daily')}</span>
           </Button>
           <Button
             variant={viewMode === 'weekly' ? 'default' : 'ghost'}
             size="sm"
             className={cn(
-              "h-7 px-2 transition-colors",
+              "h-7 px-3 transition-colors",
               viewMode === 'weekly' && "bg-primary text-primary-foreground shadow-sm font-semibold"
             )}
             onClick={() => setViewMode('weekly')}
           >
             <CalendarDays className="h-4 w-4 mr-1" />
-            <span className="text-xs">{t('calendar.viewMode.weekly')}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider">{t('calendar.viewMode.weekly')}</span>
           </Button>
         </div>
       </CardFooter>

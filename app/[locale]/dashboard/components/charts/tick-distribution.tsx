@@ -249,7 +249,7 @@ export default function TickDistributionChart({
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: 'hsl(var(--foreground) / )' }}
+                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                 />
                 <Bar
                   dataKey="count"

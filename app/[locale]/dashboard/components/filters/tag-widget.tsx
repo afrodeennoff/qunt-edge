@@ -74,7 +74,7 @@ interface TagWidgetProps {
 }
 
 // Hex is intentionally used here because HexColorPicker requires hex input.
-const DEFAULT_TAG_COLOR = '#A3A3A3'
+const DEFAULT_TAG_COLOR = 'hsl(var(--muted-foreground))'
 
 export function TagWidget({ size = 'medium', onTagSelectionChange }: TagWidgetProps) {
   const t = useI18n()
