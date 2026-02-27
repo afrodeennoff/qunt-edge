@@ -18,7 +18,7 @@ import { FilterCommandMenu } from './filters/filter-command-menu'
 import { useDashboard } from '../dashboard-context'
 import { AddWidgetSheet } from './add-widget-sheet'
 import { ShareButton } from './share-button'
-import { useDashboardActions, useDashboardTrades } from '@/context/data-provider'
+import { useData } from '@/context/data-provider'
 import { cn } from '@/lib/utils'
 import { DailySummaryModal } from './daily-summary-modal'
 import { SidebarTrigger } from '@/components/ui/sidebar'
@@ -33,8 +33,7 @@ export default function Navbar() {
     autoSaveStatus,
     flushPendingSaves
   } = useDashboard()
-  const { refreshAllData, isPlusUser } = useDashboardActions()
-  const { isLoading } = useDashboardTrades()
+  const { refreshAllData, isPlusUser, isLoading } = useData()
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleRefresh = async () => {
@@ -54,7 +53,7 @@ export default function Navbar() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-auto flex flex-col glass-strong rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-2xl transition-all duration-300"
+        className="pointer-events-auto flex flex-col glass-strong rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 sm:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300"
       >
         <div className="flex items-center justify-between px-4 sm:px-6 h-14">
 
@@ -97,7 +96,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={flushPendingSaves}
-                  className="hidden sm:flex h-9 px-3 gap-2 rounded-xl text-foreground transition-all border border-white/20"
+                  className="hidden sm:flex h-9 px-3 gap-2 rounded-xl text-white transition-all border border-white/20"
                 >
                   <CloudUpload className="w-3.5 h-3.5 animate-bounce" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Save Now</span>
@@ -105,7 +104,7 @@ export default function Navbar() {
               )}
 
               {!autoSaveStatus.hasPending && isCustomizing && (
-                <div className="hidden sm:flex items-center gap-2 px-3 text-foreground/60">
+                <div className="hidden sm:flex items-center gap-2 px-3 text-white/60">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
                 </div>
@@ -127,7 +126,7 @@ export default function Navbar() {
 
                 {!isPlusUser() && (
                   <Link href="/dashboard/billing">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-white/5 border border-white/20 text-foreground text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-none hover:bg-white/10">
+                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-white/5 border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-none hover:bg-white/10">
                       <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                       <span>Elite</span>
                     </Button>

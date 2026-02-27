@@ -934,3 +934,68 @@
 - Verification evidence:
   - `npx eslint app/[locale]/dashboard/layout.tsx app/[locale]/dashboard/components/navbar.tsx` -> exit `0` (1 pre-existing complexity warning in `navbar.tsx`, 0 errors).
   - `npm run typecheck` -> exit `0`.
+
+# Dashboard Navbar Style Parity (Main-Branch Look) (2026-02-26)
+
+## Scope
+- Enforce main-branch dashboard navbar/layout framing across dashboard routes.
+
+## Acceptance Criteria
+- [x] Dashboard routes no longer use route-level `UnifiedPageShell`/`UnifiedSurface` wrappers that conflict with main dashboard layout framing.
+- [x] `/dashboard/behavior` and `/dashboard/reports` remain aligned to dashboard layout navbar styling.
+- [x] Targeted verification executed and recorded.
+
+## Plan Checklist
+- [x] Audit dashboard route files for non-main wrapper usage.
+- [x] Normalize mismatched routes (`billing`, `data`, `settings`, `trader-profile`, `reports`, `behavior`) to standard dashboard container composition under `dashboard/layout.tsx`.
+- [x] Run targeted lint/type verification and record residual risk.
+
+## Current Step
+- **Completed:** Dashboard-wide navbar style parity implemented and verified.
+
+## Progress Notes
+- 2026-02-26: Removed `UnifiedPageShell` wrappers from dashboard route pages causing non-main framing.
+- 2026-02-26: Preserved existing page content/logic while moving to standard dashboard container sections.
+- 2026-02-26: Confirmed no remaining `UnifiedPageShell`/`UnifiedSurface` usage in dashboard route page files.
+
+## Completion Notes
+- Verification evidence:
+  - `rg -n "UnifiedPageShell|UnifiedSurface" app/[locale]/dashboard -g 'page.tsx' -g 'page-client.tsx'` -> no matches.
+  - `npx eslint <touched dashboard pages>` -> exit `0` with warnings only (pre-existing complexity/unused-var debt).
+  - `npm run typecheck` -> exit `0`.
+- Residual risk:
+  - UI spacing may differ slightly from prior `UnifiedSurface` card padding in some routes; behavior and navbar framing are now consistent with dashboard layout.
+
+---
+
+# Dashboard Main-Branch Parity Audit + Fix (2026-02-27)
+
+## Scope
+- Audit current dashboard navbar/layout parity against `origin/main` and fix regressions.
+
+## Acceptance Criteria
+- [x] Dashboard layout/navbar files match `origin/main`.
+- [x] Dashboard route pages with parity regressions are restored to `origin/main`.
+- [x] Verification commands executed and recorded.
+
+## Plan Checklist
+- [x] Audit changed dashboard files vs `origin/main`.
+- [x] Restore parity-critical files (`layout`, `navbar`, dashboard route pages).
+- [x] Run typecheck and targeted lint on restored files.
+
+## Current Step
+- **Completed:** Dashboard parity restored and verified.
+
+## Completion Notes
+- Restored files:
+  - `app/[locale]/dashboard/layout.tsx`
+  - `app/[locale]/dashboard/components/navbar.tsx`
+  - `app/[locale]/dashboard/billing/page.tsx`
+  - `app/[locale]/dashboard/data/page.tsx`
+  - `app/[locale]/dashboard/reports/page.tsx`
+  - `app/[locale]/dashboard/settings/page.tsx`
+  - `app/[locale]/dashboard/trader-profile/page.tsx`
+- Verification evidence:
+  - `git diff origin/main -- <restored files>` -> no diff output.
+  - `npm run typecheck` -> exit `0`.
+  - `npx eslint <restored files>` -> exit `0` (`0` errors, warnings only; pre-existing complexity/unused-var/any debt).

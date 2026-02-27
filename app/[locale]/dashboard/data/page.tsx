@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataManagementCard } from "@/app/[locale]/dashboard/data/components/data-management/data-management-card"
 import { useEffect } from "react"
 import { TradeTableReview } from "../components/tables/trade-table-review"
-import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
 
 export default function DashboardPage() {
   useEffect(() => {
@@ -12,26 +11,22 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <UnifiedPageShell density="compact">
-      <div className="flex w-full flex-1 flex-col">
+    <div className="relative flex w-full min-h-screen px-3 pb-4 pt-0 sm:px-4 sm:pb-4 sm:pt-0 lg:px-6 lg:pb-6 lg:pt-0">
+      <div className="flex w-full flex-1 flex-col p-2 sm:p-3">
         <Tabs defaultValue="accounts" className="w-full space-y-4">
-          <TabsList className="h-auto rounded-2xl border border-white/10 bg-black/40 p-1">
+          <TabsList className="h-auto rounded-2xl border border-border/70 bg-background/70 p-1">
             <TabsTrigger value="accounts">Accounts</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
             {/* <TabsTrigger value="propfirm">Prop Firm</TabsTrigger> */}
           </TabsList>
           <TabsContent value="accounts" className="mt-0">
-            <UnifiedSurface>
-              <DataManagementCard />
-            </UnifiedSurface>
+            <DataManagementCard />
           </TabsContent>
           <TabsContent value="trades" className="mt-0 h-[calc(100vh-var(--navbar-height)-var(--tabs-height)-16px)]">
-            <UnifiedSurface className="h-full">
-              <TradeTableReview />
-            </UnifiedSurface>
+            <TradeTableReview />
           </TabsContent>
         </Tabs>
       </div>
-    </UnifiedPageShell>
+    </div>
   )
 }

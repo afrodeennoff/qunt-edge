@@ -44,3 +44,14 @@
 - mistake pattern: Treated quick action controls as visual header duplication and removed them.
 - prevention rule: During header deduplication, preserve all functional CTAs/navigation rows and only remove purely informational duplicates.
 - early trigger signals: Cleanup diff removes `Link`/`Button` action rows from dashboard pages while user request mentions headers only.
+- mistake pattern: Fixed layout-shell mismatch for one dashboard route but missed sibling dashboard routes using the same non-main wrapper pattern.
+- prevention rule: For navbar/layout regressions, audit all affected dashboard routes (`/behavior`, `/reports`, etc.) and normalize them in one pass.
+- early trigger signals: User confirms one route fix then immediately reports dashboard navbar still wrong in another route.
+- mistake pattern: Treated a "main-branch navbar parity" request as a single-route fix first, leaving other dashboard routes inconsistent.
+- prevention rule: For parity requests, run a route inventory first and apply one consistent normalization pass before asking for confirmation.
+- early trigger signals: User references "all over dashboard" or "like main branch" after an initial route-specific patch.
+
+## 2026-02-27
+- mistake pattern: Assumed a local `main` ref would exist and delayed parity validation when branch naming differed.
+- prevention rule: For parity requests, compare against `origin/main` immediately and restore target files from that ref if local `main` is missing.
+- early trigger signals: `git` returns `bad revision 'main'` while user requests "like main branch".
