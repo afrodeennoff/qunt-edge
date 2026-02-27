@@ -182,15 +182,15 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
           <span className="rounded-md border border-semantic-error-border/40 bg-semantic-error-bg/10 px-1.5 py-0.5 text-semantic-error">L {monthStats.losses}</span>
         </div>
       </div>
-      <div className="flex-1 min-h-0 p-0">
-        <div className="grid grid-cols-7 gap-0 mb-0.5">
+      <div className="flex-1 min-h-0 p-2">
+        <div className="mb-2 grid grid-cols-7 gap-1">
           {weekdayHeaders.map((day) => (
-            <div key={day.key} className="text-center font-medium text-[9px] sm:text-[11px] text-muted-foreground">
+            <div key={day.key} className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
               {day.label}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 auto-rows-fr gap-0 h-[calc(100%-18px)]">
+        <div className="grid h-[calc(100%-30px)] grid-cols-7 auto-rows-fr gap-1">
           {calendarDayStrings.map((dateString) => { // Iterate over date strings
             const dayData = calendarData[dateString] // Direct lookup using the string key
 
@@ -217,18 +217,18 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
               <div
                 key={dateString} // Key is the timezone-correct date string
                 className={cn(
-                  "relative flex cursor-pointer flex-col justify-between rounded-none p-0 transition-all",
-                  "ring-1 ring-border",
-                  dayPnl > 0 && "bg-semantic-success-bg/10",
-                  dayPnl < 0 && "bg-semantic-error-bg/10",
-                  isDateStringToday(dateString, timezone) && "ring-white bg-primary/10",
+                  "relative flex cursor-pointer flex-col justify-between rounded-lg border p-1 transition-all",
+                  dayData ? "border-border/50" : "border-border/40 bg-background/50",
+                  dayPnl > 0 && "border-semantic-success-border/40",
+                  dayPnl < 0 && "border-semantic-error-border/40",
+                  isDateStringToday(dateString, timezone) && "border-primary/70 bg-primary/10",
                   !isCurrentMonthDay && "opacity-45"
                 )}
                 onClick={() => setSelectedDate(dateInTZ)} // Pass the Date object parsed in the target timezone
               >
                 <div
                   className={cn(
-                    "pointer-events-none absolute inset-0 rounded-none",
+                    "pointer-events-none absolute inset-0 rounded-lg",
                     dayPnl > 0 && "bg-semantic-success/20",
                     dayPnl < 0 && "bg-semantic-error/20"
                   )}
@@ -244,7 +244,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                     {format(dateInTZ, 'd')}
                   </span>
                 </div>
-                <div className="mt-0.5 text-center">
+                <div className="mt-1 text-center">
                   {dayData ? (
                     <>
                       <div
@@ -255,7 +255,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                       >
                         {formatCurrency(dayPnl)}
                       </div>
-                      <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-muted/40">
+                      <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted/40">
                         <div
                           className={cn(
                             "h-full rounded-full",

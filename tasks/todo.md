@@ -1,3 +1,7 @@
+<<<<<<< Updated upstream
+=======
+# Calendar Widget Redesign (PnL Calendar) (2026-02-28)
+
 # Mobile Optimization End-to-End Audit (2026-02-28)
 
 ## Scope
@@ -5,41 +9,27 @@
 - Validate mobile viewport UX/performance/stability and fix any in-scope regressions.
 
 ## Acceptance Criteria
-- [x] Mobile-focused verification gates run with recorded outcomes.
-- [x] Critical routes/flows pass manual E2E checks in a mobile viewport.
-- [x] Any discovered in-scope issues are fixed and re-verified.
-- [x] Findings, residual risk, and evidence are documented.
+- [ ] Mobile-focused verification gates run with recorded outcomes.
+- [ ] Critical routes/flows pass manual E2E checks in a mobile viewport.
+- [ ] Any discovered in-scope issues are fixed and re-verified.
+- [ ] Findings, residual risk, and evidence are documented.
 
 ## Plan Checklist
 - [x] Review prior lessons/task context and define audit plan.
-- [x] Run static/build verification gates relevant to mobile behavior.
-- [x] Execute mobile viewport E2E checks on critical routes.
-- [x] Implement minimal scoped fixes for discovered issues.
-- [x] Re-run verification and document final evidence.
+- [ ] Run static/build verification gates relevant to mobile behavior.
+- [ ] Execute mobile viewport E2E checks on critical routes.
+- [ ] Implement minimal scoped fixes for discovered issues.
+- [ ] Re-run verification and document final evidence.
 
 ## Current Step
-- **Completed:** verification + fixes + final audit report prepared.
+- **In progress:** static/build verification gates for mobile audit.
 
 ## Progress Notes
 - 2026-02-28: Started user-requested mobile optimization end-to-end audit.
 - 2026-02-28: Loaded `verification-before-completion` and `playwright` skill instructions for evidence-first verification and browser flow checks.
-- 2026-02-28: Fixed landing mobile navbar sheet accessibility metadata by adding `SheetTitle` and `SheetDescription` in `app/[locale]/(landing)/components/navbar.tsx`.
-- 2026-02-28: Removed non-Vercel runtime `/_vercel/*` script failures by moving Vercel analytics components into opt-in wrapper `components/providers/vercel-insights.tsx` gated by `NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS`.
-- 2026-02-28: Re-ran mobile route sweep (`/en`, `/en/pricing`, `/en/propfirms`, `/en/support`, `/en/updates`, `/en/authentication`, `/en/dashboard` redirect path) at `390x844`; no horizontal overflow detected.
 
 ## Completion Notes
-- Verification evidence:
-  - `npm run typecheck` -> exit `0`.
-  - `npm run build` -> exit `0`.
-  - `npm run check:route-budgets` -> exit `1` (dashboard route budgets still exceed 80 KB by ~7.8-8.1 KB).
-  - `npm run perf:lighthouse` -> exit `1` (mobile `/en` score `0.60`, mobile `/en/pricing` score `0.57`, TBT/LCP threshold failures).
-  - Playwright mobile runtime check on critical routes -> HTTP `200` responses, no horizontal overflow, dashboard unauth redirect works.
-  - Playwright console after fixes -> removed `/_vercel/insights` / `/_vercel/speed-insights` failures and removed mobile sheet a11y warning about missing title/description.
-- Residual risk:
-  - Mobile performance remains below target due high TBT/LCP and dashboard bundle budget violations.
-  - Some public routes still have `h1Count=0` in runtime scan (`/en/pricing`, `/en/support`, `/en/updates`), which is a markup/SEO quality gap.
-
-# Calendar Widget Redesign (PnL Calendar) (2026-02-28)
+- Pending.
 
 ## Scope
 - Completely redesign dashboard calendar widgets to a stronger PnL-first calendar UI.
@@ -71,6 +61,8 @@
 - Verification evidence:
   - `npm run typecheck` -> exit `0`.
   - Key output: route type generation succeeded and `tsc --noEmit` completed (re-run after heatmap-intensity pass also exit `0`).
+
+>>>>>>> Stashed changes
 # AI Functions Audit (2026-02-26)
 
 # App-Wide Color Contract Remediation (2026-02-26)
