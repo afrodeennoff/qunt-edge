@@ -14,7 +14,7 @@ export default function AboutPage() {
   ]
 
   return (
-    <UnifiedPageShell className="py-8">
+    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="border-white/10 bg-black/40">
           <CardHeader>

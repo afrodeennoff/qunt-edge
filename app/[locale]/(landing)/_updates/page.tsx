@@ -33,7 +33,7 @@ export default async function UpdatesPage(props: PageProps) {
   }
 
   return (
-    <UnifiedPageShell className="py-8">
+    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
       {/* Display latest weekly video for French locale */}
       {locale === 'fr' && latestVideoId && (
         <UnifiedSurface className="mb-8">

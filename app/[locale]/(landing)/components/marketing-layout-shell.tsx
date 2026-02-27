@@ -11,7 +11,7 @@ type MarketingLayoutShellProps = Readonly<{
 
 export default function MarketingLayoutShell({
   children,
-  contentClassName = 'mx-auto w-full max-w-[1240px]',
+  contentClassName = 'mx-auto w-full max-w-[1280px]',
   className,
 }: MarketingLayoutShellProps) {
   return (
