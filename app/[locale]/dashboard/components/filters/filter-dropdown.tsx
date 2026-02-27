@@ -18,33 +18,26 @@ import { InstrumentFilter } from "./instrument-filter"
 import { AccountFilter } from "./account-filter"
 import { useDashboardTrades } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { AccountGroupBoard } from "./account-group-board"
+import { useState } from "react"
 import { useModalStateStore } from "../../../../../store/modal-state-store"
 
 export function FilterDropdown() {
   const t = useI18n()
   const { isMobile } = useDashboardTrades()
   const [open, setOpen] = useState(false)
-  const [accountFilterOpen, setAccountFilterOpen] = useState(false)
   const { accountGroupBoardOpen } = useModalStateStore()
-
-  // Close both dropdowns when account board is open
-  useEffect(() => {
-    if (accountGroupBoardOpen) {
-      setOpen(false)
-    }
-  }, [accountGroupBoardOpen])
+  const effectiveOpen = accountGroupBoardOpen ? false : open
 
   return (
     <>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu
+        open={effectiveOpen}
+        onOpenChange={(nextOpen) => {
+          if (!accountGroupBoardOpen) {
+            setOpen(nextOpen)
+          }
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost"

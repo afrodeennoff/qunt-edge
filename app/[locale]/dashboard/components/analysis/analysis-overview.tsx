@@ -1,16 +1,45 @@
 'use client'
 
+import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/locales/client"
 import {
   Clock,
+  Loader2,
   Trash2
 } from "lucide-react"
 import { AccountsAnalysis } from "./accounts-analysis"
+import { useAnalysisStore } from "@/store/analysis-store"
 
 export function AnalysisOverview() {
   const t = useI18n()
+  const clearAnalysis = useAnalysisStore((state) => state.clearAnalysis)
+  const hasValidData = useAnalysisStore((state) => state.hasValidData())
+  const lastPersistedUpdate = useAnalysisStore((state) => state.lastUpdated)
+  const [status, setStatus] = useState<{
+    isLoading: boolean
+    hasData: boolean
+    lastUpdated: Date | null
+  }>({
+    isLoading: false,
+    hasData: false,
+    lastUpdated: null,
+  })
+
+  const effectiveHasData = status.hasData || hasValidData
+  const effectiveLastUpdated = status.lastUpdated ?? lastPersistedUpdate
+  const statusLabel = useMemo(() => {
+    if (status.isLoading) {
+      return t("analysis.loading")
+    }
+
+    if (effectiveLastUpdated) {
+      return t("analysis.lastUpdated", { date: new Date(effectiveLastUpdated).toLocaleString() })
+    }
+
+    return t("analysis.notAnalyzed")
+  }, [effectiveLastUpdated, status.isLoading, t])
 
   return (
     <div className="space-y-6">
@@ -21,24 +50,24 @@ export function AnalysisOverview() {
         </div>
         <div className="flex items-center gap-4">
           <Button
-            onClick={() => { }}
+            onClick={() => clearAnalysis()}
             variant="ghost"
             size="default"
             title={t('analysis.clearCache')}
-            disabled={false}
+            disabled={status.isLoading || !effectiveHasData}
           >
             <Trash2 className="h-5 w-5" />
           </Button>
           <Badge variant="secondary" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            {false ? t('analysis.lastUpdated', { date: new Date().toLocaleDateString() }) : t('analysis.notAnalyzed')}
+            {status.isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
+            {statusLabel}
           </Badge>
         </div>
       </div>
 
       <div className="grid gap-8 md:grid-cols-1">
-        <AccountsAnalysis/>
+        <AccountsAnalysis onStatusChange={setStatus} />
       </div>
     </div>
   )
-} 
+}

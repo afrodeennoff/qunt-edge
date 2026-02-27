@@ -201,7 +201,8 @@ export default function ImportCallbackPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-md py-8">
+    <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-md">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -266,6 +267,7 @@ export default function ImportCallbackPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

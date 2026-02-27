@@ -3,36 +3,10 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { headers } from "next/headers";
-import { Geist, IBM_Plex_Mono, Inter, Manrope } from "next/font/google";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
 const siteOrigin = "https://qunt-edge.vercel.app";
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-ibm-mono",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -141,11 +115,17 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} bg-background`}
+      className="bg-background"
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning
-      style={{ ["--theme-intensity" as string]: "100%" }}
+      style={{
+        ["--theme-intensity" as string]: "100%",
+        ["--font-geist" as string]: "system-ui, -apple-system, Segoe UI, sans-serif",
+        ["--font-inter" as string]: "system-ui, -apple-system, Segoe UI, sans-serif",
+        ["--font-manrope" as string]: "system-ui, -apple-system, Segoe UI, sans-serif",
+        ["--font-ibm-mono" as string]: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+      }}
     >
       <head>
         {/* Resource Hinting for Performance */}
@@ -222,7 +202,7 @@ export default async function RootLayout({
 
       </head>
       <body
-        className={`${geist.variable} ${ibmPlexMono.variable} font-sans antialiased text-foreground`}
+        className="font-sans antialiased text-foreground"
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />

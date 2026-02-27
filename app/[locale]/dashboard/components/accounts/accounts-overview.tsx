@@ -334,32 +334,21 @@ function PayoutDialog({
   const params = useParams()
   const locale = params.locale as string
   const dateLocale = locale === 'fr' ? fr : undefined
-  const [date, setDate] = useState<Date>(existingPayout?.date ?? new Date())
+  const initialDate = useMemo(() => {
+    const seedDate = existingPayout?.date ?? new Date()
+    const normalized = new Date(seedDate)
+    normalized.setHours(12, 0, 0, 0)
+    return normalized
+  }, [existingPayout?.date])
+  const [date, setDate] = useState<Date>(initialDate)
   const [amount, setAmount] = useState<number>(existingPayout?.amount ?? 0)
   const [inputValue, setInputValue] = useState<string>(existingPayout?.amount?.toString() ?? "")
   const [status, setStatus] = useState<string>(existingPayout?.status ?? 'PENDING')
-  const [dateInputValue, setDateInputValue] = useState<string>("")
+  const [dateInputValue, setDateInputValue] = useState<string>(() => format(initialDate, 'yyyy-MM-dd'))
   const t = useI18n()
 
   // Combined loading state for both saving and deleting
   const isProcessing = isLoading || isDeleting
-
-  useEffect(() => {
-    if (existingPayout) {
-      setDate(existingPayout.date)
-      setAmount(existingPayout.amount)
-      setInputValue(existingPayout.amount.toString())
-      setStatus(existingPayout.status)
-      setDateInputValue(format(existingPayout.date, 'yyyy-MM-dd'))
-    } else {
-      const today = new Date()
-      setDate(today)
-      setAmount(0)
-      setInputValue("")
-      setStatus('PENDING')
-      setDateInputValue(format(today, 'yyyy-MM-dd'))
-    }
-  }, [existingPayout, open])
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -1659,6 +1648,7 @@ export function AccountsOverview({
       </CardContent>
 
       <PayoutDialog
+        key={`${selectedPayout?.id ?? "new"}-${payoutDialogOpen ? "open" : "closed"}`}
         open={payoutDialogOpen}
         onOpenChange={(open) => {
           setPayoutDialogOpen(open)

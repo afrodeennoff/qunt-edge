@@ -82,17 +82,17 @@ export function WidgetShell({
   return (
     <Card
       data-widget-shell="v2"
-      className={cn("h-full border-border/60 bg-card/90 backdrop-blur-sm", className)}
+      className={cn("h-full overflow-hidden rounded-xl border-white/12 bg-black/85 shadow-none", className)}
     >
       {(title || actions || icon || description) && (
-        <CardHeader className="border-b border-border/60 p-3 sm:p-4">
+        <CardHeader className="border-b border-white/10 px-3.5 py-3 sm:px-4 sm:py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               {(title || icon) && (
                 <div className="flex items-center gap-2">
-                  {icon ? <span className="text-muted-foreground">{icon}</span> : null}
+                  {icon ? <span className="text-fg-muted">{icon}</span> : null}
                   {title ? (
-                    <CardTitle className="line-clamp-1 text-sm sm:text-base">{title}</CardTitle>
+                    <CardTitle className="line-clamp-1 text-sm font-semibold text-fg-primary sm:text-[15px]">{title}</CardTitle>
                   ) : null}
                   {info ? (
                     <TooltipProvider>
@@ -100,7 +100,7 @@ export function WidgetShell({
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            className="text-muted-foreground transition-colors hover:text-foreground"
+                            className="text-fg-muted transition-colors hover:text-fg-primary"
                             aria-label="Widget info"
                           >
                             <Info className="h-3.5 w-3.5" />
@@ -113,7 +113,7 @@ export function WidgetShell({
                 </div>
               )}
               {description ? (
-                <p className="line-clamp-1 text-xs text-muted-foreground">{description}</p>
+                <p className="line-clamp-1 text-[11px] text-fg-muted">{description}</p>
               ) : null}
             </div>
             {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -126,7 +126,7 @@ export function WidgetShell({
       </CardContent>
 
       {footer ? (
-        <CardFooter className="border-t border-border/60 p-3 sm:p-4">{footer}</CardFooter>
+        <CardFooter className="border-t border-white/10 p-3 sm:p-4">{footer}</CardFooter>
       ) : null}
     </Card>
   )

@@ -153,3 +153,58 @@ jobs:
         with:
           name: npm-audit-report
           path: npm-audit-report.json
+
+  payment-integration:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      RUN_PAYMENT_INTEGRATION_TESTS: 'true'
+      WHOP_API_KEY: ${{ secrets.WHOP_API_KEY }}
+      WHOP_WEBHOOK_SECRET: ${{ secrets.WHOP_WEBHOOK_SECRET }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Validate Payment Test Secrets
+        run: |
+          missing=()
+          [ -z "$WHOP_API_KEY" ] && missing+=("WHOP_API_KEY")
+          [ -z "$WHOP_WEBHOOK_SECRET" ] && missing+=("WHOP_WEBHOOK_SECRET")
+          [ -z "$ENCRYPTION_KEY" ] && missing+=("ENCRYPTION_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required payment integration secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Sync Prisma Schema
+        run: npx prisma db push
+
+      - name: Payment Integration Tests
+        run: npm run test:payment
