@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 import { useCurrentLocale } from '@/locales/client'
@@ -100,6 +100,10 @@ export default function Navbar() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[88vw] max-w-[320px] border-l border-[hsl(var(--mk-border)/0.35)] bg-[hsl(var(--mk-bg-1))] p-0">
                 <div className="flex h-full flex-col p-6">
+                  <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Primary site navigation and account access actions.
+                  </SheetDescription>
                   <div className="space-y-2">
                     {LINKS.map((link) => (
                       <Link

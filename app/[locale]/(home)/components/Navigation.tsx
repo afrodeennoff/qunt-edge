@@ -124,7 +124,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                     Primary site navigation and account access actions.
                                 </SheetDescription>
                                 <div className="flex flex-col gap-6 mb-8 flex-1">
-                                    {links.map((link, i) => (
+                                    {links.map((link) => (
                                         <Link
                                             key={link.name}
                                             href={link.href}

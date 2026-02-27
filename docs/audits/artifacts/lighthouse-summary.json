@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-27T22:02:17.054Z",
+  "generatedAt": "2026-02-27T22:18:31.453Z",
   "baseUrl": "http://localhost:3000",
   "thresholds": {
     "desktopScoreMin": 0.9,
@@ -14,50 +14,51 @@
     {
       "url": "http://localhost:3000/en",
       "mode": "mobile",
-      "score": 0.62,
-      "tbt": 3233.5,
-      "lcp": 3255.1466,
+      "score": 0.6,
+      "tbt": 3254.5,
+      "lcp": 3616.6274000000003,
       "cls": 0,
       "failures": [
-        "mobile score 0.62 < 0.75",
-        "mobile TBT 3233.5ms > 1200ms"
+        "mobile score 0.6 < 0.75",
+        "mobile TBT 3254.5ms > 1200ms",
+        "mobile LCP 3616.6274000000003ms > 3500ms"
       ]
     },
     {
       "url": "http://localhost:3000/en",
       "mode": "desktop",
-      "score": 0.73,
-      "tbt": 698.4749500000001,
-      "lcp": 816.2004000000001,
+      "score": 0.74,
+      "tbt": 679.6312000000001,
+      "lcp": 774.9504000000001,
       "cls": 0,
       "failures": [
-        "desktop score 0.73 < 0.9",
-        "desktop TBT 698.4749500000001ms > 200ms"
+        "desktop score 0.74 < 0.9",
+        "desktop TBT 679.6312000000001ms > 200ms"
       ]
     },
     {
       "url": "http://localhost:3000/en/pricing",
       "mode": "mobile",
       "score": 0.57,
-      "tbt": 3089.5,
-      "lcp": 4065.4743,
+      "tbt": 3096.9999999999995,
+      "lcp": 4061.66175,
       "cls": 0,
       "failures": [
         "mobile score 0.57 < 0.75",
-        "mobile TBT 3089.5ms > 1200ms",
-        "mobile LCP 4065.4743ms > 3500ms"
+        "mobile TBT 3096.9999999999995ms > 1200ms",
+        "mobile LCP 4061.66175ms > 3500ms"
       ]
     },
     {
       "url": "http://localhost:3000/en/pricing",
       "mode": "desktop",
       "score": 0.74,
-      "tbt": 679.1979,
-      "lcp": 814.4168,
+      "tbt": 677.332025,
+      "lcp": 813.3438000000001,
       "cls": 0,
       "failures": [
         "desktop score 0.74 < 0.9",
-        "desktop TBT 679.1979ms > 200ms"
+        "desktop TBT 677.332025ms > 200ms"
       ]
     }
   ]

@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { headers } from "next/headers";
 import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
+import { VercelInsights } from "@/components/providers/vercel-insights";
 import { getUiVariant } from "@/lib/ui-v2";
 
 const siteOrigin = "https://qunt-edge.vercel.app";
@@ -109,9 +108,7 @@ export default async function RootLayout({
 }) {
   const requestNonce = (await headers()).get("x-nonce");
   const nonce = requestNonce && requestNonce.trim().length > 0 ? requestNonce : null;
-  const isProduction = process.env.NODE_ENV === "production";
-  const isVercelRuntime = process.env.VERCEL === "1";
-  const enableVercelInsights = isProduction && isVercelRuntime;
+  const enableVercelInsights = process.env.NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS === "true";
   const uiVariant = getUiVariant();
 
   return (
@@ -208,8 +205,7 @@ export default async function RootLayout({
         data-ui-variant={uiVariant}
       >
         <ScrollLockFixLazy />
-        {enableVercelInsights ? <SpeedInsights /> : null}
-        {enableVercelInsights ? <Analytics /> : null}
+        {enableVercelInsights ? <VercelInsights /> : null}
         {children}
       </body>
     </html>
