@@ -24,7 +24,7 @@ type UnifiedSurfaceProps = {
 export function UnifiedPageShell({
   children,
   className,
-  widthClassName = "max-w-none",
+  widthClassName = "max-w-7xl",
   density = "default",
 }: UnifiedPageShellProps) {
   const densityClasses =

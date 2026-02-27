@@ -59,6 +59,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { LinkedAccounts } from "@/components/linked-accounts"
+import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 
 type Locale = 'en' | 'fr'
 
@@ -153,15 +154,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-8 lg:px-6">
-      <div className="mb-8 rounded-3xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
-        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.settings')}</h1>
-        <p className="text-muted-foreground mt-2">{t('dashboard.settings.description')}</p>
-      </div>
-
+    <UnifiedPageShell density="compact">
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Profile Section */}
-        <Card className="border-border/70 bg-card/85 shadow-sm">
+        <Card className="border-white/12 bg-black/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -191,7 +187,7 @@ export default function SettingsPage() {
             </div>
             <Separator />
             <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="firstName">First Name</Label>
                   <Input id="firstName" placeholder="Enter your first name" />
@@ -211,7 +207,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Preferences Section */}
-        <Card className="border-border/70 bg-card/85 shadow-sm">
+        <Card className="border-white/12 bg-black/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
@@ -334,7 +330,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Notifications Section */}
-        <Card className="border-border/70 bg-card/85 shadow-sm">
+        <Card className="border-white/12 bg-black/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
@@ -404,7 +400,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Team Section */}
-        <Card className="border-border/70 bg-card/85 shadow-sm">
+        <Card className="border-white/12 bg-black/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -507,7 +503,7 @@ export default function SettingsPage() {
         <LinkedAccounts />
 
         {/* Password (Migration) Section */}
-        <Card className="border-border/70 bg-card/85 shadow-sm">
+        <Card className="border-white/12 bg-black/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
@@ -596,7 +592,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Account Management Section */}
-        <Card className="border-border/70 bg-card/85 shadow-sm">
+        <Card className="border-white/12 bg-black/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
@@ -642,6 +638,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </UnifiedPageShell>
   )
 }
