@@ -1,12 +1,24 @@
-import { DashboardHeader } from "./components/dashboard-header";
 import { createClient } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { DashboardProvider } from "./dashboard-context";
-import { DashboardSidebar } from "@/components/sidebar/dashboard-sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { DashboardProviders } from "@/components/providers/dashboard-providers";
-import { DashboardClientOverlays } from "./components/dashboard-client-overlays";
-import { MotionPage } from "@/components/motion/motion-primitives";
+import dynamic from "next/dynamic";
+
+const DashboardSidebar = dynamic(
+  () => import("@/components/sidebar/dashboard-sidebar").then((m) => m.DashboardSidebar),
+  {
+    loading: () => <div className="hidden md:block w-14 lg:w-[72px]" />,
+  }
+);
+
+const DashboardHeader = dynamic(
+  () => import("./components/dashboard-header").then((m) => m.DashboardHeader)
+);
+
+const DashboardClientOverlays = dynamic(
+  () => import("./components/dashboard-client-overlays").then((m) => m.DashboardClientOverlays)
+);
 
 export default async function DashboardLayout({
   children,
@@ -58,9 +70,7 @@ export default async function DashboardLayout({
             <div className="relative z-0 flex h-svh min-h-0 flex-col">
               <DashboardHeader />
               <main className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain pb-safe">
-                <MotionPage className="min-h-full">
-                  {children}
-                </MotionPage>
+                <div className="min-h-full">{children}</div>
               </main>
             </div>
           </SidebarInset>

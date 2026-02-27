@@ -37,7 +37,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
     ];
 
     return (
-        <UnifiedPageShell className="py-8">
+        <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
             <UnifiedSurface className="space-y-4">
                 <header className="mb-6">
                     <h1 className="text-3xl font-semibold text-fg-primary">Frequently Asked Questions</h1>
