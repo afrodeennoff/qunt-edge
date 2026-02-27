@@ -219,7 +219,7 @@ export default async function PropFirmsPage({ searchParams }: PropFirmsPageProps
 
   return (
     <div className="min-h-screen">
-      <div className="w-full px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4">{t('landing.propfirms.title')}</h1>
           <p className="text-lg text-muted-foreground max-w-3xl">
