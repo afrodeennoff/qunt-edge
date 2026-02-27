@@ -11,7 +11,7 @@ export function PricingPageClient() {
   }, []);
 
   return (
-    <UnifiedPageShell className="py-12 sm:py-16">
+    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-12 sm:py-16">
       <UnifiedSurface>
         <PricingPlans />
       </UnifiedSurface>

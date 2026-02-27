@@ -25,3 +25,8 @@
 - mistake pattern: Over-corrected layout gaps by switching shared shells to near full-width, reducing intended visual breathing room.
 - prevention rule: When user asks to remove side gaps, match the established reference layout width (home-page container) instead of forcing full-width globally.
 - early trigger signals: User says "too wide", "reduce more", or asks to match spacing "like home page" after a full-width change.
+
+## 2026-02-27
+- mistake pattern: Applied spacing changes globally when the user requested changes only for landing/public routes.
+- prevention rule: Scope spacing/layout edits by route group first (`/(landing)` and teams landing) and explicitly exclude dashboard shells unless requested.
+- early trigger signals: User says "only /en" or "outside dashboard" after a broad layout adjustment.

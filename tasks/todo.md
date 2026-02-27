@@ -814,3 +814,9 @@
   - `npm run analyze:bundle` -> exit `0` (artifact updated with same budget overages).
 - Residual risk:
   - Dashboard bundle budget remains above threshold and should be handled in a dedicated perf/code-splitting pass; this is separate from layout gap closure.
+
+## Follow-up Correction (2026-02-27)
+- User clarified scope must exclude dashboard routes.
+- Final spacing scope is now limited to non-dashboard pages only (landing + teams landing).
+- Final balanced container target: `max-w-[1280px]` on public shells.
+- Dashboard spacing remains unchanged from prior dashboard behavior.

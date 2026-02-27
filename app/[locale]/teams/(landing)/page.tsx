@@ -52,7 +52,7 @@ export default function TeamPage() {
   ]
 
   return (
-    <UnifiedPageShell className="py-8">
+    <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
       <UnifiedSurface className="mb-6">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
