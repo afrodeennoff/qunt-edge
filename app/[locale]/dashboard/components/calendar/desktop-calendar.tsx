@@ -489,6 +489,15 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
     }, 0)
   }, [calendarData, currentDate])
 
+  const monthMaxMagnitude = useMemo(() => {
+    return Math.max(
+      1,
+      ...Object.entries(calendarData)
+        .filter(([dateString]) => isSameMonth(new Date(dateString), currentDate))
+        .map(([, dayData]) => Math.abs(dayData.pnl))
+    )
+  }, [calendarData, currentDate])
+
   const calculateWeeklyTotal = React.useCallback((index: number, calendarDays: Date[], calendarData: CalendarData) => {
     const startOfWeekIndex = index - 6
     const weekDays = calendarDays.slice(startOfWeekIndex, index + 1)
@@ -562,6 +571,9 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
               <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1 text-semantic-error">
                 Losses: {periodStats.losingDays}
               </span>
+              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1">
+                Avg/Active: {periodStats.activeDays > 0 ? formatCurrency((viewMode === 'daily' ? monthlyTotal : yearTotal) / periodStats.activeDays, { maximumFractionDigits: 0 }) : "$0"}
+              </span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -627,6 +639,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                 const maxProfit = calculations.maxProfit
                 const maxDrawdown = calculations.maxDrawdown
                 const dayPnl = dayData?.pnl ?? 0
+                const pnlIntensity = Math.min(Math.abs(dayPnl) / monthMaxMagnitude, 1)
 
                 return (
                   <React.Fragment key={dateString}>
@@ -646,6 +659,14 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         setSelectedDate(date)
                       }}
                     >
+                      <div
+                        className={cn(
+                          "pointer-events-none absolute inset-0 rounded-lg transition-opacity",
+                          dayPnl > 0 && "bg-semantic-success/20",
+                          dayPnl < 0 && "bg-semantic-error/20"
+                        )}
+                        style={{ opacity: pnlIntensity * 0.8 }}
+                      />
                       <div className="flex items-start justify-between gap-1">
                         <span className={cn(
                           "min-w-[18px] rounded-md border border-border/40 bg-background/65 px-1 py-0.5 text-center text-[10px] font-semibold",
@@ -684,6 +705,15 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         </div>
                         {dayData && (
                           <>
+                            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-background/60">
+                              <div
+                                className={cn(
+                                  "h-full rounded-full",
+                                  dayPnl >= 0 ? "bg-semantic-success/90" : "bg-semantic-error/90"
+                                )}
+                                style={{ width: `${Math.max(10, Math.round(pnlIntensity * 100))}%` }}
+                              />
+                            </div>
                             <div className={cn(
                               "truncate text-center text-[8px] text-muted-foreground",
                               !isCurrentMonth && "opacity-50"

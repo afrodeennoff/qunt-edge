@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, getDay, addDays } from "date-fns"
 import { formatInTimeZone, toDate } from 'date-fns-tz'
 import { fr, enUS } from 'date-fns/locale'
@@ -139,6 +139,18 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
   }
 
   const maxPnl = getMaxPnl()
+  const monthStats = useMemo(() => {
+    let activeDays = 0
+    let wins = 0
+    let losses = 0
+    Object.values(calendarData).forEach((dayData) => {
+      if (!dayData) return
+      if (dayData.tradeNumber > 0) activeDays += 1
+      if (dayData.pnl > 0) wins += 1
+      if (dayData.pnl < 0) losses += 1
+    })
+    return { activeDays, wins, losses }
+  }, [calendarData])
 
   return (
     <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/65 backdrop-blur-xl">
@@ -163,6 +175,11 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+        <div className="mt-2 flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="rounded-md border border-border/50 bg-background/50 px-1.5 py-0.5">Days {monthStats.activeDays}</span>
+          <span className="rounded-md border border-semantic-success-border/40 bg-semantic-success-bg/10 px-1.5 py-0.5 text-semantic-success">W {monthStats.wins}</span>
+          <span className="rounded-md border border-semantic-error-border/40 bg-semantic-error-bg/10 px-1.5 py-0.5 text-semantic-error">L {monthStats.losses}</span>
         </div>
       </div>
       <div className="flex-1 min-h-0 p-2">
@@ -193,10 +210,6 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
               dateInTZ.getMonth() === currentMonth &&
               dateInTZ.getFullYear() === currentYear
 
-            // contribution calculation uses dayData which is already correct
-            const contribution = dayData && monthlyTotal !== 0
-              ? Math.abs(dayData.pnl / monthlyTotal)
-              : 0
             const intensity = maxPnl > 0 ? Math.min(Math.abs(dayData?.pnl ?? 0) / maxPnl, 1) : 0
             const dayPnl = dayData?.pnl ?? 0
 
@@ -213,6 +226,14 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                 )}
                 onClick={() => setSelectedDate(dateInTZ)} // Pass the Date object parsed in the target timezone
               >
+                <div
+                  className={cn(
+                    "pointer-events-none absolute inset-0 rounded-lg",
+                    dayPnl > 0 && "bg-semantic-success/20",
+                    dayPnl < 0 && "bg-semantic-error/20"
+                  )}
+                  style={{ opacity: intensity * 0.8 }}
+                />
                 <div className={cn(
                   "inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/40 bg-background/60 text-xs font-semibold",
                   dayPnl > 0 && "text-semantic-success",
