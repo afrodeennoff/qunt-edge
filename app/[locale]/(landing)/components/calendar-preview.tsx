@@ -50,7 +50,7 @@ function buildDemoCalendarData(): CalendarData {
       shortNumber: shorts,
       // Minimal trade stubs so the preview shows intra-day stats without
       // requiring full trade objects from the dashboard.
-      trades: tradeStubs as unknown as import("@/prisma/generated/prisma").Trade[]
+      trades: tradeStubs as unknown as import("@/lib/data-types").Trade[]
     }
 
     return acc
