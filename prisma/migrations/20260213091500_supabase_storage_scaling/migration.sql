@@ -2,6 +2,29 @@
 -- 1) Add a listing RPC that can leverage indexes for prefix scans.
 -- 2) Add indexes that improve common RLS and listing patterns.
 
+-- Ensure the schema exists for testing environments
+CREATE SCHEMA IF NOT EXISTS storage;
+
+-- Ensure the objects table exists for testing environments
+CREATE TABLE IF NOT EXISTS storage.objects (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text,
+  bucket_id text,
+  owner uuid,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  last_accessed_at timestamptz DEFAULT now(),
+  metadata jsonb
+);
+
+-- Mock function for foldername if it doesn't exist
+CREATE OR REPLACE FUNCTION storage.foldername(name text)
+RETURNS text[]
+LANGUAGE sql
+AS $$
+  SELECT string_to_array(name, '/');
+$$;
+
 create or replace function storage.list_objects(
   bucket_id text,
   prefix text default '',

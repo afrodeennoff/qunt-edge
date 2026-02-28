@@ -100,7 +100,7 @@ export function CreatePost({ children }: Props) {
         form.setValue('screenshots', [...currentScreenshots, base64String])
       }
       reader.readAsDataURL(file)
-    } catch (error) {
+    } catch {
       toast.error(t('community.createPost.error'))
     } finally {
       setIsUploading(false)
@@ -119,7 +119,7 @@ export function CreatePost({ children }: Props) {
       form.reset()
       router.refresh()
       toast.success(t('community.createPost.success'))
-    } catch (error) {
+    } catch {
       toast.error(t('community.createPost.error'))
     }
   }
