@@ -48,7 +48,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
         <div className="flex items-center gap-2">
           <div className={cn(
             "precision-panel p-1.5 rounded-md transition-all duration-500",
-            isPositive ? "bg-white/10 border-white/20" : "bg-white/5 border-white/10"
+            isPositive ? "bg-secondary/30 border-border/65" : "bg-secondary/22 border-border/55"
           )}>
             {isPositive ? (
               <TrendingUp className={cn(iconSize, "metric-positive")} />
@@ -80,10 +80,10 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
         {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 border-dashed">
+      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/55 border-dashed">
         <div className="flex flex-col gap-0.5">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Profits</span>
-          <span className="font-terminal text-[11px] font-bold text-white tabular-nums">{formatCurrency(safeGrossWin)}</span>
+          <span className="font-terminal text-[11px] font-bold text-foreground tabular-nums">{formatCurrency(safeGrossWin)}</span>
         </div>
         <div className="flex flex-col gap-0.5 text-right">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Losses</span>

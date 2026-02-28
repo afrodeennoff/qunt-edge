@@ -119,14 +119,14 @@ export default function TickDistributionChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
-            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("tickDistribution.tooltip.ticks")}</span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">{data.ticks}</span>
+        <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
+            <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("tickDistribution.tooltip.ticks")}</span>
+            <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{data.ticks}</span>
           </div>
           <div className="flex justify-between items-center pt-1.5">
-            <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("tickDistribution.tooltip.trades")}</span>
-            <span className="font-black text-white text-[11px] tabular-nums">
+            <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("tickDistribution.tooltip.trades")}</span>
+            <span className="font-black text-foreground text-[11px] tabular-nums">
               {data.count}
             </span>
           </div>
@@ -140,7 +140,7 @@ export default function TickDistributionChart({
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
         )}
       >
@@ -148,7 +148,7 @@ export default function TickDistributionChart({
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
+                "line-clamp-1 font-bold tracking-tight text-foreground uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -159,7 +159,7 @@ export default function TickDistributionChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-white/20 hover:text-white transition-colors cursor-help",
+                      "text-muted-foreground/70 hover:text-foreground transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
@@ -174,7 +174,7 @@ export default function TickDistributionChart({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-white/40 hover:text-white hover:bg-white/5"
+              className="h-6 px-2 text-[9px] uppercase font-black tracking-widest text-muted-foreground/70 hover:text-foreground hover:bg-secondary/22"
               onClick={() => setTickFilter({ value: null })}
             >
               {t("tickDistribution.clearFilter")}

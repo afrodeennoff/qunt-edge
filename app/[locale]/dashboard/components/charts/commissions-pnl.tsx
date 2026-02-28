@@ -38,17 +38,17 @@ function CommissionsTooltip({
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-        <div className="flex flex-col mb-2 border-b border-white/5 pb-1">
-          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+      <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
+        <div className="flex flex-col mb-2 border-b border-border/55 pb-1">
+          <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
             {t("commissions.tooltip.type")}
           </span>
-          <span className="font-black text-white text-[11px] uppercase tracking-widest">
+          <span className="font-black text-foreground text-[11px] uppercase tracking-widest">
             {data.name}
           </span>
         </div>
         <div className="flex flex-col mb-2">
-          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+          <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
             {t("commissions.tooltip.amount")}
           </span>
           <span className={cn(
@@ -56,11 +56,11 @@ function CommissionsTooltip({
             data.raw >= 0 ? "metric-positive" : "metric-negative"
           )}>{formatCurrency(data.raw)}</span>
         </div>
-        <div className="flex flex-col pt-2 border-t border-white/5">
-          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+        <div className="flex flex-col pt-2 border-t border-border/55">
+          <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
             {t("commissions.tooltip.percentage")}
           </span>
-          <span className="font-black text-white/60 text-[11px]">
+          <span className="font-black text-muted-foreground/85 text-[11px]">
             {data.value.toFixed(2)}%</span>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function CommissionsPnLChart({
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === 'small' ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
         )}
       >
@@ -209,11 +209,11 @@ export default function CommissionsPnLChart({
                 </ResponsiveContainer>
               </div>
               <div className="flex flex-col items-center gap-3 pb-1 pt-2">
-                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-white/58">
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-muted-foreground/85">
                   <span className="h-3 w-3 rounded-full bg-white" />
                   {t("commissions.legend.netPnl")}
                 </span>
-                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-white/58">
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-muted-foreground/85">
                   <span className="h-3 w-3 rounded-full bg-white/35" />
                   {t("commissions.legend.commissions")}
                 </span>

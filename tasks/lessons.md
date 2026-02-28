@@ -35,3 +35,8 @@
 - mistake pattern: Interpreted "zero error" as only merge conflicts first, while CI/runtime checks also needed explicit reconciliation.
 - prevention rule: For "zero error" requests on PRs, treat success as three-part gate: mergeability (no conflicts), required checks green or explained, and local verification summary.
 - early trigger signals: GitHub shows conflict banner plus failing/canceled checks simultaneously.
+
+## 2026-02-28
+- mistake pattern: Changed opacity work in a way that also impacted perceived spacing/gap hierarchy and caused visual regressions outside the requested contrast-only scope.
+- prevention rule: For color/opacity-only requests, explicitly freeze geometry classes (`gap-*`, `p-*`, `m-*`, `h-*`, `w-*`, grid spans) and run a final diff scan to ensure only color/border/text/background token classes changed.
+- early trigger signals: User calls out "gaps" or layout break right after a color-only change request.

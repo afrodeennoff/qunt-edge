@@ -153,7 +153,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
   }, [calendarData])
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/65 backdrop-blur-xl">
+    <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/95 backdrop-blur-xl">
       <div className="shrink-0 border-b border-border/60 p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -168,16 +168,16 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-8 w-8 border-border/60 bg-background/70">
+            <Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-8 w-8 border-border/60 bg-card/92">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-8 w-8 border-border/60 bg-background/70">
+            <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-8 w-8 border-border/60 bg-card/92">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
         <div className="mt-2 flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-          <span className="rounded-md border border-border/50 bg-background/50 px-1.5 py-0.5">Days {monthStats.activeDays}</span>
+          <span className="rounded-md border border-border/55 bg-card/92 px-1.5 py-0.5">Days {monthStats.activeDays}</span>
           <span className="rounded-md border border-semantic-success-border/40 bg-semantic-success-bg/10 px-1.5 py-0.5 text-semantic-success">W {monthStats.wins}</span>
           <span className="rounded-md border border-semantic-error-border/40 bg-semantic-error-bg/10 px-1.5 py-0.5 text-semantic-error">L {monthStats.losses}</span>
         </div>
@@ -185,7 +185,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
       <div className="flex-1 min-h-0 p-2">
         <div className="mb-2 grid grid-cols-7 gap-1">
           {weekdayHeaders.map((day) => (
-            <div key={day.key} className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div key={day.key} className="rounded-md border border-border/55 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
               {day.label}
             </div>
           ))}
@@ -202,7 +202,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
             } catch (e) {
               console.error("Error parsing date string for display:", dateString, e);
               // Render a placeholder or skip if parsing fails
-              return <div key={dateString} className="text-white/40 text-[10px] uppercase font-bold">Error</div>;
+              return <div key={dateString} className="text-muted-foreground/70 text-[10px] uppercase font-bold">Error</div>;
             }
 
             // Determine if the date belongs to the currently displayed month
@@ -218,7 +218,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                 key={dateString} // Key is the timezone-correct date string
                 className={cn(
                   "relative flex cursor-pointer flex-col justify-between rounded-lg border p-1 transition-all",
-                  dayData ? "border-border/50" : "border-border/40 bg-background/50",
+                  dayData ? "border-border/55" : "border-border/55 bg-card/92",
                   dayPnl > 0 && "border-semantic-success-border/40",
                   dayPnl < 0 && "border-semantic-error-border/40",
                   isDateStringToday(dateString, timezone) && "border-primary/70 bg-primary/10",
@@ -235,7 +235,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                   style={{ opacity: intensity * 0.8 }}
                 />
                 <div className={cn(
-                  "inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/40 bg-background/60 text-xs font-semibold",
+                  "inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/55 bg-card/92 text-xs font-semibold",
                   dayPnl > 0 && "text-semantic-success",
                   dayPnl < 0 && "text-semantic-error"
                 )}>
@@ -266,7 +266,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
                       </div>
                     </>
                   ) : (
-                    <div className="truncate text-[10px] text-muted-foreground/60">-</div>
+                    <div className="truncate text-[10px] text-muted-foreground/70">-</div>
                   )}
                 </div>
               </div>

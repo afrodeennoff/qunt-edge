@@ -105,7 +105,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
     }
 
     return (
-        <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/70 backdrop-blur-xl relative group">
+        <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/95 backdrop-blur-xl relative group">
             {/* Background Decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-10" />
 
@@ -115,7 +115,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                         <Brain className="h-4 w-4 text-primary" />
                         {t('widgets.smartInsights.title')}
                     </CardTitle>
-                    <CardDescription className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+                    <CardDescription className="text-[10px] text-muted-foreground/70 uppercase tracking-widest">
                         {t('widgets.smartInsights.tooltip')}
                     </CardDescription>
                 </div>
@@ -135,7 +135,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                     <div className="space-y-3 pt-2">
                         {loading && insights.length === 0 ? (
                             Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/50 bg-secondary/20 p-3">
+                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/55 bg-secondary/20 p-3">
                                     <Skeleton className="h-8 w-8 rounded-full" />
                                     <div className="space-y-2 flex-1">
                                         <Skeleton className="h-4 w-24" />
@@ -152,11 +152,11 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/50 bg-secondary/20 p-3 hover:bg-secondary/30 transition-colors"
+                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/55 bg-secondary/20 p-3 hover:bg-secondary/30 transition-colors"
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-2">
-                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 border border-border/50",
+                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 border border-border/55",
                                                     insight.type === 'risk' && "bg-destructive/20 border-destructive/30",
                                                     insight.type === 'opportunity' && "bg-semantic-warning-bg/10 border-semantic-warning-border/20",
                                                 )}>
@@ -164,13 +164,13 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                                 </div>
                                                 <div>
                                                     <h4 className="text-sm font-medium leading-none">{insight.title}</h4>
-                                                    <span className="text-[10px] text-muted-foreground/60">
+                                                    <span className="text-[10px] text-muted-foreground/70">
                                                         {formatInsightDate(insight.timestamp)}
                                                     </span>
                                                 </div>
                                             </div>
                                             {insight.confidence && (
-                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/20 border-border/50 text-muted-foreground/70">
+                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/20 border-border/55 text-muted-foreground/70">
                                                     {insight.confidence}% Conf.
                                                 </Badge>
                                             )}

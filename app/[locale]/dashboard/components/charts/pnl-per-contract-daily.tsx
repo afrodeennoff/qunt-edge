@@ -153,34 +153,34 @@ export default function PnLPerContractDailyChart({
       const data = payload[0]?.payload as ChartDatum | undefined;
       if (!data) return null;
       return (
-        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[160px]">
-          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
-            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.date")}</span>
-            <span className="font-black text-white/60 text-[10px] uppercase tracking-widest">{data.date}</span>
+        <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[160px]">
+          <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
+            <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.date")}</span>
+            <span className="font-black text-muted-foreground/85 text-[10px] uppercase tracking-widest">{data.date}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.averagePnl")}</span>
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.averagePnl")}</span>
               <span className={cn(
                 "font-black text-[13px] tabular-nums",
                 data.averagePnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.averagePnl)}</span>
             </div>
-            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
-              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.totalPnl")}</span>
-              <span className="font-black text-white/60 text-[10px]">
+            <div className="flex justify-between items-center pt-1.5 border-t border-border/55">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.totalPnl")}</span>
+              <span className="font-black text-muted-foreground/85 text-[10px]">
                 {formatCurrency(data.totalPnl)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.trades")}</span>
-              <span className="font-black text-white/60 text-[10px]">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.trades")}</span>
+              <span className="font-black text-muted-foreground/85 text-[10px]">
                 {data.tradeCount} ({formatWinRate(data.winCount, data.tradeCount)}% WR)
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.totalContracts")}</span>
-              <span className="font-black text-white/60 text-[10px]">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlPerContractDaily.tooltip.totalContracts")}</span>
+              <span className="font-black text-muted-foreground/85 text-[10px]">
                 {data.totalContracts}
               </span>
             </div>
@@ -195,7 +195,7 @@ export default function PnLPerContractDailyChart({
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
         )}
       >
@@ -203,7 +203,7 @@ export default function PnLPerContractDailyChart({
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
+                "line-clamp-1 font-bold tracking-tight text-foreground uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -214,7 +214,7 @@ export default function PnLPerContractDailyChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-white/20 hover:text-white transition-colors cursor-help",
+                      "text-muted-foreground/70 hover:text-foreground transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />
@@ -234,16 +234,16 @@ export default function PnLPerContractDailyChart({
                 className={cn(
                   "w-[120px]",
                   size === "small" ? "h-6 text-[9px]" : "h-8 text-[10px]",
-                  "bg-white/[0.03] border-white/10 text-white font-black uppercase tracking-widest"
+                  "bg-secondary/22 border-border/55 text-foreground font-black uppercase tracking-widest"
                 )}
               >
                 <SelectValue
                   placeholder={t("pnlPerContractDaily.selectInstrument")}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
+              <SelectContent className="bg-card/96 backdrop-blur-xl border-border/55">
                 {availableInstruments.map((instrument) => (
-                  <SelectItem key={instrument} value={instrument} className="text-[10px] font-black uppercase tracking-widest text-white/60 focus:text-white">
+                  <SelectItem key={instrument} value={instrument} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/85 focus:text-foreground">
                     {instrument}
                   </SelectItem>
                 ))}
@@ -421,7 +421,7 @@ export default function PnLPerContractDailyChart({
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full text-white/20 text-[10px] font-black uppercase tracking-widest">
+            <div className="flex items-center justify-center h-full text-muted-foreground/70 text-[10px] font-black uppercase tracking-widest">
               {config.selectedInstrument
                 ? t("pnlPerContractDaily.noData")
                 : t("pnlPerContractDaily.selectInstrument")}

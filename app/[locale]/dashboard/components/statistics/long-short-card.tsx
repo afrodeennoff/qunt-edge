@@ -40,18 +40,18 @@ export default function LongShortPerformanceCard({ size = 'medium' }: LongShortP
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/10 border border-white/20">
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary/30 border border-border/65">
         <ArrowUpFromLine className="h-3 w-3 metric-positive" />
         <span className="font-terminal font-bold text-[11px] tabular-nums metric-positive">{longNumber} ({longRate}%)</span>
       </div>
-      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
+      <div className="precision-panel flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary/22 border border-border/55">
         <ArrowDownFromLine className="h-3 w-3 metric-negative" />
         <span className="font-terminal font-bold text-[11px] tabular-nums metric-negative">{shortNumber} ({shortRate}%)</span>
       </div>
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <HelpCircle className="h-3 w-3 text-white/40 cursor-help" />
+            <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
           </TooltipTrigger>
           <TooltipContent
             side="bottom"

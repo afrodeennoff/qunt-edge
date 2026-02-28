@@ -101,14 +101,14 @@ export default function PnLBySideChart({
       const data = payload[0]?.payload as ChartDatum | undefined;
       if (!data) return null;
       return (
-        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
-            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.side")}</span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">{data.side}</span>
+        <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
+            <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.side")}</span>
+            <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{data.side}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">
                 {data.isAverage ? t("pnlBySide.tooltip.averageTotal") : "Total"} P/L
               </span>
               <span className={cn(
@@ -116,15 +116,15 @@ export default function PnLBySideChart({
                 data.pnl >= 0 ? "metric-positive" : "metric-negative"
               )}>{formatCurrency(data.pnl)}</span>
             </div>
-            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
-              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.winRate")}</span>
-              <span className="font-black text-white/60 text-[11px]">
+            <div className="flex justify-between items-center pt-1.5 border-t border-border/55">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.winRate")}</span>
+              <span className="font-black text-muted-foreground/85 text-[11px]">
                 {formatWinRate(data.winCount, data.tradeCount)}%
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.trades")}</span>
-              <span className="font-black text-white/60 text-[11px]">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("pnlBySide.tooltip.trades")}</span>
+              <span className="font-black text-muted-foreground/85 text-[11px]">
                 {data.tradeCount}
               </span>
             </div>
@@ -139,7 +139,7 @@ export default function PnLBySideChart({
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
         )}
       >

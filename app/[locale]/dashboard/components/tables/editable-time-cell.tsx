@@ -116,26 +116,26 @@ export function EditableTimeCell({
           onChange={(e) => setTempValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="HH:mm:ss"
-          className="h-7 text-xs font-mono border-white/40 focus-visible:ring-1"
+          className="h-7 text-xs font-mono border-border/65 focus-visible:ring-1"
           disabled={isSaving}
         />
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 hover:bg-white/10"
+          className="h-7 w-7 p-0 hover:bg-secondary/30"
           onClick={handleSave}
           disabled={isSaving}
         >
-          <Check className="h-3 w-3 text-white" />
+          <Check className="h-3 w-3 text-foreground" />
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0 hover:bg-white/5"
+          className="h-7 w-7 p-0 hover:bg-secondary/22"
           onClick={handleCancel}
           disabled={isSaving}
         >
-          <X className="h-3 w-3 text-white/40" />
+          <X className="h-3 w-3 text-muted-foreground/70" />
         </Button>
       </div>
     )
@@ -146,7 +146,7 @@ export function EditableTimeCell({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            "group cursor-pointer hover:bg-white/5 rounded px-2 py-1 transition-colors border border-transparent hover:border-white/10",
+            "group cursor-pointer hover:bg-secondary/22 rounded px-2 py-1 transition-colors border border-transparent hover:border-border/55",
             className
           )}
           onClick={() => setIsPopoverOpen(true)}

@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 # Widget Opacity Normalization (2026-02-28)
 
 ## Scope
@@ -92,7 +90,6 @@
   - `npm run typecheck` -> exit `0`.
   - Key output: route type generation succeeded and `tsc --noEmit` completed (re-run after heatmap-intensity pass also exit `0`).
 
->>>>>>> Stashed changes
 # AI Functions Audit (2026-02-26)
 
 # App-Wide Color Contract Remediation (2026-02-26)
@@ -925,3 +922,25 @@
 ## Residual Risks / Open Items
 - Dashboard route budget overages remain unresolved and require a dedicated dashboard code-splitting/perf pass.
 - Some historical PR check statuses in GitHub UI may show stale/canceled runs; latest branch commits are pushed.
+
+# Dashboard Opacity/Contrast Recovery (2026-02-28)
+
+## Scope
+- Restore high-contrast readability across dashboard widgets/charts/calendar/statistics/tables.
+- Restrict changes to opacity/contrast token classes and shared shell surface styles.
+
+## Acceptance Criteria
+- [x] Shared widget/chart shell contrast normalized to high-contrast tiers.
+- [x] Dashboard widget/chart/calendar/statistics/table text/surface/border opacity raised to readability tiers.
+- [x] No behavior/data-flow/layout-geometry changes introduced.
+- [x] Verification commands executed and recorded.
+
+## Plan Checklist
+- [x] Normalize shared shell and global dashboard surface selectors.
+- [x] Apply contrast ladder updates across scoped dashboard component folders.
+- [x] Sweep residual low-opacity classes in scope.
+- [x] Run `npm run typecheck` and targeted eslint on changed files.
+
+## Completion Notes
+- Typecheck: `npm run typecheck` -> exit `0`.
+- Lint: `git diff --name-only -z -- '*.ts' '*.tsx' '*.js' '*.jsx' | xargs -0 -r npx eslint` -> exit `0` with warnings only (`0` errors).

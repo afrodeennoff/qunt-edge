@@ -28,8 +28,8 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
       <div className={cn(
         "precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md",
         isProfitable
-          ? "bg-white/10 border-white/20"
-          : "bg-white/5 border-white/10"
+          ? "bg-secondary/30 border-border/65"
+          : "bg-secondary/22 border-border/55"
       )}>
         <Scale className={cn("h-3 w-3", isProfitable ? "metric-positive" : "metric-negative")} />
         <span className={cn(
@@ -43,7 +43,7 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
             <TooltipTrigger asChild>
               <HelpCircle className={cn(
                 "h-3 w-3 cursor-help",
-                isProfitable ? "text-white/50" : "text-fg-muted/50"
+                isProfitable ? "text-muted-foreground/70" : "text-fg-muted/50"
               )} />
             </TooltipTrigger>
             <TooltipContent

@@ -58,7 +58,7 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <HelpCircle className="h-3 w-3 text-white/40 cursor-help" />
+              <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
             </TooltipTrigger>
             <TooltipContent
               side="bottom"
@@ -76,7 +76,7 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
             <div className="w-full px-4 py-1 cursor-pointer">
               <Progress
                 value={profitPercentage}
-                className="h-1 bg-white/5"
+                className="h-1 bg-secondary/22"
                 indicatorClassName="bg-white chart-positive-emphasis"
               />
             </div>

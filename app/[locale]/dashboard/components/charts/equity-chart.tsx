@@ -310,20 +310,20 @@ const OptimizedTooltip = React.memo(
     });
 
     return (
-      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[160px]">
+      <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[160px]">
         <div className="grid gap-2">
-          <div className="flex justify-between items-center border-b border-white/5 pb-1">
-            <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+          <div className="flex justify-between items-center border-b border-border/55 pb-1">
+            <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
               {t("equity.tooltip.date")}
             </span>
-            <span className="font-black text-white/60 text-[10px] uppercase tracking-widest">
+            <span className="font-black text-muted-foreground/85 text-[10px] uppercase tracking-widest">
               {format(new Date(data.date), "MMM d, yyyy", {
                 locale: dateLocale,
               })}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[8px] uppercase text-white/40 font-black tracking-widest">
+            <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
               {t("equity.tooltip.totalEquity")}
             </span>
             <span className={cn(
@@ -335,8 +335,8 @@ const OptimizedTooltip = React.memo(
           </div>
 
           {resetAccounts.length > 0 && (
-            <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
-              <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            <div className="flex flex-col gap-1.5 pt-1.5 border-t border-border/55">
+              <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
                 {t("equity.tooltip.resets")}
               </span>
               <div className="space-y-1">
@@ -360,8 +360,8 @@ const OptimizedTooltip = React.memo(
           )}
 
           {payoutAccounts.length > 0 && (
-            <div className="flex flex-col gap-1.5 pt-1.5 border-t border-white/5">
-              <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+            <div className="flex flex-col gap-1.5 pt-1.5 border-t border-border/55">
+              <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
                 {t("equity.tooltip.payouts")}
               </span>
               <div className="space-y-1">
@@ -376,12 +376,12 @@ const OptimizedTooltip = React.memo(
                             generateAccountColor(account),
                         }}
                       />
-                      <span className="text-[10px] font-black text-white/70 uppercase tracking-widest leading-none">
+                      <span className="text-[10px] font-black text-foreground/80 uppercase tracking-widest leading-none">
                         {account}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-white tabular-nums">
+                      <span className="text-[10px] font-black text-foreground tabular-nums">
                         {formatCurrency(amount)}
                       </span>
                       <span
@@ -868,7 +868,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center"
         )}
       >
@@ -876,7 +876,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
+                "line-clamp-1 font-bold tracking-tight text-foreground uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base"
               )}
             >
@@ -887,7 +887,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-white/20 hover:text-white transition-colors cursor-help",
+                      "text-muted-foreground/70 hover:text-foreground transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4"
                     )}
                   />

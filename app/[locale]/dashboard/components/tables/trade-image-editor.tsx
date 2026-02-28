@@ -371,7 +371,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                     height={40}
                   />
                   {imageArray.length > 1 && (
-                    <span className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1 rounded">
+                    <span className="absolute bottom-1 right-1 bg-card/92 text-foreground text-xs px-1 rounded">
                       {imageArray.length}
                     </span>
                   )}
@@ -507,7 +507,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                         </div>
                       </TransformComponent>
 
-                      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-lg bg-white/50 backdrop-blur-xs z-50">
+                      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-lg bg-secondary/220 backdrop-blur-xs z-50">
                         <Button
                           variant="ghost"
                           size="icon"

@@ -92,7 +92,7 @@ export default function TimeInPositionChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/90 backdrop-blur-md p-3 border border-white/10 rounded-lg shadow-xl">
+        <div className="bg-card/95 backdrop-blur-md p-3 border border-border/55 rounded-lg shadow-xl">
           <div className="flex flex-col mb-2">
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t("timeInPosition.tooltip.time")}
@@ -109,7 +109,7 @@ export default function TimeInPositionChart({
               {formatTime(data.avgTimeInPosition)}
             </span>
           </div>
-          <div className="flex flex-col pt-2 border-t border-white/5">
+          <div className="flex flex-col pt-2 border-t border-border/55">
             <span className="text-[10px] uppercase text-fg-muted font-bold tracking-wider">
               {t("timeInPosition.tooltip.trades")}
             </span>
@@ -130,7 +130,7 @@ export default function TimeInPositionChart({
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
         )}
       >
