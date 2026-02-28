@@ -39,10 +39,10 @@ export default function ExpectancyWidget({ size }: { size?: string }) {
                         <div className={cn(
                             "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
                             expectancy > 0
-                                ? "bg-white/10 metric-positive border border-white/20"
+                                ? "bg-secondary/30 metric-positive border border-border/60"
                                 : expectancy < 0
-                                    ? "bg-white/5 metric-negative border border-white/10"
-                                    : "bg-white/5 text-fg-muted/50 border border-white/10"
+                                    ? "bg-secondary/20 metric-negative border border-border/50"
+                                    : "bg-secondary/20 text-fg-muted/60 border border-border/50"
                         )}>
                             {expectancy > 0 ? "Positive edge" : expectancy < 0 ? "Negative edge" : "Neutral"}
                         </div>

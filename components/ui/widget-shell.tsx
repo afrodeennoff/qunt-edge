@@ -82,10 +82,10 @@ export function WidgetShell({
   return (
     <Card
       data-widget-shell="v2"
-      className={cn("h-full overflow-hidden rounded-xl border-white/12 bg-black/85 shadow-none", className)}
+      className={cn("h-full overflow-hidden rounded-xl border-border/60 bg-background/95 shadow-none", className)}
     >
       {(title || actions || icon || description) && (
-        <CardHeader className="border-b border-white/10 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <CardHeader className="border-b border-border/50 px-3.5 py-3 sm:px-4 sm:py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               {(title || icon) && (
@@ -126,7 +126,7 @@ export function WidgetShell({
       </CardContent>
 
       {footer ? (
-        <CardFooter className="border-t border-white/10 p-3 sm:p-4">{footer}</CardFooter>
+        <CardFooter className="border-t border-border/50 p-3 sm:p-4">{footer}</CardFooter>
       ) : null}
     </Card>
   )

@@ -1,5 +1,35 @@
 <<<<<<< Updated upstream
 =======
+# Widget Opacity Normalization (2026-02-28)
+
+## Scope
+- Normalize opacity usage across core dashboard widget components.
+- Keep behavior and layout logic unchanged.
+
+## Acceptance Criteria
+- [x] Shared widget shell uses consistent border/background opacity tokens.
+- [x] Core widgets use consistent surface/text opacity levels.
+- [x] Verification passes.
+
+## Plan Checklist
+- [x] Audit opacity usage in widget shell and widget components.
+- [x] Update opacity classes in targeted widget files.
+- [x] Run `npm run typecheck` and record outcome.
+
+## Current Step
+- **Completed:** opacity normalization + verification.
+
+## Completion Notes
+- Updated files:
+  - `components/ui/widget-shell.tsx`
+  - `app/[locale]/dashboard/components/widgets/trading-score-widget.tsx`
+  - `app/[locale]/dashboard/components/widgets/expectancy-widget.tsx`
+  - `app/[locale]/dashboard/components/widgets/risk-metrics-widget.tsx`
+  - `app/[locale]/dashboard/components/widgets/propfirm-catalogue-widget.tsx`
+  - `app/[locale]/dashboard/components/widgets/smart-insights-widget.tsx`
+- Verification:
+  - `npm run typecheck` -> exit `0`.
+
 # Calendar Widget Redesign (PnL Calendar) (2026-02-28)
 
 # Mobile Optimization End-to-End Audit (2026-02-28)
@@ -846,3 +876,52 @@
   - `npm run analyze:bundle` -> exit `0` (artifact updated with same budget overages).
 - Residual risk:
   - Dashboard bundle budget remains above threshold and should be handled in a dedicated perf/code-splitting pass; this is separate from layout gap closure.
+
+---
+
+# Thread Closure: Navbar Parity, PR Conflicts, and Non-Dashboard Spacing (2026-02-27)
+
+## Scope
+- Close user-reported regressions across this thread:
+  - restore dashboard navbar parity with main behavior,
+  - remove GitHub PR merge-conflict blockers,
+  - apply balanced spacing only to non-dashboard pages,
+  - verify end-to-end status.
+
+## Acceptance Criteria
+- [x] Dashboard navbar/layout parity restored and preserved.
+- [x] PR conflict set resolved and branch pushed cleanly.
+- [x] Non-dashboard spacing standardized on requested pages (`/en/propfirms`, `/en/teams`, `/en/pricing`, `/en/support`, and related public pages).
+- [x] Dashboard pages excluded from final spacing scope.
+- [x] End-to-end verification run and reported with explicit pass/fail.
+
+## Plan Checklist
+- [x] Restore and re-verify dashboard navbar shell invariants.
+- [x] Resolve open PR conflict files against latest `origin/main` and push merge commit.
+- [x] Identify and patch remaining non-dashboard spacing outliers.
+- [x] Re-run end-to-end checks and capture residual blockers.
+
+## Completion Notes
+- Dashboard/navbar parity actions:
+  - restored dashboard shell and navigation behavior to main-branch expectations.
+- PR conflict actions:
+  - merged latest `origin/main` into `codex/backend-full-hardening` and resolved listed conflicts.
+  - pushed merge commit: `af56a4e`.
+- CI follow-up action:
+  - added Postgres service + readiness wait to `validate` job in `.github/workflows/ci.yml`.
+  - pushed commit: `4c2c1a0`.
+- Non-dashboard spacing actions:
+  - applied balanced container (`max-w-[1280px]`) to landing/teams pages.
+  - fixed `/en/propfirms` outlier wrapper to `mx-auto w-full max-w-[1280px]`.
+
+## Final Verification Snapshot
+- `npm run typecheck` -> pass.
+- `npm test` -> pass (`150 passed | 46 skipped`).
+- `npm run lint -- --max-warnings=999999` -> pass (`0` errors, warnings-only).
+- `npm run build` -> pass.
+- `npm run check:route-budgets` -> fail (dashboard routes ~`94.76–95.05 KB` > `80 KB` budget).
+- `npm run analyze:bundle` -> pass (artifact updated).
+
+## Residual Risks / Open Items
+- Dashboard route budget overages remain unresolved and require a dedicated dashboard code-splitting/perf pass.
+- Some historical PR check statuses in GitHub UI may show stale/canceled runs; latest branch commits are pushed.

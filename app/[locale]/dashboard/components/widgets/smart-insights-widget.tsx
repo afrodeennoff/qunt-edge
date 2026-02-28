@@ -105,9 +105,9 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
     }
 
     return (
-        <Card className="h-full flex flex-col overflow-hidden border-border bg-card/50 backdrop-blur-xl relative group">
+        <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/70 backdrop-blur-xl relative group">
             {/* Background Decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-10" />
 
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
                 <div className="space-y-1">
@@ -115,7 +115,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                         <Brain className="h-4 w-4 text-primary" />
                         {t('widgets.smartInsights.title')}
                     </CardTitle>
-                    <CardDescription className="text-[10px] text-muted-foreground/70 uppercase tracking-widest">
+                    <CardDescription className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
                         {t('widgets.smartInsights.tooltip')}
                     </CardDescription>
                 </div>
@@ -135,7 +135,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                     <div className="space-y-3 pt-2">
                         {loading && insights.length === 0 ? (
                             Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/50 bg-secondary/10 p-3">
+                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/50 bg-secondary/20 p-3">
                                     <Skeleton className="h-8 w-8 rounded-full" />
                                     <div className="space-y-2 flex-1">
                                         <Skeleton className="h-4 w-24" />
@@ -152,25 +152,25 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/50 bg-secondary/10 p-3 hover:bg-secondary/20 transition-colors"
+                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/50 bg-secondary/20 p-3 hover:bg-secondary/30 transition-colors"
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-2">
-                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/50 border border-border",
-                                                    insight.type === 'risk' && "bg-destructive/10 border-destructive/20",
+                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 border border-border/50",
+                                                    insight.type === 'risk' && "bg-destructive/20 border-destructive/30",
                                                     insight.type === 'opportunity' && "bg-semantic-warning-bg/10 border-semantic-warning-border/20",
                                                 )}>
                                                     {getIcon(insight.type)}
                                                 </div>
                                                 <div>
                                                     <h4 className="text-sm font-medium leading-none">{insight.title}</h4>
-                                                    <span className="text-[10px] text-muted-foreground">
+                                                    <span className="text-[10px] text-muted-foreground/60">
                                                         {formatInsightDate(insight.timestamp)}
                                                     </span>
                                                 </div>
                                             </div>
                                             {insight.confidence && (
-                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/30 border-border text-muted-foreground">
+                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/20 border-border/50 text-muted-foreground/70">
                                                     {insight.confidence}% Conf.
                                                 </Badge>
                                             )}
@@ -197,9 +197,9 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
 
                         {!loading && insights.length === 0 && (
                             <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                                <Brain className="h-8 w-8 mb-2 opacity-20" />
+                                <Brain className="h-8 w-8 mb-2 opacity-30" />
                                 <p className="text-sm">No insights available yet.</p>
-                                <p className="text-xs opacity-50">Trade more to generate data.</p>
+                                <p className="text-xs opacity-60">Trade more to generate data.</p>
                             </div>
                         )}
                     </div>
