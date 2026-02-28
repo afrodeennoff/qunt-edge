@@ -1,7 +1,6 @@
 'use client'
 
 import { useDashboardStats } from "@/context/data-provider"
-import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import {
   Tooltip,
@@ -51,44 +50,60 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
   }, [formattedTrades])
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-2 p-2 bg-transparent">
-      <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md">
-        <Scale className="h-3 w-3 metric-positive" />
-        <span className="font-terminal font-bold text-[11px] uppercase tracking-wider metric-positive">RR {riskRewardRatio}</span>
+    <div className="h-full flex flex-col justify-between gap-2 p-3 bg-transparent">
+      <div className="flex items-center justify-between">
+        <div className="inline-flex items-center gap-1.5 rounded-md border border-border/55 bg-secondary/22 px-2.5 py-1">
+          <Scale className="h-3.5 w-3.5 text-foreground/95" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/85">Risk/Reward</span>
+        </div>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
             </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              sideOffset={5}
-              className="max-w-[300px]"
-            >
+            <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
               {t('widgets.riskRewardRatio.tooltip')}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
-      <TooltipProvider delayDuration={100}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="w-full px-4 py-1 cursor-pointer">
-              <Progress
-                value={profitPercentage}
-                className="h-1 bg-secondary/22"
-                indicatorClassName="bg-white chart-positive-emphasis"
-              />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={5}>
-            <div className="font-terminal text-[10px] font-bold uppercase tracking-tight space-y-1">
-              <div className="metric-positive">Avg. Win: ${avgWin.toFixed(2)}</div>
-              <div className="metric-negative">Avg. Loss: ${avgLoss.toFixed(2)}</div>
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+
+      <div className="flex items-end justify-center gap-2 px-1">
+        <span className="font-terminal text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">RR</span>
+        <span className="font-terminal text-[24px] font-black leading-none tracking-tight text-foreground/95">
+          {riskRewardRatio.toFixed(2)}
+        </span>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground/70">Avg Win</span>
+          <span className="text-foreground/95">${avgWin.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground/70">Avg Loss</span>
+          <span className="text-muted-foreground/85">${avgLoss.toFixed(2)}</span>
+        </div>
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="w-full cursor-pointer">
+                <Progress
+                  value={profitPercentage}
+                  className="h-1.5 bg-secondary/22"
+                  indicatorClassName="bg-white chart-positive-emphasis"
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={5}>
+              <div className="font-terminal text-[10px] font-bold uppercase tracking-tight space-y-1">
+                <div className="metric-positive">Avg. Win: ${avgWin.toFixed(2)}</div>
+                <div className="metric-negative">Avg. Loss: ${avgLoss.toFixed(2)}</div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   )
 } 
