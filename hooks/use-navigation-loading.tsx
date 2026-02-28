@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 
-let loadingState = {
+const loadingState = {
   isLoading: false,
   currentPath: "",
 }

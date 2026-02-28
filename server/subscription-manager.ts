@@ -50,7 +50,7 @@ export class SubscriptionManager {
     metadata?: Record<string, any>
   }): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
     try {
-      const existingSubscription = await prisma.subscription.findUnique({
+      const _existingSubscription = await prisma.subscription.findUnique({
         where: { userId: data.userId },
       })
 

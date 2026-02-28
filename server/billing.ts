@@ -212,7 +212,7 @@ export async function getSubscriptionData() {
   }
 }
 
-export async function updateSubscription(action: 'pause' | 'resume' | 'cancel', subscriptionId: string) {
+export async function updateSubscription(action: 'pause' | 'resume' | 'cancel', _subscriptionId: string) {
   // For Whop, we typically direct users to the billing portal (manage_url)
   // But we can also use the API if needed for direct cancellation
   try {
