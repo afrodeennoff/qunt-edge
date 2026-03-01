@@ -56,14 +56,14 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
       <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
         <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           <Scale className="h-4 w-4 shrink-0 text-foreground/95" />
-          <span className="shrink-0 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground/85">RR</span>
-          <span className="font-terminal shrink-0 text-center text-[24px] font-black leading-none tracking-tight text-foreground/95">
+          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-foreground/80">RR</span>
+          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/95">
             {riskRewardRatio.toFixed(2)}
           </span>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <HelpCircle className="h-4 w-4 shrink-0 cursor-help text-muted-foreground/70" />
+                <HelpCircle className="h-4 w-4 shrink-0 cursor-help text-foreground/80 hover:text-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
                 {t('widgets.riskRewardRatio.tooltip')}
