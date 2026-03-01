@@ -184,7 +184,7 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
           variant="outline"
           className={cn(
             "h-4 px-1.5 text-[8px] sm:text-[9px] font-medium cursor-pointer relative z-0 w-auto justify-center items-center gap-1",
-            "bg-white/5 text-white border-white/10 hover:bg-white/10 dark:bg-white/5 dark:text-white dark:border-white/10 dark:hover:bg-white/15",
+            "bg-secondary/22 text-foreground border-border/55 hover:bg-secondary/30 dark:bg-secondary/22 dark:text-foreground dark:border-border/55 dark:hover:bg-secondary/30",
             "transition-all duration-200 ease-in-out",
             "hover:scale-110 hover:shadow-md",
             "active:scale-95"
@@ -196,7 +196,7 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
         </Badge>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[320px] sm:w-[380px] md:w-[420px] max-w-[90vw] p-0 z-50 border shadow-lg bg-black/90 backdrop-blur-xl border-white/10"
+        className="w-[320px] sm:w-[380px] md:w-[420px] max-w-[90vw] p-0 z-50 border shadow-lg bg-card/96 backdrop-blur-xl border-border/55"
         align="start"
         side="right"
         sideOffset={8}
@@ -205,12 +205,12 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
         <div className="p-4 sm:p-6">
           {/* Header */}
           <div className="flex items-center gap-2 mb-4 sm:mb-6">
-            <div className="p-2 rounded-lg bg-white/5">
-              <Calendar className="h-4 w-4 text-white" />
+            <div className="p-2 rounded-lg bg-secondary/22">
+              <Calendar className="h-4 w-4 text-foreground" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-sm sm:text-base text-white truncate">{t('propFirm.renewal.title')}</h3>
-              <p className="text-xs text-white/50">{renewals.length} {renewals.length === 1 ? t('propFirm.renewal.account') : t('propFirm.renewal.accounts')}</p>
+              <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">{t('propFirm.renewal.title')}</h3>
+              <p className="text-xs text-muted-foreground/70">{renewals.length} {renewals.length === 1 ? t('propFirm.renewal.account') : t('propFirm.renewal.accounts')}</p>
             </div>
           </div>
 
@@ -219,7 +219,7 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
             {renewals.map((account, index) => (
               <div
                 key={account.id}
-                className="group relative p-3 sm:p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-200 hover:shadow-xs"
+                className="group relative p-3 sm:p-4 rounded-lg border border-border/55 bg-secondary/22 hover:bg-secondary/30 hover:border-border/55 transition-all duration-200 hover:shadow-xs"
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3">
                   {/* Account Info */}
@@ -227,17 +227,17 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                       {account.propfirm ? (
                         <>
-                          <div className="font-semibold text-sm text-white truncate">
+                          <div className="font-semibold text-sm text-foreground truncate">
                             {account.propfirm}
                           </div>
-                          <div className="text-xs text-white/60 bg-white/5 px-2 py-0.5 rounded-full inline-block w-fit">
+                          <div className="text-xs text-muted-foreground/85 bg-secondary/22 px-2 py-0.5 rounded-full inline-block w-fit">
                             <span className="block" title={account.number}>
                               {truncateAccountNumber(account.number, 12)}
                             </span>
                           </div>
                         </>
                       ) : (
-                        <div className="font-semibold text-sm text-white">
+                        <div className="font-semibold text-sm text-foreground">
                           <span className="block" title={account.number}>
                             {truncateAccountNumber(account.number, 18)}
                           </span>
@@ -245,12 +245,12 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-white/50">
-                      <div className="px-2 py-1 bg-white/5 text-white/80 rounded-md font-medium whitespace-nowrap border border-white/5">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-muted-foreground/70">
+                      <div className="px-2 py-1 bg-secondary/22 text-foreground/80 rounded-md font-medium whitespace-nowrap border border-border/55">
                         {account.paymentFrequency?.toLowerCase()} {t('propFirm.renewal.frequency')}
                       </div>
                       {account.autoRenewal && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-white/10 text-white rounded-md whitespace-nowrap border border-white/10">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-secondary/30 text-foreground rounded-md whitespace-nowrap border border-border/55">
                           <div className="w-1.5 h-1.5 bg-white rounded-full shrink-0 animate-pulse"></div>
                           <span className="text-xs font-medium">{t('propFirm.renewal.notification')}</span>
                         </div>
@@ -260,10 +260,10 @@ function RenewalBadge({ renewals }: { renewals: Account[] }) {
 
                   {/* Price */}
                   <div className="text-left sm:text-right shrink-0">
-                    <div className="font-bold text-base sm:text-lg text-white mb-1">
+                    <div className="font-bold text-base sm:text-lg text-foreground mb-1">
                       {account.price != null && formatCurrency(account.price, { maximumFractionDigits: 2 })}
                     </div>
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-muted-foreground/70">
                       {account.paymentFrequency?.toLowerCase()}
                     </div>
                   </div>
@@ -534,7 +534,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
   }, [calendarData, currentDate, viewMode])
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/65 backdrop-blur-xl">
+    <Card className="h-full flex flex-col overflow-hidden border-border/60 bg-card/95 backdrop-blur-xl">
       <CardHeader
         className="shrink-0 border-b border-border/60 px-4 py-3 sm:px-5 sm:py-4"
       >
@@ -559,19 +559,19 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
               {formatCurrency(viewMode === 'daily' ? monthlyTotal : yearTotal)}
             </div>
             <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1">
+              <span className="rounded-md border border-border/55 bg-card/92 px-2 py-1">
                 Active Days: {periodStats.activeDays}
               </span>
-              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1">
+              <span className="rounded-md border border-border/55 bg-card/92 px-2 py-1">
                 Trades: {periodStats.totalTrades}
               </span>
-              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1 text-semantic-success">
+              <span className="rounded-md border border-border/55 bg-card/92 px-2 py-1 text-semantic-success">
                 Wins: {periodStats.winningDays}
               </span>
-              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1 text-semantic-error">
+              <span className="rounded-md border border-border/55 bg-card/92 px-2 py-1 text-semantic-error">
                 Losses: {periodStats.losingDays}
               </span>
-              <span className="rounded-md border border-border/40 bg-background/50 px-2 py-1">
+              <span className="rounded-md border border-border/55 bg-card/92 px-2 py-1">
                 Avg/Active: {periodStats.activeDays > 0 ? formatCurrency((viewMode === 'daily' ? monthlyTotal : yearTotal) / periodStats.activeDays, { maximumFractionDigits: 0 }) : "$0"}
               </span>
             </div>
@@ -582,7 +582,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                 variant="outline"
                 size="icon"
                 onClick={() => viewMode === 'daily' ? handlePrevMonth() : setCurrentDate(new Date(getYear(currentDate) - 1, 0, 1))}
-                className="h-8 w-8 border-border/60 bg-background/70 hover:bg-secondary/50"
+                className="h-8 w-8 border-border/60 bg-card/92 hover:bg-secondary/50"
                 aria-label={viewMode === 'daily' ? "Previous month" : "Previous year"}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -591,7 +591,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                 variant="outline"
                 size="icon"
                 onClick={() => viewMode === 'daily' ? handleNextMonth() : setCurrentDate(new Date(getYear(currentDate) + 1, 0, 1))}
-                className="h-8 w-8 border-border/60 bg-background/70 hover:bg-secondary/50"
+                className="h-8 w-8 border-border/60 bg-card/92 hover:bg-secondary/50"
                 aria-label={viewMode === 'daily' ? "Next month" : "Next year"}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -618,11 +618,11 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
           <>
             <div className="mb-2 grid grid-cols-8 gap-1">
               {WEEKDAYS.map((day) => (
-                <div key={day} className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+                <div key={day} className="rounded-md border border-border/55 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
                   {translateWeekday(t, day)}
                 </div>
               ))}
-              <div className="rounded-md border border-border/40 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+              <div className="rounded-md border border-border/55 bg-secondary/30 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
                 {t('calendar.weekdays.weekly')}
               </div>
             </div>
@@ -647,7 +647,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                       className={cn(
                         "group relative h-full cursor-pointer overflow-hidden rounded-lg border p-2 transition-all duration-200",
                         "hover:-translate-y-[1px] hover:shadow-md",
-                        !dayData && "bg-card/80 border-border/50",
+                        !dayData && "bg-card/92 border-border/55",
                         dayPnl > 0 && "bg-semantic-success-bg/10 border-semantic-success-border/30",
                         dayPnl < 0 && "bg-semantic-error-bg/10 border-semantic-error-border/30",
                         !isCurrentMonth && "opacity-45",
@@ -669,7 +669,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                       />
                       <div className="flex items-start justify-between gap-1">
                         <span className={cn(
-                          "min-w-[18px] rounded-md border border-border/40 bg-background/65 px-1 py-0.5 text-center text-[10px] font-semibold",
+                          "min-w-[18px] rounded-md border border-border/55 bg-card/92 px-1 py-0.5 text-center text-[10px] font-semibold",
                           isToday(date) && "text-primary font-semibold",
                           !isCurrentMonth && "opacity-60"
                         )}>
@@ -705,7 +705,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                         </div>
                         {dayData && (
                           <>
-                            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-background/60">
+                            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-card/92">
                               <div
                                 className={cn(
                                   "h-full rounded-full",
@@ -735,7 +735,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                       return (
                         <div
                           className={cn(
-                            "flex h-full cursor-pointer items-center justify-center rounded-lg border border-border/50 bg-background/70 px-1 transition-all",
+                            "flex h-full cursor-pointer items-center justify-center rounded-lg border border-border/55 bg-card/92 px-1 transition-all",
                             "hover:bg-secondary/50 hover:border-primary/40",
                             index === 6 && "rounded-tr-xl",
                             index === 41 && "rounded-br-xl"

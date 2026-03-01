@@ -90,19 +90,19 @@ export default function ContractQuantityChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-          <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-1">
-            <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
-            <span className="font-black text-white text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
+        <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
+          <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
+            <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
+            <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.totalContracts")}</span>
-              <span className="font-black text-white text-[11px] tabular-nums">{data.totalQuantity}</span>
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.totalContracts")}</span>
+              <span className="font-black text-foreground text-[11px] tabular-nums">{data.totalQuantity}</span>
             </div>
-            <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
-              <span className="text-white/20 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.numberOfTrades")}</span>
-              <span className="font-black text-white/60 text-[11px]">
+            <div className="flex justify-between items-center pt-1.5 border-t border-border/55">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.numberOfTrades")}</span>
+              <span className="font-black text-muted-foreground/85 text-[11px]">
                 {data.tradeCount}
               </span>
             </div>
@@ -117,7 +117,7 @@ export default function ContractQuantityChart({
     <ChartSurface>
       <div
         className={cn(
-          "flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0",
+          "flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0",
           size === "small" ? "p-2 h-10 justify-center" : "p-3 sm:p-3.5 h-12 justify-center",
         )}
       >
@@ -125,7 +125,7 @@ export default function ContractQuantityChart({
           <div className="flex items-center gap-1.5">
             <CardTitle
               className={cn(
-                "line-clamp-1 font-bold tracking-tight text-white uppercase tracking-widest",
+                "line-clamp-1 font-bold tracking-tight text-foreground uppercase tracking-widest",
                 size === "small" ? "text-sm" : "text-base",
               )}
             >
@@ -136,7 +136,7 @@ export default function ContractQuantityChart({
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      "text-white/20 hover:text-white transition-colors cursor-help",
+                      "text-muted-foreground/70 hover:text-foreground transition-colors cursor-help",
                       size === "small" ? "h-3.5 w-3.5" : "h-4 w-4",
                     )}
                   />

@@ -153,20 +153,20 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
                     onChange={(e) => handleUrlChange(e.target.value)}
                     className={cn(
                       "pr-8",
-                      !isValid && draftUrl && "border-white/20 focus-visible:ring-white/20",
+                      !isValid && draftUrl && "border-border/65 focus-visible:ring-white/20",
                       showSuccess && "border-white focus-visible:ring-white",
-                      isUpdating && "border-white/50"
+                      isUpdating && "border-border/65"
                     )}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {isUpdating && (
                       <div className="h-4 w-4">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-r-transparent" />
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-border/65 border-r-transparent" />
                       </div>
                     )}
                     {showSuccess && !isUpdating && (
                       <svg
-                        className="h-4 w-4 text-white"
+                        className="h-4 w-4 text-foreground"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         stroke="currentColor"
@@ -182,7 +182,7 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
                     )}
                     {!isValid && draftUrl && !isUpdating && (
                       <svg
-                        className="h-4 w-4 text-white/30"
+                        className="h-4 w-4 text-muted-foreground/55"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         stroke="currentColor"
@@ -203,13 +203,13 @@ export function TradeVideoUrl({ tradeIds, videoUrl: initialVideoUrl, onVideoUrlC
                   size="icon"
                   disabled={isUpdating || !draftUrl}
                   onClick={handleClear}
-                  className="shrink-0 text-white/40 hover:text-white"
+                  className="shrink-0 text-muted-foreground/70 hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
               {!isValid && draftUrl && (
-                <p className="text-xs font-mono uppercase tracking-widest text-white/40">
+                <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground/70">
                   {t('trade-table.invalidVideoUrl')}
                 </p>
               )}

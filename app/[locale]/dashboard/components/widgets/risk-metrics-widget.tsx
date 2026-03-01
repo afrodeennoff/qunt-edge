@@ -52,26 +52,26 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                 <div className="grid h-full grid-cols-2">
                     {/* Return Risk Ratios */}
                     <div className={cn(
-                        "flex flex-col border-r border-b border-white/10",
+                        "flex flex-col border-r border-b border-border/50",
                         size === 'tiny' ? "p-1.5" : "p-4"
                     )}>
                         <h3 className="text-[11px] font-medium tracking-tight mb-3 text-fg-muted">Ratios</h3>
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-muted text-xs">Sharpe</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSharpeRatio > 1 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSharpeRatio > 1 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-foreground/60 bg-secondary/20 border border-border/50")}>
                                     {safeSharpeRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-muted text-xs">Sortino</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSortinoRatio > 1.5 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSortinoRatio > 1.5 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-foreground/60 bg-secondary/20 border border-border/50")}>
                                     {safeSortinoRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-fg-muted text-xs">Calmar</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeCalmarRatio > 1 ? "text-white bg-white/10 border border-white/20" : "text-white/40 bg-white/5 border border-white/10")}>
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeCalmarRatio > 1 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-foreground/60 bg-secondary/20 border border-border/50")}>
                                     {safeCalmarRatio.toFixed(2)}
                                 </span>
                             </div>
@@ -80,7 +80,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
 
                     {/* Position Sizing */}
                     <div className={cn(
-                        "flex flex-col border-b border-white/10",
+                        "flex flex-col border-b border-border/50",
                         size === 'tiny' ? "p-1.5" : "p-4"
                     )}>
                         <h3 className="text-[11px] font-medium tracking-tight mb-3 text-fg-muted">Position sizing</h3>
@@ -113,13 +113,13 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                     )}>
                         <div className="flex justify-between items-end mb-2">
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold font-mono tracking-tight tabular-nums text-white/90">
+                                <span className="text-xl font-bold font-mono tracking-tight tabular-nums text-foreground/90">
                                     {formatCurrency(safeMaxDrawdown)}
                                 </span>
                             </div>
                         </div>
-                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                            <div className="h-full bg-white/40 w-full" />
+                        <div className="w-full h-1 bg-secondary/20 rounded-full overflow-hidden">
+                            <div className="h-full bg-foreground/40 w-full" />
                         </div>
                     </div>
                 </div>

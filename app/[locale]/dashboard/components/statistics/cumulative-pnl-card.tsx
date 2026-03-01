@@ -41,6 +41,38 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
 
   const valueSizeClass = size === 'tiny' ? 'text-lg' : 'text-2xl'
   const iconSize = size === 'tiny' ? 'h-4 w-4' : 'h-5 w-5'
+  const isCompact = size === 'tiny' || size === 'small' || size === 'small-long'
+
+  if (isCompact) {
+    return (
+      <div className="h-full flex items-center justify-center p-2 bg-transparent">
+        <div className={cn(
+          "precision-panel flex w-full max-w-full items-center gap-2 rounded-md px-3 py-1.5",
+          isPositive ? "bg-secondary/30 border-border/65" : "bg-secondary/22 border-border/55"
+        )}>
+          {isPositive ? (
+            <TrendingUp className="h-3.5 w-3.5 shrink-0 metric-positive" />
+          ) : (
+            <TrendingDown className="h-3.5 w-3.5 shrink-0 metric-negative" />
+          )}
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/85">Net</span>
+          <span className={cn("font-terminal min-w-0 flex-1 truncate text-right text-[16px] font-black leading-none tracking-tight", isPositive ? "metric-positive" : "metric-negative")}>
+            {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
+          </span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 shrink-0 text-fg-muted cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
+                {t('widgets.cumulativePnl.tooltip')}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full flex flex-col justify-center gap-3 p-4 bg-transparent relative">
@@ -48,7 +80,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
         <div className="flex items-center gap-2">
           <div className={cn(
             "precision-panel p-1.5 rounded-md transition-all duration-500",
-            isPositive ? "bg-white/10 border-white/20" : "bg-white/5 border-white/10"
+            isPositive ? "bg-secondary/30 border-border/65" : "bg-secondary/22 border-border/55"
           )}>
             {isPositive ? (
               <TrendingUp className={cn(iconSize, "metric-positive")} />
@@ -80,10 +112,10 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
         {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 border-dashed">
+      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/55 border-dashed">
         <div className="flex flex-col gap-0.5">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Profits</span>
-          <span className="font-terminal text-[11px] font-bold text-white tabular-nums">{formatCurrency(safeGrossWin)}</span>
+          <span className="font-terminal text-[11px] font-bold text-foreground tabular-nums">{formatCurrency(safeGrossWin)}</span>
         </div>
         <div className="flex flex-col gap-0.5 text-right">
           <span className="text-[9px] font-bold uppercase tracking-tight text-fg-muted">Losses</span>

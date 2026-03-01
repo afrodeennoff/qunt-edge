@@ -77,20 +77,20 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     if (!data) return null
 
     return (
-      <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl min-w-[140px]">
-        <div className="flex flex-col mb-1 border-b border-white/5 pb-1">
-          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+      <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
+        <div className="flex flex-col mb-1 border-b border-border/55 pb-1">
+          <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
             {t('tradeDistribution.tooltip.type')}
           </span>
-          <span className="font-black text-white text-[11px] uppercase tracking-widest">
+          <span className="font-black text-foreground text-[11px] uppercase tracking-widest">
             {data.name}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-[8px] uppercase text-white/20 font-black tracking-widest">
+          <span className="text-[8px] uppercase text-muted-foreground/70 font-black tracking-widest">
             {t('tradeDistribution.tooltip.percentage')}
           </span>
-          <span className={cn('font-black text-sm tabular-nums', data.count > 0 ? 'text-white' : 'text-white/45')}>
+          <span className={cn('font-black text-sm tabular-nums', data.count > 0 ? 'text-foreground' : 'text-muted-foreground/55')}>
             {data.value.toFixed(2)}%
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     <ChartSurface>
       <div
         className={cn(
-          'flex flex-col items-stretch space-y-0 border-b border-white/5 shrink-0',
+          'flex flex-col items-stretch space-y-0 border-b border-border/55 shrink-0',
           size === 'small' ? 'p-2 h-10 justify-center' : 'p-3 sm:p-3.5 h-12 justify-center'
         )}
       >
@@ -110,7 +110,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                'line-clamp-1 font-bold tracking-tight text-white',
+                'line-clamp-1 font-bold tracking-tight text-foreground',
                 size === 'small' ? 'text-sm' : 'text-base'
               )}
             >
@@ -121,7 +121,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                 <TooltipTrigger asChild>
                   <Info
                     className={cn(
-                      'text-white/20 hover:text-white transition-colors cursor-help',
+                      'text-muted-foreground/70 hover:text-foreground transition-colors cursor-help',
                       size === 'small' ? 'h-3.5 w-3.5' : 'h-4 w-4'
                     )}
                   />
@@ -187,7 +187,7 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                     className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em]"
                   >
                     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span className="text-white/58">{entry.name}</span>
+                    <span className="text-muted-foreground/85">{entry.name}</span>
                   </div>
                 ))}
               </div>
