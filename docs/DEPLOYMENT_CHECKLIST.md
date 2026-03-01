@@ -15,6 +15,8 @@
 - [ ] All secrets configured in Vercel Dashboard > Settings > Environment Variables
 - [ ] `ENCRYPTION_KEY` is at least 32 characters, randomly generated
 - [ ] `CRON_SECRET` is unique and at least 20 characters
+- [ ] `HEALTHCHECK_SECRET` is unique and at least 20 characters
+- [ ] `WELCOME_WEBHOOK_SECRET` is unique and at least 20 characters
 - [ ] `WHOP_WEBHOOK_SECRET` is configured for production
 - [ ] `UNSUBSCRIBE_TOKEN_SECRET` is at least 32 characters
 
@@ -30,6 +32,7 @@
 ### 3. Authentication ✅
 
 - [ ] Supabase Auth configured with production URLs
+- [ ] Supabase leaked password protection enabled
 - [ ] OAuth redirect URLs point to production domain
 - [ ] Email templates configured in Supabase Dashboard
 - [ ] Magic link email sender configured (Resend API key set)
@@ -47,6 +50,7 @@
 ### 5. Security Headers ✅
 
 - [ ] `middleware.ts` deployed (CSP, CORS, HSTS, X-Frame-Options)
+- [ ] `CSP_REPORT_ONLY=false` in production unless temporary rollout window is active
 - [ ] `next.config.ts` security headers confirmed (no-cache for API routes)
 - [ ] `poweredByHeader: false` in Next.js config
 - [ ] CORS allowlist updated with production domain

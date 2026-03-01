@@ -114,7 +114,7 @@ export async function POST(req: Request) {
     return handleWhopTeamCheckout(user, websiteURL, locale, teamName || undefined);
 }
 
-export async function GET(req: Request) {
+export async function GET() {
     return NextResponse.json(
         { error: "Method Not Allowed", code: "METHOD_NOT_ALLOWED" },
         { status: 405, headers: { Allow: "POST" } },

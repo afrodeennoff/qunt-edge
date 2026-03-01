@@ -9,3 +9,6 @@
 - 2026-03-01: CSP builder omits `upgrade-insecure-requests` when `CSP_REPORT_ONLY` mode is active to prevent recurring browser console report-only warnings.
 - 2026-03-01: Next config now sets `turbopack.root` and `outputFileTracingRoot` to project root for consistent root detection during local dev/build audits.
 - 2026-03-01: Landing/auth readability audits should prioritize route-impacting regressions first (navigation/locale/link correctness), then contrast/typography issues that materially affect legibility.
+- 2026-03-01: Checkout creation endpoints now enforce POST-only semantics; GET returns `405` with `Allow: POST` for `/api/whop/checkout` and `/api/whop/checkout-team`.
+- 2026-03-01: Browser-initiated checkout mutations now enforce trusted-origin and form content-type checks before processing request payloads.
+- 2026-03-01: Supabase security posture now explicitly forces RLS and deny-by-default policies on `AiRequestLog`, `AuthAttempt`, `OAuthState`, `RecoveryCode`, `ReferralRedemption`, and `TraderBenchmarkSnapshot` with `service_role_all` carve-out.

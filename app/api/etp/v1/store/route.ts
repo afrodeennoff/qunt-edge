@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
       message: `${createdOrders.length} orders stored successfully` 
     }, { status: 200 });
     
-  } catch (error) {
+  } catch {
     return jsonError(500, "INTERNAL_ERROR", "Failed to store orders", requestId)
   }
 }
@@ -258,7 +258,7 @@ export async function GET(req: NextRequest) {
       }
     }, { status: 200 });
     
-  } catch (error) {
+  } catch {
     return jsonError(500, "INTERNAL_ERROR", "Failed to retrieve orders", requestId)
   }
 }
@@ -286,7 +286,7 @@ export async function DELETE(req: NextRequest) {
       message: `${result.count} orders deleted successfully`
     }, { status: 200 });
     
-  } catch (error) {
+  } catch {
     return jsonError(500, "INTERNAL_ERROR", "Failed to delete orders", requestId)
   }
 } 

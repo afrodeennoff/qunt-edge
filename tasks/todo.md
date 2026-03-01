@@ -1,3 +1,46 @@
+# Bank-Grade Security Remediation Implementation (2026-03-01)
+
+## Scope
+- Execute the approved bank-grade hardening campaign end-to-end across middleware, API handlers, and Supabase policy posture.
+
+## Acceptance Criteria
+- [x] Broad API GET public caching removed in favor of explicit allowlist behavior.
+- [x] Open redirect risk reduced via strict internal redirect path handling.
+- [x] Side-effecting checkout GET endpoints removed (POST-only).
+- [x] High-risk API routes avoid internal error detail leakage in client responses.
+- [x] Supabase RLS force/policy gaps closed for flagged tables and advisor rechecked.
+
+## Plan Checklist
+- [x] Harden middleware cache + redirect + CSP defaults.
+- [x] Harden checkout endpoints for HTTP semantics + CSRF/content-type checks.
+- [x] Standardize error envelope in high-risk ingestion APIs (`thor`, `etp`).
+- [x] Apply Supabase migration for force-RLS + explicit deny/service policies.
+- [x] Run verification gates and capture evidence.
+
+## Current Step
+- **Completed:** implementation + verification finished.
+
+## Completion Notes
+- Code updates (security-relevant):
+  - `.env.example`: added `HEALTHCHECK_SECRET`, `WELCOME_WEBHOOK_SECRET`, CSP env guidance defaults.
+  - `app/api/whop/checkout/route.ts`: POST-only checkout creation; trusted-origin + content-type checks; GET returns 405.
+  - `app/api/whop/checkout-team/route.ts`: POST-only team-checkout creation; trusted-origin + content-type checks; GET returns 405.
+  - `app/api/etp/v1/store/route.ts`: request-id based safe error envelope, removed internal error detail leakage.
+  - `docs/DEPLOYMENT_CHECKLIST.md`: added security controls for secrets and enforced CSP expectation.
+- Database migration applied:
+  - `bank_grade_rls_force_and_internal_policy_alignment`
+  - Forced RLS and explicit policies added on:
+    - `AiRequestLog`, `AuthAttempt`, `OAuthState`, `RecoveryCode`, `ReferralRedemption`, `TraderBenchmarkSnapshot`
+  - Revoked broad `anon`/`authenticated` privileges on these internal tables.
+- Verification evidence:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npx eslint <touched security files>` -> exit `0` with warnings only (no errors).
+  - `npm run -s build` -> exit `0`.
+  - `npm run -s check:route-budgets` -> exit `0`.
+  - `npm run -s analyze:bundle` -> exit `0` (artifact refreshed).
+  - Supabase advisor security check -> only remaining warning: leaked password protection disabled.
+  - Supabase SQL checks confirm `relforcerowsecurity=true` and explicit policies on all six flagged tables.
+
 # Security + DB Isolation Audit (2026-03-01)
 
 ## Scope
