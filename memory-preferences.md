@@ -7,3 +7,4 @@
 - 2026-03-01: User prefers all compact RR metric elements to be fully centered as a single aligned group.
 - 2026-03-01: User wants compact RR to visually match the existing compact widget style used by other dashboard widgets.
 - 2026-03-01: User prefers RR compact styling to match similar compact statistic widgets exactly.
+- 2026-03-01: User prefers full end-to-end audits across the entire page surface with automated verification rather than partial route checks.

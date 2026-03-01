@@ -12,5 +12,8 @@
 - Updated compact RR again to match the shared compact widget visual pattern (`precision-panel`) while preserving centered alignment and larger metric text.
 - Finalized compact RR to exactly mirror the same compact-stat widget structure/classes used by similar widgets.
 - Completed a focused `/strategies` audit and identified high-impact trade-update consistency and table-accuracy issues with command-backed evidence.
+- Completed an end-to-end page-surface audit (public + protected/admin/team entry routes) with Playwright route sweeps and static verification gates.
+- Fixed a hydration defect by removing nested button markup in the unified sidebar header (`SidebarTrigger` moved outside `SidebarMenuButton`), then re-verified `/en/teams/join` and `/en/teams/manage`.
+- Captured remaining risk: dashboard route-budget violations (~95 KB vs 80 KB target) still failing `check:route-budgets`.
 - Mapped all dashboard pages/flows reusing `TradeTableReview` and confirmed shared issue propagation beyond `/strategies` (table tab, data/trades tab, calendar modal table, widget table, import processor table).
 - Implemented shared trade-table consistency fixes across server action + provider + table UI: hard-fail update path with rollback signaling, raw-trade footer counts, and row expandability alignment, then verified via typecheck and targeted eslint.

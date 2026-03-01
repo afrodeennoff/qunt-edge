@@ -189,16 +189,21 @@ export function UnifiedSidebar({
       <SidebarHeader className="border-b border-sidebar-border/30 h-14 flex flex-col justify-center px-2 py-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="pointer-events-auto transition-colors group">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                <Logo className="size-5 fill-current" />
-              </div>
-              <div className="flex flex-col gap-0.5 leading-none px-1 overflow-hidden">
-                <span className="truncate font-bold tracking-tight text-sm uppercase">Qunt Edge</span>
-                <span className="truncate text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-medium">Workspace</span>
-              </div>
-              <SidebarTrigger className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex h-6 w-6" />
-            </SidebarMenuButton>
+            <div className="flex items-center gap-2">
+              <SidebarMenuButton size="lg" className="pointer-events-auto transition-colors group flex-1">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+                  <Logo className="size-5 fill-current" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none px-1 overflow-hidden">
+                  <span className="truncate font-bold tracking-tight text-sm uppercase">Qunt Edge</span>
+                  <span className="truncate text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-medium">Workspace</span>
+                </div>
+              </SidebarMenuButton>
+              <SidebarTrigger
+                className="opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex h-6 w-6"
+                aria-label="Toggle sidebar"
+              />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

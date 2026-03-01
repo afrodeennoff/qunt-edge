@@ -4,28 +4,39 @@
 - Audit the entire page surface end to end (public, auth, dashboard/teams/admin entrypoints) for runtime failures, navigation breakage, console/network errors, and major regressions.
 
 ## Acceptance Criteria
-- [ ] Static quality gates run with recorded evidence.
-- [ ] Public page routes are browser-audited with console/network checks.
-- [ ] Protected routes are checked for expected redirect/auth behavior.
-- [ ] Findings are prioritized by severity with file-level references.
-- [ ] Re-verification is captured for any in-scope fix.
+- [x] Static quality gates run with recorded evidence.
+- [x] Public page routes are browser-audited with console/network checks.
+- [x] Protected routes are checked for expected redirect/auth behavior.
+- [x] Findings are prioritized by severity with file-level references.
+- [x] Re-verification is captured for any in-scope fix.
 
 ## Plan Checklist
 - [x] Create task plan and inventory route/page targets.
-- [ ] Run static quality gates and collect evidence.
-- [ ] Run browser E2E route audit pass with artifacts.
-- [ ] Triage findings and implement minimal scoped fixes if clear.
-- [ ] Re-run affected checks and document final results.
+- [x] Run static quality gates and collect evidence.
+- [x] Run browser E2E route audit pass with artifacts.
+- [x] Triage findings and implement minimal scoped fixes if clear.
+- [x] Re-run affected checks and document final results.
 
 ## Current Step
-- **In progress:** static quality gates and baseline capture.
+- **Completed:** end-to-end page audit, scoped fix, and re-verification.
 
 ## Progress Notes
 - 2026-03-01: Loaded and applied `playwright` and `verification-before-completion` skills for this audit.
 - 2026-03-01: Inventory identified 46 page routes under `app/[locale]/**/page.tsx` to audit.
+- 2026-03-01: Static checks run (`npm run -s typecheck`, `npm run -s build`, `npm run -s check:route-budgets`, `npm run -s analyze:bundle`).
+- 2026-03-01: Playwright route sweeps completed across public pages plus protected/admin/team routes.
+- 2026-03-01: Identified and fixed nested `<button>` hydration defect in sidebar header by moving `SidebarTrigger` out of `SidebarMenuButton`.
 
 ## Completion Notes
-- Pending.
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npm run -s build` -> exit `0`.
+  - `npm run -s check:route-budgets` -> exit `1` (dashboard app-route client payload budget violations remain).
+  - `npm run -s analyze:bundle` -> exit `0`.
+  - `npx eslint components/ui/unified-sidebar.tsx` -> exit `0` (warnings only).
+  - Playwright recheck:
+    - `/en/teams/join` -> nested button/hydration errors no longer present.
+    - `/en/teams/manage` -> nested button/hydration errors no longer present.
 
 # Shared Trade Table Consistency Fix (2026-03-01)
 
