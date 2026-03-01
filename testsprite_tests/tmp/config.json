@@ -1,8 +1,8 @@
 {
   "status": "init",
-  "type": "backend",
+  "type": "frontend",
   "scope": "codebase",
-  "localEndpoint": "http://localhost:3001",
+  "localEndpoint": "http://localhost:3001/en",
   "backendAuthType": "basic token",
   "backendUsername": "xapis30734@hutudns.com ",
   "backendPassword": "12345678",

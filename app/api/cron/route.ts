@@ -24,18 +24,33 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_R
   }
 }
 
-export async function GET(req: Request) {
-  if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is missing')
-    return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
-  }
-  const resend = new Resend(process.env.RESEND_API_KEY)
-
+export async function GET() {
   try {
-    // Verify that this is a legitimate Vercel cron job request
+    // Fail with auth errors first so unauthorized calls don't get masked by config errors.
     const headersList = await headers()
     const authHeader = headersList.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json(
+        { error: 'Missing authorization header', code: 'UNAUTHORIZED' },
+        { status: 401 },
+      )
+    }
+    if (!process.env.CRON_SECRET) {
+      return NextResponse.json(
+        { error: 'Service not configured', code: 'CRON_SECRET_MISSING' },
+        { status: 503 },
+      )
+    }
     requireServiceAuth(authHeader, { serviceName: 'cron' })
+
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is missing')
+      return NextResponse.json(
+        { error: 'Service not configured', code: 'RESEND_API_KEY_MISSING' },
+        { status: 503 },
+      )
+    }
+    const resend = new Resend(process.env.RESEND_API_KEY)
 
     // Get all users with newsletter enabled
     const usersWithNewsletter = await prisma.newsletter.findMany({

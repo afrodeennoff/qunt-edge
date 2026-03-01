@@ -434,6 +434,7 @@ export default function ImportButton() {
       <Button
         onClick={() => setIsOpen(true)}
         variant="outline"
+        data-testid="dashboard-import-trigger"
         className={cn("gap-2 flex border-border hover:bg-accent/50 bg-background/50 backdrop-blur-sm group h-10 items-center px-3 md:px-4 w-auto justify-center")}
         id="import-data"
         onMouseEnter={() => uploadIconRef.current?.startAnimation()}

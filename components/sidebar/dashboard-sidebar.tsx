@@ -42,6 +42,7 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             href: `/${locale}/dashboard`, // Matches widgets by default in our new mapping
             icon: <LayoutDashboard className="size-4" />,
             label: "Dashboard",
+            testId: "nav-dashboard",
             group: "Overview",
             exact: true
         },
@@ -49,6 +50,7 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             href: `/${locale}/dashboard?tab=table`,
             icon: <TrendingUp className="size-4" />,
             label: "Trades",
+            testId: "nav-trades",
             group: "Trading"
         },
         {
@@ -73,12 +75,14 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             href: `/${locale}/dashboard/strategies`,
             icon: <BookOpen className="size-4" />,
             label: "Trade Desk",
+            testId: "nav-trade-desk",
             group: "Trading"
         },
         {
             href: `/${locale}/dashboard/reports`,
             icon: <BarChart3 className="size-4" />,
             label: "Reports",
+            testId: "nav-reports",
             group: "Analytics"
         },
         {
@@ -103,6 +107,7 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             href: `/${locale}/dashboard/data`,
             icon: <Database className="size-4" />,
             label: "Data",
+            testId: "nav-data",
             group: "System"
         },
         {
@@ -115,12 +120,14 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             href: `/${locale}/dashboard/billing`,
             icon: <CreditCard className="size-4" />,
             label: "Billing",
+            testId: "nav-billing",
             group: "System"
         },
         {
             href: `/${locale}/dashboard/settings`,
             icon: <Settings className="size-4" />,
             label: "Settings",
+            testId: "nav-settings",
             group: "System"
         },
         ...(isAdmin ? [{

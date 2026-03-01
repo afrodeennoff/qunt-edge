@@ -40,6 +40,7 @@ export interface UnifiedSidebarItem {
   href?: string
   icon: React.ReactNode
   label: string
+  testId?: string
   i18nKey?: string
   action?: () => void
   badge?: React.ReactNode
@@ -238,6 +239,7 @@ export function UnifiedSidebar({
                         {href ? (
                           <Link
                             href={href}
+                            data-testid={item.testId}
                             prefetch={false}
                             onClick={() => {
                               if (debugCache) {
@@ -264,7 +266,7 @@ export function UnifiedSidebar({
                             <span className="ml-3 truncate">{label}</span>
                           </Link>
                         ) : (
-                          <div className="flex items-center w-full">
+                          <div className="flex items-center w-full" data-testid={item.testId}>
                             <span className="shrink-0">{item.icon}</span>
                             <span className="ml-3 truncate">{label}</span>
                           </div>

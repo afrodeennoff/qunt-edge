@@ -52,7 +52,10 @@ export async function POST(req: Request) {
 
       if (!process.env.RESEND_API_KEY) {
         logger.error("[WelcomeWebhook] RESEND_API_KEY is missing")
-        return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Service not configured', code: 'RESEND_API_KEY_MISSING' },
+          { status: 503 },
+        )
       }
       const resend = new Resend(process.env.RESEND_API_KEY)
 

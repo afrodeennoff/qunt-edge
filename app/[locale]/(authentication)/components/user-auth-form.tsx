@@ -417,6 +417,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     </TabsTrigger>
                     <TabsTrigger
                         value="password"
+                        data-testid="auth-password-tab"
                         className="relative h-9 rounded-lg text-xs font-semibold text-zinc-300 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
                     >
                         <span className="truncate">{t('auth.tabs.password')}</span>
@@ -558,6 +559,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                         <FormControl>
                                             <Input
                                                 id="email_password"
+                                                data-testid="auth-email-input"
                                                 placeholder={t('auth.emailPlaceholder')}
                                                 type="email"
                                                 autoCapitalize="none"
@@ -581,6 +583,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                         <FormControl>
                                             <Input
                                                 id="password_login"
+                                                data-testid="auth-password-input"
                                                 placeholder={t('auth.passwordPlaceholder')}
                                                 type="password"
                                                 autoComplete="current-password"
@@ -596,6 +599,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             <Button
                                 disabled={isLoading}
                                 type="submit"
+                                data-testid="auth-password-submit"
                                 className="h-11 rounded-xl bg-white font-semibold text-black shadow-sm hover:bg-zinc-200"
                             >
                                 {isLoading && authMethod === 'email' && (

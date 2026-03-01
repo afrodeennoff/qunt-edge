@@ -24,6 +24,7 @@
     "loadtest:k6": "k6 run scripts/loadtest/k6-smoke.js",
     "check:route-budgets": "node scripts/check-route-budgets.mjs",
     "check:color-contract": "node scripts/check-color-contract.mjs",
+    "testsprite:preflight": "node scripts/testsprite-preflight.mjs",
     "analyze:bundle": "node scripts/analyze-bundle.mjs",
     "perf:verify": "npm run check:route-budgets && npm run analyze:bundle",
     "postinstall": "prisma generate",

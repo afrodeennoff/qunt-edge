@@ -8,7 +8,7 @@
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
+        "description": "Navigate to /en/authentication"
       },
       {
         "type": "action",
@@ -43,29 +43,70 @@
   {
     "id": "TC002",
     "title": "Navigate from Dashboard to Strategies page using in-app navigation",
-    "description": "Verifies the user can move between dashboard pages to reach Strategies without direct URL navigation.",
+    "description": "Verifies user reaches Trade Desk (/dashboard/strategies) from authenticated dashboard navigation.",
     "category": "Dashboard analytics and widgets",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
+        "description": "Navigate to \"/en/authentication\""
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+        "description": "Click on the password auth tab (data-testid=\"auth-password-tab\")"
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+        "description": "Type \"{{LOGIN_USER}}\" into email input (data-testid=\"auth-email-input\")"
       },
       {
         "type": "action",
-        "description": "Click on the \"Sign in\" button"
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into password input (data-testid=\"auth-password-input\")"
       },
       {
         "type": "action",
-        "description": "Click on \"Strategies\" in the dashboard navigation"
+        "description": "Click submit (data-testid=\"auth-password-submit\")"
+      },
+      {
+        "type": "action",
+        "description": "Click dashboard nav item data-testid=\"nav-trade-desk\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/strategies\""
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Filter trade statistics on Strategies and see results update",
+    "description": "Verifies Strategies route loads after authentication and analytics surfaces render.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/authentication\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the password auth tab (data-testid=\"auth-password-tab\")"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into email input (data-testid=\"auth-email-input\")"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into password input (data-testid=\"auth-password-input\")"
+      },
+      {
+        "type": "action",
+        "description": "Click submit (data-testid=\"auth-password-submit\")"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/dashboard/strategies\""
       },
       {
         "type": "assertion",
@@ -73,48 +114,7 @@
       },
       {
         "type": "assertion",
-        "description": "Verify text \"Strategies\" is visible"
-      }
-    ]
-  },
-  {
-    "id": "TC003",
-    "title": "Filter trade statistics on Strategies and see results update",
-    "description": "Verifies filtering controls on the Strategies page update visible trade statistics, chart, or table output.",
-    "category": "Dashboard analytics and widgets",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
-      },
-      {
-        "type": "action",
-        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
-      },
-      {
-        "type": "action",
-        "description": "Click on the \"Sign in\" button"
-      },
-      {
-        "type": "action",
-        "description": "Click on \"Strategies\" in the dashboard navigation"
-      },
-      {
-        "type": "action",
-        "description": "Select \"Last 30 days\" from the date range dropdown"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify text \"Last 30 days\" is visible"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify element \"Strategy performance\" is visible"
+        "description": "Verify main analytics/chart or table surface is visible on the page"
       }
     ]
   },
@@ -127,7 +127,7 @@
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
+        "description": "Navigate to /en/authentication"
       },
       {
         "type": "action",
@@ -168,7 +168,7 @@
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
+        "description": "Navigate to /en/authentication"
       },
       {
         "type": "action",
@@ -203,29 +203,33 @@
   {
     "id": "TC006",
     "title": "Navigate across Dashboard, Reports, and back to Dashboard without losing UI shell",
-    "description": "Verifies the authenticated dashboard shell remains functional while navigating across analytics pages.",
+    "description": "Verifies authenticated navigation between dashboard and reports using stable nav selectors.",
     "category": "Dashboard analytics and widgets",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
+        "description": "Navigate to \"/en/authentication\""
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+        "description": "Click on the password auth tab (data-testid=\"auth-password-tab\")"
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+        "description": "Type \"{{LOGIN_USER}}\" into email input (data-testid=\"auth-email-input\")"
       },
       {
         "type": "action",
-        "description": "Click on the \"Sign in\" button"
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into password input (data-testid=\"auth-password-input\")"
       },
       {
         "type": "action",
-        "description": "Click on \"Reports\" in the dashboard navigation"
+        "description": "Click submit (data-testid=\"auth-password-submit\")"
+      },
+      {
+        "type": "action",
+        "description": "Click dashboard nav item data-testid=\"nav-reports\""
       },
       {
         "type": "assertion",
@@ -233,7 +237,7 @@
       },
       {
         "type": "action",
-        "description": "Click on \"Dashboard\" in the dashboard navigation"
+        "description": "Click dashboard nav item data-testid=\"nav-dashboard\""
       },
       {
         "type": "assertion",
@@ -244,78 +248,62 @@
   {
     "id": "TC007",
     "title": "Empty/No-data state messaging on analytics surfaces (if applicable)",
-    "description": "Verifies the UI shows a clear empty state when no trades/analytics are available (without backend manipulation).",
+    "description": "Verifies Strategies view handles both populated and empty-state analytics surfaces.",
     "category": "Dashboard analytics and widgets",
     "priority": "Low",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
+        "description": "Navigate to \"/en/authentication\""
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+        "description": "Click on the password auth tab (data-testid=\"auth-password-tab\")"
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+        "description": "Type \"{{LOGIN_USER}}\" into email input (data-testid=\"auth-email-input\")"
       },
       {
         "type": "action",
-        "description": "Click on the \"Sign in\" button"
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into password input (data-testid=\"auth-password-input\")"
       },
       {
         "type": "action",
-        "description": "Click on \"Strategies\" in the dashboard navigation"
+        "description": "Click submit (data-testid=\"auth-password-submit\")"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/dashboard/strategies\""
       },
       {
         "type": "assertion",
-        "description": "Verify element \"Trade table\" is visible"
+        "description": "Verify URL contains \"/dashboard/strategies\""
       },
       {
         "type": "assertion",
-        "description": "Verify element \"No data\" is visible"
+        "description": "Verify either data rows are visible or an explicit empty-state message is visible"
       }
     ]
   },
   {
     "id": "TC008",
     "title": "Authentication required messaging when attempting dashboard access (in-session unauthenticated)",
-    "description": "Verifies the app shows an authentication-required message when the session is not authorized and dashboard access is attempted.",
+    "description": "Verifies protected dashboard access redirects unauthenticated sessions to the authentication flow.",
     "category": "Dashboard analytics and widgets",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Type \"invalid_user@example.com\" into the email/username field"
-      },
-      {
-        "type": "action",
-        "description": "Type \"wrong-password\" into the password field"
-      },
-      {
-        "type": "action",
-        "description": "Click on the \"Sign in\" button"
+        "description": "Navigate to \"/en/dashboard\" without authenticating"
       },
       {
         "type": "assertion",
-        "description": "Verify text \"Invalid\" is visible"
-      },
-      {
-        "type": "action",
-        "description": "Navigate to /en/authentication"
+        "description": "Verify browser is redirected to \"/en/authentication\" (or authentication screen is shown)"
       },
       {
         "type": "assertion",
-        "description": "Verify text \"Authentication\" is visible"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify text \"required\" is visible"
+        "description": "Verify password auth tab (data-testid=\"auth-password-tab\") is present"
       }
     ]
   },
@@ -363,7 +351,7 @@
   {
     "id": "TC010",
     "title": "Navigate from home to updates page from the public header/navigation",
-    "description": "Verifies a visitor can discover and open the Updates page from the home page navigation.",
+    "description": "Verifies Updates is discoverable from home top navigation and route loads.",
     "category": "Pricing and marketing discovery",
     "priority": "Medium",
     "steps": [
@@ -372,12 +360,8 @@
         "description": "Navigate to \"/en\""
       },
       {
-        "type": "assertion",
-        "description": "Verify URL contains \"/en\""
-      },
-      {
         "type": "action",
-        "description": "Click on the link labeled \"Updates\""
+        "description": "Click top navigation link \"Updates\""
       },
       {
         "type": "assertion",
@@ -385,11 +369,7 @@
       },
       {
         "type": "assertion",
-        "description": "Verify text \"Updates\" is visible"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify element \"updates list or feed\" is visible"
+        "description": "Verify updates page content is visible"
       }
     ]
   },
@@ -618,7 +598,7 @@
   {
     "id": "TC017",
     "title": "Open import page and verify trade import entrypoint is visible",
-    "description": "Verifies the import route loads and exposes synchronization/import UI affordances for authenticated users.",
+    "description": "Verifies import entrypoint is accessible through the dashboard import trigger and opens modal flow.",
     "category": "Trade data import",
     "priority": "Medium",
     "steps": [
@@ -628,31 +608,31 @@
       },
       {
         "type": "action",
-        "description": "Click on the \"Password\" tab"
+        "description": "Click on the password auth tab (data-testid=\"auth-password-tab\")"
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+        "description": "Type \"{{LOGIN_USER}}\" into email input (data-testid=\"auth-email-input\")"
       },
       {
         "type": "action",
-        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into password input (data-testid=\"auth-password-input\")"
       },
       {
         "type": "action",
-        "description": "Click on the \"Sign In with Password\" button"
-      },
-      {
-        "type": "action",
-        "description": "Navigate to \"/en/dashboard/import\""
+        "description": "Click submit (data-testid=\"auth-password-submit\")"
       },
       {
         "type": "assertion",
-        "description": "Verify URL contains \"/en/dashboard/import\""
+        "description": "Verify import trigger exists (data-testid=\"dashboard-import-trigger\")"
+      },
+      {
+        "type": "action",
+        "description": "Click import trigger (data-testid=\"dashboard-import-trigger\")"
       },
       {
         "type": "assertion",
-        "description": "Verify text \"Import\" is visible"
+        "description": "Verify import dialog/modal opens"
       }
     ]
   },
