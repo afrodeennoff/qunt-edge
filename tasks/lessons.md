@@ -40,3 +40,8 @@
 - mistake pattern: Changed opacity work in a way that also impacted perceived spacing/gap hierarchy and caused visual regressions outside the requested contrast-only scope.
 - prevention rule: For color/opacity-only requests, explicitly freeze geometry classes (`gap-*`, `p-*`, `m-*`, `h-*`, `w-*`, grid spans) and run a final diff scan to ensure only color/border/text/background token classes changed.
 - early trigger signals: User calls out "gaps" or layout break right after a color-only change request.
+
+## 2026-03-01
+- mistake pattern: Drifted from the user’s explicitly approved compact RR style by reintroducing the shared `precision-panel` pattern after they had asked for a single centered row.
+- prevention rule: When the user confirms a specific visual spec ("this exact version"), treat it as locked and only apply edits that preserve that exact structure until they request a change.
+- early trigger signals: User repeats "same as before/exactly this" and references concrete class-level outcomes (size, centering, single-row/no card).

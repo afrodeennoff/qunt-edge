@@ -5,3 +5,9 @@
 - Implemented fixes for mobile dialog accessibility metadata and non-Vercel analytics script failures.
 - Confirmed unresolved performance risks remain: dashboard route bundle budget overruns and Lighthouse mobile/desktop threshold failures.
 - Implemented full dashboard opacity/contrast recovery sweep across shared shells, widgets, charts, calendar, statistics, and table surfaces with typecheck passing and lint warnings-only.
+
+## 2026-03-01
+- Updated the compact `RiskRewardRatioCard` styling to remove nested/double-card appearance and render a single centered RR metric row with larger value typography.
+- Followed up with a full-center alignment pass so the compact RR icon/label/value/help cluster is centered as one unit.
+- Updated compact RR again to match the shared compact widget visual pattern (`precision-panel`) while preserving centered alignment and larger metric text.
+- Finalized compact RR to exactly mirror the same compact-stat widget structure/classes used by similar widgets.

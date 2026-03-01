@@ -45,24 +45,21 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
 
   if (isCompact) {
     return (
-      <div className="h-full flex items-center justify-center p-2 bg-transparent">
-        <div className={cn(
-          "precision-panel flex w-full max-w-full items-center gap-2 rounded-md px-3 py-1.5",
-          isPositive ? "bg-secondary/30 border-border/65" : "bg-secondary/22 border-border/55"
-        )}>
+      <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
+        <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           {isPositive ? (
-            <TrendingUp className="h-3.5 w-3.5 shrink-0 metric-positive" />
+            <TrendingUp className="h-4 w-4 shrink-0 metric-positive" />
           ) : (
-            <TrendingDown className="h-3.5 w-3.5 shrink-0 metric-negative" />
+            <TrendingDown className="h-4 w-4 shrink-0 metric-negative" />
           )}
-          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/85">Net</span>
-          <span className={cn("font-terminal min-w-0 flex-1 truncate text-right text-[16px] font-black leading-none tracking-tight", isPositive ? "metric-positive" : "metric-negative")}>
+          <span className="shrink-0 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Net</span>
+          <span className={cn("font-terminal shrink-0 text-center text-[18px] font-black leading-none tracking-tight", isPositive ? "metric-positive" : "metric-negative")}>
             {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
           </span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3.5 w-3.5 shrink-0 text-fg-muted cursor-help" />
+                <Info className="h-4 w-4 shrink-0 text-fg-muted cursor-help" />
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
                 {t('widgets.cumulativePnl.tooltip')}

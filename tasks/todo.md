@@ -1,5 +1,31 @@
 # Widget Opacity Normalization (2026-02-28)
 
+# Compact RR Widget Cleanup (2026-03-01)
+
+## Scope
+- Make compact Risk/Reward widget visually centered, slightly larger, and single-surface (no nested/double card).
+
+## Acceptance Criteria
+- [x] Compact RR content is centered in the widget.
+- [x] RR value typography is larger than prior compact version.
+- [x] Nested inner panel chrome is removed.
+- [x] Verification passes.
+
+## Plan Checklist
+- [x] Locate compact RR widget render branch.
+- [x] Replace nested panel markup with single centered row.
+- [x] Run focused verification and record result.
+
+## Current Step
+- **Completed:** compact RR widget cleanup + verification.
+
+## Completion Notes
+- Verification:
+  - `npm run typecheck` -> exit `0`.
+- 2026-03-01 follow-up: refined compact RR alignment to full-center using an `inline-flex` centered cluster (`mx-auto`) so all metric elements remain centered as one group.
+- 2026-03-01 follow-up: aligned compact RR with shared compact-widget visual style using `precision-panel` while keeping centered layout and larger RR value.
+- 2026-03-01 final follow-up: adjusted RR compact classes to match similar compact statistic widgets exactly (`p-2` wrapper, `w-full` precision-panel row, compact icon/label/value sizing).
+
 ## Scope
 - Normalize opacity usage across core dashboard widget components.
 - Keep behavior and layout logic unchanged.
