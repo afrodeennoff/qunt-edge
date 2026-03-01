@@ -19,7 +19,10 @@ export default async function PostPage(props: Props) {
       getPost(params.id),
       getComments(params.id),
     ])
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === "__POST_NOT_FOUND__") {
+      notFound()
+    }
     notFound()
   }
 

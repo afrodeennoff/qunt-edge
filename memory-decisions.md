@@ -5,3 +5,6 @@
 - 2026-02-28: Dashboard contrast recovery uses a strict ladder: primary `text-foreground`/`text-foreground/95`, secondary `text-muted-foreground/85`, helper `text-muted-foreground/70`, tertiary `text-muted-foreground/55`, with card/border floors aligned to `bg-card/92+` and `border-border/55+`.
 - 2026-03-01: Compact Risk/Reward widget is standardized to a single centered presentation with larger metric text and no nested inner card chrome.
 - 2026-03-01: Sidebar header trigger in `components/ui/unified-sidebar.tsx` is now rendered as a sibling of `SidebarMenuButton` to avoid invalid nested button markup and hydration failures on teams pages.
+- 2026-03-01: Dashboard header now lazy-loads heavy action modules (`filters`, `import`, `share`, `sync`, `daily summary`, widget controls) to keep dashboard-family app-route manifests under the 80 KB budget.
+- 2026-03-01: CSP builder omits `upgrade-insecure-requests` when `CSP_REPORT_ONLY` mode is active to prevent recurring browser console report-only warnings.
+- 2026-03-01: Next config now sets `turbopack.root` and `outputFileTracingRoot` to project root for consistent root detection during local dev/build audits.

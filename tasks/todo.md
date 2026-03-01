@@ -26,17 +26,24 @@
 - 2026-03-01: Static checks run (`npm run -s typecheck`, `npm run -s build`, `npm run -s check:route-budgets`, `npm run -s analyze:bundle`).
 - 2026-03-01: Playwright route sweeps completed across public pages plus protected/admin/team routes.
 - 2026-03-01: Identified and fixed nested `<button>` hydration defect in sidebar header by moving `SidebarTrigger` out of `SidebarMenuButton`.
+- 2026-03-01: Fixed community missing-post flow to preserve expected not-found path without noisy error logging.
+- 2026-03-01: Removed CSP report-only warning noise by applying `upgrade-insecure-requests` only in enforcing CSP mode.
+- 2026-03-01: Reduced dashboard app-route client manifest size by dynamically loading heavy dashboard-header action modules and removing dashboard-context dependency on `widget-registry`.
+- 2026-03-01: Added dev root alignment (`turbopack.root`, `outputFileTracingRoot`) to reduce root ambiguity during local audits.
 
 ## Completion Notes
 - Verification:
   - `npm run -s typecheck` -> exit `0`.
   - `npm run -s build` -> exit `0`.
-  - `npm run -s check:route-budgets` -> exit `1` (dashboard app-route client payload budget violations remain).
+  - `npm run -s check:route-budgets` -> exit `0` (dashboard-family routes now within `80 KB` budget).
   - `npm run -s analyze:bundle` -> exit `0`.
-  - `npx eslint components/ui/unified-sidebar.tsx` -> exit `0` (warnings only).
-  - Playwright recheck:
-    - `/en/teams/join` -> nested button/hydration errors no longer present.
-    - `/en/teams/manage` -> nested button/hydration errors no longer present.
+  - `npx eslint components/ui/unified-sidebar.tsx app/[locale]/(landing)/actions/community.ts app/[locale]/(landing)/community/post/[id]/page.tsx tests/sidebar-trigger-contract.test.ts` -> exit `0` (warnings only).
+  - `npm test -- --run tests/sidebar-trigger-contract.test.ts` -> exit `0` (`3` tests passed).
+  - Playwright checks:
+    - Redirect behavior confirmed for `/en/dashboard*`, `/en/admin`, `/en/teams/dashboard` -> localized auth redirect with `next` param.
+    - `/en/teams/join` and `/en/teams/manage` -> no nested-button/hydration errors.
+    - `/en/community/post/non-existent` -> no `Failed to fetch post` console spam in browser check.
+    - 32-route sequential crawl completed without navigation failure in `next dev`.
 
 # Shared Trade Table Consistency Fix (2026-03-01)
 

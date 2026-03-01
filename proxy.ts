@@ -463,7 +463,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   if (cspEnabled) {
-    const appCsp = buildAppCsp({ nonce, isDev, strictMode: cspStrictMode })
+    const appCsp = buildAppCsp({ nonce, isDev, strictMode: cspStrictMode, reportOnly: cspReportOnly })
     setCspHeader(response, appCsp, cspReportOnly)
   }
 

@@ -2,6 +2,7 @@ type AppCspOptions = {
   nonce: string;
   isDev: boolean;
   strictMode: boolean;
+  reportOnly: boolean;
 };
 
 const PROD_CONNECT_SOURCES = [
@@ -34,7 +35,7 @@ function normalizeSources(sources: string[]): string {
   return Array.from(new Set(sources)).join(" ");
 }
 
-export function buildAppCsp({ nonce, isDev, strictMode }: AppCspOptions): string {
+export function buildAppCsp({ nonce, isDev, strictMode, reportOnly }: AppCspOptions): string {
   const connectSources = isDev ? DEV_CONNECT_SOURCES : PROD_CONNECT_SOURCES;
   const scriptSources = strictMode
     ? [`'self'`, `'nonce-${nonce}'`]
@@ -51,7 +52,7 @@ export function buildAppCsp({ nonce, isDev, strictMode }: AppCspOptions): string
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
-    "upgrade-insecure-requests",
+    ...(reportOnly ? [] : ["upgrade-insecure-requests"]),
   ];
 
   return directives.join("; ");

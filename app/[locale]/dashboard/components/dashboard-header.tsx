@@ -5,18 +5,11 @@ import React from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useDashboard } from '@/app/[locale]/dashboard/dashboard-context';
-import { AddWidgetSheet } from '@/app/[locale]/dashboard/components/add-widget-sheet';
 import { cn } from '@/lib/utils';
-import { FilterCommandMenu } from './filters/filter-command-menu';
-import ImportButton from './import/import-button';
-import { DailySummaryModal } from './daily-summary-modal';
-import { ShareButton } from './share-button';
-import { GlobalSyncButton } from './global-sync-button';
 import { useI18n } from '@/locales/client';
 import { useDashboardActions, useDashboardFilters } from '@/context/data-provider';
-import { ActiveFilterTags } from './filters/active-filter-tags';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import dynamic from 'next/dynamic';
 import {
     CloudUpload,
     CheckCircle2,
@@ -36,6 +29,32 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+
+const AddWidgetSheet = dynamic(
+    () => import('@/app/[locale]/dashboard/components/add-widget-sheet').then((m) => m.AddWidgetSheet),
+    { ssr: false }
+)
+const FilterCommandMenu = dynamic(
+    () => import('./filters/filter-command-menu').then((m) => m.FilterCommandMenu),
+    { ssr: false }
+)
+const ImportButton = dynamic(() => import('./import/import-button'), { ssr: false })
+const DailySummaryModal = dynamic(
+    () => import('./daily-summary-modal').then((m) => m.DailySummaryModal),
+    { ssr: false }
+)
+const ShareButton = dynamic(
+    () => import('./share-button').then((m) => m.ShareButton),
+    { ssr: false }
+)
+const GlobalSyncButton = dynamic(
+    () => import('./global-sync-button').then((m) => m.GlobalSyncButton),
+    { ssr: false }
+)
+const ActiveFilterTags = dynamic(
+    () => import('./filters/active-filter-tags').then((m) => m.ActiveFilterTags),
+    { ssr: false }
+)
 
 export function DashboardHeader() {
     const pathname = usePathname();
@@ -195,28 +214,20 @@ export function DashboardHeader() {
                                         : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                                 )}
                             >
-                                <motion.div
-                                    animate={{ rotate: isCustomizing ? 180 : 0 }}
-                                    transition={{ duration: 0.3 }}
-                                >
+                                <div className={cn("transition-transform duration-300", isCustomizing && "rotate-180")}>
                                     {isCustomizing ? (
                                         <CheckCircle2 className="h-4 w-4" />
                                     ) : (
                                         <Sparkles className="h-4 w-4" />
                                     )}
-                                </motion.div>
+                                </div>
                                 <span className={cn("text-[10px] font-bold uppercase tracking-widest", isMobile && "sr-only")}>
                                     {isCustomizing ? t('widgets.done') : t('widgets.edit')}
                                 </span>
                             </button>
 
                             {isCustomizing && (
-                                <motion.div
-                                    initial={isMobile ? false : { width: 0, opacity: 0, scale: 0.9 }}
-                                    animate={isMobile ? undefined : { width: 'auto', opacity: 1, scale: 1 }}
-                                    exit={isMobile ? undefined : { width: 0, opacity: 0, scale: 0.9 }}
-                                    className="flex items-center gap-1.5"
-                                >
+                                <div className="flex items-center gap-1.5">
                                     <div className="h-4 w-px bg-border/50 mx-0.5" />
                                     <AddWidgetSheet
                                         onAddWidget={addWidget}
@@ -308,7 +319,7 @@ export function DashboardHeader() {
                                             <CheckCircle2 className="w-4 h-4 text-white" />
                                         </div>
                                     )}
-                                </motion.div>
+                                </div>
                             )}
 
                             {!isMobile && (
@@ -333,20 +344,13 @@ export function DashboardHeader() {
                         </div>
                     )
                 ) : (
-                    <AnimatePresence>
-                        {hasActiveFilters && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="relative px-4 pb-3 pt-1 sm:px-8"
-                            >
-                                <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
-                                    <ActiveFilterTags showAccountNumbers={true} />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    hasActiveFilters && (
+                        <div className="relative px-4 pb-3 pt-1 sm:px-8">
+                            <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                                <ActiveFilterTags showAccountNumbers={true} />
+                            </div>
+                        </div>
+                    )
                 )
             }
         </header>

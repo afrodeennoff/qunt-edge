@@ -15,5 +15,8 @@
 - Completed an end-to-end page-surface audit (public + protected/admin/team entry routes) with Playwright route sweeps and static verification gates.
 - Fixed a hydration defect by removing nested button markup in the unified sidebar header (`SidebarTrigger` moved outside `SidebarMenuButton`), then re-verified `/en/teams/join` and `/en/teams/manage`.
 - Captured remaining risk: dashboard route-budget violations (~95 KB vs 80 KB target) still failing `check:route-budgets`.
+- Implemented complete remediation pass: community missing-post no longer emits noisy generic error logs, CSP report-only warning noise removed, and dev root config aligned.
+- Reduced dashboard app-route manifests from ~85 KB to ~52-55 KB by removing heavy dashboard-context coupling and dynamically loading non-critical dashboard-header modules; route-budget gate now passes.
+- Re-verified with `typecheck`, `build`, `check:route-budgets`, `analyze:bundle`, focused lint/tests, and Playwright redirects/hydration/missing-post checks plus a 32-route sequential dev crawl.
 - Mapped all dashboard pages/flows reusing `TradeTableReview` and confirmed shared issue propagation beyond `/strategies` (table tab, data/trades tab, calendar modal table, widget table, import processor table).
 - Implemented shared trade-table consistency fixes across server action + provider + table UI: hard-fail update path with rollback signaling, raw-trade footer counts, and row expandability alignment, then verified via typecheck and targeted eslint.
