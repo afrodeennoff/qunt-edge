@@ -36,25 +36,25 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                         <span className={score >= 80 ? "metric-positive" : "metric-negative font-normal"}>
                             {score}
                         </span>
-                        <span className="text-base text-muted-foreground/70 ml-1">/ 100</span>
+                        <span className="text-base text-fg-muted ml-1">/ 100</span>
                     </div>
                 </div>
                 <div className={cn(
-                    "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight bg-secondary/22 text-foreground/90 border border-border/55"
+                    "px-2.5 py-1 rounded-full text-[11px] font-medium tracking-tight bg-secondary/20 text-foreground/90 border border-border/50"
                 )}>
                     {normalizedLabel}
                 </div>
                 <div className="mt-6 grid grid-cols-3 gap-2 w-full text-center">
-                    <div className="flex flex-col p-2.5 bg-secondary/22 rounded-xl border border-border/55">
-                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/70">Win Rate</span>
+                    <div className="flex flex-col p-2.5 bg-secondary/20 rounded-xl border border-border/50">
+                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">Win Rate</span>
                         <span className="font-semibold text-sm tabular-nums mt-0.5 text-foreground/90">{metrics.winRate.toFixed(1)}%</span>
                     </div>
-                    <div className="flex flex-col p-2.5 bg-secondary/22 rounded-xl border border-border/55">
-                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/70">P. Factor</span>
+                    <div className="flex flex-col p-2.5 bg-secondary/20 rounded-xl border border-border/50">
+                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">P. Factor</span>
                         <span className="font-semibold text-sm tabular-nums mt-0.5 text-foreground/90">{metrics.profitFactor.toFixed(2)}</span>
                     </div>
-                    <div className="flex flex-col p-2.5 bg-secondary/22 rounded-xl border border-border/55">
-                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/70">Trades</span>
+                    <div className="flex flex-col p-2.5 bg-secondary/20 rounded-xl border border-border/50">
+                        <span className="text-[10px] font-medium tracking-tight text-fg-muted">Trades</span>
                         <span className="font-semibold text-sm tabular-nums mt-0.5 text-foreground/90">{metrics.totalTrades}</span>
                     </div>
                 </div>
