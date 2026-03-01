@@ -53,7 +53,9 @@ const PRIVATE_DOCUMENT_PATH_PREFIXES = [
   "/authentication",
   "/admin",
 ]
-const PUBLIC_READ_API_PATH_PREFIXES = ["/api/health", "/api"]
+const PUBLIC_READ_API_PATHS = new Set<string>([
+  "/api/health",
+])
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   const cookieHeader = request.headers.get("cookie")
@@ -97,9 +99,34 @@ function isPublicDocumentRoute(pathname: string): boolean {
 }
 
 function isPublicReadApiRoute(pathname: string): boolean {
-  return PUBLIC_READ_API_PATH_PREFIXES.some((prefix) =>
-    pathMatchesPrefix(pathname, prefix)
-  )
+  return PUBLIC_READ_API_PATHS.has(pathname)
+}
+
+function parseBooleanEnv(value: string | undefined): boolean | undefined {
+  if (value == null) return undefined
+  const normalized = value.trim().toLowerCase()
+  if (normalized === "true") return true
+  if (normalized === "false") return false
+  return undefined
+}
+
+function sanitizeInternalRedirectPath(candidate: string | null): string | null {
+  if (!candidate) return null
+  const value = candidate.trim()
+  if (!value) return null
+
+  // Reject absolute/protocol-relative/backslash-prefixed paths.
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("//") ||
+    value.startsWith("\\")
+  ) {
+    return null
+  }
+
+  if (!value.startsWith("/")) return null
+  return value
 }
 
 async function updateSession(request: NextRequest) {
@@ -192,8 +219,8 @@ export default async function middleware(req: NextRequest) {
   const isApiRoute = pathname.startsWith("/api/")
   const isDev = process.env.NODE_ENV === "development"
   const cspEnabled = process.env.CSP_ENABLED !== "false"
-  const cspReportOnly = process.env.CSP_REPORT_ONLY !== "false"
-  const cspStrictMode = process.env.CSP_STRICT_MODE === "true"
+  const cspReportOnly = parseBooleanEnv(process.env.CSP_REPORT_ONLY) ?? isDev
+  const cspStrictMode = parseBooleanEnv(process.env.CSP_STRICT_MODE) ?? !isDev
   const isStaticAsset =
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/videos/") ||
@@ -267,7 +294,7 @@ export default async function middleware(req: NextRequest) {
     const referer = req.headers.get("referer")
     const isLocalFile = origin === "null" || referer?.startsWith("file://") || (!origin && !referer)
     // If embedding from a local file (file://), omit CSP entirely so browsers don't block
-    if (isLocalFile) {
+    if (isLocalFile && isDev) {
       response.headers.delete("Content-Security-Policy")
       response.headers.delete("Content-Security-Policy-Report-Only")
       return response
@@ -286,9 +313,6 @@ export default async function middleware(req: NextRequest) {
       "'self'",
       "https://*.deltalytix.app", // Main domain
       "https://*.beta.deltalytix.app", // Beta subdomain
-      "http://localhost:*", // For local testing
-      "http://127.0.0.1:*", // For local testing
-      "file:", // For local HTML file testing (may be ignored by some browsers)
       "https://thortradecopier.com",
       "https://app.thortradecopier.com",
     ].join(" ")
@@ -404,9 +428,13 @@ export default async function middleware(req: NextRequest) {
       const nextParam = req.nextUrl.searchParams.get("next")
 
       let redirectPath = "/dashboard"
-      if (nextParam) {
-        // Assume nextParam is full path
-        redirectPath = nextParam
+      const sanitizedNext = sanitizeInternalRedirectPath(nextParam)
+      if (nextParam && !sanitizedNext) {
+        console.warn("[Proxy] Rejected unsafe auth redirect path", { nextParam })
+      }
+
+      if (sanitizedNext) {
+        redirectPath = sanitizedNext
       }
 
       // Ensure redirect path has locale if missing and starts with /

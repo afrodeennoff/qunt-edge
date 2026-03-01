@@ -40,3 +40,8 @@
 - mistake pattern: Changed opacity work in a way that also impacted perceived spacing/gap hierarchy and caused visual regressions outside the requested contrast-only scope.
 - prevention rule: For color/opacity-only requests, explicitly freeze geometry classes (`gap-*`, `p-*`, `m-*`, `h-*`, `w-*`, grid spans) and run a final diff scan to ensure only color/border/text/background token classes changed.
 - early trigger signals: User calls out "gaps" or layout break right after a color-only change request.
+
+## 2026-03-01
+- mistake pattern: Ran `git add` with unquoted bracketed paths (for example `app/[locale]/...`) in `zsh`, causing glob expansion failure (`no matches found`).
+- prevention rule: Always quote or escape paths containing `[` `]` `(` `)` in shell git commands, especially when staging multiple Next.js route files.
+- early trigger signals: Shell error includes `zsh: no matches found` immediately after `git add` on bracketed route paths.

@@ -6,6 +6,11 @@ import { getReferralBySlug } from "@/server/referral";
 import { getSubscriptionDetails } from "@/server/subscription";
 import { createRouteClient } from "@/lib/supabase/route-client";
 
+const FORM_CONTENT_TYPES = [
+  "multipart/form-data",
+  "application/x-www-form-urlencoded",
+]
+
 function safeLocale(value: string | null | undefined): string {
   const raw = (value || "").trim().toLowerCase();
   if (!raw) return "en";
@@ -47,6 +52,22 @@ function resolvePlanId(lookupKey: string): string {
 
   const found = candidates.find((v) => typeof v === "string" && v.trim().length > 0);
   return found?.trim() || "";
+}
+
+function isAllowedFormContentType(contentType: string | null): boolean {
+  if (!contentType) return false
+  const normalized = contentType.toLowerCase()
+  return FORM_CONTENT_TYPES.some((allowed) => normalized.startsWith(allowed))
+}
+
+function isTrustedOrigin(request: Request, websiteURL: string): boolean {
+  const origin = request.headers.get("origin")
+  if (!origin) return true
+  try {
+    return new URL(origin).origin === new URL(websiteURL).origin
+  } catch {
+    return false
+  }
 }
 
 async function handleWhopCheckout(
@@ -125,8 +146,22 @@ async function handleWhopCheckout(
 }
 
 export async function POST(req: Request) {
-  const body = await req.formData();
   const websiteURL = await getWebsiteURL();
+  if (!isTrustedOrigin(req, websiteURL)) {
+    return NextResponse.json(
+      { error: "Forbidden", code: "ORIGIN_MISMATCH" },
+      { status: 403 },
+    );
+  }
+
+  if (!isAllowedFormContentType(req.headers.get("content-type"))) {
+    return NextResponse.json(
+      { error: "Unsupported content type", code: "UNSUPPORTED_CONTENT_TYPE" },
+      { status: 415 },
+    );
+  }
+
+  const body = await req.formData();
 
   const lookupKey = body.get("lookup_key") as string;
   const referral = body.get("referral") as string | null;
@@ -171,34 +206,8 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const websiteURL = await getWebsiteURL();
-  const { searchParams } = new URL(req.url);
-  const lookupKey = searchParams.get("lookup_key");
-  const referral = searchParams.get("referral");
-  const locale = searchParams.get("locale");
-  const promoCode = searchParams.get("promo_code");
-
-  if (!lookupKey) {
-    return NextResponse.json({ message: "Lookup key is required" }, { status: 400 });
-  }
-
-  const supabase = createRouteClient(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    const effectiveLocale = safeLocale(locale);
-    const search = new URLSearchParams();
-    search.set("subscription", "true");
-    search.set("lookup_key", lookupKey);
-    if (referral) search.set("referral", referral);
-    if (promoCode) search.set("promo_code", promoCode);
-    return NextResponse.redirect(
-      new URL(withLocalePrefix(effectiveLocale, `/authentication?${search.toString()}`), websiteURL),
-      303,
-    );
-  }
-
-  return handleWhopCheckout(lookupKey, user, websiteURL, referral, locale, promoCode);
+  return NextResponse.json(
+    { error: "Method Not Allowed", code: "METHOD_NOT_ALLOWED" },
+    { status: 405, headers: { Allow: "POST" } },
+  );
 }

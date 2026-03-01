@@ -3,6 +3,11 @@ import { getWebsiteURL } from "@/server/auth";
 import { getWhop } from "@/lib/whop";
 import { createRouteClient } from "@/lib/supabase/route-client";
 
+const FORM_CONTENT_TYPES = [
+    "multipart/form-data",
+    "application/x-www-form-urlencoded",
+]
+
 function safeLocale(value: string | null | undefined): string {
     const raw = (value || "").trim().toLowerCase();
     if (!raw) return "en";
@@ -18,6 +23,22 @@ function withLocalePrefix(locale: string, pathWithOptionalQuery: string): string
 }
 
 type CheckoutUser = { id: string; email?: string | null }
+
+function isAllowedFormContentType(contentType: string | null): boolean {
+    if (!contentType) return false
+    const normalized = contentType.toLowerCase()
+    return FORM_CONTENT_TYPES.some((allowed) => normalized.startsWith(allowed))
+}
+
+function isTrustedOrigin(request: Request, websiteURL: string): boolean {
+    const origin = request.headers.get("origin")
+    if (!origin) return true
+    try {
+        return new URL(origin).origin === new URL(websiteURL).origin
+    } catch {
+        return false
+    }
+}
 
 async function handleWhopTeamCheckout(user: CheckoutUser, websiteURL: string, locale: string, teamName?: string) {
     const planId = process.env.NEXT_PUBLIC_WHOP_TEAM_PLAN_ID;
@@ -57,8 +78,21 @@ async function handleWhopTeamCheckout(user: CheckoutUser, websiteURL: string, lo
 }
 
 export async function POST(req: Request) {
-    const body = await req.formData();
     const websiteURL = await getWebsiteURL();
+    if (!isTrustedOrigin(req, websiteURL)) {
+        return NextResponse.json(
+            { error: "Forbidden", code: "ORIGIN_MISMATCH" },
+            { status: 403 },
+        );
+    }
+    if (!isAllowedFormContentType(req.headers.get("content-type"))) {
+        return NextResponse.json(
+            { error: "Unsupported content type", code: "UNSUPPORTED_CONTENT_TYPE" },
+            { status: 415 },
+        );
+    }
+
+    const body = await req.formData();
     const teamName = body.get('teamName') as string | null;
     const locale = safeLocale(body.get('locale') as string | null);
 
@@ -81,25 +115,8 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-    const websiteURL = await getWebsiteURL();
-    const { searchParams } = new URL(req.url);
-    const teamName = searchParams.get('teamName');
-    const locale = safeLocale(searchParams.get('locale'));
-
-    const supabase = createRouteClient(req);
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        const search = new URLSearchParams();
-        search.set('subscription', 'true');
-        search.set('plan', 'team');
-        search.set('locale', locale);
-        if (teamName) search.set('teamName', teamName);
-        return NextResponse.redirect(
-            new URL(withLocalePrefix(locale, `/authentication?${search.toString()}`), websiteURL),
-            303
-        );
-    }
-
-    return handleWhopTeamCheckout(user, websiteURL, locale, teamName || undefined);
+    return NextResponse.json(
+        { error: "Method Not Allowed", code: "METHOD_NOT_ALLOWED" },
+        { status: 405, headers: { Allow: "POST" } },
+    );
 }

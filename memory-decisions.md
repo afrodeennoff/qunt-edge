@@ -8,3 +8,4 @@
 - 2026-03-01: Dashboard header now lazy-loads heavy action modules (`filters`, `import`, `share`, `sync`, `daily summary`, widget controls) to keep dashboard-family app-route manifests under the 80 KB budget.
 - 2026-03-01: CSP builder omits `upgrade-insecure-requests` when `CSP_REPORT_ONLY` mode is active to prevent recurring browser console report-only warnings.
 - 2026-03-01: Next config now sets `turbopack.root` and `outputFileTracingRoot` to project root for consistent root detection during local dev/build audits.
+- 2026-03-01: Landing/auth readability audits should prioritize route-impacting regressions first (navigation/locale/link correctness), then contrast/typography issues that materially affect legibility.

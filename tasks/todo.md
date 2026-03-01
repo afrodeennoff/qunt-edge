@@ -1,3 +1,36 @@
+# Security + DB Isolation Audit (2026-03-01)
+
+## Scope
+- Audit end-to-end security posture with focus on bank-grade controls, database isolation, and cyber-attack resilience.
+
+## Acceptance Criteria
+- [x] Core app-layer security controls reviewed (middleware, authz, APIs, secrets, logging).
+- [x] Live database posture validated (RLS, policies, grants, advisor findings).
+- [x] Critical findings prioritized with concrete file/line references.
+- [x] Hardening roadmap documented by priority and control domain.
+
+## Plan Checklist
+- [x] Review middleware/CSP/CORS/cache/security-header behavior.
+- [x] Review auth/session/access control implementation in server helpers and API routes.
+- [x] Validate Supabase posture with live metadata/advisor queries.
+- [x] Produce attack-focused findings plus bank-grade isolation plan.
+
+## Current Step
+- **Completed:** security audit and remediation blueprint prepared for user handoff.
+
+## Progress Notes
+- 2026-03-01: Reviewed `proxy.ts`, `lib/security/csp.ts`, authz helpers, and representative API handlers for auth consistency, cache controls, and exploitability.
+- 2026-03-01: Validated live Supabase posture via MCP (`list_tables`, `get_advisors`, policy/grant SQL checks).
+- 2026-03-01: Identified priority risks including broad API GET public-cache policy in middleware, auth-route `next` open redirect behavior, report-only/relaxed CSP defaults, and partial RLS-force/policy drift on select tables.
+
+## Completion Notes
+- Verification evidence:
+  - Repo code review of middleware/auth/api files with line-level references.
+  - Supabase live checks:
+    - `list_tables(schemas=['public'])`
+    - `get_advisors(type='security')`
+    - SQL checks on `pg_policies`, `pg_class.relforcerowsecurity`, and `information_schema.role_table_grants`.
+
 # Full Page End-to-End Audit (2026-03-01)
 
 ## Scope
@@ -44,6 +77,12 @@
     - `/en/teams/join` and `/en/teams/manage` -> no nested-button/hydration errors.
     - `/en/community/post/non-existent` -> no `Failed to fetch post` console spam in browser check.
     - 32-route sequential crawl completed without navigation failure in `next dev`.
+- Git/PR handoff (2026-03-01):
+  - Committed remediation implementation: `972ab8b` (`fix(audit): implement user-facing remediation phases`).
+  - Synced branch with latest `origin/main` and resolved merge conflicts (kept latest `origin/main` on unrelated widget/stat surfaces; retained audit-tracking updates in `tasks/memory` files).
+  - Completed merge commit: `cf8c0f4`.
+  - Pushed branch: `codex/backend-full-hardening`.
+  - Updated open PR with latest fixes and conflict resolution: `https://github.com/afrodeennoff/final-qunt-edge/pull/137`.
 
 # Shared Trade Table Consistency Fix (2026-03-01)
 
@@ -1090,3 +1129,57 @@
 ## Completion Notes
 - Typecheck: `npm run typecheck` -> exit `0`.
 - Lint: `git diff --name-only -z -- '*.ts' '*.tsx' '*.js' '*.jsx' | xargs -0 -r npx eslint` -> exit `0` with warnings only (`0` errors).
+
+# Dashboard Surface Readability/Opacity Audit (2026-03-01)
+
+## Scope
+- Audit `app/[locale]/dashboard/**`, `components/ui/widget-shell.tsx`, and dashboard-relevant selectors in `app/globals.css` for readability hierarchy, opacity contrast, cramped typography, compact-card cropping, and inconsistent shell/border tiers.
+
+## Acceptance Criteria
+- [x] Findings prioritized by severity with concrete file+line references.
+- [x] Coverage includes shell/container tiers and representative compact/statistics cards.
+- [x] Residual risks/gaps documented.
+
+## Plan Checklist
+- [x] Map dashboard shell selectors and global dashboard-surface CSS.
+- [x] Inspect dashboard page/component surfaces for readability and compact-card issues.
+- [x] Compile prioritized findings and risks.
+
+## Current Step
+- **Completed:** findings triaged and ready for handoff.
+
+## Completion Notes
+- Audit method:
+  - Source inspection with `nl -ba` across `app/[locale]/dashboard/**`, `components/ui/widget-shell.tsx`, `components/ui/chart-surface.tsx`, and dashboard-related selectors in `app/globals.css`.
+  - Targeted pattern scans for small typography, opacity tiers, fixed heights, overflow, and border/surface class inconsistencies.
+- Output:
+  - Prioritized findings delivered with concrete file+line references and residual risk notes.
+
+# Landing/Auth UI Readability-Contrast Consistency Audit (2026-03-01)
+
+## Scope
+- Audit page UI readability/contrast/consistency and obvious regressions under:
+  - `app/[locale]/(home)`
+  - `app/[locale]/(landing)`
+  - `app/[locale]/(authentication)`
+
+## Acceptance Criteria
+- [x] Findings prioritized by severity with exact file+line references.
+- [x] Focus includes readability/contrast/consistency and obvious regressions.
+- [x] Route-impacting issues distinguished from lower-confidence style debt.
+
+## Plan Checklist
+- [x] Inventory route files and route-used components in scope.
+- [x] Inspect contrast/typography/token/link patterns with line-level evidence.
+- [x] Compile prioritized findings and residual risk notes.
+
+## Current Step
+- **Completed:** audit findings prepared for handoff.
+
+## Completion Notes
+- Audit method:
+  - Enumerated in-scope files with `rg --files`.
+  - Performed targeted scans for low-contrast/small-text/tokens/links using `rg -n`.
+  - Verified findings using `nl -ba` line-level source inspection on impacted files.
+- Output:
+  - Prioritized findings with route impact and exact references ready for user handoff.

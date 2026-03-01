@@ -20,3 +20,5 @@
 - Re-verified with `typecheck`, `build`, `check:route-budgets`, `analyze:bundle`, focused lint/tests, and Playwright redirects/hydration/missing-post checks plus a 32-route sequential dev crawl.
 - Mapped all dashboard pages/flows reusing `TradeTableReview` and confirmed shared issue propagation beyond `/strategies` (table tab, data/trades tab, calendar modal table, widget table, import processor table).
 - Implemented shared trade-table consistency fixes across server action + provider + table UI: hard-fail update path with rollback signaling, raw-trade footer counts, and row expandability alignment, then verified via typecheck and targeted eslint.
+- Completed a focused readability/contrast/consistency audit for home/landing/auth pages and identified a route-level locale-link regression plus multiple small-text/low-contrast readability hotspots with line-level evidence.
+- Completed a code-and-runtime security posture audit with Supabase live checks (RLS/policies/advisors), identified priority gaps (API cache policy scope, open redirect path, non-enforcing CSP defaults, and DB RLS consistency drift), and prepared a bank-grade hardening/isolation plan.

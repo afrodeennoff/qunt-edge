@@ -61,7 +61,7 @@ export function buildAppCsp({ nonce, isDev, strictMode, reportOnly }: AppCspOpti
 export function buildEmbedCsp(allowedOrigins: string): string {
   return [
     `frame-ancestors ${allowedOrigins}`,
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
+    "script-src 'self' https://vercel.live",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "connect-src 'self' https://vercel.live",
