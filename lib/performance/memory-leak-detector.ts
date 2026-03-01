@@ -64,8 +64,8 @@ class MemoryLeakDetector {
    */
   private monitorComponentMounts() {
     const originalLog = console.error;
-    let mountCount = 0;
-    let unmountCount = 0;
+    const mountCount = 0;
+    const unmountCount = 0;
 
     console.error = (...args) => {
       const message = args[0];

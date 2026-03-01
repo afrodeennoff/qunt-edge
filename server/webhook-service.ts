@@ -180,7 +180,7 @@ export class WebhookService {
 
   private async processEventWithRetry(
     event: WebhookEvent,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     let attempt = 0
     let lastResult: WebhookProcessingResult = {
@@ -256,7 +256,7 @@ export class WebhookService {
     return this.stats.retryCount
   }
 
-  private async acquireWebhookLock(prisma: PrismaClient, event: WebhookEvent): Promise<boolean> {
+  private async acquireWebhookLock(_prisma: PrismaClient, event: WebhookEvent): Promise<boolean> {
     try {
       await prisma.processedWebhook.create({
         data: {
@@ -279,7 +279,7 @@ export class WebhookService {
   }
 
   private async finalizeWebhookLock(
-    prisma: PrismaClient,
+    _prisma: PrismaClient,
     event: WebhookEvent,
     result: WebhookProcessingResult,
   ): Promise<void> {
@@ -301,7 +301,7 @@ export class WebhookService {
     })
   }
 
-  private async releaseWebhookLock(prisma: PrismaClient, event: WebhookEvent): Promise<void> {
+  private async releaseWebhookLock(_prisma: PrismaClient, event: WebhookEvent): Promise<void> {
     await prisma.processedWebhook.deleteMany({
       where: {
         webhookId: event.id,
@@ -312,7 +312,7 @@ export class WebhookService {
 
   private async handleEventByType(
     event: WebhookEvent,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     const { type, data } = event
 
@@ -362,7 +362,7 @@ export class WebhookService {
 
   private async handleMembershipActivated(
     membership: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       if (!membership.user?.email) {
@@ -437,7 +437,7 @@ export class WebhookService {
     userId: string | undefined,
     planName: string,
     interval: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     const metadata = membership.metadata || {}
     const teamName = metadata.team_name || 'My Team'
@@ -529,7 +529,7 @@ export class WebhookService {
     userId: string | undefined,
     planName: string,
     interval: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     const metadata = membership.metadata || {}
     const businessName = metadata.business_name || 'My Business'
@@ -612,7 +612,7 @@ export class WebhookService {
 
   private async handleMembershipDeactivated(
     membership: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       if (!membership.user?.email) {
@@ -678,7 +678,7 @@ export class WebhookService {
   private async handleTeamMembershipDeactivated(
     membership: any,
     email: string,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     const subscription = await prisma.teamSubscription.findUnique({
       where: { email }
@@ -705,7 +705,7 @@ export class WebhookService {
   private async handleBusinessMembershipDeactivated(
     membership: any,
     email: string,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     const subscription = await prisma.businessSubscription.findUnique({
       where: { email }
@@ -731,7 +731,7 @@ export class WebhookService {
 
   private async handleMembershipUpdated(
     membership: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       if (!membership.user?.email) {
@@ -812,7 +812,7 @@ export class WebhookService {
 
   private async handleMembershipTrialing(
     membership: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       if (!membership.user?.email) {
@@ -876,7 +876,7 @@ export class WebhookService {
 
   private async handlePaymentSucceeded(
     payment: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       const membershipId = payment.membership_id
@@ -949,7 +949,7 @@ export class WebhookService {
 
   private async handlePaymentFailed(
     payment: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       const membershipId = payment.membership_id
@@ -1018,7 +1018,7 @@ export class WebhookService {
 
   private async handlePaymentRefunded(
     refund: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       const paymentId = refund.payment_id
@@ -1053,14 +1053,14 @@ export class WebhookService {
 
   private async handlePaymentPartiallyRefunded(
     refund: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     return await this.handlePaymentRefunded(refund, prisma)
   }
 
   private async handleInvoiceCreated(
     invoice: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       if (!invoice.user?.email || !invoice.membership?.id) {
@@ -1108,7 +1108,7 @@ export class WebhookService {
 
   private async handleInvoicePaid(
     invoice: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       await prisma.invoice.update({
@@ -1142,7 +1142,7 @@ export class WebhookService {
 
   private async handleInvoicePaymentFailed(
     invoice: any,
-    prisma: PrismaClient
+    _prisma: PrismaClient
   ): Promise<WebhookProcessingResult> {
     try {
       await prisma.invoice.update({

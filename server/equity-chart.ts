@@ -68,7 +68,7 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
   // Validate timezone and fallback to UTC if needed
   try {
     Intl.DateTimeFormat(undefined, { timeZone: params.timezone })
-  } catch (e) {
+  } catch {
     console.warn(`[getEquityChartDataAction] Invalid timezone '${params.timezone}', falling back to UTC`)
     params.timezone = 'UTC'
   }
