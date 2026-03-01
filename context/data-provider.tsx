@@ -1584,6 +1584,7 @@ export const DataProvider: React.FC<{
   const updateTrades = useCallback(
     async (tradeIds: string[], update: Partial<Trade>) => {
       if (!supabaseUser?.id) return;
+      if (tradeIds.length === 0) return;
 
       const previousTrades = [...trades];
 
@@ -1598,7 +1599,12 @@ export const DataProvider: React.FC<{
         );
         setTrades(updatedTrades);
         // Cast to any to bypass strict Decimal vs Number mismatch in server action signature
-        await updateTradesAction(tradeIds, update as any);
+        const updatedCount = await updateTradesAction(tradeIds, update as any);
+        if (updatedCount === 0 || updatedCount !== tradeIds.length) {
+          throw new Error(
+            `Failed to persist trade updates (updated ${updatedCount}/${tradeIds.length})`,
+          );
+        }
       } catch (error) {
         console.error("Error updating trades, rolling back:", error);
         setTrades(previousTrades);

@@ -415,23 +415,37 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
     // Generate a temporary groupId using timestamp + random number
     const tempGroupId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Update local state immediately
-    await updateTrades(selectedTrades, { groupId: tempGroupId });
+    try {
+      // Update local state immediately
+      await updateTrades(selectedTrades, { groupId: tempGroupId });
 
-    // Reset table selection
-    table.resetRowSelection();
-    setSelectedTrades([]);
+      // Reset table selection
+      table.resetRowSelection();
+      setSelectedTrades([]);
+    } catch (error) {
+      console.error("Error grouping trades:", error);
+      toast.error(t("trade-table.deleteError"), {
+        description: t("trade-table.deleteErrorDescription"),
+      });
+    }
   };
 
   const handleUngroupTrades = async () => {
     if (selectedTrades.length === 0) return;
 
-    // Update local state immediately
-    await updateTrades(selectedTrades, { groupId: null });
+    try {
+      // Update local state immediately
+      await updateTrades(selectedTrades, { groupId: null });
 
-    // Reset table selection
-    table.resetRowSelection();
-    setSelectedTrades([]);
+      // Reset table selection
+      table.resetRowSelection();
+      setSelectedTrades([]);
+    } catch (error) {
+      console.error("Error ungrouping trades:", error);
+      toast.error(t("trade-table.deleteError"), {
+        description: t("trade-table.deleteErrorDescription"),
+      });
+    }
   };
 
   const handleDeleteTrades = async () => {
@@ -609,6 +623,13 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
     });
 
     return { totalPnl, totalCommission, totalQuantity };
+  }, [groupedTrades]);
+
+  const totalTradeCount = useMemo(() => {
+    return groupedTrades.reduce(
+      (count, row) => count + (row.trades.length > 0 ? row.trades.length : 1),
+      0,
+    );
   }, [groupedTrades]);
 
   // Check if all trades across all pages are selected
@@ -1201,7 +1222,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getRowCanExpand: (row) => row.original.trades.length > 0,
+    getRowCanExpand: (row) => row.original.trades.length > 1,
     getExpandedRowModel: getExpandedRowModel(),
     onSortingChange: handleSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,
@@ -1626,7 +1647,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
       </CardContent>
       <CardFooter className="flex items-center justify-between border-t bg-background px-4 py-3">
         <div className="text-sm text-muted-foreground">
-          {t("trade-table.totalTrades", { count: groupedTrades.length })}
+          {t("trade-table.totalTrades", { count: totalTradeCount })}
         </div>
         <div className="flex items-center gap-2">
           <Button

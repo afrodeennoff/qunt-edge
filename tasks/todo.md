@@ -1,3 +1,105 @@
+# Full Page End-to-End Audit (2026-03-01)
+
+## Scope
+- Audit the entire page surface end to end (public, auth, dashboard/teams/admin entrypoints) for runtime failures, navigation breakage, console/network errors, and major regressions.
+
+## Acceptance Criteria
+- [ ] Static quality gates run with recorded evidence.
+- [ ] Public page routes are browser-audited with console/network checks.
+- [ ] Protected routes are checked for expected redirect/auth behavior.
+- [ ] Findings are prioritized by severity with file-level references.
+- [ ] Re-verification is captured for any in-scope fix.
+
+## Plan Checklist
+- [x] Create task plan and inventory route/page targets.
+- [ ] Run static quality gates and collect evidence.
+- [ ] Run browser E2E route audit pass with artifacts.
+- [ ] Triage findings and implement minimal scoped fixes if clear.
+- [ ] Re-run affected checks and document final results.
+
+## Current Step
+- **In progress:** static quality gates and baseline capture.
+
+## Progress Notes
+- 2026-03-01: Loaded and applied `playwright` and `verification-before-completion` skills for this audit.
+- 2026-03-01: Inventory identified 46 page routes under `app/[locale]/**/page.tsx` to audit.
+
+## Completion Notes
+- Pending.
+
+# Shared Trade Table Consistency Fix (2026-03-01)
+
+## Scope
+- Implement shared reliability/correctness fixes for all surfaces using `TradeTableReview`.
+
+## Acceptance Criteria
+- [x] Trade update failures hard-fail and propagate to client rollback paths.
+- [x] Footer total count reflects raw underlying trade count.
+- [x] Expandability logic matches visible expand button behavior.
+- [x] Targeted verification commands completed.
+
+## Plan Checklist
+- [x] Update `updateTradesAction` to throw on server failure.
+- [x] Add `updateTrades` client guard for zero/mismatch updated-count returns.
+- [x] Add group/ungroup error handling in `TradeTableReview`.
+- [x] Replace grouped-row count footer with underlying trade count helper.
+- [x] Normalize row expandability to `trades.length > 1`.
+- [x] Run `typecheck` and targeted `eslint`.
+
+## Current Step
+- **Completed:** implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `server/trades.ts`
+  - `context/data-provider.tsx`
+  - `app/[locale]/dashboard/components/tables/trade-table-review.tsx`
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npx eslint app/[locale]/dashboard/components/tables/trade-table-review.tsx context/data-provider.tsx server/trades.ts` -> exit `0` (warnings only, no errors).
+
+# Strategies Related-Page Impact Audit (2026-03-01)
+
+## Scope
+- Find all pages/flows that reuse `/strategies` trade-table logic and identify related shared issues.
+
+## Acceptance Criteria
+- [x] Route-level impact map produced for all reachable `TradeTableReview` surfaces.
+- [x] Shared issues cross-referenced to each impacted page/flow.
+- [x] Evidence links captured with file references.
+
+## Plan Checklist
+- [x] Inventory all page routes and `TradeTableReview` usages.
+- [x] Trace route composition paths (tab shell, widgets, modal, import flow).
+- [x] Map previously found strategy issues to every impacted route/flow.
+
+## Current Step
+- **Completed:** related-page impact mapping ready for handoff.
+
+# Strategies Route Audit (2026-03-01)
+
+## Scope
+- Audit `/strategies` (`TradeTableReview`) for correctness, data integrity, and UX/reporting accuracy regressions.
+
+## Acceptance Criteria
+- [x] Route/component implementation reviewed with file-level evidence.
+- [x] Findings prioritized by severity with exact references.
+- [x] Verification commands executed and outcomes captured.
+
+## Plan Checklist
+- [x] Inspect `/strategies` page and `TradeTableReview` implementation.
+- [x] Trace update/group/delete flows through data-provider and server actions.
+- [x] Run focused lint/type verification on touched route files.
+- [x] Document findings and residual risks.
+
+## Current Step
+- **Completed:** `/strategies` audit findings documented for handoff.
+
+## Completion Notes
+- Verification:
+  - `npx eslint app/[locale]/dashboard/strategies/page.tsx app/[locale]/dashboard/components/tables/trade-table-review.tsx` -> exit `0` (warnings only).
+  - `npm run -s typecheck` -> exit `0`.
+
 # Widget Opacity Normalization (2026-02-28)
 
 # Compact RR Widget Cleanup (2026-03-01)
@@ -76,7 +178,7 @@
 - [ ] Re-run verification and document final evidence.
 
 ## Current Step
-- **In progress:** static/build verification gates for mobile audit.
+- **Paused:** static/build verification gates for mobile audit (superseded by full-page audit request).
 
 ## Progress Notes
 - 2026-02-28: Started user-requested mobile optimization end-to-end audit.
