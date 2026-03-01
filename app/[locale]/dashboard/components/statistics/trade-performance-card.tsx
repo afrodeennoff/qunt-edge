@@ -34,14 +34,14 @@ export default function TradePerformanceCard({ size = 'medium' }: TradePerforman
       <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
         <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           <TrendingUp className="h-4 w-4 shrink-0 metric-positive" />
-          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-foreground/80">W/L</span>
-          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/95">
+          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">W/L</span>
+          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">
             {winRate}/{lossRate}
           </span>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <HelpCircle className="h-4 w-4 shrink-0 text-foreground/80 hover:text-foreground transition-colors cursor-help" />
+                <HelpCircle className="h-4 w-4 shrink-0 text-muted-foreground/70 hover:text-muted-foreground/85 transition-colors cursor-help" />
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
                 {t('widgets.tradePerformance.tooltip')}
@@ -70,7 +70,7 @@ export default function TradePerformanceCard({ size = 'medium' }: TradePerforman
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <HelpCircle className="h-3 w-3 text-fg-muted cursor-help" />
+            <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
           </TooltipTrigger>
           <TooltipContent
             side="bottom"
