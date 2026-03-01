@@ -49,11 +49,13 @@ export function parseQuery<T>(
 }
 
 export function toValidationErrorResponse(error: unknown) {
+  const requestId = crypto.randomUUID();
   if (error instanceof RequestValidationError) {
     return NextResponse.json(
       {
         error: error.message,
-        ...(error.details ? { details: error.details } : {}),
+        code: "VALIDATION_FAILED",
+        requestId,
       },
       { status: error.status }
     );
@@ -61,10 +63,13 @@ export function toValidationErrorResponse(error: unknown) {
 
   if (error instanceof z.ZodError) {
     return NextResponse.json(
-      { error: "Validation failed", details: error.issues },
+      { error: "Validation failed", code: "VALIDATION_FAILED", requestId },
       { status: 400 }
     );
   }
 
-  return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  return NextResponse.json(
+    { error: "Internal server error", code: "INTERNAL_ERROR", requestId },
+    { status: 500 }
+  );
 }

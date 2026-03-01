@@ -6,6 +6,13 @@ const MAX_ETP_BODY_BYTES = 2 * 1024 * 1024
 const MAX_ETP_ORDERS = 2_000
 const MAX_PAGINATION_LIMIT = 500
 
+function jsonError(status: number, code: string, message: string, requestId: string) {
+  return NextResponse.json(
+    { error: message, code, requestId },
+    { status }
+  )
+}
+
 type ETPOrderPayload = {
   AccountId: string
   OrderId: string
@@ -91,22 +98,22 @@ async function authenticateRequest(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
+    const contentType = req.headers.get("content-type")?.toLowerCase() ?? ""
+    if (!contentType.startsWith("application/json")) {
+      return jsonError(415, "UNSUPPORTED_CONTENT_TYPE", "Unsupported content type", requestId)
+    }
+
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_ETP_BODY_BYTES) {
-      return NextResponse.json(
-        { error: 'Request payload is too large' },
-        { status: 413 }
-      )
+      return jsonError(413, "PAYLOAD_TOO_LARGE", "Request payload is too large", requestId)
     }
 
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
-      }, { status: auth.error?.status || 401 });
+      return jsonError(auth.error?.status || 401, "UNAUTHORIZED", "Unauthorized", requestId)
     }
     
     const user = auth.user!;
@@ -116,22 +123,16 @@ export async function POST(req: NextRequest) {
     const orders = Array.isArray(body?.orders) ? body.orders : null
 
     if (!orders || orders.length === 0) {
-      return NextResponse.json({ error: 'Invalid orders data' }, { status: 400 });
+      return jsonError(400, "BAD_REQUEST", "Invalid orders data", requestId)
     }
 
     if (orders.length > MAX_ETP_ORDERS) {
-      return NextResponse.json(
-        { error: `Too many orders. Maximum is ${MAX_ETP_ORDERS}.` },
-        { status: 413 }
-      )
+      return jsonError(413, "PAYLOAD_TOO_LARGE", `Too many orders. Maximum is ${MAX_ETP_ORDERS}.`, requestId)
     }
 
     const sanitizedOrders = sanitizeOrders(orders)
     if (sanitizedOrders.length !== orders.length) {
-      return NextResponse.json(
-        { error: 'Invalid order payload format' },
-        { status: 400 }
-      )
+      return jsonError(400, "BAD_REQUEST", "Invalid order payload format", requestId)
     }
     
     // Process and store each order
@@ -182,22 +183,17 @@ export async function POST(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to store orders', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    return jsonError(500, "INTERNAL_ERROR", "Failed to store orders", requestId)
   }
 }
 
 export async function GET(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
-      }, { status: auth.error?.status || 401 });
+      return jsonError(auth.error?.status || 401, "UNAUTHORIZED", "Unauthorized", requestId)
     }
     
     const user = auth.user!;
@@ -263,22 +259,17 @@ export async function GET(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to retrieve orders', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    return jsonError(500, "INTERNAL_ERROR", "Failed to retrieve orders", requestId)
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
-      }, { status: auth.error?.status || 401 });
+      return jsonError(auth.error?.status || 401, "UNAUTHORIZED", "Unauthorized", requestId)
     }
     
     const user = auth.user!;
@@ -296,9 +287,6 @@ export async function DELETE(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to delete orders', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    return jsonError(500, "INTERNAL_ERROR", "Failed to delete orders", requestId)
   }
 } 

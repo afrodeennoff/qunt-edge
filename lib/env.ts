@@ -6,7 +6,9 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_UI_V2_ENABLED: z.string().optional(),
-  CRON_SECRET: z.string().min(1).optional(),
+  CRON_SECRET: z.string().min(20).optional(),
+  HEALTHCHECK_SECRET: z.string().min(20).optional(),
+  WELCOME_WEBHOOK_SECRET: z.string().min(20).optional(),
   UNSUBSCRIBE_TOKEN_SECRET: z.string().min(32).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
   AI_BASE_URL: z.string().url().optional(),
@@ -53,4 +55,8 @@ export function assertProductionEnv(): void {
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "CRON_SECRET",
   ]);
+
+  if (!env.UNSUBSCRIBE_TOKEN_SECRET) {
+    throw new Error("Missing required environment variable: UNSUBSCRIBE_TOKEN_SECRET");
+  }
 }

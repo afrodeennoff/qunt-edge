@@ -146,6 +146,12 @@ export function requireServiceAuth(
   const secret = process.env[secretEnvKey]
 
   if (!secret) {
+    logger.error('[ServiceAuth] Secret missing', {
+      serviceName,
+      secretEnvKey,
+      requestId,
+      eventType: 'service_auth_misconfigured',
+    })
     throw new AuthzError(
       `${serviceName} secret not configured`,
       500,
@@ -156,15 +162,30 @@ export function requireServiceAuth(
 
   const candidate = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
   if (!candidate) {
+    logger.warn('[ServiceAuth] Missing bearer token', {
+      serviceName,
+      requestId,
+      eventType: 'service_auth_missing_bearer',
+    })
     throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
   }
 
   try {
     const isValid = timingSafeEqual(Buffer.from(candidate), Buffer.from(secret))
     if (!isValid) {
+      logger.warn('[ServiceAuth] Invalid bearer token', {
+        serviceName,
+        requestId,
+        eventType: 'service_auth_invalid_bearer',
+      })
       throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
     }
   } catch {
+    logger.warn('[ServiceAuth] Bearer validation failed', {
+      serviceName,
+      requestId,
+      eventType: 'service_auth_validation_failed',
+    })
     throw new AuthzError('Unauthorized', 401, 'AUTH_UNAUTHORIZED', requestId)
   }
 

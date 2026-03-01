@@ -8,6 +8,13 @@ const MAX_THOR_BODY_BYTES = 3 * 1024 * 1024
 const MAX_THOR_TRADES = 5_000
 const MAX_PAGINATION_LIMIT = 500
 
+function jsonError(status: number, code: string, message: string, requestId: string) {
+  return NextResponse.json(
+    { error: message, code, requestId },
+    { status }
+  )
+}
+
 function normalizePositiveInt(value: string | null, fallback: number, max: number): number {
   const parsed = Number.parseInt(value ?? '', 10)
   if (!Number.isFinite(parsed) || parsed < 0) return fallback
@@ -79,19 +86,22 @@ interface ThorRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
+    const contentType = req.headers.get("content-type")?.toLowerCase() ?? ""
+    if (!contentType.startsWith("application/json")) {
+      return jsonError(415, "UNSUPPORTED_CONTENT_TYPE", "Unsupported content type", requestId)
+    }
+
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_THOR_BODY_BYTES) {
-      return NextResponse.json({ error: 'Request payload is too large' }, { status: 413 })
+      return jsonError(413, "PAYLOAD_TOO_LARGE", "Request payload is too large", requestId)
     }
 
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
-      }, { status: auth.error?.status || 401 });
+      return jsonError(auth.error?.status || 401, "UNAUTHORIZED", "Unauthorized", requestId)
     }
     
     const user = auth.user!;
@@ -101,13 +111,10 @@ export async function POST(req: NextRequest) {
       ? data.dates.reduce((sum, dateData) => sum + (Array.isArray(dateData?.trades) ? dateData.trades.length : 0), 0)
       : 0
     if (totalTrades === 0) {
-      return NextResponse.json({ error: 'Invalid payload: no trades provided' }, { status: 400 })
+      return jsonError(400, "BAD_REQUEST", "Invalid payload: no trades provided", requestId)
     }
     if (totalTrades > MAX_THOR_TRADES) {
-      return NextResponse.json(
-        { error: `Too many trades. Maximum is ${MAX_THOR_TRADES}.` },
-        { status: 413 }
-      )
+      return jsonError(413, "PAYLOAD_TOO_LARGE", `Too many trades. Maximum is ${MAX_THOR_TRADES}.`, requestId)
     }
     
     // Transform the data to match the Trade schema
@@ -147,10 +154,7 @@ export async function POST(req: NextRequest) {
 
     // Handle duplicate trades as success, but return errors for other cases
     if (result.error && result.error !== 'DUPLICATE_TRADES') {
-      return NextResponse.json(
-        { error: result.error, details: result.details },
-        { status: 400 }
-      )
+      return jsonError(400, "BAD_REQUEST", "Trade import failed", requestId)
     }
 
     return NextResponse.json({
@@ -160,22 +164,17 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('[thor/store] Error processing request:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return jsonError(500, "INTERNAL_ERROR", "Internal server error", requestId)
   }
 }
 
 export async function GET(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
-      }, { status: auth.error?.status || 401 });
+      return jsonError(auth.error?.status || 401, "UNAUTHORIZED", "Unauthorized", requestId)
     }
     
     const user = auth.user!;
@@ -185,10 +184,7 @@ export async function GET(req: NextRequest) {
     const accountNumber = searchParams.get('accountNumber');
     
     if (!accountNumber) {
-      return NextResponse.json({ 
-        error: 'Bad Request', 
-        message: 'accountNumber parameter is required' 
-      }, { status: 400 });
+      return jsonError(400, "BAD_REQUEST", "accountNumber parameter is required", requestId)
     }
     
     const limit = normalizePositiveInt(searchParams.get('limit'), 100, MAX_PAGINATION_LIMIT);
@@ -246,22 +242,17 @@ export async function GET(req: NextRequest) {
     
   } catch (error) {
     console.error('[thor/store] Error retrieving trades:', error);
-    return NextResponse.json({ 
-      error: 'Failed to retrieve trades', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    return jsonError(500, "INTERNAL_ERROR", "Failed to retrieve trades", requestId)
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
-      }, { status: auth.error?.status || 401 });
+      return jsonError(auth.error?.status || 401, "UNAUTHORIZED", "Unauthorized", requestId)
     }
     
     const user = auth.user!;
@@ -271,10 +262,7 @@ export async function DELETE(req: NextRequest) {
     const accountNumber = searchParams.get('accountNumber');
     
     if (!accountNumber) {
-      return NextResponse.json({ 
-        error: 'Bad Request', 
-        message: 'accountNumber parameter is required' 
-      }, { status: 400 });
+      return jsonError(400, "BAD_REQUEST", "accountNumber parameter is required", requestId)
     }
     
     // Delete trades for this user and specific account
@@ -292,9 +280,6 @@ export async function DELETE(req: NextRequest) {
     
   } catch (error) {
     console.error('[thor/store] Error deleting trades:', error);
-    return NextResponse.json({ 
-      error: 'Failed to delete trades', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    return jsonError(500, "INTERNAL_ERROR", "Failed to delete trades", requestId)
   }
 }
