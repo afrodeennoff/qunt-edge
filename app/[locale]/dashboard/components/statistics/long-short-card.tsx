@@ -16,7 +16,6 @@ interface LongShortPerformanceCardProps {
 }
 
 export default function LongShortPerformanceCard({ size = 'medium' }: LongShortPerformanceCardProps) {
-  void size
   const { calendarData } = useDashboardStats()
   const t = useI18n()
 
@@ -37,6 +36,31 @@ export default function LongShortPerformanceCard({ size = 'medium' }: LongShortP
   }
   const longRate = toPercent(longNumber, totalTrades)
   const shortRate = toPercent(shortNumber, totalTrades)
+  const isCompact = size === 'tiny' || size === 'small' || size === 'small-long'
+
+  if (isCompact) {
+    return (
+      <div className="h-full flex items-center justify-center p-2 bg-transparent">
+        <div className="precision-panel flex w-full max-w-full items-center gap-2 rounded-md border-border/65 bg-secondary/30 px-3 py-1.5">
+          <ArrowUpFromLine className="h-3.5 w-3.5 shrink-0 metric-positive" />
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/85">L/S</span>
+          <span className="font-terminal min-w-0 flex-1 truncate text-right text-[14px] font-black leading-none tracking-tight text-foreground/95">
+            {longRate}/{shortRate}
+          </span>
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
+                {t('widgets.longShortPerformance.tooltip')}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
