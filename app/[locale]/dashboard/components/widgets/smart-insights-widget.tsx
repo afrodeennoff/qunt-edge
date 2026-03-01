@@ -135,7 +135,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                     <div className="space-y-3 pt-2">
                         {loading && insights.length === 0 ? (
                             Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/55 bg-secondary/20 p-3">
+                                <div key={i} className="flex items-start gap-3 rounded-lg border border-border/55 bg-secondary/22 p-3">
                                     <Skeleton className="h-8 w-8 rounded-full" />
                                     <div className="space-y-2 flex-1">
                                         <Skeleton className="h-4 w-24" />
@@ -152,7 +152,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/55 bg-secondary/20 p-3 hover:bg-secondary/30 transition-colors"
+                                        className="group/item relative flex flex-col gap-2 rounded-lg border border-border/55 bg-secondary/22 p-3 hover:bg-secondary/30 transition-colors"
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                                 </div>
                                             </div>
                                             {insight.confidence && (
-                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/20 border-border/55 text-muted-foreground/70">
+                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/22 border-border/55 text-muted-foreground/70">
                                                     {insight.confidence}% Conf.
                                                 </Badge>
                                             )}

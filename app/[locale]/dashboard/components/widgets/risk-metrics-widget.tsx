@@ -52,26 +52,26 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                 <div className="grid h-full grid-cols-2">
                     {/* Return Risk Ratios */}
                     <div className={cn(
-                        "flex flex-col border-r border-b border-border/50",
+                        "flex flex-col border-r border-b border-border/55",
                         size === 'tiny' ? "p-1.5" : "p-4"
                     )}>
-                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-fg-muted">Ratios</h3>
+                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-muted-foreground/70">Ratios</h3>
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
-                                <span className="text-fg-muted text-xs">Sharpe</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSharpeRatio > 1 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-foreground/60 bg-secondary/20 border border-border/50")}>
+                                <span className="text-muted-foreground/70 text-xs">Sharpe</span>
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSharpeRatio > 1 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-muted-foreground/85 bg-secondary/22 border border-border/55")}>
                                     {safeSharpeRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-fg-muted text-xs">Sortino</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSortinoRatio > 1.5 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-foreground/60 bg-secondary/20 border border-border/50")}>
+                                <span className="text-muted-foreground/70 text-xs">Sortino</span>
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeSortinoRatio > 1.5 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-muted-foreground/85 bg-secondary/22 border border-border/55")}>
                                     {safeSortinoRatio.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-fg-muted text-xs">Calmar</span>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeCalmarRatio > 1 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-foreground/60 bg-secondary/20 border border-border/50")}>
+                                <span className="text-muted-foreground/70 text-xs">Calmar</span>
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider tabular-nums px-2 py-0.5 rounded-md", safeCalmarRatio > 1 ? "text-foreground/90 bg-secondary/30 border border-border/60" : "text-muted-foreground/85 bg-secondary/22 border border-border/55")}>
                                     {safeCalmarRatio.toFixed(2)}
                                 </span>
                             </div>
@@ -80,25 +80,25 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
 
                     {/* Position Sizing */}
                     <div className={cn(
-                        "flex flex-col border-b border-border/50",
+                        "flex flex-col border-b border-border/55",
                         size === 'tiny' ? "p-1.5" : "p-4"
                     )}>
-                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-fg-muted">Position sizing</h3>
+                        <h3 className="text-[11px] font-medium tracking-tight mb-3 text-muted-foreground/70">Position sizing</h3>
                         <div className="flex-1 flex flex-col justify-center gap-2.5">
                             <div className="flex justify-between items-center">
-                                <span className="text-fg-muted text-xs text-balance">Kelly Half</span>
+                                <span className="text-muted-foreground/70 text-xs text-balance">Kelly Half</span>
                                 <span className={cn("text-xs font-mono font-bold tabular-nums", safeKellyHalf > 0 ? "metric-positive" : "metric-negative")}>
                                     {(safeKellyHalf * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-fg-muted text-xs">Optimal</span>
+                                <span className="text-muted-foreground/70 text-xs">Optimal</span>
                                 <span className={cn("text-xs font-mono font-bold tabular-nums", safeKellyFull > 0 ? "metric-positive" : "metric-negative")}>
                                     {(safeKellyFull * 100).toFixed(1)}%
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-fg-muted text-xs">Conservative</span>
+                                <span className="text-muted-foreground/70 text-xs">Conservative</span>
                                 <span className={cn("text-xs font-mono font-bold tabular-nums", safeKellyHalf > 0 ? "metric-positive" : "metric-negative")}>
                                     {((safeKellyHalf / 2) * 100).toFixed(1)}%
                                 </span>
@@ -118,7 +118,7 @@ export default function RiskMetricsWidget({ size = 'medium' }: { size?: 'tiny' |
                                 </span>
                             </div>
                         </div>
-                        <div className="w-full h-1 bg-secondary/20 rounded-full overflow-hidden">
+                        <div className="w-full h-1 bg-secondary/22 rounded-full overflow-hidden">
                             <div className="h-full bg-foreground/40 w-full" />
                         </div>
                     </div>
