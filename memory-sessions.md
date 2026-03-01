@@ -34,3 +34,5 @@
 - Expanded TestSprite backend plan with additional API/security coverage (`TC005`-`TC008`) and executed backend run twice via direct generate+execute flow.
 - Backend executions remained blocked by connection-layer reachability errors (urllib3 connection/getresponse traces) with 0/8 passing.
 - Local probe to `http://localhost:3001/api/health` from this runtime returned `000`, indicating local endpoint not reachable from the backend test runtime path.
+- Completed launch-gate rerun after codebase-wide fixes: `typecheck`, full `test` suite, full `lint` (warnings-only), production `build`, `check:route-budgets`, `analyze:bundle`, `test:smoke`, `perf:baseline`, and `perf:headers`.
+- Fixed `perf:headers` launch regression in `/api/referral` by returning `401` (not `500`) for unauthenticated requests in both `GET` and `POST` error paths.

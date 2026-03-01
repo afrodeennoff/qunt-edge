@@ -17,3 +17,4 @@
 - 2026-03-01: Keep adding explicit `/en/authentication` password-flow test cases in TestSprite plans because generated default `/en/login` steps frequently cause false negatives.
 - 2026-03-01: In development-mode TestSprite execution, expect subset execution behavior (15-case run observed) even when the plan file contains more cases.
 - 2026-03-01: Backend TestSprite runs in this environment are currently constrained by local endpoint reachability; until local API is reachable from the runner, backend test outcomes are transport failures rather than endpoint-contract validation.
+- 2026-03-01: `/api/referral` now maps unauthenticated server-auth failures (`User not authenticated`) to HTTP `401` instead of generic `500`, aligning API behavior with launch header/smoke gates.
