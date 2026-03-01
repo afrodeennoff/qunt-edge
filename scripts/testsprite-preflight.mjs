@@ -1,5 +1,3 @@
-import { execSync } from "node:child_process";
-
 const BASE_URL = process.env.TESTSPRITE_BASE_URL || "http://localhost:3001";
 
 async function assertReachable(pathname) {
@@ -11,28 +9,26 @@ async function assertReachable(pathname) {
   return response.status;
 }
 
-function portPids(port) {
+async function probe(url) {
   try {
-    const out = execSync(`lsof -ti tcp:${port}`, { encoding: "utf8" }).trim();
-    if (!out) return [];
-    return out.split("\n").filter(Boolean);
+    const response = await fetch(url, { redirect: "manual" });
+    return response.status;
   } catch {
-    return [];
+    return null;
   }
 }
 
 async function main() {
-  const p3000 = portPids(3000);
-  const p3001 = portPids(3001);
-
-  if (p3001.length !== 1) {
+  const p3001Status = await probe("http://localhost:3001/en");
+  if (!p3001Status) {
     throw new Error(
-      `Preflight failed: expected exactly 1 process on port 3001, found ${p3001.length}.`
+      "Preflight failed: localhost:3001 is not reachable. Start the app on port 3001 first."
     );
   }
-  if (p3000.length > 0) {
+  const p3000Status = await probe("http://localhost:3000/en");
+  if (p3000Status) {
     throw new Error(
-      `Preflight failed: port 3000 is also active (${p3000.join(", ")}). Keep one app port active for TestSprite.`
+      `Preflight failed: localhost:3000 is also reachable (${p3000Status}). Keep a single active app port for TestSprite.`
     );
   }
 
@@ -45,7 +41,7 @@ async function main() {
         ok: true,
         baseUrl: BASE_URL,
         checks: { "/en": enStatus, "/api/health": healthStatus },
-        pid3001: p3001[0],
+        ports: { "3001": p3001Status, "3000": p3000Status },
       },
       null,
       2

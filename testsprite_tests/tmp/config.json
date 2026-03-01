@@ -9,22 +9,13 @@
   "executionArgs": {
     "projectName": "final-qunt-edge-main",
     "projectPath": "/Users/timon/Downloads/final-qunt-edge-main",
-    "testIds": [
-      "TC001",
-      "TC002",
-      "TC003",
-      "TC004",
-      "TC005",
-      "TC006",
-      "TC007",
-      "TC008"
-    ],
-    "additionalInstruction": "Backend rerun on live local endpoint http://localhost:3001. Execute TC001-TC008 from testsprite_backend_test_plan.json and validate endpoint status/auth/method behavior with detailed failure assertions.",
+    "testIds": [],
+    "additionalInstruction": "Use corrected testsprite_frontend_test_plan.json. Strict auth route: /en/authentication with data-testid selectors auth-password-tab/auth-email-input/auth-password-input/auth-password-submit. Use nav selectors nav-dashboard/nav-trade-desk/nav-reports/nav-billing/nav-settings/nav-data and import trigger dashboard-import-trigger. Base app endpoint is local http://localhost:3001/en.",
     "serverMode": "development",
     "envs": {
       "API_KEY": "sk-user-YUJCJ3ANs3B8SRSd8Ss6J0Y0UQV3uM55VY4OO-LTjk2Naf7MTzfikO9l26g3ieKR2dVPzj3xxabSTlEFOwSD2NExHRNQusmN95y_xE_aJwXzLpXAptKBBm5mQ6Zv46qUu8k"
     }
   },
-  "serverPort": 56460,
-  "proxy": "http://ecfeb96e-b63e-4a08-b189-a496f0b5318f:DP695hRoeDFZrKlxS60L4yg4RB8eU9yt@tun.testsprite.com:8080"
+  "serverPort": 57024,
+  "proxy": "http://90e781a5-88cb-4d72-822e-a11ce27b0ccc:jioQTrOcORBpG2mOvpP3yBu2t4K3BV2e@tun.testsprite.com:8080"
 }
