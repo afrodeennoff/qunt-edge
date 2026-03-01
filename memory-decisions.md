@@ -18,3 +18,7 @@
 - 2026-03-01: In development-mode TestSprite execution, expect subset execution behavior (15-case run observed) even when the plan file contains more cases.
 - 2026-03-01: Backend TestSprite runs in this environment are currently constrained by local endpoint reachability; until local API is reachable from the runner, backend test outcomes are transport failures rather than endpoint-contract validation.
 - 2026-03-01: `/api/referral` now maps unauthenticated server-auth failures (`User not authenticated`) to HTTP `401` instead of generic `500`, aligning API behavior with launch header/smoke gates.
+- 2026-03-01: Keep dashboard label `Trade Desk` and align tests/selectors to route `/dashboard/strategies` without renaming UI copy.
+- 2026-03-01: Add explicit `Updates` entry in home top navigation to satisfy discoverability and test intent.
+- 2026-03-01: Use deterministic `data-testid` anchors for auth/sidebar/import flows to reduce TestSprite selector fragility.
+- 2026-03-01: For `/api/cron`, return auth/config deterministic statuses (`401`/`503`) before provider-dependent work to avoid noisy generic `500` responses.

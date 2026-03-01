@@ -1351,6 +1351,63 @@
   - All failures are connection-layer errors from test runtime (`urllib3` connection/getresponse trace), not assertion-level API contract failures.
   - Local probe from current shell to `http://localhost:3001/api/health` returned `000`, indicating the backend endpoint is not reachable from this runtime path.
 
+# One-Shot Stabilization Implementation (2026-03-01)
+
+## Scope
+- Implemented one-shot stabilization across UI selectors, test plans, API hardening, preflight checks, and rerun workflow.
+
+## Acceptance Criteria
+- [x] App selectors and navigation updates implemented.
+- [x] Frontend/backend TestSprite plans realigned to current routes/endpoints.
+- [x] API hardening changes applied for deterministic auth/config failure behavior.
+- [x] Preflight runtime script added and validated.
+- [x] Frontend TestSprite rerun executed; backend TestSprite rerun attempted.
+- [x] Production smoke (direct, non-TestSprite) executed for public routes.
+
+## Completion Notes
+- Code changes implemented:
+  - Added stable auth test selectors in `app/[locale]/(authentication)/components/user-auth-form.tsx`:
+    - `auth-password-tab`, `auth-email-input`, `auth-password-input`, `auth-password-submit`.
+  - Added sidebar item test IDs and render-through support:
+    - `components/sidebar/dashboard-sidebar.tsx`
+    - `components/ui/unified-sidebar.tsx`
+    - IDs include `nav-dashboard`, `nav-trades`, `nav-trade-desk`, `nav-reports`, `nav-billing`, `nav-settings`, `nav-data`.
+  - Added explicit `Updates` link to top home navigation:
+    - `app/[locale]/(home)/components/Navigation.tsx`
+  - Added import trigger selector:
+    - `app/[locale]/dashboard/components/import/import-button.tsx` -> `dashboard-import-trigger`.
+  - API hardening updates:
+    - `app/api/cron/route.ts` now returns deterministic auth/config responses (`401` for missing auth header, `503` for missing `CRON_SECRET`/`RESEND_API_KEY`) before expensive processing.
+    - `app/api/email/welcome/route.ts` returns deterministic `503` with explicit code when `RESEND_API_KEY` missing.
+  - Added preflight runtime check:
+    - `scripts/testsprite-preflight.mjs`
+    - `package.json` script `testsprite:preflight`.
+- Test plan updates:
+  - Frontend plan corrected and expanded in `testsprite_tests/testsprite_frontend_test_plan.json`:
+    - `/en/login` replaced with `/en/authentication`,
+    - failing cases realigned to route/selector-driven steps,
+    - retained and harmonized `TC014`–`TC019`.
+  - Backend plan realigned to real endpoints in `testsprite_tests/testsprite_backend_test_plan.json`:
+    - `/api/health`, `/api/whop/checkout`, `/api/whop/checkout-team`, `/api/email/unsubscribe`, `/api/email/welcome`, `/api/cron`.
+- Verification:
+  - `npm run typecheck` -> pass.
+  - Targeted `eslint` on touched files -> warnings only, `0` errors.
+  - `npm run testsprite:preflight` -> pass (local `/en` and `/api/health` on `3001`).
+- Rerun outcomes:
+  - Frontend TestSprite rerun completed: `15 total`, `3 passed`, `12 failed`.
+  - Backend TestSprite rerun blocked by provider billing response (`403` insufficient credits).
+  - Direct backend API smoke fallback (local) passed for core hardening checks:
+    - `GET /api/whop/checkout` -> `405` + `Allow: POST`
+    - `GET /api/whop/checkout-team` -> `405` + `Allow: POST`
+    - `GET /api/cron` unauthorized -> `401`
+    - `GET /api/email/unsubscribe` missing token -> `401`
+    - `POST /api/email/welcome` unauthorized -> `401`
+  - Production public-route smoke (direct Playwright) passed for:
+    - `/en`, `/en/authentication`, `/en/pricing`, `/en/support`, `/en/updates`
+- Artifacts:
+  - Consolidated report: `testsprite_tests/testsprite-mcp-test-report.md`
+  - Latest TestSprite result JSON: `testsprite_tests/tmp/test_results.json`
+
 # Codebase-Wide Launch Plan Execution (2026-03-01)
 
 ## Scope

@@ -36,3 +36,8 @@
 - Local probe to `http://localhost:3001/api/health` from this runtime returned `000`, indicating local endpoint not reachable from the backend test runtime path.
 - Completed launch-gate rerun after codebase-wide fixes: `typecheck`, full `test` suite, full `lint` (warnings-only), production `build`, `check:route-budgets`, `analyze:bundle`, `test:smoke`, `perf:baseline`, and `perf:headers`.
 - Fixed `perf:headers` launch regression in `/api/referral` by returning `401` (not `500`) for unauthenticated requests in both `GET` and `POST` error paths.
+- Implemented one-shot stabilization pass: auth/sidebar/import test selectors, top-nav Updates link, TestSprite frontend/backend plan realignment, cron/welcome deterministic failure hardening, and TestSprite preflight script.
+- Verified with typecheck and targeted lint (warnings-only), plus preflight success on local `3001`.
+- Frontend TestSprite rerun completed but remained auth-gated (3/15 pass); backend TestSprite rerun was blocked by provider credit exhaustion (403).
+- Executed direct local API smoke fallback validating hardened endpoint behavior (`/api/whop/checkout*` 405, `/api/cron` 401 unauthorized, `/api/email/welcome` 401 unauthorized, `/api/email/unsubscribe` controlled 401).
+- Executed direct production public-route smoke on `https://qunt-edge.vercel.app/en` (home/auth/pricing/support/updates all reachable).
