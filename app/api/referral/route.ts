@@ -9,6 +9,10 @@ import {
   ReferralAlreadyAppliedError,
 } from '@/server/referral'
 
+function isUnauthenticatedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'User not authenticated'
+}
+
 export async function GET(_req: NextRequest) {
   try {
     const userId = await getDatabaseUserId()
@@ -44,6 +48,12 @@ export async function GET(_req: NextRequest) {
       },
     })
   } catch (error) {
+    if (isUnauthenticatedError(error)) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
     console.error('[referral/GET] Error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch referral data' },
@@ -98,6 +108,12 @@ export async function POST(req: NextRequest) {
       message: 'Referral code applied successfully',
     })
   } catch (error) {
+    if (isUnauthenticatedError(error)) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
     if (error instanceof ReferralAlreadyAppliedError) {
       return NextResponse.json(
         { error: 'You have already been referred' },
