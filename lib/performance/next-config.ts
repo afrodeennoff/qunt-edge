@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 export type OptimizedNextConfigResult = {
   config: NextConfig;
@@ -44,6 +45,7 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
   const warnings: string[] = [];
   const cpus = parseBuildCpus(process.env.NEXT_BUILD_CPUS, warnings);
   const imageHosts = getImageHosts(process.env.NEXT_PUBLIC_CDN_URL, process.env.NEXT_PUBLIC_SUPABASE_URL, warnings);
+  const projectRoot = path.resolve(process.cwd());
 
   const config: NextConfig = {
     poweredByHeader: false,
@@ -52,6 +54,10 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
     experimental: {
       ...(cpus ? { cpus } : {}),
     },
+    turbopack: {
+      root: projectRoot,
+    },
+    outputFileTracingRoot: projectRoot,
     images: {
       formats: ["image/avif", "image/webp"],
       minimumCacheTTL: 60 * 60 * 24 * 7,

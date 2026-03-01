@@ -12,6 +12,7 @@ import { fr, enUS } from 'date-fns/locale'
 import CommentNotificationEmail from '@/components/emails/blog/comment-notification'
 
 // resend will be initialized inside functions that need it
+const POST_NOT_FOUND_SENTINEL = "__POST_NOT_FOUND__"
 
 // Helper function to check if user is admin
 async function isAdmin(userId: string) {
@@ -300,15 +301,16 @@ export async function getPost(id: string) {
       },
     })
 
-    if (!post) {
-      throw new Error('Post not found')
-    }
+    if (!post) throw new Error(POST_NOT_FOUND_SENTINEL)
 
     return {
       ...post,
       isAuthor: currentUserId ? (post.userId === currentUserId || process.env.NODE_ENV === 'development') : false
     }
   } catch (error) {
+    if (error instanceof Error && error.message === POST_NOT_FOUND_SENTINEL) {
+      throw error
+    }
     console.error('Failed to fetch post:', error)
     throw new Error('Failed to fetch post')
   }

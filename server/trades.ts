@@ -443,7 +443,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
     return tradesIds.length
   } catch (error) {
     logger.error('[updateTrades] Error', { error })
-    return 0
+    throw error
   }
 }
 

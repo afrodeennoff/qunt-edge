@@ -1,4 +1,150 @@
+# Full Page End-to-End Audit (2026-03-01)
+
+## Scope
+- Audit the entire page surface end to end (public, auth, dashboard/teams/admin entrypoints) for runtime failures, navigation breakage, console/network errors, and major regressions.
+
+## Acceptance Criteria
+- [x] Static quality gates run with recorded evidence.
+- [x] Public page routes are browser-audited with console/network checks.
+- [x] Protected routes are checked for expected redirect/auth behavior.
+- [x] Findings are prioritized by severity with file-level references.
+- [x] Re-verification is captured for any in-scope fix.
+
+## Plan Checklist
+- [x] Create task plan and inventory route/page targets.
+- [x] Run static quality gates and collect evidence.
+- [x] Run browser E2E route audit pass with artifacts.
+- [x] Triage findings and implement minimal scoped fixes if clear.
+- [x] Re-run affected checks and document final results.
+
+## Current Step
+- **Completed:** end-to-end page audit, scoped fix, and re-verification.
+
+## Progress Notes
+- 2026-03-01: Loaded and applied `playwright` and `verification-before-completion` skills for this audit.
+- 2026-03-01: Inventory identified 46 page routes under `app/[locale]/**/page.tsx` to audit.
+- 2026-03-01: Static checks run (`npm run -s typecheck`, `npm run -s build`, `npm run -s check:route-budgets`, `npm run -s analyze:bundle`).
+- 2026-03-01: Playwright route sweeps completed across public pages plus protected/admin/team routes.
+- 2026-03-01: Identified and fixed nested `<button>` hydration defect in sidebar header by moving `SidebarTrigger` out of `SidebarMenuButton`.
+- 2026-03-01: Fixed community missing-post flow to preserve expected not-found path without noisy error logging.
+- 2026-03-01: Removed CSP report-only warning noise by applying `upgrade-insecure-requests` only in enforcing CSP mode.
+- 2026-03-01: Reduced dashboard app-route client manifest size by dynamically loading heavy dashboard-header action modules and removing dashboard-context dependency on `widget-registry`.
+- 2026-03-01: Added dev root alignment (`turbopack.root`, `outputFileTracingRoot`) to reduce root ambiguity during local audits.
+
+## Completion Notes
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npm run -s build` -> exit `0`.
+  - `npm run -s check:route-budgets` -> exit `0` (dashboard-family routes now within `80 KB` budget).
+  - `npm run -s analyze:bundle` -> exit `0`.
+  - `npx eslint components/ui/unified-sidebar.tsx app/[locale]/(landing)/actions/community.ts app/[locale]/(landing)/community/post/[id]/page.tsx tests/sidebar-trigger-contract.test.ts` -> exit `0` (warnings only).
+  - `npm test -- --run tests/sidebar-trigger-contract.test.ts` -> exit `0` (`3` tests passed).
+  - Playwright checks:
+    - Redirect behavior confirmed for `/en/dashboard*`, `/en/admin`, `/en/teams/dashboard` -> localized auth redirect with `next` param.
+    - `/en/teams/join` and `/en/teams/manage` -> no nested-button/hydration errors.
+    - `/en/community/post/non-existent` -> no `Failed to fetch post` console spam in browser check.
+    - 32-route sequential crawl completed without navigation failure in `next dev`.
+
+# Shared Trade Table Consistency Fix (2026-03-01)
+
+## Scope
+- Implement shared reliability/correctness fixes for all surfaces using `TradeTableReview`.
+
+## Acceptance Criteria
+- [x] Trade update failures hard-fail and propagate to client rollback paths.
+- [x] Footer total count reflects raw underlying trade count.
+- [x] Expandability logic matches visible expand button behavior.
+- [x] Targeted verification commands completed.
+
+## Plan Checklist
+- [x] Update `updateTradesAction` to throw on server failure.
+- [x] Add `updateTrades` client guard for zero/mismatch updated-count returns.
+- [x] Add group/ungroup error handling in `TradeTableReview`.
+- [x] Replace grouped-row count footer with underlying trade count helper.
+- [x] Normalize row expandability to `trades.length > 1`.
+- [x] Run `typecheck` and targeted `eslint`.
+
+## Current Step
+- **Completed:** implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `server/trades.ts`
+  - `context/data-provider.tsx`
+  - `app/[locale]/dashboard/components/tables/trade-table-review.tsx`
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npx eslint app/[locale]/dashboard/components/tables/trade-table-review.tsx context/data-provider.tsx server/trades.ts` -> exit `0` (warnings only, no errors).
+
+# Strategies Related-Page Impact Audit (2026-03-01)
+
+## Scope
+- Find all pages/flows that reuse `/strategies` trade-table logic and identify related shared issues.
+
+## Acceptance Criteria
+- [x] Route-level impact map produced for all reachable `TradeTableReview` surfaces.
+- [x] Shared issues cross-referenced to each impacted page/flow.
+- [x] Evidence links captured with file references.
+
+## Plan Checklist
+- [x] Inventory all page routes and `TradeTableReview` usages.
+- [x] Trace route composition paths (tab shell, widgets, modal, import flow).
+- [x] Map previously found strategy issues to every impacted route/flow.
+
+## Current Step
+- **Completed:** related-page impact mapping ready for handoff.
+
+# Strategies Route Audit (2026-03-01)
+
+## Scope
+- Audit `/strategies` (`TradeTableReview`) for correctness, data integrity, and UX/reporting accuracy regressions.
+
+## Acceptance Criteria
+- [x] Route/component implementation reviewed with file-level evidence.
+- [x] Findings prioritized by severity with exact references.
+- [x] Verification commands executed and outcomes captured.
+
+## Plan Checklist
+- [x] Inspect `/strategies` page and `TradeTableReview` implementation.
+- [x] Trace update/group/delete flows through data-provider and server actions.
+- [x] Run focused lint/type verification on touched route files.
+- [x] Document findings and residual risks.
+
+## Current Step
+- **Completed:** `/strategies` audit findings documented for handoff.
+
+## Completion Notes
+- Verification:
+  - `npx eslint app/[locale]/dashboard/strategies/page.tsx app/[locale]/dashboard/components/tables/trade-table-review.tsx` -> exit `0` (warnings only).
+  - `npm run -s typecheck` -> exit `0`.
+
 # Widget Opacity Normalization (2026-02-28)
+
+# Compact RR Widget Cleanup (2026-03-01)
+
+## Scope
+- Make compact Risk/Reward widget visually centered, slightly larger, and single-surface (no nested/double card).
+
+## Acceptance Criteria
+- [x] Compact RR content is centered in the widget.
+- [x] RR value typography is larger than prior compact version.
+- [x] Nested inner panel chrome is removed.
+- [x] Verification passes.
+
+## Plan Checklist
+- [x] Locate compact RR widget render branch.
+- [x] Replace nested panel markup with single centered row.
+- [x] Run focused verification and record result.
+
+## Current Step
+- **Completed:** compact RR widget cleanup + verification.
+
+## Completion Notes
+- Verification:
+  - `npm run typecheck` -> exit `0`.
+- 2026-03-01 follow-up: refined compact RR alignment to full-center using an `inline-flex` centered cluster (`mx-auto`) so all metric elements remain centered as one group.
+- 2026-03-01 follow-up: aligned compact RR with shared compact-widget visual style using `precision-panel` while keeping centered layout and larger RR value.
+- 2026-03-01 final follow-up: adjusted RR compact classes to match similar compact statistic widgets exactly (`p-2` wrapper, `w-full` precision-panel row, compact icon/label/value sizing).
 
 ## Scope
 - Normalize opacity usage across core dashboard widget components.
@@ -50,7 +196,7 @@
 - [ ] Re-run verification and document final evidence.
 
 ## Current Step
-- **In progress:** static/build verification gates for mobile audit.
+- **Paused:** static/build verification gates for mobile audit (superseded by full-page audit request).
 
 ## Progress Notes
 - 2026-02-28: Started user-requested mobile optimization end-to-end audit.

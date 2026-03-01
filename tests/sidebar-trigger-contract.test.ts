@@ -23,4 +23,15 @@ describe("Dashboard sidebar trigger contract", () => {
     expect(triggerUsages).toHaveLength(1)
     expect(source).toContain("hidden md:flex")
   })
+
+  it("does not nest SidebarTrigger inside SidebarMenuButton", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components/ui/unified-sidebar.tsx"),
+      "utf8"
+    )
+
+    expect(source).toMatch(
+      /<SidebarMenuButton[\s\S]*?<\/SidebarMenuButton>\s*<SidebarTrigger/
+    )
+  })
 })

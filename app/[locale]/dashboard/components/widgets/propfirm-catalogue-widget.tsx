@@ -43,7 +43,7 @@ export default function PropfirmCatalogueWidget() {
                     {sortedStats.map((stat) => (
                         <div
                             key={stat.propfirmName}
-                            className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 border border-border/50 hover:bg-secondary/30 transition-colors"
+                            className="flex items-center justify-between p-3 rounded-xl bg-secondary/22 border border-border/55 hover:bg-secondary/30 transition-colors"
                         >
                             <div className="flex flex-col gap-1 min-w-0">
                                 <span className="font-bold text-sm truncate tracking-tight">{stat.propfirmName}</span>

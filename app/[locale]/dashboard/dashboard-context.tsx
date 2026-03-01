@@ -4,12 +4,11 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import { useUserStore } from '@/store/user-store'
 import { useI18n } from "@/locales/client"
 import { Widget, WidgetType, WidgetSize, LayoutItem } from './types/dashboard'
-import { WIDGET_REGISTRY } from './config/widget-registry'
 import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { DashboardLayoutWithWidgets } from '@/store/user-store'
 import { useData } from '@/context/data-provider'
-import { DashboardLayout as PrismaDashboardLayout, Prisma } from '@/prisma/generated/prisma'
+import type { DashboardLayout as PrismaDashboardLayout, Prisma } from '@/prisma/generated/prisma'
 
 // --- Helper Functions (Moved from WidgetCanvas) ---
 export const sizeToGrid = (size: WidgetSize, isSmallScreen = false): { w: number, h: number } => {
@@ -36,8 +35,7 @@ export const sizeToGrid = (size: WidgetSize, isSmallScreen = false): { w: number
 }
 
 export const getWidgetGrid = (type: WidgetType, size: WidgetSize, isSmallScreen = false): { w: number, h: number } => {
-    const config = WIDGET_REGISTRY[type]
-    if (!config) return isSmallScreen ? { w: 12, h: 4 } : { w: 6, h: 4 }
+    void type
     if (isSmallScreen) return sizeToGrid(size, true)
     return sizeToGrid(size)
 }
