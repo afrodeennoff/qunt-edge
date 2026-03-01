@@ -1,0 +1,42 @@
+[
+  {
+    "id": "TC001",
+    "title": "validate_email_password_authentication_flow",
+    "description": "Test the email/password authentication endpoint POST /api/auth/login to ensure users can successfully log in with valid credentials and receive appropriate error messages for invalid credentials."
+  },
+  {
+    "id": "TC002",
+    "title": "verify_dashboard_data_retrieval",
+    "description": "Test the GET /api/trades and GET /api/user-data endpoints to confirm authenticated users can retrieve trade data and user-specific data for dashboard analytics and widgets."
+  },
+  {
+    "id": "TC003",
+    "title": "test_trade_data_import_synchronization",
+    "description": "Test the POST /api/sync endpoint to verify users can trigger trade import and synchronization jobs, handle success confirmations, and properly display error notifications on failure."
+  },
+  {
+    "id": "TC004",
+    "title": "validate_teams_dashboard_access_and_data",
+    "description": "Test the GET /api/teams/:slug endpoint to ensure authenticated team members can access team dashboard data and non-members receive access denied responses."
+  },
+  {
+    "id": "TC005",
+    "title": "verify_health_endpoint_operational_signals",
+    "description": "Test GET /api/health to validate service availability response shape, status signaling, and non-sensitive diagnostics fields."
+  },
+  {
+    "id": "TC006",
+    "title": "validate_checkout_endpoints_post_only_enforcement",
+    "description": "Test /api/whop/checkout and /api/whop/checkout-team to confirm GET requests return 405 with Allow: POST and POST enforces expected security checks."
+  },
+  {
+    "id": "TC007",
+    "title": "verify_cron_endpoints_require_service_auth",
+    "description": "Test cron routes such as /api/cron, /api/cron/investing, and /api/cron/compute-trade-data to verify unauthorized requests are rejected and authorized requests follow expected behavior."
+  },
+  {
+    "id": "TC008",
+    "title": "validate_unsubscribe_and_email_security_flows",
+    "description": "Test /api/email/unsubscribe and /api/email/welcome related behavior to ensure signed-token/secret checks are enforced and invalid requests fail closed."
+  }
+]

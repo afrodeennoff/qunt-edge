@@ -116,11 +116,20 @@ export function UserSelector({ users, selectedUsers, onSelectionChange }: UserSe
               return (
                 <div
                   key={user.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
                   className={cn(
                     "flex items-center space-x-3 p-3 rounded-lg border transition-colors cursor-pointer",
                     isSelected && "bg-primary/5 border-primary"
                   )}
                   onClick={() => toggleUser(user.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      toggleUser(user.id)
+                    }
+                  }}
                 >
                   <Checkbox
                     checked={isSelected}

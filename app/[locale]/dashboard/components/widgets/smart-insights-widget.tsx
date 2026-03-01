@@ -115,7 +115,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                         <Brain className="h-4 w-4 text-primary" />
                         {t('widgets.smartInsights.title')}
                     </CardTitle>
-                    <CardDescription className="text-[10px] text-muted-foreground/70 uppercase tracking-widest">
+                    <CardDescription className="text-[10px] text-muted-foreground/85 uppercase tracking-widest">
                         {t('widgets.smartInsights.tooltip')}
                     </CardDescription>
                 </div>
@@ -164,13 +164,13 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                                 </div>
                                                 <div>
                                                     <h4 className="text-sm font-medium leading-none">{insight.title}</h4>
-                                                    <span className="text-[10px] text-muted-foreground/70">
+                                                    <span className="text-[10px] text-muted-foreground/85">
                                                         {formatInsightDate(insight.timestamp)}
                                                     </span>
                                                 </div>
                                             </div>
                                             {insight.confidence && (
-                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/22 border-border/55 text-muted-foreground/70">
+                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-secondary/22 border-border/55 text-muted-foreground/85">
                                                     {insight.confidence}% Conf.
                                                 </Badge>
                                             )}

@@ -12,3 +12,8 @@
 - 2026-03-01: Checkout creation endpoints now enforce POST-only semantics; GET returns `405` with `Allow: POST` for `/api/whop/checkout` and `/api/whop/checkout-team`.
 - 2026-03-01: Browser-initiated checkout mutations now enforce trusted-origin and form content-type checks before processing request payloads.
 - 2026-03-01: Supabase security posture now explicitly forces RLS and deny-by-default policies on `AiRequestLog`, `AuthAttempt`, `OAuthState`, `RecoveryCode`, `ReferralRedemption`, and `TraderBenchmarkSnapshot` with `service_role_all` carve-out.
+- 2026-03-01: TestSprite execution in this repo requires seeded PRD artifacts (`testsprite_tests/tmp/prd_files/*`) before frontend plan and code execution can produce stable outputs.
+- 2026-03-01: Authentication route for automated E2E in this app is `/en/authentication` (not `/en/login`); tests assuming `/en/login` create false negatives.
+- 2026-03-01: Keep adding explicit `/en/authentication` password-flow test cases in TestSprite plans because generated default `/en/login` steps frequently cause false negatives.
+- 2026-03-01: In development-mode TestSprite execution, expect subset execution behavior (15-case run observed) even when the plan file contains more cases.
+- 2026-03-01: Backend TestSprite runs in this environment are currently constrained by local endpoint reachability; until local API is reachable from the runner, backend test outcomes are transport failures rather than endpoint-contract validation.

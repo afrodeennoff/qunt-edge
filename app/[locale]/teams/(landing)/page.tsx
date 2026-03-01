@@ -18,9 +18,11 @@ import {
   Globe,
 } from 'lucide-react'
 import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell'
+import { useCurrentLocale } from '@/locales/client'
 
 export default function TeamPage() {
   const t = useI18n()
+  const locale = useCurrentLocale()
 
   useEffect(() => {
     ;(async () => {
@@ -61,7 +63,7 @@ export default function TeamPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/authentication?next=teams/dashboard"
+              href={`/${locale}/authentication?next=${encodeURIComponent(`/${locale}/teams/dashboard`)}`}
               className="inline-flex h-10 items-center rounded-xl border border-white/15 bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
             >
               {t('teams.cta')}
@@ -142,7 +144,7 @@ export default function TeamPage() {
         <p className="mb-5 text-fg-muted">{t('teams.cta.createAccount.description')}</p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/authentication?next=teams/dashboard"
+            href={`/${locale}/authentication?next=${encodeURIComponent(`/${locale}/teams/dashboard`)}`}
             className="inline-flex h-10 items-center rounded-xl border border-white/15 bg-white px-6 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
           >
             {t('teams.cta.createAccount.button')}

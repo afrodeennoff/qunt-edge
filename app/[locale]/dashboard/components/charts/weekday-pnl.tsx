@@ -218,7 +218,19 @@ export default function WeekdayPNLChart({
           size === "small" ? "p-1" : "p-2 sm:p-3",
         )}
       >
-        <div className="w-full h-full cursor-pointer" onClick={handleClick}>
+        <div
+          className="w-full h-full cursor-pointer"
+          role="button"
+          tabIndex={0}
+          aria-label="Toggle weekday filter"
+          onClick={handleClick}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleClick();
+            }
+          }}
+        >
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart

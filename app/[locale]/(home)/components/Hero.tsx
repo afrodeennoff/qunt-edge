@@ -42,7 +42,7 @@ export default function Hero() {
           variants={shouldAnimate ? { show: { transition: { staggerChildren: 0.1 } } } : undefined}
         >
           <motion.div variants={fadeUp} className="mb-8 flex justify-center">
-            <Badge variant="secondary" className="border-white/10 px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] backdrop-blur-sm [font-family:var(--home-copy)]">
+            <Badge variant="secondary" className="border-white/10 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] backdrop-blur-sm [font-family:var(--home-copy)]">
               <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" />
               Built for serious discretionary traders
             </Badge>
@@ -64,12 +64,12 @@ export default function Hero() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
-            <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-2xl text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg shadow-primary/20 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
+            <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-2xl text-[11px] font-semibold uppercase tracking-[0.14em] shadow-lg shadow-primary/20 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
               <Link href={`/${locale}/authentication?next=dashboard`}>
                 Start My Performance Audit
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-2xl border-white/12 bg-black/40 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm hover:bg-black/60 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
+            <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-2xl border-white/12 bg-black/40 text-[11px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm hover:bg-black/60 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
               <Link href={`/${locale}/#pricing`}>
                 Compare Plans
                 <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -82,15 +82,15 @@ export default function Hero() {
               <CardContent className="p-4 sm:p-6">
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Session Grade Confidence</p>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/85 [font-family:var(--home-copy)]">Session Grade Confidence</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">94%</p>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Rule Adherence Uplift</p>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/85 [font-family:var(--home-copy)]">Rule Adherence Uplift</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-fg-primary [font-family:var(--home-display)]">+37%</p>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Impulse Trades Reduced</p>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/85 [font-family:var(--home-copy)]">Impulse Trades Reduced</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-primary [font-family:var(--home-display)]">-42%</p>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ export default function Hero() {
             </Card>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">
+          <motion.div variants={fadeUp} className="mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/85 [font-family:var(--home-copy)]">
             <span>Tradovate</span>
             <span>Rithmic</span>
             <span>IBKR</span>

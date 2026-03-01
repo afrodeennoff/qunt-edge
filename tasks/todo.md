@@ -1226,3 +1226,127 @@
   - Verified findings using `nl -ba` line-level source inspection on impacted files.
 - Output:
   - Prioritized findings with route impact and exact references ready for user handoff.
+
+# TestSprite Full E2E Validation (2026-03-01)
+
+## Scope
+- Use TestSprite MCP to run robust end-to-end testing for the provided production URL `https://qunt-edge.vercel.app/en` and project codebase at `/Users/timon/Downloads/final-qunt-edge-main`.
+- Exercise TestSprite setup, plan generation, and test execution flow.
+
+## Acceptance Criteria
+- [x] TestSprite project initialization status confirmed.
+- [x] Frontend/backend test plan generation attempted and outcomes recorded.
+- [x] Test execution triggered with available TestSprite entrypoint(s).
+- [x] Pass/fail evidence and blockers documented with next actions.
+
+## Plan Checklist
+- [x] Validate TestSprite config precondition (`.testsprite/config.json`) and repo readiness.
+- [x] Initialize TestSprite (only if config is absent).
+- [x] Generate required TestSprite PRD/summary/test plans.
+- [x] Execute generated tests and collect report output.
+- [x] Summarize coverage, failures, and residual risks for handoff.
+
+## Current Step
+- **Completed:** two TestSprite execution cycles completed; report artifacts recorded.
+
+## Completion Notes
+- Bootstrap behavior:
+  - Initial `testsprite_bootstrap` MCP call timed out, but generated `testsprite_tests/tmp/config.json` with `status: init` and local endpoint details.
+  - Manual unblock applied by creating missing pipeline directories and PRD source file under `testsprite_tests/tmp/prd_files`.
+- Artifact generation:
+  - Generated/confirmed:
+    - `testsprite_tests/standard_prd.json`
+    - `testsprite_tests/testsprite_frontend_test_plan.json`
+    - `testsprite_tests/tmp/raw_report.md`
+    - `testsprite_tests/tmp/test_results.json`
+    - `testsprite_tests/testsprite-mcp-test-report.md`
+- Execution evidence:
+  - First execution completed with low authenticated coverage due login-route mismatch assumptions.
+  - Second execution (with explicit `/en/authentication` instruction) completed and improved stability.
+  - Final run pass rate: `53.85%` (`7/13` passed, `6/13` failed).
+- Major blockers observed:
+  - Domain mismatch in generated tests (`localhost:3000` used for many flows vs requested `https://qunt-edge.vercel.app/en`).
+  - Dashboard `Strategies` navigation/control not found by generated tests.
+  - Expected `Net P&L` control path not found in reports widget interaction test.
+  - Public `Updates` discovery and some pricing-page interactive element detection mismatches.
+
+# TestSprite Plan Expansion + Direct Execute (2026-03-01)
+
+## Scope
+- Add more TestSprite frontend test cases to the existing generated plan.
+- Trigger `testsprite_generate_code_and_execute` directly after plan expansion.
+
+## Acceptance Criteria
+- [x] Additional test cases appended to frontend test plan JSON.
+- [x] Direct `testsprite_generate_code_and_execute` call executed.
+- [x] Returned terminal execution command run and results captured.
+
+## Plan Checklist
+- [x] Extend `testsprite_frontend_test_plan.json` with new high-value test cases (`TC014+`).
+- [x] Call TestSprite generate+execute tool directly with robust instructions.
+- [x] Execute terminal command and summarize incremental pass/fail outcomes.
+
+## Current Step
+- **Completed:** expanded-plan execution completed and results captured.
+
+## Completion Notes
+- Plan updates:
+  - Added `TC014` to `TC019` in `testsprite_tests/testsprite_frontend_test_plan.json` to increase coverage for:
+    - explicit `/en/authentication` password login path,
+    - `/en/dashboard/billing`,
+    - `/en/dashboard/settings`,
+    - `/en/dashboard/import`,
+    - `/en/dashboard/reports`,
+    - direct `/en/updates` route validation.
+- Direct execution:
+  - Called `testsprite_generate_code_and_execute` directly via MCP.
+  - Executed returned terminal command to run tests.
+- Latest run metrics:
+  - Executed tests: `15`
+  - Passed: `9`
+  - Failed: `6`
+  - Pass rate: `60.00%`
+- Improvements from prior run:
+  - Prior run: `7/13` passed (`53.85%`)
+  - Expanded run: `9/15` passed (`60.00%`)
+  - New passes include:
+    - `TC014` (localized auth/password flow),
+    - `TC015` (billing route),
+    - `TC016` (settings route).
+- Remaining failures:
+  - `TC002`, `TC003` (strategies route/nav assumptions and /en/login fallback in generated actions),
+  - `TC006`, `TC008` (generated auth flow still hitting `/en/login` in some runs),
+  - `TC010` (updates discoverability from home navigation),
+  - `TC017` (import page blocked by authentication processing modal / missing visible import controls).
+
+## Production-Only Attempt (Constraint: no localhost)
+- Attempted to force TestSprite to production URL only by setting `testsprite_tests/tmp/config.json` `localEndpoint` to `https://qunt-edge.vercel.app/en` and re-running direct execution.
+- Result: TestSprite terminal runner fails before tests start with:
+  - `checkPortListening failed: 443 localhost`
+  - `Failed to set up testing tunnel: Because the local project is not running on port 443`
+- Conclusion: current TestSprite runner requires a local listening endpoint for tunnel bootstrap and cannot run true production-only mode without localhost in this environment.
+
+# TestSprite Backend Expansion + Execution (2026-03-01)
+
+## Scope
+- Add more backend test cases to TestSprite backend plan and run them.
+
+## Acceptance Criteria
+- [x] Backend plan expanded with additional API/security scenarios.
+- [x] Backend generate+execute flow invoked directly.
+- [x] Backend execution results collected.
+
+## Completion Notes
+- Added backend cases `TC005`–`TC008` to [testsprite_tests/testsprite_backend_test_plan.json](/Users/timon/Downloads/final-qunt-edge-main/testsprite_tests/testsprite_backend_test_plan.json):
+  - health endpoint operational checks,
+  - checkout POST-only enforcement,
+  - cron auth enforcement,
+  - unsubscribe/email security flows.
+- Ran backend execution twice (initial and rerun bound to port `3001`).
+- Latest backend run outcome:
+  - Total: `8`
+  - Passed: `0`
+  - Failed: `8`
+- Observed blocker pattern:
+  - All failures are connection-layer errors from test runtime (`urllib3` connection/getresponse trace), not assertion-level API contract failures.
+  - Local probe from current shell to `http://localhost:3001/api/health` returned `000`, indicating the backend endpoint is not reachable from this runtime path.

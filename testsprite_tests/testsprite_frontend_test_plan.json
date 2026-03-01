@@ -1,0 +1,721 @@
+[
+  {
+    "id": "TC001",
+    "title": "Dashboard loads with core analytics widgets and charts visible (authenticated)",
+    "description": "Verifies an authenticated user can open the dashboard and see key widgets/charts rendered.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Charts\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Trades\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Navigate from Dashboard to Strategies page using in-app navigation",
+    "description": "Verifies the user can move between dashboard pages to reach Strategies without direct URL navigation.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Strategies\" in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/strategies\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Strategies\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Filter trade statistics on Strategies and see results update",
+    "description": "Verifies filtering controls on the Strategies page update visible trade statistics, chart, or table output.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Strategies\" in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Last 30 days\" from the date range dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Last 30 days\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Strategy performance\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Open a dashboard widget and view its detailed panel/state",
+    "description": "Verifies a dashboard widget can be opened and its details are visible to the user.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Trades\" widget"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Trades\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Trade table\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Close\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Interact with a widget control and see chart/table update",
+    "description": "Verifies that interacting with a widget control updates visible data in a chart or table.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Reports\" tab in the dashboard navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Net P&L\" from the metric dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Net P&L\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Report chart\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Navigate across Dashboard, Reports, and back to Dashboard without losing UI shell",
+    "description": "Verifies the authenticated dashboard shell remains functional while navigating across analytics pages.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Reports\" in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/reports\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Empty/No-data state messaging on analytics surfaces (if applicable)",
+    "description": "Verifies the UI shows a clear empty state when no trades/analytics are available (without backend manipulation).",
+    "category": "Dashboard analytics and widgets",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Strategies\" in the dashboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Trade table\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"No data\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Authentication required messaging when attempting dashboard access (in-session unauthenticated)",
+    "description": "Verifies the app shows an authentication-required message when the session is not authorized and dashboard access is attempted.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"invalid_user@example.com\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"wrong-password\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Invalid\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /en/authentication"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Authentication\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Discover pricing from home and reach authentication via pricing CTA",
+    "description": "Verifies a visitor can navigate from the home page to pricing, view plan details, and use a pricing CTA to reach the authentication page.",
+    "category": "Pricing and marketing discovery",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the link labeled \"Pricing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/pricing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Pricing\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the plans section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Plan\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on a visible pricing CTA button that indicates signing in or getting started"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Navigate from home to updates page from the public header/navigation",
+    "description": "Verifies a visitor can discover and open the Updates page from the home page navigation.",
+    "category": "Pricing and marketing discovery",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the link labeled \"Updates\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/updates\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Updates\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"updates list or feed\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Navigate from home to support page from the public header/navigation",
+    "description": "Verifies a visitor can open the Support page and see contact/help content.",
+    "category": "Pricing and marketing discovery",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the link labeled \"Support\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/support\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Support\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"support contact or help content\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Pricing page displays plan details content on successful load",
+    "description": "Verifies the pricing page loads and presents plan details that a visitor can read.",
+    "category": "Pricing and marketing discovery",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/pricing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/pricing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Pricing\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the plans section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Monthly\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Year\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Public navigation allows switching between marketing pages without authentication",
+    "description": "Verifies a visitor can move from Pricing to Support using on-page navigation and remains in public routes.",
+    "category": "Pricing and marketing discovery",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/pricing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/pricing\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the link labeled \"Support\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/support\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Support\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the link labeled \"Pricing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/pricing\""
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Login via /en/authentication password flow and land on dashboard",
+    "description": "Verifies the localized authentication route supports password sign-in and redirects to the dashboard.",
+    "category": "Email/password authentication",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/authentication\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Password\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign In with Password\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Open billing page from dashboard shell after authentication",
+    "description": "Verifies the billing route is reachable and renders billing/subscription content for an authenticated user.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/authentication\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Password\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign In with Password\" button"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/dashboard/billing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/dashboard/billing\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Billing\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Open settings page and verify account settings surface",
+    "description": "Verifies authenticated user can open settings and see account/profile configuration content.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/authentication\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Password\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign In with Password\" button"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/dashboard/settings\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/dashboard/settings\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Settings\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Open import page and verify trade import entrypoint is visible",
+    "description": "Verifies the import route loads and exposes synchronization/import UI affordances for authenticated users.",
+    "category": "Trade data import",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/authentication\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Password\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign In with Password\" button"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/dashboard/import\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/dashboard/import\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Import\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Open reports page and verify key reporting context is present",
+    "description": "Verifies authenticated user can open reports page and view reporting header/context.",
+    "category": "Dashboard analytics and widgets",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/authentication\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Password\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign In with Password\" button"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/dashboard/reports\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/dashboard/reports\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reports\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Direct-load updates page and verify update feed context",
+    "description": "Verifies public updates route is reachable directly even if not exposed prominently in home navigation.",
+    "category": "Pricing and marketing discovery",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/en/updates\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/en/updates\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Updates\" is visible"
+      }
+    ]
+  }
+]

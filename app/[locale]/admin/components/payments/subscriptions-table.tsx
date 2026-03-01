@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cancelSubscriptionAction } from '../../actions/payment-actions'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
 
 interface Subscription {
     id: string
+    userId: string
     plan: string
     status: string
     interval: string | null
@@ -44,7 +44,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
             } else {
                 toast.error(result.error || "Failed to cancel subscription")
             }
-        } catch (error) {
+        } catch {
             toast.error("An error occurred")
         } finally {
             setIsCancelling(null)
@@ -86,20 +86,10 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                                         variant="ghost"
                                         size="sm"
                                         className="text-semantic-error hover:text-semantic-error hover:bg-semantic-error-bg"
-                                        onClick={() => handleCancel(sub.user.email)} // Assuming userId logic inside action handles lookup, but standard uses userId. 
-                                    // Wait, our action takes userId, but table has sub.user.email? 
-                                    // Let's check schema. Subscription has userId.
-                                    // We should pass sub.userId which we might need to select in the action too?
-                                    // The schema says Subscription has userId.
-                                    // Let's adjust action to return userId or check if we mapped it.
-                                    // Actually, let's fix the prop usage here. We need sub.userId.
-                                    // I will assume for now I can pass sub.userId if I include it in interface, 
-                                    // but the action used `include: { user: ... }`. 
-                                    // Prisma returns top level scalar fields by default so userId is there.
+                                        disabled={isCancelling === sub.userId}
+                                        onClick={() => handleCancel(sub.userId)}
                                     >
-                                        {/* We need to pass sub.userId not email to cancelSubscriptionAction which expects userId */}
-                                        {/* Let's fix the onClick to use sub.userId, but typescript interface needs it */}
-                                        Cancel
+                                        {isCancelling === sub.userId ? 'Cancelling...' : 'Cancel'}
                                     </Button>
                                 )}
                             </TableCell>

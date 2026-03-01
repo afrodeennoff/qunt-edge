@@ -36,7 +36,7 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                         <span className={score >= 80 ? "metric-positive" : "metric-negative font-normal"}>
                             {score}
                         </span>
-                        <span className="text-base text-muted-foreground/70 ml-1">/ 100</span>
+                        <span className="text-base text-muted-foreground/85 ml-1">/ 100</span>
                     </div>
                 </div>
                 <div className={cn(
@@ -46,15 +46,15 @@ export default function TradingScoreWidget({ size }: { size?: string }) {
                 </div>
                 <div className="mt-6 grid grid-cols-3 gap-2 w-full text-center">
                     <div className="flex flex-col p-2.5 bg-secondary/22 rounded-xl border border-border/55">
-                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/70">Win Rate</span>
+                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/85">Win Rate</span>
                         <span className="font-semibold text-sm tabular-nums mt-0.5 text-foreground/90">{metrics.winRate.toFixed(1)}%</span>
                     </div>
                     <div className="flex flex-col p-2.5 bg-secondary/22 rounded-xl border border-border/55">
-                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/70">P. Factor</span>
+                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/85">P. Factor</span>
                         <span className="font-semibold text-sm tabular-nums mt-0.5 text-foreground/90">{metrics.profitFactor.toFixed(2)}</span>
                     </div>
                     <div className="flex flex-col p-2.5 bg-secondary/22 rounded-xl border border-border/55">
-                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/70">Trades</span>
+                        <span className="text-[10px] font-medium tracking-tight text-muted-foreground/85">Trades</span>
                         <span className="font-semibold text-sm tabular-nums mt-0.5 text-foreground/90">{metrics.totalTrades}</span>
                     </div>
                 </div>

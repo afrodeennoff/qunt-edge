@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
                     <span className="text-sm font-bold tracking-tighter uppercase mono">Qunt Edge</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8 text-[10px] font-bold uppercase tracking-widest text-zinc-500 max-w-md">
+                <div className="grid grid-cols-2 gap-8 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-400 max-w-md">
                     <div className="flex flex-col gap-2">
                         <span className="text-white mb-2">Product</span>
                         <Link href={`/${locale}/#features`} className="hover:text-white transition-colors">Features</Link>
@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
                         <Link href={`/${locale}/disclaimers`} className="hover:text-white transition-colors">Disclaimers</Link>
                     </div>
                 </div>
-                <div className="text-[10px] mono text-zinc-600">
+                <div className="text-[11px] mono text-zinc-500">
                     © {new Date().getFullYear()} Qunt Edge. All rights reserved. Professional trading analytics.
                 </div>
             </div>

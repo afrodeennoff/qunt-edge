@@ -120,6 +120,7 @@ export function WeeklyRecapPreview() {
                 variant="outline"
                 size="icon"
                 onClick={() => setViewMode(viewMode === "desktop" ? "mobile" : "desktop")}
+                aria-label={viewMode === "desktop" ? "Switch to mobile preview" : "Switch to desktop preview"}
                 title={`Switch to ${viewMode === "desktop" ? "mobile" : "desktop"} view`}
               >
                 {viewMode === "desktop" ? <Smartphone className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
@@ -129,6 +130,7 @@ export function WeeklyRecapPreview() {
                 size="icon"
                 onClick={() => setZoom((prev: number) => Math.max(0.5, prev - 0.1))}
                 disabled={zoom <= 0.5}
+                aria-label="Zoom out preview"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -138,6 +140,7 @@ export function WeeklyRecapPreview() {
                 size="icon"
                 onClick={() => setZoom((prev: number) => Math.min(2, prev + 0.1))}
                 disabled={zoom >= 2}
+                aria-label="Zoom in preview"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -149,7 +152,7 @@ export function WeeklyRecapPreview() {
             {/* Edit Form - Always visible */}
             <div className="p-6 space-y-6 overflow-y-auto">
               <div className="space-y-2">
-                <Label>Select User</Label>
+                <Label htmlFor="weekly-recap-user-search">Select User</Label>
                 <div className="relative">
                   <Command 
                     className="w-full" 
@@ -161,6 +164,7 @@ export function WeeklyRecapPreview() {
                     }}
                   >
                     <CommandInput 
+                      id="weekly-recap-user-search"
                       ref={inputRef}
                       placeholder="Search users..." 
                       value={searchQuery}

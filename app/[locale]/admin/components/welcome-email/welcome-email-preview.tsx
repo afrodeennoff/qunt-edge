@@ -55,6 +55,7 @@ export function WelcomeEmailPreview() {
                 size="icon"
                 onClick={() => setZoom(prev => Math.max(0.5, prev - 0.1))}
                 disabled={zoom <= 0.5}
+                aria-label="Zoom out preview"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -64,6 +65,7 @@ export function WelcomeEmailPreview() {
                 size="icon"
                 onClick={() => setZoom(prev => Math.min(2, prev + 0.1))}
                 disabled={zoom >= 2}
+                aria-label="Zoom in preview"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>

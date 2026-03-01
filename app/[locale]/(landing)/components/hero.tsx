@@ -2,12 +2,14 @@
 import React, { useRef } from 'react';
 import { motion, Variants, useScroll, useTransform } from 'framer-motion';
 import Link from "next/link";
+import { useCurrentLocale } from "@/locales/client";
 
 interface HeroProps {
   onStart?: () => void;
 }
 
 export default function Hero({ onStart }: HeroProps) {
+  const locale = useCurrentLocale();
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -82,14 +84,14 @@ export default function Hero({ onStart }: HeroProps) {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
         >
           <Link
-            href="/dashboard"
+            href={`/${locale}/dashboard`}
             className="touch-target group relative inline-flex h-12 w-full sm:w-auto min-w-[220px] items-center justify-center rounded-full bg-white px-8 text-center text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-black transition-all hover:bg-white hover:shadow-none"
           >
             Apply for Access
           </Link>
 
           <Link
-            href="/updates"
+            href={`/${locale}/updates`}
             className="touch-target text-zinc-500 hover:text-white transition-colors text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] flex items-center gap-2 group"
           >
              View Documentation

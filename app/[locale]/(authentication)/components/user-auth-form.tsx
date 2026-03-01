@@ -447,7 +447,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                 autoComplete="email"
                                                 autoCorrect="off"
                                                 disabled={isLoading || (isEmailSent || authMethod === 'discord' || authMethod === 'google')}
-                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-white/40 focus-visible:ring-offset-0"
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-400 focus-visible:ring-white/40 focus-visible:ring-offset-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -564,7 +564,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                 autoComplete="email"
                                                 autoCorrect="off"
                                                 disabled={isLoading}
-                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-white/40 focus-visible:ring-offset-0"
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-400 focus-visible:ring-white/40 focus-visible:ring-offset-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -585,7 +585,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                 type="password"
                                                 autoComplete="current-password"
                                                 disabled={isLoading}
-                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-white/40 focus-visible:ring-offset-0"
+                                                className="h-11 rounded-xl border-white/15 bg-white/[0.03] px-4 text-sm text-white placeholder:text-zinc-400 focus-visible:ring-white/40 focus-visible:ring-offset-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -612,8 +612,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-white/10" />
                 </div>
-                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.14em]">
-                    <span className="bg-card px-2 text-zinc-500">
+                <div className="relative flex justify-center text-[11px] uppercase tracking-[0.12em]">
+                    <span className="bg-card px-2 text-zinc-400">
                         {t('auth.continueWith')}
                     </span>
                 </div>

@@ -408,7 +408,16 @@
   }
 
   /* Unified flat widget shell */
-  [data-widget-shell="true"],
+  [data-widget-shell="true"] {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.85rem;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: none;
+  }
+
   [data-widget-shell="v2"] {
     position: relative;
     overflow: hidden;
@@ -429,8 +438,6 @@
     border-radius: inherit;
   }
 
-  [data-widget-shell="true"]>article,
-  [data-widget-shell="true"]>[data-chart-surface="modern"],
   [data-widget-shell="v2"]>article,
   [data-widget-shell="v2"]>[data-chart-surface="v2"] {
     border: 0 !important;
@@ -468,15 +475,15 @@
   }
 
   /* Dashboard-only spacing normalization for ChartSurface headers */
-  [data-widget-shell="true"] [data-chart-surface="modern"]>div:first-child:not(.flex-1),
-  [data-widget-shell="v2"] [data-chart-surface="v2"]>div:first-child:not(.flex-1) {
+  [data-widget-shell="true"] [data-chart-surface="modern"] [data-chart-surface-header],
+  [data-widget-shell="v2"] [data-chart-surface="v2"] [data-chart-surface-header] {
     height: 2.95rem !important;
     min-height: 2.95rem;
     padding: 0.55rem 0.85rem !important;
   }
 
-  [data-widget-shell="true"] [data-chart-surface="modern"]>div:nth-child(2),
-  [data-widget-shell="v2"] [data-chart-surface="v2"]>div:nth-child(2) {
+  [data-widget-shell="true"] [data-chart-surface="modern"] [data-chart-surface-body],
+  [data-widget-shell="v2"] [data-chart-surface="v2"] [data-chart-surface-body] {
     padding: 0.6rem 0.8rem !important;
   }
 
@@ -486,7 +493,6 @@
     padding-bottom: 0 !important;
   }
 
-  [data-widget-shell="true"]:hover,
   [data-widget-shell="v2"]:hover {
     border-color: hsl(var(--border) / 0.7);
     background: hsl(var(--card) / 0.99);
@@ -615,7 +621,7 @@
 
   .metric-negative {
     color: hsl(var(--chart-loss));
-    opacity: 0.78;
+    opacity: 0.9;
   }
 
   .chart-positive-emphasis {

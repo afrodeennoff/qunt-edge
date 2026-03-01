@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Logo } from "@/components/logo"
-import { Moon, Sun, Menu, Globe, Laptop } from "lucide-react"
+import { Moon, Sun, Menu, Laptop } from "lucide-react"
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -15,13 +15,12 @@ import {
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-    navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { useTheme } from '@/context/theme-provider'
 import { cn } from '@/lib/utils'
-import { useChangeLocale, useI18n } from "@/locales/client"
+import { useCurrentLocale, useI18n } from "@/locales/client"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
 import { LanguageSelector } from "@/components/ui/language-selector"
 import { Badge } from "@/components/ui/badge"
 
@@ -62,6 +61,85 @@ const MobileNavItem = ({ href, children, onClick, className }: { href: string; c
     </li>
 )
 
+function MobileNavContent({
+    locale,
+    onLinkClick,
+    onThemeChange,
+    themeIcon,
+    t,
+}: {
+    locale: string
+    onLinkClick: () => void
+    onThemeChange: (value: string) => void
+    themeIcon: React.ReactNode
+    t: ReturnType<typeof useI18n>
+}) {
+    const baseTeamsPath = `/${locale}/teams`
+    const dashboardPath = `/${locale}/teams/dashboard`
+    return (
+        <nav className="flex flex-col space-y-4">
+            <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="features">
+                    <AccordionTrigger>{t('teams.navbar.features')}</AccordionTrigger>
+                    <AccordionContent>
+                        <ul className="space-y-2 list-none">
+                            <MobileNavItem href={`${baseTeamsPath}#features`} onClick={onLinkClick}>{t('teams.navbar.features.multiAccount')}</MobileNavItem>
+                            <MobileNavItem href={`${baseTeamsPath}#features`} onClick={onLinkClick}>{t('teams.navbar.features.teamAnalytics')}</MobileNavItem>
+                            <MobileNavItem href={`${baseTeamsPath}#features`} onClick={onLinkClick}>{t('teams.navbar.features.realTime')}</MobileNavItem>
+                            <MobileNavItem href={`${baseTeamsPath}#features`} onClick={onLinkClick}>{t('teams.navbar.features.riskManagement')}</MobileNavItem>
+                        </ul>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="roadmap">
+                    <AccordionTrigger>{t('teams.navbar.roadmap')}</AccordionTrigger>
+                    <AccordionContent>
+                        <ul className="space-y-2 list-none">
+                            <MobileNavItem href={`${baseTeamsPath}#roadmap`} onClick={onLinkClick}>{t('teams.navbar.roadmap.q1')}</MobileNavItem>
+                            <MobileNavItem href={`${baseTeamsPath}#roadmap`} onClick={onLinkClick}>{t('teams.navbar.roadmap.q2')}</MobileNavItem>
+                            <MobileNavItem href={`${baseTeamsPath}#roadmap`} onClick={onLinkClick}>{t('teams.navbar.roadmap.q3')}</MobileNavItem>
+                            <MobileNavItem href={`${baseTeamsPath}#roadmap`} onClick={onLinkClick}>{t('teams.navbar.roadmap.q4')}</MobileNavItem>
+                        </ul>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+            <Button asChild variant="outline" className="w-full" onClick={onLinkClick}>
+                <Link href={dashboardPath}>{t('teams.cta')}</Link>
+            </Button>
+            <div className="py-4 border-t space-y-4">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-start">
+                            {themeIcon}
+                            <span className="ml-2">{t('teams.navbar.theme.change')}</span>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0" align="start">
+                        <Command>
+                            <CommandList>
+                                <CommandGroup>
+                                    <CommandItem onSelect={() => onThemeChange("light")}>
+                                        <Sun className="mr-2 h-4 w-4" />
+                                        <span>{t('teams.navbar.theme.light')}</span>
+                                    </CommandItem>
+                                    <CommandItem onSelect={() => onThemeChange("dark")}>
+                                        <Moon className="mr-2 h-4 w-4" />
+                                        <span>{t('teams.navbar.theme.dark')}</span>
+                                    </CommandItem>
+                                    <CommandItem onSelect={() => onThemeChange("system")}>
+                                        <Laptop className="mr-2 h-4 w-4" />
+                                        <span>{t('teams.navbar.theme.system')}</span>
+                                    </CommandItem>
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+                <LanguageSelector showLabel align="start" />
+            </div>
+        </nav>
+    )
+}
+
 export default function TeamNavbar() {
     const { theme, setTheme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
@@ -69,6 +147,7 @@ export default function TeamNavbar() {
     const [isVisible, setIsVisible] = useState(true)
     const [lastScrollY, setLastScrollY] = useState(0)
     const t = useI18n()
+    const locale = useCurrentLocale()
 
     const toggleMenu = () => setIsOpen(!isOpen)
     const closeMenu = () => setIsOpen(false)
@@ -99,17 +178,8 @@ export default function TeamNavbar() {
         }
     }, [lastScrollY])
 
-    const [themeOpen, setThemeOpen] = useState(false)
-    const [languageOpen, setLanguageOpen] = useState(false)
-    const changeLocale = useChangeLocale()
     const handleThemeChange = (value: string) => {
         setTheme(value as "light" | "dark" | "system")
-        setThemeOpen(false)
-    }
-
-    const handleLanguageChange = (value: string) => {
-        changeLocale(value as "en" | "fr")
-        setLanguageOpen(false)
     }
 
     const getThemeIcon = () => {
@@ -124,76 +194,12 @@ export default function TeamNavbar() {
         return <Laptop className="h-5 w-5" />;
     };
 
-    const MobileNavContent = ({ onLinkClick }: { onLinkClick: () => void }) => (
-        <nav className="flex flex-col space-y-4">
-            <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="features">
-                    <AccordionTrigger>{t('teams.navbar.features')}</AccordionTrigger>
-                    <AccordionContent>
-                        <ul className="space-y-2 list-none">
-                            <MobileNavItem href="/teams#features" onClick={onLinkClick}>{t('teams.navbar.features.multiAccount')}</MobileNavItem>
-                            <MobileNavItem href="/teams#features" onClick={onLinkClick}>{t('teams.navbar.features.teamAnalytics')}</MobileNavItem>
-                            <MobileNavItem href="/teams#features" onClick={onLinkClick}>{t('teams.navbar.features.realTime')}</MobileNavItem>
-                            <MobileNavItem href="/teams#features" onClick={onLinkClick}>{t('teams.navbar.features.riskManagement')}</MobileNavItem>
-                        </ul>
-                    </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="roadmap">
-                    <AccordionTrigger>{t('teams.navbar.roadmap')}</AccordionTrigger>
-                    <AccordionContent>
-                        <ul className="space-y-2 list-none">
-                            <MobileNavItem href="/teams#roadmap" onClick={onLinkClick}>{t('teams.navbar.roadmap.q1')}</MobileNavItem>
-                            <MobileNavItem href="/teams#roadmap" onClick={onLinkClick}>{t('teams.navbar.roadmap.q2')}</MobileNavItem>
-                            <MobileNavItem href="/teams#roadmap" onClick={onLinkClick}>{t('teams.navbar.roadmap.q3')}</MobileNavItem>
-                            <MobileNavItem href="/teams#roadmap" onClick={onLinkClick}>{t('teams.navbar.roadmap.q4')}</MobileNavItem>
-                        </ul>
-                    </AccordionContent>
-                </AccordionItem>
-
-            </Accordion>
-            <Button asChild variant="outline" className="w-full" onClick={onLinkClick}>
-                <Link href={"/teams/dashboard"}>{t('teams.cta')}</Link>
-            </Button>
-            <div className="py-4 border-t space-y-4">
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-start">
-                            {getThemeIcon()}
-                            <span className="ml-2">{t('teams.navbar.theme.change')}</span>
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0" align="start">
-                        <Command>
-                            <CommandList>
-                                <CommandGroup>
-                                    <CommandItem onSelect={() => handleThemeChange("light")}>
-                                        <Sun className="mr-2 h-4 w-4" />
-                                        <span>{t('teams.navbar.theme.light')}</span>
-                                    </CommandItem>
-                                    <CommandItem onSelect={() => handleThemeChange("dark")}>
-                                        <Moon className="mr-2 h-4 w-4" />
-                                        <span>{t('teams.navbar.theme.dark')}</span>
-                                    </CommandItem>
-                                    <CommandItem onSelect={() => handleThemeChange("system")}>
-                                        <Laptop className="mr-2 h-4 w-4" />
-                                        <span>{t('teams.navbar.theme.system')}</span>
-                                    </CommandItem>
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-                <LanguageSelector showLabel align="start" />
-            </div>
-        </nav>
-    )
-
     return (
         <>
             <div className={`fixed inset-0 bg-background/80  backdrop-blur-xs z-40 transition-opacity duration-300 ${hoveredItem ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
             <span className={`h-14 fixed top-0 left-0 right-0 bg-background z-50 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}></span>
             <header className={`max-w-7xl mx-auto fixed top-0 left-0 right-0 px-4 lg:px-6 h-14 flex items-center justify-between z-50  text-foreground transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-                <Link href="/teams" className="flex items-center space-x-2">
+                <Link href={`/${locale}/teams`} className="flex items-center space-x-2">
                     <Logo className='w-6 h-6 fill-black dark:fill-white' />
                     <span className="font-bold text-xl">Qunt Edge</span>
                     <Badge variant="secondary" className="text-xs">
@@ -209,7 +215,7 @@ export default function TeamNavbar() {
                                     <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] list-none">
                                         <li className="row-span-3">
                                             <NavigationMenuLink asChild>
-                                                <Link className="flex h-full w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/50 to-muted p-6 no-underline outline-hidden focus:shadow-md" href="/team">
+                                                <Link className="flex h-full w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/50 to-muted p-6 no-underline outline-hidden focus:shadow-md" href={`/${locale}/teams`}>
                                                     <Logo className='w-6 h-6' />
                                                     <div className="mb-2 mt-4 text-lg font-medium">
                                                         Qunt Edge Enterprise
@@ -220,17 +226,17 @@ export default function TeamNavbar() {
                                                 </Link>
                                             </NavigationMenuLink>
                                         </li>
-                                        <ListItem href="/teams#features" title={t('teams.navbar.features.multiAccount')}>
+                                        <ListItem href={`/${locale}/teams#features`} title={t('teams.navbar.features.multiAccount')}>
                                             Monitor and analyze performance across multiple trading accounts
                                         </ListItem>
-                                        <ListItem href="/teams#features" title={t('teams.navbar.features.teamAnalytics')}>
+                                        <ListItem href={`/${locale}/teams#features`} title={t('teams.navbar.features.teamAnalytics')}>
                                             Track individual trader performance and optimize team allocation
                                         </ListItem>
-                                        <ListItem href="/teams#features" title={t('teams.navbar.features.realTime')}>
+                                        <ListItem href={`/${locale}/teams#features`} title={t('teams.navbar.features.realTime')}>
                                             Get instant alerts and real-time updates on trading activities
                                         </ListItem>
                                         <div className='col-span-2'>
-                                            <ListItem href="/teams#features" title={t('teams.navbar.features.riskManagement')}>
+                                            <ListItem href={`/${locale}/teams#features`} title={t('teams.navbar.features.riskManagement')}>
                                                 Advanced risk analytics with position sizing and drawdown analysis
                                             </ListItem>
                                         </div>
@@ -241,16 +247,16 @@ export default function TeamNavbar() {
                                 <NavigationMenuTrigger className='bg-transparent'>{t('teams.navbar.roadmap')}</NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <ul className="grid gap-3 p-4 w-[400px] list-none">
-                                        <ListItem href="/teams#roadmap" title={t('teams.navbar.roadmap.q1')}>
+                                        <ListItem href={`/${locale}/teams#roadmap`} title={t('teams.navbar.roadmap.q1')}>
                                             Multi-account dashboard, team analytics, basic reporting
                                         </ListItem>
-                                        <ListItem href="/teams#roadmap" title={t('teams.navbar.roadmap.q2')}>
+                                        <ListItem href={`/${locale}/teams#roadmap`} title={t('teams.navbar.roadmap.q2')}>
                                             Real-time monitoring, risk management tools, compliance reporting
                                         </ListItem>
-                                        <ListItem href="/teams#roadmap" title={t('teams.navbar.roadmap.q3')}>
+                                        <ListItem href={`/${locale}/teams#roadmap`} title={t('teams.navbar.roadmap.q3')}>
                                             Enterprise API, custom integrations, advanced security
                                         </ListItem>
-                                        <ListItem href="/teams#roadmap" title={t('teams.navbar.roadmap.q4')}>
+                                        <ListItem href={`/${locale}/teams#roadmap`} title={t('teams.navbar.roadmap.q4')}>
                                             Complete enterprise suite, dedicated support, custom onboarding
                                         </ListItem>
                                     </ul>
@@ -260,7 +266,7 @@ export default function TeamNavbar() {
                         </NavigationMenuList>
                         <Separator orientation="vertical" className="h-6 mx-4" />
                         <Button variant="ghost" className="text-sm font-medium hover:text-accent-foreground" asChild>
-                            <Link href={"/teams/dashboard"}>{t('teams.cta')}</Link>
+                            <Link href={`/${locale}/teams/dashboard`}>{t('teams.cta')}</Link>
                         </Button>
                     </NavigationMenu>
                 </div>
@@ -305,7 +311,13 @@ export default function TeamNavbar() {
                         <SheetContent side="right" className="w-[300px] sm:w-[400px] lg:hidden">
                             <div className="flex flex-col h-full">
                                 <div className="grow overflow-y-auto py-6">
-                                    <MobileNavContent onLinkClick={closeMenu} />
+                                    <MobileNavContent
+                                        locale={locale}
+                                        onLinkClick={closeMenu}
+                                        onThemeChange={handleThemeChange}
+                                        themeIcon={getThemeIcon()}
+                                        t={t}
+                                    />
                                 </div>
                             </div>
                         </SheetContent>

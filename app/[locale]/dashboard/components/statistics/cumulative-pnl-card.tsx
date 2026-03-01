@@ -45,15 +45,15 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
 
   if (isCompact) {
     return (
-      <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
-        <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
+      <div className="flex h-full items-center justify-center bg-transparent px-2 py-1 overflow-hidden">
+        <div className="mx-auto inline-flex max-w-full items-center justify-center gap-2 text-center">
           {isPositive ? (
             <TrendingUp className="h-4 w-4 shrink-0 metric-positive" />
           ) : (
             <TrendingDown className="h-4 w-4 shrink-0 metric-negative" />
           )}
-          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Net</span>
-          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">
+          <span className="shrink-0 text-[12px] font-bold uppercase tracking-[0.12em] text-muted-foreground/85 whitespace-nowrap">Net</span>
+          <span className="font-terminal shrink-0 whitespace-nowrap text-center text-[26px] font-black leading-none tracking-tight text-foreground/95">
             {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
           </span>
           <TooltipProvider>

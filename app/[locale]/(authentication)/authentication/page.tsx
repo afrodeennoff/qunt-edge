@@ -49,7 +49,7 @@ export default function AuthenticationPage() {
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to website
             </Link>
-            <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+            <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-300">
               Secure Access
             </span>
           </div>
@@ -127,7 +127,7 @@ export default function AuthenticationPage() {
                 <span>Discord and Google authentication</span>
               </div>
               <div>
-                <p className="pl-[1.35rem] text-xs text-zinc-500">Protected session handling for every login method.</p>
+                <p className="pl-[1.35rem] text-xs text-zinc-400">Protected session handling for every login method.</p>
               </div>
             </div>
 

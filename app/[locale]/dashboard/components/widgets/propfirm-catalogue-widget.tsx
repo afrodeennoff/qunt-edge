@@ -48,13 +48,13 @@ export default function PropfirmCatalogueWidget() {
                             <div className="flex flex-col gap-1 min-w-0">
                                 <span className="font-bold text-sm truncate tracking-tight">{stat.propfirmName}</span>
                                 <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground/85">
                                         <Users className="w-3 h-3 opacity-60" />
                                         <span>{stat.accountsCount}</span>
                                     </div>
-                                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground/85">
                                         <DollarSign className="w-3 h-3 opacity-60 text-semantic-success/80" />
-                                        <span className="text-semantic-success/80 font-medium">{stat.payouts.paidCount} Payouts</span>
+                                        <span className="text-semantic-success/90 font-medium">{stat.payouts.paidCount} Payouts</span>
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +64,7 @@ export default function PropfirmCatalogueWidget() {
                                         ? `${(stat.payouts.paidAmount / 1000).toFixed(1)}k`
                                         : stat.payouts.paidAmount.toLocaleString()}
                                 </div>
-                                <div className="text-[9px] font-semibold text-semantic-success/80 uppercase tracking-wider">
+                                <div className="text-[9px] font-semibold text-semantic-success/90 uppercase tracking-wider">
                                     Paid
                                 </div>
                             </div>

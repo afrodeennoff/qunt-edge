@@ -76,6 +76,7 @@ export function ChartSurface({
     >
       {hasHeader && (
         <div
+          data-chart-surface-header
           className={cn(
             "flex shrink-0 items-center border-b border-white/10",
             isSmall ? "h-10 px-2.5" : "h-12 px-3.5",
@@ -104,6 +105,7 @@ export function ChartSurface({
         </div>
       )}
       <div
+        data-chart-surface-body
         className={cn(
           "flex flex-col flex-1 min-h-0",
           shouldPadBody ? (isSmall ? "p-1.5" : "p-2.5 sm:p-3") : "p-0",

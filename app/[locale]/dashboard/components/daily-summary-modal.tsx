@@ -268,7 +268,20 @@ export function DailySummaryModal() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                <div className="group flex items-center gap-2 cursor-pointer transition-all hover:bg-white/5 px-3 py-1.5 rounded-lg border border-transparent hover:border-white/5" onClick={(e) => { e.stopPropagation(); setIsEditingHandle(true); }}>
+                                <div
+                                    className="group flex items-center gap-2 cursor-pointer transition-all hover:bg-white/5 px-3 py-1.5 rounded-lg border border-transparent hover:border-white/5"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label="Edit trading handle"
+                                    onClick={(e) => { e.stopPropagation(); setIsEditingHandle(true); }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setIsEditingHandle(true);
+                                        }
+                                    }}
+                                >
                                     {isEditingHandle ? (
                                         <input autoFocus className="bg-transparent border-none outline-none text-xs font-bold text-white text-right w-24 uppercase tracking-wider" value={handle} onChange={(e) => setHandle(e.target.value)} onBlur={() => setIsEditingHandle(false)} />
                                     ) : (
@@ -409,9 +422,14 @@ export function DailySummaryModal() {
                                             />
                                         </div>
                                     ) : (
-                                        <span onClick={() => setIsEditingTarget(true)} className="text-sm font-bold text-white/90 cursor-pointer hover:text-white transition-colors">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsEditingTarget(true)}
+                                            className="text-sm font-bold text-white/90 cursor-pointer hover:text-white transition-colors"
+                                            aria-label="Edit total goal target"
+                                        >
                                             ${customTarget.toLocaleString()}
-                                        </span>
+                                        </button>
                                     )}
                                 </div>
                                 <span className={cn("text-sm font-bold", toSafeNumber(stats.total.pnl) < 0 ? "text-white/40" : "text-white")}>{Math.round(totalGoalProgress)}%</span>

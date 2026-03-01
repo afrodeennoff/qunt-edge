@@ -227,23 +227,26 @@ export default function EmbedPage() {
     const chartsToRender = React.useMemo(() => {
       const filtered = chartDefinitions.filter((c) => !selectedCharts || selectedCharts.has(c.key))
       // If selection was provided but no keys matched, fall back to all
-      return (selectedCharts && filtered.length === 0 ? chartDefinitions : filtered).map((component) => (
-        <div 
-          key={component.key}
-          className="cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => {
-            const chartName = component.key.split('-').map(word => 
-              word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ')
-            sendChartClickMessage(component.key, chartName)
-          }}
-          title={`Click to add "${component.key.split('-').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1)
-          ).join(' ')}" to selection`}
-        >
-          {component.render()}
-        </div>
-      ))
+      return (selectedCharts && filtered.length === 0 ? chartDefinitions : filtered).map((component) => {
+        const chartName = component.key
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ')
+        const actionLabel = `Add ${chartName} chart to selection`
+
+        return (
+          <button
+            key={component.key}
+            type="button"
+            className="group block w-full text-left cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+            onClick={() => sendChartClickMessage(component.key, chartName)}
+            aria-label={actionLabel}
+            title={actionLabel}
+          >
+            {component.render()}
+          </button>
+        )
+      })
     }, [chartDefinitions, selectedCharts, sendChartClickMessage])
 
     return (

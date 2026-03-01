@@ -25,7 +25,6 @@ import { Prisma, DashboardLayout } from "@/prisma/generated/prisma"
 import { useDashboard } from '../dashboard-context'
 import { motion, useReducedMotion } from 'framer-motion'
 import { WidgetShell } from "@/components/ui/widget-shell"
-import { isUiV2Enabled } from "@/lib/ui-v2"
 import { useSearchParams } from "next/navigation"
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
@@ -158,7 +157,6 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
 }) => {
   const t = useI18n()
   const { isMobile } = useDashboardTrades()
-  const uiV2Enabled = isUiV2Enabled()
   const widgetRef = useRef<HTMLDivElement>(null)
   const [isSizePopoverOpen, setIsSizePopoverOpen] = useState(false)
 
@@ -196,7 +194,6 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
         data-widget-shell="true"
         className={cn(
           "h-full min-h-0 w-full",
-          uiV2Enabled && "rounded-xl border border-border/60 bg-card/90 backdrop-blur-sm",
           isCustomizing && "blur-[2px]"
         )}
       >

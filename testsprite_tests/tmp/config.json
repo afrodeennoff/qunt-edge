@@ -1,0 +1,30 @@
+{
+  "status": "init",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3001",
+  "backendAuthType": "basic token",
+  "backendUsername": "xapis30734@hutudns.com ",
+  "backendPassword": "12345678",
+  "executionArgs": {
+    "projectName": "final-qunt-edge-main",
+    "projectPath": "/Users/timon/Downloads/final-qunt-edge-main",
+    "testIds": [
+      "TC001",
+      "TC002",
+      "TC003",
+      "TC004",
+      "TC005",
+      "TC006",
+      "TC007",
+      "TC008"
+    ],
+    "additionalInstruction": "Backend rerun on live local endpoint http://localhost:3001. Execute TC001-TC008 from testsprite_backend_test_plan.json and validate endpoint status/auth/method behavior with detailed failure assertions.",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-YUJCJ3ANs3B8SRSd8Ss6J0Y0UQV3uM55VY4OO-LTjk2Naf7MTzfikO9l26g3ieKR2dVPzj3xxabSTlEFOwSD2NExHRNQusmN95y_xE_aJwXzLpXAptKBBm5mQ6Zv46qUu8k"
+    }
+  },
+  "serverPort": 56460,
+  "proxy": "http://ecfeb96e-b63e-4a08-b189-a496f0b5318f:DP695hRoeDFZrKlxS60L4yg4RB8eU9yt@tun.testsprite.com:8080"
+}

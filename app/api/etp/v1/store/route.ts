@@ -100,14 +100,14 @@ async function authenticateRequest(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID()
   try {
-    const contentType = req.headers.get("content-type")?.toLowerCase() ?? ""
-    if (!contentType.startsWith("application/json")) {
-      return jsonError(415, "UNSUPPORTED_CONTENT_TYPE", "Unsupported content type", requestId)
-    }
-
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_ETP_BODY_BYTES) {
       return jsonError(413, "PAYLOAD_TOO_LARGE", "Request payload is too large", requestId)
+    }
+
+    const contentType = req.headers.get("content-type")?.toLowerCase() ?? ""
+    if (!contentType.startsWith("application/json")) {
+      return jsonError(415, "UNSUPPORTED_CONTENT_TYPE", "Unsupported content type", requestId)
     }
 
     const auth = await authenticateRequest(req);
