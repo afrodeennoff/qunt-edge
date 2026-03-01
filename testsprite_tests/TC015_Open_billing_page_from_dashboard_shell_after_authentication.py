@@ -30,36 +30,36 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Navigate to '/en/authentication' (use explicit navigate action as required by the test plan).
-        await page.goto("http://localhost:3000/en/authentication", wait_until="commit", timeout=10000)
+        # -> Navigate to '/en/authentication' using the navigate action (explicit test step requires direct navigation).
+        await page.goto("http://localhost:3001/en/authentication", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Password' tab to reveal the password sign-in form (click element index 750).
+        # -> Click the 'Password' tab to reveal the password sign-in fields (use element index 814).
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div/button[2]').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Type the login email into the email field (index 953).
+        # -> Type 'example@gmail.com' into the email field (index 1011), then type 'password123' into the password field (index 1015), then click the 'Sign In with Password' button (index 1018).
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('xapis30734@hutudns.com')
+        await page.wait_for_timeout(3000); await elem.fill('example@gmail.com')
         
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('12345678')
+        await page.wait_for_timeout(3000); await elem.fill('password123')
         
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Navigate to '/en/dashboard/billing' (explicit navigate as required by the test plan) to verify the billing route for the authenticated user.
-        await page.goto("http://localhost:3000/en/dashboard/billing", wait_until="commit", timeout=10000)
+        # -> Navigate to '/en/dashboard/billing' (explicit test step requires direct navigation).
+        await page.goto("http://localhost:3001/en/dashboard/billing", wait_until="commit", timeout=10000)
         
         # --> Assertions to verify final state
         frame = context.pages[-1]

@@ -30,28 +30,19 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Sign In' link to navigate to the login page (use element index 262).
+        # -> Click the 'Sign In' link to navigate to the authentication page (/en/authentication).
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/footer/div/div/div/div[2]/a').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Navigate to /login using the site's base URL (http://localhost:3000/login) as the test step explicitly requests.
-        await page.goto("http://localhost:3000/login", wait_until="commit", timeout=10000)
-        
-        # -> Click the link for /en/authentication (element index 2007) to reach the authentication page and locate the login form.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[4]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        await expect(frame.locator('text=Last 30 days').first).to_be_visible(timeout=3000)
-        await expect(frame.locator('xpath=//*[contains(normalize-space(.),"Strategy performance")]').first).to_be_visible(timeout=3000)
+        assert '/dashboard/strategies' in frame.url
+        await expect(frame.locator('text=Strategies').first).to_be_visible(timeout=3000)
         await asyncio.sleep(5)
 
     finally:

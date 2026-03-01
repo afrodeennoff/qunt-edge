@@ -30,41 +30,16 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Sign In' link on the homepage to open the login page (/login).
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/footer/div/div/div/div[2]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-        # -> Navigate to /login using the exact path appended to the site's base URL (http://localhost:3000/login) as specified by the test step.
-        await page.goto("http://localhost:3000/login", wait_until="commit", timeout=10000)
-        
-        # -> Click the search suggestion link for /en/authentication in the page's list (anchor element) to open the authentication page and check for the authentication-required messages.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[4]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-        # -> Click the '/en/authentication' link from the search suggestions (anchor element) to open the authentication page and then evaluate the page for 'Authentication' and 'required' text.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[4]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-        # -> Click the '/en/dashboard' suggestion link (search result) to attempt accessing the dashboard and observe whether an authentication-required message appears.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[25]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Navigate to http://localhost:3001/en/dashboard (use navigate action as this test step explicitly requires).
+        await page.goto("http://localhost:3001/en/dashboard", wait_until="commit", timeout=10000)
         
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        await expect(frame.locator('text=Invalid').first).to_be_visible(timeout=3000)
-        await expect(frame.locator('text=Authentication').first).to_be_visible(timeout=3000)
-        await expect(frame.locator('text=required').first).to_be_visible(timeout=3000)
+        assert '/en/authentication' in frame.url
+        await expect(frame.locator('xpath=//*[@data-testid="auth-password-tab"]').first).to_be_visible(timeout=3000)
         await asyncio.sleep(5)
 
     finally:

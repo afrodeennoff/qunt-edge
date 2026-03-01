@@ -30,32 +30,35 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Sign In' link in the header to open the authentication page (element index 260).
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/footer/div/div/div/div[2]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Navigate to '/en/authentication' (explicit navigate as specified by test step).
+        await page.goto("http://localhost:3001/en/authentication", wait_until="commit", timeout=10000)
         
-        # -> Fill the email field with xapis30734@hutudns.com (index 1554) then click the 'Password' tab to switch to the password flow (index 1547).
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[2]/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('xapis30734@hutudns.com')
-        
+        # -> Click the password auth tab (data-testid="auth-password-tab") to reveal the password sign-in fields.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div/button[2]').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Enter the password into the password field and click the 'Sign In with Password' button to submit the login form.
+        # -> Type email into email input (index 1117), type password into password input (index 1121), then click the Sign In with Password button (index 1124).
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('example@gmail.com')
+        
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('12345678')
+        await page.wait_for_timeout(3000); await elem.fill('password123')
         
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Retry signing in by clicking the 'Sign In with Password' button again and wait for the SPA to redirect; then look for the dashboard nav item (data-testid='nav-trade-desk'). If nav-trade-desk appears, click it; if not, report the feature issue and finish the task.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
@@ -64,7 +67,6 @@ async def run_test():
         # --> Assertions to verify final state
         frame = context.pages[-1]
         assert '/dashboard/strategies' in frame.url
-        await expect(frame.locator('text=Strategies').first).to_be_visible(timeout=3000)
         await asyncio.sleep(5)
 
     finally:

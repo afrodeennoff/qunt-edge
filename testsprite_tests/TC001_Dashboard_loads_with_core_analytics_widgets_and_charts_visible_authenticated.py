@@ -30,32 +30,35 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Sign In' link to open the authentication page (login)
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/footer/div/div/div/div[2]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Navigate to /en/authentication to start the login flow.
+        await page.goto("http://localhost:3001/en/authentication", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Password' tab (index 2314) to switch to the password sign-in flow so both email and password fields are available.
+        # -> Click the 'Password' tab to switch to password sign-in flow and reveal email/password inputs.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div/button[2]').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Type the test email into input index 2585, type the test password into input index 2589, then click the 'Sign In with Password' button at index 2592 to authenticate.
+        # -> Type 'example@gmail.com' into the email field, type 'password123' into the password field, then click the Sign In button to submit credentials.
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('xapis30734@hutudns.com')
+        await page.wait_for_timeout(3000); await elem.fill('example@gmail.com')
         
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('12345678')
+        await page.wait_for_timeout(3000); await elem.fill('password123')
         
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Click the 'Sign In with Password' button (index 1163) again to attempt login (2nd attempt), wait for the app to redirect/render the dashboard, then verify the dashboard URL and that 'Dashboard', 'Charts', and 'Trades' elements are visible.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
@@ -63,14 +66,10 @@ async def run_test():
         
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        # Assertions for dashboard page
-        assert "/dashboard" in frame.url
-        dashboard = frame.locator('xpath=/html/body/div[2]/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div[2]/ul/li/a').nth(0)
-        assert await dashboard.is_visible(), "Expected 'Dashboard' to be visible on the page"
-        charts = frame.locator('xpath=/html/body/div[2]/div[2]/div[2]/div/div[2]/div/div[2]/div[2]/div[2]/ul/li[2]/a').nth(0)
-        assert await charts.is_visible(), "Expected 'Chart the Future' (Charts) to be visible on the page"
-        trades = frame.locator('xpath=/html/body/div[2]/div[2]/div[2]/div/div[2]/div/div[2]/div[2]/div[2]/ul/li[1]/a').nth(0)
-        assert await trades.is_visible(), "Expected 'Trades' to be visible on the page"
+        assert '/dashboard' in frame.url
+        await expect(frame.locator('text=Dashboard').first).to_be_visible(timeout=3000)
+        await expect(frame.locator("xpath=//*[normalize-space(text())='Charts']").first).to_be_visible(timeout=3000)
+        await expect(frame.locator("xpath=//*[normalize-space(text())='Trades']").first).to_be_visible(timeout=3000)
         await asyncio.sleep(5)
 
     finally:

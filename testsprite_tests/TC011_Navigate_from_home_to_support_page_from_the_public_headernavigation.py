@@ -30,16 +30,10 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Click the header 'Support' link (index 144) to open the Support page.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/header/div/div/nav/div[5]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-        # -> Click the 'Support' link (index 144) again to attempt to open the Support page and then verify the URL and support content.
+        # -> Click the link labeled 'Support' in the top navigation to open the Support page.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/header/div/div/nav/div[5]/a').nth(0)
@@ -47,19 +41,18 @@ async def run_test():
         
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        # Assertions for Support page navigation and content
-        frame = context.pages[-1]
-        # Verify we are on /en
+        # Assert we are on the /en page
         assert "/en" in frame.url
-        # Verify the header 'Support' link is visible and contains the text 'Support'
-        support_link = frame.locator('xpath=/html/body/div[3]/div[2]/div/header/div/div/nav/div[5]/a').nth(0)
-        assert await support_link.is_visible()
-        link_text = await support_link.inner_text()
-        assert "Support" in link_text
-        # Verify the URL contains /en/support after clicking the Support link
+        # Wait briefly for navigation to finish after the click
+        await page.wait_for_timeout(1000)
+        # Assert the Support page is loaded (URL contains /en/support)
         assert "/en/support" in frame.url
-        # The test plan expects visibility of 'support contact or help content' but no exact xpath for that element is available in the provided available elements list.
-        raise AssertionError("Missing element for 'support contact or help content' in the available elements list; cannot assert its visibility. Provide the exact xpath from the available elements list to perform this assertion.")
+        # Verify the 'Support' link/text is visible (header link)
+        support_link = frame.locator('xpath=/html/body/div[3]/div[2]/div/header/div/div/nav/div[5]/a')
+        assert await support_link.is_visible()
+        # Verify support contact/help content is visible (support message textarea)
+        support_textarea = frame.locator('xpath=/html/body/div[3]/div[2]/div/div[2]/div/div/div/div/section/form/div[1]/textarea')
+        assert await support_textarea.is_visible()
         await asyncio.sleep(5)
 
     finally:

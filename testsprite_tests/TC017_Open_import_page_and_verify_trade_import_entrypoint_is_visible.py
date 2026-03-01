@@ -30,47 +30,38 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Click the 'Sign In' link (index 277) to reach the authentication page (/en/authentication).
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[3]/div[2]/div/footer/div/div/div/div[2]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Navigate to /en/authentication (use navigate action to the exact path)
+        await page.goto("http://localhost:3001/en/authentication", wait_until="commit", timeout=10000)
         
-        # -> Navigate to '/en/authentication' using the explicit navigate action (per test step).
-        await page.goto("http://localhost:3000/en/authentication", wait_until="commit", timeout=10000)
-        
-        # -> Click the 'Password' tab to reveal the password sign-in form.
+        # -> Click the password authentication tab (element index 765) to reveal the password inputs.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div/button[2]').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Fill the email field (index 2083) with the provided email, fill the password field (index 2087), click the 'Sign In with Password' button (index 2090), then navigate to '/en/dashboard/import' and look for the text 'Import'.
+        # -> Type example@gmail.com into the email input (element index 969), then enter password123 into the password input (element index 973), then click the Sign In with Password button (element index 976).
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('xapis30734@hutudns.com')
+        await page.wait_for_timeout(3000); await elem.fill('example@gmail.com')
         
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('12345678')
+        await page.wait_for_timeout(3000); await elem.fill('password123')
         
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Navigate to '/en/dashboard/import' (use explicit navigate action to the site's base URL + path) and then verify the URL contains '/en/dashboard/import' and that the page contains the text 'Import'.
-        await page.goto("http://localhost:3000/en/dashboard/import", wait_until="commit", timeout=10000)
-        
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        assert '/en/dashboard/import' in frame.url
-        await expect(frame.locator('text=Import').first).to_be_visible(timeout=3000)
+        await expect(frame.locator('xpath=//*[@data-testid="dashboard-import-trigger"]').first).to_be_visible(timeout=3000)
+        await expect(frame.locator('text=Import Data').first).to_be_visible(timeout=3000)
         await asyncio.sleep(5)
 
     finally:

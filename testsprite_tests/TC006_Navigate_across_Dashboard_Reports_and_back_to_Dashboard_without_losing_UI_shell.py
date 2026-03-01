@@ -30,28 +30,49 @@ async def run_test():
         page = await context.new_page()
 
         # Interact with the page elements to simulate user flow
-        # -> Navigate to http://localhost:3000/en
-        await page.goto("http://localhost:3000/en", wait_until="commit", timeout=10000)
+        # -> Navigate to http://localhost:3001/en
+        await page.goto("http://localhost:3001/en", wait_until="commit", timeout=10000)
         
-        # -> Navigate to /login (use explicit navigate to http://localhost:3000/login as the test step requires).
-        await page.goto("http://localhost:3000/login", wait_until="commit", timeout=10000)
+        # -> Navigate to '/en/authentication' to locate the password auth tab and perform login using data-testid selectors.
+        await page.goto("http://localhost:3001/en/authentication", wait_until="commit", timeout=10000)
         
-        # -> Click the /en/authentication link in the search results to navigate to the actual authentication page (click element index 804).
+        # -> Click on the password auth tab (data-testid="auth-password-tab") to reveal the password input and submit controls.
         frame = context.pages[-1]
         # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[4]').nth(0)
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div/button[2]').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Try clicking the search-list link that should lead to /en/authentication to open the real authentication page (click element index 803).
+        # -> Type '{{LOGIN_USER}}' into the email input (data-testid='auth-email-input', index 1006), then type '{{LOGIN_PASSWORD}}' into the password input (data-testid='auth-password-input', index 1010), then click the Sign In with Password button (index 1013).
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('{{LOGIN_USER}}')
+        
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('{{LOGIN_PASSWORD}}')
+        
         frame = context.pages[-1]
         # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[3]').nth(0)
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
-        # -> Click the /en/authentication search result link (anchor element index 804) to open the actual authentication page.
+        # -> Replace placeholder credentials with test credentials and submit the password form so authentication can proceed (fill email with example@gmail.com and password with password123, then click Sign In with Password).
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('example@gmail.com')
+        
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('password123')
+        
+        # -> Click the 'Sign In with Password' button (index 1013) to submit credentials and start authentication.
         frame = context.pages[-1]
         # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/div/ul/a[4]').nth(0)
+        elem = frame.locator('xpath=/html/body/div[2]/div[2]/main/div[2]/div/div/section[2]/div/div[3]/div/div[3]/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
         # --> Assertions to verify final state
