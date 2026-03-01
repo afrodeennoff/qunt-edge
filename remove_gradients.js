@@ -35,9 +35,9 @@ const patternsToRemove = [
 
 let changedAny = false;
 
-for (let file of files) {
+for (const file of files) {
     if (fs.existsSync(file)) {
-        let content = fs.readFileSync(file, 'utf8');
+        const content = fs.readFileSync(file, 'utf8');
         let newContent = content;
 
         // remove glow divs entirely
