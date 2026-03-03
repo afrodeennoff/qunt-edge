@@ -32,6 +32,8 @@ export default function Hero() {
     <section ref={ref} className="relative overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8">
       <motion.div style={shouldAnimate ? { opacity } : undefined} className="pointer-events-none absolute inset-0">
         <div className={cn("absolute inset-0 bg-grid-white/[0.02] bg-[size:48px_48px]", isMobile && "bg-[size:34px_34px]")} />
+        <div className="absolute -left-28 top-10 h-56 w-56 rounded-full bg-white/10 blur-[120px] sm:h-72 sm:w-72" />
+        <div className="absolute -right-24 top-16 h-48 w-48 rounded-full bg-white/8 blur-[110px] sm:h-64 sm:w-64" />
         <div className="absolute inset-x-8 top-6 h-px bg-white/10 sm:inset-x-12" />
       </motion.div>
 
@@ -42,25 +44,25 @@ export default function Hero() {
           variants={shouldAnimate ? { show: { transition: { staggerChildren: 0.1 } } } : undefined}
         >
           <motion.div variants={fadeUp} className="mb-8 flex justify-center">
-            <Badge variant="secondary" className="border-white/10 px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] backdrop-blur-sm [font-family:var(--home-copy)]">
+            <Badge variant="secondary" className="border-white/14 bg-black/45 px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] backdrop-blur-sm [font-family:var(--home-copy)]">
               <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" />
-              Built for serious discretionary traders
+              Live decision telemetry for discretionary traders
             </Badge>
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
-            className="mx-auto max-w-4xl text-center text-[clamp(2.55rem,10.2vw,6.6rem)] font-semibold leading-[0.92] tracking-[-0.032em] [font-family:var(--home-display)]"
+            className="mx-auto max-w-5xl text-center text-[clamp(2.7rem,10.2vw,6.8rem)] font-semibold leading-[0.92] tracking-[-0.032em] [font-family:var(--home-display)]"
           >
-            Trade like the benchmark.
-            <span className="mt-2 block text-[hsl(var(--brand-primary))]">
-              Not like the crowd.
+            Build repeatable edge.
+            <span className="mt-2 block bg-[linear-gradient(92deg,hsl(var(--foreground))_0%,hsl(var(--foreground)/0.72)_100%)] bg-clip-text text-transparent">
+              Eliminate emotional drift.
             </span>
           </motion.h1>
 
           <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-3xl text-center text-[14px] leading-[1.72] text-muted-foreground sm:text-[18px] sm:leading-[1.8] [font-family:var(--home-copy)]">
-            Qunt Edge gives disciplined traders the one thing most platforms miss: a clear diagnosis of decision quality.
-            See where your edge leaks, what behavior caused it, and what to correct before your next session.
+            Qunt Edge isolates execution quality, behavioral drift, and risk discipline in one review surface.
+            Every session gets a precise diagnosis, so your next session starts with intent, not guesswork.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
@@ -78,18 +80,18 @@ export default function Hero() {
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-16">
-            <Card className="border-white/12 bg-black/45 shadow-xl backdrop-blur-md">
+            <Card className="overflow-hidden border-white/12 bg-black/45 shadow-xl backdrop-blur-md">
               <CardContent className="p-4 sm:p-6">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
+                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center transition-colors hover:bg-black/45">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Session Grade Confidence</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] [font-family:var(--home-display)]">94%</p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
+                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center transition-colors hover:bg-black/45">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Rule Adherence Uplift</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-fg-primary [font-family:var(--home-display)]">+37%</p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center">
+                  <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-center transition-colors hover:bg-black/45">
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground [font-family:var(--home-copy)]">Impulse Trades Reduced</p>
                     <p className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-primary [font-family:var(--home-display)]">-42%</p>
                   </div>
