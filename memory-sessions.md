@@ -28,3 +28,5 @@
 - Captured operational risks during understanding pass: stale stack claims in `README.md` and missing helper scripts referenced by `.github/workflows/widget-policy-compliance.yml`.
 - Implemented approved theme-token migration: moved canonical semantic tokens and color-only `@theme inline` bridge into `styles/tokens.css`, removed duplicate token blocks from `app/globals.css`, and added `docs/THEME_TOKEN_CONTRACT.md`.
 - Preserved compatibility with temporary alias `--sidebar -> --sidebar-background`; re-verified with `typecheck`, `lint` (warnings-only), and `build`.
+- Completed Phase B migration sweep for legacy `--sidebar` usage and confirmed no internal dependencies outside canonical token source/docs; added `docs/audits/theme-token-phase-b-2026-03-03.md` with ready Phase C alias-removal diff.
+- Executed Phase C: removed legacy `--sidebar` alias from `styles/tokens.css`, updated token contract docs, and verified with alias/reference grep sweep plus `typecheck` (`0`).

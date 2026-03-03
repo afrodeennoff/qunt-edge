@@ -1,3 +1,55 @@
+# Theme Token Migration Phase C (Alias Removal) (2026-03-03)
+
+## Scope
+- Remove legacy sidebar alias token (`--sidebar`) after Phase B confirmed zero internal usage.
+
+## Acceptance Criteria
+- [x] Alias removed from canonical token source.
+- [x] No remaining `var(--sidebar)` or alias-definition references in app/components/lib/tokens contract.
+- [x] Typecheck passes after alias removal.
+
+## Plan Checklist
+- [x] Remove `--sidebar: var(--sidebar-background)` from `:root` and `.dark` in `styles/tokens.css`.
+- [x] Update token contract doc to reflect no active aliases.
+- [x] Run repo sweep for alias/reference usage.
+- [x] Run `npm run -s typecheck`.
+- [x] Save Phase C audit evidence file.
+
+## Current Step
+- **Completed:** Phase C alias removal complete and verified.
+
+## Completion Notes
+- Updated files:
+  - `styles/tokens.css`
+  - `docs/THEME_TOKEN_CONTRACT.md`
+  - `docs/audits/theme-token-phase-c-2026-03-03.md`
+- Verification:
+  - alias/reference `rg` sweep -> no matches.
+  - `npm run -s typecheck` -> exit `0`.
+
+# Theme Token Migration Phase B (Legacy Alias Usage Sweep) (2026-03-03)
+
+## Scope
+- Execute Phase B by verifying and migrating any remaining internal usage of legacy `--sidebar` alias.
+
+## Acceptance Criteria
+- [x] Repo-wide sweep confirms no remaining internal `--sidebar` usage outside canonical token source/docs.
+- [x] Phase B evidence is documented.
+- [x] Phase C removal diff is prepared (not applied).
+
+## Plan Checklist
+- [x] Run repo-wide search for `var(--sidebar)` and `--sidebar:` usage excluding canonical token file/docs.
+- [x] Verify there are no remaining internal dependencies.
+- [x] Document result + ready Phase C diff in audit note.
+
+## Current Step
+- **Completed:** Phase B sweep complete; Phase C patch prepared.
+
+## Completion Notes
+- Evidence query returned no internal matches outside canonical token/doc allowlist.
+- Added audit file:
+  - `docs/audits/theme-token-phase-b-2026-03-03.md`
+
 # Theme Token Integration (Safe Migration + Backward Aliases) (2026-03-03)
 
 ## Scope

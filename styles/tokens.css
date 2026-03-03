@@ -63,9 +63,6 @@
     --precision-panel-line: 0 0% 10%;
     --precision-panel-inner: 0 0% 100%;
 
-    /* Backward compatibility aliases (temporary). */
-    --sidebar: var(--sidebar-background);
-
     /* ===== OPTIMIZATION PASS: SEMANTIC CORE TOKENS ===== */
     --bg: 0 0% 0%;
     --surface-1: 0 0% 4%;
@@ -303,8 +300,6 @@
     --chart-axis: 0 0% 68%;
     --chart-tooltip: 0 0% 4%;
     --chart-tooltip-border: 0 0% 12%;
-
-    --sidebar: var(--sidebar-background);
 
     /* Dark theme inherits same structure, ensuring consistency */
     --bg-base: 240 10% 3.9%;

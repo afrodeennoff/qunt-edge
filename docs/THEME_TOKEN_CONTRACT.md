@@ -61,16 +61,12 @@
   - `borderRadius` -> `var(--radius)`
 
 ## Backward-Compatibility Aliases
-- Current temporary alias:
-  - `--sidebar` -> `var(--sidebar-background)`
+- None active.
 
 ## Alias Deprecation Timeline
-- Phase A (now): keep aliases enabled for safe rollout.
-- Phase B: migrate all internal references to canonical names.
-- Phase C: remove alias tokens only after:
-  - repo grep confirms no usage,
-  - light/dark visual checks pass on `/en`, `/en/dashboard`, `/en/teams/dashboard`, `/en/admin`,
-  - build and lint checks are green.
+- Phase A: aliases enabled for safe rollout.
+- Phase B: internal references migrated to canonical names.
+- Phase C (completed 2026-03-03): legacy alias removed after grep and verification gates.
 
 ## Adding New Tokens
 1. Add token under canonical block in `styles/tokens.css` for both `:root` and `.dark` when required.

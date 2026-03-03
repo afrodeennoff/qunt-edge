@@ -10,3 +10,4 @@
 - 2026-03-01: Next config now sets `turbopack.root` and `outputFileTracingRoot` to project root for consistent root detection during local dev/build audits.
 - 2026-03-03: Repository understanding workflow now uses a skill applicability matrix (applicable vs conditional vs not-applicable) plus parallel explorer subagent cross-checks before sharing architecture summaries.
 - 2026-03-03: Theme token contract now uses `styles/tokens.css` as canonical source; duplicate semantic token blocks were removed from `app/globals.css`, and compatibility alias `--sidebar -> --sidebar-background` is retained for one migration cycle.
+- 2026-03-03: Completed token migration Phase C by removing `--sidebar` compatibility alias after zero internal usage was confirmed; canonical sidebar token is now only `--sidebar-background`.
