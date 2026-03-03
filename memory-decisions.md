@@ -8,3 +8,5 @@
 - 2026-03-01: Dashboard header now lazy-loads heavy action modules (`filters`, `import`, `share`, `sync`, `daily summary`, widget controls) to keep dashboard-family app-route manifests under the 80 KB budget.
 - 2026-03-01: CSP builder omits `upgrade-insecure-requests` when `CSP_REPORT_ONLY` mode is active to prevent recurring browser console report-only warnings.
 - 2026-03-01: Next config now sets `turbopack.root` and `outputFileTracingRoot` to project root for consistent root detection during local dev/build audits.
+- 2026-03-03: Repository understanding workflow now uses a skill applicability matrix (applicable vs conditional vs not-applicable) plus parallel explorer subagent cross-checks before sharing architecture summaries.
+- 2026-03-03: Theme token contract now uses `styles/tokens.css` as canonical source; duplicate semantic token blocks were removed from `app/globals.css`, and compatibility alias `--sidebar -> --sidebar-background` is retained for one migration cycle.

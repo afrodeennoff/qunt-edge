@@ -20,3 +20,11 @@
 - Re-verified with `typecheck`, `build`, `check:route-budgets`, `analyze:bundle`, focused lint/tests, and Playwright redirects/hydration/missing-post checks plus a 32-route sequential dev crawl.
 - Mapped all dashboard pages/flows reusing `TradeTableReview` and confirmed shared issue propagation beyond `/strategies` (table tab, data/trades tab, calendar modal table, widget table, import processor table).
 - Implemented shared trade-table consistency fixes across server action + provider + table UI: hard-fail update path with rollback signaling, raw-trade footer counts, and row expandability alignment, then verified via typecheck and targeted eslint.
+
+## 2026-03-03
+- Completed a full repository reconnaissance pass driven by all currently installed skills and produced a skill-to-codebase applicability map.
+- Validated core architecture surface counts and entry points (`46` page routes, `45` API route handlers; Next `16.1.6` + React `19.2.1` stack).
+- Used parallel explorer subagents to cross-check frontend architecture, backend/auth/data model, and CI/deploy workflows; merged only locally validated findings.
+- Captured operational risks during understanding pass: stale stack claims in `README.md` and missing helper scripts referenced by `.github/workflows/widget-policy-compliance.yml`.
+- Implemented approved theme-token migration: moved canonical semantic tokens and color-only `@theme inline` bridge into `styles/tokens.css`, removed duplicate token blocks from `app/globals.css`, and added `docs/THEME_TOKEN_CONTRACT.md`.
+- Preserved compatibility with temporary alias `--sidebar -> --sidebar-background`; re-verified with `typecheck`, `lint` (warnings-only), and `build`.

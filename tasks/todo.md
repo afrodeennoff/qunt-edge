@@ -1,3 +1,78 @@
+# Theme Token Integration (Safe Migration + Backward Aliases) (2026-03-03)
+
+## Scope
+- Implement the approved theme-token integration plan with canonical token source, compatibility aliases, and duplicate-token cleanup.
+
+## Acceptance Criteria
+- [x] Canonical semantic tokens centralized in `styles/tokens.css`.
+- [x] Duplicate/conflicting root/dark token blocks removed from `app/globals.css`.
+- [x] Color-only `@theme inline` bridge retained with no font/radius misclassification.
+- [x] Backward alias layer added for legacy sidebar token naming.
+- [x] Token contract documentation added under `docs/`.
+- [x] Verification commands run and recorded.
+
+## Plan Checklist
+- [x] Move canonical semantic tokens (core/sidebar/chart) to `styles/tokens.css`.
+- [x] Add backward alias (`--sidebar -> --sidebar-background`) for compatibility.
+- [x] Add color-only `@theme inline` token bridge in `styles/tokens.css`.
+- [x] Remove duplicated root/dark token definitions and sidebar-only theme bridge from `app/globals.css`.
+- [x] Add `docs/THEME_TOKEN_CONTRACT.md` with canonical+alias rules and deprecation timeline.
+- [x] Run `npm run -s typecheck`, `npm run -s lint`, and `npm run -s build`.
+
+## Current Step
+- **Completed:** implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `styles/tokens.css`
+  - `app/globals.css`
+  - `docs/THEME_TOKEN_CONTRACT.md`
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npm run -s lint` -> exit `0` (warnings only, no errors).
+  - `npm run -s build` -> exit `0`.
+
+# Project Understanding via All Skills (2026-03-03)
+
+## Scope
+- Use every available skill as an analysis lens to understand this project/app end-to-end.
+- Produce a practical architecture + workflow map for future implementation/debug/deploy work.
+
+## Acceptance Criteria
+- [x] All listed skills are reviewed and mapped to this repo (applicable / conditionally applicable / not currently applicable).
+- [x] Core app architecture is documented (frontend, backend, data, auth, i18n, infra, tests).
+- [x] Primary engineering workflows are documented (local dev, quality gates, deploy paths, CI touchpoints).
+- [x] Results and residual risks are captured in completion notes.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md` and current `tasks/todo.md`.
+- [x] Read all listed skill `SKILL.md` files.
+- [x] Gather repository evidence (scripts, structure, key modules, docs).
+- [x] Map each skill to concrete repo entry points and usage conditions.
+- [x] Deliver concise project understanding summary to user.
+- [x] Record completion notes in `tasks/todo.md` and session memory.
+
+## Current Step
+- **Completed:** repository reconnaissance and skill-to-repo mapping complete.
+
+## Progress Notes
+- 2026-03-03: Loaded all listed skills (`cloudflare-deploy`, `develop-web-game`, `figma-implement-design`, `frontend-design`, `gh-address-comments`, `gh-fix-ci`, `playwright`, `vercel-deploy`, `verification-before-completion`, `skill-creator`, `skill-installer`) and extracted execution rules.
+- 2026-03-03: Collected repository evidence for app routes, API handlers, middleware/security, Prisma/Supabase usage, i18n, scripts/tests, CI/workflows, and deployment artifacts.
+- 2026-03-03: Ran parallel explorer subagents for frontend architecture, backend/data/auth architecture, and workflow/CI/deploy mapping; validated key claims locally before integration.
+
+## Completion Notes
+- Project snapshot (verified from repo):
+  - `46` `page.tsx` routes under `app/**`.
+  - `45` API route handlers under `app/api/**`.
+  - Core stack currently pinned to Next `16.1.6`, React `19.2.1`, TypeScript `5.9.3`.
+- Skill applicability summary:
+  - Immediately applicable for this repo workflow: `frontend-design`, `gh-address-comments`, `gh-fix-ci`, `playwright`, `vercel-deploy`, `verification-before-completion`, `skill-creator`, `skill-installer`.
+  - Conditionally applicable by task type: `figma-implement-design`, `cloudflare-deploy`.
+  - Not typically applicable unless the product scope changes to game development: `develop-web-game`.
+- Residual risks noted during reconnaissance:
+  - `README.md` stack/version claims are outdated relative to `package.json` (README says Next 15, package is Next 16).
+  - `.github/workflows/widget-policy-compliance.yml` references several `.github/scripts/*.js` files that are not present (only `check-manifests.js` exists), so that workflow appears partially stale.
+
 # Full Page End-to-End Audit (2026-03-01)
 
 ## Scope
