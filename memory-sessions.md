@@ -30,3 +30,9 @@
 - Preserved compatibility with temporary alias `--sidebar -> --sidebar-background`; re-verified with `typecheck`, `lint` (warnings-only), and `build`.
 - Completed Phase B migration sweep for legacy `--sidebar` usage and confirmed no internal dependencies outside canonical token source/docs; added `docs/audits/theme-token-phase-b-2026-03-03.md` with ready Phase C alias-removal diff.
 - Executed Phase C: removed legacy `--sidebar` alias from `styles/tokens.css`, updated token contract docs, and verified with alias/reference grep sweep plus `typecheck` (`0`).
+
+## 2026-03-04
+- Implemented full performance + polish pass across public/home, landing navbar/shell, dashboard sidebar/table shell, admin dashboard surfaces, and teams dashboard shell.
+- Added safe performance-focused adjustments: removed fixed decorative home layers, narrowed dashboard sidebar context subscription (`useDashboardActions`), and reduced redundant trade-table scroll updates.
+- Executed full verification gates (`typecheck`, `lint`, `build`, route budgets, bundle analysis) and generated fresh performance artifacts (`performance-baseline.json`, Lighthouse reports/summary).
+- Captured current bottleneck: Lighthouse thresholds fail on `/en` and `/en/pricing` mainly from high TBT; documented next-focus actions in `docs/audits/performance-polish-2026-03-04.md`.

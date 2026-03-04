@@ -1217,3 +1217,38 @@
 ## Completion Notes
 - Typecheck: `npm run typecheck` -> exit `0`.
 - Lint: `git diff --name-only -z -- '*.ts' '*.tsx' '*.js' '*.jsx' | xargs -0 -r npx eslint` -> exit `0` with warnings only (`0` errors).
+
+# Full Performance + Polish Plan Implementation (2026-03-04)
+
+## Scope
+- Implement the approved all-surfaces performance + polish pass with premium monochrome direction.
+
+## Acceptance Criteria
+- [x] Core target surfaces polished (home/landing/dashboard/admin/teams shells).
+- [x] Target performance-related adjustments applied without API contract changes.
+- [x] `typecheck`, `lint`, `build`, route-budget, bundle analysis executed.
+- [x] Header/baseline/lighthouse perf scripts executed with artifacts captured.
+- [x] Route-level status sweep captured for public + protected paths.
+
+## Plan Checklist
+- [x] Baseline + build/budget analysis run.
+- [x] Remove dead-scope `Navigation.tsx` edit from working set.
+- [x] Implement UI polish and safe perf tweaks on approved file targets.
+- [x] Run narrow lint on touched files.
+- [x] Run full verification and perf scripts.
+- [x] Document outcomes and residual risks in audit doc.
+
+## Current Step
+- **Completed:** Full implementation and verification finished.
+
+## Completion Notes
+- Implementation + results documented in:
+  - `docs/audits/performance-polish-2026-03-04.md`
+- Verification highlights:
+  - `npm run -s typecheck` -> exit `0`
+  - `npm run -s lint` -> exit `0` (warnings-only)
+  - `npm run -s build` -> exit `0`
+  - `npm run -s check:route-budgets` -> exit `0`
+  - `npm run -s analyze:bundle` -> exit `0`
+  - `perf:headers`, `perf:baseline`, `perf:lighthouse` executed against `http://127.0.0.1:3001`
+- Lighthouse thresholds currently fail (TBT/score) on `/en` and `/en/pricing`; see audit doc for exact metrics.

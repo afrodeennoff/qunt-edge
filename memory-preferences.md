@@ -4,3 +4,4 @@
 - 2026-02-28: User prefers dashboard fixes to prioritize high-contrast readability and strict consistency of opacity tiers across all widgets.
 - 2026-02-28: User wants color/opacity-only recovery changes without geometry/gap/layout behavior changes.
 - 2026-03-03: User prefers project understanding requests to use all available skills as analysis lenses before implementation work.
+- 2026-03-04: User prefers full-scope implementation (not partial planning) for performance audit + visual polish requests, with concrete verification artifacts.
