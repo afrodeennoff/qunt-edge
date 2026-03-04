@@ -18,13 +18,13 @@ import {
     Shield,
 } from "lucide-react"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardActions } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { useCurrentLocale } from "@/locales/client"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 
 export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
-    const { refreshAllData } = useData()
+    const { refreshAllData } = useDashboardActions()
     const locale = useCurrentLocale()
     const user = useUserStore(state => state.supabaseUser)
     const timezone = useUserStore(state => state.timezone)

@@ -326,6 +326,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const tableViewportRef = useRef<HTMLDivElement>(null);
   const scrollRafRef = useRef<number | null>(null);
+  const lastScrollTopRef = useRef(0);
   const [viewportHeight, setViewportHeight] = useState(600);
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -1294,11 +1295,11 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
 
   return (
     <Card
-      className="h-full flex flex-col w-full"
+      className="flex h-full w-full flex-col border-border/70 bg-card/80 shadow-[0_20px_40px_-32px_hsl(var(--foreground)/0.55)] backdrop-blur-sm"
       style={cardStyle}
     >
       {showHeader && (
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b shrink-0 p-3 sm:p-4 h-[56px]">
+        <CardHeader className="h-[56px] shrink-0 border-b border-border/70 bg-muted/25 p-3 sm:p-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-1.5">
               <CardTitle className="line-clamp-1 text-base">
@@ -1422,11 +1423,16 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
       )}
       <CardContent
         ref={tableViewportRef}
-        className="flex-1 min-h-0 overflow-auto p-0"
+        className="min-h-0 flex-1 overflow-auto p-0"
         onScroll={(event) => {
           const nextScrollTop = event.currentTarget.scrollTop;
           if (scrollRafRef.current !== null) return;
           scrollRafRef.current = requestAnimationFrame(() => {
+            if (Math.abs(nextScrollTop - lastScrollTopRef.current) < 2) {
+              scrollRafRef.current = null;
+              return;
+            }
+            lastScrollTopRef.current = nextScrollTop;
             setScrollTop(nextScrollTop);
             scrollRafRef.current = null;
           });
@@ -1434,7 +1440,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
       >
         <div className="relative w-full min-w-fit">
           <table className="w-full border-separate border-spacing-0 caption-bottom text-sm">
-            <thead className="sticky top-0 z-10 bg-muted/90 backdrop-blur-xs shadow-xs border-b [&_tr]:border-b">
+            <thead className="sticky top-0 z-10 border-b bg-muted/90 shadow-xs backdrop-blur-xs [&_tr]:border-b">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
@@ -1475,7 +1481,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                     <tr
                       data-state={row.getIsSelected() && "selected"}
                       className={cn(
-                        "border-b border-border transition-all duration-75 hover:bg-muted/40 group",
+                        "group border-b border-border/70 transition-all duration-75 hover:bg-muted/40",
                         row.getIsSelected() && "bg-accent/50 hover:bg-accent data-[state=selected]:bg-muted",
                         row.getIsExpanded()
                           ? "bg-muted/60"
@@ -1491,7 +1497,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                         <td
                           key={cell.id}
                           className={cn(
-                            "p-4 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l group-hover:border-border",
+                            "whitespace-nowrap border-r border-border/50 px-3 py-2 text-sm align-middle [&:has([role=checkbox])]:pr-0 first:border-l last:border-r-0 group-hover:border-border",
                             row.getIsSelected() && "border-border",
                           )}
                           style={{ width: cell.column.getSize() }}
@@ -1538,7 +1544,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
                 </tr>
               )}
             </tbody>
-            <tfoot className="sticky bottom-0 z-10 bg-background/90 backdrop-blur-md border-t border-border shadow-md">
+            <tfoot className="sticky bottom-0 z-10 border-t border-border bg-background/90 shadow-md backdrop-blur-md">
               <tr className="border-b transition-colors">
                 {visibleColumns.map((column, index) => {
                   const columnId = column.id || (column as any).accessorKey;
@@ -1645,7 +1651,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           </table>
         </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between border-t bg-background px-4 py-3">
+      <CardFooter className="flex items-center justify-between border-t border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
         <div className="text-sm text-muted-foreground">
           {t("trade-table.totalTrades", { count: totalTradeCount })}
         </div>

@@ -39,7 +39,12 @@ export function AdminDashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const userData = await getUserStats()
+        const [userData, txnRes, subRes] = await Promise.all([
+          getUserStats(),
+          getTransactionsAction({ limit: 20 }),
+          getSubscriptionsAction(),
+        ])
+
         setUserStats({
           totalUsers: userData.totalUsers,
           dailyData: userData.dailyData.map(item => ({
@@ -48,40 +53,31 @@ export function AdminDashboard() {
           })),
           allUsers: userData.allUsers
         })
+        setPaymentData({
+          transactions: txnRes.success ? txnRes.transactions || [] : [],
+          subscriptions: subRes.success ? subRes.subscriptions || [] : []
+        })
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching admin dashboard data:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    async function fetchPaymentData() {
-      const [txnRes, subRes] = await Promise.all([
-        getTransactionsAction({ limit: 20 }),
-        getSubscriptionsAction()
-      ])
-
-      setPaymentData({
-        transactions: txnRes.success ? txnRes.transactions || [] : [],
-        subscriptions: subRes.success ? subRes.subscriptions || [] : []
-      })
-    }
-
     fetchData()
-    fetchPaymentData()
   }, [])
 
   if (isLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-8 w-1/4 rounded bg-muted"></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="h-32 bg-gray-200 rounded"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
+            <div className="h-32 rounded bg-muted"></div>
+            <div className="h-32 rounded bg-muted"></div>
+            <div className="h-32 rounded bg-muted"></div>
           </div>
-          <div className="h-80 bg-gray-200 rounded"></div>
+          <div className="h-80 rounded bg-muted"></div>
         </div>
       </div>
     )
@@ -89,9 +85,9 @@ export function AdminDashboard() {
 
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
+        <TabsList className="border border-border/70 bg-card/70 p-1 shadow-sm">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
@@ -99,7 +95,7 @@ export function AdminDashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-6 space-y-2">
+            <Card className="space-y-2 border-border/70 bg-card/80 p-6 shadow-[0_20px_36px_-30px_hsl(var(--foreground)/0.45)]">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">Total Users</h3>
                 <Badge variant="secondary">Active</Badge>
@@ -115,7 +111,7 @@ export function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="users">
-          <Card className="p-6">
+          <Card className="border-border/70 bg-card/80 p-6 shadow-[0_20px_36px_-30px_hsl(var(--foreground)/0.45)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Free Users</h3>
               <Badge variant="secondary">Active</Badge>
@@ -125,14 +121,14 @@ export function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">
-          <Card className="p-6">
+          <Card className="border-border/70 bg-card/80 p-6 shadow-[0_20px_36px_-30px_hsl(var(--foreground)/0.45)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Recent Transactions</h3>
             </div>
             <TransactionsTable transactions={paymentData.transactions} />
           </Card>
 
-          <Card className="p-6">
+          <Card className="border-border/70 bg-card/80 p-6 shadow-[0_20px_36px_-30px_hsl(var(--foreground)/0.45)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Active Subscriptions</h3>
             </div>

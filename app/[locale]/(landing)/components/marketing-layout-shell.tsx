@@ -11,14 +11,14 @@ type MarketingLayoutShellProps = Readonly<{
 
 export default function MarketingLayoutShell({
   children,
-  contentClassName = 'mx-auto w-full max-w-[1280px]',
+  contentClassName = 'mx-auto w-full max-w-[1320px]',
   className,
 }: MarketingLayoutShellProps) {
   return (
     <div className={cn('marketing-shell min-h-screen w-full overflow-x-hidden', className)}>
-      <div className="pointer-events-none fixed inset-0 hidden marketing-grid opacity-40 sm:block" />
+      <div className="pointer-events-none fixed inset-0 hidden marketing-grid opacity-30 sm:block" />
       <Navbar />
-      <div className={cn('relative z-10 pt-20 sm:pt-28', contentClassName)}>
+      <div className={cn('relative z-10 pt-20 sm:pt-28 lg:pt-32', contentClassName)}>
         <MotionStagger>
           <MotionStaggerItem>{children}</MotionStaggerItem>
         </MotionStagger>
