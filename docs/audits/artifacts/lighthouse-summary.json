@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-02-27T22:02:17.054Z",
-  "baseUrl": "http://localhost:3000",
+  "generatedAt": "2026-03-04T13:49:35.016Z",
+  "baseUrl": "http://127.0.0.1:3001",
   "thresholds": {
     "desktopScoreMin": 0.9,
     "mobileScoreMin": 0.75,
@@ -12,52 +12,52 @@
   },
   "results": [
     {
-      "url": "http://localhost:3000/en",
+      "url": "http://127.0.0.1:3001/en",
       "mode": "mobile",
-      "score": 0.62,
-      "tbt": 3233.5,
-      "lcp": 3255.1466,
+      "score": 0.61,
+      "tbt": 4743.13495,
+      "lcp": 3268.4601999999995,
       "cls": 0,
       "failures": [
-        "mobile score 0.62 < 0.75",
-        "mobile TBT 3233.5ms > 1200ms"
+        "mobile score 0.61 < 0.75",
+        "mobile TBT 4743.13495ms > 1200ms"
       ]
     },
     {
-      "url": "http://localhost:3000/en",
+      "url": "http://127.0.0.1:3001/en",
       "mode": "desktop",
       "score": 0.73,
-      "tbt": 698.4749500000001,
-      "lcp": 816.2004000000001,
+      "tbt": 673.5724999999999,
+      "lcp": 787.4200000000002,
       "cls": 0,
       "failures": [
         "desktop score 0.73 < 0.9",
-        "desktop TBT 698.4749500000001ms > 200ms"
+        "desktop TBT 673.5724999999999ms > 200ms"
       ]
     },
     {
-      "url": "http://localhost:3000/en/pricing",
+      "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "mobile",
       "score": 0.57,
-      "tbt": 3089.5,
-      "lcp": 4065.4743,
+      "tbt": 3068,
+      "lcp": 4062.90765,
       "cls": 0,
       "failures": [
         "mobile score 0.57 < 0.75",
-        "mobile TBT 3089.5ms > 1200ms",
-        "mobile LCP 4065.4743ms > 3500ms"
+        "mobile TBT 3068ms > 1200ms",
+        "mobile LCP 4062.90765ms > 3500ms"
       ]
     },
     {
-      "url": "http://localhost:3000/en/pricing",
+      "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "desktop",
       "score": 0.74,
-      "tbt": 679.1979,
-      "lcp": 814.4168,
+      "tbt": 675.2016000000001,
+      "lcp": 814.3871999999999,
       "cls": 0,
       "failures": [
         "desktop score 0.74 < 0.9",
-        "desktop TBT 679.1979ms > 200ms"
+        "desktop TBT 675.2016000000001ms > 200ms"
       ]
     }
   ]
