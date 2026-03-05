@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X, AlertCircle } from "lucide-react"
 import { useCurrentLocale, useI18n } from "@/locales/client"
-import NumberFlow from '@number-flow/react'
 import {
   Dialog,
   DialogContent,
@@ -275,6 +274,23 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
     }
   }
 
+  const formatPrice = (value: number, {
+    withMonthSuffix = false,
+    minimumFractionDigits = 0,
+    maximumFractionDigits = 2,
+  }: {
+    withMonthSuffix?: boolean;
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+  } = {}) => {
+    const formatted = new Intl.NumberFormat(currency === 'EUR' ? 'de-DE' : 'en-US', {
+      minimumFractionDigits,
+      maximumFractionDigits,
+    }).format(value)
+    const amount = currency === 'EUR' ? `${formatted}${symbol}` : `${symbol}${formatted}`
+    return withMonthSuffix ? `${amount}/${t('pricing.month')}` : amount
+  }
+
   const FreePlan = ({ plan, isModal, onClose }: { plan: Plan, isModal?: boolean, onClose?: () => void }) => {
     const t = useI18n()
     return (
@@ -325,20 +341,26 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   }
 
   const PlusPlan = ({ plan, billingPeriod, setBillingPeriod, currency, symbol }: { plan: Plan, billingPeriod: BillingPeriod, setBillingPeriod: (period: BillingPeriod) => void, currency: 'USD' | 'EUR', symbol: string }) => {
-    const [currentPricing, setCurrentPricing] = useState(0)
-    const [previousPrice, setPreviousPrice] = useState(0)
-
-    useEffect(() => {
-      setCurrentPricing(billingPeriod === 'yearly' ? plan.price.yearly / 12 :
-        billingPeriod === 'quarterly' ? plan.price.quarterly / 3 :
-          billingPeriod === 'lifetime' ? plan.price.lifetime :
-            plan.price.monthly)
-
-      setPreviousPrice(billingPeriod === 'yearly' ? previousPricing.yearly / 12 :
-        billingPeriod === 'quarterly' ? previousPricing.quarterly / 3 :
-          billingPeriod === 'lifetime' ? previousPricing.lifetime :
-            previousPricing.monthly)
-    }, [billingPeriod, plan.price])
+    const currentPricing = useMemo(
+      () => billingPeriod === 'yearly'
+        ? plan.price.yearly / 12
+        : billingPeriod === 'quarterly'
+          ? plan.price.quarterly / 3
+          : billingPeriod === 'lifetime'
+            ? plan.price.lifetime
+            : plan.price.monthly,
+      [billingPeriod, plan.price]
+    )
+    const previousPrice = useMemo(
+      () => billingPeriod === 'yearly'
+        ? previousPricing.yearly / 12
+        : billingPeriod === 'quarterly'
+          ? previousPricing.quarterly / 3
+          : billingPeriod === 'lifetime'
+            ? previousPricing.lifetime
+            : previousPricing.monthly,
+      [billingPeriod]
+    )
 
     const t = useI18n()
 
@@ -429,12 +451,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                     <div className="flex items-center justify-center gap-4">
                       {/* Previous price (crossed out) */}
                       <div className="text-lg text-muted-foreground relative">
-                        <NumberFlow
-                          prefix={currency === 'EUR' ? undefined : `${symbol}`}
-                          suffix={currency === 'EUR' ? `${symbol}` : undefined}
-                          value={previousPrice}
-                          format={{ minimumIntegerDigits: 3 }}
-                        />
+                        {formatPrice(previousPrice, { maximumFractionDigits: 0 })}
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full h-px bg-current"></div>
                         </div>
@@ -442,12 +459,7 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                       <div className="text-muted-foreground">→</div>
                       {/* Current price */}
                       <div className="flex items-baseline text-4xl font-bold">
-                        <NumberFlow
-                          prefix={currency === 'EUR' ? undefined : `${symbol}`}
-                          suffix={currency === 'EUR' ? `${symbol}` : undefined}
-                          value={currentPricing}
-                          format={{ minimumIntegerDigits: 3 }}
-                        />
+                        {formatPrice(currentPricing, { maximumFractionDigits: 0 })}
                       </div>
                     </div>
                     <p className="text-xs text-center text-muted-foreground mt-2">
@@ -460,13 +472,11 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
                 <div className="text-center">
                   <div className="flex items-baseline justify-center mb-3">
                     <span className="text-4xl font-bold">
-                      <NumberFlow
-                        prefix={currency === 'EUR' ? undefined : `${symbol}`}
-                        suffix={currency === 'EUR' ? `${symbol}/${t('pricing.month')}` : `/${t('pricing.month')}`}
-                        value={currentPricing}
-                        digits={{ 1: { max: 2 } }}
-                        format={{ minimumIntegerDigits: 2 }}
-                      />
+                      {formatPrice(currentPricing, {
+                        withMonthSuffix: true,
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">

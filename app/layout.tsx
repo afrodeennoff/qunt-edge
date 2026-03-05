@@ -134,8 +134,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href={siteOrigin} />
 
         {/* Mobile-First Meta Tags */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-          <meta name="theme-color" content="black" />
+        <meta name="theme-color" content="black" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

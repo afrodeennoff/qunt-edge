@@ -53,7 +53,9 @@ const PRIVATE_DOCUMENT_PATH_PREFIXES = [
   "/authentication",
   "/admin",
 ]
-const PUBLIC_READ_API_PATH_PREFIXES = ["/api/health", "/api"]
+const PUBLIC_READ_API_PATHS = new Set<string>([
+  "/api/health",
+])
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   const cookieHeader = request.headers.get("cookie")
@@ -97,9 +99,26 @@ function isPublicDocumentRoute(pathname: string): boolean {
 }
 
 function isPublicReadApiRoute(pathname: string): boolean {
-  return PUBLIC_READ_API_PATH_PREFIXES.some((prefix) =>
-    pathMatchesPrefix(pathname, prefix)
-  )
+  return PUBLIC_READ_API_PATHS.has(pathname)
+}
+
+function applyPrivateNoStoreHeaders(response: NextResponse) {
+  response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate")
+  response.headers.set("Pragma", "no-cache")
+  response.headers.set("Expires", "0")
+  response.headers.set("x-dashboard-cache-policy", "private-no-store")
+}
+
+function applyPublicRevalidateHeaders(response: NextResponse) {
+  response.headers.set("Cache-Control", "public, max-age=0, must-revalidate")
+  response.headers.set("x-dashboard-cache-policy", "public-revalidate")
+}
+
+function redirectWithPrivateNoStore(url: URL) {
+  const redirectResponse = NextResponse.redirect(url)
+  applySecurityHeaders(redirectResponse)
+  applyPrivateNoStoreHeaders(redirectResponse)
+  return redirectResponse
 }
 
 async function updateSession(request: NextRequest) {
@@ -183,12 +202,13 @@ function setCspHeader(response: NextResponse, csp: string, reportOnly: boolean) 
 
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
+  const normalizedPathname = normalizePathWithoutLocale(pathname)
   const origin = req.headers.get('origin')
   const locale = getLocale(pathname)
-  const isDashboardRoute = pathname.includes("/dashboard")
-  const isAdminRoute = pathname.includes("/admin")
-  const isAuthRoute = pathname.includes("/authentication")
-  const isEmbedRoute = pathname.includes("/embed")
+  const isDashboardRoute = pathMatchesPrefix(normalizedPathname, "/dashboard")
+  const isAdminRoute = pathMatchesPrefix(normalizedPathname, "/admin")
+  const isAuthRoute = pathMatchesPrefix(normalizedPathname, "/authentication")
+  const isEmbedRoute = pathMatchesPrefix(normalizedPathname, "/embed")
   const isApiRoute = pathname.startsWith("/api/")
   const isDev = process.env.NODE_ENV === "development"
   const cspEnabled = process.env.CSP_ENABLED !== "false"
@@ -241,8 +261,9 @@ export default async function middleware(req: NextRequest) {
         "Cache-Control",
         "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
       )
+      apiResponse.headers.set("x-dashboard-cache-policy", "public-read-api")
     } else {
-      apiResponse.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate")
+      applyPrivateNoStoreHeaders(apiResponse)
     }
     // Attach CORS header for allowed cross-origin API requests
     if (origin && isAllowedOrigin(origin)) {
@@ -344,6 +365,8 @@ export default async function middleware(req: NextRequest) {
 
     // If Next-International wants to redirect, let it redirect.
     if (response.status >= 300 && response.status < 400) {
+      applySecurityHeaders(response)
+      applyPrivateNoStoreHeaders(response)
       return response
     }
 
@@ -359,12 +382,12 @@ export default async function middleware(req: NextRequest) {
     if (nextPath) {
       authUrl.searchParams.append("next", nextPath)
     }
-    return NextResponse.redirect(authUrl)
+    return redirectWithPrivateNoStore(authUrl)
   }
 
   // Maintenance mode check
   if (MAINTENANCE_MODE && !pathname.includes("/maintenance") && isDashboardRoute) {
-    return NextResponse.redirect(new URL(`/${locale}/maintenance`, req.url))
+    return redirectWithPrivateNoStore(new URL(`/${locale}/maintenance`, req.url))
   }
 
   // Admin route check with better error handling
@@ -372,12 +395,12 @@ export default async function middleware(req: NextRequest) {
     if (!user || error) {
       const authUrl = new URL(`/${locale}/authentication`, req.url)
       authUrl.searchParams.set("error", "admin_access_required")
-      return NextResponse.redirect(authUrl)
+      return redirectWithPrivateNoStore(authUrl)
     }
 
     // Only allow access to admin in production
     if (user.id !== process.env.ADMIN_USER_ID) {
-      return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url))
+      return redirectWithPrivateNoStore(new URL(`/${locale}/dashboard`, req.url))
     }
   }
 
@@ -396,7 +419,7 @@ export default async function middleware(req: NextRequest) {
         authUrl.searchParams.set("auth_error", "session_invalid")
       }
 
-      return NextResponse.redirect(authUrl)
+      return redirectWithPrivateNoStore(authUrl)
     }
   } else if (isAuthRoute) {
     // Authenticated - redirect from auth to dashboard
@@ -414,7 +437,7 @@ export default async function middleware(req: NextRequest) {
         redirectPath = `/${locale}${redirectPath}`
       }
 
-      return NextResponse.redirect(new URL(redirectPath, req.url))
+      return redirectWithPrivateNoStore(new URL(redirectPath, req.url))
     }
   }
 
@@ -473,13 +496,9 @@ export default async function middleware(req: NextRequest) {
   // - private documents: strict no-store
   // - public documents: revalidated public cacheability
   if (isPrivateDocumentRoute(pathname)) {
-    response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate")
-    response.headers.set("Pragma", "no-cache")
-    response.headers.set("Expires", "0")
-    response.headers.set("x-dashboard-cache-policy", "private-no-store")
+    applyPrivateNoStoreHeaders(response)
   } else if (isPublicDocumentRoute(pathname)) {
-    response.headers.set("Cache-Control", "public, max-age=0, must-revalidate")
-    response.headers.set("x-dashboard-cache-policy", "public-revalidate")
+    applyPublicRevalidateHeaders(response)
   }
 
   return response
