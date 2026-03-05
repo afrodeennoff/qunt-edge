@@ -422,7 +422,7 @@ export default function TraderProfilePage() {
 
   return (
     <UnifiedPageShell density="compact">
-      <div className="mx-auto grid w-full gap-3 sm:gap-4 xl:grid-cols-[1.35fr_1fr]">
+      <div className="mx-auto grid w-full gap-3 sm:gap-4 xl:grid-cols-[3fr_1fr]">
         <section className="space-y-3 sm:space-y-4">
           <Card className="border border-white/10 bg-black/40 p-3.5 shadow-sm">
             <div className="flex items-start gap-4">
