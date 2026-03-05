@@ -212,10 +212,10 @@
   }
 
   :root {
-    --qe-surface-0: 0 0% 5%;
-    --qe-surface-1: 240 8% 6%;
-    --qe-surface-2: 240 8% 8%;
-    --qe-panel: 240 8% 7%;
+    --qe-surface-0: 0 0% 4%;
+    --qe-surface-1: 240 8% 7%;
+    --qe-surface-2: 240 8% 10%;
+    --qe-panel: 240 8% 8%;
   }
 
   .surface-flat-0 {

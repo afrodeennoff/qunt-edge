@@ -28,7 +28,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -198,10 +197,6 @@ export function UnifiedSidebar({
                   <span className="truncate text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-medium">Workspace</span>
                 </div>
               </SidebarMenuButton>
-              <SidebarTrigger
-                className="opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex h-6 w-6"
-                aria-label="Toggle sidebar"
-              />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
