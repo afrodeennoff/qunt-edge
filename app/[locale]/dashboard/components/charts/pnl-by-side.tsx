@@ -101,6 +101,15 @@ export default function PnLBySideChart({
   }, [trades, showAverage]);
 
   const hasData = chartData.some((d) => d.tradeCount > 0);
+  const dominantSide = React.useMemo(() => {
+    const [longPoint, shortPoint] = chartData
+    if (!longPoint && !shortPoint) return { label: "—", trades: 0 }
+    if ((longPoint?.tradeCount ?? 0) === 0 && (shortPoint?.tradeCount ?? 0) === 0) {
+      return { label: "—", trades: 0 }
+    }
+    const winner = (longPoint?.tradeCount ?? 0) >= (shortPoint?.tradeCount ?? 0) ? longPoint : shortPoint
+    return { label: (winner?.side ?? "—").toUpperCase(), trades: winner?.tradeCount ?? 0 }
+  }, [chartData])
   const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as ChartDatum | undefined;
@@ -220,6 +229,14 @@ export default function PnLBySideChart({
                       className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
                     />
                   ))}
+                  <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central">
+                    <tspan x="50%" dy="-0.1em" className="fill-white font-black text-2xl">
+                      {dominantSide.label}
+                    </tspan>
+                    <tspan x="50%" dy="1.35em" className="fill-white/55 text-[10px] uppercase font-black tracking-[0.16em]">
+                      {dominantSide.trades} TRADES
+                    </tspan>
+                  </text>
                 </Pie>
                 <Tooltip content={renderTooltip} cursor={{ fill: "transparent" }} />
               </PieChart>

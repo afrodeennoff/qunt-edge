@@ -169,8 +169,12 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
                     />
                   ))}
                   <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
-                    <tspan x="50%" dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
-                    <tspan x="50%" dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
+                    <tspan x="50%" dy="-0.1em" className="fill-white font-black text-2xl chart-positive-emphasis">
+                      {chartData[0].value.toFixed(0)}%
+                    </tspan>
+                    <tspan x="50%" dy="1.35em" className="fill-white/55 text-[10px] uppercase font-black tracking-[0.16em]">
+                      WIN RATE
+                    </tspan>
                   </text>
                 </Pie>
                 <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
