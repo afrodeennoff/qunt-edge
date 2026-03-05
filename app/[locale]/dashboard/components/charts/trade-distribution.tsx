@@ -62,12 +62,12 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
 
   const pieLayout = React.useMemo(() => {
     if (size === 'small') {
-      return { innerRadius: '58%', outerRadius: '82%', cy: '42%' }
+      return { innerRadius: '58%', outerRadius: '82%', cy: '50%' }
     }
     if (size === 'large' || size === 'extra-large') {
-      return { innerRadius: '63%', outerRadius: '92%', cy: '43%' }
+      return { innerRadius: '63%', outerRadius: '92%', cy: '50%' }
     }
-    return { innerRadius: '61%', outerRadius: '90%', cy: '43%' }
+    return { innerRadius: '61%', outerRadius: '90%', cy: '50%' }
   }, [size])
 
   const renderTooltip = React.useCallback(({ active, payload }: TooltipProps) => {
@@ -141,57 +141,41 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
           size === 'small' ? 'p-1.5' : 'p-2 sm:p-3'
         )}
       >
-        <div className="w-full h-full flex min-h-0 flex-col">
+        <div className="w-full h-full min-h-0">
           {hasData ? (
-            <>
-              <div className="min-h-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy={pieLayout.cy}
-                      innerRadius={pieLayout.innerRadius}
-                      outerRadius={pieLayout.outerRadius}
-                      paddingAngle={2}
-                      dataKey="value"
-                      startAngle={90}
-                      endAngle={-270}
-                      stroke="transparent"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.color}
-                          fillOpacity={entry.color === 'hsl(var(--chart-1))' ? 0.95 : 1}
-                          className={cn(
-                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
-                            entry.color === "hsl(var(--chart-1))" ? "chart-positive-emphasis" : "chart-negative-muted"
-                          )}
-                        />
-                      ))}
-                      <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
-                        <tspan x="50%" dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
-                        <tspan x="50%" dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
-                      </text>
-                    </Pie>
-                    <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="flex flex-col items-center gap-3 pb-1 pt-2">
-                {chartData.map((entry) => (
-                  <div
-                    key={entry.name}
-                    className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em]"
-                  >
-                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span className="text-muted-foreground/85">{entry.name}</span>
-                  </div>
-                ))}
-              </div>
-            </>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy={pieLayout.cy}
+                  innerRadius={pieLayout.innerRadius}
+                  outerRadius={pieLayout.outerRadius}
+                  paddingAngle={2}
+                  dataKey="value"
+                  startAngle={90}
+                  endAngle={-270}
+                  stroke="transparent"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      fillOpacity={entry.color === 'hsl(var(--chart-1))' ? 0.95 : 1}
+                      className={cn(
+                        "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                        entry.color === "hsl(var(--chart-1))" ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
+                    />
+                  ))}
+                  <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
+                    <tspan x="50%" dy="-0.2em" className="fill-white/10 text-[10px] uppercase font-black tracking-[0.2em]">WinRate</tspan>
+                    <tspan x="50%" dy="1.2em" className="fill-white font-black text-lg chart-positive-emphasis">{chartData[0].value}%</tspan>
+                  </text>
+                </Pie>
+                <Tooltip content={renderTooltip as any} cursor={{ fill: 'transparent' }} />
+              </PieChart>
+            </ResponsiveContainer>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
               {t("widgets.emptyState") ?? "No trades yet."}
