@@ -10,6 +10,7 @@
   [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
   [![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/a5YVF5Ec2n)
+  ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/afrodeennoff/final-qunt-edge?utm_source=oss&utm_medium=github&utm_campaign=afrodeennoff%2Ffinal-qunt-edge&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
   
   <a href="https://trustmrr.com/startup/qunt edge" target="_blank"><img src="https://trustmrr.com/api/embed/qunt edge?format=svg" alt="TrustMRR verified revenue badge" width="220" height="90" /></a>
   

@@ -1405,3 +1405,56 @@
   - strict `perf:headers` PASS
   - `perf:baseline` PASS
   - `perf:lighthouse` FAIL (threshold blockers on `/en` and `/en/pricing`)
+
+# End-to-End Project Understanding Pass (2026-03-06)
+
+## Scope
+- Build a full system-level understanding of the project architecture, runtime flow, data model, integrations, and verification gates.
+
+## Acceptance Criteria
+- [x] Document app shell, routing strategy, and middleware/security model.
+- [x] Document backend/data layer (Prisma, server modules, authz boundaries).
+- [x] Document external integrations (AI, Whop, Supabase) and ops scripts/tests.
+- [x] Provide concise end-to-end summary for rapid onboarding.
+
+## Plan Checklist
+- [x] Inspect core entrypoints (`package.json`, root/layout, middleware/proxy).
+- [x] Map route surfaces (`app/[locale]`, `app/api`) and dashboard shell/data provider flows.
+- [x] Review database schema and server module responsibilities.
+- [x] Review test/perf/verification scripts and deployment assumptions.
+- [x] Deliver architecture walkthrough to user.
+
+## Current Step
+- **Completed:** repository understanding pass completed and ready for handoff.
+
+## Completion Notes
+- Core findings:
+  - Next.js App Router architecture with locale-first routing and a middleware-centered security/cache policy.
+  - Hybrid data flow: server actions + API routes with Prisma on Postgres/Supabase and client-side Zustand + context composition.
+  - Integration-heavy platform: AI (OpenAI-compatible GLM endpoint), Whop billing/webhooks, Supabase auth/session/cookies.
+  - Strong verification tooling present (`typecheck`, `build`, route budgets, bundle analysis, smoke/perf scripts, Vitest suites).
+
+# End-to-End Security Audit (2026-03-06)
+
+## Scope
+- Complete static security audit across API routes, server actions, middleware, auth/authz, rate limiting, input validation, and secret handling.
+
+## Acceptance Criteria
+- [x] Enumerate endpoint protection coverage (auth/rate-limit/validation).
+- [x] Identify concrete vulnerabilities with file-level evidence.
+- [x] Provide prioritized remediation guidance.
+- [x] Summarize security strengths and residual risks.
+
+## Plan Checklist
+- [x] Scan all `app/api/**/route.ts` handlers.
+- [x] Review auth, service-secret, and admin-gate flows.
+- [x] Review validation and payload-boundary controls.
+- [x] Review rate-limit coverage and anti-abuse posture.
+- [x] Produce severity-ranked findings summary for user handoff.
+
+## Current Step
+- **Completed:** audit complete; findings delivered to user.
+
+## Completion Notes
+- High-priority issue identified: auth-guard hooks are currently no-op stubs (`lib/security/auth-attempts.ts`), weakening brute-force and abuse protections.
+- Medium-priority gaps identified: uneven rate-limit coverage, inconsistent schema validation on selected mutation endpoints, and verbose internal error details in token ingestion routes.

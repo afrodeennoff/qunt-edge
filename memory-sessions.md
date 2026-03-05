@@ -47,3 +47,10 @@
 - Re-verified full gates; route budgets and strict header checks remain green, pricing HTML payload dropped materially, and desktop home TBT improved, but mobile TBT on `/en` and `/en/pricing` still fails threshold targets.
 - Completed a full all-pages audit (46 route pages + 6 page-client companions) and identified structural duplication in dashboard behavior/trader-profile page-client files plus page-specific lint/complexity hotspots.
 - Re-ran full production preflight gates and generated complete issue inventories in JSON/Markdown, confirming build gates are green while Lighthouse thresholds remain the primary release blocker.
+
+## 2026-03-06
+- Completed an end-to-end architecture understanding pass across app routing, middleware/security, server/data layers, schema, and integrations.
+- Confirmed core stack and runtime model: Next.js 16 App Router, React 19, Prisma + Supabase/Postgres, hybrid server actions and API route surfaces.
+- Mapped key platform domains (dashboard trading workflows, team/admin surfaces, AI endpoints, billing/webhooks) and verification/tooling gates used in production preflight.
+- Completed a full static security audit of API and privileged server surfaces, including auth/authz, rate limiting, input validation, secret handling, and vulnerability triage.
+- Confirmed strongest controls (service-secret timing-safe auth, webhook signature verification, structured validation helpers, sensitive-log redaction) and flagged key gaps (no-op auth guard hooks, uneven endpoint throttling, selective verbose error leakage).
