@@ -46,8 +46,8 @@ function LazySection({
 export default function DeferredHomeSections() {
   return (
     <>
-      <LazySection component={ProblemStatement} eager />
-      <LazySection component={Features} eager />
+      <LazySection component={ProblemStatement} />
+      <LazySection component={Features} />
       <LazySection component={HowItWorks} />
       <LazySection component={AnalysisDemo} />
       <LazySection component={WhyChooseUs} />

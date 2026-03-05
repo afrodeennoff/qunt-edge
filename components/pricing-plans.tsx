@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -68,17 +68,14 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   const locale = useCurrentLocale()
   const { currency, symbol } = useCurrency()
 
-  // Read referral code from URL params or localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      import('@/lib/referral-storage').then(({ getReferralCode }) => {
-        const ref = getReferralCode()
-        if (ref) {
-          setReferralCode(ref)
-        }
-      })
-    }
-  }, [])
+  const ensureReferralCode = async () => {
+    if (referralCode !== null) return referralCode
+    if (typeof window === 'undefined') return null
+    const { getReferralCode } = await import('@/lib/referral-storage')
+    const ref = getReferralCode()
+    setReferralCode(ref ?? '')
+    return ref
+  }
 
   // Function to check if current plan matches lookup key
   const isCurrentPlan = (lookupKey: string) => {
@@ -138,10 +135,11 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   const handlePlanSwitch = async (lookupKey: string) => {
     if (!currentSubscription) {
       // No subscription exists: jump straight into Whop checkout.
+      const resolvedReferral = await ensureReferralCode()
       window.location.assign(
         buildWhopCheckoutUrl({
           lookupKey,
-          referral: referralCode,
+          referral: resolvedReferral,
           locale,
         }),
       )
@@ -200,10 +198,11 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
       } else if ('requiresCheckout' in result && result.requiresCheckout) {
         // Lifetime plans need checkout session, redirect to checkout
         const finalLookupKey = result.lookupKey || lookupKey
+        const resolvedReferral = await ensureReferralCode()
         window.location.assign(
           buildWhopCheckoutUrl({
             lookupKey: finalLookupKey,
-            referral: referralCode,
+            referral: resolvedReferral,
             locale,
           }),
         )
