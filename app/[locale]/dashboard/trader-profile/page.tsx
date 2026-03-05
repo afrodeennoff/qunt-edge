@@ -551,12 +551,16 @@ export default function TraderProfilePage() {
                 }}
                 className="w-full p-0"
                 classNames={{
-                  months: "flex flex-col gap-2",
-                  month: "space-y-2",
-                  weekday: "w-10 text-center text-[0.75rem] font-medium text-fg-muted",
-                  day: "relative h-10 w-10 overflow-hidden rounded-md p-0 text-center align-middle",
+                  months: "flex w-full flex-col gap-2",
+                  month: "w-full space-y-2",
+                  month_grid: "w-full table-fixed border-collapse",
+                  weekdays: "grid grid-cols-7",
+                  weekday: "h-9 px-0 text-center text-[0.8rem] font-medium text-fg-muted",
+                  weeks: "space-y-1",
+                  week: "grid grid-cols-7 gap-1",
+                  day: "relative h-14 overflow-hidden rounded-md p-0 text-center align-middle",
                   day_button:
-                    "h-10 w-10 rounded-md p-0 font-normal text-fg-primary hover:bg-white/10 aria-selected:bg-white/15 aria-selected:text-fg-primary",
+                    "h-14 w-full rounded-md p-0 font-normal text-fg-primary hover:bg-white/10 aria-selected:bg-white/15 aria-selected:text-fg-primary",
                 }}
                 components={{
                   DayButton: ({ day, className, ...buttonProps }: DayButtonProps) => {
