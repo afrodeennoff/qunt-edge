@@ -1345,4 +1345,30 @@
   - `npm run -s analyze:bundle` -> exit `0`
   - `PERF_HEADER_STRICT=true npm run -s perf:headers` -> strict checks pass
   - `npm run -s perf:baseline` -> pricing HTML response size improved (`49,574 -> 38,713` bytes)
-  - `npm run -s perf:lighthouse` -> still fails thresholds; desktop `/en` TBT improved vs prior run (`~1019ms -> ~677ms`), mobile remains high.
+- `npm run -s perf:lighthouse` -> still fails thresholds; desktop `/en` TBT improved vs prior run (`~1019ms -> ~677ms`), mobile remains high.
+
+# Complete Page Audit (All Route Pages) (2026-03-05)
+
+## Scope
+- Perform full one-by-one audit across all `app/**/page.tsx` routes and related `*page-client.tsx` files.
+
+## Acceptance Criteria
+- [x] All route pages inventoried.
+- [x] All page-client companions inventoried and cross-checked.
+- [x] Page-focused lint/complexity risk list generated.
+- [x] Duplicate/unused page implementations identified.
+
+## Plan Checklist
+- [x] Enumerate all route pages and client-page companions.
+- [x] Run focused static audit signals (`use client`, no-store fetch, interval polling, context usage).
+- [x] Run eslint on all route pages and page-client files.
+- [x] Produce complete prioritized issue list with exact file references.
+
+## Current Step
+- **Completed:** full page audit completed and summarized for user.
+
+## Completion Notes
+- Coverage: `46` route pages + `6` client-page companions.
+- Distribution: `19` client route pages, `27` server route pages.
+- Route/page lint result: `14` page-family files with warnings (complexity/unused/any).
+- Critical structural finding: unused duplicate full implementations for dashboard behavior/trader-profile page-client files.
