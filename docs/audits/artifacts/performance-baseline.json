@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-05T11:04:45.764Z",
+  "generatedAt": "2026-03-05T11:30:17.073Z",
   "baseUrl": "http://127.0.0.1:3001",
   "runs": 5,
   "routes": [
@@ -8,47 +8,47 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.475957,
-          "total": 0.476534,
+          "ttfb": 1.146198,
+          "total": 1.149688,
           "size": 47250,
           "code": 200
         },
         {
           "run": 2,
-          "ttfb": 0.482281,
-          "total": 0.482788,
+          "ttfb": 1.473692,
+          "total": 1.943386,
           "size": 47250,
           "code": 200
         },
         {
           "run": 3,
-          "ttfb": 0.480608,
-          "total": 0.481219,
+          "ttfb": 1.072278,
+          "total": 1.072949,
           "size": 47250,
           "code": 200
         },
         {
           "run": 4,
-          "ttfb": 0.484685,
-          "total": 0.485251,
+          "ttfb": 0.466336,
+          "total": 0.466868,
           "size": 47250,
           "code": 200
         },
         {
           "run": 5,
-          "ttfb": 0.490548,
-          "total": 0.491117,
+          "ttfb": 0.462057,
+          "total": 0.46257,
           "size": 47250,
           "code": 200
         }
       ],
       "summary": {
-        "ttfbMedian": 0.482281,
-        "ttfbP50": 0.482281,
-        "ttfbP95": 0.490548,
-        "totalMedian": 0.482788,
-        "totalP50": 0.482788,
-        "totalP95": 0.491117,
+        "ttfbMedian": 1.072278,
+        "ttfbP50": 1.072278,
+        "ttfbP95": 1.473692,
+        "totalMedian": 1.072949,
+        "totalP50": 1.072949,
+        "totalP95": 1.943386,
         "statusCodes": [
           200
         ],
@@ -60,47 +60,47 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.474644,
-          "total": 0.475121,
+          "ttfb": 0.475215,
+          "total": 0.47576,
           "size": 49574,
           "code": 200
         },
         {
           "run": 2,
-          "ttfb": 0.478866,
-          "total": 0.479351,
+          "ttfb": 0.476504,
+          "total": 0.476987,
           "size": 49574,
           "code": 200
         },
         {
           "run": 3,
-          "ttfb": 0.484181,
-          "total": 0.484812,
+          "ttfb": 0.463126,
+          "total": 0.463609,
           "size": 49574,
           "code": 200
         },
         {
           "run": 4,
-          "ttfb": 0.484896,
-          "total": 0.485399,
+          "ttfb": 0.483096,
+          "total": 0.483526,
           "size": 49574,
           "code": 200
         },
         {
           "run": 5,
-          "ttfb": 0.480594,
-          "total": 0.481038,
+          "ttfb": 0.475564,
+          "total": 0.476006,
           "size": 49574,
           "code": 200
         }
       ],
       "summary": {
-        "ttfbMedian": 0.480594,
-        "ttfbP50": 0.480594,
-        "ttfbP95": 0.484896,
-        "totalMedian": 0.481038,
-        "totalP50": 0.481038,
-        "totalP95": 0.485399,
+        "ttfbMedian": 0.475564,
+        "ttfbP50": 0.475564,
+        "ttfbP95": 0.483096,
+        "totalMedian": 0.476006,
+        "totalP50": 0.476006,
+        "totalP95": 0.483526,
         "statusCodes": [
           200
         ],
@@ -112,47 +112,47 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.47887,
-          "total": 0.479561,
+          "ttfb": 0.467258,
+          "total": 0.467779,
           "size": 55959,
           "code": 200
         },
         {
           "run": 2,
-          "ttfb": 0.478774,
-          "total": 0.479285,
+          "ttfb": 0.472243,
+          "total": 0.47287,
           "size": 55959,
           "code": 200
         },
         {
           "run": 3,
-          "ttfb": 0.474786,
-          "total": 0.475266,
+          "ttfb": 0.467748,
+          "total": 0.46817,
           "size": 55959,
           "code": 200
         },
         {
           "run": 4,
-          "ttfb": 0.471547,
-          "total": 0.472054,
+          "ttfb": 0.477976,
+          "total": 0.48659,
           "size": 55959,
           "code": 200
         },
         {
           "run": 5,
-          "ttfb": 0.47735,
-          "total": 0.477829,
+          "ttfb": 0.46368,
+          "total": 0.4642,
           "size": 55959,
           "code": 200
         }
       ],
       "summary": {
-        "ttfbMedian": 0.47735,
-        "ttfbP50": 0.47735,
-        "ttfbP95": 0.47887,
-        "totalMedian": 0.477829,
-        "totalP50": 0.477829,
-        "totalP95": 0.479561,
+        "ttfbMedian": 0.467748,
+        "ttfbP50": 0.467748,
+        "ttfbP95": 0.477976,
+        "totalMedian": 0.46817,
+        "totalP50": 0.46817,
+        "totalP95": 0.48659,
         "statusCodes": [
           200
         ],
@@ -164,47 +164,47 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.002328,
-          "total": 0.002397,
+          "ttfb": 0.001754,
+          "total": 0.001806,
           "size": 41,
           "code": 307
         },
         {
           "run": 2,
-          "ttfb": 0.00182,
-          "total": 0.001877,
+          "ttfb": 0.001395,
+          "total": 0.001447,
           "size": 41,
           "code": 307
         },
         {
           "run": 3,
-          "ttfb": 0.001716,
-          "total": 0.001769,
+          "ttfb": 0.00123,
+          "total": 0.001286,
           "size": 41,
           "code": 307
         },
         {
           "run": 4,
-          "ttfb": 0.001573,
-          "total": 0.001627,
+          "ttfb": 0.001301,
+          "total": 0.001352,
           "size": 41,
           "code": 307
         },
         {
           "run": 5,
-          "ttfb": 0.001714,
-          "total": 0.001792,
+          "ttfb": 0.001267,
+          "total": 0.001324,
           "size": 41,
           "code": 307
         }
       ],
       "summary": {
-        "ttfbMedian": 0.001716,
-        "ttfbP50": 0.001716,
-        "ttfbP95": 0.002328,
-        "totalMedian": 0.001792,
-        "totalP50": 0.001792,
-        "totalP95": 0.002397,
+        "ttfbMedian": 0.001301,
+        "ttfbP50": 0.001301,
+        "ttfbP95": 0.001754,
+        "totalMedian": 0.001352,
+        "totalP50": 0.001352,
+        "totalP95": 0.001806,
         "statusCodes": [
           307
         ],
