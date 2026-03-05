@@ -306,13 +306,15 @@ export default function TraderProfilePage() {
 
   const radarData = useMemo(() => {
     const baseline = benchmark ?? { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0, sampleSize: 0 }
+    const totalTradeBaseline = Math.max(20, baseline.sampleSize)
     return [
+      { metric: "TOTAL TRADES", trader: scoreHigherBetter(metrics.totalTrades, totalTradeBaseline) },
       { metric: "RISK REWARD", trader: scoreHigherBetter(metrics.riskReward, baseline.riskReward) },
       { metric: "AVG. DRAWDOWN", trader: scoreLowerBetter(metrics.drawdown, baseline.drawdown) },
       { metric: "WIN RATE", trader: scoreHigherBetter(metrics.winRate, baseline.winRate) },
       { metric: "AVG RETURN", trader: scoreSigned(metrics.avgReturn, baseline.avgReturn) },
     ]
-  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.winRate])
+  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.totalTrades, metrics.winRate])
 
   const compareRows = useMemo(() => {
     const baseline = benchmark ?? { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0, sampleSize: 0 }

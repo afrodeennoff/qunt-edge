@@ -102,19 +102,19 @@ export default function CommissionsPnLChart({
     const commPercent = total > 0 ? Number(((Math.abs(totalCommissions) / total) * 100).toFixed(2)) : 0;
     return [
       {
-        name: t("commissions.legend.netPnl"),
+        name: "NET P/L",
         value: pnlPercent,
         color: chartConfig.pnl.color,
         raw: totalPnL,
       },
       {
-        name: t("commissions.legend.commissions"),
+        name: "COMMISSIONS",
         value: commPercent,
         color: chartConfig.commissions.color,
         raw: totalCommissions,
       },
     ];
-  }, [trades, t]);
+  }, [trades]);
   const hasData = chartData.some((item) => item.value > 0);
 
 
@@ -192,11 +192,11 @@ export default function CommissionsPnLChart({
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.name === t("commissions.legend.netPnl") ? "hsl(var(--foreground))" : "hsl(var(--foreground) / 0.35)"}
-                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
+                          fill={entry.name === "NET P/L" ? "hsl(var(--foreground))" : "hsl(var(--foreground) / 0.35)"}
+                          fillOpacity={entry.name === "NET P/L" ? 0.98 : 0.24}
                           className={cn(
                             "transition-all duration-300 ease-in-out hover:fill-opacity-100",
-                            entry.name === t("commissions.legend.netPnl") ? "chart-positive-emphasis" : "chart-negative-muted"
+                            entry.name === "NET P/L" ? "chart-positive-emphasis" : "chart-negative-muted"
                           )}
                         />
                       ))}
@@ -211,11 +211,11 @@ export default function CommissionsPnLChart({
               <div className="flex flex-col items-center gap-3 pb-1 pt-2">
                 <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-muted-foreground/85">
                   <span className="h-3 w-3 rounded-full bg-white" />
-                  {t("commissions.legend.netPnl")}
+                  NET P/L
                 </span>
                 <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-muted-foreground/85">
                   <span className="h-3 w-3 rounded-full bg-white/35" />
-                  {t("commissions.legend.commissions")}
+                  COMMISSIONS
                 </span>
               </div>
             </>

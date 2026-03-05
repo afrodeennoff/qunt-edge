@@ -54,11 +54,11 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
     const beRate = Number((100 - winRate - lossRate).toFixed(2))
 
     return [
-      { name: t('tradeDistribution.winWithCount', { count: nbWin, total: nbTrades }), value: winRate, color: 'hsl(var(--chart-1))', count: nbWin, total: nbTrades },
-      { name: t('tradeDistribution.breakevenWithCount', { count: nbBe, total: nbTrades }), value: beRate, color: 'hsl(var(--chart-5))', count: nbBe, total: nbTrades },
-      { name: t('tradeDistribution.lossWithCount', { count: nbLoss, total: nbTrades }), value: lossRate, color: 'hsl(var(--chart-6))', count: nbLoss, total: nbTrades },
+      { name: `WINNING TRADES (${nbWin}/${nbTrades})`, value: winRate, color: 'hsl(var(--chart-1))', count: nbWin, total: nbTrades },
+      { name: `BREAKEVEN TRADES (${nbBe}/${nbTrades})`, value: beRate, color: 'hsl(var(--chart-5))', count: nbBe, total: nbTrades },
+      { name: `LOSING TRADES (${nbLoss}/${nbTrades})`, value: lossRate, color: 'hsl(var(--chart-6))', count: nbLoss, total: nbTrades },
     ]
-  }, [nbWin, nbLoss, nbBe, nbTrades, t])
+  }, [nbWin, nbLoss, nbBe, nbTrades])
 
   const pieLayout = React.useMemo(() => {
     if (size === 'small') {
