@@ -36,3 +36,4 @@
 - Added safe performance-focused adjustments: removed fixed decorative home layers, narrowed dashboard sidebar context subscription (`useDashboardActions`), and reduced redundant trade-table scroll updates.
 - Executed full verification gates (`typecheck`, `lint`, `build`, route budgets, bundle analysis) and generated fresh performance artifacts (`performance-baseline.json`, Lighthouse reports/summary).
 - Captured current bottleneck: Lighthouse thresholds fail on `/en` and `/en/pricing` mainly from high TBT; documented next-focus actions in `docs/audits/performance-polish-2026-03-04.md`.
+- 2026-03-05: Implementing full Redis setup for split frontend/backend VM deployment readiness: unified Redis utility + caching for AI trade aggregation, secure token verification, and behavior insights, plus invalidation hooks on trade mutations.

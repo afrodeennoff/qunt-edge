@@ -1252,3 +1252,28 @@
   - `npm run -s analyze:bundle` -> exit `0`
   - `perf:headers`, `perf:baseline`, `perf:lighthouse` executed against `http://127.0.0.1:3001`
 - Lighthouse thresholds currently fail (TBT/score) on `/en` and `/en/pricing`; see audit doc for exact metrics.
+
+# Redis Full Setup (Dokploy-ready) (2026-03-05)
+
+## Scope
+- Implement unified Redis cache utilities and wire critical backend hot paths.
+- Keep behavior unchanged while reducing repeated Supabase/Postgres load.
+
+## Acceptance Criteria
+- [ ] Unified Redis utility supports local Redis and Upstash fallback.
+- [ ] AI full-trade fetch path uses Redis cache.
+- [ ] Secure token verification uses Redis cache with safe TTL.
+- [ ] Behavior insights endpoint uses Redis cache with short TTL.
+- [ ] Trade mutation paths invalidate Redis namespaces.
+- [ ] Typecheck passes.
+
+## Plan Checklist
+- [ ] Add shared Redis cache utility.
+- [ ] Integrate Redis in AI trade aggregation helper.
+- [ ] Integrate Redis in API token verification helper.
+- [ ] Integrate Redis in behavior insights endpoint.
+- [ ] Add Redis invalidation in trade write/update mutations.
+- [ ] Run `npm run typecheck` and record evidence.
+
+## Current Step
+- **In Progress:** adding shared Redis utility and integrating high-impact hot paths.
