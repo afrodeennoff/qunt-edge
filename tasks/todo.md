@@ -1372,3 +1372,36 @@
 - Distribution: `19` client route pages, `27` server route pages.
 - Route/page lint result: `14` page-family files with warnings (complexity/unused/any).
 - Critical structural finding: unused duplicate full implementations for dashboard behavior/trader-profile page-client files.
+
+# Production Preflight Re-Audit (Complete Issue Inventory) (2026-03-05)
+
+## Scope
+- Re-audit the entire app before production with full quality/performance gates and complete issue extraction.
+
+## Acceptance Criteria
+- [x] Core build gates re-run.
+- [x] Runtime perf/security checks re-run against production server.
+- [x] Complete issue list exported in machine-readable and human-readable forms.
+- [x] Final blocker list clearly identified.
+
+## Plan Checklist
+- [x] Run `typecheck`, `lint`, `build`, route budgets, bundle analysis.
+- [x] Run strict perf headers + baseline + Lighthouse on local prod server.
+- [x] Export full ESLint findings to artifact file.
+- [x] Produce comprehensive production preflight issue report.
+
+## Current Step
+- **Completed:** full re-audit and complete issue inventory published.
+
+## Completion Notes
+- Artifacts:
+  - `docs/audits/artifacts/eslint-full-2026-03-05.json`
+  - `docs/audits/production-preflight-full-issues-2026-03-05.md`
+- Gate status:
+  - `typecheck` PASS
+  - `build` PASS
+  - `check:route-budgets` PASS
+  - `analyze:bundle` PASS
+  - strict `perf:headers` PASS
+  - `perf:baseline` PASS
+  - `perf:lighthouse` FAIL (threshold blockers on `/en` and `/en/pricing`)

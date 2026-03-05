@@ -46,3 +46,4 @@
 - Implemented additional Phase 3 reductions by tightening deferred home-section load thresholds and lazy-loading pricing plans on `/en/pricing` with skeleton fallback.
 - Re-verified full gates; route budgets and strict header checks remain green, pricing HTML payload dropped materially, and desktop home TBT improved, but mobile TBT on `/en` and `/en/pricing` still fails threshold targets.
 - Completed a full all-pages audit (46 route pages + 6 page-client companions) and identified structural duplication in dashboard behavior/trader-profile page-client files plus page-specific lint/complexity hotspots.
+- Re-ran full production preflight gates and generated complete issue inventories in JSON/Markdown, confirming build gates are green while Lighthouse thresholds remain the primary release blocker.

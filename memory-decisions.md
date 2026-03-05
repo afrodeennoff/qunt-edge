@@ -18,3 +18,4 @@
 - 2026-03-05: Warning-budget governance is treated as an active CI gate with current baseline cap and planned ratchet reductions.
 - 2026-03-05: Pricing page now lazy-loads `PricingPlans` behind a lightweight fallback to shift heavy subscription UI off initial execution path.
 - 2026-03-05: Deferred home sections now use tighter intersection thresholds and idle-callback scheduling to reduce immediate main-thread contention during first paint.
+- 2026-03-05: Production preflight release decision requires Lighthouse threshold pass on `/en` and `/en/pricing`; other core gates are currently passing.
