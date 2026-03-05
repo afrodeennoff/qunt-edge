@@ -1260,20 +1260,31 @@
 - Keep behavior unchanged while reducing repeated Supabase/Postgres load.
 
 ## Acceptance Criteria
-- [ ] Unified Redis utility supports local Redis and Upstash fallback.
-- [ ] AI full-trade fetch path uses Redis cache.
-- [ ] Secure token verification uses Redis cache with safe TTL.
-- [ ] Behavior insights endpoint uses Redis cache with short TTL.
-- [ ] Trade mutation paths invalidate Redis namespaces.
-- [ ] Typecheck passes.
+- [x] Unified Redis utility supports local Redis and Upstash fallback.
+- [x] AI full-trade fetch path uses Redis cache.
+- [x] Secure token verification uses Redis cache with safe TTL.
+- [x] Behavior insights endpoint uses Redis cache with short TTL.
+- [x] Trade mutation paths invalidate Redis namespaces.
+- [x] Typecheck passes.
 
 ## Plan Checklist
-- [ ] Add shared Redis cache utility.
-- [ ] Integrate Redis in AI trade aggregation helper.
-- [ ] Integrate Redis in API token verification helper.
-- [ ] Integrate Redis in behavior insights endpoint.
-- [ ] Add Redis invalidation in trade write/update mutations.
-- [ ] Run `npm run typecheck` and record evidence.
+- [x] Add shared Redis cache utility.
+- [x] Integrate Redis in AI trade aggregation helper.
+- [x] Integrate Redis in API token verification helper.
+- [x] Integrate Redis in behavior insights endpoint.
+- [x] Add Redis invalidation in trade write/update mutations.
+- [x] Run `npm run typecheck` and record evidence.
 
 ## Current Step
-- **In Progress:** adding shared Redis utility and integrating high-impact hot paths.
+- **Completed:** Redis setup implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `lib/redis-cache.ts`
+  - `lib/ai/get-all-trades.ts`
+  - `lib/api-auth.ts`
+  - `app/api/behavior/insights/route.ts`
+  - `server/trades.ts`
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npx eslint lib/redis-cache.ts lib/ai/get-all-trades.ts lib/api-auth.ts app/api/behavior/insights/route.ts server/trades.ts` -> exit `0` (warnings only, no errors).

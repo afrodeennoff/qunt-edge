@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-03T18:02:32.069Z",
+  "generatedAt": "2026-03-05T11:03:24.416Z",
   "budgets": {
     "defaultRouteBudgetKb": 300,
     "homeRouteBudgetKb": 80,
@@ -69,8 +69,8 @@
     {
       "route": "/[locale]/dashboard/billing",
       "file": "/Users/timon/Downloads/final-qunt-edge-main/.next/server/app/[locale]/dashboard/billing/page_client-reference-manifest.js",
-      "bytes": 53858,
-      "kb": 52.6,
+      "bytes": 53736,
+      "kb": 52.48,
       "budgetKb": 80,
       "withinBudget": true
     },
@@ -237,8 +237,8 @@
     {
       "route": "/[locale]/(landing)/pricing",
       "file": "/Users/timon/Downloads/final-qunt-edge-main/.next/server/app/[locale]/(landing)/pricing/page_client-reference-manifest.js",
-      "bytes": 29551,
-      "kb": 28.86,
+      "bytes": 29429,
+      "kb": 28.74,
       "budgetKb": 300,
       "withinBudget": true
     },

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-04T13:49:35.016Z",
+  "generatedAt": "2026-03-05T11:05:54.988Z",
   "baseUrl": "http://127.0.0.1:3001",
   "thresholds": {
     "desktopScoreMin": 0.9,
@@ -14,50 +14,50 @@
     {
       "url": "http://127.0.0.1:3001/en",
       "mode": "mobile",
-      "score": 0.61,
-      "tbt": 4743.13495,
-      "lcp": 3268.4601999999995,
+      "score": 0.59,
+      "tbt": 8291.625075,
+      "lcp": 3171.4997000000003,
       "cls": 0,
       "failures": [
-        "mobile score 0.61 < 0.75",
-        "mobile TBT 4743.13495ms > 1200ms"
+        "mobile score 0.59 < 0.75",
+        "mobile TBT 8291.625075ms > 1200ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en",
       "mode": "desktop",
-      "score": 0.73,
-      "tbt": 673.5724999999999,
-      "lcp": 787.4200000000002,
+      "score": 0.72,
+      "tbt": 692.2399499999999,
+      "lcp": 840.0803999999998,
       "cls": 0,
       "failures": [
-        "desktop score 0.73 < 0.9",
-        "desktop TBT 673.5724999999999ms > 200ms"
+        "desktop score 0.72 < 0.9",
+        "desktop TBT 692.2399499999999ms > 200ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "mobile",
-      "score": 0.57,
-      "tbt": 3068,
-      "lcp": 4062.90765,
+      "score": 0.55,
+      "tbt": 5254.357924999999,
+      "lcp": 4213.1366,
       "cls": 0,
       "failures": [
-        "mobile score 0.57 < 0.75",
-        "mobile TBT 3068ms > 1200ms",
-        "mobile LCP 4062.90765ms > 3500ms"
+        "mobile score 0.55 < 0.75",
+        "mobile TBT 5254.357924999999ms > 1200ms",
+        "mobile LCP 4213.1366ms > 3500ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "desktop",
-      "score": 0.74,
-      "tbt": 675.2016000000001,
-      "lcp": 814.3871999999999,
+      "score": 0.73,
+      "tbt": 751.4999999999999,
+      "lcp": 779.5205499999997,
       "cls": 0,
       "failures": [
-        "desktop score 0.74 < 0.9",
-        "desktop TBT 675.2016000000001ms > 200ms"
+        "desktop score 0.73 < 0.9",
+        "desktop TBT 751.4999999999999ms > 200ms"
       ]
     }
   ]
