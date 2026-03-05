@@ -1313,3 +1313,36 @@
 - Report: `docs/audits/master-remediation-phase1-3-2026-03-05.md`
 - Header checks now pass in strict mode for protected redirects and private APIs.
 - Lighthouse still fails thresholds on `/en` and `/en/pricing` due high TBT; this remains the top open item.
+
+# Master Remediation Plan Execution (Phase 3 Continuation) (2026-03-05)
+
+## Scope
+- Continue TBT-focused remediation on `/en` and `/en/pricing` after Phase 1/2 correctness gates were green.
+
+## Acceptance Criteria
+- [x] Add additional lazy/deferred loading boundaries on home and pricing surfaces.
+- [x] Re-run full verification + perf evidence after code changes.
+- [x] Capture delta and residual blockers.
+
+## Plan Checklist
+- [x] Tighten intersection-triggered rendering for deferred home sections.
+- [x] Lazy-load pricing plans module on landing pricing page with non-blocking fallback.
+- [x] Run targeted lint + typecheck + build + route budgets + bundle analysis.
+- [x] Run strict `perf:headers`, `perf:baseline`, and `perf:lighthouse` against local prod server.
+
+## Current Step
+- **Completed:** Phase 3 continuation implemented and verified.
+
+## Completion Notes
+- Updated files:
+  - `app/[locale]/(home)/components/DeferredHomeSections.tsx`
+  - `app/[locale]/(landing)/pricing/pricing-page-client.tsx`
+- Verification:
+  - `npx eslint <touched files>` -> exit `0`
+  - `npm run -s typecheck` -> exit `0`
+  - `npm run -s build` -> exit `0`
+  - `npm run -s check:route-budgets` -> exit `0`
+  - `npm run -s analyze:bundle` -> exit `0`
+  - `PERF_HEADER_STRICT=true npm run -s perf:headers` -> strict checks pass
+  - `npm run -s perf:baseline` -> pricing HTML response size improved (`49,574 -> 38,713` bytes)
+  - `npm run -s perf:lighthouse` -> still fails thresholds; desktop `/en` TBT improved vs prior run (`~1019ms -> ~677ms`), mobile remains high.

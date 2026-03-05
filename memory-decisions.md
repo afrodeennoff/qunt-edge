@@ -16,3 +16,5 @@
 - 2026-03-05: Decided to standardize Redis access behind a single utility (local Redis first, Upstash fallback) and apply it to high-traffic read/auth paths with explicit invalidation on trade writes.
 - 2026-03-05: Cache policy behavior for protected redirects/private APIs is enforced as strict private no-store and validated via strict header checks.
 - 2026-03-05: Warning-budget governance is treated as an active CI gate with current baseline cap and planned ratchet reductions.
+- 2026-03-05: Pricing page now lazy-loads `PricingPlans` behind a lightweight fallback to shift heavy subscription UI off initial execution path.
+- 2026-03-05: Deferred home sections now use tighter intersection thresholds and idle-callback scheduling to reduce immediate main-thread contention during first paint.

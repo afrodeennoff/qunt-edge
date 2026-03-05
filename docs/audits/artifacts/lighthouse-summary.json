@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-05T11:05:54.988Z",
+  "generatedAt": "2026-03-05T11:41:40.940Z",
   "baseUrl": "http://127.0.0.1:3001",
   "thresholds": {
     "desktopScoreMin": 0.9,
@@ -14,50 +14,50 @@
     {
       "url": "http://127.0.0.1:3001/en",
       "mode": "mobile",
-      "score": 0.59,
-      "tbt": 8291.625075,
-      "lcp": 3171.4997000000003,
+      "score": 0.62,
+      "tbt": 3179.610575,
+      "lcp": 3300.5577000000003,
       "cls": 0,
       "failures": [
-        "mobile score 0.59 < 0.75",
-        "mobile TBT 8291.625075ms > 1200ms"
+        "mobile score 0.62 < 0.75",
+        "mobile TBT 3179.610575ms > 1200ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en",
       "mode": "desktop",
-      "score": 0.72,
-      "tbt": 692.2399499999999,
-      "lcp": 840.0803999999998,
+      "score": 0.74,
+      "tbt": 677.3291499999999,
+      "lcp": 853.3667999999998,
       "cls": 0,
       "failures": [
-        "desktop score 0.72 < 0.9",
-        "desktop TBT 692.2399499999999ms > 200ms"
+        "desktop score 0.74 < 0.9",
+        "desktop TBT 677.3291499999999ms > 200ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "mobile",
-      "score": 0.55,
-      "tbt": 5254.357924999999,
-      "lcp": 4213.1366,
+      "score": 0.56,
+      "tbt": 3096.8783,
+      "lcp": 4062.9736,
       "cls": 0,
       "failures": [
-        "mobile score 0.55 < 0.75",
-        "mobile TBT 5254.357924999999ms > 1200ms",
-        "mobile LCP 4213.1366ms > 3500ms"
+        "mobile score 0.56 < 0.75",
+        "mobile TBT 3096.8783ms > 1200ms",
+        "mobile LCP 4062.9736ms > 3500ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "desktop",
       "score": 0.73,
-      "tbt": 751.4999999999999,
-      "lcp": 779.5205499999997,
-      "cls": 0,
+      "tbt": 677.7954749999999,
+      "lcp": 893.6361999999997,
+      "cls": 0.02193223010244287,
       "failures": [
         "desktop score 0.73 < 0.9",
-        "desktop TBT 751.4999999999999ms > 200ms"
+        "desktop TBT 677.7954749999999ms > 200ms"
       ]
     }
   ]

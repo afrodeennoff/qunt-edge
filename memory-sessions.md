@@ -43,3 +43,5 @@
 - Re-ran strict header audits and confirmed private route/API cache contract behavior is enforced in practice.
 - Refreshed baseline and Lighthouse artifacts; confirmed TBT on `/en` and `/en/pricing` remains the primary unresolved performance bottleneck.
 - Added remediation progress report at `docs/audits/master-remediation-phase1-3-2026-03-05.md` and updated task tracking for current phase state.
+- Implemented additional Phase 3 reductions by tightening deferred home-section load thresholds and lazy-loading pricing plans on `/en/pricing` with skeleton fallback.
+- Re-verified full gates; route budgets and strict header checks remain green, pricing HTML payload dropped materially, and desktop home TBT improved, but mobile TBT on `/en` and `/en/pricing` still fails threshold targets.
