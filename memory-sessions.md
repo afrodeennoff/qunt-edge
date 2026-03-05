@@ -37,3 +37,9 @@
 - Executed full verification gates (`typecheck`, `lint`, `build`, route budgets, bundle analysis) and generated fresh performance artifacts (`performance-baseline.json`, Lighthouse reports/summary).
 - Captured current bottleneck: Lighthouse thresholds fail on `/en` and `/en/pricing` mainly from high TBT; documented next-focus actions in `docs/audits/performance-polish-2026-03-04.md`.
 - 2026-03-05: Implementing full Redis setup for split frontend/backend VM deployment readiness: unified Redis utility + caching for AI trade aggregation, secure token verification, and behavior insights, plus invalidation hooks on trade mutations.
+
+## 2026-03-05
+- Continued implementation of the 30-issue remediation program with verified focus on cache correctness and performance governance controls.
+- Re-ran strict header audits and confirmed private route/API cache contract behavior is enforced in practice.
+- Refreshed baseline and Lighthouse artifacts; confirmed TBT on `/en` and `/en/pricing` remains the primary unresolved performance bottleneck.
+- Added remediation progress report at `docs/audits/master-remediation-phase1-3-2026-03-05.md` and updated task tracking for current phase state.

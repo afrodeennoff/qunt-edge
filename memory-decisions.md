@@ -14,3 +14,5 @@
 - 2026-03-04: All-surfaces polish pass stays on premium monochrome direction; no brand-color re-theme was introduced.
 - 2026-03-04: Dashboard sidebar now consumes `useDashboardActions()` instead of `useData()` to reduce broad context subscription churn in navigation shell renders.
 - 2026-03-05: Decided to standardize Redis access behind a single utility (local Redis first, Upstash fallback) and apply it to high-traffic read/auth paths with explicit invalidation on trade writes.
+- 2026-03-05: Cache policy behavior for protected redirects/private APIs is enforced as strict private no-store and validated via strict header checks.
+- 2026-03-05: Warning-budget governance is treated as an active CI gate with current baseline cap and planned ratchet reductions.

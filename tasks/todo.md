@@ -1288,3 +1288,28 @@
 - Verification:
   - `npm run -s typecheck` -> exit `0`.
   - `npx eslint lib/redis-cache.ts lib/ai/get-all-trades.ts lib/api-auth.ts app/api/behavior/insights/route.ts server/trades.ts` -> exit `0` (warnings only, no errors).
+
+# Master Remediation Plan Execution (Phases 1-3) (2026-03-05)
+
+## Scope
+- Continue implementation of approved 30-issue remediation plan with emphasis on correctness/cache contract and measurable perf governance.
+
+## Acceptance Criteria
+- [x] Strict header checks pass for private/public route classes.
+- [x] Warning-budget governance check exists and passes.
+- [x] CI includes baseline perf snapshot artifacts.
+- [x] Full verification suite re-run with evidence.
+
+## Plan Checklist
+- [x] Run typecheck/lint/build/budget/bundle checks.
+- [x] Run strict `perf:headers` against local prod server.
+- [x] Run `perf:baseline` and `perf:lighthouse` and capture artifacts.
+- [x] Document implementation state and remaining bottleneck.
+
+## Current Step
+- **Completed:** Phase 1/2 controls verified + Phase 3 perf evidence refreshed.
+
+## Completion Notes
+- Report: `docs/audits/master-remediation-phase1-3-2026-03-05.md`
+- Header checks now pass in strict mode for protected redirects and private APIs.
+- Lighthouse still fails thresholds on `/en` and `/en/pricing` due high TBT; this remains the top open item.
