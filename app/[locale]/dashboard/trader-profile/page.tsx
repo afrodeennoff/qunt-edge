@@ -108,6 +108,11 @@ function formatPnlCell(value: number) {
   return `${sign}${abs.toFixed(0)}`
 }
 
+function formatCompareMetric(value: number, suffix = "") {
+  if (!Number.isFinite(value)) return `0${suffix}`
+  return `${value.toFixed(2)}${suffix}`
+}
+
 function getTradeDay(dateValue: string | Date) {
   const date = new Date(dateValue)
   if (Number.isNaN(date.getTime())) return "Invalid date"
@@ -301,15 +306,39 @@ export default function TraderProfilePage() {
 
   const radarData = useMemo(() => {
     const baseline = benchmark ?? { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0, sampleSize: 0 }
-    const totalTradeBaseline = Math.max(20, baseline.sampleSize)
     return [
-      { metric: "TOTAL TRADES", trader: scoreHigherBetter(metrics.totalTrades, totalTradeBaseline) },
       { metric: "RISK REWARD", trader: scoreHigherBetter(metrics.riskReward, baseline.riskReward) },
       { metric: "AVG. DRAWDOWN", trader: scoreLowerBetter(metrics.drawdown, baseline.drawdown) },
       { metric: "WIN RATE", trader: scoreHigherBetter(metrics.winRate, baseline.winRate) },
       { metric: "AVG RETURN", trader: scoreSigned(metrics.avgReturn, baseline.avgReturn) },
     ]
-  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.totalTrades, metrics.winRate])
+  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.winRate])
+
+  const compareRows = useMemo(() => {
+    const baseline = benchmark ?? { riskReward: 0, drawdown: 0, winRate: 0, avgReturn: 0, sampleSize: 0 }
+    return [
+      {
+        label: "Risk Reward",
+        own: formatCompareMetric(metrics.riskReward),
+        average: formatCompareMetric(baseline.riskReward),
+      },
+      {
+        label: "Avg Drawdown",
+        own: formatCompareMetric(metrics.drawdown),
+        average: formatCompareMetric(baseline.drawdown),
+      },
+      {
+        label: "Win Rate",
+        own: formatCompareMetric(metrics.winRate, "%"),
+        average: formatCompareMetric(baseline.winRate, "%"),
+      },
+      {
+        label: "Avg Return",
+        own: formatCompareMetric(metrics.avgReturn),
+        average: formatCompareMetric(baseline.avgReturn),
+      },
+    ]
+  }, [benchmark, metrics.avgReturn, metrics.drawdown, metrics.riskReward, metrics.winRate])
 
   const closedTrades = useMemo(() => {
     return [...(filteredTrades || [])]
@@ -710,6 +739,9 @@ export default function TraderProfilePage() {
               </span>
               <span className="text-[11px]">{isBenchmarkLoading ? "Loading..." : "Live"}</span>
             </div>
+            <p className="mt-1 text-[11px] text-fg-muted">
+              Sample size: {benchmark?.sampleSize ?? 0} users
+            </p>
             <div className="mt-2.5 rounded-xl border border-white/10 bg-black/35 p-2.5">
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
@@ -723,6 +755,23 @@ export default function TraderProfilePage() {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
+            </div>
+            <div className="mt-2.5 rounded-xl border border-white/10 bg-black/35">
+              <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-white/10 px-3 py-2 text-[10px] uppercase tracking-wider text-fg-muted">
+                <span>Metric</span>
+                <span className="text-right">Your Data</span>
+                <span className="text-right">Avg User</span>
+              </div>
+              {compareRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-white/5 px-3 py-2 last:border-b-0"
+                >
+                  <span className="text-xs text-fg-muted">{row.label}</span>
+                  <span className="text-right text-xs font-semibold text-fg-primary">{row.own}</span>
+                  <span className="text-right text-xs text-fg-muted">{row.average}</span>
+                </div>
+              ))}
             </div>
           </Card>
 
