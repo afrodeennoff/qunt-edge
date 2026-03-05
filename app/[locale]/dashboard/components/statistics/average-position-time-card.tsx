@@ -24,8 +24,8 @@ export default function AveragePositionTimeCard({ size = 'medium' }: AveragePosi
       <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
         <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           <Clock className="h-4 w-4 shrink-0 metric-positive" />
-          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Avg Time</span>
-          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">{averagePositionTime}</span>
+          <span className="micro-sans shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Avg Time</span>
+          <span className="micro-sans tabular-nums shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">{averagePositionTime}</span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

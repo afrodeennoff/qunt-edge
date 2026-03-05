@@ -53,8 +53,8 @@ export default function PropfirmCatalogueWidget() {
                                         <span>{stat.accountsCount}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                                        <DollarSign className="w-3 h-3 opacity-60 text-semantic-success/80" />
-                                        <span className="text-semantic-success/80 font-medium">{stat.payouts.paidCount} Payouts</span>
+                                        <DollarSign className="w-3 h-3 opacity-60 text-foreground/70" />
+                                        <span className="text-foreground/70 font-medium">{stat.payouts.paidCount} Payouts</span>
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +64,7 @@ export default function PropfirmCatalogueWidget() {
                                         ? `${(stat.payouts.paidAmount / 1000).toFixed(1)}k`
                                         : stat.payouts.paidAmount.toLocaleString()}
                                 </div>
-                                <div className="text-[9px] font-semibold text-semantic-success/80 uppercase tracking-wider">
+                                <div className="text-[9px] font-semibold text-foreground/65 uppercase tracking-wider">
                                     Paid
                                 </div>
                             </div>

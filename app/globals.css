@@ -479,17 +479,17 @@
   }
 
   .metric-positive {
-    color: hsl(var(--chart-win));
-    text-shadow: 0 0 16px rgba(255, 255, 255, 0.42);
+    color: hsl(var(--foreground) / 0.96);
+    text-shadow: none;
   }
 
   .metric-negative {
-    color: hsl(var(--chart-loss));
-    opacity: 0.78;
+    color: hsl(var(--foreground) / 0.62);
+    text-shadow: none;
   }
 
   .chart-positive-emphasis {
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.46));
+    filter: none;
   }
 
   .chart-negative-muted {
