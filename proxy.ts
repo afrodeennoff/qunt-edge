@@ -59,6 +59,18 @@ const PRIVATE_DOCUMENT_PATH_PREFIXES = [
 const PUBLIC_READ_API_PATHS = new Set<string>([
   "/api/health",
 ])
+const PRIVATE_API_PATH_PREFIXES = [
+  "/api/",
+]
+
+type RouteClass =
+  | "static-asset"
+  | "embed"
+  | "public-api"
+  | "private-api"
+  | "public-document"
+  | "private-document"
+  | "other-document"
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   const cookieHeader = request.headers.get("cookie")
@@ -103,6 +115,32 @@ function isPublicDocumentRoute(pathname: string): boolean {
 
 function isPublicReadApiRoute(pathname: string): boolean {
   return PUBLIC_READ_API_PATHS.has(pathname)
+}
+
+function isPrivateApiRoute(pathname: string): boolean {
+  return PRIVATE_API_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+}
+
+function classifyRoute(pathname: string): RouteClass {
+  const normalizedPathname = normalizePathWithoutLocale(pathname)
+  const isStaticAsset =
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/videos/") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname.includes("/opengraph-image") ||
+    pathname.includes("/twitter-image") ||
+    pathname.includes("/icon") ||
+    STATIC_FILE_REGEX.test(pathname)
+
+  if (isStaticAsset) return "static-asset"
+  if (pathMatchesPrefix(normalizedPathname, "/embed")) return "embed"
+  if (isPublicReadApiRoute(pathname)) return "public-api"
+  if (isPrivateApiRoute(pathname)) return "private-api"
+  if (isPrivateDocumentRoute(pathname)) return "private-document"
+  if (isPublicDocumentRoute(pathname)) return "public-document"
+  return "other-document"
 }
 
 function applyPrivateNoStoreHeaders(response: NextResponse) {
@@ -208,30 +246,21 @@ export default async function middleware(req: NextRequest) {
   const normalizedPathname = normalizePathWithoutLocale(pathname)
   const origin = req.headers.get('origin')
   const locale = getLocale(pathname)
+  const routeClass = classifyRoute(pathname)
   const isDashboardRoute = pathMatchesPrefix(normalizedPathname, "/dashboard")
   const isAdminRoute = pathMatchesPrefix(normalizedPathname, "/admin")
   const isAuthRoute = pathMatchesPrefix(normalizedPathname, "/authentication")
-  const isEmbedRoute = pathMatchesPrefix(normalizedPathname, "/embed")
-  const isApiRoute = pathname.startsWith("/api/")
+  const isEmbedRoute = routeClass === "embed"
+  const isApiRoute = routeClass === "public-api" || routeClass === "private-api"
   const isDev = process.env.NODE_ENV === "development"
   const cspEnabled = process.env.CSP_ENABLED !== "false"
   const cspReportOnly = process.env.CSP_REPORT_ONLY
     ? process.env.CSP_REPORT_ONLY === "true"
     : process.env.NODE_ENV !== "production"
   const cspStrictMode = process.env.CSP_STRICT_MODE === "true"
-  const isStaticAsset =
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/videos/") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/robots.txt" ||
-    pathname === "/sitemap.xml" ||
-    pathname.includes("/opengraph-image") ||
-    pathname.includes("/twitter-image") ||
-    pathname.includes("/icon") ||
-    STATIC_FILE_REGEX.test(pathname)
 
   // More specific static asset exclusions - must be first!
-  if (isStaticAsset) {
+  if (routeClass === "static-asset") {
     return NextResponse.next()
   }
 
@@ -261,7 +290,7 @@ export default async function middleware(req: NextRequest) {
     // Let API routes pass through with security headers + optional CORS
     const apiResponse = NextResponse.next()
     applySecurityHeaders(apiResponse)
-    if (req.method === "GET" && isPublicReadApiRoute(pathname)) {
+    if (req.method === "GET" && routeClass === "public-api") {
       apiResponse.headers.set(
         "Cache-Control",
         "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
@@ -500,9 +529,9 @@ export default async function middleware(req: NextRequest) {
   // Route-class cache policy split:
   // - private documents: strict no-store
   // - public documents: revalidated public cacheability
-  if (isPrivateDocumentRoute(pathname)) {
+  if (routeClass === "private-document") {
     applyPrivateNoStoreHeaders(response)
-  } else if (isPublicDocumentRoute(pathname)) {
+  } else if (routeClass === "public-document") {
     applyPublicRevalidateHeaders(response)
   }
 

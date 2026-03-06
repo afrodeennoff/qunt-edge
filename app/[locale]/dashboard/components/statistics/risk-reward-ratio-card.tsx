@@ -95,8 +95,8 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
       </div>
 
       <div className="flex items-end justify-center gap-2 px-1">
-        <span className="font-terminal text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">RR</span>
-        <span className="font-terminal text-[24px] font-black leading-none tracking-tight text-foreground/90">
+        <span className="micro-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/78">RR</span>
+        <span className="micro-sans text-[24px] font-black leading-none tracking-tight text-foreground/90">
           {riskRewardRatio.toFixed(2)}
         </span>
       </div>
@@ -122,7 +122,7 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
               </div>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={5}>
-              <div className="font-terminal text-[10px] font-bold uppercase tracking-tight space-y-1">
+              <div className="micro-sans text-[10px] font-bold uppercase tracking-tight space-y-1">
                 <div className="metric-positive">Avg. Win: ${avgWin.toFixed(2)}</div>
                 <div className="metric-negative">Avg. Loss: ${avgLoss.toFixed(2)}</div>
               </div>

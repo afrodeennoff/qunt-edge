@@ -57,7 +57,7 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
       )}>
         <Scale className={cn("h-3 w-3", isProfitable ? "metric-positive" : "metric-negative")} />
         <span className={cn(
-          "font-terminal font-bold text-[11px] uppercase tracking-wider",
+          "micro-sans font-bold text-[11px] uppercase tracking-[0.18em]",
           isProfitable ? "metric-positive" : "metric-negative"
         )}>
           {formattedPF} PF

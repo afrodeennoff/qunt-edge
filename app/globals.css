@@ -37,9 +37,18 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
-    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  [role="tab"] {
+    transition-property: background-color, border-color, color, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
+    transition-duration: 180ms;
   }
 }
 
@@ -431,8 +440,8 @@
       radial-gradient(1200px 800px at 6% -10%, rgba(255, 255, 255, 0.07), transparent 62%),
       radial-gradient(900px 600px at 92% 10%, rgba(255, 255, 255, 0.05), transparent 64%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0) 24%);
-    opacity: 0.52;
-    animation: dashboard-mesh-drift 26s ease-in-out infinite alternate;
+    opacity: 0.42;
+    animation: none;
   }
 
   .dashboard-texture-layer {
@@ -484,7 +493,7 @@
   }
 
   .metric-negative {
-    color: hsl(var(--foreground) / 0.62);
+    color: hsl(var(--foreground) / 0.78);
     text-shadow: none;
   }
 

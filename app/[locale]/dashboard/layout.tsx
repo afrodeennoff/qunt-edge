@@ -57,10 +57,9 @@ export default async function DashboardLayout({
               <div className="hidden md:block dashboard-mesh-layer" />
               <div className="hidden md:block dashboard-texture-layer" />
 
-              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-60 mix-blend-screen">
-                <div className="absolute -top-[20%] -left-[10%] h-[1000px] w-[1000px] animate-[pulse_12s_ease-in-out_infinite] rounded-full bg-primary/5 blur-[150px]" />
-                <div className="absolute top-[30%] -right-[15%] h-[1200px] w-[1200px] animate-[pulse_18s_ease-in-out_infinite] rounded-full bg-white/[0.03] blur-[200px]" />
-                <div className="absolute -bottom-[20%] left-[20%] h-[900px] w-[900px] animate-[pulse_15s_ease-in-out_infinite] rounded-full bg-white/[0.025] blur-[180px]" />
+              <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-40 mix-blend-screen xl:block">
+                <div className="absolute -top-[16%] -left-[8%] h-[820px] w-[820px] rounded-full bg-primary/5 blur-[120px]" />
+                <div className="absolute top-[34%] -right-[12%] h-[900px] w-[900px] rounded-full bg-white/[0.03] blur-[140px]" />
               </div>
 
               <div className="hidden md:block absolute inset-y-0 left-0 w-px bg-[linear-gradient(180deg,transparent,hsl(var(--foreground) / 0.22),transparent)]" />
