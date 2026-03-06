@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-05T13:25:27.876Z",
+  "generatedAt": "2026-03-06T10:13:35.247Z",
   "baseUrl": "http://127.0.0.1:3001",
   "thresholds": {
     "desktopScoreMin": 0.9,
@@ -14,51 +14,51 @@
     {
       "url": "http://127.0.0.1:3001/en",
       "mode": "mobile",
-      "score": 0.62,
-      "tbt": 1456.067525,
-      "lcp": 3908.59485,
+      "score": 0.61,
+      "tbt": 3136.1628,
+      "lcp": 3566.0231999999996,
       "cls": 0,
       "failures": [
-        "mobile score 0.62 < 0.75",
-        "mobile TBT 1456.067525ms > 1200ms",
-        "mobile LCP 3908.59485ms > 3500ms"
+        "mobile score 0.61 < 0.75",
+        "mobile TBT 3136.1628ms > 1200ms",
+        "mobile LCP 3566.0231999999996ms > 3500ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en",
       "mode": "desktop",
-      "score": 0.86,
-      "tbt": 313.67617499999994,
-      "lcp": 771.76175,
+      "score": 0.74,
+      "tbt": 659.9792500000001,
+      "lcp": 816.1660000000002,
       "cls": 0,
       "failures": [
-        "desktop score 0.86 < 0.9",
-        "desktop TBT 313.67617499999994ms > 200ms"
+        "desktop score 0.74 < 0.9",
+        "desktop TBT 659.9792500000001ms > 200ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "mobile",
-      "score": 0.61,
-      "tbt": 1475.5489499999994,
-      "lcp": 4061.608400000002,
+      "score": 0.55,
+      "tbt": 4621.000000000001,
+      "lcp": 4063.2823499999986,
       "cls": 0,
       "failures": [
-        "mobile score 0.61 < 0.75",
-        "mobile TBT 1475.5489499999994ms > 1200ms",
-        "mobile LCP 4061.608400000002ms > 3500ms"
+        "mobile score 0.55 < 0.75",
+        "mobile TBT 4621.000000000001ms > 1200ms",
+        "mobile LCP 4063.2823499999986ms > 3500ms"
       ]
     },
     {
       "url": "http://127.0.0.1:3001/en/pricing",
       "mode": "desktop",
-      "score": 0.86,
-      "tbt": 315.34040000000016,
-      "lcp": 891.3616000000002,
+      "score": 0.73,
+      "tbt": 662.295925,
+      "lcp": 893.6325999999997,
       "cls": 0.02193223010244287,
       "failures": [
-        "desktop score 0.86 < 0.9",
-        "desktop TBT 315.34040000000016ms > 200ms"
+        "desktop score 0.73 < 0.9",
+        "desktop TBT 662.295925ms > 200ms"
       ]
     }
   ]

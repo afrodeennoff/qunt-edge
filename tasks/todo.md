@@ -1534,3 +1534,41 @@
   - `npm run -s typecheck` -> exit `0`.
   - `npm test` -> exit `0` (`156 passed`, `46 skipped`).
   - `npm run -s build` -> exit `0`.
+
+# One-Shot Production Remediation (2026-03-06)
+
+## Scope
+- Execute an end-to-end remediation train for cache correctness, edge stability, dashboard performance hardening, and widget visual consistency.
+
+## Acceptance Criteria
+- [x] Route-class cache policy contract enforced (private no-store/public revalidate).
+- [x] Middleware/runtime no longer fails globally on optional env-format issues.
+- [x] Dashboard shell/render path receives targeted performance reductions.
+- [x] Widget KPI typography/color parity tightened across primary stat cards.
+- [x] Core release gates run and results documented with artifacts.
+
+## Plan Checklist
+- [x] Refactor middleware into explicit route classes and central cache policy handling.
+- [x] Harden env parsing and runtime middleware behavior for optional Redis/CSP env variance.
+- [x] Reduce dashboard shell visual overhead and broad CSS transition cost.
+- [x] Improve server user-data logging/caching behavior on hot dashboard path.
+- [x] Run verification suite and record residual risks.
+
+## Current Step
+- **Completed:** remediation code + verification + audit artifact capture complete.
+
+## Completion Notes
+- Updated files:
+  - `proxy.ts`
+  - `lib/env.ts`
+  - `app/[locale]/dashboard/layout.tsx`
+  - `server/user-data.ts`
+  - `app/globals.css`
+  - `app/[locale]/dashboard/components/statistics/cumulative-pnl-card.tsx`
+  - `app/[locale]/dashboard/components/statistics/profit-factor-card.tsx`
+  - `app/[locale]/dashboard/components/statistics/risk-reward-ratio-card.tsx`
+  - `app/[locale]/dashboard/components/statistics/average-position-time-card.tsx`
+  - `docs/audits/one-shot-remediation-2026-03-06.md`
+- Verification summary:
+  - `typecheck`, `lint`, `build`, `check:route-budgets`, `analyze:bundle`, strict `perf:headers`, and `perf:baseline` passed.
+  - `perf:lighthouse` still fails threshold targets on `/en` and `/en/pricing` due TBT/LCP/score.

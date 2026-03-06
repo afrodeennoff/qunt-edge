@@ -60,3 +60,6 @@
 - Mapped key platform domains (dashboard trading workflows, team/admin surfaces, AI endpoints, billing/webhooks) and verification/tooling gates used in production preflight.
 - Completed a full static security audit of API and privileged server surfaces, including auth/authz, rate limiting, input validation, secret handling, and vulnerability triage.
 - Confirmed strongest controls (service-secret timing-safe auth, webhook signature verification, structured validation helpers, sensitive-log redaction) and flagged key gaps (no-op auth guard hooks, uneven endpoint throttling, selective verbose error leakage).
+- 2026-03-06: Implemented one-shot remediation pass: explicit middleware route-class cache contract, fail-safe runtime env validation handling, dashboard shell paint-cost reduction, scoped global transition performance cleanup, server user-data logger/cache improvements, and KPI stat-card typography unification.
+- Re-verified release gates: typecheck/lint/build/route-budgets/bundle analysis and strict perf headers passed; refreshed baseline and Lighthouse artifacts.
+- Captured residual blocker: Lighthouse thresholds still fail on `/en` and `/en/pricing` due high TBT/LCP; documented in `docs/audits/one-shot-remediation-2026-03-06.md`.
