@@ -59,10 +59,10 @@ export function SharedWidgetCanvas() {
         layouts={generateResponsiveLayouts(transformedLayout)}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-        rowHeight={isMobile ? 65 : 70}
+        rowHeight={isMobile ? 56 : 68}
         isDraggable={false}
         isResizable={false}
-        margin={[16, 16]}
+        margin={isMobile ? [6, 4] : [8, 8]}
         containerPadding={[0, 0]}
         compactType="vertical"
         preventCollision={false}

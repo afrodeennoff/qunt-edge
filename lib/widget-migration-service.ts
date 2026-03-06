@@ -126,13 +126,14 @@ class WidgetMigrationService {
   }
 
   private addUpgradeWidgets(widgets: Widget[]): Widget[] {
+    const nextY = widgets.reduce((maxY, widget) => Math.max(maxY, widget.y + widget.h), 0)
     const premiumWidgets: Widget[] = [
       {
         i: `widget${Date.now()}_risk`,
         type: 'riskMetrics',
         size: 'medium',
         x: 0,
-        y: widgets.length,
+        y: nextY,
         w: 6,
         h: 4,
         updatedAt: new Date()

@@ -1,5 +1,6 @@
 import { Widget, WidgetType, WidgetSize } from '@/app/[locale]/dashboard/types/dashboard'
 import { WIDGET_REGISTRY } from '@/app/[locale]/dashboard/config/widget-registry'
+import { FALLBACK_WIDGET_TYPE, getAllowedWidgetTypes, normalizeWidgetSize } from '@/lib/widget-layout'
 
 export interface ValidationResult {
   valid: boolean
@@ -22,38 +23,7 @@ export interface ValidationWarning {
 }
 
 class WidgetValidator {
-  private readonly VALID_WIDGET_TYPES: WidgetType[] = [
-    'equityChart',
-    'pnlChart',
-    'timeOfDayChart',
-    'timeInPositionChart',
-    'weekdayPnlChart',
-    'pnlBySideChart',
-    'pnlPerContractChart',
-    'pnlPerContractDailyChart',
-    'tickDistribution',
-    'dailyTickTarget',
-    'commissionsPnl',
-    'calendarWidget',
-    'averagePositionTime',
-    'cumulativePnl',
-    'longShortPerformance',
-    'tradePerformance',
-    'winningStreak',
-    'profitFactor',
-    'statisticsWidget',
-    'tradeTableReview',
-    'chatWidget',
-    'tradeDistribution',
-    'propFirm',
-    'timeRangePerformance',
-    'tagWidget',
-    'riskRewardRatio',
-    'mindsetWidget',
-    'tradingScore',
-    'expectancy',
-    'riskMetrics'
-  ]
+  private readonly VALID_WIDGET_TYPES: WidgetType[] = getAllowedWidgetTypes()
 
   private readonly VALID_SIZES: WidgetSize[] = [
     'tiny',
@@ -378,8 +348,8 @@ class WidgetValidator {
 
     return {
       i: String(widget.i),
-      type: widget.type || 'chart',
-      size: widget.size || 'medium',
+      type: widget.type || FALLBACK_WIDGET_TYPE,
+      size: normalizeWidgetSize(widget.type || FALLBACK_WIDGET_TYPE, widget.size),
       x: Math.max(0, Math.min(11, Math.floor(Number(widget.x) || 0))),
       y: Math.max(0, Math.floor(Number(widget.y) || 0)),
       w: Math.max(1, Math.min(12, Math.floor(Number(widget.w) || 6))),
