@@ -27,6 +27,13 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { WidgetShell } from "@/components/ui/widget-shell"
 import { isUiV2Enabled } from "@/lib/ui-v2"
 import { useSearchParams } from "next/navigation"
+import {
+  generateResponsiveLayouts,
+  getEffectiveWidgetSize,
+  isRegisteredWidgetType,
+  normalizeWidgetSize,
+  sizeToGrid,
+} from "@/lib/widget-layout"
 // Helper function to convert internal layout to Prisma type
 const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => {
   return {
@@ -37,90 +44,6 @@ const toPrismaLayout = (layout: DashboardLayoutWithWidgets): DashboardLayout => 
     desktop: layout.desktop as unknown as Prisma.JsonValue,
     mobile: layout.mobile as unknown as Prisma.JsonValue,
   }
-}
-
-// Update sizeToGrid to handle responsive sizes
-const sizeToGrid = (size: WidgetSize, isSmallScreen = false): { w: number, h: number } => {
-  if (isSmallScreen) {
-    switch (size) {
-      case 'tiny':
-        return { w: 12, h: 1 }
-      case 'small':
-        return { w: 12, h: 2 }
-      case 'small-long':
-        return { w: 12, h: 2 }
-      case 'medium':
-        return { w: 12, h: 3 }
-      case 'large':
-      case 'extra-large':
-        return { w: 12, h: 4 }
-      default:
-        return { w: 12, h: 3 }
-    }
-  }
-
-  // Desktop sizes
-  switch (size) {
-    case 'tiny':
-      return { w: 3, h: 1 }
-    case 'small':
-      return { w: 3, h: 4 }
-    case 'small-long':
-      return { w: 6, h: 2 }
-    case 'medium':
-      return { w: 6, h: 4 }
-    case 'large':
-      return { w: 6, h: 8 }
-    case 'extra-large':
-      return { w: 12, h: 8 }
-    default:
-      return { w: 6, h: 4 }
-  }
-}
-
-// Add a function to get grid dimensions based on widget type and size
-const getWidgetGrid = (type: WidgetType, size: WidgetSize, isSmallScreen = false): { w: number, h: number } => {
-  const config = WIDGET_REGISTRY[type]
-  if (!config) {
-    // Return a default medium size grid for deprecated widgets
-    return isSmallScreen ? { w: 12, h: 4 } : { w: 6, h: 4 }
-  }
-  if (isSmallScreen) {
-    return sizeToGrid(size, true)
-  }
-  return sizeToGrid(size)
-}
-
-// Create layouts for different breakpoints
-const generateResponsiveLayout = (widgets: Widget[]) => {
-  const widgetArray = Array.isArray(widgets) ? widgets : []
-
-  const layouts = {
-    lg: widgetArray.map(widget => ({
-      ...widget,
-      ...getWidgetGrid(widget.type as WidgetType, widget.size as WidgetSize)
-    })),
-    md: widgetArray.map(widget => ({
-      ...widget,
-      ...getWidgetGrid(widget.type as WidgetType, widget.size as WidgetSize),
-    })),
-    sm: widgetArray.map(widget => ({
-      ...widget,
-      ...getWidgetGrid(widget.type as WidgetType, widget.size as WidgetSize, true),
-      x: 0 // Align to left
-    })),
-    xs: widgetArray.map(widget => ({
-      ...widget,
-      ...getWidgetGrid(widget.type as WidgetType, widget.size as WidgetSize, true),
-      x: 0 // Align to left
-    })),
-    xxs: widgetArray.map(widget => ({
-      ...widget,
-      ...getWidgetGrid(widget.type as WidgetType, widget.size as WidgetSize, true),
-      x: 0 // Align to left
-    }))
-  }
-  return layouts
 }
 
 const LAYOUT_SAVE_DEBOUNCE_MS = 250
@@ -415,7 +338,7 @@ export default function WidgetCanvas() {
 
   const responsiveLayout = useMemo(() => {
     if (!layouts) return {}
-    return generateResponsiveLayout(activeWidgets)
+    return generateResponsiveLayouts(activeWidgets)
   }, [layouts, activeWidgets])
 
   const currentLayout = activeWidgets
@@ -530,9 +453,7 @@ export default function WidgetCanvas() {
 
     // Prevent charts from being set to tiny size
     let effectiveSize = newSize
-    if (widget.type.includes('Chart') && newSize === 'tiny') {
-      effectiveSize = 'medium'
-    }
+    effectiveSize = normalizeWidgetSize(widget.type, newSize)
 
     const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
     const updatedWidgets = currentActiveLayout.map(widget =>
@@ -566,29 +487,15 @@ export default function WidgetCanvas() {
   // Define renderWidget with all dependencies
   const renderWidget = useCallback((widget: Widget) => {
     // Ensure widget.type is a valid WidgetType
-    if (!Object.keys(WIDGET_REGISTRY).includes(widget.type)) {
+    if (!isRegisteredWidgetType(widget.type)) {
       return (
         <DeprecatedWidget onRemove={() => removeWidget(widget.i)} />
       )
     }
 
-    const config = WIDGET_REGISTRY[widget.type as keyof typeof WIDGET_REGISTRY]
+    const effectiveSize = getEffectiveWidgetSize(widget.type, widget.size, isMobile)
 
-    // For charts, ensure size is at least small-long
-    const effectiveSize = (() => {
-      if (config.requiresFullWidth) {
-        return config.defaultSize
-      }
-      if (config.allowedSizes.length === 1) {
-        return config.allowedSizes[0]
-      }
-      if (isMobile && widget.size !== 'tiny') {
-        return 'small' as WidgetSize
-      }
-      return widget.size as WidgetSize
-    })()
-
-    return getWidgetComponent(widget.type as WidgetType, effectiveSize)
+    return getWidgetComponent(widget.type, effectiveSize)
   }, [isMobile, removeWidget]);
 
   useEffect(() => {
