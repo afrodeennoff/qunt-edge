@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifySecureToken } from '@/lib/api-auth'
+import { z } from 'zod'
+import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
+import { parseJson, parseQuery, toValidationErrorResponse } from '@/app/api/_utils/validate'
 
 const MAX_ETP_BODY_BYTES = 2 * 1024 * 1024
 const MAX_ETP_ORDERS = 2_000
 const MAX_PAGINATION_LIMIT = 500
+const etpWriteRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: 'etp-store-write' })
+const etpReadRateLimit = rateLimit({ limit: 120, window: 60_000, identifier: 'etp-store-read' })
 
 type ETPOrderPayload = {
   AccountId: string
@@ -20,34 +25,31 @@ type ETPOrderPayload = {
   }
 }
 
-function normalizePositiveInt(value: string | null, fallback: number, max: number): number {
-  const parsed = Number.parseInt(value ?? '', 10)
-  if (!Number.isFinite(parsed) || parsed < 0) return fallback
-  return Math.min(parsed, max)
-}
+const etpOrderSchema = z.object({
+  AccountId: z.string().min(1),
+  OrderId: z.string().min(1),
+  OrderAction: z.string().min(1),
+  Quantity: z.number().finite(),
+  AverageFilledPrice: z.number().finite(),
+  IsOpeningOrder: z.boolean(),
+  Time: z.string().min(1),
+  Instrument: z.object({
+    Symbol: z.string().min(1),
+    Type: z.string().min(1),
+  }),
+})
 
-function validateOrderPayload(order: unknown): order is ETPOrderPayload {
-  if (!order || typeof order !== 'object') return false
-  const candidate = order as Partial<ETPOrderPayload>
-  return Boolean(
-    typeof candidate.AccountId === 'string' &&
-    typeof candidate.OrderId === 'string' &&
-    typeof candidate.OrderAction === 'string' &&
-    typeof candidate.Quantity === 'number' &&
-    Number.isFinite(candidate.Quantity) &&
-    typeof candidate.AverageFilledPrice === 'number' &&
-    Number.isFinite(candidate.AverageFilledPrice) &&
-    typeof candidate.IsOpeningOrder === 'boolean' &&
-    typeof candidate.Time === 'string' &&
-    candidate.Instrument &&
-    typeof candidate.Instrument.Symbol === 'string' &&
-    typeof candidate.Instrument.Type === 'string'
-  )
-}
+const etpPostBodySchema = z.object({
+  orders: z.array(etpOrderSchema).min(1).max(MAX_ETP_ORDERS),
+})
 
-function sanitizeOrders(orders: unknown[]): ETPOrderPayload[] {
-  return orders.filter(validateOrderPayload)
-}
+const etpGetQuerySchema = z.object({
+  accountId: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(MAX_PAGINATION_LIMIT).default(100),
+  offset: z.coerce.number().int().min(0).max(50_000).default(0),
+  from: z.string().optional(),
+  to: z.string().optional(),
+})
 
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
@@ -91,11 +93,21 @@ async function authenticateRequest(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
+    const limit = await etpWriteRateLimit(req)
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      })
+    }
+
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_ETP_BODY_BYTES) {
       return NextResponse.json(
-        { error: 'Request payload is too large' },
+        { error: 'Request payload is too large', requestId },
         { status: 413 }
       )
     }
@@ -110,33 +122,11 @@ export async function POST(req: NextRequest) {
     }
     
     const user = auth.user!;
-    
-    // Parse the request body
-    const body = await req.json();
-    const orders = Array.isArray(body?.orders) ? body.orders : null
-
-    if (!orders || orders.length === 0) {
-      return NextResponse.json({ error: 'Invalid orders data' }, { status: 400 });
-    }
-
-    if (orders.length > MAX_ETP_ORDERS) {
-      return NextResponse.json(
-        { error: `Too many orders. Maximum is ${MAX_ETP_ORDERS}.` },
-        { status: 413 }
-      )
-    }
-
-    const sanitizedOrders = sanitizeOrders(orders)
-    if (sanitizedOrders.length !== orders.length) {
-      return NextResponse.json(
-        { error: 'Invalid order payload format' },
-        { status: 400 }
-      )
-    }
+    const { orders } = await parseJson(req, etpPostBodySchema)
     
     // Process and store each order
     const createdOrders = await Promise.all(
-      sanitizedOrders.map(async (order) => {
+      orders.map(async (order) => {
         const orderTime = new Date(order.Time)
         if (Number.isNaN(orderTime.getTime())) {
           throw new Error(`Invalid order timestamp: ${order.Time}`)
@@ -182,15 +172,27 @@ export async function POST(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     return NextResponse.json({ 
-      error: 'Failed to store orders', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      error: 'Failed to store orders',
+      requestId,
     }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
+    const limitResult = await etpReadRateLimit(req)
+    if (!limitResult.success) {
+      return createRateLimitResponse({
+        limit: limitResult.limit,
+        remaining: limitResult.remaining,
+        resetTime: limitResult.resetTime,
+      })
+    }
+
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
@@ -202,13 +204,10 @@ export async function GET(req: NextRequest) {
     
     const user = auth.user!;
     
-    // Get query parameters
-    const searchParams = req.nextUrl.searchParams;
-    const accountId = searchParams.get('accountId');
-    const limit = normalizePositiveInt(searchParams.get('limit'), 100, MAX_PAGINATION_LIMIT);
-    const offset = normalizePositiveInt(searchParams.get('offset'), 0, 50_000);
-    const fromDate = searchParams.get('from');
-    const toDate = searchParams.get('to');
+    const { accountId, limit, offset, from: fromDate, to: toDate } = parseQuery(
+      req.nextUrl.searchParams,
+      etpGetQuerySchema
+    )
     
     // Build the query
     const query: Parameters<typeof prisma.order.findMany>[0] = {
@@ -263,15 +262,27 @@ export async function GET(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     return NextResponse.json({ 
-      error: 'Failed to retrieve orders', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      error: 'Failed to retrieve orders',
+      requestId,
     }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
+    const limitResult = await etpWriteRateLimit(req)
+    if (!limitResult.success) {
+      return createRateLimitResponse({
+        limit: limitResult.limit,
+        remaining: limitResult.remaining,
+        resetTime: limitResult.resetTime,
+      })
+    }
+
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
@@ -297,8 +308,8 @@ export async function DELETE(req: NextRequest) {
     
   } catch (error) {
     return NextResponse.json({ 
-      error: 'Failed to delete orders', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      error: 'Failed to delete orders',
+      requestId,
     }, { status: 500 });
   }
 } 

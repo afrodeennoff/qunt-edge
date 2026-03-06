@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { prisma } from './prisma'
+import { getRedisJson, invalidateCacheNamespace, setRedisJson } from './redis-cache'
 
 const TOKEN_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -19,12 +20,21 @@ export async function generateSecureToken(userId: string, tokenType: 'etp' | 'th
       [`${tokenType}TokenExpiresAt`]: expiresAt
     }
   })
+
+  await invalidateCacheNamespace(`secure-token-${tokenType}`)
   
   return token
 }
 
 export async function verifySecureToken(token: string, tokenType: 'etp' | 'thor') {
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+  const cacheKey = `hash:${tokenHash}`
+  const namespace = `secure-token-${tokenType}`
+  const cachedUser = await getRedisJson<{ id: string }>(namespace, cacheKey)
+  if (cachedUser?.id) {
+    return cachedUser
+  }
+
   const field = tokenType === 'etp' ? 'etpTokenHash' : 'thorTokenHash'
   const expiresField = `${tokenType}TokenExpiresAt`
   
@@ -36,6 +46,10 @@ export async function verifySecureToken(token: string, tokenType: 'etp' | 'thor'
       }
     }
   })
+
+  if (user?.id) {
+    await setRedisJson(namespace, cacheKey, { id: user.id }, 60)
+  }
   
   return user
 }
@@ -53,4 +67,6 @@ export async function revokeSecureToken(userId: string, tokenType: 'etp' | 'thor
       [expiresField]: null
     }
   })
+
+  await invalidateCacheNamespace(`secure-token-${tokenType}`)
 }

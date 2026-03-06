@@ -5,8 +5,15 @@ import TeamInvitationEmail from '@/components/emails/team-invitation'
 import { render } from "@react-email/render"
 import { prisma } from "@/lib/prisma"
 import { createRouteClient } from "@/lib/supabase/route-client"
+import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit"
+import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate"
 
 export const dynamic = 'force-dynamic'
+const inviteRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "team-invite" })
+const inviteSchema = z.object({
+  teamId: z.string().min(1),
+  email: z.string().email(),
+})
 
 export async function POST(req: Request) {
   if (!process.env.RESEND_API_KEY) {
@@ -16,27 +23,16 @@ export async function POST(req: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY)
 
   try {
-
-    const body = await req.json()
-    const schema = z.object({
-      teamId: z.string(),
-      email: z.string().email(),
-    })
-
-    const parseResult = schema.safeParse(body)
-
-    if (!parseResult.success) {
-      return NextResponse.json({ error: 'Invalid input', details: parseResult.error.format() }, { status: 400 })
+    const limit = await inviteRateLimit(req)
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      })
     }
 
-    const { teamId, email } = parseResult.data
-
-    if (!teamId || !email) {
-      return NextResponse.json(
-        { error: 'Team ID and email are required' },
-        { status: 400 }
-      )
-    }
+    const { teamId, email } = await parseJson(req, inviteSchema)
 
     const supabase = createRouteClient(req)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -180,9 +176,11 @@ export async function POST(req: Request) {
     )
 
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     console.error('Error sending team invitation:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', requestId: crypto.randomUUID() },
       { status: 500 }
     )
   }

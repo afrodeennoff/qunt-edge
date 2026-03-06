@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getDatabaseUserId } from "@/server/auth"
 import { computeBehaviorInsights } from "@/lib/behavior-insights"
+import { getRedisJson, setRedisJson } from "@/lib/redis-cache"
 
 function sanitizePeriodDays(value: string | null): number {
   if (!value) return 30
@@ -18,6 +19,12 @@ export async function GET(request: NextRequest) {
     }
 
     const periodDays = sanitizePeriodDays(request.nextUrl.searchParams.get("periodDays"))
+    const cacheKey = `user:${userId}:period:${periodDays}`
+    const cached = await getRedisJson<ReturnType<typeof computeBehaviorInsights>>("behavior-insights", cacheKey)
+    if (cached) {
+      return NextResponse.json(cached)
+    }
+
     const fromDate = new Date()
     fromDate.setDate(fromDate.getDate() - periodDays)
 
@@ -47,6 +54,7 @@ export async function GET(request: NextRequest) {
     ])
 
     const insights = computeBehaviorInsights(trades, moods, periodDays)
+    await setRedisJson("behavior-insights", cacheKey, insights, 60)
     return NextResponse.json(insights)
   } catch (error) {
     console.error("[Behavior Insights API] Failed to build insights", error)

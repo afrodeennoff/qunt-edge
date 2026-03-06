@@ -28,7 +28,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -138,10 +137,9 @@ export function UnifiedSidebar({
   const t = useI18n()
   const translate = t as unknown as (key: string) => string
   const isActive = useActiveLink()
-  const { isMobile, setOpenMobile, state } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const { isLoading } = useNavigationLoading()
   const { isQueryParamOnly } = useNavigationHelper()
-  const isCollapsed = state === "collapsed"
   const debugCache = process.env.NEXT_PUBLIC_CACHE_DEBUG === "true"
   const pathname = usePathname()
 
@@ -185,13 +183,13 @@ export function UnifiedSidebar({
   const initials = useMemo(() => getUserInitials(user), [user])
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar text-sidebar-foreground pointer-events-auto">
-      <SidebarHeader className="border-b border-sidebar-border/30 h-14 flex flex-col justify-center px-2 py-0">
+    <Sidebar collapsible="icon" className="pointer-events-auto border-r border-sidebar-border/60 bg-sidebar/95 text-sidebar-foreground backdrop-blur-sm">
+      <SidebarHeader className="h-14 border-b border-sidebar-border/40 px-2 py-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-2">
-              <SidebarMenuButton size="lg" className="pointer-events-auto transition-colors group flex-1">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+              <SidebarMenuButton size="lg" className="group pointer-events-auto flex-1 transition-colors hover:bg-sidebar-accent/70">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[0_10px_24px_-16px_hsl(var(--foreground))]">
                   <Logo className="size-5 fill-current" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none px-1 overflow-hidden">
@@ -199,19 +197,15 @@ export function UnifiedSidebar({
                   <span className="truncate text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-medium">Workspace</span>
                 </div>
               </SidebarMenuButton>
-              <SidebarTrigger
-                className="opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex h-6 w-6"
-                aria-label="Toggle sidebar"
-              />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
+      <SidebarContent className="scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent px-1">
         {groupedItems.order.map((groupName, groupIndex) => (
           <SidebarGroup key={groupName} className="px-2 py-2">
-            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/50 mb-1" id={`sidebar-group-${groupIndex}`}>
+            <SidebarGroupLabel className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/55" id={`sidebar-group-${groupIndex}`}>
               {groupName}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -233,7 +227,12 @@ export function UnifiedSidebar({
                           item.action?.()
                           if (isMobile) setOpenMobile(false)
                         } : undefined}
-                        className={cn("pointer-events-auto font-medium transition-colors", itemIsActive && "font-semibold shadow-sm")}
+                        className={cn(
+                          "pointer-events-auto rounded-lg font-medium transition-colors duration-150",
+                          itemIsActive
+                            ? "font-semibold shadow-[inset_0_0_0_1px_hsl(var(--sidebar-border))]"
+                            : "hover:bg-sidebar-accent/65"
+                        )}
                       >
                         {href ? (
                           <Link
@@ -290,7 +289,7 @@ export function UnifiedSidebar({
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/30 p-2">
+      <SidebarFooter className="border-t border-sidebar-border/40 p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>

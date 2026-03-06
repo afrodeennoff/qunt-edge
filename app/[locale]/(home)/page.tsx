@@ -25,5 +25,5 @@ export default async function HomePage({
     const { locale } = await params;
     setStaticParamsLocale(locale);
 
-    return <HomeContent />;
+    return <HomeContent locale={locale} />;
 }

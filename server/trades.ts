@@ -10,6 +10,7 @@ import { formatTimestamp, isChronologicalRange, normalizeToUtcTimestamp } from '
 import { v5 as uuidv5 } from 'uuid'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
+import { invalidateCacheNamespace } from '@/lib/redis-cache'
 
 const importTradeSchema = z.object({
   accountNumber: z.string().min(1, 'Account number is required'),
@@ -103,6 +104,13 @@ export async function revalidateCache(tags: string[]) {
       logger.error(`[revalidateCache] Error revalidating tag ${tag}`, { error })
     }
   })
+}
+
+async function invalidateTradeRelatedCaches(): Promise<void> {
+  await Promise.all([
+    invalidateCacheNamespace('ai-trades'),
+    invalidateCacheNamespace('behavior-insights'),
+  ])
 }
 
 const TRADE_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
@@ -255,6 +263,7 @@ export async function saveTradesAction(
 
     updateTag(`trades-${userId}`)
     updateTag(`user-data-${userId}`)
+    await invalidateTradeRelatedCaches()
 
     if (result.count === 0) {
       logger.info('[saveTrades] No trades added. Duplicate check.')
@@ -440,6 +449,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
     }
 
     updateTag(`trades-${userId}`)
+    await invalidateTradeRelatedCaches()
     return tradesIds.length
   } catch (error) {
     logger.error('[updateTrades] Error', { error })
@@ -458,6 +468,7 @@ export async function updateTradeCommentAction(tradeId: string, comment: string 
       where: { id: tradeId, userId },
       data: { comment }
     })
+    await invalidateTradeRelatedCaches()
     revalidatePath('/')
   } catch (error) {
     logger.error("[updateTradeComment] Error", { error })
@@ -476,6 +487,7 @@ export async function updateTradeVideoUrlAction(tradeId: string, videoUrl: strin
       where: { id: tradeId, userId },
       data: { videoUrl }
     })
+    await invalidateTradeRelatedCaches()
     revalidatePath('/')
   } catch (error) {
     logger.error("[updateTradeVideoUrl] Error", { error })
@@ -504,6 +516,7 @@ export async function addTagToTrade(tradeId: string, tag: string) {
       }
     })
 
+    await invalidateTradeRelatedCaches()
     revalidatePath('/')
     return updatedTrade
   } catch (error) {
@@ -533,6 +546,7 @@ export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
       }
     })
 
+    await invalidateTradeRelatedCaches()
     revalidatePath('/')
     return updatedTrade
   } catch (error) {
@@ -566,6 +580,7 @@ export async function deleteTagFromAllTrades(tag: string) {
       )
     )
 
+    await invalidateTradeRelatedCaches()
     revalidateTag(userId, { expire: 0 })
     return { success: true }
   } catch (error) {
@@ -596,6 +611,7 @@ export async function updateTradeImage(
       }
     })
 
+    await invalidateTradeRelatedCaches()
     revalidatePath('/')
     return trades
   } catch (error) {
@@ -645,6 +661,7 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
       )
     )
 
+    await invalidateTradeRelatedCaches()
     revalidatePath('/')
     return { success: true, tradesUpdated: trades.length }
   } catch (error) {

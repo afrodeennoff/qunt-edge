@@ -11,3 +11,11 @@
 - 2026-03-03: Repository understanding workflow now uses a skill applicability matrix (applicable vs conditional vs not-applicable) plus parallel explorer subagent cross-checks before sharing architecture summaries.
 - 2026-03-03: Theme token contract now uses `styles/tokens.css` as canonical source; duplicate semantic token blocks were removed from `app/globals.css`, and compatibility alias `--sidebar -> --sidebar-background` is retained for one migration cycle.
 - 2026-03-03: Completed token migration Phase C by removing `--sidebar` compatibility alias after zero internal usage was confirmed; canonical sidebar token is now only `--sidebar-background`.
+- 2026-03-04: All-surfaces polish pass stays on premium monochrome direction; no brand-color re-theme was introduced.
+- 2026-03-04: Dashboard sidebar now consumes `useDashboardActions()` instead of `useData()` to reduce broad context subscription churn in navigation shell renders.
+- 2026-03-05: Decided to standardize Redis access behind a single utility (local Redis first, Upstash fallback) and apply it to high-traffic read/auth paths with explicit invalidation on trade writes.
+- 2026-03-05: Cache policy behavior for protected redirects/private APIs is enforced as strict private no-store and validated via strict header checks.
+- 2026-03-05: Warning-budget governance is treated as an active CI gate with current baseline cap and planned ratchet reductions.
+- 2026-03-05: Pricing page now lazy-loads `PricingPlans` behind a lightweight fallback to shift heavy subscription UI off initial execution path.
+- 2026-03-05: Deferred home sections now use tighter intersection thresholds and idle-callback scheduling to reduce immediate main-thread contention during first paint.
+- 2026-03-05: Production preflight release decision requires Lighthouse threshold pass on `/en` and `/en/pricing`; other core gates are currently passing.

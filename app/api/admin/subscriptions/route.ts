@@ -3,18 +3,61 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { assertAdminAccess, toErrorResponse, logAdminMutation } from '@/server/authz'
 import type { Prisma } from '@/prisma/generated/prisma'
+import { z } from 'zod'
+import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
+import { parseJson, parseQuery, toValidationErrorResponse } from '@/app/api/_utils/validate'
+
+const adminSubscriptionsReadRateLimit = rateLimit({ limit: 120, window: 60_000, identifier: 'admin-subscriptions-read' })
+const adminSubscriptionsWriteRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: 'admin-subscriptions-write' })
+
+const subscriptionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  status: z.string().optional(),
+  plan: z.string().optional(),
+  search: z.string().optional(),
+})
+
+const patchUpdatePlanSchema = z.object({
+  subscriptionId: z.string().min(1),
+  action: z.literal('updatePlan'),
+  plan: z.string().min(1),
+  endDate: z.string().optional(),
+})
+
+const patchExtendTrialSchema = z.object({
+  subscriptionId: z.string().min(1),
+  action: z.literal('extendTrial'),
+  days: z.number().int().min(1).max(365).optional(),
+})
+
+const patchSimpleActionSchema = z.object({
+  subscriptionId: z.string().min(1),
+  action: z.enum(['grantFreeAccess', 'cancel', 'reactivate']),
+})
+
+const patchBodySchema = z.union([
+  patchUpdatePlanSchema,
+  patchExtendTrialSchema,
+  patchSimpleActionSchema,
+])
 
 export async function GET(req: NextRequest) {
   const requestId = crypto.randomUUID()
   try {
+    const limitResult = await adminSubscriptionsReadRateLimit(req)
+    if (!limitResult.success) {
+      return createRateLimitResponse({
+        limit: limitResult.limit,
+        remaining: limitResult.remaining,
+        resetTime: limitResult.resetTime,
+      })
+    }
+
     await assertAdminAccess(requestId)
 
     const { searchParams } = new URL(req.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const status = searchParams.get('status')
-    const plan = searchParams.get('plan')
-    const search = searchParams.get('search')
+    const { page, limit, status, plan, search } = parseQuery(searchParams, subscriptionsQuerySchema)
 
     const where: Prisma.SubscriptionWhereInput = {}
 
@@ -111,6 +154,8 @@ export async function GET(req: NextRequest) {
       requestId,
     })
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     logger.error('[Admin Subscriptions] Failed to fetch subscriptions', { error })
     return toErrorResponse(error)
   }
@@ -119,17 +164,19 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const requestId = crypto.randomUUID()
   try {
+    const limitResult = await adminSubscriptionsWriteRateLimit(req)
+    if (!limitResult.success) {
+      return createRateLimitResponse({
+        limit: limitResult.limit,
+        remaining: limitResult.remaining,
+        resetTime: limitResult.resetTime,
+      })
+    }
+
     const admin = await assertAdminAccess(requestId)
 
-    const body = await req.json()
-    const { subscriptionId, action, ...data } = body
-
-    if (!subscriptionId || !action) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
+    const payload = await parseJson(req, patchBodySchema)
+    const { subscriptionId, action } = payload
 
     const subscription = await prisma.subscription.findUnique({
       where: { id: subscriptionId },
@@ -146,19 +193,25 @@ export async function PATCH(req: NextRequest) {
 
     switch (action) {
       case 'updatePlan':
+        if (payload.action !== 'updatePlan') {
+          return NextResponse.json({ error: 'Invalid payload for updatePlan' }, { status: 400 })
+        }
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
-            plan: data.plan.toUpperCase(),
+            plan: payload.plan.toUpperCase(),
             status: 'ACTIVE',
-            endDate: data.endDate ? new Date(data.endDate) : subscription.endDate,
+            endDate: payload.endDate ? new Date(payload.endDate) : subscription.endDate,
           },
         })
         break
 
       case 'extendTrial':
+        if (payload.action !== 'extendTrial') {
+          return NextResponse.json({ error: 'Invalid payload for extendTrial' }, { status: 400 })
+        }
         const newTrialEnd = new Date()
-        newTrialEnd.setDate(newTrialEnd.getDate() + (data.days || 14))
+        newTrialEnd.setDate(newTrialEnd.getDate() + (payload.days || 14))
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
@@ -213,13 +266,15 @@ export async function PATCH(req: NextRequest) {
       actor: admin,
       target: subscriptionId,
       details: {
-        plan: data.plan,
-        endDate: data.endDate,
+        plan: payload.action === 'updatePlan' ? payload.plan : undefined,
+        endDate: payload.action === 'updatePlan' ? payload.endDate : undefined,
       },
     })
 
     return NextResponse.json({ subscription: updatedSubscription, requestId })
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     logger.error('[Admin Subscriptions] Failed to update subscription', { error })
     return toErrorResponse(error)
   }

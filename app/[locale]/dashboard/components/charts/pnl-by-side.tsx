@@ -2,15 +2,11 @@
 
 import * as React from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
+  Pie,
+  PieChart,
   Tooltip,
   Cell,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts";
 import { ChartSurface } from "@/components/ui/chart-surface";
 import { useDashboardStats } from "@/context/data-provider";
@@ -36,6 +32,8 @@ type ChartDatum = {
   tradeCount: number;
   winCount: number;
   isAverage: boolean;
+  value: number;
+  color: string;
 }
 
 const formatCurrency = (value: number) =>
@@ -67,7 +65,7 @@ export default function PnLBySideChart({
     const longWins = longTrades.filter((trade) => Number(trade.pnl) > 0).length;
     const shortWins = shortTrades.filter((trade) => Number(trade.pnl) > 0).length;
 
-    return [
+    const points = [
       {
         side: "Long",
         pnl: showAverage
@@ -78,6 +76,8 @@ export default function PnLBySideChart({
         tradeCount: longTrades.length,
         winCount: longWins,
         isAverage: showAverage,
+        value: 0,
+        color: "hsl(var(--foreground))",
       },
       {
         side: "Short",
@@ -89,13 +89,27 @@ export default function PnLBySideChart({
         tradeCount: shortTrades.length,
         winCount: shortWins,
         isAverage: showAverage,
+        value: 0,
+        color: "hsl(var(--foreground) / 0.35)",
       },
     ];
+
+    return points.map((point) => ({
+      ...point,
+      value: Math.abs(point.pnl),
+    }));
   }, [trades, showAverage]);
 
-  const maxPnL = Math.max(...chartData.map((d) => d.pnl));
-  const minPnL = Math.min(...chartData.map((d) => d.pnl));
   const hasData = chartData.some((d) => d.tradeCount > 0);
+  const dominantSide = React.useMemo(() => {
+    const [longPoint, shortPoint] = chartData
+    if (!longPoint && !shortPoint) return { label: "—", trades: 0 }
+    if ((longPoint?.tradeCount ?? 0) === 0 && (shortPoint?.tradeCount ?? 0) === 0) {
+      return { label: "—", trades: 0 }
+    }
+    const winner = (longPoint?.tradeCount ?? 0) >= (shortPoint?.tradeCount ?? 0) ? longPoint : shortPoint
+    return { label: (winner?.side ?? "—").toUpperCase(), trades: winner?.tradeCount ?? 0 }
+  }, [chartData])
   const renderTooltip = React.useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as ChartDatum | undefined;
@@ -191,72 +205,41 @@ export default function PnLBySideChart({
           size === "small" ? "p-1" : "p-2 sm:p-3",
         )}
       >
-        <div className={cn("w-full h-full")}>
+        <div className={cn("w-full h-full min-h-0")}>
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData}
-                margin={
-                  size === "small"
-                    ? { left: 0, right: 0, top: 4, bottom: 20 }
-                    : { left: 0, right: 0, top: 8, bottom: 24 }
-                }
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  className="text-border dark:opacity-[0.1] opacity-[0.2]"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="side"
-                  tickLine={false}
-                  axisLine={false}
-                  height={size === "small" ? 20 : 24}
-                  tickMargin={size === "small" ? 4 : 8}
-                  tick={{
-                    fontSize: size === "small" ? 9 : 10,
-                    fill: "var(--fg-muted)",
-                  }}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  width={60}
-                  tickMargin={4}
-                  tick={{
-                    fontSize: size === "small" ? 9 : 10,
-                    fill: "var(--fg-muted)",
-                  }}
-                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                  domain={[Math.min(minPnL * 1.1, 0), Math.max(maxPnL * 1.1, 0)]}
-                />
-                <ReferenceLine y={0} stroke="hsl(var(--foreground) / 0.35)" />
-                <Tooltip
-                  content={renderTooltip}
-                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
-                />
-                <Bar
-                  dataKey="pnl"
-                  radius={[2, 2, 2, 2]}
-                  maxBarSize={size === "small" ? 25 : 40}
-                  className="transition-all duration-300 ease-in-out"
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={size === "small" ? "54%" : "62%"}
+                  outerRadius={size === "small" ? "78%" : "90%"}
+                  paddingAngle={2}
+                  dataKey="value"
+                  startAngle={90}
+                  endAngle={-270}
+                  stroke="transparent"
                 >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill="hsl(var(--foreground))"
-                      fillOpacity={entry.pnl >= 0 ? 0.98 : 0.22}
-                      stroke="hsl(var(--foreground))"
-                      strokeOpacity={entry.pnl >= 0 ? 0.42 : 0.06}
-                      strokeWidth={1}
-                      className={cn(
-                        "hover:fill-opacity-100 transition-all duration-300",
-                        entry.pnl >= 0 ? "chart-positive-emphasis" : "chart-negative-muted"
-                      )}
+                      fill={entry.color}
+                      fillOpacity={entry.side === "Long" ? 0.98 : 0.26}
+                      className="transition-all duration-300 ease-in-out hover:fill-opacity-100"
                     />
                   ))}
-                </Bar>
-              </BarChart>
+                  <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central">
+                    <tspan x="50%" dy="-0.1em" className="fill-white font-black text-2xl">
+                      {dominantSide.label}
+                    </tspan>
+                    <tspan x="50%" dy="1.35em" className="fill-white/55 text-[10px] uppercase font-black tracking-[0.16em]">
+                      {dominantSide.trades} TRADES
+                    </tspan>
+                  </text>
+                </Pie>
+                <Tooltip content={renderTooltip} cursor={{ fill: "transparent" }} />
+              </PieChart>
             </ResponsiveContainer>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">

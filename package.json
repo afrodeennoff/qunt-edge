@@ -23,6 +23,8 @@
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "loadtest:k6": "k6 run scripts/loadtest/k6-smoke.js",
     "check:route-budgets": "node scripts/check-route-budgets.mjs",
+    "check:route-security": "node scripts/check-route-security.mjs",
+    "check:warning-budget": "node scripts/check-warning-budget.mjs",
     "check:color-contract": "node scripts/check-color-contract.mjs",
     "analyze:bundle": "node scripts/analyze-bundle.mjs",
     "perf:verify": "npm run check:route-budgets && npm run analyze:bundle",
@@ -33,7 +35,7 @@
     "perf:lighthouse": "node scripts/perf-lighthouse.mjs",
     "perf:headers": "node scripts/perf-header-check.mjs",
     "perf:baseline": "node scripts/perf-baseline.mjs",
-    "perf:ci": "npm run check:route-budgets && npm run analyze:bundle && npm run perf:headers && npm run perf:lighthouse"
+    "perf:ci": "npm run check:route-security && npm run check:route-budgets && npm run analyze:bundle && PERF_HEADER_STRICT=true npm run perf:headers && npm run perf:baseline && npm run perf:lighthouse"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.10",

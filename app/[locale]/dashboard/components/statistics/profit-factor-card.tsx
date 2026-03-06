@@ -28,8 +28,8 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
       <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
         <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           <Scale className={cn("h-4 w-4 shrink-0", isProfitable ? "metric-positive" : "metric-negative")} />
-          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">PF</span>
-          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">
+          <span className="micro-sans shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">PF</span>
+          <span className="micro-sans tabular-nums shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">
             {formattedPF}
           </span>
           <TooltipProvider delayDuration={100}>
@@ -57,7 +57,7 @@ export default function ProfitFactorCard({ size = 'medium' }: ProfitFactorCardPr
       )}>
         <Scale className={cn("h-3 w-3", isProfitable ? "metric-positive" : "metric-negative")} />
         <span className={cn(
-          "font-terminal font-bold text-[11px] uppercase tracking-wider",
+          "micro-sans font-bold text-[11px] uppercase tracking-[0.18em]",
           isProfitable ? "metric-positive" : "metric-negative"
         )}>
           {formattedPF} PF

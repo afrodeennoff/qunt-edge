@@ -1,3 +1,28 @@
+# Understand `app/[locale]` Route Architecture (2026-03-06)
+
+## Scope
+- Understand how localized routing under `app/[locale]` is structured and how locale resolution/auth gating work.
+
+## Acceptance Criteria
+- [x] Route groups under `app/[locale]` are mapped.
+- [x] Locale middleware + provider wiring is verified from source files.
+- [x] Authentication and cache behavior at localized paths is summarized.
+- [x] Key risks/mismatches are identified with file evidence.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md` before analysis.
+- [x] Inspect `proxy.ts` locale/auth flow and matcher behavior.
+- [x] Inspect `app/[locale]/layout.tsx` and primary route-group layouts/pages.
+- [x] Summarize localized route architecture for handoff.
+
+## Current Step
+- **Completed:** reconnaissance and architecture summary ready.
+
+## Completion Notes
+- Verified locale segment is handled by middleware redirect strategy (`/` -> `/{locale}`) and then served through `app/[locale]` provider layout.
+- Confirmed key route groups: `(home)`, `(landing)`, `(authentication)`, `dashboard`, `teams`, `admin`, `embed`, `shared`.
+- Noted locale support mismatch: middleware allows `de|pt|vi|zh|yo` but client i18n map does not declare those locales.
+
 # Theme Token Migration Phase C (Alias Removal) (2026-03-03)
 
 ## Scope
@@ -1217,3 +1242,333 @@
 ## Completion Notes
 - Typecheck: `npm run typecheck` -> exit `0`.
 - Lint: `git diff --name-only -z -- '*.ts' '*.tsx' '*.js' '*.jsx' | xargs -0 -r npx eslint` -> exit `0` with warnings only (`0` errors).
+
+# Full Performance + Polish Plan Implementation (2026-03-04)
+
+## Scope
+- Implement the approved all-surfaces performance + polish pass with premium monochrome direction.
+
+## Acceptance Criteria
+- [x] Core target surfaces polished (home/landing/dashboard/admin/teams shells).
+- [x] Target performance-related adjustments applied without API contract changes.
+- [x] `typecheck`, `lint`, `build`, route-budget, bundle analysis executed.
+- [x] Header/baseline/lighthouse perf scripts executed with artifacts captured.
+- [x] Route-level status sweep captured for public + protected paths.
+
+## Plan Checklist
+- [x] Baseline + build/budget analysis run.
+- [x] Remove dead-scope `Navigation.tsx` edit from working set.
+- [x] Implement UI polish and safe perf tweaks on approved file targets.
+- [x] Run narrow lint on touched files.
+- [x] Run full verification and perf scripts.
+- [x] Document outcomes and residual risks in audit doc.
+
+## Current Step
+- **Completed:** Full implementation and verification finished.
+
+## Completion Notes
+- Implementation + results documented in:
+  - `docs/audits/performance-polish-2026-03-04.md`
+- Verification highlights:
+  - `npm run -s typecheck` -> exit `0`
+  - `npm run -s lint` -> exit `0` (warnings-only)
+  - `npm run -s build` -> exit `0`
+  - `npm run -s check:route-budgets` -> exit `0`
+  - `npm run -s analyze:bundle` -> exit `0`
+  - `perf:headers`, `perf:baseline`, `perf:lighthouse` executed against `http://127.0.0.1:3001`
+- Lighthouse thresholds currently fail (TBT/score) on `/en` and `/en/pricing`; see audit doc for exact metrics.
+
+# Redis Full Setup (Dokploy-ready) (2026-03-05)
+
+## Scope
+- Implement unified Redis cache utilities and wire critical backend hot paths.
+- Keep behavior unchanged while reducing repeated Supabase/Postgres load.
+
+## Acceptance Criteria
+- [x] Unified Redis utility supports local Redis and Upstash fallback.
+- [x] AI full-trade fetch path uses Redis cache.
+- [x] Secure token verification uses Redis cache with safe TTL.
+- [x] Behavior insights endpoint uses Redis cache with short TTL.
+- [x] Trade mutation paths invalidate Redis namespaces.
+- [x] Typecheck passes.
+
+## Plan Checklist
+- [x] Add shared Redis cache utility.
+- [x] Integrate Redis in AI trade aggregation helper.
+- [x] Integrate Redis in API token verification helper.
+- [x] Integrate Redis in behavior insights endpoint.
+- [x] Add Redis invalidation in trade write/update mutations.
+- [x] Run `npm run typecheck` and record evidence.
+
+## Current Step
+- **Completed:** Redis setup implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `lib/redis-cache.ts`
+  - `lib/ai/get-all-trades.ts`
+  - `lib/api-auth.ts`
+  - `app/api/behavior/insights/route.ts`
+  - `server/trades.ts`
+- Verification:
+  - `npm run -s typecheck` -> exit `0`.
+  - `npx eslint lib/redis-cache.ts lib/ai/get-all-trades.ts lib/api-auth.ts app/api/behavior/insights/route.ts server/trades.ts` -> exit `0` (warnings only, no errors).
+
+# Master Remediation Plan Execution (Phases 1-3) (2026-03-05)
+
+## Scope
+- Continue implementation of approved 30-issue remediation plan with emphasis on correctness/cache contract and measurable perf governance.
+
+## Acceptance Criteria
+- [x] Strict header checks pass for private/public route classes.
+- [x] Warning-budget governance check exists and passes.
+- [x] CI includes baseline perf snapshot artifacts.
+- [x] Full verification suite re-run with evidence.
+
+## Plan Checklist
+- [x] Run typecheck/lint/build/budget/bundle checks.
+- [x] Run strict `perf:headers` against local prod server.
+- [x] Run `perf:baseline` and `perf:lighthouse` and capture artifacts.
+- [x] Document implementation state and remaining bottleneck.
+
+## Current Step
+- **Completed:** Phase 1/2 controls verified + Phase 3 perf evidence refreshed.
+
+## Completion Notes
+- Report: `docs/audits/master-remediation-phase1-3-2026-03-05.md`
+- Header checks now pass in strict mode for protected redirects and private APIs.
+- Lighthouse still fails thresholds on `/en` and `/en/pricing` due high TBT; this remains the top open item.
+
+# Master Remediation Plan Execution (Phase 3 Continuation) (2026-03-05)
+
+## Scope
+- Continue TBT-focused remediation on `/en` and `/en/pricing` after Phase 1/2 correctness gates were green.
+
+## Acceptance Criteria
+- [x] Add additional lazy/deferred loading boundaries on home and pricing surfaces.
+- [x] Re-run full verification + perf evidence after code changes.
+- [x] Capture delta and residual blockers.
+
+## Plan Checklist
+- [x] Tighten intersection-triggered rendering for deferred home sections.
+- [x] Lazy-load pricing plans module on landing pricing page with non-blocking fallback.
+- [x] Run targeted lint + typecheck + build + route budgets + bundle analysis.
+- [x] Run strict `perf:headers`, `perf:baseline`, and `perf:lighthouse` against local prod server.
+
+## Current Step
+- **Completed:** Phase 3 continuation implemented and verified.
+
+## Completion Notes
+- Updated files:
+  - `app/[locale]/(home)/components/DeferredHomeSections.tsx`
+  - `app/[locale]/(landing)/pricing/pricing-page-client.tsx`
+- Verification:
+  - `npx eslint <touched files>` -> exit `0`
+  - `npm run -s typecheck` -> exit `0`
+  - `npm run -s build` -> exit `0`
+  - `npm run -s check:route-budgets` -> exit `0`
+  - `npm run -s analyze:bundle` -> exit `0`
+  - `PERF_HEADER_STRICT=true npm run -s perf:headers` -> strict checks pass
+  - `npm run -s perf:baseline` -> pricing HTML response size improved (`49,574 -> 38,713` bytes)
+- `npm run -s perf:lighthouse` -> still fails thresholds; desktop `/en` TBT improved vs prior run (`~1019ms -> ~677ms`), mobile remains high.
+
+# Complete Page Audit (All Route Pages) (2026-03-05)
+
+## Scope
+- Perform full one-by-one audit across all `app/**/page.tsx` routes and related `*page-client.tsx` files.
+
+## Acceptance Criteria
+- [x] All route pages inventoried.
+- [x] All page-client companions inventoried and cross-checked.
+- [x] Page-focused lint/complexity risk list generated.
+- [x] Duplicate/unused page implementations identified.
+
+## Plan Checklist
+- [x] Enumerate all route pages and client-page companions.
+- [x] Run focused static audit signals (`use client`, no-store fetch, interval polling, context usage).
+- [x] Run eslint on all route pages and page-client files.
+- [x] Produce complete prioritized issue list with exact file references.
+
+## Current Step
+- **Completed:** full page audit completed and summarized for user.
+
+## Completion Notes
+- Coverage: `46` route pages + `6` client-page companions.
+- Distribution: `19` client route pages, `27` server route pages.
+- Route/page lint result: `14` page-family files with warnings (complexity/unused/any).
+- Critical structural finding: unused duplicate full implementations for dashboard behavior/trader-profile page-client files.
+
+# Production Preflight Re-Audit (Complete Issue Inventory) (2026-03-05)
+
+## Scope
+- Re-audit the entire app before production with full quality/performance gates and complete issue extraction.
+
+## Acceptance Criteria
+- [x] Core build gates re-run.
+- [x] Runtime perf/security checks re-run against production server.
+- [x] Complete issue list exported in machine-readable and human-readable forms.
+- [x] Final blocker list clearly identified.
+
+## Plan Checklist
+- [x] Run `typecheck`, `lint`, `build`, route budgets, bundle analysis.
+- [x] Run strict perf headers + baseline + Lighthouse on local prod server.
+- [x] Export full ESLint findings to artifact file.
+- [x] Produce comprehensive production preflight issue report.
+
+## Current Step
+- **Completed:** full re-audit and complete issue inventory published.
+
+## Completion Notes
+- Artifacts:
+  - `docs/audits/artifacts/eslint-full-2026-03-05.json`
+  - `docs/audits/production-preflight-full-issues-2026-03-05.md`
+- Gate status:
+  - `typecheck` PASS
+  - `build` PASS
+  - `check:route-budgets` PASS
+  - `analyze:bundle` PASS
+  - strict `perf:headers` PASS
+  - `perf:baseline` PASS
+  - `perf:lighthouse` FAIL (threshold blockers on `/en` and `/en/pricing`)
+
+# End-to-End Project Understanding Pass (2026-03-06)
+
+## Scope
+- Build a full system-level understanding of the project architecture, runtime flow, data model, integrations, and verification gates.
+
+## Acceptance Criteria
+- [x] Document app shell, routing strategy, and middleware/security model.
+- [x] Document backend/data layer (Prisma, server modules, authz boundaries).
+- [x] Document external integrations (AI, Whop, Supabase) and ops scripts/tests.
+- [x] Provide concise end-to-end summary for rapid onboarding.
+
+## Plan Checklist
+- [x] Inspect core entrypoints (`package.json`, root/layout, middleware/proxy).
+- [x] Map route surfaces (`app/[locale]`, `app/api`) and dashboard shell/data provider flows.
+- [x] Review database schema and server module responsibilities.
+- [x] Review test/perf/verification scripts and deployment assumptions.
+- [x] Deliver architecture walkthrough to user.
+
+## Current Step
+- **Completed:** repository understanding pass completed and ready for handoff.
+
+## Completion Notes
+- Core findings:
+  - Next.js App Router architecture with locale-first routing and a middleware-centered security/cache policy.
+  - Hybrid data flow: server actions + API routes with Prisma on Postgres/Supabase and client-side Zustand + context composition.
+  - Integration-heavy platform: AI (OpenAI-compatible GLM endpoint), Whop billing/webhooks, Supabase auth/session/cookies.
+  - Strong verification tooling present (`typecheck`, `build`, route budgets, bundle analysis, smoke/perf scripts, Vitest suites).
+
+# End-to-End Security Audit (2026-03-06)
+
+## Scope
+- Complete static security audit across API routes, server actions, middleware, auth/authz, rate limiting, input validation, and secret handling.
+
+## Acceptance Criteria
+- [x] Enumerate endpoint protection coverage (auth/rate-limit/validation).
+- [x] Identify concrete vulnerabilities with file-level evidence.
+- [x] Provide prioritized remediation guidance.
+- [x] Summarize security strengths and residual risks.
+
+## Plan Checklist
+- [x] Scan all `app/api/**/route.ts` handlers.
+- [x] Review auth, service-secret, and admin-gate flows.
+- [x] Review validation and payload-boundary controls.
+- [x] Review rate-limit coverage and anti-abuse posture.
+- [x] Produce severity-ranked findings summary for user handoff.
+
+## Current Step
+- **Completed:** audit complete; findings delivered to user.
+
+## Completion Notes
+- High-priority issue identified: auth-guard hooks are currently no-op stubs (`lib/security/auth-attempts.ts`), weakening brute-force and abuse protections.
+- Medium-priority gaps identified: uneven rate-limit coverage, inconsistent schema validation on selected mutation endpoints, and verbose internal error details in token ingestion routes.
+  - `npm run -s perf:lighthouse` -> still fails thresholds; desktop `/en` TBT improved vs prior run (`~1019ms -> ~677ms`), mobile remains high.
+
+# End-to-End Security Remediation Plan (0->99) (2026-03-06)
+
+## Scope
+- Implement full hardening pass for auth abuse protection, rate limiting, validation normalization, error sanitization, production safety defaults, and governance guardrails.
+
+## Acceptance Criteria
+- [x] Auth guard is stateful and lockout-aware (`allow -> fail escalation -> lock -> recover`).
+- [x] Targeted non-AI mutation surfaces have explicit route-level throttling.
+- [x] Covered mutation/query handlers use shared schema-backed validation helpers.
+- [x] External API 500s no longer expose raw internal error details.
+- [x] Production safety defaults enforce secure health/CSP behavior.
+- [x] Route-security governance check exists and passes.
+- [x] Verification gates pass (`typecheck`, `test`, `build`).
+
+## Plan Checklist
+- [x] Replace auth-attempt stubs with persisted keyed tracking and lockout/retry handling.
+- [x] Add explicit throttling policies to invite/sync/token-ingest/admin mutation routes.
+- [x] Normalize parsing/validation via `parseJson`/`parseQuery` + Zod schemas.
+- [x] Sanitize error responses and preserve diagnostics in logs only.
+- [x] Add env assertions for dangerous production combinations and secure defaults.
+- [x] Add route-security manifest checker + PR checklist documentation.
+- [x] Run full verification and capture evidence.
+
+## Current Step
+- **Completed:** security remediation implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `lib/security/auth-attempts.ts`
+  - `app/api/team/invite/route.ts`
+  - `app/api/etp/v1/store/route.ts`
+  - `app/api/thor/store/route.ts`
+  - `app/api/tradovate/sync/route.ts`
+  - `app/api/rithmic/synchronizations/route.ts`
+  - `app/api/admin/subscriptions/route.ts`
+  - `app/api/health/route.ts`
+  - `lib/env.ts`
+  - `proxy.ts`
+  - `package.json`
+- Added files:
+  - `scripts/check-route-security.mjs`
+  - `tests/auth-attempts.test.ts`
+  - `tests/security-route-contract.test.ts`
+  - `docs/SECURITY_PR_CHECKLIST.md`
+- Verification:
+  - `npm run -s check:route-security` -> exit `0`.
+  - `npm run -s typecheck` -> exit `0`.
+  - `npm test` -> exit `0` (`156 passed`, `46 skipped`).
+  - `npm run -s build` -> exit `0`.
+
+# One-Shot Production Remediation (2026-03-06)
+
+## Scope
+- Execute an end-to-end remediation train for cache correctness, edge stability, dashboard performance hardening, and widget visual consistency.
+
+## Acceptance Criteria
+- [x] Route-class cache policy contract enforced (private no-store/public revalidate).
+- [x] Middleware/runtime no longer fails globally on optional env-format issues.
+- [x] Dashboard shell/render path receives targeted performance reductions.
+- [x] Widget KPI typography/color parity tightened across primary stat cards.
+- [x] Core release gates run and results documented with artifacts.
+
+## Plan Checklist
+- [x] Refactor middleware into explicit route classes and central cache policy handling.
+- [x] Harden env parsing and runtime middleware behavior for optional Redis/CSP env variance.
+- [x] Reduce dashboard shell visual overhead and broad CSS transition cost.
+- [x] Improve server user-data logging/caching behavior on hot dashboard path.
+- [x] Run verification suite and record residual risks.
+
+## Current Step
+- **Completed:** remediation code + verification + audit artifact capture complete.
+
+## Completion Notes
+- Updated files:
+  - `proxy.ts`
+  - `lib/env.ts`
+  - `app/[locale]/dashboard/layout.tsx`
+  - `server/user-data.ts`
+  - `app/globals.css`
+  - `app/[locale]/dashboard/components/statistics/cumulative-pnl-card.tsx`
+  - `app/[locale]/dashboard/components/statistics/profit-factor-card.tsx`
+  - `app/[locale]/dashboard/components/statistics/risk-reward-ratio-card.tsx`
+  - `app/[locale]/dashboard/components/statistics/average-position-time-card.tsx`
+  - `docs/audits/one-shot-remediation-2026-03-06.md`
+- Verification summary:
+  - `typecheck`, `lint`, `build`, `check:route-budgets`, `analyze:bundle`, strict `perf:headers`, and `perf:baseline` passed.
+  - `perf:lighthouse` still fails threshold targets on `/en` and `/en/pricing` due TBT/LCP/score.

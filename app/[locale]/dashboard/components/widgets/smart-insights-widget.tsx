@@ -60,10 +60,10 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
 
     const getIcon = (type: SmartInsight['type']) => {
         switch (type) {
-            case 'risk': return <AlertTriangle className="h-4 w-4 text-destructive" />
-            case 'opportunity': return <Lightbulb className="h-4 w-4 text-semantic-warning" />
-            case 'achievement': return <CheckCircle2 className="h-4 w-4 text-primary" />
-            default: return <TrendingUp className="h-4 w-4 text-primary" />
+            case 'risk': return <AlertTriangle className="h-4 w-4 text-foreground/75" />
+            case 'opportunity': return <Lightbulb className="h-4 w-4 text-foreground/75" />
+            case 'achievement': return <CheckCircle2 className="h-4 w-4 text-foreground/90" />
+            default: return <TrendingUp className="h-4 w-4 text-foreground/90" />
         }
     }
 
@@ -157,8 +157,8 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-2">
                                                 <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 border border-border/55",
-                                                    insight.type === 'risk' && "bg-destructive/20 border-destructive/30",
-                                                    insight.type === 'opportunity' && "bg-semantic-warning-bg/10 border-semantic-warning-border/20",
+                                                    insight.type === 'risk' && "bg-secondary/35 border-border/65",
+                                                    insight.type === 'opportunity' && "bg-secondary/35 border-border/65",
                                                 )}>
                                                     {getIcon(insight.type)}
                                                 </div>

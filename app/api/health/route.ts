@@ -4,7 +4,12 @@ import { logger, withLogContext } from '@/lib/logger'
 import { requireServiceAuth } from '@/server/authz'
 
 const DB_LATENCY_ALERT_MS = Number.parseInt(process.env.DB_LATENCY_ALERT_MS || "250", 10)
-const EXPOSE_HEALTH_DETAILS_PUBLICLY = process.env.HEALTH_DETAILS_PUBLIC === 'true'
+const EXPOSE_HEALTH_DETAILS_PUBLICLY =
+  process.env.NODE_ENV !== 'production' && process.env.HEALTH_DETAILS_PUBLIC === 'true'
+
+if (process.env.NODE_ENV === 'production' && process.env.HEALTH_DETAILS_PUBLIC === 'true') {
+  logger.warn('[health] HEALTH_DETAILS_PUBLIC=true ignored in production for safety')
+}
 
 
 async function checkDatabase(): Promise<{ ok: boolean; latencyMs: number; error?: string }> {

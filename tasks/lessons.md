@@ -40,3 +40,8 @@
 - mistake pattern: Changed opacity work in a way that also impacted perceived spacing/gap hierarchy and caused visual regressions outside the requested contrast-only scope.
 - prevention rule: For color/opacity-only requests, explicitly freeze geometry classes (`gap-*`, `p-*`, `m-*`, `h-*`, `w-*`, grid spans) and run a final diff scan to ensure only color/border/text/background token classes changed.
 - early trigger signals: User calls out "gaps" or layout break right after a color-only change request.
+
+## 2026-03-05
+- mistake pattern: Answered with the wrong visual issue first instead of confirming the exact duplicate-control and color-layering defects visible in the screenshot.
+- prevention rule: For screenshot bug triage, verify concrete UI anomalies in this order before answering: duplicate controls, color contrast/layer separation, then text/labels.
+- early trigger signals: User replies "find carefully" or rejects initial diagnosis without asking for new context.

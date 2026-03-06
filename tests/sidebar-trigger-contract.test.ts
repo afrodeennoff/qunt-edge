@@ -12,7 +12,7 @@ describe("Dashboard sidebar trigger contract", () => {
     expect(source).toMatch(/<SidebarTrigger className=\"[^\"]*h-11[^\"]*w-11[^\"]*md:h-7[^\"]*md:w-7[^\"]*\"/)
   })
 
-  it("keeps a single desktop trigger in unified sidebar", () => {
+  it("does not render an extra trigger in unified sidebar header", () => {
     const source = readFileSync(
       join(process.cwd(), "components/ui/unified-sidebar.tsx"),
       "utf8"
@@ -20,18 +20,15 @@ describe("Dashboard sidebar trigger contract", () => {
 
     const triggerUsages = source.match(/<SidebarTrigger/g) || []
 
-    expect(triggerUsages).toHaveLength(1)
-    expect(source).toContain("hidden md:flex")
+    expect(triggerUsages).toHaveLength(0)
   })
 
-  it("does not nest SidebarTrigger inside SidebarMenuButton", () => {
+  it("does not reference SidebarTrigger in unified sidebar", () => {
     const source = readFileSync(
       join(process.cwd(), "components/ui/unified-sidebar.tsx"),
       "utf8"
     )
 
-    expect(source).toMatch(
-      /<SidebarMenuButton[\s\S]*?<\/SidebarMenuButton>\s*<SidebarTrigger/
-    )
+    expect(source).not.toContain("SidebarTrigger")
   })
 })

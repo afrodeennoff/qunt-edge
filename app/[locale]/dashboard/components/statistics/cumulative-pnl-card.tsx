@@ -52,8 +52,8 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
           ) : (
             <TrendingDown className="h-4 w-4 shrink-0 metric-negative" />
           )}
-          <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Net</span>
-          <span className="font-terminal shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">
+          <span className="micro-sans shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Net</span>
+          <span className="micro-sans tabular-nums shrink-0 text-center text-[30px] font-black leading-none tracking-tight text-foreground/90">
             {isPositive ? '+' : '-'}{formatCurrency(netPnl)}
           </span>
           <TooltipProvider>
@@ -85,7 +85,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
               <TrendingDown className={cn(iconSize, "metric-negative")} />
             )}
           </div>
-          <span className="font-terminal text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+          <span className="micro-sans text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/78">
             {t('statistics.profitLoss.net')}
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
       </div>
 
       <div className={cn(
-        "text-center font-terminal font-bold tracking-tighter tabular-nums drop-shadow-2xl",
+        "text-center micro-sans font-black tracking-tight tabular-nums",
         isPositive ? "metric-positive" : "metric-negative",
         valueSizeClass === 'text-2xl' ? 'text-3xl' : 'text-xl'
       )}>
@@ -112,11 +112,11 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/55 border-dashed">
         <div className="flex flex-col gap-0.5">
           <span className="text-[9px] font-bold uppercase tracking-tight text-muted-foreground/70">Profits</span>
-          <span className="font-terminal text-[11px] font-bold text-foreground tabular-nums">{formatCurrency(safeGrossWin)}</span>
+          <span className="micro-sans text-[11px] font-bold text-foreground tabular-nums">{formatCurrency(safeGrossWin)}</span>
         </div>
         <div className="flex flex-col gap-0.5 text-right">
           <span className="text-[9px] font-bold uppercase tracking-tight text-muted-foreground/70">Losses</span>
-          <span className="font-terminal text-[11px] font-bold metric-negative tabular-nums">{formatCurrency(safeGrossLosses)}</span>
+          <span className="micro-sans text-[11px] font-bold metric-negative tabular-nums">{formatCurrency(safeGrossLosses)}</span>
         </div>
       </div>
     </div>

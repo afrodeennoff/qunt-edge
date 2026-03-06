@@ -24,6 +24,7 @@ env:
   LIGHTHOUSE_DESKTOP_LCP_MAX_MS: 1800
   LIGHTHOUSE_MOBILE_LCP_MAX_MS: 3500
   PERF_HEADER_STRICT: 'true'
+  LINT_WARNING_MAX: '1546'
 
 jobs:
   validate:
@@ -67,6 +68,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Warning Budget Check
+        run: npm run check:warning-budget
 
       - name: Clean Build Artifacts
         run: npm run clean:build-artifacts
@@ -131,6 +135,9 @@ jobs:
       - name: Header Cache Policy Check
         run: npm run perf:headers
 
+      - name: Baseline Performance Snapshot
+        run: npm run perf:baseline
+
       - name: Lighthouse Performance Gate
         run: npm run perf:lighthouse
 
@@ -149,6 +156,7 @@ jobs:
           name: performance-artifacts
           path: |
             docs/audits/artifacts/bundle-summary.json
+            docs/audits/artifacts/performance-baseline.json
             docs/audits/artifacts/lighthouse-*.json
             docs/audits/artifacts/lighthouse-summary.json
             /tmp/qunt-start.log

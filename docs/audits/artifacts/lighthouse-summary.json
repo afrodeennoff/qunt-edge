@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-02-27T22:02:17.054Z",
-  "baseUrl": "http://localhost:3000",
+  "generatedAt": "2026-03-06T10:13:35.247Z",
+  "baseUrl": "http://127.0.0.1:3001",
   "thresholds": {
     "desktopScoreMin": 0.9,
     "mobileScoreMin": 0.75,
@@ -12,52 +12,53 @@
   },
   "results": [
     {
-      "url": "http://localhost:3000/en",
+      "url": "http://127.0.0.1:3001/en",
       "mode": "mobile",
-      "score": 0.62,
-      "tbt": 3233.5,
-      "lcp": 3255.1466,
+      "score": 0.61,
+      "tbt": 3136.1628,
+      "lcp": 3566.0231999999996,
       "cls": 0,
       "failures": [
-        "mobile score 0.62 < 0.75",
-        "mobile TBT 3233.5ms > 1200ms"
+        "mobile score 0.61 < 0.75",
+        "mobile TBT 3136.1628ms > 1200ms",
+        "mobile LCP 3566.0231999999996ms > 3500ms"
       ]
     },
     {
-      "url": "http://localhost:3000/en",
-      "mode": "desktop",
-      "score": 0.73,
-      "tbt": 698.4749500000001,
-      "lcp": 816.2004000000001,
-      "cls": 0,
-      "failures": [
-        "desktop score 0.73 < 0.9",
-        "desktop TBT 698.4749500000001ms > 200ms"
-      ]
-    },
-    {
-      "url": "http://localhost:3000/en/pricing",
-      "mode": "mobile",
-      "score": 0.57,
-      "tbt": 3089.5,
-      "lcp": 4065.4743,
-      "cls": 0,
-      "failures": [
-        "mobile score 0.57 < 0.75",
-        "mobile TBT 3089.5ms > 1200ms",
-        "mobile LCP 4065.4743ms > 3500ms"
-      ]
-    },
-    {
-      "url": "http://localhost:3000/en/pricing",
+      "url": "http://127.0.0.1:3001/en",
       "mode": "desktop",
       "score": 0.74,
-      "tbt": 679.1979,
-      "lcp": 814.4168,
+      "tbt": 659.9792500000001,
+      "lcp": 816.1660000000002,
       "cls": 0,
       "failures": [
         "desktop score 0.74 < 0.9",
-        "desktop TBT 679.1979ms > 200ms"
+        "desktop TBT 659.9792500000001ms > 200ms"
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3001/en/pricing",
+      "mode": "mobile",
+      "score": 0.55,
+      "tbt": 4621.000000000001,
+      "lcp": 4063.2823499999986,
+      "cls": 0,
+      "failures": [
+        "mobile score 0.55 < 0.75",
+        "mobile TBT 4621.000000000001ms > 1200ms",
+        "mobile LCP 4063.2823499999986ms > 3500ms"
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3001/en/pricing",
+      "mode": "desktop",
+      "score": 0.73,
+      "tbt": 662.295925,
+      "lcp": 893.6325999999997,
+      "cls": 0.02193223010244287,
+      "failures": [
+        "desktop score 0.73 < 0.9",
+        "desktop TBT 662.295925ms > 200ms"
       ]
     }
   ]

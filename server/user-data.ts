@@ -8,6 +8,7 @@ import { getCurrentLocale } from '@/locales/server'
 import { prisma } from '@/lib/prisma'
 import { getDatabaseUserId, getUserId } from './auth'
 import { revalidateTag, unstable_cache } from 'next/cache'
+import { logger } from '@/lib/logger'
 
 export type SharedDataResponse = {
   trades: Trade[]
@@ -70,7 +71,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   // If forceRefresh is true, bypass cache and fetch directly
   if (forceRefresh) {
     const start = performance.now();
-    console.log(`[getUserData] Force refresh - bypassing cache for user ${userId}`)
+    logger.info('[getUserData] Force refresh requested', { userId })
     revalidateTag(`user-data-${userId}`, { expire: 0 })
 
     // Fetch data in parallel without transaction to avoid timeouts
@@ -104,7 +105,10 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
       })
     ])
 
-    console.log(`[getUserData] Force refresh completed in ${(performance.now() - start).toFixed(2)}ms`)
+    logger.info('[getUserData] Force refresh completed', {
+      userId,
+      durationMs: Number((performance.now() - start).toFixed(2)),
+    })
 
     return {
       userData,
@@ -136,9 +140,6 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   // TIER 3: User Core Data (Subscription, User profile)
   const getCachedCoreUserData = unstable_cache(
     async () => {
-      const start = performance.now();
-      console.log(`[Cache MISS] Fetching core user data for user ${userId}`)
-
       const [userData, subscription] = await Promise.all([
         prisma.user.findUnique({
           where: { auth_user_id: authUserId }
@@ -148,7 +149,6 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
         })
       ])
 
-      console.log(`[getUserData] Core data fetch completed in ${(performance.now() - start).toFixed(2)}ms`)
       return { userData, subscription }
     },
     [`user-data-core-${userId}`],
@@ -161,9 +161,6 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   // TIER 4: User Supplemental Data (Accounts, Groups, Tags) - Cached because these don't change every second
   const getCachedSupplementalData = unstable_cache(
     async () => {
-      const start = performance.now();
-      console.log(`[Cache MISS] Fetching supplemental user data for user ${userId}`)
-
       const [accounts, groups, tags, moodHistory] = await Promise.all([
         prisma.account.findMany({
           where: { userId: userId },
@@ -184,7 +181,6 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
         })
       ])
 
-      console.log(`[getUserData] Supplemental data fetch completed in ${(performance.now() - start).toFixed(2)}ms`)
       return { accounts, groups, tags, moodHistory }
     },
     [`user-data-supplemental-${userId}`],
@@ -215,13 +211,17 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
 }
 
 export async function getDashboardLayout(userId: string): Promise<DashboardLayout | null> {
-  console.log('getDashboardLayout')
+  const getCachedDashboardLayout = unstable_cache(
+    async () => prisma.dashboardLayout.findUnique({ where: { userId } }),
+    [`dashboard-layout-${userId}`],
+    {
+      tags: [`dashboard-layout-${userId}`, `dashboard-${userId}`],
+      revalidate: 120,
+    }
+  )
+
   try {
-    const layout = await prisma.dashboardLayout.findUnique({
-      where: {
-        userId: userId  // Correct, as DashboardLayout.userId is linked to auth_user_id
-      }
-    })
+    const layout = await getCachedDashboardLayout()
 
     if (!layout) return null
 
@@ -231,7 +231,7 @@ export async function getDashboardLayout(userId: string): Promise<DashboardLayou
         try {
           return JSON.parse(val)
         } catch (e) {
-          console.error('Failed to parse dashboard JSON', e)
+          logger.error('[getDashboardLayout] Failed to parse dashboard JSON', { error: e, userId })
           return []
         }
       }
@@ -244,7 +244,7 @@ export async function getDashboardLayout(userId: string): Promise<DashboardLayou
       mobile: parseIfNeeded(layout.mobile)
     }
   } catch (error) {
-    console.error('Error fetching dashboard layout:', error)
+    logger.error('[getDashboardLayout] Error fetching dashboard layout', { error, userId })
     return null
   }
 }

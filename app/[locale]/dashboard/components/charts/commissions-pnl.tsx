@@ -84,6 +84,15 @@ const chartConfig = {
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+const formatCenterCurrency = (value: number) => {
+  if (!Number.isFinite(value)) return "$0"
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  })
+}
+
 export default function CommissionsPnLChart({
   size = "medium",
 }: CommissionsPnLChartProps) {
@@ -102,19 +111,19 @@ export default function CommissionsPnLChart({
     const commPercent = total > 0 ? Number(((Math.abs(totalCommissions) / total) * 100).toFixed(2)) : 0;
     return [
       {
-        name: t("commissions.legend.netPnl"),
+        name: "NET P/L",
         value: pnlPercent,
         color: chartConfig.pnl.color,
         raw: totalPnL,
       },
       {
-        name: t("commissions.legend.commissions"),
+        name: "COMMISSIONS",
         value: commPercent,
         color: chartConfig.commissions.color,
         raw: totalCommissions,
       },
     ];
-  }, [trades, t]);
+  }, [trades]);
   const hasData = chartData.some((item) => item.value > 0);
 
 
@@ -169,56 +178,50 @@ export default function CommissionsPnLChart({
           size === 'small' ? "p-0.5" : "p-1"
         )}
       >
-        <div className="w-full h-full flex min-h-0 flex-col">
+        <div className="w-full h-full min-h-0">
           {hasData ? (
-            <>
-              <div className="min-h-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy={pieLayout.cy}
-                      innerRadius={pieLayout.innerRadius}
-                      outerRadius={pieLayout.outerRadius}
-                      paddingAngle={2}
-                      dataKey="value"
-                      nameKey="name"
-                      startAngle={90}
-                      endAngle={-270}
-                      stroke="transparent"
-                      strokeWidth={1}
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.name === t("commissions.legend.netPnl") ? "hsl(var(--foreground))" : "hsl(var(--foreground) / 0.35)"}
-                          fillOpacity={entry.name === t("commissions.legend.netPnl") ? 0.98 : 0.24}
-                          className={cn(
-                            "transition-all duration-300 ease-in-out hover:fill-opacity-100",
-                            entry.name === t("commissions.legend.netPnl") ? "chart-positive-emphasis" : "chart-negative-muted"
-                          )}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      content={<CommissionsTooltip />}
-                      cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy={pieLayout.cy}
+                  innerRadius={pieLayout.innerRadius}
+                  outerRadius={pieLayout.outerRadius}
+                  paddingAngle={2}
+                  dataKey="value"
+                  nameKey="name"
+                  startAngle={90}
+                  endAngle={-270}
+                  stroke="transparent"
+                  strokeWidth={1}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.name === "NET P/L" ? "hsl(var(--foreground))" : "hsl(var(--foreground) / 0.35)"}
+                      fillOpacity={entry.name === "NET P/L" ? 0.98 : 0.24}
+                      className={cn(
+                        "transition-all duration-300 ease-in-out hover:fill-opacity-100",
+                        entry.name === "NET P/L" ? "chart-positive-emphasis" : "chart-negative-muted"
+                      )}
                     />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-col items-center gap-3 pb-1 pt-2">
-                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-muted-foreground/85">
-                  <span className="h-3 w-3 rounded-full bg-white" />
-                  {t("commissions.legend.netPnl")}
-                </span>
-                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] uppercase font-black tracking-[0.08em] text-muted-foreground/85">
-                  <span className="h-3 w-3 rounded-full bg-white/35" />
-                  {t("commissions.legend.commissions")}
-                </span>
-              </div>
-            </>
+                  ))}
+                  <text x="50%" y={pieLayout.cy} textAnchor="middle" dominantBaseline="central">
+                    <tspan x="50%" dy="-0.1em" className="fill-white font-black text-2xl">
+                      {formatCenterCurrency(chartData[0]?.raw ?? 0)}
+                    </tspan>
+                    <tspan x="50%" dy="1.35em" className="fill-white/55 text-[10px] uppercase font-black tracking-[0.16em]">
+                      NET P/L
+                    </tspan>
+                  </text>
+                </Pie>
+                <Tooltip
+                  content={<CommissionsTooltip />}
+                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           ) : (
             <div className="h-full w-full flex items-center justify-center text-xs text-fg-muted">
               {t("widgets.emptyState") ?? "No trades yet."}

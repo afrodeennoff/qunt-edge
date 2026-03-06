@@ -29,11 +29,15 @@ function LazySection({
     const observer = new IntersectionObserver(
       entries => {
         if (entries.some(entry => entry.isIntersecting)) {
-          setShouldRender(true)
+          if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            window.requestIdleCallback(() => setShouldRender(true), { timeout: 400 })
+          } else {
+            setShouldRender(true)
+          }
           observer.disconnect()
         }
       },
-      { rootMargin: '420px 0px' }
+      { rootMargin: '120px 0px' }
     )
 
     observer.observe(ref.current)
@@ -46,8 +50,8 @@ function LazySection({
 export default function DeferredHomeSections() {
   return (
     <>
-      <LazySection component={ProblemStatement} eager />
-      <LazySection component={Features} eager />
+      <LazySection component={ProblemStatement} />
+      <LazySection component={Features} />
       <LazySection component={HowItWorks} />
       <LazySection component={AnalysisDemo} />
       <LazySection component={WhyChooseUs} />

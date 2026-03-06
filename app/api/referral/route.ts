@@ -8,6 +8,7 @@ import {
   getNextTier,
   ReferralAlreadyAppliedError,
 } from '@/server/referral'
+import { logger } from '@/lib/logger'
 
 function isUnauthenticatedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'User not authenticated'
@@ -54,7 +55,7 @@ export async function GET(_req: NextRequest) {
         { status: 401 }
       )
     }
-    console.error('[referral/GET] Error:', error)
+    logger.error('[referral/GET] Error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch referral data' },
       { status: 500 }
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('[referral/POST] Error:', error)
+    logger.error('[referral/POST] Error', { error })
     return NextResponse.json(
       { error: 'Failed to apply referral code' },
       { status: 500 }

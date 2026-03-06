@@ -37,9 +37,18 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
-    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  [role="tab"] {
+    transition-property: background-color, border-color, color, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
+    transition-duration: 180ms;
   }
 }
 
@@ -196,6 +205,11 @@
     font-family: var(--font-geist), var(--font-inter), system-ui, sans-serif;
   }
 
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
   body[data-scroll-locked],
   body[style*="padding-right"],
   body[style*="margin-right"],
@@ -207,10 +221,10 @@
   }
 
   :root {
-    --qe-surface-0: 0 0% 5%;
-    --qe-surface-1: 240 8% 6%;
-    --qe-surface-2: 240 8% 8%;
-    --qe-panel: 240 8% 7%;
+    --qe-surface-0: 0 0% 4%;
+    --qe-surface-1: 240 8% 7%;
+    --qe-surface-2: 240 8% 10%;
+    --qe-panel: 240 8% 8%;
   }
 
   .surface-flat-0 {
@@ -426,8 +440,8 @@
       radial-gradient(1200px 800px at 6% -10%, rgba(255, 255, 255, 0.07), transparent 62%),
       radial-gradient(900px 600px at 92% 10%, rgba(255, 255, 255, 0.05), transparent 64%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0) 24%);
-    opacity: 0.52;
-    animation: dashboard-mesh-drift 26s ease-in-out infinite alternate;
+    opacity: 0.42;
+    animation: none;
   }
 
   .dashboard-texture-layer {
@@ -474,17 +488,17 @@
   }
 
   .metric-positive {
-    color: hsl(var(--chart-win));
-    text-shadow: 0 0 16px rgba(255, 255, 255, 0.42);
+    color: hsl(var(--foreground) / 0.96);
+    text-shadow: none;
   }
 
   .metric-negative {
-    color: hsl(var(--chart-loss));
-    opacity: 0.78;
+    color: hsl(var(--foreground) / 0.78);
+    text-shadow: none;
   }
 
   .chart-positive-emphasis {
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.46));
+    filter: none;
   }
 
   .chart-negative-muted {
