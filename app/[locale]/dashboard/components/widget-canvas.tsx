@@ -598,53 +598,57 @@ export default function WidgetCanvas() {
           >
             {currentLayout.map((widget, index) => {
               return (
-                <motion.div
+                <div
                   key={widget.i}
                   className="h-full min-h-0"
                   data-customizing={isCustomizing}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-                  animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-                  transition={
-                    shouldReduceMotion
-                      ? undefined
-                      : {
-                        delay: Math.min(0.035 * index, 0.42),
-                        type: "spring",
-                        stiffness: 165,
-                        damping: 21,
-                        mass: 0.88,
-                      }
-                  }
-                  whileHover={shouldReduceMotion || isCustomizing ? undefined : { scale: 1.01 }}
                 >
-                  <WidgetWrapper
-                    onRemove={() => removeWidget(widget.i)}
-                    onChangeSize={(size) => changeWidgetSize(widget.i, size)}
-                    isCustomizing={isCustomizing}
-                    size={widget.size}
-                    currentType={widget.type}
+                  <motion.div
+                    className="h-full min-h-0"
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
+                    animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    transition={
+                      shouldReduceMotion
+                        ? undefined
+                        : {
+                          delay: Math.min(0.035 * index, 0.42),
+                          type: "spring",
+                          stiffness: 165,
+                          damping: 21,
+                          mass: 0.88,
+                        }
+                    }
+                    whileHover={shouldReduceMotion || isCustomizing ? undefined : { scale: 1.01 }}
                   >
-                    <div className={cn(
-                      "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
-                      isCustomizing
-                        ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_hsl(var(--background)/0.95)]"
-                        : "bg-black/95 hover:border-white/20"
-                    )}>
-                      {showDataDebug && !isCustomizing && (
-                        <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
-                          T:{trades.length} F:{formattedTrades.length}
-                          {(instruments.length > 0 || accountNumbers.length > 0 || Boolean(dateRange?.from || dateRange?.to)) && (
-                            <span className="ml-2 text-foreground/40">filtered</span>
-                          )}
+                    <WidgetWrapper
+                      onRemove={() => removeWidget(widget.i)}
+                      onChangeSize={(size) => changeWidgetSize(widget.i, size)}
+                      isCustomizing={isCustomizing}
+                      size={widget.size}
+                      currentType={widget.type}
+                    >
+                      <div className={cn(
+                        "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
+                        isCustomizing
+                          ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_hsl(var(--background)/0.95)]"
+                          : "bg-black/95 hover:border-white/20"
+                      )}>
+                        {showDataDebug && !isCustomizing && (
+                          <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
+                            T:{trades.length} F:{formattedTrades.length}
+                            {(instruments.length > 0 || accountNumbers.length > 0 || Boolean(dateRange?.from || dateRange?.to)) && (
+                              <span className="ml-2 text-foreground/40">filtered</span>
+                            )}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                        <div className="relative h-full w-full">
+                          {renderWidget(widget)}
                         </div>
-                      )}
-                      <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
-                      <div className="relative h-full w-full">
-                        {renderWidget(widget)}
                       </div>
-                    </div>
-                  </WidgetWrapper>
-                </motion.div>
+                    </WidgetWrapper>
+                  </motion.div>
+                </div>
               )
             })}
           </ResponsiveGridLayout>

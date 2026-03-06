@@ -4,42 +4,12 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import { useUserStore } from '@/store/user-store'
 import { useI18n } from "@/locales/client"
 import { Widget, WidgetType, WidgetSize, LayoutItem } from './types/dashboard'
-import { WIDGET_REGISTRY } from './config/widget-registry'
 import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { DashboardLayoutWithWidgets } from '@/store/user-store'
 import { useData } from '@/context/data-provider'
 import { DashboardLayout as PrismaDashboardLayout, Prisma } from '@/prisma/generated/prisma'
-
-export const sizeToGrid = (size: WidgetSize, isSmallScreen = false): { w: number, h: number } => {
-    if (isSmallScreen) {
-        switch (size) {
-            case 'tiny': return { w: 12, h: 1 }
-            case 'small': return { w: 12, h: 2 }
-            case 'small-long': return { w: 12, h: 2 }
-            case 'medium': return { w: 12, h: 4 }
-            case 'large': return { w: 12, h: 6 }
-            case 'extra-large': return { w: 12, h: 6 }
-            default: return { w: 12, h: 4 }
-        }
-    }
-    switch (size) {
-        case 'tiny': return { w: 3, h: 1 }
-        case 'small': return { w: 3, h: 4 }
-        case 'small-long': return { w: 6, h: 2 }
-        case 'medium': return { w: 6, h: 4 }
-        case 'large': return { w: 6, h: 8 }
-        case 'extra-large': return { w: 12, h: 8 }
-        default: return { w: 6, h: 4 }
-    }
-}
-
-export const getWidgetGrid = (type: WidgetType, size: WidgetSize, isSmallScreen = false): { w: number, h: number } => {
-    const config = WIDGET_REGISTRY[type]
-    if (!config) return isSmallScreen ? { w: 12, h: 4 } : { w: 6, h: 4 }
-    if (isSmallScreen) return sizeToGrid(size, true)
-    return sizeToGrid(size)
-}
+import { getNextWidgetPlacement, normalizeWidgetSize, sizeToGrid } from "@/lib/widget-layout"
 
 interface DashboardContextType {
     isCustomizing: boolean
@@ -173,23 +143,18 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
             return
         }
 
-        const effectiveSize = size
-        const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
-
-        let lowestY = 0
-        currentItems.forEach(widget => {
-            const widgetBottom = widget.y + widget.h
-            if (widgetBottom > lowestY) lowestY = widgetBottom
-        })
+        const effectiveSize = normalizeWidgetSize(type, size)
+        const grid = getNextWidgetPlacement(currentItems, type, effectiveSize, activeLayout)
 
         const newWidget: Widget = {
             i: `widget${Date.now()}`,
             type,
             size: effectiveSize,
-            x: 0,
-            y: lowestY,
+            x: grid.x,
+            y: grid.y,
             w: grid.w,
-            h: grid.h
+            h: grid.h,
+            updatedAt: new Date()
         }
 
         const updatedWidgets = [...currentItems, newWidget]
@@ -222,7 +187,14 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const changeWidgetType = useCallback(async (i: string, newType: WidgetType) => {
         if (!userId || !layouts) return
         const updatedWidgets = layouts[activeLayout].map(widget =>
-            widget.i === i ? { ...widget, type: newType } : widget
+            widget.i === i
+                ? {
+                    ...widget,
+                    type: newType,
+                    size: normalizeWidgetSize(newType, widget.size),
+                    updatedAt: new Date()
+                }
+                : widget
         )
         const newLayouts = { ...layouts, [activeLayout]: updatedWidgets, updatedAt: new Date() }
         setLayouts(newLayouts)
@@ -234,12 +206,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         const widget = layouts[activeLayout].find(w => w.i === i)
         if (!widget) return
 
-        let effectiveSize = newSize
-        if (widget.type.includes('Chart') && newSize === 'tiny') effectiveSize = 'medium'
-
-        const grid = sizeToGrid(effectiveSize)
+        const effectiveSize = normalizeWidgetSize(widget.type, newSize)
+        const grid = sizeToGrid(effectiveSize, activeLayout === 'mobile')
         const updatedWidgets = layouts[activeLayout].map(widget =>
-            widget.i === i ? { ...widget, size: effectiveSize, ...grid } : widget
+            widget.i === i ? { ...widget, size: effectiveSize, ...grid, updatedAt: new Date() } : widget
         )
         const newLayouts = { ...layouts, [activeLayout]: updatedWidgets, updatedAt: new Date() }
         setLayouts(newLayouts)

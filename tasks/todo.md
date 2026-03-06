@@ -15,13 +15,29 @@
 - [x] Inspect widget canvas edit/render/save flows.
 - [x] Inspect validation, migration, storage, and version helpers.
 - [x] Inspect shared/team widget rendering paths.
-- [ ] Centralize widget layout sizing/render helpers used by dashboard and shared canvases.
-- [ ] Preserve layout metadata through store writes.
-- [ ] Fix free-tier migration filtering and validator parity with the registry.
-- [ ] Re-run available verification and capture completion notes.
+- [x] Centralize widget layout sizing/render helpers used by dashboard and shared canvases.
+- [x] Preserve layout metadata through store writes.
+- [x] Fix free-tier migration filtering and validator parity with the registry.
+- [x] Re-run available verification and capture completion notes.
 
 ## Current Step
-- **In progress:** implementing widget consistency and drag/render fixes.
+- **Completed:** widget consistency and render fixes implemented.
+
+## Completion Notes
+- Implemented widget consistency fixes in the current tree:
+  - centralized layout sizing/render helpers in `lib/widget-layout.ts`,
+  - aligned dashboard/shared/context widget sizing + placement logic to the shared helper,
+  - preserved layout metadata in `store/user-store.ts`,
+  - corrected free-tier migration filtering and safer widget repair defaults,
+  - aligned validator widget-type source with the live registry,
+  - moved widget entry animations off the React Grid Layout item node so grid transforms no longer collapse cards at the top-left,
+  - fixed add-widget preview card height rendering to use inline styles instead of a runtime Tailwind class.
+- Verification:
+  - Source verification confirms the shared widget canvas now uses stored layout items instead of auto-arranging them.
+  - Source verification confirms metadata fields (`version`, `schemaVersion`, `checksum`, `deviceId`) are retained on store writes.
+  - `npm run -s typecheck` remains blocked in this workspace because dependencies are not installed: `sh: next: command not found`.
+- Residual risk:
+  - Runtime drag/drop behavior could not be exercised here without the local Next/toolchain install, so browser interaction should be rechecked once `node_modules` is available.
 
 ## Review
 - Findings confirmed from source:

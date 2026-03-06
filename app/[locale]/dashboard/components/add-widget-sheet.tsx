@@ -22,6 +22,7 @@ interface PreviewCardProps {
   onClick: () => void
   children: React.ReactNode
   className?: string
+  style?: React.CSSProperties
 }
 
 interface LazyWidgetPreviewProps {
@@ -94,7 +95,7 @@ const LazyWidgetPreview: React.FC<LazyWidgetPreviewProps> = ({
 }
 
 const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
-  ({ onClick, className, children }, ref) => {
+  ({ onClick, className, style, children }, ref) => {
     const t = useI18n()
     const { isMobile } = useDashboardTrades()
     return (
@@ -105,6 +106,7 @@ const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
           "active:scale-[0.98] transition-all duration-150 ease-in-out",
           className
         )}
+        style={style}
         onClick={onClick}
       >
         {!isMobile && (
@@ -172,9 +174,8 @@ export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>
             <PreviewCard
               key={config.type}
               onClick={() => handleAddWidget(config.type)}
-              className={cn(
-                `h-[${config.previewHeight}px]`,
-              )}
+              className="w-full"
+              style={{ height: config.previewHeight }}
             >
               {
                 category === 'charts' ? (
