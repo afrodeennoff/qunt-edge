@@ -1,26 +1,44 @@
 import { z } from "zod";
 
+const optionalString = () =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().optional()
+  );
+
+const optionalUrl = () =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().url().optional()
+  );
+
+const optionalMinString = (minLength: number) =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().min(minLength).optional()
+  );
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  DATABASE_URL: z.string().min(1).optional(),
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
-  NEXT_PUBLIC_UI_V2_ENABLED: z.string().optional(),
-  CRON_SECRET: z.string().min(1).optional(),
-  UNSUBSCRIBE_TOKEN_SECRET: z.string().min(32).optional(),
-  OPENAI_API_KEY: z.string().min(1).optional(),
-  AI_BASE_URL: z.string().url().optional(),
-  AI_MODEL: z.string().min(1).optional(),
-  AI_TIMEOUT_MS: z.string().optional(),
-  AI_MAX_STEPS: z.string().optional(),
-  AI_LOG_SAMPLE_RATE: z.string().optional(),
-  HEALTH_DETAILS_PUBLIC: z.string().optional(),
-  CSP_ENABLED: z.string().optional(),
-  CSP_REPORT_ONLY: z.string().optional(),
-  CSP_STRICT_MODE: z.string().optional(),
-  REDIS_URL: z.string().optional(),
-  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  DATABASE_URL: optionalString(),
+  NEXT_PUBLIC_SUPABASE_URL: optionalUrl(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalMinString(1),
+  NEXT_PUBLIC_UI_V2_ENABLED: optionalString(),
+  CRON_SECRET: optionalMinString(1),
+  UNSUBSCRIBE_TOKEN_SECRET: optionalMinString(32),
+  OPENAI_API_KEY: optionalMinString(1),
+  AI_BASE_URL: optionalUrl(),
+  AI_MODEL: optionalMinString(1),
+  AI_TIMEOUT_MS: optionalString(),
+  AI_MAX_STEPS: optionalString(),
+  AI_LOG_SAMPLE_RATE: optionalString(),
+  HEALTH_DETAILS_PUBLIC: optionalString(),
+  CSP_ENABLED: optionalString(),
+  CSP_REPORT_ONLY: optionalString(),
+  CSP_STRICT_MODE: optionalString(),
+  REDIS_URL: optionalString(),
+  UPSTASH_REDIS_REST_URL: optionalUrl(),
+  UPSTASH_REDIS_REST_TOKEN: optionalMinString(1),
 });
 
 type AppEnv = z.infer<typeof envSchema>;

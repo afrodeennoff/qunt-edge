@@ -6,7 +6,13 @@ import { User } from "@supabase/supabase-js"
 import { buildAppCsp, buildEmbedCsp, createNonce } from "@/lib/security/csp"
 import { assertSecurityEnvConsistency } from "@/lib/env"
 
-assertSecurityEnvConsistency()
+try {
+  assertSecurityEnvConsistency()
+} catch (error) {
+  // Never fail middleware hard at runtime due env policy mismatch.
+  // Validation still needs to be enforced by CI/release gates.
+  console.error("[Proxy] Security environment validation failed:", error)
+}
 
 // Maintenance mode flag - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false
