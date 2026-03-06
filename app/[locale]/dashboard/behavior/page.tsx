@@ -33,10 +33,6 @@ export default function DashboardBehaviorPage() {
   const [insightsError, setInsightsError] = useState<string | null>(null)
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
-  useEffect(() => {
     let isMounted = true
 
     const loadInsights = async () => {

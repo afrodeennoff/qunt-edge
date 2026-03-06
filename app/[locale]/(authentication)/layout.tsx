@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCurrentLocale } from "@/locales/client";
+import { RootProviders } from "@/components/providers/root-providers";
 interface AuthenticationLayoutProps {
   children: React.ReactNode;
 }
@@ -29,5 +30,5 @@ export default function AuthenticationLayout({
     }
   }, [locale, router]);
 
-  return children;
+  return <RootProviders>{children}</RootProviders>;
 }

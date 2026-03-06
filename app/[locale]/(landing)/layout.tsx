@@ -1,4 +1,5 @@
 import MarketingLayoutShell from "./components/marketing-layout-shell";
+import { PublicRootProviders } from "@/components/providers/root-providers";
 
 import { Metadata } from 'next';
 
@@ -34,10 +35,12 @@ export default async function RootLayout(
   await params;
 
   return (
-    <MarketingLayoutShell contentClassName="w-full px-4 sm:px-6 lg:px-8">
-      <div>
-        {children}
-      </div>
-    </MarketingLayoutShell>
+    <PublicRootProviders>
+      <MarketingLayoutShell contentClassName="w-full px-4 sm:px-6 lg:px-8">
+        <div>
+          {children}
+        </div>
+      </MarketingLayoutShell>
+    </PublicRootProviders>
   );
 }

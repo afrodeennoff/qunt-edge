@@ -1,3 +1,42 @@
+# Client/Server Render Audit (2026-03-07)
+
+## Scope
+- Audit App Router client-side vs server-side rendering boundaries for hydration risk, unnecessary client rendering, and server component opportunities.
+
+## Acceptance Criteria
+- [x] Root layout/provider SSR/CSR boundaries are inspected.
+- [x] High-traffic route shells and dashboard surfaces are checked for client-only rendering drift.
+- [x] Findings are prioritized with file evidence.
+- [x] Verification limits and residual risks are documented.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md` before starting.
+- [x] Inspect root layouts, templates, and provider stack.
+- [x] Inspect dashboard/shared/client-heavy surfaces and `dynamic(..., { ssr: false })` usage.
+- [x] Inspect data-fetching/auth/i18n boundaries affecting SSR behavior.
+- [x] Record findings and verification limits.
+
+## Current Step
+- **Completed:** client/server rendering audit fixes implemented from the approved plan.
+
+## Completion Notes
+- Implemented render-boundary fixes:
+  - Reduced `app/[locale]/layout.tsx` to locale wiring only, and moved provider ownership into route layouts with `RootProviders`, `PublicRootProviders`, and `SidebarRootProviders`.
+  - Removed pathname-based route classification from `components/providers/root-providers.tsx`; dashboard/admin/teams sidebar/auth behavior now comes from the layouts that actually need it.
+  - Moved shared-route `DataProvider` ownership from the layout into `app/[locale]/shared/[slug]/page.tsx` and added `initialSharedData` / `initialSharedSlug` bootstrapping in `context/data-provider.tsx` so shared pages no longer do a duplicate first-mount fetch when server data already exists.
+  - Removed the shared-page hydration effect from `app/[locale]/shared/[slug]/shared-page-client.tsx`; it now renders directly from provider state.
+  - Replaced the home-page deferred client gate in `app/[locale]/(home)/components/DeferredHomeSections.tsx` with direct section rendering so the route can SSR meaningful section HTML again.
+  - Centralized dashboard scroll reset in `app/[locale]/dashboard/components/dashboard-scroll-reset.tsx` and removed route-level `window.scrollTo` effects; `reports`, `strategies`, and `data` pages no longer need client shells just for scroll behavior.
+- Verification:
+  - Source-level checks confirm `components/providers/root-providers.tsx` no longer uses `usePathname()` for route branching.
+  - Source-level checks confirm `app/[locale]/(home)/components/DeferredHomeSections.tsx` no longer uses `ssr: false` / intersection-gated rendering.
+  - Source-level checks confirm `context/data-provider.tsx` now has a bootstrapped shared-data path and skips the initial mount `loadData()` path when `initialSharedData` is supplied.
+  - Source-level checks confirm `app/[locale]/dashboard/reports/page.tsx`, `app/[locale]/dashboard/strategies/page.tsx`, and `app/[locale]/dashboard/data/page.tsx` are no longer promoted to client pages for scroll reset.
+  - Runtime/build verification remains blocked here because dependencies are not installed (`next: command not found` during `npm run -s typecheck`).
+- Residual risk:
+  - Without browser/runtime verification in this workspace, this work is still limited to code-path evidence rather than measured hydration/runtime timings.
+  - Shared widgets now avoid the duplicate fetch path, but their full first-paint behavior still needs a browser pass because many downstream widget modules are client-heavy and local dependencies are unavailable here.
+
 # Widget Audit (2026-03-07)
 
 ## Scope

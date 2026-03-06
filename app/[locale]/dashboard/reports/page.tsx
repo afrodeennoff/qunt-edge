@@ -1,14 +1,7 @@
-"use client"
-
-import { useEffect } from "react"
 import { AnalysisOverview } from "../components/analysis/analysis-overview"
 import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
 
 export default function DashboardReportsPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
   return (
     <UnifiedPageShell density="compact">
       <UnifiedSurface>
