@@ -1,5 +1,11 @@
 # Memory: Sessions
 
+## 2026-03-06
+- Completed a focused architecture read of localized routing under `app/[locale]`, including middleware i18n redirect behavior, provider wiring, and protected-route auth gating.
+- Mapped primary localized route groups (`(home)`, `(landing)`, `(authentication)`, `dashboard`, `teams`, `admin`, `embed`, `shared`) and verified the catch-all not-found flow.
+- Identified a locale support mismatch: middleware accepts additional locales (`de`, `pt`, `vi`, `zh`, `yo`) while client i18n declarations only include `en`, `fr`, `hi`, `ja`, `es`, `it`.
+- Implemented end-to-end security remediation plan: replaced auth-attempt stubs with persistent lockout logic, applied explicit route throttling/validation on key mutation endpoints, sanitized leaked API errors, enforced production env safety assertions for health/CSP, and added route-security governance checks with full green verification (`check:route-security`, `typecheck`, `test`, `build`).
+
 ## 2026-02-28
 - Completed a mobile optimization end-to-end audit with fresh verification (`typecheck`, `build`, route budgets, Lighthouse, Playwright mobile flow checks).
 - Implemented fixes for mobile dialog accessibility metadata and non-Vercel analytics script failures.

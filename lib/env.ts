@@ -14,6 +14,10 @@ const envSchema = z.object({
   AI_TIMEOUT_MS: z.string().optional(),
   AI_MAX_STEPS: z.string().optional(),
   AI_LOG_SAMPLE_RATE: z.string().optional(),
+  HEALTH_DETAILS_PUBLIC: z.string().optional(),
+  CSP_ENABLED: z.string().optional(),
+  CSP_REPORT_ONLY: z.string().optional(),
+  CSP_STRICT_MODE: z.string().optional(),
   REDIS_URL: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
@@ -53,4 +57,21 @@ export function assertProductionEnv(): void {
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "CRON_SECRET",
   ]);
+}
+
+export function assertSecurityEnvConsistency(): void {
+  const env = getEnv();
+  if (env.NODE_ENV !== "production") return;
+
+  if (env.HEALTH_DETAILS_PUBLIC === "true") {
+    throw new Error("Invalid production config: HEALTH_DETAILS_PUBLIC=true is not allowed.");
+  }
+
+  const cspEnabled = env.CSP_ENABLED !== "false";
+  const reportOnly = env.CSP_REPORT_ONLY === "true";
+  if (cspEnabled && reportOnly) {
+    throw new Error(
+      "Invalid production config: CSP_REPORT_ONLY=true while CSP is enabled. Set CSP_REPORT_ONLY=false in production."
+    );
+  }
 }

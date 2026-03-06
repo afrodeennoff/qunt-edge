@@ -1,3 +1,28 @@
+# Understand `app/[locale]` Route Architecture (2026-03-06)
+
+## Scope
+- Understand how localized routing under `app/[locale]` is structured and how locale resolution/auth gating work.
+
+## Acceptance Criteria
+- [x] Route groups under `app/[locale]` are mapped.
+- [x] Locale middleware + provider wiring is verified from source files.
+- [x] Authentication and cache behavior at localized paths is summarized.
+- [x] Key risks/mismatches are identified with file evidence.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md` before analysis.
+- [x] Inspect `proxy.ts` locale/auth flow and matcher behavior.
+- [x] Inspect `app/[locale]/layout.tsx` and primary route-group layouts/pages.
+- [x] Summarize localized route architecture for handoff.
+
+## Current Step
+- **Completed:** reconnaissance and architecture summary ready.
+
+## Completion Notes
+- Verified locale segment is handled by middleware redirect strategy (`/` -> `/{locale}`) and then served through `app/[locale]` provider layout.
+- Confirmed key route groups: `(home)`, `(landing)`, `(authentication)`, `dashboard`, `teams`, `admin`, `embed`, `shared`.
+- Noted locale support mismatch: middleware allows `de|pt|vi|zh|yo` but client i18n map does not declare those locales.
+
 # Theme Token Migration Phase C (Alias Removal) (2026-03-03)
 
 ## Scope
@@ -1458,3 +1483,54 @@
 ## Completion Notes
 - High-priority issue identified: auth-guard hooks are currently no-op stubs (`lib/security/auth-attempts.ts`), weakening brute-force and abuse protections.
 - Medium-priority gaps identified: uneven rate-limit coverage, inconsistent schema validation on selected mutation endpoints, and verbose internal error details in token ingestion routes.
+  - `npm run -s perf:lighthouse` -> still fails thresholds; desktop `/en` TBT improved vs prior run (`~1019ms -> ~677ms`), mobile remains high.
+
+# End-to-End Security Remediation Plan (0->99) (2026-03-06)
+
+## Scope
+- Implement full hardening pass for auth abuse protection, rate limiting, validation normalization, error sanitization, production safety defaults, and governance guardrails.
+
+## Acceptance Criteria
+- [x] Auth guard is stateful and lockout-aware (`allow -> fail escalation -> lock -> recover`).
+- [x] Targeted non-AI mutation surfaces have explicit route-level throttling.
+- [x] Covered mutation/query handlers use shared schema-backed validation helpers.
+- [x] External API 500s no longer expose raw internal error details.
+- [x] Production safety defaults enforce secure health/CSP behavior.
+- [x] Route-security governance check exists and passes.
+- [x] Verification gates pass (`typecheck`, `test`, `build`).
+
+## Plan Checklist
+- [x] Replace auth-attempt stubs with persisted keyed tracking and lockout/retry handling.
+- [x] Add explicit throttling policies to invite/sync/token-ingest/admin mutation routes.
+- [x] Normalize parsing/validation via `parseJson`/`parseQuery` + Zod schemas.
+- [x] Sanitize error responses and preserve diagnostics in logs only.
+- [x] Add env assertions for dangerous production combinations and secure defaults.
+- [x] Add route-security manifest checker + PR checklist documentation.
+- [x] Run full verification and capture evidence.
+
+## Current Step
+- **Completed:** security remediation implementation and verification complete.
+
+## Completion Notes
+- Updated files:
+  - `lib/security/auth-attempts.ts`
+  - `app/api/team/invite/route.ts`
+  - `app/api/etp/v1/store/route.ts`
+  - `app/api/thor/store/route.ts`
+  - `app/api/tradovate/sync/route.ts`
+  - `app/api/rithmic/synchronizations/route.ts`
+  - `app/api/admin/subscriptions/route.ts`
+  - `app/api/health/route.ts`
+  - `lib/env.ts`
+  - `proxy.ts`
+  - `package.json`
+- Added files:
+  - `scripts/check-route-security.mjs`
+  - `tests/auth-attempts.test.ts`
+  - `tests/security-route-contract.test.ts`
+  - `docs/SECURITY_PR_CHECKLIST.md`
+- Verification:
+  - `npm run -s check:route-security` -> exit `0`.
+  - `npm run -s typecheck` -> exit `0`.
+  - `npm test` -> exit `0` (`156 passed`, `46 skipped`).
+  - `npm run -s build` -> exit `0`.

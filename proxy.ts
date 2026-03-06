@@ -4,6 +4,9 @@ import { createServerClient } from "@supabase/ssr"
 import { geolocation } from "@vercel/functions"
 import { User } from "@supabase/supabase-js"
 import { buildAppCsp, buildEmbedCsp, createNonce } from "@/lib/security/csp"
+import { assertSecurityEnvConsistency } from "@/lib/env"
+
+assertSecurityEnvConsistency()
 
 // Maintenance mode flag - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false
@@ -212,7 +215,9 @@ export default async function middleware(req: NextRequest) {
   const isApiRoute = pathname.startsWith("/api/")
   const isDev = process.env.NODE_ENV === "development"
   const cspEnabled = process.env.CSP_ENABLED !== "false"
-  const cspReportOnly = process.env.CSP_REPORT_ONLY !== "false"
+  const cspReportOnly = process.env.CSP_REPORT_ONLY
+    ? process.env.CSP_REPORT_ONLY === "true"
+    : process.env.NODE_ENV !== "production"
   const cspStrictMode = process.env.CSP_STRICT_MODE === "true"
   const isStaticAsset =
     pathname.startsWith("/_next/") ||

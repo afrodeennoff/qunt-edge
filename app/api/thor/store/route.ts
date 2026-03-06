@@ -3,16 +3,50 @@ import { prisma } from '@/lib/prisma'
 import { saveTradesAction } from '@/server/database';
 import type { ImportTradeDraft } from '@/lib/trade-types';
 import { verifySecureToken } from '@/lib/api-auth';
+import { z } from 'zod'
+import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
+import { parseJson, parseQuery, toValidationErrorResponse } from '@/app/api/_utils/validate'
 
 const MAX_THOR_BODY_BYTES = 3 * 1024 * 1024
 const MAX_THOR_TRADES = 5_000
 const MAX_PAGINATION_LIMIT = 500
+const thorWriteRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: 'thor-store-write' })
+const thorReadRateLimit = rateLimit({ limit: 120, window: 60_000, identifier: 'thor-store-read' })
 
-function normalizePositiveInt(value: string | null, fallback: number, max: number): number {
-  const parsed = Number.parseInt(value ?? '', 10)
-  if (!Number.isFinite(parsed) || parsed < 0) return fallback
-  return Math.min(parsed, max)
-}
+const thorTradeSchema = z.object({
+  symbol: z.string().min(1),
+  pnl: z.number().finite(),
+  pnltick: z.number().finite(),
+  entry_time: z.string().min(1),
+  exit_time: z.string().min(1),
+  entry_price: z.number().finite(),
+  exit_price: z.number().finite(),
+  quantity: z.number().finite(),
+  side: z.enum(['Buy', 'Sell']),
+  is_shared: z.boolean(),
+})
+
+const thorDateSchema = z.object({
+  date: z.string().min(1),
+  trades: z.array(thorTradeSchema),
+})
+
+const thorPostBodySchema = z.object({
+  account_id: z.string().min(1),
+  dates: z.array(thorDateSchema).min(1),
+})
+
+const thorGetQuerySchema = z.object({
+  accountNumber: z.string().min(1),
+  limit: z.coerce.number().int().min(1).max(MAX_PAGINATION_LIMIT).default(100),
+  offset: z.coerce.number().int().min(0).max(50_000).default(0),
+  from: z.string().optional(),
+  to: z.string().optional(),
+})
+
+const thorDeleteQuerySchema = z.object({
+  accountNumber: z.string().min(1),
+})
 
 // Common authentication function to use across all methods
 async function authenticateRequest(req: NextRequest) {
@@ -55,34 +89,21 @@ async function authenticateRequest(req: NextRequest) {
   }
 }
 
-interface ThorTrade {
-  symbol: string
-  pnl: number
-  pnltick: number
-  entry_time: string
-  exit_time: string
-  entry_price: number
-  exit_price: number
-  quantity: number
-  side: 'Buy' | 'Sell'
-  is_shared: boolean
-}
-
-interface ThorDate {
-  date: string
-  trades: ThorTrade[]
-}
-
-interface ThorRequest {
-  account_id: string
-  dates: ThorDate[]
-}
-
 export async function POST(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
+    const limit = await thorWriteRateLimit(req)
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      })
+    }
+
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_THOR_BODY_BYTES) {
-      return NextResponse.json({ error: 'Request payload is too large' }, { status: 413 })
+      return NextResponse.json({ error: 'Request payload is too large', requestId }, { status: 413 })
     }
 
     const auth = await authenticateRequest(req);
@@ -95,7 +116,7 @@ export async function POST(req: NextRequest) {
     }
     
     const user = auth.user!;
-    const data: ThorRequest = await req.json();
+    const data = await parseJson(req, thorPostBodySchema);
 
     const totalTrades = Array.isArray(data?.dates)
       ? data.dates.reduce((sum, dateData) => sum + (Array.isArray(dateData?.trades) ? dateData.trades.length : 0), 0)
@@ -159,16 +180,28 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     console.error('[thor/store] Error processing request:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', requestId },
       { status: 500 }
     )
   }
 }
 
 export async function GET(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
+    const limitResult = await thorReadRateLimit(req)
+    if (!limitResult.success) {
+      return createRateLimitResponse({
+        limit: limitResult.limit,
+        remaining: limitResult.remaining,
+        resetTime: limitResult.resetTime,
+      })
+    }
+
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
@@ -179,22 +212,13 @@ export async function GET(req: NextRequest) {
     }
     
     const user = auth.user!;
-    
-    // Get query parameters
-    const searchParams = req.nextUrl.searchParams;
-    const accountNumber = searchParams.get('accountNumber');
-    
-    if (!accountNumber) {
-      return NextResponse.json({ 
-        error: 'Bad Request', 
-        message: 'accountNumber parameter is required' 
-      }, { status: 400 });
-    }
-    
-    const limit = normalizePositiveInt(searchParams.get('limit'), 100, MAX_PAGINATION_LIMIT);
-    const offset = normalizePositiveInt(searchParams.get('offset'), 0, 50_000);
-    const fromDate = searchParams.get('from');
-    const toDate = searchParams.get('to');
+    const {
+      accountNumber,
+      limit,
+      offset,
+      from: fromDate,
+      to: toDate,
+    } = parseQuery(req.nextUrl.searchParams, thorGetQuerySchema)
     
     // Build the query
     const query: Parameters<typeof prisma.trade.findMany>[0] = {
@@ -245,16 +269,28 @@ export async function GET(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     console.error('[thor/store] Error retrieving trades:', error);
     return NextResponse.json({ 
-      error: 'Failed to retrieve trades', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      error: 'Failed to retrieve trades',
+      requestId,
     }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
+    const limitResult = await thorWriteRateLimit(req)
+    if (!limitResult.success) {
+      return createRateLimitResponse({
+        limit: limitResult.limit,
+        remaining: limitResult.remaining,
+        resetTime: limitResult.resetTime,
+      })
+    }
+
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
@@ -265,17 +301,7 @@ export async function DELETE(req: NextRequest) {
     }
     
     const user = auth.user!;
-    
-    // Get accountNumber from query parameters
-    const searchParams = req.nextUrl.searchParams;
-    const accountNumber = searchParams.get('accountNumber');
-    
-    if (!accountNumber) {
-      return NextResponse.json({ 
-        error: 'Bad Request', 
-        message: 'accountNumber parameter is required' 
-      }, { status: 400 });
-    }
+    const { accountNumber } = parseQuery(req.nextUrl.searchParams, thorDeleteQuerySchema)
     
     // Delete trades for this user and specific account
     const result = await prisma.trade.deleteMany({
@@ -291,10 +317,12 @@ export async function DELETE(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
     console.error('[thor/store] Error deleting trades:', error);
     return NextResponse.json({ 
-      error: 'Failed to delete trades', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      error: 'Failed to delete trades',
+      requestId,
     }, { status: 500 });
   }
 }
