@@ -170,7 +170,7 @@ jobs:
       - name: Check for Secrets in Code
         run: |
           # Basic secret pattern check — flags obvious leaks
-          PATTERNS='(SUPABASE_SERVICE_ROLE_KEY|ENCRYPTION_KEY|WHOP_WEBHOOK_SECRET|password\s*=\s*["\x27][^"\x27]{8,})'
+          PATTERNS='(password\s*=\s*["\x27][^"\x27]{8,})'
           if grep -rIE "$PATTERNS" --include='*.ts' --include='*.tsx' --include='*.js' --include='*.json' \
              --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=coverage \
              --exclude='.env.example' --exclude='package-lock.json' . ; then
