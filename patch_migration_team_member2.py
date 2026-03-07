@@ -1,4 +1,11 @@
--- Add marker to prevent duplicate renewal notice sends per billing cycle.
+import re
+
+filepath = 'prisma/migrations/20260220184500_team_membership_and_renewal_notice_marker/migration.sql'
+
+with open(filepath, 'r') as f:
+    content = f.read()
+
+new_content = '''-- Add marker to prevent duplicate renewal notice sends per billing cycle.
 ALTER TABLE "public"."Account"
 ADD COLUMN IF NOT EXISTS "renewalNoticeLastSentAt" TIMESTAMP(3);
 
@@ -34,3 +41,7 @@ BEGIN
         ';
     END IF;
 END $$;
+'''
+
+with open(filepath, 'w') as f:
+    f.write(new_content)

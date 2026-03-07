@@ -7,7 +7,7 @@ interface HeroProps {
   onStart?: () => void;
 }
 
-export default function Hero({ onStart }: HeroProps) {
+export default function Hero({  }: HeroProps) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
