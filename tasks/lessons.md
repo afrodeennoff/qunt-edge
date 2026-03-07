@@ -45,3 +45,8 @@
 - mistake pattern: Answered with the wrong visual issue first instead of confirming the exact duplicate-control and color-layering defects visible in the screenshot.
 - prevention rule: For screenshot bug triage, verify concrete UI anomalies in this order before answering: duplicate controls, color contrast/layer separation, then text/labels.
 - early trigger signals: User replies "find carefully" or rejects initial diagnosis without asking for new context.
+
+## 2026-03-07
+- mistake pattern: Converted a route shell back to a server component without validating whether its transitive table modules were explicitly marked `"use client"`, which caused a production build failure on Vercel.
+- prevention rule: When de-clientifying a page in App Router, audit every directly imported subtree for hook-using files that rely on implicit client ancestry and add explicit `"use client"` boundaries before considering the refactor safe.
+- early trigger signals: Build traces mention hook usage (`useState`, `useEffect`, `useRef`) in components that do not begin with a client directive after a server-boundary change.

@@ -32,6 +32,7 @@
   - Source-level checks confirm `app/[locale]/(home)/components/DeferredHomeSections.tsx` no longer uses `ssr: false` / intersection-gated rendering.
   - Source-level checks confirm `context/data-provider.tsx` now has a bootstrapped shared-data path and skips the initial mount `loadData()` path when `initialSharedData` is supplied.
   - Source-level checks confirm `app/[locale]/dashboard/reports/page.tsx`, `app/[locale]/dashboard/strategies/page.tsx`, and `app/[locale]/dashboard/data/page.tsx` are no longer promoted to client pages for scroll reset.
+  - Follow-up source verification for the Vercel regression confirms `app/[locale]/dashboard/components/tables/trade-table-review.tsx` and `app/[locale]/dashboard/components/tables/column-header.tsx` now declare `"use client"` explicitly, so they no longer depend on implicit client ancestry from a page shell.
   - Runtime/build verification remains blocked here because dependencies are not installed (`next: command not found` during `npm run -s typecheck`).
 - Residual risk:
   - Without browser/runtime verification in this workspace, this work is still limited to code-path evidence rather than measured hydration/runtime timings.

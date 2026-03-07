@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useDashboardFilters, useDashboardStats, useDashboardActions } from "@/context/data-provider";
 import {
