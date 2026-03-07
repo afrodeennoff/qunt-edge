@@ -37,7 +37,7 @@ interface AccountTableProps {
 }
 
 export function AccountTable({
-  accountNumber,
+  accountNumber: _accountNumber,
   startingBalance,
   profitTarget,
   dailyMetrics,
@@ -50,6 +50,7 @@ export function AccountTable({
   const t = useI18n()
   const locale = useCurrentLocale()
   const dateLocale = locale === 'fr' ? fr : enUS
+  void _accountNumber
 
   // Helper function to safely calculate percentage of target
   const calculatePercentageOfTarget = (runningBalance: number, startingBalance: number, profitTarget: number) => {
@@ -105,6 +106,30 @@ export function AccountTable({
   // Calculate total PnL for each period
   const totalPnLBefore = metricsBeforeReset.reduce((sum, metric) => sum + metric.pnl, 0)
   const totalPnLAfter = metricsAfterReset.reduce((sum, metric) => sum + metric.pnl, 0)
+
+  function buildRowsWithRunningBalance(
+    metrics: typeof sortedMetrics,
+    totalPnL: number
+  ) {
+    return metrics.reduce<{
+      runningBalance: number
+      rows: React.ReactNode[]
+    }>(
+      (acc, metric) => {
+        const payoutAmount = metric.payout?.status === 'PAID' ? metric.payout.amount : 0
+        const nextRunningBalance = acc.runningBalance + metric.pnl - payoutAmount
+        acc.rows.push(renderMetricRow(metric, nextRunningBalance, totalPnL))
+        return {
+          runningBalance: nextRunningBalance,
+          rows: acc.rows,
+        }
+      },
+      {
+        runningBalance: startingBalance,
+        rows: [],
+      }
+    ).rows
+  }
 
   function renderTableHeader() {
     return (
@@ -293,16 +318,7 @@ export function AccountTable({
             <Table>
               {renderTableHeader()}
               <TableBody>
-                {(() => {
-                  let runningBalance = startingBalance
-                  return metricsBeforeReset.map(metric => {
-                    runningBalance += metric.pnl
-                    if (metric.payout?.status === 'PAID') {
-                      runningBalance -= metric.payout.amount
-                    }
-                    return renderMetricRow(metric, runningBalance, totalPnLBefore)
-                  })
-                })()}
+                {buildRowsWithRunningBalance(metricsBeforeReset, totalPnLBefore)}
                 {renderTotalRow(metricsBeforeReset, totalPnLBefore, metricsBeforeReset.reduce((balance, metric) => {
                   balance += metric.pnl
                   if (metric.payout?.status === 'PAID') {
@@ -341,16 +357,7 @@ export function AccountTable({
           <Table>
             {renderTableHeader()}
             <TableBody>
-              {(() => {
-                let runningBalance = startingBalance
-                return metricsAfterReset.map(metric => {
-                  runningBalance += metric.pnl
-                  if (metric.payout?.status === 'PAID') {
-                    runningBalance -= metric.payout.amount
-                  }
-                  return renderMetricRow(metric, runningBalance, totalPnLAfter)
-                })
-              })()}
+              {buildRowsWithRunningBalance(metricsAfterReset, totalPnLAfter)}
               {renderTotalRow(metricsAfterReset, totalPnLAfter, metricsAfterReset.reduce((balance, metric) => {
                 balance += metric.pnl
                 if (metric.payout?.status === 'PAID') {

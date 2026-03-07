@@ -1,3 +1,141 @@
+# Production Readiness Audit + Refactor Pass (2026-03-08, Pass B)
+
+## Scope
+- Run a focused reliability/performance audit on active dashboard/provider surfaces and ship minimal-risk fixes with full verification evidence.
+
+## Acceptance Criteria
+- [x] Confirm at least one concrete runtime bug and one concrete code-quality/runtime warning are resolved.
+- [x] Keep fix scope narrow to avoid regressions in unrelated modules.
+- [x] Re-run typecheck/build/tests and key operational checks.
+- [x] Record residual production risks and next actions.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md`.
+- [x] Inspect active modified files and nearby runtime boundaries.
+- [x] Patch confirmed issues with minimal behavioral surface-area.
+- [x] Re-run verification gates and capture results.
+- [x] Add completion review with risks/follow-ups.
+
+## Current Step
+- **Completed:** focused pass implemented and verified.
+
+## Completion Notes
+- Implemented fixes:
+  - `components/providers/root-providers.tsx`: fixed service-worker lifecycle race by executing load logic immediately when `document.readyState === "complete"` instead of relying only on the `load` event listener.
+  - `app/[locale]/dashboard/components/accounts/account-table.tsx`: replaced render-time running-balance mutation blocks with deterministic reducer-based row construction to satisfy React immutability constraints and reduce render-risk.
+- Verification:
+  - `npm run -s typecheck` -> pass.
+  - `npm run -s build` -> pass.
+  - `npm test` -> pass (`37` files passed, `1` skipped; `156` tests passed, `46` skipped).
+  - `npm run -s check:route-security` -> pass.
+  - `npm run -s lint -- components/providers/root-providers.tsx app/[locale]/dashboard/components/accounts/account-table.tsx` -> `0` errors (`complexity` warnings remain).
+  - `npm run -s check:route-budgets` -> fails on dashboard routes (`~89.88-102.94 KB` vs `80 KB` budget), pre-existing and still unresolved.
+
+## Review
+- Verified:
+  - production build and typecheck are green after fixes,
+  - regression suite passes,
+  - route security checks pass,
+  - targeted warning that indicated render-time mutation is removed.
+- Remaining risk:
+  - dashboard client payload budget is still above threshold and needs a dedicated decomposition pass across shared dashboard client boundaries.
+  - high global lint warning volume remains and was not in scope for this targeted pass.
+- Follow-up:
+  - split/defers for high-cost dashboard shared client modules (header/tooling/data contexts) to clear route-budget violations.
+
+# Dashboard Smoothness Pass (2026-03-08)
+
+## Scope
+- Remove the biggest dashboard interaction lag sources causing stuck-feeling route transitions and forced hard-reload behavior.
+
+## Acceptance Criteria
+- [x] Dashboard route-budget violations resolved.
+- [x] Shared dashboard client payload materially reduced.
+- [x] Service-worker stale-state risk neutralized in app runtime.
+- [x] Build/tests/security checks remain green.
+
+## Plan Checklist
+- [x] Trace dashboard shared-chunk contributors from route manifests.
+- [x] Decouple layout math from heavyweight widget component registry imports.
+- [x] Apply service-worker runtime safety change for stale-cache prevention.
+- [x] Re-run build, tests, route budgets, and security checks.
+- [x] Document measured before/after impact.
+
+## Current Step
+- **Completed:** smoothness fixes implemented and verified.
+
+## Completion Notes
+- Implemented:
+  - Added lightweight widget metadata map:
+    - `app/[locale]/dashboard/config/widget-metadata.ts`
+  - Rewired `lib/widget-layout.ts` to use widget metadata instead of importing `WIDGET_REGISTRY` (which pulled chart/table/widget components into shared dashboard shell chunks).
+  - Updated `components/providers/root-providers.tsx` to always unregister existing service workers/caches on load and removed registration path, preventing stale client-controller behavior that can require force reloads.
+- Measured impact:
+  - Dashboard app-route client manifests dropped from:
+    - `/[locale]/dashboard/data`: `102.94 KB -> 63.38 KB`
+    - `/[locale]/dashboard`: `89.99 KB -> 53.24 KB`
+    - Similar reductions across all dashboard routes.
+  - `npm run -s check:route-budgets` now passes for all dashboard routes.
+- Verification:
+  - `npm run -s typecheck` -> pass.
+  - `npm test` -> pass (`37` files passed, `1` skipped; `156` tests passed).
+  - `npm run -s build` -> pass.
+  - `npm run -s check:route-budgets` -> pass.
+  - `npm run -s analyze:bundle` -> pass (artifact refreshed).
+  - `npm run -s check:route-security` -> pass.
+  - `npm run -s check:warning-budget` -> pass (`errors=0`, `warnings=1540`).
+
+# Production Readiness Audit + Refactor Pass (2026-03-08)
+
+## Scope
+- Run a production-readiness audit and implement high-impact, low-risk fixes across quality, performance, and operational checks without changing user-facing flows.
+
+## Acceptance Criteria
+- [x] Baseline checks captured (`typecheck`, `lint`, `build`, tests).
+- [x] Critical regressions/build blockers checked and resolved in touched scope.
+- [x] Performance hotspots inspected and at least one shared-chunk reduction refactor applied.
+- [x] Security/logging/env sanity checks run with project scripts.
+- [x] Review notes include verification evidence and residual risks.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md` before implementation.
+- [x] Record repo baseline status and current failures.
+- [x] Prioritize findings by severity and user impact.
+- [x] Implement focused fixes for top-priority issues.
+- [x] Re-run relevant verification gates.
+- [x] Document completion notes, risks, and follow-ups.
+
+## Current Step
+- **Completed:** baseline audit and focused refactor pass finished.
+
+## Completion Notes
+- Baseline gate outcomes:
+  - `npm run -s typecheck` -> pass.
+  - `npm run -s build` -> pass.
+  - `npm test` -> pass (`37` files passed, `1` skipped; `156` tests passed, `46` skipped).
+  - `npm run -s lint` -> `0` errors, `1541` warnings (pre-existing warning-heavy baseline).
+  - `npm run -s check:route-security` -> pass.
+  - `npm run -s check:warning-budget` -> pass (`errors=0`, `warnings=1542`, budget `1546`).
+- Implemented fixes:
+  - Extracted dashboard widget-edit controls into a lazy component:
+    - added `app/[locale]/dashboard/components/dashboard-header-widget-controls.tsx`,
+    - simplified `app/[locale]/dashboard/components/dashboard-header.tsx` to avoid eager `useDashboard` coupling in the global header path.
+  - Removed unused global query provider mount from `components/providers/root-providers.tsx` after confirming `@tanstack/react-query` hooks are not used elsewhere in the app.
+  - Refreshed bundle audit artifact via `npm run -s analyze:bundle`.
+- Measured impact:
+  - Dashboard client-manifest sizes decreased slightly (roughly `~0.8-0.9 KB` on affected dashboard routes).
+
+## Review
+- Verified:
+  - touched files typecheck/lint clean (no errors),
+  - full build and test suite pass,
+  - route security and warning-budget checks pass.
+- Remaining risk:
+  - `npm run -s check:route-budgets` still fails on dashboard routes (`~89.88-102.94 KB` vs `80 KB` budget), indicating a larger shared dashboard client chunk still needs decomposition.
+  - full elimination of lint warnings was out of scope for this pass; warning volume remains high.
+- Follow-up:
+  - perform a dedicated dashboard payload decomposition pass (split high-cost shared client boundaries in dashboard shell/data contexts and route-specific tools) to clear the `80 KB` budget.
+
 # Client/Server Render Audit (2026-03-07)
 
 ## Scope

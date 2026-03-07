@@ -1,4 +1,4 @@
-import { WIDGET_REGISTRY } from "@/app/[locale]/dashboard/config/widget-registry";
+import { WIDGET_METADATA } from "@/app/[locale]/dashboard/config/widget-metadata";
 import { Widget, WidgetSize, WidgetType } from "@/app/[locale]/dashboard/types/dashboard";
 
 export type DashboardLayoutMode = "desktop" | "mobile";
@@ -36,7 +36,7 @@ export function getWidgetGrid(
   size: WidgetSize,
   isSmallScreen = false,
 ): { w: number; h: number } {
-  const config = WIDGET_REGISTRY[type];
+  const config = WIDGET_METADATA[type];
   if (!config) {
     return isSmallScreen ? { w: 12, h: 4 } : { w: 6, h: 4 };
   }
@@ -45,11 +45,11 @@ export function getWidgetGrid(
 }
 
 export function isRegisteredWidgetType(type: string): type is WidgetType {
-  return type in WIDGET_REGISTRY;
+  return type in WIDGET_METADATA;
 }
 
 export function getAllowedWidgetTypes(): WidgetType[] {
-  return Object.keys(WIDGET_REGISTRY) as WidgetType[];
+  return Object.keys(WIDGET_METADATA) as WidgetType[];
 }
 
 export function normalizeWidgetType(type: unknown): WidgetType {
@@ -64,7 +64,7 @@ export function normalizeWidgetSize(
   type: WidgetType,
   size: unknown,
 ): WidgetSize {
-  const config = WIDGET_REGISTRY[type];
+  const config = WIDGET_METADATA[type];
   if (typeof size === "string" && config.allowedSizes.includes(size as WidgetSize)) {
     return size as WidgetSize;
   }
@@ -77,7 +77,7 @@ export function getEffectiveWidgetSize(
   requestedSize: WidgetSize,
   isMobile: boolean,
 ): WidgetSize {
-  const config = WIDGET_REGISTRY[type];
+  const config = WIDGET_METADATA[type];
   if (!config) {
     return requestedSize;
   }

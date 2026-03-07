@@ -4,36 +4,15 @@
 import React from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useDashboard } from '@/app/[locale]/dashboard/dashboard-context';
 import { cn } from '@/lib/utils';
-import { useI18n } from '@/locales/client';
 import { useDashboardActions, useDashboardFilters } from '@/context/data-provider';
 import { useIsMobile } from '@/hooks/use-mobile';
 import dynamic from 'next/dynamic';
 import {
-    CloudUpload,
-    CheckCircle2,
-    Sparkles,
-    Trash2,
-    RotateCcw
+    Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
-const AddWidgetSheet = dynamic(
-    () => import('@/app/[locale]/dashboard/components/add-widget-sheet').then((m) => m.AddWidgetSheet),
-    { ssr: false }
-)
 const FilterCommandMenu = dynamic(
     () => import('./filters/filter-command-menu').then((m) => m.FilterCommandMenu),
     { ssr: false }
@@ -41,10 +20,6 @@ const FilterCommandMenu = dynamic(
 const ImportButton = dynamic(() => import('./import/import-button'), { ssr: false })
 const DailySummaryModal = dynamic(
     () => import('./daily-summary-modal').then((m) => m.DailySummaryModal),
-    { ssr: false }
-)
-const ShareButton = dynamic(
-    () => import('./share-button').then((m) => m.ShareButton),
     { ssr: false }
 )
 const GlobalSyncButton = dynamic(
@@ -55,21 +30,14 @@ const ActiveFilterTags = dynamic(
     () => import('./filters/active-filter-tags').then((m) => m.ActiveFilterTags),
     { ssr: false }
 )
+const DashboardHeaderWidgetControls = dynamic(
+    () => import('./dashboard-header-widget-controls').then((m) => m.DashboardHeaderWidgetControls),
+    { ssr: false }
+)
 
 export function DashboardHeader() {
     const pathname = usePathname();
     const isMobile = useIsMobile();
-    const {
-        isCustomizing,
-        toggleCustomizing,
-        addWidget,
-        layouts,
-        autoSaveStatus,
-        flushPendingSaves,
-        removeAllWidgets,
-        restoreDefaultLayout
-    } = useDashboard();
-    const t = useI18n();
     const { isPlusUser } = useDashboardActions();
     const {
         accountNumbers,
@@ -106,7 +74,6 @@ export function DashboardHeader() {
     };
 
     const title = getTitle();
-    const currentLayout = layouts || { desktop: [], mobile: [] };
     const sectionLabel = isDashboardRoot ? "Workspace" : "Dashboard";
     const showSectionLabel = !(isDashboardRoot && activeTab === 'accounts');
     const subtitle = isDashboardRoot
@@ -194,142 +161,7 @@ export function DashboardHeader() {
                     </div>
 
                     {/* Customization Group (Conditional) */}
-                    {isDashboardRoot && isWidgetsTab && (
-                        <div className={cn(
-                            "ml-1 flex shrink-0 items-center gap-1.5",
-                            isMobile
-                                ? "rounded-lg border border-border/35 bg-background/70 p-1"
-                                : "rounded-xl border border-border/50 bg-background/50 p-1.5 shadow-sm ring-1 ring-white/5 backdrop-blur-sm"
-                        )}>
-                            <button
-                                type="button"
-                                id="customize-mode"
-                                aria-label={isCustomizing ? t('widgets.done') : t('widgets.edit')}
-                                onClick={toggleCustomizing}
-                                className={cn(
-                                    "relative group flex items-center gap-2 rounded-lg transition-all duration-300",
-                                    isMobile ? "h-11 w-11 justify-center px-0" : "h-8 px-3",
-                                    isCustomizing
-                                        ? "bg-primary text-primary-foreground shadow-none"
-                                        : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                                )}
-                            >
-                                <div className={cn("transition-transform duration-300", isCustomizing && "rotate-180")}>
-                                    {isCustomizing ? (
-                                        <CheckCircle2 className="h-4 w-4" />
-                                    ) : (
-                                        <Sparkles className="h-4 w-4" />
-                                    )}
-                                </div>
-                                <span className={cn("text-[10px] font-bold uppercase tracking-widest", isMobile && "sr-only")}>
-                                    {isCustomizing ? t('widgets.done') : t('widgets.edit')}
-                                </span>
-                            </button>
-
-                            {isCustomizing && (
-                                <div className="flex items-center gap-1.5">
-                                    <div className="h-4 w-px bg-border/50 mx-0.5" />
-                                    <AddWidgetSheet
-                                        onAddWidget={addWidget}
-                                        isCustomizing={isCustomizing}
-                                    />
-
-                                    {!isMobile && (
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <button
-                                                    aria-label={t('widgets.restoreDefaults')}
-                                                    className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                                    title={t('widgets.restoreDefaults')}
-                                                >
-                                                    <RotateCcw className="h-4 w-4" />
-                                                </button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>{t('widgets.restoreDefaultsConfirmTitle')}</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        {t('widgets.restoreDefaultsConfirmDescription')}
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={restoreDefaultLayout}>
-                                                        {t('widgets.confirmRestoreDefaults')}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    )}
-
-                                    {!isMobile && (
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <button
-                                                    aria-label={t('widgets.deleteAll')}
-                                                    className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
-                                                    title={t('widgets.deleteAll')}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>{t('widgets.deleteAllConfirmTitle')}</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        {t('widgets.deleteAllConfirmDescription')}
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={removeAllWidgets}
-                                                        className="bg-white/10 text-white hover:bg-white/20 border border-white/10"
-                                                    >
-                                                        {t('widgets.confirmDeleteAll')}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    )}
-
-                                    {autoSaveStatus.hasPending ? (
-                                        <button
-                                            type="button"
-                                            onClick={flushPendingSaves}
-                                            aria-label="Save pending dashboard changes"
-                                            className={cn(
-                                                "flex items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors animate-pulse",
-                                                isMobile ? "h-11 w-11" : "h-8 w-8"
-                                            )}
-                                            title="Save Changes"
-                                        >
-                                            <CloudUpload className="w-4 h-4" />
-                                        </button>
-                                    ) : (
-                                        <div
-                                            role="status"
-                                            aria-label="All changes saved"
-                                            className={cn(
-                                                "flex items-center justify-center text-white/70",
-                                                isMobile ? "h-11 w-11" : "h-8 w-8"
-                                            )}
-                                            title="All changes saved"
-                                        >
-                                            <CheckCircle2 className="w-4 h-4 text-white" />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {!isMobile && (
-                                <>
-                                    <div className="mx-1 h-4 w-px bg-border/50" />
-                                    <ShareButton currentLayout={currentLayout} />
-                                </>
-                            )}
-                        </div>
-                    )}
+                    {isDashboardRoot && isWidgetsTab ? <DashboardHeaderWidgetControls isMobile={isMobile} /> : null}
                 </div>
             </div>
 
