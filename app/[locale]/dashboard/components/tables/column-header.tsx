@@ -1,3 +1,5 @@
+"use client"
+
 import { Column } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff, Filter, X } from "lucide-react"
 import { useState, useEffect } from "react"

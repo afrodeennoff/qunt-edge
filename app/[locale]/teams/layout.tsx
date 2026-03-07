@@ -1,6 +1,6 @@
 
-import { ThemeProvider } from "@/context/theme-provider";
 import { Metadata } from 'next';
+import { RootProviders } from "@/components/providers/root-providers";
 
 type Locale = 'en' | 'fr';
 
@@ -25,8 +25,8 @@ export default async function TeamLayout({
   children: React.ReactNode,
 }) {
   return (
-    <ThemeProvider>
+    <RootProviders>
       {children}
-    </ThemeProvider>
+    </RootProviders>
   );
 }

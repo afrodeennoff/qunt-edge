@@ -63,3 +63,18 @@
 - 2026-03-06: Implemented one-shot remediation pass: explicit middleware route-class cache contract, fail-safe runtime env validation handling, dashboard shell paint-cost reduction, scoped global transition performance cleanup, server user-data logger/cache improvements, and KPI stat-card typography unification.
 - Re-verified release gates: typecheck/lint/build/route-budgets/bundle analysis and strict perf headers passed; refreshed baseline and Lighthouse artifacts.
 - Captured residual blocker: Lighthouse thresholds still fail on `/en` and `/en/pricing` due high TBT/LCP; documented in `docs/audits/one-shot-remediation-2026-03-06.md`.
+
+## 2026-03-07
+- Completed a backend architecture analysis focused on `app/api` route domains, `server/*` ownership, auth/authz boundaries, and integration request/data flows.
+- Verified route-surface shape (`40` API handlers), with largest backend domains in AI, cron/email automation, and Whop billing/webhooks.
+- Traced key integration pipelines:
+  - Whop checkout + webhook lifecycle into subscription/payment persistence,
+  - AI model policy/client/telemetry stack with tool-enabled streaming routes,
+  - Broker ingestion/sync paths (Tradovate, Rithmic, IBKR, Thor/ETP token-auth ingestion).
+- Confirmed shared backend guardrails and primitives in active use: Supabase request-scoped auth client, service/admin authz helpers, centralized request validation helpers, and route-level rate limiting.
+- 2026-03-07: Completed a focused frontend architecture analysis across app route groups, UI shells, state layers, i18n wiring, and user flows.
+- Verified frontend composition boundaries across locale/app layouts (`app/layout.tsx`, `app/[locale]/layout.tsx`, dashboard/teams/admin/public route-group layouts) and traced primary navigation surfaces (`UnifiedSidebar`, landing navigation, teams sidebar).
+- Confirmed hybrid state model: React Query + dashboard context slices + multiple scoped Zustand stores with selective persistence for layout/timezone preferences.
+- Mapped i18n wiring through `next-international` client/server + middleware locale redirects, with locale-aware redirects and links across auth and protected routes.
+- 2026-03-07: Completed a focused data/ops quality audit covering Prisma schema/index posture, runtime DB/TLS pooling behavior, middleware+CSP security headers/authz, cache-control/SW/server cache strategy, quality scripts/tests, and deployment config.
+- Captured concrete strengths in CI guardrails (lint/typecheck/test/build/perf/security scans) and identified a workflow hygiene gap: widget-policy workflow references several missing `.github/scripts/*.js` helpers while only `check-manifests.js` exists.

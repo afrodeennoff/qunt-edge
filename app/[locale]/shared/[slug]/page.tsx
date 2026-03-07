@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { getShared } from "@/server/shared"
 import { SharedPageClient } from "./shared-page-client"
+import { DataProvider } from "@/context/data-provider"
 
 interface SharedPageProps {
   params: Promise<{
@@ -21,5 +22,13 @@ export default async function SharedPage({ params }: SharedPageProps) {
   }
 
   // Pass the resolved params and fetched data to the client component
-  return <SharedPageClient params={resolvedParams} initialData={sharedData} />
+  return (
+    <DataProvider
+      isSharedView
+      initialSharedSlug={resolvedParams.slug}
+      initialSharedData={sharedData}
+    >
+      <SharedPageClient />
+    </DataProvider>
+  )
 }

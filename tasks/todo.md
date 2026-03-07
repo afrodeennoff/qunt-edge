@@ -1,27 +1,97 @@
-# Understand `app/[locale]` Route Architecture (2026-03-06)
+# Client/Server Render Audit (2026-03-07)
 
 ## Scope
-- Understand how localized routing under `app/[locale]` is structured and how locale resolution/auth gating work.
+- Audit App Router client-side vs server-side rendering boundaries for hydration risk, unnecessary client rendering, and server component opportunities.
 
 ## Acceptance Criteria
-- [x] Route groups under `app/[locale]` are mapped.
-- [x] Locale middleware + provider wiring is verified from source files.
-- [x] Authentication and cache behavior at localized paths is summarized.
-- [x] Key risks/mismatches are identified with file evidence.
+- [x] Root layout/provider SSR/CSR boundaries are inspected.
+- [x] High-traffic route shells and dashboard surfaces are checked for client-only rendering drift.
+- [x] Findings are prioritized with file evidence.
+- [x] Verification limits and residual risks are documented.
 
 ## Plan Checklist
-- [x] Read `tasks/lessons.md` before analysis.
-- [x] Inspect `proxy.ts` locale/auth flow and matcher behavior.
-- [x] Inspect `app/[locale]/layout.tsx` and primary route-group layouts/pages.
-- [x] Summarize localized route architecture for handoff.
+- [x] Read `tasks/lessons.md` before starting.
+- [x] Inspect root layouts, templates, and provider stack.
+- [x] Inspect dashboard/shared/client-heavy surfaces and `dynamic(..., { ssr: false })` usage.
+- [x] Inspect data-fetching/auth/i18n boundaries affecting SSR behavior.
+- [x] Record findings and verification limits.
 
 ## Current Step
-- **Completed:** reconnaissance and architecture summary ready.
+- **Completed:** client/server rendering audit fixes implemented from the approved plan.
 
 ## Completion Notes
-- Verified locale segment is handled by middleware redirect strategy (`/` -> `/{locale}`) and then served through `app/[locale]` provider layout.
-- Confirmed key route groups: `(home)`, `(landing)`, `(authentication)`, `dashboard`, `teams`, `admin`, `embed`, `shared`.
-- Noted locale support mismatch: middleware allows `de|pt|vi|zh|yo` but client i18n map does not declare those locales.
+- Implemented render-boundary fixes:
+  - Reduced `app/[locale]/layout.tsx` to locale wiring only, and moved provider ownership into route layouts with `RootProviders`, `PublicRootProviders`, and `SidebarRootProviders`.
+  - Removed pathname-based route classification from `components/providers/root-providers.tsx`; dashboard/admin/teams sidebar/auth behavior now comes from the layouts that actually need it.
+  - Moved shared-route `DataProvider` ownership from the layout into `app/[locale]/shared/[slug]/page.tsx` and added `initialSharedData` / `initialSharedSlug` bootstrapping in `context/data-provider.tsx` so shared pages no longer do a duplicate first-mount fetch when server data already exists.
+  - Removed the shared-page hydration effect from `app/[locale]/shared/[slug]/shared-page-client.tsx`; it now renders directly from provider state.
+  - Replaced the home-page deferred client gate in `app/[locale]/(home)/components/DeferredHomeSections.tsx` with direct section rendering so the route can SSR meaningful section HTML again.
+  - Centralized dashboard scroll reset in `app/[locale]/dashboard/components/dashboard-scroll-reset.tsx` and removed route-level `window.scrollTo` effects; `reports`, `strategies`, and `data` pages no longer need client shells just for scroll behavior.
+- Verification:
+  - Source-level checks confirm `components/providers/root-providers.tsx` no longer uses `usePathname()` for route branching.
+  - Source-level checks confirm `app/[locale]/(home)/components/DeferredHomeSections.tsx` no longer uses `ssr: false` / intersection-gated rendering.
+  - Source-level checks confirm `context/data-provider.tsx` now has a bootstrapped shared-data path and skips the initial mount `loadData()` path when `initialSharedData` is supplied.
+  - Source-level checks confirm `app/[locale]/dashboard/reports/page.tsx`, `app/[locale]/dashboard/strategies/page.tsx`, and `app/[locale]/dashboard/data/page.tsx` are no longer promoted to client pages for scroll reset.
+  - Follow-up source verification for the Vercel regression confirms `app/[locale]/dashboard/components/tables/trade-table-review.tsx` and `app/[locale]/dashboard/components/tables/column-header.tsx` now declare `"use client"` explicitly, so they no longer depend on implicit client ancestry from a page shell.
+  - Runtime/build verification remains blocked here because dependencies are not installed (`next: command not found` during `npm run -s typecheck`).
+- Residual risk:
+  - Without browser/runtime verification in this workspace, this work is still limited to code-path evidence rather than measured hydration/runtime timings.
+  - Shared widgets now avoid the duplicate fetch path, but their full first-paint behavior still needs a browser pass because many downstream widget modules are client-heavy and local dependencies are unavailable here.
+
+# Widget Audit (2026-03-07)
+
+## Scope
+- Audit the dashboard/shared widget system for correctness bugs, regression risks, and verification gaps.
+
+## Acceptance Criteria
+- [x] Widget architecture and primary flows are inspected from source.
+- [x] High-severity and medium-severity findings are identified with file evidence.
+- [x] At least one targeted verification pass is run for any confirmed or likely defect.
+- [x] `tasks/todo.md` includes final review notes with residual risks.
+
+## Plan Checklist
+- [x] Read `tasks/lessons.md` before starting.
+- [x] Inspect widget registry, types, and default layout definitions.
+- [x] Inspect widget canvas edit/render/save flows.
+- [x] Inspect validation, migration, storage, and version helpers.
+- [x] Inspect shared/team widget rendering paths.
+- [x] Centralize widget layout sizing/render helpers used by dashboard and shared canvases.
+- [x] Preserve layout metadata through store writes.
+- [x] Fix free-tier migration filtering and validator parity with the registry.
+- [x] Re-run available verification and capture completion notes.
+
+## Current Step
+- **Completed:** widget consistency and render fixes implemented.
+
+## Completion Notes
+- Implemented widget consistency fixes in the current tree:
+  - centralized layout sizing/render helpers in `lib/widget-layout.ts`,
+  - aligned dashboard/shared/context widget sizing + placement logic to the shared helper,
+  - preserved layout metadata in `store/user-store.ts`,
+  - corrected free-tier migration filtering and safer widget repair defaults,
+  - aligned validator widget-type source with the live registry,
+  - moved widget entry animations off the React Grid Layout item node so grid transforms no longer collapse cards at the top-left,
+  - fixed add-widget preview card height rendering to use inline styles instead of a runtime Tailwind class.
+- Verification:
+  - Source verification confirms the shared widget canvas now uses stored layout items instead of auto-arranging them.
+  - Source verification confirms metadata fields (`version`, `schemaVersion`, `checksum`, `deviceId`) are retained on store writes.
+  - `npm run -s typecheck` remains blocked in this workspace because dependencies are not installed: `sh: next: command not found`.
+- Residual risk:
+  - Runtime drag/drop behavior could not be exercised here without the local Next/toolchain install, so browser interaction should be rechecked once `node_modules` is available.
+
+## Review
+- Findings confirmed from source:
+  - `store/user-store.ts` strips layout metadata (`version`, `schemaVersion`, `checksum`, `deviceId`) every time `setDashboardLayout` runs, which breaks the versioning/migration/checksum features layered on top of widget layouts.
+  - `lib/widget-migration-service.ts` uses stale widget type names in `filterFreeWidgets`, so a paid-to-free downgrade would filter out essentially every real widget and can leave users with an empty dashboard.
+  - `lib/widget-validator.ts` hardcodes a widget-type allowlist that no longer matches `WidgetType` / `WIDGET_REGISTRY`, so valid widgets like `smartInsights` and `propFirmCatalogue` are treated as invalid.
+  - `app/[locale]/shared/[slug]/shared-widget-canvas.tsx` reflows shared widgets instead of respecting stored `x/y` positions, so shared dashboards will not match the owner’s actual arrangement.
+  - Widget sizing logic is duplicated and inconsistent between `widget-canvas`, `dashboard-context`, and `shared-widget-canvas`, which creates layout drift across dashboard/shared/mobile surfaces.
+- Verification:
+  - Static source cross-checks were run across widget type definitions, registry entries, canvas rendering, migration, validator, store, and shared rendering paths.
+  - `npm run -s typecheck` could not complete in this workspace because `next` is unavailable (`sh: next: command not found`) and `node_modules` is absent.
+- Residual risks:
+  - There are no dedicated widget regression tests in `tests/` covering migration, validator parity, or shared-layout fidelity, so these paths can regress silently.
+  - The project currently maintains multiple widget orchestration implementations (`widget-canvas`, `dashboard-context`, `dashboard-context-auto-save`, shared canvas helpers), which increases drift risk until the layout math is centralized.
 
 # Theme Token Migration Phase C (Alias Removal) (2026-03-03)
 
@@ -1572,3 +1642,92 @@
 - Verification summary:
   - `typecheck`, `lint`, `build`, `check:route-budgets`, `analyze:bundle`, strict `perf:headers`, and `perf:baseline` passed.
   - `perf:lighthouse` still fails threshold targets on `/en` and `/en/pricing` due TBT/LCP/score.
+# Backend Architecture Analysis (2026-03-07)
+
+## Scope
+- Analyze backend architecture with focus on `app/api` routes, `server` modules, auth/authz, integrations (Whop, AI, brokers), and end-to-end request/data flow.
+
+## Acceptance Criteria
+- [x] Key API route domains and responsibilities are mapped.
+- [x] Core server/auth/authz modules are mapped with file-level ownership.
+- [x] Integration modules (Whop, AI, brokers) are traced through request/data paths.
+- [x] Final summary includes concrete file paths and data-flow narrative.
+
+## Plan Checklist
+- [x] Review `tasks/lessons.md` and active repo context.
+- [x] Inventory `app/api`, `server`, and integration/auth module files.
+- [x] Trace representative request/data flows by domain.
+- [x] Deliver concise architecture report to user with file-path references.
+
+## Current Step
+- **Completed:** architecture mapping and request/data-flow trace complete.
+
+## Completion Notes
+- Route surface inventory confirmed `40` API route handlers across `app/api`, with largest domains in `ai` (`11`) and service operations (`cron`, `email`, `whop`).
+- Auth/AuthZ boundary validated across:
+  - Supabase session auth (`createRouteClient`, `server/auth`),
+  - admin/service authorization (`server/authz`),
+  - token-based partner ingestion (`lib/api-auth` for ETP/Thor).
+- Integration traces completed for:
+  - Whop checkout + webhook lifecycle,
+  - AI route policy/model/tool stack,
+  - Broker ingestion/sync (Tradovate, Rithmic, IBKR, Thor/ETP).
+
+# Frontend Architecture Analysis (2026-03-07)
+
+## Scope
+- Analyze frontend architecture for route groups, major UI components, state management, i18n, and user flows.
+
+## Acceptance Criteria
+- [x] App route groups and layout boundaries are mapped.
+- [x] Major UI shell/components and composition patterns are identified.
+- [x] State management model (providers/context/stores) is summarized.
+- [x] i18n locale wiring and propagation paths are summarized.
+- [x] Core user flows are documented with representative file evidence.
+
+## Plan Checklist
+- [x] Review `tasks/lessons.md`.
+- [x] Inventory `app/[locale]` route groups and layouts.
+- [x] Read representative UI shell/navigation components.
+- [x] Read provider/context/store and i18n files.
+- [x] Produce concise architecture summary with key file paths.
+
+## Current Step
+- **Completed:** frontend architecture summary delivered.
+
+## Completion Notes
+- Route groups confirmed: `(home)`, `(landing)`, `(authentication)`, `dashboard`, `teams`, `admin`, `embed`, `shared`, with locale wrapper at `app/[locale]/layout.tsx`.
+- Frontend shell pattern confirmed: `MarketingLayoutShell` for public pages, `UnifiedSidebar` + `SidebarProvider` for app workspaces, route-level dynamic/lazy loading in dashboard tab shell.
+- State model confirmed: `DataProvider` + sliced dashboard contexts, React Query global provider, and domain/UI Zustand stores (with selective persistence).
+- i18n confirmed via `next-international` server/client setup, middleware locale redirect strategy, and locale hooks in nav/auth/dashboard surfaces.
+
+# Data/Ops Quality Audit (Prisma + Caching + Security + Scripts + Tests + Deploy) (2026-03-07)
+
+## Scope
+- Analyze data/ops quality across Prisma schema, caching strategy, security middleware/CSP, scripts, tests, and deployment configuration.
+
+## Acceptance Criteria
+- [x] Prisma schema quality posture summarized with concrete evidence.
+- [x] Caching strategy and stale-data protections mapped across middleware/SW/server caches.
+- [x] Security middleware/CSP/authz controls summarized with key enforcement points.
+- [x] Scripts/tests/CI/deployment guardrails reviewed for reliability/security/performance coverage.
+- [x] Key strengths and notable risks/gaps called out with file references.
+
+## Plan Checklist
+- [x] Review existing lessons and current repo state.
+- [x] Inspect target source files for each requested domain.
+- [x] Cross-check CI scripts/workflows against local script inventory.
+- [x] Compile reliability/security/performance enforcement map.
+- [x] Deliver concise audit summary with key files.
+
+## Current Step
+- **Completed:** audit evidence collection and synthesis complete.
+
+## Completion Notes
+- Covered focus areas with source evidence from:
+  - `prisma/schema.prisma`, `lib/prisma.ts`
+  - `proxy.ts`, `lib/security/csp.ts`, `server/authz.ts`, `lib/rate-limit.ts`, `app/api/_utils/validate.ts`
+  - `components/providers/root-providers.tsx`, `public/sw.js`, `server/user-data.ts`, `components/ui/unified-sidebar.tsx`
+  - `scripts/check-route-security.mjs`, `scripts/perf-header-check.mjs`, `scripts/check-route-budgets.mjs`, `scripts/perf-lighthouse.mjs`, `scripts/smoke-http.mjs`
+  - `.github/workflows/ci.yml`, `.github/workflows/widget-policy-compliance.yml`, `Dockerfile`, `docker-compose*.yml`, `vercel.json`, `vitest.config.ts`
+- Noted one concrete ops gap: widget-policy workflow references multiple `.github/scripts/*` files that are absent in repository.

@@ -1,4 +1,5 @@
 import MarketingLayoutShell from "../(landing)/components/marketing-layout-shell";
+import { PublicRootProviders } from "@/components/providers/root-providers";
 
 export default function HomeLayout({
   children,
@@ -6,8 +7,10 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <MarketingLayoutShell contentClassName="w-full">
-      {children}
-    </MarketingLayoutShell>
+    <PublicRootProviders>
+      <MarketingLayoutShell contentClassName="w-full">
+        {children}
+      </MarketingLayoutShell>
+    </PublicRootProviders>
   );
 }

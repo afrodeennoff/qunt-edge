@@ -4,8 +4,10 @@ import React, {
   useState,
   useContext,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 import {
   Trade as PrismaTrade,
@@ -62,7 +64,6 @@ import { useFinancialEventsStore } from "@/store/financial-events-store";
 import { useTradesStore } from "@/store/trades-store";
 import { getTradesCache, setTradesCache, getUserDataCache, setUserDataCache } from "@/lib/indexeddb/trades-cache"
 import { deleteTagAction } from "@/server/tags";
-import { useRouter } from "next/navigation";
 import { useCurrentLocale } from "@/locales/client";
 import { useMoodStore } from "@/store/mood-store";
 import { useSubscriptionStore } from "@/store/subscription-store";
@@ -240,17 +241,27 @@ function useIsMobileDetection() {
 export const DataProvider: React.FC<{
   children: React.ReactNode;
   isSharedView?: boolean;
+  initialSharedSlug?: string;
+  initialSharedData?: {
+    params: SharedParams;
+    trades: Trade[];
+    groups: GroupInput[];
+  } | null;
   adminView?: {
     userId: string;
   };
-}> = ({ children, isSharedView = false, adminView = null }) => {
+}> = ({
+  children,
+  isSharedView = false,
+  initialSharedSlug,
+  initialSharedData = null,
+  adminView = null,
+}) => {
   const supabase = useMemo(() => createClient(), []);
-  const router = useRouter();
   const params = useParams();
   const isMobile = useIsMobileDetection();
 
   // Get store values
-  const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const setSubscription = useUserStore((state) => state.setSubscription);
   const setTags = useUserStore((state) => state.setTags);
@@ -263,7 +274,6 @@ export const DataProvider: React.FC<{
   const groups = useUserStore((state) => state.groups);
   const accounts = useUserStore((state) => state.accounts);
   const setSupabaseUser = useUserStore((state) => state.setSupabaseUser);
-  const subscription = useUserStore((state) => state.subscription);
   const setTickDetails = useTickDetailsStore((state) => state.setTickDetails);
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
   const setEvents = useFinancialEventsStore((state) => state.setEvents);
@@ -284,13 +294,58 @@ export const DataProvider: React.FC<{
   const setSubscriptionError = useSubscriptionStore(
     (state) => state.setError
   );
+  const bootstrappedSharedSlugRef = useRef<string | null>(null);
+
+  const buildSharedAccountNumbers = useCallback(
+    (sharedData: NonNullable<typeof initialSharedData>) =>
+      sharedData.params.accountNumbers.length > 0
+        ? sharedData.params.accountNumbers
+        : Array.from(new Set(sharedData.trades.map((trade) => trade.accountNumber))),
+    []
+  );
+
+  const buildSharedParams = useCallback(
+    (sharedData: NonNullable<typeof initialSharedData>) => ({
+      ...sharedData.params,
+      accountNumbers: buildSharedAccountNumbers(sharedData),
+    }),
+    [buildSharedAccountNumbers]
+  );
+
+  const prepareSharedTrades = useCallback(
+    (incomingTrades: Trade[]) =>
+      incomingTrades
+        .filter((trade) => isValid(new Date(trade.entryDate)))
+        .map((trade) => {
+          let utcDateStr = "";
+          try {
+            utcDateStr = formatInTimeZone(
+              new Date(trade.entryDate),
+              timezone || "UTC",
+              "yyyy-MM-dd"
+            );
+          } catch (error) {
+            console.error("Error formatting trade date:", trade.id, error);
+          }
+
+          return {
+            ...trade,
+            utcDateStr,
+          };
+        }),
+    [timezone]
+  );
 
   // Local states
-  const [sharedParams, setSharedParams] = useState<SharedParams | null>(null);
+  const [sharedParams, setSharedParams] = useState<SharedParams | null>(() =>
+    initialSharedData ? buildSharedParams(initialSharedData) : null
+  );
 
   // Filter states
   const [instruments, setInstruments] = useState<string[]>([]);
-  const [accountNumbers, setAccountNumbers] = useState<string[]>([]);
+  const [accountNumbers, setAccountNumbers] = useState<string[]>(() =>
+    initialSharedData ? buildSharedAccountNumbers(initialSharedData) : []
+  );
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [tickRange, setTickRange] = useState<TickRange>({
     min: undefined,
@@ -368,6 +423,60 @@ export const DataProvider: React.FC<{
     [withTimeout]
   );
 
+  const syncSharedDataState = useCallback(
+    (sharedData: NonNullable<typeof initialSharedData>) => {
+      const hydratedSharedParams = buildSharedParams(sharedData);
+      const sharedGroups = normalizeGroupsForClient(sharedData.groups || []);
+      const sharedAccounts = normalizeAccountsForClient(
+        (sharedData.groups?.flatMap((group) => group.accounts) || []) as AccountInput[]
+      );
+
+      setTrades(sanitizeTradesForState(prepareSharedTrades(sharedData.trades)));
+      setSharedParams(hydratedSharedParams);
+      setAccountNumbers(hydratedSharedParams.accountNumbers);
+      setDashboardLayout(defaultLayouts);
+      setGroups(sharedGroups);
+      setAccounts(sharedAccounts);
+
+      if (sharedData.params.tickDetails) {
+        setTickDetails(sharedData.params.tickDetails);
+      }
+
+      return sharedAccounts;
+    },
+    [
+      buildSharedParams,
+      prepareSharedTrades,
+      sanitizeTradesForState,
+      setAccounts,
+      setDashboardLayout,
+      setGroups,
+      setTickDetails,
+      setTrades,
+    ]
+  );
+
+  const hydrateSharedAccountMetrics = useCallback(
+    async (sharedAccounts: Account[]) => {
+      let accountsWithMetrics = sharedAccounts;
+      try {
+        accountsWithMetrics = await withTimeout(
+          calculateAccountMetricsAction(sharedAccounts),
+          15000,
+          "calculateAccountMetricsAction(shared)"
+        );
+      } catch (error) {
+        console.error(
+          "[DataProvider] Account metrics timed out for shared view; continuing without metrics",
+          error
+        );
+      }
+
+      setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+    },
+    [setAccounts, withTimeout]
+  );
+
   // Load data from the server
   const loadData = useCallback(async () => {
     console.log("[DataProvider] loadData triggered, isSharedView:", isSharedView);
@@ -376,60 +485,25 @@ export const DataProvider: React.FC<{
       setIsLoading(true);
 
       if (isSharedView) {
+        if (initialSharedData) {
+          const sharedAccounts = syncSharedDataState(initialSharedData);
+          await hydrateSharedAccountMetrics(sharedAccounts);
+          setIsLoading(false);
+          return;
+        }
+
         const sharedData = await withTimeout(
           loadSharedData(params.slug as string),
           15000,
           "loadSharedData"
         );
         if (!sharedData.error) {
-          const processedSharedTrades = sharedData.trades
-            .filter(trade => isValid(new Date(trade.entryDate)))
-            .map((trade) => {
-              let utcDateStr = '';
-              try {
-                utcDateStr = formatInTimeZone(
-                  new Date(trade.entryDate),
-                  timezone,
-                  "yyyy-MM-dd"
-                );
-              } catch (e) {
-                console.error("Error formatting trade date:", trade.id, e);
-              }
-              return {
-                ...trade,
-                utcDateStr,
-              };
-            });
-
-          // Batch state updates
-          const updates = async () => {
-            setTrades(sanitizeTradesForState(processedSharedTrades as Trade[]));
-            setSharedParams(sharedData.params);
-
-            setDashboardLayout(defaultLayouts);
-
-            if (sharedData.params.tickDetails) {
-              setTickDetails(sharedData.params.tickDetails);
-            }
-
-            const sharedAccounts = normalizeAccountsForClient(
-              (sharedData.groups?.flatMap((group) => group.accounts) || []) as AccountInput[]
-            );
-            let accountsWithMetrics = sharedAccounts;
-            try {
-              accountsWithMetrics = await withTimeout(
-                calculateAccountMetricsAction(sharedAccounts),
-                15000,
-                "calculateAccountMetricsAction(shared)"
-              );
-            } catch (e) {
-              console.error("[DataProvider] Account metrics timed out for shared view; continuing without metrics", e);
-            }
-            setGroups(normalizeGroupsForClient(sharedData.groups || []));
-            setAccounts(normalizeAccountsForClient(accountsWithMetrics));
-          };
-
-          await updates();
+          const sharedAccounts = syncSharedDataState({
+            params: sharedData.params,
+            trades: sharedData.trades as Trade[],
+            groups: (sharedData.groups || []) as GroupInput[],
+          });
+          await hydrateSharedAccountMetrics(sharedAccounts);
         }
         setIsLoading(false);
         return;
@@ -626,12 +700,33 @@ export const DataProvider: React.FC<{
     }
   }, [
     isSharedView,
+    initialSharedData,
     params?.slug,
-    timezone,
     fetchAllTrades,
+    hydrateSharedAccountMetrics,
     setIsLoading,
+    syncSharedDataState,
     withTimeout,
     supabase,
+  ]);
+
+  useLayoutEffect(() => {
+    if (!isSharedView || !initialSharedData || !initialSharedSlug) return;
+    if (bootstrappedSharedSlugRef.current === initialSharedSlug) return;
+
+    bootstrappedSharedSlugRef.current = initialSharedSlug;
+    const sharedAccounts = syncSharedDataState(initialSharedData);
+    setIsLoading(false);
+    hydrateSharedAccountMetrics(sharedAccounts).catch((error) => {
+      console.error("[DataProvider] Failed to hydrate shared account metrics", error);
+    });
+  }, [
+    hydrateSharedAccountMetrics,
+    initialSharedData,
+    initialSharedSlug,
+    isSharedView,
+    setIsLoading,
+    syncSharedDataState,
   ]);
 
   // Load data on mount and when isSharedView changes
@@ -640,7 +735,11 @@ export const DataProvider: React.FC<{
 
     const loadDataIfMounted = async () => {
       if (!mounted) return;
+      if (isSharedView && initialSharedData) {
+        return;
+      }
       await loadData();
+      if (isSharedView) return;
       // Load Whop subscription data
       try {
         setSubscriptionLoading(true);
@@ -663,7 +762,7 @@ export const DataProvider: React.FC<{
     return () => {
       mounted = false;
     };
-  }, [isSharedView]); // Only depend on isSharedView
+  }, [isSharedView, initialSharedData, loadData]);
 
   // Persist language changes without blocking UI
   useEffect(() => {

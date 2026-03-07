@@ -1,3 +1,5 @@
+"use client"
+
 import { X, ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useDashboardFilters } from "@/context/data-provider"

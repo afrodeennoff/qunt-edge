@@ -1,5 +1,4 @@
 import { I18nProviderClient } from "@/locales/client";
-import { RootProviders } from "@/components/providers/root-providers";
 import ConsentBannerLazy from "@/components/lazy/consent-banner-lazy";
 
 export default async function RootLayout(props: {
@@ -12,10 +11,8 @@ export default async function RootLayout(props: {
 
   return (
     <I18nProviderClient locale={locale}>
-      <RootProviders>
-        <ConsentBannerLazy />
-        {children}
-      </RootProviders>
+      <ConsentBannerLazy />
+      {children}
     </I18nProviderClient>
   );
 }

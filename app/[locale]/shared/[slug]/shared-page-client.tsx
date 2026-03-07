@@ -10,21 +10,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useCurrentLocale, useI18n } from "@/locales/client"
 import { Loader2, ChevronDown } from "lucide-react"
-import { useEffect, useState } from "react"
-import { SharedParams } from "@/server/shared"
-import { Trade } from "@/lib/data-types"
+import { useState } from "react"
 import { LanguageSelector } from "@/components/ui/language-selector"
-
-interface SharedPageClientProps {
-  params: {
-    locale: string;
-    slug: string;
-  }
-  initialData: {
-    params: SharedParams;
-    trades: Trade[];
-  }
-}
 
 type I18nFn = ReturnType<typeof useI18n>
 
@@ -146,28 +133,9 @@ function TopBanner({ t }: { t: I18nFn }) {
   )
 }
 
-export function SharedPageClient({ initialData }: SharedPageClientProps) {
+export function SharedPageClient() {
   const t = useI18n()
-  const { isLoading, sharedParams, setSharedParams, setAccountNumbers } = useData()
-
-  // Hydrate the initial data
-  useEffect(() => {
-    if (initialData) {
-      // If accountNumbers is empty, deduce them from trades
-      const deducedAccountNumbers = initialData.params.accountNumbers.length === 0
-        ? Array.from(new Set(initialData.trades.map(trade => trade.accountNumber)))
-        : initialData.params.accountNumbers
-
-      // Update both sharedParams and accountNumbers
-      setSharedParams({
-        ...initialData.params,
-        accountNumbers: deducedAccountNumbers
-      })
-      
-      // Initialize accountNumbers with all accounts
-      setAccountNumbers(deducedAccountNumbers)
-    }
-  }, [initialData, setSharedParams, setAccountNumbers])
+  const { isLoading, sharedParams } = useData()
 
   if (isLoading) {
     return (

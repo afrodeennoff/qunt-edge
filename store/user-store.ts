@@ -183,6 +183,10 @@ export const useUserStore = create<UserStore>()(
               typeof layout.mobile === "string"
                 ? JSON.parse(layout.mobile)
                 : (layout.mobile as Widget[]),
+            version: layout.version,
+            schemaVersion: layout.schemaVersion,
+            checksum: layout.checksum ?? null,
+            deviceId: layout.deviceId ?? null,
             createdAt: layout.createdAt,
             updatedAt: layout.updatedAt,
           },

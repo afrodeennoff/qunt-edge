@@ -46,10 +46,6 @@ export default function DashboardBehaviorPage() {
   const inFlightControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
-  useEffect(() => {
     let isMounted = true
     inFlightControllerRef.current?.abort()
     const controller = new AbortController()

@@ -36,6 +36,24 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-07: Client/Server Render Boundary Cleanup
+- **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.
+- **What I want:** Public/home/shared routes should retain meaningful server-rendered HTML, shared pages should use the server fetch as the first render source, and dashboard route shells should stay server-oriented unless they genuinely own client state.
+- **What I don't want:** Pathname-based provider branching in a global client wrapper, duplicate shared-data fetches after SSR, `ssr: false` marketing sections gutting home-page HTML, or route entrypoints becoming client pages only to call `window.scrollTo`.
+- **How we fixed that:**
+  - Reduced `app/[locale]/layout.tsx` to locale wiring only.
+  - Split provider responsibilities in `components/providers/root-providers.tsx` into structural route stacks (`RootProviders`, `PublicRootProviders`, `SidebarRootProviders`) and removed `usePathname()` branching.
+  - Moved shared-route `DataProvider` ownership into `app/[locale]/shared/[slug]/page.tsx` and added `initialSharedData` / `initialSharedSlug` bootstrapping in `context/data-provider.tsx` so shared pages skip the initial duplicate fetch.
+  - Removed shared-page hydration boot logic from `app/[locale]/shared/[slug]/shared-page-client.tsx`.
+  - Replaced the client-only deferred home-section gate with direct section rendering in `app/[locale]/(home)/components/DeferredHomeSections.tsx`.
+  - Centralized dashboard scroll reset in `app/[locale]/dashboard/components/dashboard-scroll-reset.tsx` and removed route-level scroll effects from dashboard page entrypoints.
+- **Key Files:** `app/[locale]/layout.tsx`, `components/providers/root-providers.tsx`, `context/data-provider.tsx`, `app/[locale]/shared/[slug]/page.tsx`, `app/[locale]/shared/[slug]/shared-page-client.tsx`, `app/[locale]/(home)/components/DeferredHomeSections.tsx`, `app/[locale]/dashboard/layout.tsx`
+- **Verification:**
+  - Source checks confirm `RootProviders` no longer uses `usePathname()`.
+  - Source checks confirm `DeferredHomeSections` no longer uses `ssr: false` or intersection-only rendering.
+  - Source checks confirm shared pages now have a bootstrapped `initialSharedData` path and skip the initial duplicate `loadData()` call when server data exists.
+  - Runtime verification is still pending in this workspace because dependencies are not installed (`next: command not found`).
+
 ### 2026-02-27: Non-Dashboard Spacing Balance Alignment (Landing/Teams Only)
 - **What changed:** Applied a balanced container width policy for public non-dashboard routes while explicitly keeping dashboard spacing untouched.
 - **What I want:** `/en` public pages (for example `/en/propfirms`, `/en/teams`, `/en/pricing`, `/en/support`) should have consistent, premium side spacing similar to the home-page visual rhythm.

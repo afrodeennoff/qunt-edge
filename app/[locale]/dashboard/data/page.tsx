@@ -1,16 +1,9 @@
-'use client'
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataManagementCard } from "@/app/[locale]/dashboard/data/components/data-management/data-management-card"
-import { useEffect } from "react"
 import { TradeTableReview } from "../components/tables/trade-table-review"
 import { UnifiedPageShell, UnifiedSurface } from "@/components/layout/unified-page-shell"
 
 export default function DashboardPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
   return (
     <UnifiedPageShell density="compact">
       <div className="flex w-full flex-1 flex-col">

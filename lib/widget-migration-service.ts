@@ -1,5 +1,6 @@
 import { DashboardLayoutWithWidgets, Widget } from "@/store/user-store"
 import { defaultLayouts } from "@/lib/default-layouts"
+import { FALLBACK_WIDGET_TYPE, normalizeWidgetSize } from "@/lib/widget-layout"
 
 export interface MigrationResult {
   success: boolean
@@ -125,13 +126,14 @@ class WidgetMigrationService {
   }
 
   private addUpgradeWidgets(widgets: Widget[]): Widget[] {
+    const nextY = widgets.reduce((maxY, widget) => Math.max(maxY, widget.y + widget.h), 0)
     const premiumWidgets: Widget[] = [
       {
         i: `widget${Date.now()}_risk`,
         type: 'riskMetrics',
         size: 'medium',
         x: 0,
-        y: widgets.length,
+        y: nextY,
         w: 6,
         h: 4,
         updatedAt: new Date()
@@ -142,8 +144,25 @@ class WidgetMigrationService {
   }
 
   private filterFreeWidgets(widgets: Widget[]): Widget[] {
-    const freeWidgetTypes = ['statistics', 'chart', 'calendar', 'mindset']
-    return widgets.filter(w => freeWidgetTypes.includes(w.type))
+    const freeWidgetTypes = new Set<Widget["type"]>([
+      'statisticsWidget',
+      'equityChart',
+      'calendarWidget',
+      'mindsetWidget',
+      'cumulativePnl',
+      'profitFactor',
+      'riskRewardRatio',
+      'averagePositionTime',
+      'weekdayPnlChart',
+      'timeOfDayChart',
+      'pnlBySideChart',
+      'tradeDistribution',
+      'commissionsPnl',
+      'timeInPositionChart',
+      'tickDistribution',
+      'pnlChart',
+    ])
+    return widgets.filter(w => freeWidgetTypes.has(w.type))
   }
 
   migrateForDeviceChange(
@@ -241,8 +260,8 @@ class WidgetMigrationService {
       .filter(w => w && typeof w === 'object')
       .map(widget => ({
         i: widget.i || `widget${Date.now()}_${Math.random()}`,
-        type: widget.type || 'chart',
-        size: widget.size || 'medium',
+        type: widget.type || FALLBACK_WIDGET_TYPE,
+        size: normalizeWidgetSize(widget.type || FALLBACK_WIDGET_TYPE, widget.size),
         x: widget.x ?? 0,
         y: widget.y ?? 0,
         w: widget.w ?? 6,
