@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/prisma/generated/prisma"
+import { logger } from '@/lib/logger'
 import { DashboardLayoutWithWidgets, type Widget } from "@/store/user-store"
 import type { Prisma } from "@/prisma/generated/prisma"
 
@@ -77,13 +78,13 @@ class WidgetStorageService {
       localStorage.setItem(this.getMetadataKey(userId), JSON.stringify(metadata))
       return true
     } catch (error) {
-      console.error('[WidgetStorageService] Local storage save failed:', error)
+      logger.error('[WidgetStorageService] Local storage save failed:', error)
       
       try {
         sessionStorage.setItem(this.getStorageKey(userId), JSON.stringify(layout))
         return true
       } catch (sessionError) {
-        console.error('[WidgetStorageService] Session storage save also failed:', sessionError)
+        logger.error('[WidgetStorageService] Session storage save also failed:', sessionError)
         return false
       }
     }
@@ -105,7 +106,7 @@ class WidgetStorageService {
       
       return null
     } catch (error) {
-      console.error('[WidgetStorageService] Local storage load failed:', error)
+      logger.error('[WidgetStorageService] Local storage load failed:', error)
       return null
     }
   }
@@ -130,7 +131,7 @@ class WidgetStorageService {
       
       throw new Error(result.error || 'Database save failed')
     } catch (error) {
-      console.error('[WidgetStorageService] Database save failed:', error)
+      logger.error('[WidgetStorageService] Database save failed:', error)
       
       const localSaveSuccess = this.saveToLocalStorage(userId, layout)
       if (localSaveSuccess) {
@@ -168,7 +169,7 @@ class WidgetStorageService {
     retryCount = 0
   ): Promise<StorageResult> {
     if (!this.isOnline) {
-      console.log('[WidgetStorageService] Offline - saving to local storage')
+      logger.info('[WidgetStorageService] Offline - saving to local storage')
       const saved = this.saveToLocalStorage(userId, layout)
       return {
         success: saved,
@@ -203,7 +204,7 @@ class WidgetStorageService {
       const result = await this.saveToDatabase(userId, layout)
       
       if (!result.success && retryCount < MAX_RETRIES) {
-        console.log(`[WidgetStorageService] Retry ${retryCount + 1}/${MAX_RETRIES}`)
+        logger.info(`[WidgetStorageService] Retry ${retryCount + 1}/${MAX_RETRIES}`)
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)))
         return this.performSave(userId, layout, retryCount + 1)
       }
@@ -211,7 +212,7 @@ class WidgetStorageService {
       return result
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
-        console.log(`[WidgetStorageService] Retry ${retryCount + 1}/${MAX_RETRIES} after error`)
+        logger.info(`[WidgetStorageService] Retry ${retryCount + 1}/${MAX_RETRIES} after error`)
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)))
         return this.performSave(userId, layout, retryCount + 1)
       }
@@ -276,13 +277,13 @@ class WidgetStorageService {
       
       const localLayout = this.loadFromLocalStorage(userId)
       if (localLayout) {
-        console.log('[WidgetStorageService] Loaded from local storage fallback')
+        logger.info('[WidgetStorageService] Loaded from local storage fallback')
         return localLayout
       }
       
       return null
     } catch (error) {
-      console.error('[WidgetStorageService] Load from database failed, trying local:', error)
+      logger.error('[WidgetStorageService] Load from database failed, trying local:', error)
       return this.loadFromLocalStorage(userId)
     }
   }
@@ -308,7 +309,7 @@ class WidgetStorageService {
       localStorage.removeItem(this.getMetadataKey(userId))
       sessionStorage.removeItem(this.getStorageKey(userId))
     } catch (error) {
-      console.error('[WidgetStorageService] Clear local storage failed:', error)
+      logger.error('[WidgetStorageService] Clear local storage failed:', error)
     }
   }
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { logger } from '@/lib/logger'
 import { prisma } from "@/lib/prisma"
 import { generateText, Output } from "ai"
 import { z } from "zod"
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    console.log(`Processing ${subscribers.length} emails for name inference`)
+    logger.info(`Processing ${subscribers.length} emails for name inference`)
 
     // Prepare emails for AI processing
     const emails = subscribers.map(sub => sub.email)
@@ -152,7 +153,7 @@ Return the inferred names with confidence levels:
             status: "updated"
           })
         } catch (error) {
-          console.error(`Failed to update ${inference.email}:`, error)
+          logger.error(`Failed to update ${inference.email}:`, error)
           results.push({
             email: inference.email,
             status: "error",
@@ -170,7 +171,7 @@ Return the inferred names with confidence levels:
       }
     }
 
-    console.log(`Name inference completed: ${updatedCount} updated out of ${subscribers.length} processed`)
+    logger.info(`Name inference completed: ${updatedCount} updated out of ${subscribers.length} processed`)
 
     return NextResponse.json({
       success: true,
@@ -187,7 +188,7 @@ Return the inferred names with confidence levels:
     })
 
   } catch (error) {
-    console.error("Error in name inference:", error)
+    logger.error("Error in name inference:", error)
     return toErrorResponse(error)
   }
 }
@@ -225,7 +226,7 @@ export async function GET(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error("Error checking subscribers:", error)
+    logger.error("Error checking subscribers:", error)
     return toErrorResponse(error)
   }
 }

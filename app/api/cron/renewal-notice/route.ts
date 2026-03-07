@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { logger } from '@/lib/logger'
 import { prisma } from "@/lib/prisma"
 import { Resend } from 'resend'
 import { headers } from 'next/headers'
@@ -18,7 +19,7 @@ const getDateLocale = (language: string) => {
 // Daily cron job handler - runs every day at 9 AM UTC
 export async function GET(req: Request) {
   if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is missing')
+    logger.error('RESEND_API_KEY is missing')
     return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
   }
   const resend = new Resend(process.env.RESEND_API_KEY)
@@ -135,25 +136,25 @@ export async function GET(req: Request) {
             })
 
             if (error) {
-              console.error(`Failed to send renewal notice to ${userEmail} for account ${account.id}:`, error)
+              logger.error(`Failed to send renewal notice to ${userEmail} for account ${account.id}:`, error)
               errorCount++
             } else {
-              console.log(`Renewal notice sent to ${userEmail} for account ${account.id}`)
+              logger.info(`Renewal notice sent to ${userEmail} for account ${account.id}`)
               successCount++
 
             }
           } catch (accountError) {
-            console.error(`Error processing account ${account.id}:`, accountError)
+            logger.error(`Error processing account ${account.id}:`, accountError)
             errorCount++
           }
         }
       } catch (userError) {
-        console.error(`Error processing user ${userEmail}:`, userError)
+        logger.error(`Error processing user ${userEmail}:`, userError)
         errorCount += userAccounts.length
       }
     }
 
-    console.log(`Renewal notice emails processed: ${successCount} successful, ${errorCount} failed`)
+    logger.info(`Renewal notice emails processed: ${successCount} successful, ${errorCount} failed`)
 
     return NextResponse.json({
       success: true,
@@ -168,7 +169,7 @@ export async function GET(req: Request) {
     })
 
   } catch (error) {
-    console.error('Renewal notice cron job error:', error)
+    logger.error('Renewal notice cron job error:', error)
     return toErrorResponse(error)
   }
 }

@@ -105,7 +105,6 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
 
     try {
       const runSync = async () => {
-        console.log('Starting sync for account:', accountId)
         if (!account.token) {
           const errorMsg = `Token for account ${accountId} is expired`
           return { error: true, message: errorMsg }
@@ -134,7 +133,6 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
         const savedCount = payload.savedCount || 0
         const ordersCount = payload.ordersCount || 0
 
-        console.log(`Sync complete for ${accountId}: ${savedCount} trades saved, ${ordersCount} orders processed`)
 
         // Show success message
         let successMessage: string
@@ -254,7 +252,6 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
         const minutesSinceLastSync = (now - lastSyncTime) / (1000 * 60)
 
         if (minutesSinceLastSync >= syncInterval) {
-          console.log(`Auto-sync triggered for account ${account.accountId}`)
           await performSyncForAccount(account.accountId)
         }
       }

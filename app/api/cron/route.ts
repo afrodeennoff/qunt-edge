@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { logger } from '@/lib/logger'
 import { prisma } from "@/lib/prisma"
 import { Resend } from 'resend'
 import { headers } from 'next/headers'
@@ -16,7 +17,7 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_R
     return response
   } catch (error) {
     if (retries > 0 && (error instanceof Error && error.message.includes('ECONNRESET'))) {
-      console.warn(`Retrying fetch (${MAX_RETRIES - retries + 1}/${MAX_RETRIES}) for ${url}`)
+      logger.warn(`Retrying fetch (${MAX_RETRIES - retries + 1}/${MAX_RETRIES}) for ${url}`)
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
       return fetchWithRetry(url, options, retries - 1)
     }
@@ -26,7 +27,7 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_R
 
 export async function GET(req: Request) {
   if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is missing')
+    logger.error('RESEND_API_KEY is missing')
     return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
   }
   const resend = new Resend(process.env.RESEND_API_KEY)
@@ -79,7 +80,7 @@ export async function GET(req: Request) {
       try {
         const emailBatch = batch.map(async (user) => {
           if (!user.email) {
-            console.warn(`No email found for user: ${user.id}`)
+            logger.warn(`No email found for user: ${user.id}`)
             return null
           }
 
@@ -97,14 +98,14 @@ export async function GET(req: Request) {
 
             if (!response.ok) {
               const errorText = await response.text()
-              console.warn(`Failed to get email data for user ${user.id}:`, errorText)
+              logger.warn(`Failed to get email data for user ${user.id}:`, errorText)
               return null
             }
 
             const { emailData } = await response.json()
             return emailData
           } catch (error) {
-            console.warn(`Error processing user ${user.id}:`, error)
+            logger.warn(`Error processing user ${user.id}:`, error)
             return null
           }
         })
@@ -117,17 +118,17 @@ export async function GET(req: Request) {
             successCount += result.data?.data.length || 0
             errorCount += batch.length - (result.data?.data.length || 0)
           } catch (error) {
-            console.error('Failed to send email batch:', error)
+            logger.error('Failed to send email batch:', error)
             errorCount += validEmails.length
           }
         }
       } catch (error) {
-        console.error('Error processing batch:', error)
+        logger.error('Error processing batch:', error)
         errorCount += batch.length
       }
     }
 
-    console.log(`Weekly emails processed: ${successCount} successful, ${errorCount} failed`)
+    logger.info(`Weekly emails processed: ${successCount} successful, ${errorCount} failed`)
 
     return NextResponse.json({
       success: true,
@@ -136,7 +137,7 @@ export async function GET(req: Request) {
     })
 
   } catch (error) {
-    console.error('Cron job error:', error)
+    logger.error('Cron job error:', error)
     return toErrorResponse(error)
   }
 }

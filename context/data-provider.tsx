@@ -479,7 +479,6 @@ export const DataProvider: React.FC<{
 
   // Load data from the server
   const loadData = useCallback(async () => {
-    console.log("[DataProvider] loadData triggered, isSharedView:", isSharedView);
     // Prevent multiple simultaneous loads
     try {
       setIsLoading(true);
@@ -575,7 +574,6 @@ export const DataProvider: React.FC<{
         // Try local cache first
         const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-          console.log("[DataProvider] Using local IndexedDB cache for trades");
           setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
 
           // Refresh in background if not in dev or if we want freshest data
@@ -587,14 +585,12 @@ export const DataProvider: React.FC<{
           }).catch(console.error);
         } else {
           if (!userId) return;
-          console.log("[DataProvider] Refreshing trades for userId:", userId);
 
           const safeTrades = await withTimeout(
             fetchAllTrades(userId, false),
             20000,
             "fetchAllTrades(user)"
           );
-          console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
 
           // Only use mock data in development — never show fake data in production
           const tradesToUse = safeTrades.length > 0
@@ -602,7 +598,6 @@ export const DataProvider: React.FC<{
             : process.env.NODE_ENV === 'development'
               ? generateMockTrades(userId || "demo-user")
               : [];
-          console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0 && tradesToUse.length > 0, ")");
           setTrades(sanitizeTradesForState(tradesToUse));
           if (tradesToUse.length > 0) {
             setTradesCache(userId, tradesToUse).catch(console.error);
@@ -618,7 +613,6 @@ export const DataProvider: React.FC<{
       if (userId && !isSharedView) {
         const cachedUserData = await withTimeout(getUserDataCache(userId), 2000, "getUserDataCache");
         if (cachedUserData) {
-          console.log("[DataProvider] Using local IndexedDB cache for user data");
           // Apply cached data immediately
           const normalizedAccounts = normalizeAccountsForClient(cachedUserData.accounts);
           setAccounts(normalizedAccounts);
@@ -688,7 +682,6 @@ export const DataProvider: React.FC<{
       // Only fallback to mock data in development
       if (process.env.NODE_ENV === 'development') {
         const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
-        console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
         setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
       } else {
         setTrades([]);
@@ -911,7 +904,6 @@ export const DataProvider: React.FC<{
           includeSubscription: true,
           withLoading: false,
         });
-        console.log("[refreshAllData] Successfully refreshed trades and user data");
       } catch (error) {
         console.error("Error refreshing all data:", error);
       } finally {

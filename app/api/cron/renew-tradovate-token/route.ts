@@ -1,5 +1,6 @@
 // app/api/cron/renew-tradovate-token/route.ts
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger'
 import { NextRequest } from 'next/server';
 import { requireServiceAuth, toErrorResponse } from '@/server/authz';
 
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
     // If tokenExpiresAt is null, clear the token (invalid state)
     const missingExpiry = synchronizations.filter((s) => !s.tokenExpiresAt);
     if (missingExpiry.length > 0) {
-      console.warn(`[CRON] Clearing ${missingExpiry.length} Tradovate tokens missing tokenExpiresAt`);
+      logger.warn(`[CRON] Clearing ${missingExpiry.length} Tradovate tokens missing tokenExpiresAt`);
       await prisma.synchronization.updateMany({
         where: {
           id: { in: missingExpiry.map((s) => s.id) }
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
       dailySyncs
     });
   } catch (error) {
-    console.error('Cron job error:', error);
+    logger.error('Cron job error:', error);
     return toErrorResponse(error);
   }
 }
@@ -123,7 +124,7 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
     // `Synchronization` has no persisted `environment` field, so default to demo.
     const apiBaseUrl = 'https://demo.tradovateapi.com';
 
-    console.log(`[CRON] Attempting token renewal for account ${synchronization.accountId}`);
+    logger.info(`[CRON] Attempting token renewal for account ${synchronization.accountId}`);
 
     const renewal = await fetch(`${apiBaseUrl}/auth/renewAccessToken`, {
       headers: {
@@ -133,7 +134,7 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
 
     if (!renewal.ok) {
       const errorText = await renewal.text();
-      console.error(`[CRON] Failed to renew token for account ${synchronization.accountId}: ${errorText}`);
+      logger.error(`[CRON] Failed to renew token for account ${synchronization.accountId}: ${errorText}`);
       // Only clear token on explicit auth failures.
       // For transient provider/network errors, keep current token.
       if (renewal.status === 401 || renewal.status === 403) {
@@ -155,7 +156,7 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
 
     return true;
   } catch (error) {
-    console.error(`[CRON] Error renewing token for account ${synchronization.accountId}:`, error);
+    logger.error(`[CRON] Error renewing token for account ${synchronization.accountId}:`, error);
     // Do not clear token on transient runtime errors.
     return false;
   }
@@ -168,9 +169,9 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
  */
 async function performDailySync(synchronization: SynchronizationRecord): Promise<boolean> {
   try {
-    console.log(`[CRON] Performing daily sync for account ${synchronization.accountId}`);
+    logger.info(`[CRON] Performing daily sync for account ${synchronization.accountId}`);
     if (!synchronization.token) {
-      console.error(`[CRON] Cannot sync account ${synchronization.accountId}: missing access token`);
+      logger.error(`[CRON] Cannot sync account ${synchronization.accountId}: missing access token`);
       return false;
     }
 
@@ -181,14 +182,14 @@ async function performDailySync(synchronization: SynchronizationRecord): Promise
     const result = await getTradovateTrades(synchronization.token, { userId: synchronization.userId });
 
     if (result.error) {
-      console.error(`[CRON] Failed to sync trades for account ${synchronization.accountId}:`, result.error);
+      logger.error(`[CRON] Failed to sync trades for account ${synchronization.accountId}:`, result.error);
       return false;
     }
 
-    console.log(`[CRON] Successfully synced ${result.savedCount || 0} trades for account ${synchronization.accountId}`);
+    logger.info(`[CRON] Successfully synced ${result.savedCount || 0} trades for account ${synchronization.accountId}`);
     return true;
   } catch (error) {
-    console.error(`[CRON] Error during daily sync for account ${synchronization.accountId}:`, error);
+    logger.error(`[CRON] Error during daily sync for account ${synchronization.accountId}:`, error);
     return false;
   }
 }

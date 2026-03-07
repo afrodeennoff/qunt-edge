@@ -1,4 +1,5 @@
 import { createClient, ensureUserInDatabase, getWebsiteURL } from '@/server/auth'
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 // The client you created from the Server-Side Auth instructions
 
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
   const locale = searchParams.get('locale') || undefined
 
   // Add debugging for Edge
-  console.log('Auth callback debug:', {
+  logger.info('Auth callback debug:', {
     userAgent: request.headers.get('user-agent'),
     origin,
     hasCode: !!code,
@@ -89,7 +90,7 @@ export async function GET(request: Request) {
           if (isNextRedirectError(e)) {
             throw e
           }
-          console.error('Auth callback ensureUserInDatabase error:', e)
+          logger.error('Auth callback ensureUserInDatabase error:', e)
           // Non-fatal: continue redirect
         }
 
@@ -98,7 +99,7 @@ export async function GET(request: Request) {
         }
         return NextResponse.redirect(new URL(withLocalePrefix('/dashboard'), websiteURL))
       } else {
-        console.log('Auth callback error:', error)
+        logger.info('Auth callback error:', error)
       }
     } catch (error: unknown) {
       if (isNextRedirectError(error)) {
@@ -121,11 +122,11 @@ export async function GET(request: Request) {
         originalErrorMessage.includes('Unexpected token') ||
         originalErrorMessage.includes('is not valid JSON')
       ) {
-        console.error('[Auth Callback] Supabase API returned non-JSON response:', error)
+        logger.error('[Auth Callback] Supabase API returned non-JSON response:', error)
         // Redirect to auth page with error message
         return NextResponse.redirect(new URL(withLocalePrefix('/authentication?error=service_unavailable'), websiteURL))
       }
-      console.error('Auth callback unexpected error:', error)
+      logger.error('Auth callback unexpected error:', error)
     }
   }
 

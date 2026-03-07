@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * Browser Sandbox Utility for Vercel
  * 
@@ -49,12 +50,12 @@ const BROWSERS_DIR = "browsers";
 const PORT = 9222;
 
 async function setupSandbox(sandbox: Sandbox) {
-  console.log('Creating browsers directory...');
+  logger.info('Creating browsers directory...');
   await sandbox.mkDir(BROWSERS_DIR);
 
   const chromeRpmPath = `${BROWSERS_DIR}/google-chrome-stable_current_x86_64.rpm`;
 
-  console.log("Downloading Chrome RPM...");
+  logger.info("Downloading Chrome RPM...");
   const downloadRpm = await sandbox.runCommand({
     cmd: "curl",
     args: [
@@ -65,11 +66,11 @@ async function setupSandbox(sandbox: Sandbox) {
   });
 
   if (downloadRpm.exitCode !== 0) {
-    console.error("Failed to download Chrome RPM:", downloadRpm.stderr);
+    logger.error("Failed to download Chrome RPM:", downloadRpm.stderr);
     throw new Error("Chrome RPM download failed");
   }
 
-  console.log("Installing Chrome...")
+  logger.info("Installing Chrome...")
   const installChrome = await sandbox.runCommand({
     cmd: "dnf",
     args: ["install", "-y", chromeRpmPath],
@@ -77,11 +78,11 @@ async function setupSandbox(sandbox: Sandbox) {
   });
 
   if (installChrome.exitCode !== 0) {
-    console.error("Failed to install Chrome:", installChrome.stderr);
+    logger.error("Failed to install Chrome:", installChrome.stderr);
     throw new Error("Chrome installation failed");
   }
 
-  console.log("Starting Chrome...")
+  logger.info("Starting Chrome...")
   await sandbox.runCommand({
     cmd: "google-chrome",
     args: [
@@ -93,7 +94,7 @@ async function setupSandbox(sandbox: Sandbox) {
     detached: true,
   });
 
-  console.log("Waiting for Chrome to start...");
+  logger.info("Waiting for Chrome to start...");
   // Health check until the browser is ready
   const fetchVersion = await retryWithBackoff(async () => {
     const result = await sandbox.runCommand({
@@ -116,13 +117,13 @@ async function setupSandbox(sandbox: Sandbox) {
 
   const sandboxUrl = new URL(sandbox.domain(PORT));
   const externalUrl = `wss://${sandboxUrl.host}${url.pathname}`;
-  console.log("Chrome started successfully. WebSocket URL:", externalUrl);
+  logger.info("Chrome started successfully. WebSocket URL:", externalUrl);
 
   return externalUrl;
 }
 
 export async function createBrowserSandbox() {
-  console.log("Setting up sandbox...");
+  logger.info("Setting up sandbox...");
   const sandbox = await Sandbox.create({
     timeout: ms('5m'), // 5 minutes timeout
     ports: [PORT],
@@ -151,7 +152,7 @@ export async function scrapeWithSandbox(
   // Try sandbox approach first (works in Vercel production)
   if (isProduction) {
     try {
-      console.log('Using Vercel Sandbox for browser automation...');
+      logger.info('Using Vercel Sandbox for browser automation...');
       const { sandbox, webSocketDebuggerUrl } = await createBrowserSandbox();
       
       try {
@@ -161,14 +162,14 @@ export async function scrapeWithSandbox(
         });
         const page = await context.newPage();
 
-        console.log(`Navigating to ${url} with sandboxed browser...`);
+        logger.info(`Navigating to ${url} with sandboxed browser...`);
         const response = await page.goto(url, {
           waitUntil: 'domcontentloaded',
           timeout: options.timeout || 60000
         });
 
         if (!response || !response.ok()) {
-          console.error('Navigation response:', {
+          logger.error('Navigation response:', {
             status: response?.status(),
             statusText: response?.statusText(),
             headers: response?.headers()
@@ -179,13 +180,13 @@ export async function scrapeWithSandbox(
         // Wait for specific selector if provided
         if (options.waitFor) {
           await page.waitForSelector(options.waitFor, { timeout: 10000 }).catch(() => {
-            console.log(`Warning: Could not find selector ${options.waitFor}, continuing anyway`);
+            logger.info(`Warning: Could not find selector ${options.waitFor}, continuing anyway`);
           });
         }
 
-        console.log('Page loaded successfully. Getting HTML content...');
+        logger.info('Page loaded successfully. Getting HTML content...');
         const html = await page.content();
-        console.log('HTML length:', html.length);
+        logger.info('HTML length:', html.length);
 
         await browser.close();
         return html;
@@ -193,12 +194,12 @@ export async function scrapeWithSandbox(
         await sandbox.stop();
       }
     } catch (sandboxError) {
-      console.error('Sandbox approach failed:', sandboxError);
+      logger.error('Sandbox approach failed:', sandboxError);
       throw new Error('Browser automation failed in production environment. Vercel Sandbox may not be properly configured.');
     }
   } else {
     // Fallback for development - use local Playwright
-    console.log('Development mode: Using local Playwright browser...');
+    logger.info('Development mode: Using local Playwright browser...');
     try {
       const browser = await chromium.launch({
         headless: true
@@ -209,7 +210,7 @@ export async function scrapeWithSandbox(
       });
       const page = await context.newPage();
 
-      console.log(`Navigating to ${url} with local browser...`);
+      logger.info(`Navigating to ${url} with local browser...`);
       const response = await page.goto(url, {
         waitUntil: 'domcontentloaded',
         timeout: options.timeout || 60000
@@ -222,17 +223,17 @@ export async function scrapeWithSandbox(
       // Wait for specific selector if provided
       if (options.waitFor) {
         await page.waitForSelector(options.waitFor, { timeout: 10000 }).catch(() => {
-          console.log(`Warning: Could not find selector ${options.waitFor}, continuing anyway`);
+          logger.info(`Warning: Could not find selector ${options.waitFor}, continuing anyway`);
         });
       }
 
       const html = await page.content();
-      console.log('HTML length:', html.length);
+      logger.info('HTML length:', html.length);
 
       await browser.close();
       return html;
     } catch (localError) {
-      console.error('Local Playwright failed:', localError);
+      logger.error('Local Playwright failed:', localError);
       throw new Error('Browser automation failed in development. Make sure Playwright browsers are installed.');
     }
   }

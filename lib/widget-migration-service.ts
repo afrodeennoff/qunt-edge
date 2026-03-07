@@ -1,4 +1,5 @@
 import { DashboardLayoutWithWidgets, Widget } from "@/store/user-store"
+import { logger } from '@/lib/logger'
 import { defaultLayouts } from "@/lib/default-layouts"
 import { FALLBACK_WIDGET_TYPE, normalizeWidgetSize } from "@/lib/widget-layout"
 
@@ -70,7 +71,7 @@ class WidgetMigrationService {
     try {
       for (const migration of this.migrations) {
         if (migration.version > currentVersion && migration.version <= this.currentVersion) {
-          console.log(`[WidgetMigration] Applying migration v${migration.version}: ${migration.description}`)
+          logger.info(`[WidgetMigration] Applying migration v${migration.version}: ${migration.description}`)
 
           currentLayout = migration.migrate(currentLayout)
           currentVersion = migration.version
@@ -284,7 +285,7 @@ class WidgetMigrationService {
       const backup = JSON.parse(atob(backupString))
       return backup.layout as DashboardLayoutWithWidgets
     } catch (error) {
-      console.error('[WidgetMigration] Failed to restore backup:', error)
+      logger.error('[WidgetMigration] Failed to restore backup:', error)
       return null
     }
   }

@@ -1,4 +1,5 @@
 import { DashboardLayoutWithWidgets, Widget } from '@/store/user-store'
+import { logger } from '@/lib/logger'
 import { widgetStorageService, StorageResult } from './widget-storage-service'
 import { optimisticWidgetManager, WidgetLayoutChange } from './widget-optimistic-updates'
 import { widgetConflictResolver, ConflictResolution } from './widget-conflict-resolution'
@@ -52,11 +53,11 @@ class WidgetPersistenceManager {
     } = {}
   ): Promise<SaveResult> {
     try {
-      console.log('[WidgetPersistenceManager] Starting save process...')
+      logger.info('[WidgetPersistenceManager] Starting save process...')
 
       const validation = widgetValidator.validateLayout(layout.desktop)
       if (!validation.valid) {
-        console.error('[WidgetPersistenceManager] Validation failed:', validation.errors)
+        logger.error('[WidgetPersistenceManager] Validation failed:', validation.errors)
         return {
           success: false,
           source: 'local',
@@ -91,7 +92,7 @@ class WidgetPersistenceManager {
         }, this.config.autoSaveDelay)
       })
     } catch (error) {
-      console.error('[WidgetPersistenceManager] Save failed:', error)
+      logger.error('[WidgetPersistenceManager] Save failed:', error)
       return {
         success: false,
         source: 'local',
@@ -107,7 +108,7 @@ class WidgetPersistenceManager {
     changeType: 'manual' | 'auto' | 'migration' | 'conflict_resolution' = 'manual'
   ): Promise<SaveResult> {
     try {
-      console.log('[WidgetPersistenceManager] Performing save...')
+      logger.info('[WidgetPersistenceManager] Performing save...')
 
       const checksum = widgetVersionService.generateChecksum(layout)
       const deviceId = widgetVersionService['getOrCreateDeviceId']()
@@ -143,7 +144,7 @@ class WidgetPersistenceManager {
           )
           version = (this.lastKnownLayout?.version || 0) + 1
         } catch (versionError) {
-          console.warn('[WidgetPersistenceManager] Version save failed (non-critical):', versionError)
+          logger.warn('[WidgetPersistenceManager] Version save failed (non-critical):', versionError)
         }
       }
 
@@ -165,7 +166,7 @@ class WidgetPersistenceManager {
         version
       }
     } catch (error) {
-      console.error('[WidgetPersistenceManager] Perform save failed:', error)
+      logger.error('[WidgetPersistenceManager] Perform save failed:', error)
       
       const localSaveSuccess = widgetStorageService['saveToLocalStorage'](userId, layout)
       
@@ -183,12 +184,12 @@ class WidgetPersistenceManager {
 
   async loadLayout(userId: string): Promise<DashboardLayoutWithWidgets | null> {
     try {
-      console.log('[WidgetPersistenceManager] Loading layout...')
+      logger.info('[WidgetPersistenceManager] Loading layout...')
 
       const layout = await widgetStorageService.load(userId)
 
       if (!layout) {
-        console.warn('[WidgetPersistenceManager] No layout found')
+        logger.warn('[WidgetPersistenceManager] No layout found')
         return null
       }
 
@@ -198,7 +199,7 @@ class WidgetPersistenceManager {
           this.lastKnownLayout = decryptedLayout
           return decryptedLayout
         } catch (decryptError) {
-          console.error('[WidgetPersistenceManager] Decryption failed:', decryptError)
+          logger.error('[WidgetPersistenceManager] Decryption failed:', decryptError)
           this.lastKnownLayout = layout
           return layout
         }
@@ -206,7 +207,7 @@ class WidgetPersistenceManager {
 
       const validation = widgetValidator.validateLayout(layout.desktop)
       if (!validation.valid) {
-        console.warn('[WidgetPersistenceManager] Loaded invalid layout, sanitizing...')
+        logger.warn('[WidgetPersistenceManager] Loaded invalid layout, sanitizing...')
         layout.desktop = widgetValidator.sanitizeLayout(layout.desktop)
         layout.mobile = widgetValidator.sanitizeLayout(layout.mobile)
       }
@@ -214,7 +215,7 @@ class WidgetPersistenceManager {
       this.lastKnownLayout = layout
       return layout
     } catch (error) {
-      console.error('[WidgetPersistenceManager] Load failed:', error)
+      logger.error('[WidgetPersistenceManager] Load failed:', error)
       return null
     }
   }
@@ -276,7 +277,7 @@ class WidgetPersistenceManager {
 
       return false
     } catch (error) {
-      console.error('[WidgetPersistenceManager] Conflict detection failed:', error)
+      logger.error('[WidgetPersistenceManager] Conflict detection failed:', error)
       return false
     }
   }
@@ -340,7 +341,7 @@ class WidgetPersistenceManager {
   }
 
   async sync(userId: string): Promise<SaveResult> {
-    console.log('[WidgetPersistenceManager] Syncing...')
+    logger.info('[WidgetPersistenceManager] Syncing...')
 
     const result = await widgetStorageService.sync(userId)
 
