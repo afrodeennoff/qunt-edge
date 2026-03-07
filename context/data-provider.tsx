@@ -963,6 +963,18 @@ export const DataProvider: React.FC<{
         ? fromDate.getTime()
         : null;
 
+    // Extract times to avoid redundant object parsing inside the filter loop
+    const fromTime = fromDate?.getTime() ?? null;
+    const toTime = toDate?.getTime() ?? null;
+
+    // Pre-calculate account reset times
+    const accountResetTimes = new Map<string, number>();
+    for (const account of accounts) {
+        if (account.resetDate && account.shouldConsiderTradesBeforeReset === false) {
+            accountResetTimes.set(account.number, startOfDay(new Date(account.resetDate)).getTime());
+        }
+    }
+
     const tickFilterValue = tickFilter?.value
       ? Number(tickFilter.value.replace("+", ""))
       : null;
@@ -990,16 +1002,17 @@ export const DataProvider: React.FC<{
 
         if (!isValid(entryDate)) return false;
 
-        if (tradeAccount?.resetDate && tradeAccount.shouldConsiderTradesBeforeReset === false) {
-          const resetDate = startOfDay(new Date(tradeAccount.resetDate));
-          if (startOfDay(entryDate) < resetDate) return false;
+        const resetTime = accountResetTimes.get(trade.accountNumber);
+        if (resetTime !== undefined && startOfDay(entryDate).getTime() < resetTime) {
+            return false;
         }
 
         if (instrumentFilterSet && !instrumentFilterSet.has(trade.instrument)) return false;
         if (accountFilterSet && !accountFilterSet.has(trade.accountNumber)) return false;
 
-        if (fromDate && entryDate < fromDate) return false;
-        if (toDate && entryDate > toDate) return false;
+        const entryTime = entryDate.getTime();
+        if (fromTime !== null && entryTime < fromTime) return false;
+        if (toTime !== null && entryTime > toTime) return false;
         if (singleDayTimestamp !== null && startOfDay(entryDate).getTime() !== singleDayTimestamp) {
           return false;
         }

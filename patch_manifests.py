@@ -1,4 +1,10 @@
-#!/usr/bin/env node
+import re
+
+with open('.github/scripts/check-manifests.js', 'r') as f:
+    content = f.read()
+
+# Refactor the inner loop into a separate function to reduce complexity
+refactored_content = '''#!/usr/bin/env node
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -77,7 +83,7 @@ function checkManifests() {
   const errors = []
   const warnings = []
   const widgetsDir = path.join(process.cwd(), 'app/[locale]/dashboard/components/widgets')
-  
+
   if (!fs.existsSync(widgetsDir)) {
     errors.push(`Widgets directory not found: ${widgetsDir}`)
     return { errors, warnings }
@@ -95,12 +101,12 @@ function checkManifests() {
   }
 
   if (errors.length > 0) {
-    console.error('\n❌ Errors found:')
+    console.error('\\n❌ Errors found:')
     errors.forEach(error => console.error(`  - ${error}`))
   }
 
   if (warnings.length > 0) {
-    console.warn('\n⚠️  Warnings:')
+    console.warn('\\n⚠️  Warnings:')
     warnings.forEach(warning => console.warn(`  - ${warning}`))
   }
 
@@ -108,7 +114,7 @@ function checkManifests() {
     process.exit(1)
   }
 
-  console.log('\n✅ All manifest checks passed')
+  console.log('\\n✅ All manifest checks passed')
   return { errors, warnings }
 }
 
@@ -121,3 +127,7 @@ if (isDirectRun) {
 }
 
 export { checkManifests }
+'''
+
+with open('.github/scripts/check-manifests.js', 'w') as f:
+    f.write(refactored_content)
