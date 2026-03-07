@@ -1,3 +1,30 @@
+# Comprehensive Dead/Unused Code Audit + Cleanup (2026-03-08)
+
+## Scope
+- Perform a repo-wide dead/unused/duplicate code audit.
+- Apply safe, high-confidence cleanup changes.
+- Add automated enforcement for ongoing prevention.
+
+## Acceptance Criteria
+- [ ] Baseline metrics captured (lint/typecheck/tests/build/coverage and dead-code signals).
+- [ ] Unused imports/variables/dead code/comments removed in touched scope.
+- [ ] Duplicate/redundant utilities identified and consolidated or explicitly deferred with rationale.
+- [ ] Automated checks for unused/dead code added to CI scripts.
+- [ ] Full verification suite run and results documented.
+- [ ] Audit report with before/after metrics written to `docs/audits/`.
+
+## Plan Checklist
+- [ ] Read `tasks/lessons.md` and current repo state.
+- [ ] Capture baseline quality and dead-code metrics.
+- [ ] Run static discovery (unused exports/imports/files, duplicate patterns, commented blocks).
+- [ ] Implement safe removals/refactors with minimal behavioral risk.
+- [ ] Add/strengthen automated checks (`lint` rules, static scan scripts, coverage gate if feasible).
+- [ ] Re-run typecheck, lint, tests, build, and key perf/security scripts.
+- [ ] Publish audit report and complete review notes (risks + follow-up items).
+
+## Current Step
+- **In progress:** baseline metrics and static discovery.
+
 # Production Readiness Audit + Refactor Pass (2026-03-08, Pass B)
 
 ## Scope
@@ -42,6 +69,40 @@
   - high global lint warning volume remains and was not in scope for this targeted pass.
 - Follow-up:
   - split/defers for high-cost dashboard shared client modules (header/tooling/data contexts) to clear route-budget violations.
+
+# Runtime Breakage Hotfix (2026-03-08)
+
+## Scope
+- Audit and fix immediate code-level breakage causing the app to appear broken/stuck after recent logger refactor drift.
+
+## Acceptance Criteria
+- [x] Root cause identified from compile/runtime evidence.
+- [x] Blocking type/runtime regressions fixed.
+- [x] Build and targeted tests pass after fix.
+
+## Plan Checklist
+- [x] Run `typecheck` to surface blocking regressions.
+- [x] Repair logger API compatibility and browser-safe behavior.
+- [x] Re-run `typecheck`, `build`, `check:route-budgets`, and logger tests.
+- [x] Document fix and residual risks.
+
+## Current Step
+- **Completed:** blocking logger/runtime regressions fixed and verified.
+
+## Completion Notes
+- Root cause:
+  - `lib/logger.ts` had been rewritten to a pino-only shape that broke existing call signatures and removed `withLogContext`.
+  - Client code (`context/data-provider.tsx`) now imports the logger, so server-only assumptions in logger implementation can break browser runtime/hydration.
+- Fix applied:
+  - Replaced `lib/logger.ts` with a compatibility logger that:
+    - supports both call styles (`logger.info("msg", meta)` and `logger.info(meta, "msg")`),
+    - restores `withLogContext`, `getLogContext`, `createLogger`, and `withLogger`,
+    - keeps structured redaction and threshold alert behavior.
+- Verification:
+  - `npm run -s typecheck` -> pass.
+  - `npm run -s build` -> pass.
+  - `npm run -s check:route-budgets` -> pass.
+  - `npm test -- tests/logger.test.ts` -> pass.
 
 # Dashboard Smoothness Pass (2026-03-08)
 
