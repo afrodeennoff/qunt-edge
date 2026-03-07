@@ -77,6 +77,7 @@ import { isValid, startOfDay, endOfDay } from "date-fns";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { calculateStatistics, formatCalendarData, cn, groupBy, calculateTradingDays } from "@/lib/utils";
 import { useParams } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 import {
   StatisticsProps,
@@ -325,7 +326,7 @@ export const DataProvider: React.FC<{
               "yyyy-MM-dd"
             );
           } catch (error) {
-            console.error("Error formatting trade date:", trade.id, error);
+            logger.error({ tradeId: trade.id, error }, "Error formatting trade date");
           }
 
           return {
@@ -466,10 +467,7 @@ export const DataProvider: React.FC<{
           "calculateAccountMetricsAction(shared)"
         );
       } catch (error) {
-        console.error(
-          "[DataProvider] Account metrics timed out for shared view; continuing without metrics",
-          error
-        );
+        logger.warn({ error }, "Account metrics timed out for shared view; continuing without metrics");
       }
 
       setAccounts(normalizeAccountsForClient(accountsWithMetrics));
@@ -479,7 +477,7 @@ export const DataProvider: React.FC<{
 
   // Load data from the server
   const loadData = useCallback(async () => {
-    console.log("[DataProvider] loadData triggered, isSharedView:", isSharedView);
+    logger.debug({ isSharedView }, "DataProvider: loadData triggered");
     // Prevent multiple simultaneous loads
     try {
       setIsLoading(true);
@@ -575,26 +573,26 @@ export const DataProvider: React.FC<{
         // Try local cache first
         const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-          console.log("[DataProvider] Using local IndexedDB cache for trades");
+          logger.debug({ userId, count: cachedTrades.length }, "Using local IndexedDB cache for trades");
           setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
 
           // Refresh in background if not in dev or if we want freshest data
           fetchAllTrades(userId, false).then(freshTrades => {
             if (freshTrades && freshTrades.length > 0) {
               setTrades(sanitizeTradesForState(freshTrades));
-              setTradesCache(userId, freshTrades).catch(console.error);
+              setTradesCache(userId, freshTrades).catch((err) => logger.error({ err }, "Failed to set trades cache"));
             }
-          }).catch(console.error);
+          }).catch((err) => logger.error({ err }, "Failed to refresh trades from cache"));
         } else {
           if (!userId) return;
-          console.log("[DataProvider] Refreshing trades for userId:", userId);
+          logger.debug({ userId }, "Refreshing trades for user");
 
           const safeTrades = await withTimeout(
             fetchAllTrades(userId, false),
             20000,
             "fetchAllTrades(user)"
           );
-          console.log("[DataProvider] Fresh trades fetched:", safeTrades.length);
+          logger.info({ userId, count: safeTrades.length }, "Fresh trades fetched");
 
           // Only use mock data in development — never show fake data in production
           const tradesToUse = safeTrades.length > 0
@@ -602,10 +600,10 @@ export const DataProvider: React.FC<{
             : process.env.NODE_ENV === 'development'
               ? generateMockTrades(userId || "demo-user")
               : [];
-          console.log("[DataProvider] Found", safeTrades.length, "server trades. Using", tradesToUse.length, "trades total (isMock:", safeTrades.length === 0 && tradesToUse.length > 0, ")");
+          logger.debug({ serverTrades: safeTrades.length, usingTrades: tradesToUse.length, isMock: safeTrades.length === 0 && tradesToUse.length > 0 }, "Trades loaded");
           setTrades(sanitizeTradesForState(tradesToUse));
           if (tradesToUse.length > 0) {
-            setTradesCache(userId, tradesToUse).catch(console.error);
+            setTradesCache(userId, tradesToUse).catch((err) => logger.error({ err }, "Failed to set trades cache"));
           }
         }
       } else {
@@ -618,7 +616,7 @@ export const DataProvider: React.FC<{
       if (userId && !isSharedView) {
         const cachedUserData = await withTimeout(getUserDataCache(userId), 2000, "getUserDataCache");
         if (cachedUserData) {
-          console.log("[DataProvider] Using local IndexedDB cache for user data");
+          logger.debug({ userId }, "Using local IndexedDB cache for user data");
           // Apply cached data immediately
           const normalizedAccounts = normalizeAccountsForClient(cachedUserData.accounts);
           setAccounts(normalizedAccounts);
@@ -633,11 +631,7 @@ export const DataProvider: React.FC<{
       }
 
       const data = await withTimeout(getUserData(), 20000, "getUserData");
-      console.log("[DataProvider] User data response:", {
-        hasData: !!data,
-        accountsCount: data?.accounts?.length || 0,
-        tagsCount: data?.tags?.length || 0
-      });
+      logger.debug({ hasData: !!data, accountsCount: data?.accounts?.length || 0, tagsCount: data?.tags?.length || 0 }, "User data response");
 
       if (!data) {
         await signOut();
@@ -657,7 +651,7 @@ export const DataProvider: React.FC<{
           "calculateAccountMetricsAction"
         );
       } catch (e) {
-        console.error("[DataProvider] Account metrics timed out; continuing without metrics", e);
+        logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
       }
       setAccounts(normalizeAccountsForClient(accountsWithMetrics));
 
@@ -681,14 +675,14 @@ export const DataProvider: React.FC<{
           groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
           financialEvents: data.financialEvents,
           moodHistory: data.moodHistory
-        }).catch(console.error);
+        }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
       }
     } catch (error) {
-      console.error("[DataProvider] FATAL: Error loading data:", error);
+      logger.error({ error }, "FATAL: Error loading data");
       // Only fallback to mock data in development
       if (process.env.NODE_ENV === 'development') {
         const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
-        console.log("[DataProvider] Falling back to mock data due to error for user:", currentUserId);
+        logger.warn({ userId: currentUserId }, "Falling back to mock data due to error");
         setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
       } else {
         setTrades([]);
@@ -718,7 +712,7 @@ export const DataProvider: React.FC<{
     const sharedAccounts = syncSharedDataState(initialSharedData);
     setIsLoading(false);
     hydrateSharedAccountMetrics(sharedAccounts).catch((error) => {
-      console.error("[DataProvider] Failed to hydrate shared account metrics", error);
+      logger.error({ error }, "Failed to hydrate shared account metrics");
     });
   }, [
     hydrateSharedAccountMetrics,
@@ -747,7 +741,7 @@ export const DataProvider: React.FC<{
         setSubscriptionData(subscriptionData);
         setSubscriptionError(null);
       } catch (error) {
-        console.error("Error loading Whop subscription:", error);
+        logger.error({ error }, "Error loading Whop subscription");
         setSubscriptionError(
           error instanceof Error ? error.message : "Failed to load subscription"
         );
@@ -770,7 +764,7 @@ export const DataProvider: React.FC<{
       if (!supabaseUser?.id || !locale) return;
       // Fire and forget; do not block UI
       await updateUserLanguage(locale).catch((e) => {
-        console.error("[DataProvider] Failed to update user language", e);
+        logger.error({ error: e, locale }, "Failed to update user language");
       });
     };
     updateLanguage();
@@ -783,7 +777,7 @@ export const DataProvider: React.FC<{
       setSubscriptionData(subscriptionData);
       setSubscriptionError(null);
     } catch (error) {
-      console.error("Error loading Whop subscription:", error);
+      logger.error({ error }, "Error loading Whop subscription");
       setSubscriptionError(
         error instanceof Error ? error.message : "Failed to load subscription"
       );
@@ -824,11 +818,11 @@ export const DataProvider: React.FC<{
         if (process.env.NODE_ENV === "development") {
           // Best-effort cache write; do not block UI on failure
           setTradesCache(userId, tradesToUse).catch((err) =>
-            console.error("[refreshTradesOnly] Failed to cache trades in IndexedDB", err),
+            logger.error({ err }, "Failed to cache trades in IndexedDB"),
           );
         }
       } catch (error) {
-        console.error("Error refreshing trades:", error);
+        logger.error({ error }, "Error refreshing trades");
       } finally {
         if (withLoading) setIsLoading(false);
       }
@@ -878,7 +872,7 @@ export const DataProvider: React.FC<{
           await loadSubscriptionData();
         }
       } catch (error) {
-        console.error("Error refreshing user data:", error);
+        logger.error({ error }, "Error refreshing user data");
       } finally {
         if (withLoading) setIsLoading(false);
       }
@@ -911,9 +905,9 @@ export const DataProvider: React.FC<{
           includeSubscription: true,
           withLoading: false,
         });
-        console.log("[refreshAllData] Successfully refreshed trades and user data");
+        logger.info("Successfully refreshed trades and user data");
       } catch (error) {
-        console.error("Error refreshing all data:", error);
+        logger.error({ error }, "Error refreshing all data");
       } finally {
         setIsLoading(false);
       }
@@ -930,7 +924,7 @@ export const DataProvider: React.FC<{
 
     const timer = window.setTimeout(() => {
       setTradesCache(supabaseUser.id, trades).catch((err) =>
-        console.error("[DataProvider] Failed to sync trades to IndexedDB", err),
+        logger.error({ err }, "Failed to sync trades to IndexedDB"),
       );
     }, 200);
 
@@ -1300,7 +1294,7 @@ export const DataProvider: React.FC<{
                 setGroups([...updatedGroups, newGroup]);
               }
             } catch (error) {
-              console.error("Error fetching group:", error);
+              logger.error({ error }, "Error fetching group");
               // Fallback: create minimal group object
               const newGroup = {
                 id: newGroupId,
@@ -1337,7 +1331,7 @@ export const DataProvider: React.FC<{
           }
         }
       } catch (error) {
-        console.error("Error updating account:", error);
+        logger.error({ error }, "Error updating account");
         throw error;
       }
     },
@@ -1355,7 +1349,7 @@ export const DataProvider: React.FC<{
         setGroups([...groups, normalizedNewGroup]);
         return normalizedNewGroup;
       } catch (error) {
-        console.error("Error creating group:", error);
+        logger.error({ error }, "Error creating group");
         throw error;
       }
     },
@@ -1373,7 +1367,7 @@ export const DataProvider: React.FC<{
         );
         await renameGroupAction(groupId, name);
       } catch (error) {
-        console.error("Error renaming group:", error);
+        logger.error({ error }, "Error renaming group");
         throw error;
       }
     },
@@ -1395,7 +1389,7 @@ export const DataProvider: React.FC<{
         setGroups(groups.filter((group) => group.id !== groupId));
         await deleteGroupAction(groupId);
       } catch (error) {
-        console.error("Error deleting group:", error);
+        logger.error({ error }, "Error deleting group");
         throw error;
       }
     },
@@ -1410,7 +1404,7 @@ export const DataProvider: React.FC<{
         const { accounts: currentAccounts, groups: currentGroups } =
           useUserStore.getState();
         if (!currentAccounts || currentAccounts.length === 0) {
-          console.error("No accounts available to move");
+          logger.warn("No accounts available to move");
           return;
         }
 
@@ -1477,7 +1471,7 @@ export const DataProvider: React.FC<{
 
         await moveAccountToGroupAction(accountId, targetGroupId);
       } catch (error) {
-        console.error("Error moving account to group, rolling back:", error);
+        logger.error({ error }, "Error moving account to group, rolling back");
         setAccounts(previousAccounts);
         setGroups(previousGroups);
         throw error;
@@ -1536,7 +1530,7 @@ export const DataProvider: React.FC<{
           accountIds.map((id) => moveAccountToGroupAction(id, targetGroupId))
         );
       } catch (error) {
-        console.error("Error moving accounts to group, rolling back:", error);
+        logger.error({ error }, "Error moving accounts to group, rolling back");
         setAccounts(previousAccounts);
         setGroups(previousGroups);
         throw error;
@@ -1603,7 +1597,7 @@ export const DataProvider: React.FC<{
         // Perform server action in background
         await savePayoutAction(payout as any);
       } catch (error) {
-        console.error("Error saving payout, rolling back:", error);
+        logger.error({ error }, "Error saving payout, rolling back");
         setAccounts(previousAccounts);
         throw error;
       }
@@ -1623,7 +1617,7 @@ export const DataProvider: React.FC<{
         // Delete from database
         await deleteAccountAction(account);
       } catch (error) {
-        console.error("Error deleting account, rolling back:", error);
+        logger.error({ error }, "Error deleting account, rolling back");
         setAccounts(previousAccounts);
         throw error;
       }
@@ -1676,7 +1670,7 @@ export const DataProvider: React.FC<{
           setAccounts(updatedAccounts);
         }
       } catch (error) {
-        console.error("Error deleting payout:", error);
+        logger.error({ error }, "Error deleting payout");
         throw error;
       }
     },
@@ -1718,7 +1712,7 @@ export const DataProvider: React.FC<{
           );
         }
       } catch (error) {
-        console.error("Error updating trades, rolling back:", error);
+        logger.error({ error }, "Error updating trades, rolling back");
         setTrades(previousTrades);
         throw error;
       }
@@ -1739,7 +1733,7 @@ export const DataProvider: React.FC<{
         );
         await groupTradesAction(tradeIds);
       } catch (error) {
-        console.error("Error grouping trades, rolling back:", error);
+        logger.error({ error }, "Error grouping trades, rolling back");
         setTrades(previousTrades);
         throw error;
       }
@@ -1759,7 +1753,7 @@ export const DataProvider: React.FC<{
         );
         await ungroupTradesAction(tradeIds);
       } catch (error) {
-        console.error("Error ungrouping trades, rolling back:", error);
+        logger.error({ error }, "Error ungrouping trades, rolling back");
         setTrades(previousTrades);
         throw error;
       }
@@ -1786,7 +1780,7 @@ export const DataProvider: React.FC<{
         await deleteTradesByIdsAction(tradeIds);
       } catch (error) {
         // On error, refresh to restore the correct state
-        console.error("Error deleting trades:", error);
+        logger.error({ error }, "Error deleting trades");
         await refreshAllData();
         throw error;
       }
@@ -1800,7 +1794,7 @@ export const DataProvider: React.FC<{
       try {
         return await getTradeImagesAction(tradeId);
       } catch (error) {
-        console.error("Error fetching trade images:", error);
+        logger.error({ error }, "Error fetching trade images");
         return null;
       }
     },
@@ -1815,7 +1809,7 @@ export const DataProvider: React.FC<{
         setDashboardLayout(layout as unknown as DashboardLayoutWithWidgets);
         await saveDashboardLayoutAction(layout);
       } catch (error: unknown) {
-        console.error("DashboardActions] Error saving dashboard layout:", error);
+        logger.error({ error }, "Error saving dashboard layout");
         throw error;
       }
     },

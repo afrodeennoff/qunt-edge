@@ -509,12 +509,12 @@ export class WebhookService {
       }
     })
 
-    logger.info('[WebhookService] Team Membership activated', {
+    logger.info({
       email,
       teamId: team.id,
       teamName: team.name,
       plan: planName
-    })
+    }, '[WebhookService] Team Membership activated')
 
     return {
       success: true,
