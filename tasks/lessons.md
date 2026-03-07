@@ -50,3 +50,6 @@
 - mistake pattern: Converted a route shell back to a server component without validating whether its transitive table modules were explicitly marked `"use client"`, which caused a production build failure on Vercel.
 - prevention rule: When de-clientifying a page in App Router, audit every directly imported subtree for hook-using files that rely on implicit client ancestry and add explicit `"use client"` boundaries before considering the refactor safe.
 - early trigger signals: Build traces mention hook usage (`useState`, `useEffect`, `useRef`) in components that do not begin with a client directive after a server-boundary change.
+- mistake pattern: Switched home-section composition from client-only deferred loading to server-first composition without marking a framer-motion section component as `"use client"`, causing a production React runtime crash (`minified error #130`).
+- prevention rule: After changing an import boundary from client to server, run a sweep for `framer-motion` and React hooks in imported files and enforce explicit client directives on those components.
+- early trigger signals: Production error boundary shows React #130 with `args[]=undefined` after a boundary/refactor touching section composition.

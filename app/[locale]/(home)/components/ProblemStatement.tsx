@@ -1,3 +1,5 @@
+"use client"
+
 import { motion } from 'framer-motion'
 import { AlertTriangle, Brain, Repeat } from 'lucide-react'
 
