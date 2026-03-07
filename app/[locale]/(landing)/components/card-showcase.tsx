@@ -7,7 +7,7 @@ import { ActionCard } from "@/components/ui/action-card"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, DollarSign, Users, ShoppingCart, Zap, Shield, CheckCircle2, AlertCircle } from "lucide-react"
+import { TrendingUp, DollarSign, Users, ShoppingCart, Zap, Shield, AlertCircle } from "lucide-react"
 
 export function CardShowcase() {
   return (

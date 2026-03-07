@@ -42,7 +42,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             } else {
                 toast.error(result.error || "Failed to refund transaction")
             }
-        } catch (error) {
+        } catch {
             toast.error("An error occurred")
         } finally {
             setIsRefunding(null)

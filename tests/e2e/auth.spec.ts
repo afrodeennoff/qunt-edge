@@ -15,7 +15,7 @@ test.describe('Authentication Flow', () => {
     const TEST_PASSWORD = 'Password123!';
     const LOCALE = 'en';
 
-    test.beforeEach(async ({ page, context }) => {
+    test.beforeEach(async ({ context }) => {
         // Ensure we start from a clean state
         await context.clearCookies();
     });

@@ -1,7 +1,6 @@
 'use server'
 import { render } from "@react-email/render"
 import TraderStatsEmail from "@/components/emails/weekly-recap"
-import { PrismaClient } from "@/prisma/generated/prisma"
 import { createClient } from '@supabase/supabase-js'
 import { generateTradingAnalysis } from "@/app/api/email/weekly-summary/[userid]/actions/analysis"
 import { getUserData, computeTradingStats } from "@/app/api/email/weekly-summary/[userid]/actions/user-data"
@@ -40,15 +39,6 @@ export interface WeeklyRecapContent {
 
 function compareDates(dateA: Date, dateB: Date) {
   return dateA.getTime() - dateB.getTime()
-}
-
-function formatPnL(value: number): string {
-  // For values >= 1000 or <= -1000, use K format
-  if (Math.abs(value) >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`
-  }
-  // For values between -1000 and 1000, show at most 2 decimal places
-  return value.toFixed(Math.abs(value) < 10 ? 2 : 1)
 }
 
 export async function generateAnalysis(content: WeeklyRecapContent) {

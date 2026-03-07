@@ -21,7 +21,7 @@ interface User {
 }
 
 export function WeeklyRecapPreview() {
-  const { content, setContent, isLoading: isContextLoading, selectedUserId, setSelectedUserId, selectedEmail, setSelectedEmail } = useWeeklyRecap()
+  const { content, setContent, isLoading: isContextLoading, selectedUserId, setSelectedUserId, setSelectedEmail } = useWeeklyRecap()
   const [emailHtml, setEmailHtml] = useState("")
   const [zoom, setZoom] = useState(1)
   const [error, setError] = useState<string | null>(null)

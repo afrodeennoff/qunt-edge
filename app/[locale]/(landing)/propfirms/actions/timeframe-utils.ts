@@ -7,7 +7,6 @@ export interface DateRange {
 
 export function getTimeframeDateRange(timeframe: Timeframe): DateRange {
   const now = new Date()
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
   switch (timeframe) {
     case 'currentMonth': {
@@ -69,4 +68,3 @@ export function getTimeframeDateRange(timeframe: Timeframe): DateRange {
       }
   }
 }
-

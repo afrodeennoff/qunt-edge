@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { performanceMonitor, usePerformanceMonitor } from '@/lib/debug/performance-monitor';
+import { renderHook } from '@testing-library/react';
+import { performanceMonitor } from '@/lib/debug/performance-monitor';
 import {  useMemoryLeakDetection } from '@/lib/performance/memory-leak-detector';
 
 describe('Performance Regression Tests', () => {

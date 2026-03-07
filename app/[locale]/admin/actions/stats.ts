@@ -4,7 +4,6 @@ import { createClient, User } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
 import { normalizeTradesForClient } from '@/lib/data-types'
 import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
-import { Subscription } from '@/prisma/generated/prisma'
 import { assertAdminAccess } from '@/server/authz'
 
 function getSupabaseAdminClient() {

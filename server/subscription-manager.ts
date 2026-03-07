@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { paymentService } from './payment-service'
-import { getSubscriptionDetails } from './subscription'
 import { whop } from '@/lib/whop'
 
 export interface SubscriptionDetails {
@@ -50,10 +49,6 @@ export class SubscriptionManager {
     metadata?: Record<string, any>
   }): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
     try {
-      const _existingSubscription = await prisma.subscription.findUnique({
-        where: { userId: data.userId },
-      })
-
       const now = new Date()
       let endDate: Date | null = null
       let trialEndsAt: Date | null = null

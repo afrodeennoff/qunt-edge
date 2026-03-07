@@ -2,7 +2,6 @@
 
 import { FinancialEvent } from '@/prisma/generated/prisma'
 import { prisma } from '@/lib/prisma'
-import { format } from 'date-fns'
 
 /**
  * Retrieves financial events for a given month.

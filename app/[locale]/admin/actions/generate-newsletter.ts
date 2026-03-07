@@ -16,7 +16,7 @@ interface GenerateNewsletterProps {
   description: string
 }
 
-export async function generateNewsletterContent({ youtubeUrl, description }: GenerateNewsletterProps) {
+export async function generateNewsletterContent({ youtubeUrl: _youtubeUrl, description }: GenerateNewsletterProps) {
   try {
     const { output } = await generateText({
       model: 'openai/gpt-5-mini',

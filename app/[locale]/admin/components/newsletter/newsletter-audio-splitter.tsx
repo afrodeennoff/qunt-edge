@@ -3,8 +3,7 @@
 
 import { useRef, useState } from 'react'
 import { Input, Output, Conversion, ALL_FORMATS, BlobSource, WavOutputFormat, BufferTarget } from 'mediabunny'
-import { Upload, Download, Play, Pause, Mic } from 'lucide-react'
-import { useI18n } from '@/locales/client'
+import { Upload, Download, Play, Pause } from 'lucide-react'
 import { TranscriptionComponent } from './newsletter-transcription'
 
 interface AudioSegment {
@@ -21,7 +20,6 @@ interface AudioSplitterProps {
 }
 
 export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: AudioSplitterProps) {
-  const t = useI18n()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [segments, setSegments] = useState<AudioSegment[]>([])

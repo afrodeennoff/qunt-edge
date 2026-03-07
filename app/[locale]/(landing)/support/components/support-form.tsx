@@ -11,8 +11,6 @@ import { useI18n } from "@/locales/client";
 import { useCallback, useEffect, useState } from "react";
 import { sendSupportEmail } from "../../actions/send-support-email";
 import { UIMessage } from "@ai-sdk/react";
-import { PromptInputMessage } from "@/components/ai-elements/prompt-input";
-import { useUserStore } from "@/store/user-store";
 import { createClient } from "@/lib/supabase";
 
 
