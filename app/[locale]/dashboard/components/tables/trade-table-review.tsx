@@ -1430,7 +1430,7 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
           const nextScrollTop = event.currentTarget.scrollTop;
           if (scrollRafRef.current !== null) return;
           scrollRafRef.current = requestAnimationFrame(() => {
-            if (Math.abs(nextScrollTop - lastScrollTopRef.current) < 2) {
+            if (Math.abs(nextScrollTop - lastScrollTopRef.current) < 50) {
               scrollRafRef.current = null;
               return;
             }
