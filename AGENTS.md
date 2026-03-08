@@ -126,6 +126,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Team Analytics Duplicate Fix
+- **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.
+- **What I want:** Clean typecheck/build for team analytics routes.
+- **What I don't want:** Duplicate variable declarations or invalid best-member fields.
+- **How we fixed that:** Kept a single analytics calculation block, used `bestMemberResult[0]?._sum?.pnl` for PnL, and re-ran verification.
+- **Key Files:** `server/teams.ts`, `tasks/todo.md`.
+- **Verification:** `npm run -s typecheck`, `npm run -s lint -- --max-warnings=999999`, `npm run -s build`.
+
+
 ### 2026-03-08: Team Analytics Typecheck Fix
 - **What changed:** Removed duplicated analytics variables and ensured averageRr/bestMember values are defined once during team analytics update.
 - **What I want:** Restore clean build/typecheck for team analytics route.
@@ -262,6 +271,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Verification:**
   - `npm run -s typecheck` -> fails on pre-existing unrelated `server/teams.ts` errors.
   - `npm run -s build` -> compiles, then fails at page-data stage with missing `.next/server/pages-manifest.json` in this environment.
+
+### 2026-03-08: Runtime Lag Micro-Optimization (WidgetCanvas Subscription Narrowing)
+- **What changed:** Narrowed `WidgetCanvas` Zustand subscriptions so it no longer subscribes to the entire user store object.
+- **What I want:** Keep widget-grid rerenders scoped to fields that actually affect layout rendering.
+- **What I don't want:** `useUserStore(state => state)` broad subscriptions causing `WidgetCanvas` rerenders whenever unrelated user-store fields change.
+- **How we fixed that:**
+  - Replaced broad store subscription with field selectors in `widget-canvas.tsx`:
+    - `isMobile`
+    - `dashboardLayout`
+    - `setDashboardLayout`
+  - Kept existing widget-grid logic unchanged; only subscription surface was narrowed.
+- **Key Files:** `app/[locale]/dashboard/components/widget-canvas.tsx`, `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint app/[locale]/dashboard/components/widget-canvas.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> exits `0`.
+  - `npm run -s build` -> fails on pre-existing Prisma schema issue (`@@schema` missing on enums in `prisma/schema.prisma`), unrelated to touched files.
 
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.

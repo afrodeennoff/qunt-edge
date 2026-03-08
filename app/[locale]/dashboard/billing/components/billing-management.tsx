@@ -129,7 +129,7 @@ export default function BillingManagement() {
                   }
                 </span>
                 <span className="text-muted-foreground">•</span>
-                {subscription?.status === 'active' ? (
+                {subscription?.status === 'ACTIVE' ? (
                   <span className="text-white dark:text-white inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     {t('billing.status.active')}
@@ -156,7 +156,7 @@ export default function BillingManagement() {
                           return t('billing.status.past_due')
                         case 'paused':
                           return t('billing.status.paused')
-                        case 'trialing':
+                        case 'PENDING':
                           return t('billing.status.trialing')
                         case 'unpaid':
                           return t('billing.status.unpaid')
@@ -346,7 +346,7 @@ export default function BillingManagement() {
       </Card>
 
       {/* Subscription Management */}
-      {!isLoading && (subscription?.status === 'active' || subscription?.status === 'trialing') && subscription?.plan?.interval !== 'lifetime' && (
+      {!isLoading && (subscription?.status === 'ACTIVE' || subscription?.status === 'PENDING') && subscription?.plan?.interval !== 'lifetime' && (
         <Card className="rounded-3xl border border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
           <CardContent className="px-0">
             <div className="flex flex-col gap-4">

@@ -328,7 +328,9 @@ function DebugDataBadge() {
 }
 
 export default function WidgetCanvas() {
-  const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
+  const isMobile = useUserStore((state) => state.isMobile)
+  const layouts = useUserStore((state) => state.dashboardLayout)
+  const setLayouts = useUserStore((state) => state.setDashboardLayout)
   const user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useDashboardActions()
   const searchParams = useSearchParams()

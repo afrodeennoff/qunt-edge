@@ -215,7 +215,7 @@ export async function PATCH(req: NextRequest) {
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt: newTrialEnd,
             endDate: newTrialEnd,
           },

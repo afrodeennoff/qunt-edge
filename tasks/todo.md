@@ -41,8 +41,22 @@
 - Goal: eliminate duplicate data fetch/context mount work and reduce broad rerender subscriptions.
 - Risk to monitor: dashboard first render now fully depends on `DataProvider` client load path (no server-seeded trade payload in page shell).
 - Verification:
-  - `npm run -s typecheck` fails in `server/teams.ts` (pre-existing unrelated errors).
-  - `npm run -s build` compiles but fails during page data collection with missing `.next/server/pages-manifest.json` (environment/build-system issue, not from touched files).
+  - `npm run -s typecheck` passes.
+  - `npm run -s build` fails on pre-existing Prisma schema enum metadata issue (`@@schema` missing on enums in `prisma/schema.prisma`).
+
+# Runtime Lag Micro-Optimization (2026-03-08)
+
+- [x] Replace broad `useUserStore(state => state)` subscription in `WidgetCanvas` with field selectors.
+- [x] Keep widget-canvas behavior unchanged while narrowing rerender scope.
+- [x] Run targeted lint on touched component.
+- [x] Run full typecheck for regression check.
+
+## Review (Runtime Lag Micro-Optimization)
+
+- `WidgetCanvas` now subscribes only to `isMobile`, `dashboardLayout`, and `setDashboardLayout`, reducing rerenders from unrelated user-store updates.
+- Verification:
+  - `npx eslint app/[locale]/dashboard/components/widget-canvas.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> exits `0`.
 
 ## Review
 - Verification: ran typecheck/lint/build.
@@ -52,6 +66,12 @@
 
 ## Review
 - Verification: ran typecheck/lint/build.
+- Typecheck: OK
+- Lint: OK
+- Build: FAILED
+
+## Review
+- Verification: ran typecheck/lint/build after team analytics fix.
 - Typecheck: OK
 - Lint: OK
 - Build: FAILED

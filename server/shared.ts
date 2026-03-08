@@ -94,7 +94,6 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   // Define the cached fetcher
   const getCachedShared = unstable_cache(
     async (slug: string) => {
-      console.log(`[Cache MISS] Fetching shared data for slug: ${slug}`)
       const shared = await prisma.shared.findFirst({
         where: {
           slug,

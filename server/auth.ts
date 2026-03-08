@@ -409,7 +409,6 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
       const shouldUpdateLanguage = !!locale && locale !== existingUserByAuthId.language;
 
       if (shouldUpdateEmail || shouldUpdateLanguage) {
-        console.log('[ensureUserInDatabase] Updating existing user record');
         try {
           const updatedUser = await prisma.user.update({
             where: {
@@ -420,14 +419,12 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
               language: shouldUpdateLanguage ? (locale as string) : existingUserByAuthId.language
             },
           });
-          console.log('[ensureUserInDatabase] SUCCESS: User updated successfully');
           return updatedUser;
         } catch (updateError) {
           console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
           throw new Error('Failed to update user');
         }
       }
-      console.log('[ensureUserInDatabase] SUCCESS: Existing user found, no update needed');
       return existingUserByAuthId;
     }
 
@@ -438,18 +435,12 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
       });
 
       if (existingUserByEmail && existingUserByEmail.auth_user_id !== user.id) {
-        console.log('[ensureUserInDatabase] ERROR: Account conflict - email already associated with different auth method', {
-          userEmail: user.email,
-          existingAuthId: existingUserByEmail.auth_user_id,
-          currentAuthId: user.id
-        });
         await signOutSilently();
         throw new Error('Account conflict: Email already associated with different authentication method');
       }
     }
 
     // Create new user if no existing user found
-    console.log('[ensureUserInDatabase] Creating new user');
     try {
       const newUser = await prisma.user.create({
         data: {
@@ -459,13 +450,11 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
           language: locale || 'en'
         },
       });
-      console.log('[ensureUserInDatabase] SUCCESS: New user created successfully');
 
       // Create default dashboard layout for new user
       try {
         const { createDefaultDashboardLayout } = await import('@/server/database');
         await createDefaultDashboardLayout(user.id);
-        console.log('[ensureUserInDatabase] SUCCESS: Default dashboard layout created');
       } catch (layoutError) {
         console.error('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
         // Don't throw here - user creation succeeded, layout can be created later
@@ -475,7 +464,6 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
     } catch (createError) {
       if (createError instanceof Error &&
         createError.message.includes('Unique constraint failed')) {
-        console.log('[ensureUserInDatabase] ERROR: Unique constraint failed when creating user', createError);
         await signOutSilently();
         throw new Error('Database integrity error: Duplicate user records found');
       }
@@ -497,26 +485,22 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
     // Handle Prisma validation errors
     if (error instanceof Error) {
       if (error.message.includes('Argument `where` of type UserWhereUniqueInput needs')) {
-        console.log('[ensureUserInDatabase] ERROR: Invalid user identification provided');
         await signOutSilently();
         throw new Error('Invalid user identification provided');
       }
 
       if (error.message.includes('Unique constraint failed')) {
-        console.log('[ensureUserInDatabase] ERROR: Database integrity error - duplicate user records');
         await signOutSilently();
         throw new Error('Database integrity error: Duplicate user records found');
       }
 
       if (error.message.includes('Account conflict')) {
-        console.log('[ensureUserInDatabase] ERROR: Re-throwing account conflict error');
         // Error already handled above
         throw error;
       }
     }
 
     // For any other unexpected errors, log out the user
-    console.log('[ensureUserInDatabase] ERROR: Critical database error - signing out user');
     await signOutSilently();
     throw new Error('Critical database error occurred. Please try logging in again.');
   }
@@ -643,7 +627,6 @@ export async function getUserEmail(): Promise<string> {
 
 // Lightweight updater for user language without full ensure logic
 export async function updateUserLanguage(locale: string): Promise<{ updated: boolean }> {
-  console.log("[Auth] updateUserLanguage", locale)
   const allowedLocales = new Set(['en', 'fr'])
   if (!allowedLocales.has(locale)) {
     return { updated: false }

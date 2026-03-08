@@ -417,7 +417,6 @@ export async function savePayoutAction(payout: Payout) {
 }
 
 export async function deletePayoutAction(payoutId: string) {
-  console.log('deletePayoutAction', payoutId)
   try {
     const userId = await getDatabaseUserId()
     const payout = await prisma.payout.findFirst({

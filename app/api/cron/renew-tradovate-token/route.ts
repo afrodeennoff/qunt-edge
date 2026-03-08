@@ -123,8 +123,6 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
     // `Synchronization` has no persisted `environment` field, so default to demo.
     const apiBaseUrl = 'https://demo.tradovateapi.com';
 
-    console.log(`[CRON] Attempting token renewal for account ${synchronization.accountId}`);
-
     const renewal = await fetch(`${apiBaseUrl}/auth/renewAccessToken`, {
       headers: {
         'Authorization': `Bearer ${synchronization.token}`
@@ -168,7 +166,6 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
  */
 async function performDailySync(synchronization: SynchronizationRecord): Promise<boolean> {
   try {
-    console.log(`[CRON] Performing daily sync for account ${synchronization.accountId}`);
     if (!synchronization.token) {
       console.error(`[CRON] Cannot sync account ${synchronization.accountId}: missing access token`);
       return false;
@@ -185,7 +182,6 @@ async function performDailySync(synchronization: SynchronizationRecord): Promise
       return false;
     }
 
-    console.log(`[CRON] Successfully synced ${result.savedCount || 0} trades for account ${synchronization.accountId}`);
     return true;
   } catch (error) {
     console.error(`[CRON] Error during daily sync for account ${synchronization.accountId}:`, error);

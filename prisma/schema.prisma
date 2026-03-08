@@ -175,6 +175,8 @@ enum SubscriptionStatus {
   PAST_DUE
   PENDING
   TRIAL_EXPIRED
+
+  @@schema("public")
 }
 
 model DashboardLayout {
@@ -390,6 +392,8 @@ enum PayoutStatus {
   PAID
   REFUSED
   CANCELLED
+
+  @@schema("public")
 }
 
 model Order {

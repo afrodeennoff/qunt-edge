@@ -65,7 +65,7 @@ function getAccountBalance(account: Account) {
 
 function getAccountTotalPayouts(account: Account) {
   return (account.payouts ?? [])
-    .filter((payout) => payout.status === "PAID" || payout.status === "VALIDATED")
+    .filter((payout) => payout.status === "PAID")
     .reduce((sum, payout) => sum + payout.amount, 0)
 }
 

@@ -43,8 +43,6 @@ export async function getSubscriptionDetails(): Promise<SubscriptionInfo | null>
         }
     }
 
-    console.log("[getSubscriptionDetails] Fetching details for", normalizedEmail)
-
     try {
         const subscription = await prisma.subscription.findUnique({
             where: { email: normalizedEmail },
