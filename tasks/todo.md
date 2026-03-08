@@ -1,8 +1,6 @@
-# Performance Audit Plan (End-to-End)
+# Performance Fix Plan (Immediate)
 
-- [ ] Capture current performance signals (bundle summary, route budgets if available).
-- [ ] Audit client rendering costs (client components, memoization, context scope).
-- [ ] Audit dashboard hot paths (data provider size, widget registry, widget canvas).
-- [ ] Audit large component files and rendering patterns.
-- [ ] Audit data-fetch + computation hotspots (trade filtering, stats, date ops).
-- [ ] Summarize root causes + evidence and propose remediation steps.
+- [x] Reduce widget animation cost in widget-canvas.
+- [ ] Add React.memo to top 10 heavy chart widgets.
+- [ ] Verify widget rendering after memoization.
+- [ ] Update AGENTS.md with performance fix entry.

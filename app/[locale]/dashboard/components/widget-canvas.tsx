@@ -621,6 +621,8 @@ export default function WidgetCanvas() {
             useCSSTransforms={true}
           >
             {currentLayout.map((widget, index) => {
+              const shouldAnimateWidget =
+                shouldAnimateWidgets && index < 6
               return (
                 <div
                   key={widget.i}
@@ -629,20 +631,19 @@ export default function WidgetCanvas() {
                 >
                   <motion.div
                     className="h-full min-h-0"
-                    initial={shouldAnimateWidgets ? { opacity: 0, y: 18, scale: 0.985 } : false}
-                    animate={shouldAnimateWidgets ? { opacity: 1, y: 0, scale: 1 } : undefined}
+                    initial={shouldAnimateWidget ? { opacity: 0, y: 12 } : false}
+                    animate={shouldAnimateWidget ? { opacity: 1, y: 0 } : undefined}
                     transition={
-                      shouldAnimateWidgets
+                      shouldAnimateWidget
                         ? {
-                          delay: Math.min(0.035 * index, 0.42),
-                          type: "spring",
-                          stiffness: 165,
-                          damping: 21,
-                          mass: 0.88,
+                          delay: Math.min(0.03 * index, 0.3),
+                          type: "tween",
+                          duration: 0.25,
+                          ease: "easeOut",
                         }
                         : undefined
                     }
-                    whileHover={shouldAnimateWidgets ? { scale: 1.01 } : undefined}
+                    whileHover={shouldAnimateWidget ? { scale: 1.01 } : undefined}
                   >
                     <WidgetWrapper
                       onRemove={() => removeWidget(widget.i)}
