@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from '@/lib/utils'
 import { WidgetType, WidgetSize } from '../types/dashboard'
 import { getWidgetsByCategory, WIDGET_REGISTRY, getWidgetPreview } from '../config/widget-registry'
-import { useDashboardTrades } from '@/context/data-provider'
+import { useDashboardIsMobile } from '@/context/data-provider'
 
 interface AddWidgetSheetProps {
   onAddWidget: (type: WidgetType, size?: WidgetSize) => void
@@ -97,7 +97,7 @@ const LazyWidgetPreview: React.FC<LazyWidgetPreviewProps> = ({
 const PreviewCard = forwardRef<HTMLDivElement, PreviewCardProps>(
   ({ onClick, className, style, children }, ref) => {
     const t = useI18n()
-    const { isMobile } = useDashboardTrades()
+    const isMobile = useDashboardIsMobile()
     return (
       <div 
         ref={ref}
@@ -124,7 +124,7 @@ PreviewCard.displayName = "PreviewCard"
 export const AddWidgetSheet = forwardRef<HTMLButtonElement, AddWidgetSheetProps>(
   ({ onAddWidget, isCustomizing, showLabelOnMobile = false }, ref) => {
     const t = useI18n()
-    const { isMobile } = useDashboardTrades()
+    const isMobile = useDashboardIsMobile()
     const [isOpen, setIsOpen] = React.useState(false)
     const [loadedItems, setLoadedItems] = useState<Set<number>>(new Set())
     const [loadingStarted, setLoadingStarted] = useState(false)

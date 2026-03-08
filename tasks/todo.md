@@ -19,3 +19,10 @@
 - Verified route budgets are within threshold while runtime architecture still shows lag risk.
 - Verified hotspots with file-level evidence in `context/data-provider.tsx`, `context/trades-context.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, and large dashboard component files.
 - Remaining risk: audit is static + command-based; no React Profiler flamegraph or production tracing captured in this pass.
+
+## Review
+- Verification: ran typecheck/lint/build.
+- Typecheck: FAILED in server/teams.ts (join on PrismaClient, missing averageRr/bestMember, duplicate keys).
+- Lint: 0 errors, 1513 warnings (baseline).
+- Build: compiled successfully.
+- Follow-up: fix server/teams.ts type errors before final sign-off.

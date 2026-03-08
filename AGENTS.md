@@ -126,6 +126,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Performance Verification Attempt (Typecheck Failure)
+- **What changed:** Ran typecheck/lint/build after performance fixes.
+- **What I want:** Confirm performance changes are type-safe and build-safe.
+- **What I don't want:** Shipping changes with hidden TypeScript errors.
+- **How we fixed that:** Identified typecheck failures in `server/teams.ts` (unrelated to performance changes) and recorded follow-up requirement.
+- **Key Files:** `server/teams.ts`, `tasks/todo.md`.
+- **Verification:** `npm run -s typecheck` failed; `npm run -s lint` warnings only; `npm run -s build` succeeded.
+
+
 ### 2026-03-08: Provider Hook Migration (Import Cleanup)
 - **What changed:** Migrated dashboard hook imports to dedicated provider files and aligned provider files to re-export existing slice hooks.
 - **What I want:** Clearer separation of trades/filters/derived/actions imports without changing runtime behavior.

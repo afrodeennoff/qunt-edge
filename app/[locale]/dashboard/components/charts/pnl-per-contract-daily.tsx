@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { CardTitle } from "@/components/ui/card";
 import { ChartSurface } from "@/components/ui/chart-surface";
-import { useDashboardStats, useDashboardTrades } from "@/context/data-provider";
+import { useDashboardIsLoading, useDashboardStats } from "@/context/data-provider";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 import {
@@ -74,7 +74,7 @@ export default function PnLPerContractDailyChart({
   size = "medium",
 }: PnLPerContractDailyChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
-  const { isLoading } = useDashboardTrades();
+  const isLoading = useDashboardIsLoading();
   const { timezone } = useUserStore();
   const { config, setSelectedInstrument } = usePnLPerContractDailyStore();
   const t = useI18n();

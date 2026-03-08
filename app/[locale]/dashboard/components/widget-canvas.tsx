@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Minus, Maximize2, GripVertical } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { useDashboardActions, useDashboardFilters, useDashboardStats, useDashboardTrades } from '@/context/data-provider'
+import { useDashboardActions, useDashboardFilters, useDashboardIsMobile, useDashboardStats, useDashboardTrades } from '@/context/data-provider'
 import { useI18n } from "@/locales/client"
 import { WIDGET_REGISTRY, getWidgetComponent } from '../config/widget-registry'
 import { useAutoScroll } from '../../../../hooks/use-auto-scroll'
@@ -80,7 +80,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
   currentType: WidgetType
 }) => {
   const t = useI18n()
-  const { isMobile } = useDashboardTrades()
+  const isMobile = useDashboardIsMobile()
   const uiV2Enabled = isUiV2Enabled()
   const widgetRef = useRef<HTMLDivElement>(null)
   const [isSizePopoverOpen, setIsSizePopoverOpen] = useState(false)

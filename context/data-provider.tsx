@@ -2031,6 +2031,30 @@ export const useDashboardTrades = () => {
   return context;
 };
 
+export const useDashboardIsMobile = () => {
+  const context = useContext(DashboardDataStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsMobile must be used within a DataProvider");
+  }
+  return context.isMobile;
+};
+
+export const useDashboardIsLoading = () => {
+  const context = useContext(DashboardDataStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsLoading must be used within a DataProvider");
+  }
+  return context.isLoading;
+};
+
+export const useDashboardIsSharedView = () => {
+  const context = useContext(DashboardDataStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsSharedView must be used within a DataProvider");
+  }
+  return context.isSharedView;
+};
+
 export const useDashboardFilters = () => {
   const context = useContext(DashboardFiltersContext);
   if (!context) {
