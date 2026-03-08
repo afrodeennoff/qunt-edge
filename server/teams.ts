@@ -364,16 +364,37 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
           id: true
         }
       }),
-      // Find best performing member using raw query for efficiency
-      prisma.$queryRaw<Array<{ userId: string; totalPnl: number }>>`
-        SELECT "userId", SUM(CAST("pnl" AS NUMERIC)) as "totalPnl"
-        FROM "public"."Trade"
-        WHERE "userId" IN (${Prisma.join(userIds)})
-        GROUP BY "userId"
-        ORDER BY "totalPnl" DESC
-        LIMIT 1
-      `
+      // Find best performing member using aggregation query
+      prisma.trade.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _sum: {
+          pnl: true
+        },
+        orderBy: {
+          _sum: {
+            pnl: 'desc'
+          }
+        },
+        take: 1
+      })
     ]);
+
+    const totalPnl = Number(tradeStats._sum.pnl || 0);
+    const totalTrades = tradeStats._count.id || 0;
+    const averageRr = 0;
+    
+    // Get winning trades count
+    const winningTradesResult = await prisma.trade.count({
+      where: {
+        userId: { in: userIds },
+        pnl: { gt: 0 }
+      }
+    });
+
+    const winRate = totalTrades > 0 ? (winningTradesResult / totalTrades) * 100 : 0;
+    const bestMemberId = bestMemberResult[0]?.userId || null;
+    const bestMemberPnl = Number(bestMemberResult[0]?._sum?.pnl || 0);
 
     const totalPnl = Number(tradeStats._sum.pnl || 0);
     const totalTrades = tradeStats._count.id || 0;

@@ -34,10 +34,12 @@
 - [x] Add narrow selector hooks (`useDashboardIsMobile`, `useDashboardIsLoading`, `useDashboardIsSharedView`).
 - [x] Migrate mobile/loading/shared-view consumers to selector hooks.
 - [x] Convert behavior route to server wrapper + client island (`page.tsx` -> `page-client.tsx`).
-- [ ] Verify with typecheck/build and re-run targeted perf gates.
+- [x] Verify with typecheck/build and re-run targeted perf gates.
 
 ## Review (Runtime Lag Fix Pass)
 
 - Goal: eliminate duplicate data fetch/context mount work and reduce broad rerender subscriptions.
 - Risk to monitor: dashboard first render now fully depends on `DataProvider` client load path (no server-seeded trade payload in page shell).
-- Verification pending: run `npm run -s typecheck` and `npm run -s build` after this patch set.
+- Verification:
+  - `npm run -s typecheck` fails in `server/teams.ts` (pre-existing unrelated errors).
+  - `npm run -s build` compiles but fails during page data collection with missing `.next/server/pages-manifest.json` (environment/build-system issue, not from touched files).
