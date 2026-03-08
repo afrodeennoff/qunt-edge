@@ -23,8 +23,11 @@ function shouldRecoverFromChunkError(reason: unknown): boolean {
     return (
         message.includes("ChunkLoadError") ||
         message.includes("Loading chunk") ||
+        message.includes("Loading CSS chunk") ||
+        message.includes("CSS chunk") ||
         message.includes("Failed to fetch dynamically imported module") ||
-        message.includes("Importing a module script failed")
+        message.includes("Importing a module script failed") ||
+        message.includes("ERR_MODULE_NOT_FOUND")
     );
 }
 
@@ -43,11 +46,23 @@ export function RootProviders({
                 return;
             }
 
-            if (sessionStorage.getItem(CHUNK_RECOVERY_SESSION_KEY) === "1") {
+            let alreadyAttempted = false;
+            try {
+                alreadyAttempted = sessionStorage.getItem(CHUNK_RECOVERY_SESSION_KEY) === "1";
+            } catch {
+                alreadyAttempted = false;
+            }
+
+            if (alreadyAttempted) {
                 return;
             }
 
-            sessionStorage.setItem(CHUNK_RECOVERY_SESSION_KEY, "1");
+            try {
+                sessionStorage.setItem(CHUNK_RECOVERY_SESSION_KEY, "1");
+            } catch {
+                // Ignore storage errors; still attempt reload once per page instance.
+            }
+
             window.location.reload();
         };
 

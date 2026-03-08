@@ -747,21 +747,7 @@ export const DataProvider: React.FC<{
       }
       await loadData();
       if (isSharedView) return;
-      // Load Whop subscription data
-      try {
-        setSubscriptionLoading(true);
-        const subscriptionData = await getSubscriptionData();
-        setSubscriptionData(subscriptionData);
-        setSubscriptionError(null);
-      } catch (error) {
-        logger.error({ error }, "Error loading Whop subscription");
-        setSubscriptionError(
-          error instanceof Error ? error.message : "Failed to load subscription"
-        );
-        setSubscriptionData(null);
-      } finally {
-        setSubscriptionLoading(false);
-      }
+      await loadSubscriptionData();
     };
 
     loadDataIfMounted();
@@ -786,7 +772,11 @@ export const DataProvider: React.FC<{
   const loadSubscriptionData = useCallback(async () => {
     try {
       setSubscriptionLoading(true);
-      const subscriptionData = await getSubscriptionData();
+      const subscriptionData = await withTimeout(
+        getSubscriptionData(),
+        15000,
+        "getSubscriptionData"
+      );
       setSubscriptionData(subscriptionData);
       setSubscriptionError(null);
     } catch (error) {
@@ -798,7 +788,7 @@ export const DataProvider: React.FC<{
     } finally {
       setSubscriptionLoading(false);
     }
-  }, []);
+  }, [withTimeout, setSubscriptionData, setSubscriptionError, setSubscriptionLoading]);
 
   const refreshTradesOnly = useCallback(
     async (options?: { force?: boolean; withLoading?: boolean }) => {
@@ -857,7 +847,11 @@ export const DataProvider: React.FC<{
       if (withLoading) setIsLoading(true);
 
       try {
-        const data = await getUserData(force);
+        const data = await withTimeout(
+          getUserData(force),
+          20000,
+          "getUserData(refresh)"
+        );
 
         if (!data) {
           await signOut();
@@ -867,8 +861,10 @@ export const DataProvider: React.FC<{
         const normalizedAccounts = normalizeAccountsForClient(
           (data.accounts || []) as AccountInput[]
         );
-        const accountsWithMetrics = await calculateAccountMetricsAction(
-          normalizedAccounts
+        const accountsWithMetrics = await withTimeout(
+          calculateAccountMetricsAction(normalizedAccounts),
+          20000,
+          "calculateAccountMetricsAction(refresh)"
         );
         setAccounts(normalizeAccountsForClient(accountsWithMetrics));
 
@@ -902,6 +898,7 @@ export const DataProvider: React.FC<{
       setTickDetails,
       setIsFirstConnection,
       loadSubscriptionData,
+      withTimeout,
     ]
   );
 
