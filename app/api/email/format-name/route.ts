@@ -90,7 +90,6 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    console.log(`Processing ${subscribers.length} emails for name inference`)
 
     // Prepare emails for AI processing
     const emails = subscribers.map(sub => sub.email)
@@ -170,7 +169,6 @@ Return the inferred names with confidence levels:
       }
     }
 
-    console.log(`Name inference completed: ${updatedCount} updated out of ${subscribers.length} processed`)
 
     return NextResponse.json({
       success: true,

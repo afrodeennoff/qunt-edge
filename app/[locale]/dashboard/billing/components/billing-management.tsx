@@ -157,7 +157,7 @@ export default function BillingManagement() {
                         case 'paused':
                           return t('billing.status.paused')
                         case 'PENDING':
-                          return t('billing.status.trialing')
+                          return t('billing.status.incomplete')
                         case 'unpaid':
                           return t('billing.status.unpaid')
                         default:

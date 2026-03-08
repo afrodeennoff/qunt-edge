@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { memo, useState, useMemo, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
@@ -707,7 +707,7 @@ function PayoutDialog({
   )
 }
 
-export function AccountsOverview({
+function AccountsOverviewComponent({
   size,
   surface = "card",
 }: {
@@ -1667,4 +1667,7 @@ export function AccountsOverview({
       />
     </Card>
   )
-} 
+}
+
+export const AccountsOverview = memo(AccountsOverviewComponent)
+AccountsOverview.displayName = "AccountsOverview"

@@ -1,6 +1,12 @@
 "use client"
 
-import { useDashboardActions, useDashboardStats, useDashboardTrades } from "@/context/data-provider"
+import {
+  useDashboardAccountsList,
+  useDashboardActions,
+  useDashboardIsLoading,
+  useDashboardStats,
+  useDashboardTradeItems,
+} from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -9,10 +15,13 @@ import { clearAllCache } from "@/lib/indexeddb/trades-cache"
 import { cn } from "@/lib/utils"
 
 export function DataDebug() {
-    const { trades, isLoading, accounts } = useDashboardTrades()
+  const trades = useDashboardTradeItems()
+  const accounts = useDashboardAccountsList()
+  const isLoading = useDashboardIsLoading()
   const { formattedTrades } = useDashboardStats()
   const { refreshAllData } = useDashboardActions()
-    const { user, supabaseUser } = useUserStore(state => state)
+  const user = useUserStore((state) => state.user)
+  const supabaseUser = useUserStore((state) => state.supabaseUser)
     const [isOpen, setIsOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
 

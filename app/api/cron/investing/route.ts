@@ -256,21 +256,11 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
     // Don't forget to add the last event if there is one
     if (currentEvent) {
-      console.log('Adding final event:', currentEvent)
       events.push(currentEvent as InvestingEvent)
     }
 
-    console.log('Parsing Summary:')
-    console.log('- Total rows processed:', rowCount)
-    console.log('- Date rows found:', dateRowCount)
-    console.log('- Event rows found:', eventRowCount)
-    console.log('- Event info rows found:', eventInfoRowCount)
-    console.log('- Events created:', events.length)
-    console.log('- All day events:', events.filter(e => e.time === 'Toute la journée').length)
-    console.log('- Regular events:', events.filter(e => e.time !== 'Toute la journée').length)
-
     if (events.length === 0) {
-      console.log('Warning: No events were created. This might indicate a parsing issue.')
+      console.warn('No events were created. This might indicate a parsing issue.')
     }
 
     return events.map(event => ({
