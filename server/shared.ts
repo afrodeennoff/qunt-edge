@@ -1,6 +1,7 @@
 'use server'
 
 import { TickDetails } from '@/prisma/generated/prisma'
+import { Prisma } from '@/prisma/generated/prisma'
 import { normalizeTradesForClient, Trade } from '@/lib/data-types'
 import { revalidatePath, unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
@@ -18,8 +19,8 @@ export interface SharedParams {
     from: Date
     to?: Date
   }
-  desktop?: any[]
-  mobile?: any[]
+  desktop?: unknown[]
+  mobile?: unknown[]
   expiresAt?: Date
   viewCount?: number
   createdAt?: Date
@@ -58,8 +59,8 @@ export async function createShared(data: SharedParams): Promise<string> {
               from: data.dateRange.from.toISOString(),
               ...(data.dateRange.to && { to: data.dateRange.to.toISOString() })
             },
-            desktop: data.desktop || [],
-            mobile: data.mobile || [],
+            desktop: (data.desktop || []) as Prisma.InputJsonValue,
+            mobile: (data.mobile || []) as Prisma.InputJsonValue,
             expiresAt: data.expiresAt,
             slug,
           },
@@ -94,7 +95,6 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   // Define the cached fetcher
   const getCachedShared = unstable_cache(
     async (slug: string) => {
-      console.log(`[Cache MISS] Fetching shared data for slug: ${slug}`)
       const shared = await prisma.shared.findFirst({
         where: {
           slug,
@@ -178,8 +178,8 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
             from: fromDate,
             ...(toDate && { to: toDate })
           },
-          desktop: shared.desktop as any[],
-          mobile: shared.mobile as any[],
+          desktop: shared.desktop as unknown[],
+          mobile: shared.mobile as unknown[],
           expiresAt: shared.expiresAt || undefined,
           tickDetails,
         },

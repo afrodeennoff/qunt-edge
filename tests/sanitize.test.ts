@@ -5,13 +5,13 @@ describe('sanitizeHtml', () => {
   beforeEach(() => {
     vi.resetModules()
     // Simulate SSR by ensuring window is undefined
-    // @ts-ignore
+    // @ts-ignore test setup mutates global window
     if (typeof window !== 'undefined') {
-        // @ts-ignore
+        // @ts-ignore test setup mutates global window
         delete global.window
     }
     // Also delete DOMPurify from global if it leaked
-    // @ts-ignore
+    // @ts-expect-error test setup mutates global DOMPurify
     delete global.DOMPurify
   })
 

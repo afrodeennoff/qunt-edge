@@ -17,7 +17,6 @@ export function AuthTimeout() {
 
     const handleLogout = useCallback(async () => {
         if (user) {
-            console.log('[AuthTimeout] Inactivity timeout reached. Logging out...')
             resetUser()
             await signOut()
         }

@@ -164,7 +164,7 @@ export async function getSubscriptionData() {
       where: { userId },
       update: {
         email: normalizedEmail,
-        status: dbStatus,
+        status: dbStatus as 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'PENDING' | 'TRIAL_EXPIRED',
         plan: planName,
         endDate: parseWhopDate(membership.renewal_period_end) || null,
         interval: interval
@@ -173,7 +173,7 @@ export async function getSubscriptionData() {
         userId,
         email: normalizedEmail,
         plan: planName,
-        status: dbStatus,
+        status: dbStatus as 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'PENDING' | 'TRIAL_EXPIRED',
         endDate: parseWhopDate(membership.renewal_period_end) || null,
         interval: interval
       }

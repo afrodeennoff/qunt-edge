@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { usePathname, useParams } from 'next/navigation';
 import { useUserStore } from '@/store/user-store';
-import { useData } from "@/context/data-provider";
+import { useDashboardActions, useDashboardStats } from "@/context/data-provider";
 import { checkAdminStatus } from "@/app/[locale]/dashboard/settings/actions";
 import { signOut } from "@/server/auth";
 import { useCurrentLocale } from "@/locales/client";
@@ -34,7 +34,8 @@ export function AIModelSidebar() {
     const params = useParams();
     const locale = useCurrentLocale();
     const slug = params?.slug as string | undefined;
-    const { refreshAllData, formattedTrades } = useData();
+    const { refreshAllData } = useDashboardActions();
+    const { formattedTrades } = useDashboardStats();
     const user = useUserStore(state => state.supabaseUser);
     const resetUser = useUserStore(state => state.resetUser);
     const [isAdmin, setIsAdmin] = useState(false);

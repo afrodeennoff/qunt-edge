@@ -24,6 +24,7 @@
     "loadtest:k6": "k6 run scripts/loadtest/k6-smoke.js",
     "check:route-budgets": "node scripts/check-route-budgets.mjs",
     "check:route-security": "node scripts/check-route-security.mjs",
+    "check:dead-code": "node scripts/check-dead-code.mjs",
     "check:warning-budget": "node scripts/check-warning-budget.mjs",
     "check:color-contract": "node scripts/check-color-contract.mjs",
     "analyze:bundle": "node scripts/analyze-bundle.mjs",
@@ -35,7 +36,7 @@
     "perf:lighthouse": "node scripts/perf-lighthouse.mjs",
     "perf:headers": "node scripts/perf-header-check.mjs",
     "perf:baseline": "node scripts/perf-baseline.mjs",
-    "perf:ci": "npm run check:route-security && npm run check:route-budgets && npm run analyze:bundle && PERF_HEADER_STRICT=true npm run perf:headers && npm run perf:baseline && npm run perf:lighthouse"
+    "perf:ci": "npm run check:dead-code && npm run check:route-security && npm run check:route-budgets && npm run analyze:bundle && PERF_HEADER_STRICT=true npm run perf:headers && npm run perf:baseline && npm run perf:lighthouse"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.10",
@@ -154,6 +155,8 @@
     "pdf-lib": "^1.17.1",
     "pdf2json": "^3.2.2",
     "pg": "^8.18.0",
+    "pino": "^10.3.1",
+    "pino-pretty": "^13.1.3",
     "playwright-core": "^1.56.1",
     "react": "19.2.1",
     "react-colorful": "^5.6.1",

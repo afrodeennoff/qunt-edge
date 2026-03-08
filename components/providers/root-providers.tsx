@@ -8,11 +8,81 @@ import { SmoothScrollProvider } from "@/components/motion/smooth-scroll-provider
 import { GlobalMotionEffects } from "@/components/motion/global-motion-effects";
 import { AuthTimeout } from "@/components/auth/auth-timeout";
 
+const CHUNK_RECOVERY_SESSION_KEY = "chunk-reload-attempted";
+
+function shouldRecoverFromChunkError(reason: unknown): boolean {
+    const message =
+        reason instanceof Error
+            ? reason.message
+            : typeof reason === "string"
+                ? reason
+                : "";
+
+    if (!message) return false;
+
+    return (
+        message.includes("ChunkLoadError") ||
+        message.includes("Loading chunk") ||
+        message.includes("Loading CSS chunk") ||
+        message.includes("CSS chunk") ||
+        message.includes("Failed to fetch dynamically imported module") ||
+        message.includes("Importing a module script failed") ||
+        message.includes("ERR_MODULE_NOT_FOUND")
+    );
+}
+
 export function RootProviders({
     children,
 }: {
     children: React.ReactNode
 }) {
+    useEffect(() => {
+        if (process.env.NODE_ENV !== "production") {
+            return;
+        }
+
+        const recoverFromChunkError = (reason: unknown) => {
+            if (!shouldRecoverFromChunkError(reason)) {
+                return;
+            }
+
+            let alreadyAttempted = false;
+            try {
+                alreadyAttempted = sessionStorage.getItem(CHUNK_RECOVERY_SESSION_KEY) === "1";
+            } catch {
+                alreadyAttempted = false;
+            }
+
+            if (alreadyAttempted) {
+                return;
+            }
+
+            try {
+                sessionStorage.setItem(CHUNK_RECOVERY_SESSION_KEY, "1");
+            } catch {
+                // Ignore storage errors; still attempt reload once per page instance.
+            }
+
+            window.location.reload();
+        };
+
+        const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+            recoverFromChunkError(event.reason);
+        };
+
+        const handleWindowError = (event: ErrorEvent) => {
+            recoverFromChunkError(event.error ?? event.message);
+        };
+
+        window.addEventListener("unhandledrejection", handleUnhandledRejection);
+        window.addEventListener("error", handleWindowError);
+
+        return () => {
+            window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+            window.removeEventListener("error", handleWindowError);
+        };
+    }, []);
+
     useEffect(() => {
         if (!("serviceWorker" in navigator) || process.env.NODE_ENV !== "production") {
             return;
@@ -43,9 +113,9 @@ export function RootProviders({
             });
         };
 
-        if (document.readyState === "complete") {
-            void handleLoad();
-        } else {
+        void handleLoad();
+
+        if (document.readyState !== "complete") {
             window.addEventListener("load", handleLoad);
         }
 

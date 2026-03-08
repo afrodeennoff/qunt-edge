@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { sendNewsletter } from "@/app/[locale]/admin/actions/newsletter"
 import { useNewsletter } from "./newsletter-context"
-import { Loader2, Sparkles, Upload } from "lucide-react"
+import { Loader2, Sparkles } from "lucide-react"
 import { generateNewsletterContent } from "../../actions/generate-newsletter"
 import { generateTranscriptSummary } from "../../actions/youtube"
 import type { NewsletterContent } from "./newsletter-context"
@@ -35,12 +35,10 @@ export function NewsletterEditor() {
       try {
         setIsLoadingTranscript(true)
         const transcript = await fetchTranscriptServer(videoId)
-        console.log(transcript)
 
         if (transcript) {
           // Generate summary from transcript
           const summary = await generateTranscriptSummary(transcript)
-          console.log(summary)
           if (summary) {
             setDescription(summary)
           } else {
@@ -158,11 +156,9 @@ export function NewsletterEditor() {
             <AudioSplitter 
               onSegmentsCreated={(segments) => {
                 toast.success(`Created ${segments.length} audio segments`)
-                console.log('Audio segments created:', segments)
               }}
               onTranscriptionComplete={(transcriptions) => {
                 toast.success(`Transcription completed: ${transcriptions.length} segments`)
-                console.log('Transcriptions completed:', transcriptions)
                 // You can use these transcriptions to populate the description field
                 const fullText = transcriptions
                   .sort((a, b) => a.segmentIndex - b.segmentIndex)

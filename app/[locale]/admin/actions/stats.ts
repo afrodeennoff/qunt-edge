@@ -4,7 +4,6 @@ import { createClient, User } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
 import { normalizeTradesForClient } from '@/lib/data-types'
 import { Trade as PrismaTrade } from '@/prisma/generated/prisma'
-import { Subscription } from '@/prisma/generated/prisma'
 import { assertAdminAccess } from '@/server/authz'
 
 function getSupabaseAdminClient() {
@@ -29,7 +28,7 @@ function getSupabaseAdminClient() {
 export async function getUserStats() {
   await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
-  let allUsers: any[] = []
+  let allUsers: User[] = []
   let page = 1
   const perPage = 1000
   let hasMore = true
@@ -73,7 +72,7 @@ export async function getUserStats() {
     dailyData,
     allUsers: allUsers.map(user => ({
       id: user.id,
-      email: user.email,
+      email: user.email || '',
       created_at: user.created_at
     }))
   }
@@ -82,26 +81,20 @@ export async function getUserStats() {
 export async function getFreeUsers() {
   await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
-  console.log('Starting getFreeUsers function')
 
   // Get all trades with their user IDs
-  console.log('Fetching trades...')
   const trades = await prisma.trade.findMany({
   })
-  console.log(`Found ${trades.length} total trades`)
 
   // Get all users who have subscriptions
-  console.log('Fetching subscriptions...')
   const subscribedUsers = await prisma.subscription.findMany({
     select: { userId: true }
   })
-  console.log(`Found ${subscribedUsers.length} subscribed users`)
   const subscribedUserIds = new Set(subscribedUsers.map((sub: { userId: string }) => sub.userId))
 
   // Get unique user IDs who have trades but no subscription
   const freeUserIds = [...new Set(trades.map((trade: PrismaTrade) => trade.userId))]
     .filter(userId => !subscribedUserIds.has(userId))
-  console.log(`Found ${freeUserIds.length} free users with trades`)
 
   // Get user emails from Supabase auth
   let allUsers: User[] = []
@@ -109,9 +102,7 @@ export async function getFreeUsers() {
   const perPage = 1000
   let hasMore = true
 
-  console.log('Starting Supabase user fetch...')
   while (hasMore) {
-    console.log(`Fetching page ${page} of users...`)
     const { data, error } = await supabase.auth.admin.listUsers({
       page,
       perPage
@@ -123,27 +114,22 @@ export async function getFreeUsers() {
     }
 
     if (data.users.length === 0) {
-      console.log('No more users to fetch')
       hasMore = false
     } else {
-      console.log(`Retrieved ${data.users.length} users on page ${page}`)
       allUsers = [...allUsers, ...data.users]
       page++
     }
   }
-  console.log(`Total users fetched from Supabase: ${allUsers.length}`)
 
   // Map free users to their emails and trades
   const mappedUsers = freeUserIds.map(userId => {
     const user = allUsers.find(u => u.id === userId)
     const userTrades = trades.filter((trade: PrismaTrade) => trade.userId === userId)
-    console.log(`Mapping user ${userId}: Found email: ${!!user?.email}, Trades: ${userTrades.length}`)
     return {
       email: user?.email || '',
-      trades: normalizeTradesForClient(userTrades as any)
+      trades: normalizeTradesForClient(userTrades)
     }
   }).filter(user => user.email !== '')
 
-  console.log(`Returning ${mappedUsers.length} mapped free users`)
   return mappedUsers
 }

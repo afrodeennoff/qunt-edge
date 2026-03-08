@@ -49,12 +49,10 @@ const BROWSERS_DIR = "browsers";
 const PORT = 9222;
 
 async function setupSandbox(sandbox: Sandbox) {
-  console.log('Creating browsers directory...');
   await sandbox.mkDir(BROWSERS_DIR);
 
   const chromeRpmPath = `${BROWSERS_DIR}/google-chrome-stable_current_x86_64.rpm`;
 
-  console.log("Downloading Chrome RPM...");
   const downloadRpm = await sandbox.runCommand({
     cmd: "curl",
     args: [
@@ -69,7 +67,6 @@ async function setupSandbox(sandbox: Sandbox) {
     throw new Error("Chrome RPM download failed");
   }
 
-  console.log("Installing Chrome...")
   const installChrome = await sandbox.runCommand({
     cmd: "dnf",
     args: ["install", "-y", chromeRpmPath],
@@ -81,7 +78,6 @@ async function setupSandbox(sandbox: Sandbox) {
     throw new Error("Chrome installation failed");
   }
 
-  console.log("Starting Chrome...")
   await sandbox.runCommand({
     cmd: "google-chrome",
     args: [
@@ -93,7 +89,6 @@ async function setupSandbox(sandbox: Sandbox) {
     detached: true,
   });
 
-  console.log("Waiting for Chrome to start...");
   // Health check until the browser is ready
   const fetchVersion = await retryWithBackoff(async () => {
     const result = await sandbox.runCommand({
@@ -116,13 +111,11 @@ async function setupSandbox(sandbox: Sandbox) {
 
   const sandboxUrl = new URL(sandbox.domain(PORT));
   const externalUrl = `wss://${sandboxUrl.host}${url.pathname}`;
-  console.log("Chrome started successfully. WebSocket URL:", externalUrl);
 
   return externalUrl;
 }
 
 export async function createBrowserSandbox() {
-  console.log("Setting up sandbox...");
   const sandbox = await Sandbox.create({
     timeout: ms('5m'), // 5 minutes timeout
     ports: [PORT],
@@ -151,7 +144,6 @@ export async function scrapeWithSandbox(
   // Try sandbox approach first (works in Vercel production)
   if (isProduction) {
     try {
-      console.log('Using Vercel Sandbox for browser automation...');
       const { sandbox, webSocketDebuggerUrl } = await createBrowserSandbox();
       
       try {
@@ -161,7 +153,6 @@ export async function scrapeWithSandbox(
         });
         const page = await context.newPage();
 
-        console.log(`Navigating to ${url} with sandboxed browser...`);
         const response = await page.goto(url, {
           waitUntil: 'domcontentloaded',
           timeout: options.timeout || 60000
@@ -178,14 +169,10 @@ export async function scrapeWithSandbox(
 
         // Wait for specific selector if provided
         if (options.waitFor) {
-          await page.waitForSelector(options.waitFor, { timeout: 10000 }).catch(() => {
-            console.log(`Warning: Could not find selector ${options.waitFor}, continuing anyway`);
-          });
+          await page.waitForSelector(options.waitFor, { timeout: 10000 }).catch(() => {});
         }
 
-        console.log('Page loaded successfully. Getting HTML content...');
         const html = await page.content();
-        console.log('HTML length:', html.length);
 
         await browser.close();
         return html;
@@ -198,7 +185,6 @@ export async function scrapeWithSandbox(
     }
   } else {
     // Fallback for development - use local Playwright
-    console.log('Development mode: Using local Playwright browser...');
     try {
       const browser = await chromium.launch({
         headless: true
@@ -209,7 +195,6 @@ export async function scrapeWithSandbox(
       });
       const page = await context.newPage();
 
-      console.log(`Navigating to ${url} with local browser...`);
       const response = await page.goto(url, {
         waitUntil: 'domcontentloaded',
         timeout: options.timeout || 60000
@@ -221,13 +206,10 @@ export async function scrapeWithSandbox(
 
       // Wait for specific selector if provided
       if (options.waitFor) {
-        await page.waitForSelector(options.waitFor, { timeout: 10000 }).catch(() => {
-          console.log(`Warning: Could not find selector ${options.waitFor}, continuing anyway`);
-        });
+        await page.waitForSelector(options.waitFor, { timeout: 10000 }).catch(() => {});
       }
 
       const html = await page.content();
-      console.log('HTML length:', html.length);
 
       await browser.close();
       return html;

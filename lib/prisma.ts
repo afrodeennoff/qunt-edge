@@ -9,6 +9,7 @@ const globalForPrisma = globalThis as unknown as {
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isNextBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
+const MAX_POOL_LIMIT = 20
 
 const selectRuntimeConnectionString = (): string => {
   // Prefer provider-specific pooled URLs when available.
@@ -116,7 +117,14 @@ const shouldRejectUnauthorized = (connectionString: string): boolean => {
 // DIRECT_URL is intended for migrations/admin operations.
 const connectionString = normalizeSupabasePoolerMode(selectRuntimeConnectionString())
 const parsedPoolMax = Number.parseInt(process.env.PG_POOL_MAX ?? '', 10)
-const poolMax = Number.isFinite(parsedPoolMax) && parsedPoolMax > 0 ? parsedPoolMax : isProduction ? (isNextBuildPhase ? 1 : 2) : 5
+const defaultPoolMax = isProduction ? (isNextBuildPhase ? 1 : 2) : 5
+const poolMax = Number.isFinite(parsedPoolMax) && parsedPoolMax > 0
+  ? Math.min(parsedPoolMax, MAX_POOL_LIMIT)
+  : defaultPoolMax
+
+if (Number.isFinite(parsedPoolMax) && parsedPoolMax > MAX_POOL_LIMIT) {
+  console.warn(`[Prisma] PG_POOL_MAX=${parsedPoolMax} exceeds safe cap ${MAX_POOL_LIMIT}; using ${MAX_POOL_LIMIT}.`)
+}
 const parsedIdleTimeout = Number.parseInt(process.env.PG_POOL_IDLE_TIMEOUT_MS ?? '', 10)
 const idleTimeoutMillis = Number.isFinite(parsedIdleTimeout) && parsedIdleTimeout > 0 ? parsedIdleTimeout : 10000
 const parsedConnTimeout = Number.parseInt(process.env.PG_POOL_CONNECT_TIMEOUT_MS ?? '', 10)

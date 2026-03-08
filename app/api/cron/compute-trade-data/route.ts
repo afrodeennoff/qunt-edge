@@ -258,12 +258,10 @@ async function processInstrumentTrades(instrumentData: InstrumentData): Promise<
     const startDateStr = format(earliestDate, 'yyyy-MM-dd');
     const endDateStr = format(latestDate, 'yyyy-MM-dd');
 
-    console.log(`Fetching data for ${instrument} from ${startDateStr} to ${endDateStr}`);
 
     // Fetch historical data from Databento
     const historicalBars = await fetchDatabentoBars(instrument, startDateStr, endDateStr);
 
-    console.log(`Retrieved ${historicalBars.length} bars for ${instrument}`);
 
     // Calculate MAE/MFE for each trade
     const processedTrades: TradeWithMAEMFE[] = trades.map(trade => {
@@ -327,7 +325,6 @@ export async function GET(request: Request) {
       try {
         logger.info('[CronComputeTradeData] Starting run')
 
-        console.log('Starting MAE/MFE computation cron job');
 
         if (!DATABENTO_API_KEY) {
           throw new Error('DATABENTO_API_KEY environment variable is required');
@@ -338,7 +335,6 @@ export async function GET(request: Request) {
         const lastWeekStart = startOfWeek(subWeeks(now, 1));
         const lastWeekEnd = endOfWeek(subWeeks(now, 1));
 
-        console.log(`Processing trades from ${format(lastWeekStart, 'yyyy-MM-dd')} to ${format(lastWeekEnd, 'yyyy-MM-dd')}`);
 
         // Fetch all trades from last week
         const trades = await prisma.trade.findMany({
@@ -353,7 +349,6 @@ export async function GET(request: Request) {
           }
         });
 
-        console.log(`Found ${trades.length} trades to process`);
 
         if (trades.length === 0) {
           return NextResponse.json({
@@ -391,7 +386,6 @@ export async function GET(request: Request) {
           return acc;
         }, {} as { [key: string]: InstrumentData });
 
-        console.log(`Processing ${Object.keys(instrumentGroups).length} unique instruments`);
 
         // Process each instrument group
         const allProcessedTrades: TradeWithMAEMFE[] = [];
@@ -405,7 +399,6 @@ export async function GET(request: Request) {
         }
 
         // Save the MAE/MFE data to database
-        console.log(`Successfully processed ${allProcessedTrades.length} trades, saving to database...`);
 
         const savedAnalytics = await Promise.allSettled(
           allProcessedTrades.map(async (trade) => {
@@ -440,7 +433,6 @@ export async function GET(request: Request) {
         const successfulSaves = savedAnalytics.filter(result => result.status === 'fulfilled').length;
         const failedSaves = savedAnalytics.filter(result => result.status === 'rejected').length;
 
-        console.log(`Saved ${successfulSaves} trade analytics, ${failedSaves} failed`);
 
         // Example of potential data issues to log
         const priceDiscrepancies = allProcessedTrades.filter(trade => trade.priceDifference > 0.5);

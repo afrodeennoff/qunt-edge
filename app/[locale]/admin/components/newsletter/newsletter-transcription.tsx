@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Loader2, Mic, FileText, Download, Copy, Check } from 'lucide-react'
-import { useI18n } from '@/locales/client'
 import { toast } from 'sonner'
 
 interface AudioSegment {
@@ -31,7 +30,6 @@ interface TranscriptionComponentProps {
 }
 
 export function TranscriptionComponent({ segments, onTranscriptionComplete }: TranscriptionComponentProps) {
-  const t = useI18n()
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [transcriptionResults, setTranscriptionResults] = useState<TranscriptionResult[]>([])
   const [progress, setProgress] = useState(0)

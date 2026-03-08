@@ -54,19 +54,9 @@ export default async function DashboardLayout({
           <div className="flex min-h-screen w-full overflow-x-hidden bg-background selection:bg-primary/20 selection:text-primary">
             <DashboardSidebar isAdmin={isAdmin} />
             <SidebarInset className="flex-1 min-h-0 relative overflow-hidden">
-              {/* Global Background Effects */}
+              {/* Simplified Background - Performance Optimized */}
               <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--card))_42%,hsl(var(--background))_100%)] md:hidden" />
-                <div className="absolute inset-0 hidden bg-[radial-gradient(1200px_800px_at_0%_-20%,hsl(var(--foreground) / 0.07),transparent_60%),radial-gradient(900px_600px_at_100%_0%,hsl(var(--foreground) / 0.045),transparent_58%),linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--card))_45%,hsl(var(--background))_100%)] md:block" />
-                <div className="hidden md:block dashboard-mesh-layer" />
-                <div className="hidden md:block dashboard-texture-layer" />
-
-                <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-40 mix-blend-screen xl:block">
-                  <div className="absolute -top-[16%] -left-[8%] h-[820px] w-[820px] rounded-full bg-primary/5 blur-[120px]" />
-                  <div className="absolute top-[34%] -right-[12%] h-[900px] w-[900px] rounded-full bg-white/[0.03] blur-[140px]" />
-                </div>
-
-                <div className="hidden md:block absolute inset-y-0 left-0 w-px bg-[linear-gradient(180deg,transparent,hsl(var(--foreground) / 0.22),transparent)]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
               </div>
 
               {/* Dashboard Content Container - Lower z-index to stay below Sidebar (z-30) */}

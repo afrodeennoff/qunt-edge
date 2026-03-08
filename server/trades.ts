@@ -81,7 +81,26 @@ export interface PaginatedTrades {
   }
 }
 
-function serializeTrade(trade: any): SerializedTrade {
+type SerializableTrade = Partial<PrismaTrade> & {
+  entryPrice?: { toString: () => string } | string | number
+  closePrice?: { toString: () => string } | string | number
+  pnl?: { toString: () => string } | string | number
+  commission?: { toString: () => string } | string | number
+  quantity?: { toString: () => string } | string | number
+  timeInPosition?: { toString: () => string } | string | number
+  entryDate?: Date | string
+  closeDate?: Date | string | null
+}
+
+function serializeTrade(trade: SerializableTrade): SerializedTrade {
+  const entryDate = trade.entryDate
+    ? (trade.entryDate instanceof Date ? trade.entryDate.toISOString() : new Date(trade.entryDate).toISOString())
+    : new Date(0).toISOString()
+
+  const closeDate = trade.closeDate
+    ? (trade.closeDate instanceof Date ? trade.closeDate.toISOString() : new Date(trade.closeDate).toISOString())
+    : null
+
   return {
     ...trade,
     entryPrice: trade.entryPrice?.toString() || "0",
@@ -90,8 +109,8 @@ function serializeTrade(trade: any): SerializedTrade {
     commission: trade.commission?.toString() || "0",
     quantity: trade.quantity?.toString() || "0",
     timeInPosition: trade.timeInPosition?.toString() || "0",
-    entryDate: trade.entryDate instanceof Date ? trade.entryDate.toISOString() : new Date(trade.entryDate).toISOString(),
-    closeDate: trade.closeDate ? (trade.closeDate instanceof Date ? trade.closeDate.toISOString() : new Date(trade.closeDate).toISOString()) : null,
+    entryDate,
+    closeDate,
   } as SerializedTrade
 }
 
@@ -284,12 +303,115 @@ export async function saveTradesAction(
   }
 }
 
+// Pre-computed statistics type
+export interface PrecomputedStats {
+  cumulativeFees: number;
+  cumulativePnl: number;
+  winningStreak: number;
+  winRate: number;
+  nbTrades: number;
+  nbBe: number;
+  nbWin: number;
+  nbLoss: number;
+  totalPositionTime: number;
+  averagePositionTime: string;
+  profitFactor: number;
+  grossLosses: number;
+  grossWin: number;
+}
+
+function computeStatsFromTrades(trades: SerializedTrade[]): PrecomputedStats {
+  if (!trades.length) {
+    return {
+      cumulativeFees: 0,
+      cumulativePnl: 0,
+      winningStreak: 0,
+      winRate: 0,
+      nbTrades: 0,
+      nbBe: 0,
+      nbWin: 0,
+      nbLoss: 0,
+      totalPositionTime: 0,
+      averagePositionTime: '0s',
+      profitFactor: 1,
+      grossLosses: 0,
+      grossWin: 0,
+    };
+  }
+
+  let cumulativeFees = 0;
+  let cumulativePnl = 0;
+  let grossWin = 0;
+  let grossLosses = 0;
+  let totalPositionTime = 0;
+  let nbWin = 0;
+  let nbLoss = 0;
+  let nbBe = 0;
+  let winningStreak = 0;
+  let currentStreak = 0;
+
+  trades.forEach((trade) => {
+    const pnl = Number(trade.pnl) || 0;
+    const commission = Number(trade.commission) || 0;
+    const timeInPos = Number(trade.timeInPosition) || 0;
+
+    cumulativePnl += pnl;
+    cumulativeFees += commission;
+    totalPositionTime += timeInPos;
+
+    if (pnl === 0) {
+      nbBe++;
+      currentStreak = 0;
+    } else if (pnl > 0) {
+      nbWin++;
+      currentStreak++;
+      winningStreak = Math.max(winningStreak, currentStreak);
+      grossWin += pnl;
+    } else {
+      nbLoss++;
+      currentStreak = 0;
+      grossLosses += Math.abs(pnl);
+    }
+  });
+
+  const totalTrades = nbWin + nbLoss;
+  const winRate = totalTrades > 0 ? (nbWin / totalTrades) * 100 : 0;
+  const profitFactor = grossLosses === 0 ? (grossWin === 0 ? 1 : 100) : grossWin / grossLosses;
+
+  const avgTime = trades.length > 0 ? totalPositionTime / trades.length : 0;
+  const hours = Math.floor(avgTime / 3600);
+  const minutesLeft = Math.floor((avgTime % 3600) / 60);
+  const secondsLeft = Math.floor(avgTime % 60);
+  const averagePositionTime = [
+    hours > 0 ? `${hours}h` : '',
+    `${minutesLeft}m`,
+    `${secondsLeft}s`
+  ].filter(Boolean).join(' ') || '0s';
+
+  return {
+    cumulativeFees,
+    cumulativePnl,
+    winningStreak,
+    winRate,
+    nbTrades: trades.length,
+    nbBe,
+    nbWin,
+    nbLoss,
+    totalPositionTime,
+    averagePositionTime,
+    profitFactor,
+    grossLosses,
+    grossWin,
+  };
+}
+
 export async function getTradesAction(
   userId: string | null = null,
   page: number = 1,
   pageSize: number = 50,
-  forceRefresh: boolean = false
-): Promise<PaginatedTrades> {
+  forceRefresh: boolean = false,
+  includeStats: boolean = true
+): Promise<PaginatedTrades & { statistics?: PrecomputedStats }> {
   const currentUserId = await resolveWritableUserId(userId || await getUserId())
   if (!currentUserId) throw new Error('User not found')
 
@@ -300,7 +422,7 @@ export async function getTradesAction(
   }
 
   const getCachedTrades = unstable_cache(
-    async (uid: string, p: number, ps: number) => {
+    async (uid: string, p: number, ps: number, computeStats: boolean) => {
       const where: Prisma.TradeWhereInput = { userId: uid }
 
       const [trades, total] = await Promise.all([
@@ -333,19 +455,37 @@ export async function getTradesAction(
         prisma.trade.count({ where })
       ])
 
-      const totalPages = Math.ceil(total / ps)
+      const serializedTrades = trades.map(serializeTrade);
+      const totalPages = Math.ceil(total / ps);
 
-      return {
-        trades: trades.map(serializeTrade),
+      const result: PaginatedTrades & { statistics?: PrecomputedStats } = {
+        trades: serializedTrades,
         metadata: {
           total,
           page: p,
           totalPages,
           hasMore: p < totalPages
         }
+      };
+
+      // Compute stats on server for first page (most common case)
+      if (computeStats && p === 1) {
+        // Fetch all trades for stats calculation (cached separately)
+        const allTrades = await prisma.trade.findMany({
+          where,
+          orderBy: { entryDate: 'desc' },
+          select: {
+            pnl: true,
+            commission: true,
+            timeInPosition: true,
+          }
+        });
+        result.statistics = computeStatsFromTrades(allTrades.map(serializeTrade));
       }
+
+      return result;
     },
-    [`trades-${currentUserId}-page-${page}-size-${pageSize}`],
+    [`trades-${currentUserId}-page-${page}-size-${pageSize}-stats-${includeStats}`],
     {
       tags: [tag, `trades-${currentUserId}`],
       revalidate: 3600
@@ -353,7 +493,7 @@ export async function getTradesAction(
   )
 
   try {
-    return await getCachedTrades(currentUserId, page, pageSize)
+    return await getCachedTrades(currentUserId, page, pageSize, includeStats)
   } catch (error) {
     logger.error('getTradesAction failed', { error })
     throw error

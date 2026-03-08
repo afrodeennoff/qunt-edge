@@ -32,7 +32,6 @@ import {
   updateDailySyncTimeAction,
 } from "./actions";
 import { useTradovateSyncStore } from "@/store/tradovate-sync-store";
-import { useData } from "@/context/data-provider";
 import { useSyncContext } from "@/context/sync-context";
 
 export function TradovateCredentialsManager() {

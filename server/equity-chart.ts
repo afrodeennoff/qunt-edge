@@ -63,8 +63,6 @@ const EMPTY_EQUITY_CHART_RESULT: EquityChartResult = {
 }
 
 export async function getEquityChartDataAction(params: EquityChartParams): Promise<EquityChartResult> {
-  console.log('getEquityChartDataAction params:', JSON.stringify(params, null, 2))
-
   // Validate timezone and fallback to UTC if needed
   try {
     Intl.DateTimeFormat(undefined, { timeZone: params.timezone })
@@ -220,8 +218,6 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       return true
     }).sort((a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime())
 
-    console.log('Filtered trades count:', filteredTrades.length)
-
     if (!filteredTrades.length) {
       return EMPTY_EQUITY_CHART_RESULT
     }
@@ -262,7 +258,6 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
     })
 
     if (!finalFilteredTrades.length) {
-      console.log('Final filtered trades count:', finalFilteredTrades.length)
       return {
         chartData: [],
         accountNumbers: allAccountNumbers,
@@ -435,7 +430,6 @@ export async function getEquityChartDataAction(params: EquityChartParams): Promi
       chartData.push(point)
     })
 
-    console.log('AccountNumber', limitedAccountNumbers)
     return {
       chartData,
       accountNumbers: allAccountNumbers,

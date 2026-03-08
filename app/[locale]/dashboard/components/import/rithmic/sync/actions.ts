@@ -5,7 +5,6 @@ import { Synchronization } from "@/prisma/generated/prisma"
 import { withPrismaSchemaMismatchFallback } from "@/lib/prisma-guard"
 
 export async function getRithmicSynchronizations() {
-  console.log('CHECKING RITHMIC SYNCHRONIZATIONS')
   const userId = await getUserId()
   const synchronizations = await withPrismaSchemaMismatchFallback(
     'sync:rithmic:list',
@@ -18,7 +17,6 @@ export async function getRithmicSynchronizations() {
 }
 
 export async function setRithmicSynchronization(synchronization: Partial<Synchronization>) {
-  console.log('SETTING RITHMIC SYNCHRONIZATION')
   const userId = await getUserId()
   await withPrismaSchemaMismatchFallback<void>(
     'sync:rithmic:upsert',
@@ -49,7 +47,6 @@ export async function setRithmicSynchronization(synchronization: Partial<Synchro
 }
 
 export async function removeRithmicSynchronization(accountId: string) {
-  console.log('REMOVING RITHMIC SYNCHRONIZATION')
   const userId = await getUserId()
 
   await withPrismaSchemaMismatchFallback<void>(

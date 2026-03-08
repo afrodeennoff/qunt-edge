@@ -282,7 +282,7 @@ interface TradeTableReviewProps {
   config?: TradeTableReviewConfig;
 }
 
-export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps) {
+function TradeTableReviewComponent({ tradesParam, config }: TradeTableReviewProps) {
   const t = useI18n();
   const { formattedTrades } = useDashboardStats()
   const { updateTrades, deleteTrades } = useDashboardActions();
@@ -1731,3 +1731,6 @@ export function TradeTableReview({ tradesParam, config }: TradeTableReviewProps)
     </Card>
   );
 }
+
+export const TradeTableReview = React.memo(TradeTableReviewComponent);
+TradeTableReview.displayName = "TradeTableReview";

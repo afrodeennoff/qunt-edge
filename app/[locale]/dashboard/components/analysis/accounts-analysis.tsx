@@ -125,9 +125,6 @@ export function AccountsAnalysis({ onStatusChange }: AccountsAnalysisProps) {
     transport: new DefaultChatTransport({
       api: "/api/ai/analysis/accounts",
     }),
-    onFinish: async ({ message }) => {
-      console.log(JSON.stringify(messages, null, 2));
-    },
     onError: (error) => {
       console.error("Chat error:", error);
     },

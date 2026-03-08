@@ -48,26 +48,11 @@ import {
   ReasoningTrigger,
 } from '@/components/ai-elements/reasoning';
 import { Loader } from '@/components/ai-elements/loader';
-import { DefaultChatTransport, ToolUIPart, UIMessage } from 'ai';
+import { DefaultChatTransport } from 'ai';
 import { ClipboardCheckIcon } from '@/components/animated-icons/clipboard-check';
 import SupportForm from './components/support-form';
 import { toast } from 'sonner';
 import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
-type askForEmailFormToolInput = {
-  summary: string;
-};
-
-type askForEmailFormToolOutput = {
-  summary: string;
-};
-
-type askForEmailFormToolUIPart = ToolUIPart<{
-  askForEmailForm: {
-    input: askForEmailFormToolInput;
-    output: askForEmailFormToolOutput;
-  };
-}>;
-
 const models = [
   {
     name: 'GPT 4o',
@@ -79,38 +64,40 @@ const models = [
   },
 ];
 
-const getErrorMessage = (error: any, t: any) => {
-  // Handle Vercel AI free credits rate limit error
-  if (
-    error?.message?.includes('Free credits temporarily have rate limits') ||
-    error?.message?.includes('Purchase credits at https://vercel.com') ||
-    error?.message?.includes('rate_limit_exceeded') ||
-    error?.type === 'rate_limit_exceeded'
-  ) {
-    return t('support.errors.rateLimit');
-  }
-  if (error?.message?.includes('service_unavailable') || error?.type === 'service_unavailable') {
-    return t('support.errors.serviceUnavailable');
-  }
-  if (error?.message?.includes('internal_error') || error?.type === 'internal_error') {
-    return t('support.errors.internalError');
-  }
-  return t('support.errors.generic');
-};
-
 const ChatBotDemo = () => {
   const t = useI18n();
+  const getErrorMessage = (error: unknown) => {
+    const message = typeof error === 'object' && error !== null && 'message' in error
+      ? String((error as { message?: string }).message || '')
+      : ''
+    const type = typeof error === 'object' && error !== null && 'type' in error
+      ? String((error as { type?: string }).type || '')
+      : ''
+
+    if (
+      message.includes('Free credits temporarily have rate limits') ||
+      message.includes('Purchase credits at https://vercel.com') ||
+      message.includes('rate_limit_exceeded') ||
+      type === 'rate_limit_exceeded'
+    ) {
+      return t('support.errors.rateLimit')
+    }
+    if (message.includes('service_unavailable') || type === 'service_unavailable') {
+      return t('support.errors.serviceUnavailable')
+    }
+    if (message.includes('internal_error') || type === 'internal_error') {
+      return t('support.errors.internalError')
+    }
+    return t('support.errors.generic')
+  }
   const [input, setInput] = useState('');
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
-  const { messages, sendMessage, status, setMessages, error } = useChat(
+  const { messages, sendMessage, status, setMessages } = useChat(
     {
       transport: new DefaultChatTransport({
         api: '/api/ai/support',
       }) ,
-      onFinish: async ({ message }) => {
-        console.log(JSON.stringify(message, null, 2));
-      },
       onError: (error) => {
         console.error('Chat error:', error);
         // Add error message to chat
@@ -119,7 +106,7 @@ const ChatBotDemo = () => {
           role: 'assistant',
           parts: [{
             type: 'text',
-            text: getErrorMessage(error, t),
+            text: getErrorMessage(error),
           }],
         }]);
       },
@@ -163,10 +150,6 @@ const ChatBotDemo = () => {
     setInput('');
   };
 
-  const latestMessage = messages[messages.length - 1];
-  const askForEmailForm = latestMessage?.parts?.find(
-    (part) => part.type === 'tool-askForEmailForm',
-  ) as askForEmailFormToolUIPart | undefined;
   return (
     <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
       <UnifiedSurface className="flex h-[calc(100vh-220px)] min-h-[680px] flex-col">

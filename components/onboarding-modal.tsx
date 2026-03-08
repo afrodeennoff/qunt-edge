@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { useData } from '@/context/data-provider'
+import { useDashboardActions, useDashboardTrades } from '@/context/data-provider'
 import { useI18n, useCurrentLocale } from '@/locales/client'
 import { useUserStore } from '@/store/user-store'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
@@ -14,7 +14,8 @@ interface OnboardingModalProps {
 }
 
 export default function OnboardingModal({ onDismiss }: OnboardingModalProps) {
-  const { isFirstConnection, changeIsFirstConnection } = useData()
+  const { isFirstConnection } = useDashboardTrades()
+  const { changeIsFirstConnection } = useDashboardActions()
   const t = useI18n()
   const locale = useCurrentLocale()
   const subscription = useUserStore((state) => state.subscription)

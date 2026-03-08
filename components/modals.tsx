@@ -82,12 +82,6 @@ export default function Modals() {
       const currentIsLoading = useUserStore.getState().isLoading
       const hasNoTrades = !currentTrades || currentTrades.length === 0
 
-      console.log('Onboarding dismissed - checking trades:', {
-        tradesCount: currentTrades?.length || 0,
-        isLoading: currentIsLoading,
-        willOpen: hasNoTrades && !currentIsLoading
-      })
-
       if (hasNoTrades && !currentIsLoading) {
         setIsTradesDialogOpen(true)
       }

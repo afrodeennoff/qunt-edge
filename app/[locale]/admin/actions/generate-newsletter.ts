@@ -12,11 +12,11 @@ const newsletterSchema = z.object({
 export type NewsletterContent = z.infer<typeof newsletterSchema>
 
 interface GenerateNewsletterProps {
-  youtubeUrl: string
+  youtubeUrl?: string
   description: string
 }
 
-export async function generateNewsletterContent({ youtubeUrl, description }: GenerateNewsletterProps) {
+export async function generateNewsletterContent({ description }: GenerateNewsletterProps) {
   try {
     const { output } = await generateText({
       model: 'openai/gpt-5-mini',
@@ -51,8 +51,6 @@ Merci de respecter ces consignes.`,
       temperature: 0.7,
     })
 
-
-    console.log(output)
     return {
       success: true,
       content: output

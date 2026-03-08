@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Minus, Maximize2, GripVertical } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { useDashboardActions, useDashboardFilters, useDashboardStats, useDashboardTrades } from '@/context/data-provider'
+import { useDashboardActions, useDashboardFilters, useDashboardIsMobile, useDashboardStats, useDashboardTradeItems } from '@/context/data-provider'
 import { useI18n } from "@/locales/client"
 import { WIDGET_REGISTRY, getWidgetComponent } from '../config/widget-registry'
 import { useAutoScroll } from '../../../../hooks/use-auto-scroll'
@@ -80,7 +80,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
   currentType: WidgetType
 }) => {
   const t = useI18n()
-  const { isMobile } = useDashboardTrades()
+  const isMobile = useDashboardIsMobile()
   const uiV2Enabled = isUiV2Enabled()
   const widgetRef = useRef<HTMLDivElement>(null)
   const [isSizePopoverOpen, setIsSizePopoverOpen] = useState(false)
@@ -308,13 +308,31 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
 })
 WidgetWrapper.displayName = "WidgetWrapper"
 
+function DebugDataBadge() {
+  const trades = useDashboardTradeItems();
+  const { formattedTrades } = useDashboardStats();
+  const { instruments, accountNumbers, dateRange } = useDashboardFilters();
+  const isFiltered =
+    instruments.length > 0 ||
+    accountNumbers.length > 0 ||
+    Boolean(dateRange?.from || dateRange?.to);
+
+  return (
+    <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
+      T:{trades.length} F:{formattedTrades.length}
+      {isFiltered && (
+        <span className="ml-2 text-foreground/40">filtered</span>
+      )}
+    </div>
+  );
+}
+
 export default function WidgetCanvas() {
-  const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
+  const isMobile = useUserStore((state) => state.isMobile)
+  const layouts = useUserStore((state) => state.dashboardLayout)
+  const setLayouts = useUserStore((state) => state.setDashboardLayout)
   const user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useDashboardActions()
-  const { trades } = useDashboardTrades()
-  const { formattedTrades } = useDashboardStats()
-  const { instruments, accountNumbers, dateRange } = useDashboardFilters()
   const searchParams = useSearchParams()
   const {
     isCustomizing,
@@ -342,6 +360,8 @@ export default function WidgetCanvas() {
   }, [layouts, activeWidgets])
 
   const currentLayout = activeWidgets
+  const shouldAnimateWidgets =
+    !shouldReduceMotion && !isCustomizing && currentLayout.length <= 12
 
   // Define handleOutsideClick with stable reference
   const handleOutsideClick = useCallback((e: MouseEvent) => {
@@ -597,6 +617,8 @@ export default function WidgetCanvas() {
             useCSSTransforms={true}
           >
             {currentLayout.map((widget, index) => {
+              const shouldAnimateWidget =
+                shouldAnimateWidgets && index < 6
               return (
                 <div
                   key={widget.i}
@@ -605,20 +627,19 @@ export default function WidgetCanvas() {
                 >
                   <motion.div
                     className="h-full min-h-0"
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-                    animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    initial={shouldAnimateWidget ? { opacity: 0, y: 12 } : false}
+                    animate={shouldAnimateWidget ? { opacity: 1, y: 0 } : undefined}
                     transition={
-                      shouldReduceMotion
-                        ? undefined
-                        : {
-                          delay: Math.min(0.035 * index, 0.42),
-                          type: "spring",
-                          stiffness: 165,
-                          damping: 21,
-                          mass: 0.88,
+                      shouldAnimateWidget
+                        ? {
+                          delay: Math.min(0.03 * index, 0.3),
+                          type: "tween",
+                          duration: 0.25,
+                          ease: "easeOut",
                         }
+                        : undefined
                     }
-                    whileHover={shouldReduceMotion || isCustomizing ? undefined : { scale: 1.01 }}
+                    whileHover={shouldAnimateWidget ? { scale: 1.01 } : undefined}
                   >
                     <WidgetWrapper
                       onRemove={() => removeWidget(widget.i)}
@@ -634,12 +655,7 @@ export default function WidgetCanvas() {
                           : "bg-black/95 hover:border-white/20"
                       )}>
                         {showDataDebug && !isCustomizing && (
-                          <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
-                            T:{trades.length} F:{formattedTrades.length}
-                            {(instruments.length > 0 || accountNumbers.length > 0 || Boolean(dateRange?.from || dateRange?.to)) && (
-                              <span className="ml-2 text-foreground/40">filtered</span>
-                            )}
-                          </div>
+                          <DebugDataBadge />
                         )}
                         <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
                         <div className="relative h-full w-full">

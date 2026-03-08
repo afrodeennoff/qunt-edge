@@ -21,14 +21,6 @@ export async function GET(request: Request) {
   const action = searchParams.get('action')
   const locale = searchParams.get('locale') || undefined
 
-  // Add debugging for Edge
-  console.log('Auth callback debug:', {
-    userAgent: request.headers.get('user-agent'),
-    origin,
-    hasCode: !!code,
-    next,
-    action
-  })
 
   // Normalize next path so values like "dashboard" become "/dashboard".
   // Keep redirects internal by rejecting protocol-relative and absolute URLs.
@@ -97,8 +89,6 @@ export async function GET(request: Request) {
           return NextResponse.redirect(new URL(withLocalePrefix(normalizedNext), websiteURL))
         }
         return NextResponse.redirect(new URL(withLocalePrefix('/dashboard'), websiteURL))
-      } else {
-        console.log('Auth callback error:', error)
       }
     } catch (error: unknown) {
       if (isNextRedirectError(error)) {

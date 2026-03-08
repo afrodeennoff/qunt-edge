@@ -434,7 +434,6 @@ export async function addComment(postId: string, content: string, parentId: stri
   }
 
   try {
-    console.log('Adding comment for post:', postId)
     // Get the post and its author
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -452,9 +451,6 @@ export async function addComment(postId: string, content: string, parentId: stri
     if (!post) {
       throw new Error('Post not found')
     }
-
-    console.log('Post author:', post.user.id)
-    console.log('Current user:', user.id)
 
     const comment = await prisma.comment.create({
       data: {
@@ -475,7 +471,6 @@ export async function addComment(postId: string, content: string, parentId: stri
 
     // Send email notification to post author if it's not their own comment
     if (post.user.id !== user.id) {
-      console.log('Sending notification email to:', post.user.email)
       try {
         await sendCommentNotificationEmail({
           recipientEmail: post.user.email,
@@ -487,13 +482,10 @@ export async function addComment(postId: string, content: string, parentId: stri
           commentDate: comment.createdAt,
           language: post.user.language ?? 'en'
         })
-        console.log('Email notification sent successfully')
       } catch (emailError) {
         console.error('Failed to send email notification:', emailError)
         // Don't throw the error to prevent comment creation from failing
       }
-    } else {
-      console.log('Skipping notification - user commented on their own post')
     }
 
     revalidatePath('/community')

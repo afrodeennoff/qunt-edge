@@ -540,7 +540,6 @@ export async function getTradovateUsername(accessToken: string): Promise<string>
     throw new Error('User name not found in response')
   }
 
-  console.log('getTradovateAccountId response:', data)
   return user.name
 }
 
@@ -608,7 +607,6 @@ export async function getPropfirmName(accessToken: string): Promise<string> {
   }
 
   const organizations = await response.json() as { id: number; name: string }[]
-  console.log('organizations', organizations)
   if (Array.isArray(organizations) && organizations.length > 0) {
     return organizations[0].name
   }
@@ -872,7 +870,6 @@ export async function refreshTradovateToken(refreshToken: string): Promise<Trado
 export async function testTradovateAuth(accessToken: string) {
   try {
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.log('Testing Tradovate authentication with demo user list endpoint')
 
     const response = await fetch(`${apiBaseUrl}/v1/user/list`, {
       headers: {
@@ -881,15 +878,8 @@ export async function testTradovateAuth(accessToken: string) {
       }
     })
 
-    console.log('User list endpoint response:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    })
-
     if (response.ok) {
       const userData = await response.json()
-      console.log('User data from demo user list:', userData)
       return { success: true, userData }
     } else {
       const errorText = await response.text()
@@ -905,11 +895,6 @@ export async function testTradovateAuth(accessToken: string) {
 export async function getTradovateAccounts(accessToken: string): Promise<TradovateAccountsResult> {
   try {
     const apiBaseUrl = TRADOVATE_ENVIRONMENTS.demo.api
-    console.log('Fetching Tradovate accounts (demo only):', {
-      apiBaseUrl,
-      hasToken: !!accessToken,
-      tokenPrefix: accessToken?.substring(0, 10) + '...'
-    })
 
     // Use simple account list endpoint that we validated works
     const response = await fetch(`${apiBaseUrl}/v1/account/list`, {
@@ -919,12 +904,6 @@ export async function getTradovateAccounts(accessToken: string): Promise<Tradova
       }
     })
 
-    console.log('Account list response:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    })
-
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Failed to fetch accounts:', { status: response.status, errorText })
@@ -932,21 +911,10 @@ export async function getTradovateAccounts(accessToken: string): Promise<Tradova
     }
 
     const accounts = await response.json()
-    console.log('Received accounts from Tradovate:', {
-      accountCount: accounts.length,
-      sampleAccount: accounts[0]
-    })
 
     if (!Array.isArray(accounts) || accounts.length === 0) {
-      console.log('No accounts returned from Tradovate')
       return { error: 'No accounts found on demo environment' }
     }
-
-    console.log('Final accounts result:', {
-      isArray: Array.isArray(accounts),
-      length: accounts.length,
-      accounts: accounts
-    })
 
     return { accounts }
   } catch (error) {
@@ -1254,7 +1222,6 @@ export async function getTradovateToken(accountId: string = 'default') {
 }
 
 export async function removeTradovateToken(accountId?: string) {
-  console.log('Removing Tradovate token for account:', accountId)
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -1,51 +1,18 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Check, AlertCircle, CheckCircle2, CalendarDays, Clock, CreditCard, History, Receipt, FileText } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertCircle, CheckCircle2, CalendarDays, Clock, CreditCard, History, Receipt, FileText } from "lucide-react"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { updateSubscription, collectSubscriptionFeedback, type SubscriptionWithPrice } from "../../../../../server/billing"
+import { updateSubscription, collectSubscriptionFeedback } from "../../../../../server/billing"
 import { toast } from "sonner"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import PricingPlans from "@/components/pricing-plans"
 import Link from "next/link"
 import { useSubscriptionStore } from "@/store/subscription-store"
-
-type SubscriptionStatus = 
-  | "active"
-  | "trialing"
-  | "past_due"
-  | "canceled"
-  | "expired"
-  | "incomplete"
-  | "incomplete_expired"
-  | "paused"
-  | "unpaid"
-  | "completed"
-  | "drafted"
-  | "canceling"
-
-interface PlanPrice {
-  yearly: number
-  monthly: number
-}
-
-interface Plan {
-  name: string
-  description: string
-  price: PlanPrice
-  features: string[]
-  isPopular?: boolean
-  isComingSoon?: boolean
-}
-
-type Plans = {
-  [key: string]: Plan
-}
 
 export default function BillingManagement() {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
@@ -100,7 +67,7 @@ export default function BillingManagement() {
       } else {
         throw new Error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error("Error", {
         description: `Failed to ${action} subscription. Please try again.`,
       })
@@ -129,7 +96,7 @@ export default function BillingManagement() {
                   }
                 </span>
                 <span className="text-muted-foreground">•</span>
-                {subscription?.status === 'active' ? (
+                {subscription?.status === 'ACTIVE' ? (
                   <span className="text-white dark:text-white inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     {t('billing.status.active')}
@@ -142,24 +109,18 @@ export default function BillingManagement() {
                 ) : (
                   <span className="text-gray-500 dark:text-gray-400">
                     {subscription?.status ? (() => {
-                      const status = subscription.status as SubscriptionStatus
+                      const status = String(subscription.status || '').toUpperCase()
                       switch (status) {
-                        case 'active':
+                        case 'ACTIVE':
                           return t('billing.status.active')
-                        case 'canceled':
+                        case 'CANCELLED':
                           return t('billing.status.canceled')
-                        case 'incomplete':
+                        case 'PENDING':
                           return t('billing.status.incomplete')
-                        case 'incomplete_expired':
-                          return t('billing.status.incomplete_expired')
-                        case 'past_due':
+                        case 'PAST_DUE':
                           return t('billing.status.past_due')
-                        case 'paused':
-                          return t('billing.status.paused')
-                        case 'trialing':
-                          return t('billing.status.trialing')
-                        case 'unpaid':
-                          return t('billing.status.unpaid')
+                        case 'TRIAL_EXPIRED':
+                          return t('billing.status.incomplete_expired')
                         default:
                           return t('billing.notApplicable')
                       }
@@ -346,7 +307,7 @@ export default function BillingManagement() {
       </Card>
 
       {/* Subscription Management */}
-      {!isLoading && (subscription?.status === 'active' || subscription?.status === 'trialing') && subscription?.plan?.interval !== 'lifetime' && (
+      {!isLoading && (subscription?.status === 'ACTIVE' || subscription?.status === 'PENDING') && subscription?.plan?.interval !== 'lifetime' && (
         <Card className="rounded-3xl border border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
           <CardContent className="px-0">
             <div className="flex flex-col gap-4">

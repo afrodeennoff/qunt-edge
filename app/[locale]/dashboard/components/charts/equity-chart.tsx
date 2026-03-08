@@ -43,7 +43,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Info } from "lucide-react";
 
-import { useDashboardFilters, useDashboardStats, useDashboardTrades } from "@/context/data-provider";
+import { useDashboardFilters, useDashboardIsSharedView, useDashboardStats } from "@/context/data-provider";
 import { useI18n } from "@/locales/client";
 import { useCurrentLocale } from "@/locales/client";
 import { useUserStore } from "@/store/user-store";
@@ -575,7 +575,7 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
     hourFilter,
     tagFilter,
   } = useDashboardFilters();
-  const { isSharedView } = useDashboardTrades();
+  const isSharedView = useDashboardIsSharedView();
   const { formattedTrades } = useDashboardStats();
   const accounts = useUserStore((state) => state.accounts);
   const timezone = useUserStore((state) => state.timezone);

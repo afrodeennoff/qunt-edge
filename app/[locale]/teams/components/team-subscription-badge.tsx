@@ -39,12 +39,12 @@ export async function TeamSubscriptionBadge({
   // Compute values from subscription data
   const formattedPlan = subscription.plan || 'Free'
   const isLifetime = subscription.interval === 'lifetime'
-  const isTrialing = subscription.status === 'trialing'
-  const isActive = subscription.status === 'active' || subscription.status === 'ACTIVE'
-  const isPastDue = subscription.status === 'past_due'
-  const isIncomplete = subscription.status === 'incomplete'
-  const isUnpaid = subscription.status === 'unpaid'
-  const isCanceled = subscription.status === 'canceled'
+  const isTrialing = subscription.status === 'PENDING'
+  const isActive = subscription.status === 'ACTIVE'
+  const isPastDue = subscription.status === 'PAST_DUE'
+  const isIncomplete = subscription.status === 'PENDING'
+  const isUnpaid = subscription.status === 'PAST_DUE'
+  const isCanceled = subscription.status === 'CANCELLED'
   
   // Use endDate as the period end date
   const nextBillingDate = subscription.endDate

@@ -40,7 +40,7 @@ describe('Unsubscribe Token Secret Reuse Vulnerability', () => {
   it('should fail verification if signature is tampered', () => {
     process.env.UNSUBSCRIBE_TOKEN_SECRET = 'a_very_long_secure_secret_for_unsubscribe_tokens_at_least_32_chars';
     const token = createUnsubscribeToken('test@example.com');
-    const [payload, signature] = token.split('.');
+    const [, signature] = token.split('.');
 
     // Tamper with payload
     const tamperedPayload = Buffer.from(JSON.stringify({

@@ -325,87 +325,78 @@ export async function getTeamAnalytics(teamId: string, period: 'daily' | 'weekly
 
 export async function updateTeamAnalytics(teamId: string, userId: string) {
   try {
-    const team = await prisma.team.findFirst({
-      where: { id: teamId },
-      include: {
-        members: {
-          include: {
-            user: {
-              include: {
-                accounts: {
-                  include: {
-                    trades: true
-                  }
-                }
-              }
-            }
+    // Check authorization
+    const teamMember = await prisma.teamMember.findFirst({
+      where: {
+        teamId,
+        userId,
+        role: { in: [MemberRole.ADMIN, MemberRole.TRADER, MemberRole.ANALYST] }
+      }
+    });
+
+    if (!teamMember) {
+      throw new Error('Unauthorized');
+    }
+
+    // Get all team member user IDs
+    const teamMembers = await prisma.teamMember.findMany({
+      where: { teamId },
+      select: { userId: true }
+    });
+
+    const userIds = teamMembers.map(m => m.userId);
+
+    if (userIds.length === 0) {
+      return { success: true, analytics: null };
+    }
+
+    // Use aggregation queries instead of loading all trades
+    const [tradeStats, bestMemberResult] = await Promise.all([
+      // Get trade statistics using aggregation
+      prisma.trade.aggregate({
+        where: {
+          userId: { in: userIds }
+        },
+        _sum: {
+          pnl: true
+        },
+        _count: {
+          id: true
+        }
+      }),
+      // Find best performing member using aggregation query
+      prisma.trade.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _sum: {
+          pnl: true
+        },
+        orderBy: {
+          _sum: {
+            pnl: 'desc'
           }
-        }
+        },
+        take: 1
+      })
+    ]);
+
+    const totalPnl = Number(tradeStats._sum.pnl || 0);
+    const totalTrades = tradeStats._count.id || 0;
+    const averageRr = 0;
+    
+    // Get winning trades count
+    const winningTradesResult = await prisma.trade.count({
+      where: {
+        userId: { in: userIds },
+        pnl: { gt: 0 }
       }
-    })
+    });
 
-    if (!team) {
-      throw new Error('Team not found')
-    }
+    const winRate = totalTrades > 0 ? (winningTradesResult / totalTrades) * 100 : 0;
+    const bestMemberId = bestMemberResult[0]?.userId || null;
+    const bestMemberPnl = Number(bestMemberResult[0]?._sum?.pnl || 0);
 
-    const teamWithMembers = team as unknown as Prisma.TeamGetPayload<{
-      include: {
-        members: {
-          include: {
-            user: {
-              include: {
-                accounts: {
-                  include: {
-                    trades: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }>
-
-    const member = teamWithMembers.members.find(m => m.userId === userId)
-    if (!member || (member.role !== MemberRole.ADMIN && member.role !== MemberRole.TRADER && member.role !== MemberRole.ANALYST)) {
-      throw new Error('Unauthorized')
-    }
-
-    if (teamWithMembers.members.length === 0) {
-      return { success: true, analytics: null }
-    }
-
-    let totalPnl = 0
-    let totalTrades = 0
-    let winningTrades = 0
-    const _totalRr = 0
-    const _rrCount = 0
-
-    for (const teamMember of teamWithMembers.members) {
-      for (const account of teamMember.user.accounts) {
-        for (const trade of account.trades) {
-          totalPnl += Number(trade.pnl)
-          totalTrades++
-          if (Number(trade.pnl) > 0) winningTrades++
-          // Simplified RR calculation based on risk taken vs reward
-          // This assumes a standard risk per trade if not available, can be improved
-        }
-      }
-    }
-
-    const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0
-    const averageRr = 0 // Placeholder for better calculation logic
-
-    const bestMember = teamWithMembers.members.reduce((best: any, member: any) => {
-      const memberPnl = member.user.accounts.reduce((sum: number, acc: any) => {
-        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
-      }, 0)
-      const bestPnl = best.user.accounts.reduce((sum: number, acc: any) => {
-        return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
-      }, 0)
-      return memberPnl > bestPnl ? member : best
-    }, teamWithMembers.members[0])
-
+    // Upsert analytics
     const analytics = await prisma.teamAnalytics.upsert({
       where: {
         teamId_period: {
@@ -420,20 +411,16 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
         totalTrades,
         winRate,
         averageRr,
-        bestMemberId: bestMember?.userId,
-        bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
-        }, 0) : 0
+        bestMemberId,
+        bestMemberPnl
       },
       update: {
         totalPnl,
         totalTrades,
         winRate,
         averageRr,
-        bestMemberId: bestMember?.userId,
-        bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
-        }, 0) : 0
+        bestMemberId,
+        bestMemberPnl
       }
     })
 

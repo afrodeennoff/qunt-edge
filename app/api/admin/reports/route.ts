@@ -70,7 +70,7 @@ async function generateOverviewReport(dateFilter: DateFilter) {
     prisma.subscription.count({
       where: {
         createdAt: dateFilter,
-        status: { in: ['ACTIVE', 'TRIAL'] },
+        status: { in: ['ACTIVE', 'PENDING'] },
       },
     }),
     prisma.subscription.count({

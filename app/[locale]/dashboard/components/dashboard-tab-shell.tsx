@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
-
 import { clearReferralCode } from "@/lib/referral-storage";
 
 type DashboardTab = "widgets" | "table" | "accounts" | "chart";

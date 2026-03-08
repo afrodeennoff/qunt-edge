@@ -149,24 +149,24 @@ model ReferralRedemption {
 }
 
 model Subscription {
-  id                String  @id @unique @default(uuid())
-  email             String  @unique
-  plan              String
-  status            String  @default("ACTIVE")
-  cancelAtPeriodEnd Boolean @default(false)
-  interval          String?
+   id                String  @id @unique @default(uuid())
+   email             String  @unique
+   plan              String
+   status            String  @default("ACTIVE")
+   cancelAtPeriodEnd Boolean @default(false)
+   interval          String?
 
-  userId      String    @unique
-  endDate     DateTime?
-  trialEndsAt DateTime?
+   userId      String    @unique
+   endDate     DateTime?
+   trialEndsAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
 
-  user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+   user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([email])
-  @@schema("public")
+   @@index([email])
+   @@schema("public")
 }
 
 model DashboardLayout {
@@ -291,6 +291,7 @@ model Account {
   @@index([nextPaymentDate])
   @@index([userId, isPerformance, createdAt])
   @@index([userId, number]) // Performance scan index
+  @@index([userId, groupId])
   @@schema("public")
 }
 
@@ -337,6 +338,7 @@ model Trade {
   @@index([userId, closeDate])
   @@index([userId, accountNumber, instrument])
   @@index([userId, accountNumber, entryDate, pnl])
+  @@index([userId, instrument])
   @@schema("public")
 }
 
@@ -370,6 +372,8 @@ model Payout {
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountNumber])
+  @@index([accountId])
+  @@index([status])
   @@schema("public")
 }
 
@@ -1221,6 +1225,7 @@ model AiRequestLog {
   @@index([createdAt])
   @@index([feature, createdAt])
   @@index([userId, createdAt])
+  @@index([success])
   @@schema("public")
 }
 

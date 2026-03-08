@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import { toast } from 'sonner'
 import { useI18n } from "@/locales/client"
 import { Synchronization } from '@/prisma/generated/prisma'
@@ -41,7 +41,7 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
   const [enableAutoSync, setEnableAutoSync] = useState(false)
 
   const t = useI18n()
-  const { refreshAllData } = useData()
+  const { refreshAllData } = useDashboardActions()
 
   // Normalize dates returned from API
   const normalizeSynchronization = useCallback(
@@ -105,7 +105,6 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
 
     try {
       const runSync = async () => {
-        console.log('Starting sync for account:', accountId)
         if (!account.token) {
           const errorMsg = `Token for account ${accountId} is expired`
           return { error: true, message: errorMsg }
@@ -133,8 +132,6 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
         // Track progress
         const savedCount = payload.savedCount || 0
         const ordersCount = payload.ordersCount || 0
-
-        console.log(`Sync complete for ${accountId}: ${savedCount} trades saved, ${ordersCount} orders processed`)
 
         // Show success message
         let successMessage: string
@@ -254,7 +251,6 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
         const minutesSinceLastSync = (now - lastSyncTime) / (1000 * 60)
 
         if (minutesSinceLastSync >= syncInterval) {
-          console.log(`Auto-sync triggered for account ${account.accountId}`)
           await performSyncForAccount(account.accountId)
         }
       }

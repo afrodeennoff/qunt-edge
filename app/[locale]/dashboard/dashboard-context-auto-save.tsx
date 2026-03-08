@@ -7,7 +7,7 @@ import { Widget, WidgetType, WidgetSize, LayoutItem } from './types/dashboard'
 import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { DashboardLayoutWithWidgets } from '@/store/user-store'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import { DashboardLayout as PrismaDashboardLayout, Prisma } from '@/prisma/generated/prisma'
 import { getNextWidgetPlacement, normalizeWidgetSize, sizeToGrid } from "@/lib/widget-layout"
 
@@ -45,7 +45,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const setLayouts = useUserStore(state => state.setDashboardLayout)
     const user = useUserStore(state => state.user)
     const supabaseUser = useUserStore(state => state.supabaseUser)
-    const { saveDashboardLayout } = useData()
+    const { saveDashboardLayout } = useDashboardActions()
 
     const [isCustomizing, setIsCustomizing] = useState(false)
     const [pendingSaves, setPendingSaves] = useState(0)
@@ -125,8 +125,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }, [userId, setLayouts, layouts, activeLayout, isMobile, isCustomizing, persistLayout])
 
     const addWidget = useCallback(async (type: WidgetType, size: WidgetSize = 'medium') => {
-        console.log('[DashboardContext] addWidget', { type, size, userId, hasLayouts: !!layouts })
-
         if (!layouts) {
             console.error('[DashboardContext] addWidget failed: missing layouts')
             return
@@ -160,7 +158,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         const updatedWidgets = [...currentItems, newWidget]
         const newLayouts = { ...layouts, [activeLayout]: updatedWidgets, updatedAt: new Date() }
 
-        console.log('[DashboardContext] Updating state for addWidget')
         setLayouts(newLayouts)
         toast.success(t('widgets.widgetAdded'), { description: t('widgets.widgetAddedDescription') })
 
@@ -168,8 +165,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }, [userId, layouts, activeLayout, setLayouts, t, persistLayout])
 
     const removeWidget = useCallback(async (i: string) => {
-        console.log('[DashboardContext] removeWidget', { widgetId: i, userId, hasLayouts: !!layouts })
-
         if (!layouts) {
             console.error('[DashboardContext] removeWidget failed: missing layouts')
             return
@@ -178,7 +173,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         const updatedWidgets = layouts[activeLayout].filter(widget => widget.i !== i)
         const newLayouts = { ...layouts, [activeLayout]: updatedWidgets, updatedAt: new Date() }
 
-        console.log('[DashboardContext] Updating state for removeWidget')
         setLayouts(newLayouts)
 
         void persistLayout(newLayouts)

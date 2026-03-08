@@ -26,6 +26,28 @@ interface MemorySnapshot {
   listeners: number;
 }
 
+interface BrowserPerformanceWithMemory extends Performance {
+  memory: {
+    jsHeapSizeLimit: number;
+    usedJSHeapSize: number;
+  };
+}
+
+type ManagedEventHandler = EventListenerOrEventListenerObject;
+
+type ManagedListener = {
+  target: EventTarget;
+  type: string;
+  handler: ManagedEventHandler;
+  options?: AddEventListenerOptions | EventListenerOptions;
+};
+
+type WindowWithLeakTracking = Window & {
+  __memoryLeakDetectorInterval?: ReturnType<typeof setInterval>;
+  __trackedListeners?: Map<EventTarget, Map<string, Set<EventListener>>>;
+  __listenerCheckInterval?: ReturnType<typeof setInterval>;
+};
+
 class MemoryLeakDetector {
   private leaks: MemoryLeak[] = [];
   private snapshots: MemorySnapshot[] = [];
@@ -64,8 +86,6 @@ class MemoryLeakDetector {
    */
   private monitorComponentMounts() {
     const originalLog = console.error;
-    const mountCount = 0;
-    const unmountCount = 0;
 
     console.error = (...args) => {
       const message = args[0];
@@ -92,7 +112,7 @@ class MemoryLeakDetector {
     if (typeof performance === 'undefined' || !('memory' in performance)) return;
 
     const takeSnapshot = () => {
-      const memory = (performance as any).memory;
+      const memory = (performance as BrowserPerformanceWithMemory).memory;
       const snapshot: MemorySnapshot = {
         timestamp: Date.now(),
         heapSize: memory.jsHeapSizeLimit,
@@ -115,7 +135,7 @@ class MemoryLeakDetector {
     const intervalId = setInterval(takeSnapshot, 10000);
     
     // Store interval ID for cleanup
-    (window as any).__memoryLeakDetectorInterval = intervalId;
+      (window as WindowWithLeakTracking).__memoryLeakDetectorInterval = intervalId;
   }
 
   /**
@@ -132,9 +152,9 @@ class MemoryLeakDetector {
     elements.forEach(el => {
       const listeners = maybeGetEventListeners?.(el);
       if (listeners) {
-        Object.values(listeners).forEach((arr: any) => {
-          count += arr.length;
-        });
+          Object.values(listeners).forEach((arr: EventListener[]) => {
+            count += arr.length;
+          });
       }
     });
 
@@ -214,7 +234,7 @@ class MemoryLeakDetector {
     };
 
     // Store reference for cleanup
-    (window as any).__trackedListeners = listeners;
+    (window as WindowWithLeakTracking).__trackedListeners = listeners;
 
     // Check for listener leaks every 30 seconds
     const checkInterval = setInterval(() => {
@@ -226,7 +246,7 @@ class MemoryLeakDetector {
       }
     }, 30000);
 
-    (window as any).__listenerCheckInterval = checkInterval;
+    (window as WindowWithLeakTracking).__listenerCheckInterval = checkInterval;
   }
 
   /**
@@ -249,7 +269,7 @@ class MemoryLeakDetector {
   generateReport() {
     console.group('🔍 Memory Leak Report');
     
-    console.log('\n📊 Memory Snapshots:');
+    console.info('\n📊 Memory Snapshots:');
     console.table(
       this.snapshots.slice(-10).map(s => ({
         Time: new Date(s.timestamp).toLocaleTimeString(),
@@ -260,7 +280,7 @@ class MemoryLeakDetector {
     );
 
     if (this.leaks.length > 0) {
-      console.log('\n⚠️ Detected Leaks:');
+      console.info('\n⚠️ Detected Leaks:');
       console.table(
         this.leaks.map(leak => ({
           Component: leak.component,
@@ -270,7 +290,7 @@ class MemoryLeakDetector {
         }))
       );
     } else {
-      console.log('\n✅ No memory leaks detected');
+      console.info('\n✅ No memory leaks detected');
     }
 
     console.groupEnd();
@@ -293,26 +313,32 @@ export const memoryLeakDetector = new MemoryLeakDetector();
 export function useMemoryLeakDetection(componentName: string) {
   const mountedRef = useRef(true);
   const timersRef = useRef<Set<NodeJS.Timeout>>(new Set());
-  const listenersRef = useRef<Set<{ target: EventTarget; type: string; handler: any }>>(new Set());
+  const listenersRef = useRef<Set<ManagedListener>>(new Set());
 
   useEffect(() => {
     memoryLeakDetector.start();
     mountedRef.current = true;
+    const timers = timersRef.current;
+    const listeners = listenersRef.current;
 
     return () => {
       mountedRef.current = false;
       
       // Clean up any tracked timers
-      timersRef.current.forEach(timer => clearTimeout(timer));
-      timersRef.current.clear();
+      timers.forEach(timer => clearTimeout(timer));
+      timers.clear();
 
       // Clean up any tracked listeners
-      listenersRef.current.forEach(({ target, type, handler }) => {
+      listeners.forEach(({ target, type, handler }) => {
         target.removeEventListener(type, handler);
       });
-      listenersRef.current.clear();
+      listeners.clear();
+
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[MemoryLeakDetector] Cleanup completed for ${componentName}`);
+      }
     };
-  }, []);
+  }, [componentName]);
 
   /**
    * Track a timer for automatic cleanup
@@ -328,7 +354,7 @@ export function useMemoryLeakDetection(componentName: string) {
   const trackListener = useCallback((
     target: EventTarget,
     type: string,
-    handler: any,
+    handler: ManagedEventHandler,
     options?: AddEventListenerOptions
   ) => {
     target.addEventListener(type, handler, options);
@@ -349,9 +375,10 @@ export function useSafeTimeout() {
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   useEffect(() => {
+    const timeouts = timeoutsRef.current;
     return () => {
-      timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-      timeoutsRef.current.clear();
+      timeouts.forEach(timeout => clearTimeout(timeout));
+      timeouts.clear();
     };
   }, []);
 
@@ -380,9 +407,10 @@ export function useSafeInterval() {
   const intervalsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   useEffect(() => {
+    const intervals = intervalsRef.current;
     return () => {
-      intervalsRef.current.forEach(interval => clearInterval(interval));
-      intervalsRef.current.clear();
+      intervals.forEach(interval => clearInterval(interval));
+      intervals.clear();
     };
   }, []);
 
@@ -404,21 +432,22 @@ export function useSafeInterval() {
  * Custom hook to safely use event listeners with automatic cleanup
  */
 export function useSafeEventListener() {
-  const listenersRef = useRef<Set<{ target: EventTarget; type: string; handler: any; options?: any }>>(new Set());
+  const listenersRef = useRef<Set<ManagedListener>>(new Set());
 
   useEffect(() => {
+    const listeners = listenersRef.current;
     return () => {
-      listenersRef.current.forEach(({ target, type, handler, options }) => {
+      listeners.forEach(({ target, type, handler, options }) => {
         target.removeEventListener(type, handler, options);
       });
-      listenersRef.current.clear();
+      listeners.clear();
     };
   }, []);
 
   const addSafeListener = useCallback((
     target: EventTarget,
     type: string,
-    handler: any,
+    handler: ManagedEventHandler,
     options?: AddEventListenerOptions
   ) => {
     target.addEventListener(type, handler, options);
@@ -428,11 +457,11 @@ export function useSafeEventListener() {
   const removeSafeListener = useCallback((
     target: EventTarget,
     type: string,
-    handler: any,
+    handler: ManagedEventHandler,
     options?: EventListenerOptions
   ) => {
     target.removeEventListener(type, handler, options);
-    listenersRef.current.forEach((listener, index) => {
+    listenersRef.current.forEach((listener) => {
       if (
         listener.target === target &&
         listener.type === type &&

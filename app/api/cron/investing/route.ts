@@ -46,7 +46,6 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
     }
 
     const targetUrl = `https://sslecal2.investing.com/?timeZone=55&lang=${langMap[lang]}`;
-    console.log(`Fetching calendar events from ${targetUrl} using Vercel Sandbox...`);
 
     // Use the sandbox browser approach
     const html = await scrapeWithSandbox(targetUrl, {
@@ -94,7 +93,6 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
             // Validate the date
             if (!isValid(currentDate)) {
-              console.log('Invalid current date created:', { dateStr, currentDate })
               currentDate = null
             }
           } catch (error) {
@@ -174,14 +172,12 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
       // Handle regular events
       if (!eventTimestamp) {
-        console.log('Skipping regular event - missing timestamp:', { eventTimestamp })
         continue
       }
 
       // Extract country and currency
       const flagMatch = row.match(/<span[^>]*title="([^"]+)"[^>]*class="[^"]*ceFlags[^"]*"[^>]*>.*?<\/span>\s*([A-Z]{3})/)
       if (!flagMatch) {
-        console.log('Skipping regular event - no flag/currency match:', row)
         continue
       }
 
@@ -191,7 +187,6 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
       // Extract impact/sentiment
       const impactMatch = row.match(/<td[^>]*class="[^"]*sentiment[^"]*"[^>]*>([\s\S]*?)<\/td>/)
       if (!impactMatch) {
-        console.log('Skipping regular event - no impact match:', row)
         continue
       }
 
@@ -200,7 +195,6 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
       // Extract event name
       const eventMatch = row.match(/<td[^>]*class="[^"]*event[^"]*"[^>]*>([\s\S]*?)<\/td>/)
       if (!eventMatch) {
-        console.log('Skipping regular event - no event name match:', row)
         continue
       }
 
@@ -217,23 +211,13 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
         .trim()                  // Remove leading/trailing whitespace
 
       if (!eventName) {
-        console.log('Skipping regular event - empty event name after cleaning:', eventMatch[1])
         continue
       }
-
-      console.log('Creating regular event:', {
-        time,
-        currency,
-        event: eventName,
-        timestamp: eventTimestamp,
-        country
-      })
 
       // Parse the timestamp into UTC
       try {
         const [datePart, timePart] = eventTimestamp.split(' ')
         if (!datePart || !timePart) {
-          console.log('Invalid timestamp format:', eventTimestamp)
           continue
         }
 
@@ -241,7 +225,6 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
         const [hours, minutes] = timePart.split(':').map(Number)
 
         if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hours) || isNaN(minutes)) {
-          console.log('Invalid date/time components:', { year, month, day, hours, minutes })
           continue
         }
 
@@ -250,7 +233,6 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
         // Validate the date
         if (!isValid(utcDate)) {
-          console.log('Invalid UTC date created:', utcDate)
           continue
         }
 
@@ -274,21 +256,11 @@ async function fetchInvestingCalendarEvents(lang: 'fr' | 'en' = 'fr') {
 
     // Don't forget to add the last event if there is one
     if (currentEvent) {
-      console.log('Adding final event:', currentEvent)
       events.push(currentEvent as InvestingEvent)
     }
 
-    console.log('Parsing Summary:')
-    console.log('- Total rows processed:', rowCount)
-    console.log('- Date rows found:', dateRowCount)
-    console.log('- Event rows found:', eventRowCount)
-    console.log('- Event info rows found:', eventInfoRowCount)
-    console.log('- Events created:', events.length)
-    console.log('- All day events:', events.filter(e => e.time === 'Toute la journée').length)
-    console.log('- Regular events:', events.filter(e => e.time !== 'Toute la journée').length)
-
     if (events.length === 0) {
-      console.log('Warning: No events were created. This might indicate a parsing issue.')
+      console.warn('No events were created. This might indicate a parsing issue.')
     }
 
     return events.map(event => ({

@@ -8,7 +8,7 @@ import {
 } from "../components/import/tradovate/actions";
 import { useI18n } from "@/locales/client";
 import { useSyncContext } from "@/context/sync-context"
-import { useData } from "@/context/data-provider"
+import { useDashboardActions } from "@/context/data-provider"
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ export default function ImportCallbackPage() {
   const searchParams = useSearchParams();
   const tradovateStore = useTradovateSyncStore();
   const { tradovate } = useSyncContext();
-  const { refreshAllData } = useData();
+  const { refreshAllData } = useDashboardActions();
   const t = useI18n();
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -52,13 +52,11 @@ export default function ImportCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       if (!storeHydrated) {
-        console.log("Waiting for Tradovate store hydration...");
         return;
       }
 
       // Prevent double execution (React StrictMode in development)
       if (hasProcessed.current) {
-        console.log("Callback already processed, skipping...");
         return;
       }
       hasProcessed.current = true;
@@ -66,16 +64,6 @@ export default function ImportCallbackPage() {
       try {
         const code = searchParams.get("code");
         const state = searchParams.get("state");
-
-        console.log("OAuth callback received:", {
-          hasCode: !!code,
-          hasState: !!state,
-          state: state?.substring(0, 8) + "...",
-          environment: tradovateStore.environment,
-          userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString(),
-          url: window.location.href,
-        });
 
         if (!code) {
           setError("No authorization code received");
@@ -162,7 +150,6 @@ export default function ImportCallbackPage() {
         }
 
         // Tokens are stored during the Exchange callback
-        console.log("OAuth flow completed successfully");
         setStatus("success");
 
         // Redirect back to dashboard after a short delay

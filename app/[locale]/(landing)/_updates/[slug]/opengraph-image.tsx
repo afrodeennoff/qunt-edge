@@ -143,8 +143,7 @@ export default async function Image({
                 "Vercel-CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
             },
         })
-    } catch (e: unknown) {
-        console.log(e instanceof Error ? e.message : "Unknown error")
+    } catch {
         return new Response("Failed to generate the image", { status: 500 })
     }
-} 
+}

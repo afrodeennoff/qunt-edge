@@ -7,7 +7,7 @@ import { ActionCard } from "@/components/ui/action-card"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, DollarSign, Users, ShoppingCart, Zap, Shield, CheckCircle2, AlertCircle } from "lucide-react"
+import { TrendingUp, DollarSign, Users, ShoppingCart, Zap, Shield, AlertCircle } from "lucide-react"
 
 export function CardShowcase() {
   return (
@@ -140,7 +140,7 @@ export function CardShowcase() {
             tone="default"
             primaryAction={{
               label: "Start Setup",
-              onClick: () => console.log("Setup clicked"),
+              onClick: () => {},
               variant: "default"
             }}
             size="md"
@@ -152,7 +152,7 @@ export function CardShowcase() {
             tone="success"
             primaryAction={{
               label: "View Details",
-              onClick: () => console.log("Security clicked"),
+              onClick: () => {},
               variant: "outline"
             }}
             size="md"
@@ -164,12 +164,12 @@ export function CardShowcase() {
             tone="warning"
             primaryAction={{
               label: "Verify Now",
-              onClick: () => console.log("Verify clicked"),
+              onClick: () => {},
               variant: "default"
             }}
             secondaryAction={{
               label: "Later",
-              onClick: () => console.log("Later clicked")
+              onClick: () => {}
             }}
             size="md"
           />
@@ -193,7 +193,6 @@ export function CardShowcase() {
               </div>
             }
             imageAspect="video"
-            onClick={() => console.log("Card clicked")}
           />
           <MediaCard
             image="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop"

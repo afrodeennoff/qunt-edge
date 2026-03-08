@@ -509,12 +509,12 @@ export class WebhookService {
       }
     })
 
-    logger.info('[WebhookService] Team Membership activated', {
+    logger.info({
       email,
       teamId: team.id,
       teamName: team.name,
       plan: planName
-    })
+    }, '[WebhookService] Team Membership activated')
 
     return {
       success: true,
@@ -834,7 +834,7 @@ export class WebhookService {
         await prisma.teamSubscription.updateMany({
           where: { email },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt
           }
         })
@@ -842,7 +842,7 @@ export class WebhookService {
         await prisma.businessSubscription.updateMany({
           where: { email },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt
           }
         })
@@ -850,7 +850,7 @@ export class WebhookService {
         await prisma.subscription.update({
           where: { email },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt,
           },
         })

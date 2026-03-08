@@ -43,8 +43,6 @@ export async function getSubscriptionDetails(): Promise<SubscriptionInfo | null>
         }
     }
 
-    console.log("[getSubscriptionDetails] Fetching details for", normalizedEmail)
-
     try {
         const subscription = await prisma.subscription.findUnique({
             where: { email: normalizedEmail },
@@ -65,7 +63,7 @@ export async function getSubscriptionDetails(): Promise<SubscriptionInfo | null>
         // Only consider ACTIVE, TRIAL, and lifetime subscriptions as active
         const isActive = Boolean(
             subscription.status === 'ACTIVE' ||
-            (subscription.status === 'TRIAL' && subscription.trialEndsAt && subscription.trialEndsAt > now)
+            (subscription.status === 'PENDING' && subscription.trialEndsAt && subscription.trialEndsAt > now)
             // Removed the endDate check for non-lifetime subscriptions to allow resubscription after cancellation
         )
 

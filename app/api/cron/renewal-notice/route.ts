@@ -138,7 +138,6 @@ export async function GET(req: Request) {
               console.error(`Failed to send renewal notice to ${userEmail} for account ${account.id}:`, error)
               errorCount++
             } else {
-              console.log(`Renewal notice sent to ${userEmail} for account ${account.id}`)
               successCount++
 
             }
@@ -152,8 +151,6 @@ export async function GET(req: Request) {
         errorCount += userAccounts.length
       }
     }
-
-    console.log(`Renewal notice emails processed: ${successCount} successful, ${errorCount} failed`)
 
     return NextResponse.json({
       success: true,

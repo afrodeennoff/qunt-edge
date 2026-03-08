@@ -6,7 +6,7 @@ import { Zap, BarChart3, Eye, EyeOff, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useRef, useMemo, useEffect } from "react"
 import { motion } from "framer-motion"
-import { useDashboardStats, useDashboardTrades } from "@/context/data-provider"
+import { useDashboardAccountsList, useDashboardStats } from "@/context/data-provider"
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, parseISO, isWithinInterval, format } from "date-fns"
 import { calculateTradingScore } from "@/lib/score-calculator"
 import { type Account } from "@/lib/data-types"
@@ -30,7 +30,7 @@ const THEMES: Record<string, Theme> = {
 
 export function DailySummaryModal() {
     const { calendarData, statistics: overallStats } = useDashboardStats()
-    const { accounts } = useDashboardTrades()
+    const accounts = useDashboardAccountsList()
     const user = useUserStore((state) => state.user)
     const [displayMode, setDisplayMode] = useState<'currency' | 'percent'>('currency')
     const [currentTheme, setCurrentTheme] = useState<keyof typeof THEMES>('obsidian')

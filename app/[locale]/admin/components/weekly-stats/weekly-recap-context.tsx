@@ -2,7 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { loadInitialContent, WeeklyRecapContent } from "@/app/[locale]/admin/actions/weekly-recap"
-import { prisma } from "@/lib/prisma"
 
 const initialContent: WeeklyRecapContent = {
   firstName: "",
