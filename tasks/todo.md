@@ -1,3 +1,16 @@
+## Current Task: Commit and push current changes
+
+- [x] Review git status/diff to confirm staged scope
+- [x] Stage all intended changes
+- [x] Commit with a clear summary message
+- [x] Push to the current branch
+- [x] Record verification results (not run)
+
+## Review
+- Verification: Not run (commit-only request).
+- Risks: Changes not re-verified in this step.
+- Follow-ups: Run typecheck/lint/build if needed.
+
 # Performance Fix Plan (Immediate)
 
 - [x] Added provider hook re-export files for trades/filters/derived/actions.
