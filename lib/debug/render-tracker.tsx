@@ -52,7 +52,7 @@ class RenderTracker {
     const topRenderers = this.getTopRenderers(20)
     
     if (topRenderers.length === 0) {
-      console.log('No renders tracked yet')
+      console.info('No renders tracked yet')
       console.groupEnd()
       return
     }

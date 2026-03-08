@@ -120,7 +120,7 @@ class EventListenerTracker {
     console.group('🔍 Event Listener Tracker Report')
     const listeners = this.getActiveListeners()
     
-    console.log(`Total active listeners: ${listeners.length}`)
+    console.info(`Total active listeners: ${listeners.length}`)
     
     const byComponent = listeners.reduce((acc, l) => {
       acc[l.component] = (acc[l.component] || 0) + 1
@@ -139,7 +139,7 @@ class EventListenerTracker {
       return acc
     }, {} as Record<string, number>)
     
-    console.log('Listeners by type:', byType)
+    console.info('Listeners by type:', byType)
     
     console.groupEnd()
   }

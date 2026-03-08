@@ -26,8 +26,6 @@ interface ErrorWindowState {
   alerted: boolean;
 }
 
-type ContextRunner = <T>(context: LoggerContext, fn: () => T) => T;
-
 const errorWindowByKey = new Map<string, ErrorWindowState>();
 const contextStack: LoggerContext[] = [];
 
@@ -174,8 +172,29 @@ function emitErrorAlert(entry: LogEntry) {
       requestId: entry.requestId,
       correlationId: entry.correlationId,
     };
-    console.log(JSON.stringify(alertEntry));
+    writeStructuredLog(alertEntry);
   }
+}
+
+function safeJsonStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return JSON.stringify({
+      level: "error",
+      message: "Failed to serialize log payload",
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+
+function writeStructuredLog(entry: LogEntry): void {
+  process.stdout.write(`${safeJsonStringify(entry)}\n`);
+}
+
+function writeDevLog(entry: LogEntry, level: LogLevel, message: string, meta: Record<string, unknown>): void {
+  const metaString = Object.keys(meta).length > 0 ? safeJsonStringify(meta) : "";
+  process.stdout.write(`[${entry.timestamp}] ${level.toUpperCase()}: ${message} ${metaString}\n`);
 }
 
 function write(level: LogLevel, a: unknown, b?: unknown) {
@@ -193,10 +212,9 @@ function write(level: LogLevel, a: unknown, b?: unknown) {
   };
 
   if (process.env.NODE_ENV === "production") {
-    console.log(JSON.stringify(entry));
+    writeStructuredLog(entry);
   } else {
-    const metaString = Object.keys(redactedMeta).length > 0 ? JSON.stringify(redactedMeta) : "";
-    console.log(`[${entry.timestamp}] ${level.toUpperCase()}: ${message} ${metaString}`);
+    writeDevLog(entry, level, message, redactedMeta);
   }
 
   emitErrorAlert(entry);

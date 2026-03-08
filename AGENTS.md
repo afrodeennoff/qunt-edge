@@ -250,6 +250,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-08: Consolidated Remediation Sweep (Logs + Typing + Memo + Hook Hygiene)
+- **What changed:** Ran a single repo-wide remediation pass focused on safe mechanical hardening across runtime logs, straightforward typing cleanup, memoization, hook cleanup, and config safety.
+- **What I want:** Quiet runtime surfaces (no `console.log` spam), better local type safety in touched utilities, lower avoidable re-renders on heavy calendar components, and stable verification gates.
+- **What I don't want:** Behavior-changing refactors, risky schema/enum migrations, or non-actionable claims without typecheck/lint evidence.
+- **How we fixed that:**
+  - Removed remaining `console.log(...)` calls from touched runtime/debug paths and kept `console.warn/error`.
+  - Replaced straightforward `any` usage with specific types in touched files (`BrowserPerformanceWithMemory`, `ManagedEventHandler`, typed window leak-tracking fields).
+  - Added `React.memo` wrappers to expensive dashboard calendar components with stable prop surfaces (`weekly-calendar`, `mobile-calendar`).
+  - Fixed obvious hook hygiene issues in touched files (effect cleanup ref snapshot pattern, dead state/import removal).
+  - Added defensive logger serialization fallback + stdout writer path and capped `PG_POOL_MAX` with warning in Prisma config.
+  - Audited `"use client"` in touched scope and kept directives where client APIs/hooks are still required (no safe removals).
+- **Key Files:** `lib/logger.ts`, `lib/debug/performance-monitor.ts`, `lib/debug/event-tracker.ts`, `lib/debug/render-tracker.tsx`, `lib/performance/memory-leak-detector.ts`, `app/[locale]/dashboard/components/calendar/weekly-calendar.tsx`, `app/[locale]/dashboard/components/calendar/mobile-calendar.tsx`, `lib/prisma.ts`, `tasks/todo.md`, `AGENTS.md`.
+- **Verification:** `npm run -s typecheck` exits `0`; `npm run -s lint -- --max-warnings=999999` exits `0` (warnings-only baseline, no errors).
+
 ### 2026-03-08: App Lag Audit (Runtime Bottleneck Analysis)
 - **What changed:** Completed a full lag/slow-performance audit across dashboard runtime architecture, provider flows, render hot paths, and current quality/perf gates.
 - **What I want:** Identify real runtime bottlenecks (re-render churn, duplicate fetch work, oversized client surfaces) instead of guessing from bundle size alone.
@@ -381,6 +395,40 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Verification:**
   - `npm run -s typecheck` -> exits `0`.
   - Dashboard eslint pass -> `0` errors (warnings-only baseline).
+
+### 2026-03-08: Navigation Stall Recovery (Chunk Error Auto-Reload + Immediate SW Cleanup)
+- **What changed:** Added client-side recovery for stale chunk/module-load navigation failures and tightened service-worker cleanup timing.
+- **What I want:** If route clicks fail due to stale cached chunks, the app should self-recover without requiring the user to manually hard refresh.
+- **What I don't want:** "Click does nothing until hard reset" behavior caused by outdated `_next` assets or delayed service-worker cleanup.
+- **How we fixed that:**
+  - Updated `components/providers/root-providers.tsx` with global production-only listeners for:
+    - `unhandledrejection`
+    - `error`
+  - Added chunk-failure detection for common signatures:
+    - `ChunkLoadError`
+    - `Loading chunk`
+    - `Failed to fetch dynamically imported module`
+    - `Importing a module script failed`
+  - Added one-time session guard (`sessionStorage`) to prevent reload loops and trigger a single automatic reload on first detected chunk failure.
+  - Service-worker unregister/cache-clear now runs immediately on mount (and still keeps load-event fallback).
+- **Key Files:** `components/providers/root-providers.tsx`, `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint components/providers/root-providers.tsx` -> 0 errors.
+  - `npm run -s typecheck` -> exits `0`.
+
+### 2026-03-08: Smooth Navigation UX (Immediate Sidebar Click Feedback)
+- **What changed:** Added immediate per-link pending feedback in sidebar navigation and a client-to-hard-navigation fallback for stalled transitions.
+- **What I want:** Users should always get instant visual confirmation when they click a sidebar link, even if route transition takes a moment.
+- **What I don't want:** “Did my click work?” uncertainty when navigation is in-flight and the active route hasn’t switched yet.
+- **How we fixed that:**
+  - Updated `components/ui/unified-sidebar.tsx` to track clicked destination href as `pendingHref`.
+  - Sidebar now shows a loading spinner for the clicked item while it is pending and not yet active.
+  - Pending state naturally clears when the destination becomes active (no effect-driven reset required).
+  - Added an 8s stall fallback that upgrades stuck client-side transitions to `window.location.assign(...)` for the clicked href.
+- **Key Files:** `components/ui/unified-sidebar.tsx`, `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint components/ui/unified-sidebar.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> exits `0`.
 
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.

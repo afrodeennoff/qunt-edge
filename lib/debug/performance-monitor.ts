@@ -11,6 +11,12 @@ interface PerformanceMetrics {
   memoryUsage?: number
 }
 
+interface BrowserPerformanceWithMemory extends Performance {
+  memory: {
+    usedJSHeapSize: number
+  }
+}
+
 class PerformanceMonitor {
   private metrics: Map<string, PerformanceMetrics> = new Map()
   private observers: PerformanceObserver[] = []
@@ -74,7 +80,8 @@ class PerformanceMonitor {
 
   getMemoryUsage(): number | undefined {
     if (typeof performance !== 'undefined' && 'memory' in performance) {
-      return (performance as any).memory.usedJSHeapSize / 1048576
+      const browserPerformance = performance as BrowserPerformanceWithMemory
+      return browserPerformance.memory.usedJSHeapSize / 1048576
     }
     return undefined
   }
@@ -88,7 +95,7 @@ class PerformanceMonitor {
     const metrics = this.getMetrics() as PerformanceMetrics[]
     
     if (metrics.length === 0) {
-      console.log('No metrics recorded yet')
+      console.info('No metrics recorded yet')
       console.groupEnd()
       return
     }

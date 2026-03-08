@@ -1,6 +1,6 @@
 'use client'
 
-import React from "react"
+import { memo } from "react"
 import { format, eachWeekOfInterval, getWeek, getMonth, getYear, addDays, startOfYear, endOfYear } from "date-fns"
 import { fr, enUS } from 'date-fns/locale'
 import { cn } from "@/lib/utils"
@@ -14,7 +14,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { useUserStore } from "../../../../../store/user-store"
 
 const formatCurrency = (value: number) => {
   const formatted = value.toLocaleString('en-US', { 
@@ -31,7 +30,7 @@ interface WeeklyCalendarPnlProps {
   year: number;
 }
 
-export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendarPnlProps) {
+function WeeklyCalendarPnlComponent({ calendarData, year }: WeeklyCalendarPnlProps) {
   const t = useI18n()
   const locale = useCurrentLocale()
   const dateLocale = locale === 'fr' ? fr : enUS
@@ -259,4 +258,8 @@ export default function WeeklyCalendarPnl({ calendarData, year }: WeeklyCalendar
       </div>
     </div>
   )
-} 
+}
+
+const WeeklyCalendarPnl = memo(WeeklyCalendarPnlComponent)
+
+export default WeeklyCalendarPnl

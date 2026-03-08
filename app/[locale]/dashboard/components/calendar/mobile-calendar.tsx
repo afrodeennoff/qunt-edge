@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useMemo, useState } from "react"
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, getDay, addDays } from "date-fns"
+import { memo, useMemo, useState } from "react"
+import { format, addMonths, subMonths, getDay, addDays } from "date-fns"
 import { formatInTimeZone, toDate } from 'date-fns-tz'
 import { fr, enUS } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -60,7 +60,7 @@ function isDateStringToday(dateString: string, timezone: string): boolean {
   return dateString === todayString;
 }
 
-export default function MobileCalendarPnl({ calendarData }: { calendarData: CalendarData }) {
+function MobileCalendarPnlComponent({ calendarData }: { calendarData: CalendarData }) {
   const t = useI18n()
   const locale = useCurrentLocale()
   const timezone = useUserStore(state => state.timezone)
@@ -68,7 +68,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
   const weekStartsOnMonday = locale === 'fr'
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const isLoading = false
 
   // Generate calendar date strings based on the current date and timezone
   const calendarDayStrings = getCalendarDayStrings(currentDate, timezone, weekStartsOnMonday)
@@ -135,7 +135,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
           return false
         }
       })
-      .map(([_, data]) => Math.abs(data.pnl)))
+      .map(([, data]) => Math.abs(data.pnl)))
   }
 
   const maxPnl = getMaxPnl()
@@ -287,3 +287,7 @@ export default function MobileCalendarPnl({ calendarData }: { calendarData: Cale
     </Card>
   )
 }
+
+const MobileCalendarPnl = memo(MobileCalendarPnlComponent)
+
+export default MobileCalendarPnl

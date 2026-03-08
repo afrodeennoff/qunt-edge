@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { LogOut, MoreHorizontal, Loader2 } from "lucide-react"
@@ -64,6 +64,8 @@ export interface UnifiedSidebarConfig {
   onLogout?: () => void
   styleVariant?: "default" | "minimal" // Simplified to shadcn default
 }
+
+const NAVIGATION_STALL_TIMEOUT_MS = 8000
 
 function stripLocalePrefix(pathname: string) {
   if (!pathname) return "/"
@@ -142,6 +144,38 @@ export function UnifiedSidebar({
   const { isQueryParamOnly } = useNavigationHelper()
   const debugCache = process.env.NEXT_PUBLIC_CACHE_DEBUG === "true"
   const pathname = usePathname()
+  const [pendingHref, setPendingHref] = useState<string | null>(null)
+  const navigationFallbackTimerRef = useRef<number | null>(null)
+
+  const clearNavigationFallbackTimer = () => {
+    if (navigationFallbackTimerRef.current === null) return
+    window.clearTimeout(navigationFallbackTimerRef.current)
+    navigationFallbackTimerRef.current = null
+  }
+
+  const scheduleNavigationFallback = (href: string) => {
+    clearNavigationFallbackTimer()
+    navigationFallbackTimerRef.current = window.setTimeout(() => {
+      const targetUrl = new URL(href, window.location.origin)
+      const isAlreadyAtTarget =
+        targetUrl.pathname === window.location.pathname &&
+        targetUrl.search === window.location.search
+
+      if (!isAlreadyAtTarget) {
+        window.location.assign(targetUrl.toString())
+      }
+    }, NAVIGATION_STALL_TIMEOUT_MS)
+  }
+
+  useEffect(() => {
+    clearNavigationFallbackTimer()
+  }, [pathname])
+
+  useEffect(() => {
+    return () => {
+      clearNavigationFallbackTimer()
+    }
+  }, [])
 
   const groupedItems = useMemo(() => {
     const order: string[] = []
@@ -215,6 +249,9 @@ export function UnifiedSidebar({
                   const href = item.href
                   const isItemDisabled = Boolean(item.disabled)
                   const itemIsActive = !isItemDisabled && !!href && isActive(href, item.exact)
+                  const isPendingItem = Boolean(
+                    href && pendingHref === href && !isActive(href, item.exact)
+                  )
 
                   return (
                     <SidebarMenuItem key={`${groupName}-${item.label}-${index}`}>
@@ -239,6 +276,8 @@ export function UnifiedSidebar({
                             href={href}
                             prefetch={false}
                             onClick={() => {
+                              setPendingHref(href)
+                              scheduleNavigationFallback(href)
                               if (debugCache) {
                                 console.info("[CacheDebug] sidebar navigation click", {
                                   from: pathname,
@@ -254,8 +293,9 @@ export function UnifiedSidebar({
                               }
                             }}
                             className="flex items-center w-full"
+                            aria-busy={isPendingItem}
                           >
-                            {isLoading && itemIsActive ? (
+                            {isPendingItem || (isLoading && itemIsActive) ? (
                               <Loader2 className="h-4 w-4 animate-spin shrink-0 text-sidebar-primary" />
                             ) : (
                               <span className="shrink-0">{item.icon}</span>

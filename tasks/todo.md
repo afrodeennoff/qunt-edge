@@ -160,3 +160,65 @@
 - `useDashboardTrades(` search in `app/[locale]/dashboard/**/*.tsx` returns zero matches.
 - `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, and `app/[locale]/dashboard/trader-profile/page.tsx` are server wrappers delegating client work to dedicated `page-client.tsx` files.
 - `npm run -s typecheck` exits `0`.
+
+# Navigation Stuck After Click Fix (2026-03-08)
+
+- [x] Add one-time chunk-load auto-recovery on client runtime failures.
+- [x] Tighten service-worker cleanup timing to run immediately on mount in production.
+- [x] Run targeted lint + typecheck verification.
+
+## Review (Navigation Stuck After Click Fix)
+
+- Added runtime handlers in `components/providers/root-providers.tsx` for chunk-load failure signatures (`ChunkLoadError`, dynamic import fetch failures) that trigger a one-time session reload.
+- Service-worker unregister/cache-clear now runs immediately on provider mount (still keeps load-listener fallback for early page lifecycle).
+- Verification:
+  - `npx eslint components/providers/root-providers.tsx` -> 0 errors.
+  - `npm run -s typecheck` -> exits `0`.
+
+# Smooth Navigation UX Pass (2026-03-08)
+
+- [x] Add immediate click feedback for sidebar navigation links.
+- [x] Keep loading indicator scoped to pending destination link only.
+- [x] Ensure indicator clears naturally once route/query update completes.
+- [x] Run targeted lint and full typecheck.
+
+## Review (Smooth Navigation UX Pass)
+
+- Added pending-link state in `components/ui/unified-sidebar.tsx` so users see instant spinner feedback on click, even before route transition fully commits.
+- Pending spinner now applies only to the clicked destination and auto-clears when that destination becomes active.
+- Added an 8-second navigation stall fallback in sidebar link clicks to force full-document navigation (`window.location.assign`) when client-side transition appears stuck.
+- Verification:
+  - `npx eslint components/ui/unified-sidebar.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> exits `0`.
+# Repo-Wide Remediation Sweep (2026-03-08)
+
+- [x] Phase 1: Remove remaining runtime `console.log(...)` statements while keeping `console.warn/error`.
+- [x] Phase 2: Replace straightforward high-risk `any` usage with `unknown` or specific types.
+- [x] Phase 3: Add `React.memo` to expensive dashboard components with stable prop boundaries.
+- [x] Phase 4: Fix obvious hook dependency/order issues in touched files.
+- [x] Phase 5: Remove unnecessary `"use client"` directives only where no client APIs are used (no safe removals found in touched scope).
+- [x] Phase 6: Clean unused imports/vars and dead branches introduced by logging removals.
+- [x] Phase 7: Add obvious missing error handling in touched async/runtime flows.
+- [x] Phase 8: Apply safe DB/config hardening that avoids enum/schema-wide refactors.
+- [x] Run verification: `npm run -s typecheck` and permissive lint (`npm run -s lint -- --max-warnings=999999`).
+- [x] Add review notes and update `AGENTS.md` with this remediation pass.
+
+## Review (Repo-Wide Remediation Sweep)
+
+- Removed remaining runtime `console.log(...)` from logging/debug/perf utilities and preserved `console.warn/error` paths.
+- Replaced straightforward `any` casts/types in touched files with specific runtime types (`ManagedEventHandler`, browser memory interfaces, typed window extensions).
+- Added `React.memo` wrappers to expensive calendar components (`weekly-calendar`, `mobile-calendar`) where prop boundaries are stable.
+- Fixed obvious hook hygiene issues in touched files (effect cleanup ref snapshots, removed dead state/imports, safe cleanup semantics).
+- Added defensive log serialization fallback in `lib/logger.ts` and safe Prisma pool cap handling in `lib/prisma.ts`.
+- Verification:
+  - `npm run -s typecheck` -> exits `0`.
+  - `npm run -s lint -- --max-warnings=999999` -> exits `0` (warnings-only baseline; no errors).
+
+## Task: Read recent edits summary
+
+- [ ] Review recent git history/status for latest edits.
+- [ ] Summarize recent edits for the user.
+- [ ] Note verification or follow-up if needed.
+
+## Review
+- [ ] Pending.
