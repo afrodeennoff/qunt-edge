@@ -200,7 +200,7 @@ export async function PATCH(req: NextRequest) {
           where: { id: subscriptionId },
           data: {
             plan: payload.plan.toUpperCase(),
-            status: 'ACTIVE',
+            status: 'ACTIVE' as const,
             endDate: payload.endDate ? new Date(payload.endDate) : subscription.endDate,
           },
         })
@@ -215,7 +215,7 @@ export async function PATCH(req: NextRequest) {
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
-            status: 'PENDING',
+            status: 'PENDING' as const,
             trialEndsAt: newTrialEnd,
             endDate: newTrialEnd,
           },
@@ -228,7 +228,7 @@ export async function PATCH(req: NextRequest) {
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
-            status: 'ACTIVE',
+            status: 'ACTIVE' as const,
             plan: 'FREE',
             endDate: freeAccessEnd,
           },
@@ -239,7 +239,7 @@ export async function PATCH(req: NextRequest) {
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
-            status: 'CANCELLED',
+            status: 'CANCELLED' as const,
             endDate: new Date(),
           },
         })
@@ -251,7 +251,7 @@ export async function PATCH(req: NextRequest) {
         updatedSubscription = await prisma.subscription.update({
           where: { id: subscriptionId },
           data: {
-            status: 'ACTIVE',
+            status: 'ACTIVE' as const,
             endDate,
           },
         })

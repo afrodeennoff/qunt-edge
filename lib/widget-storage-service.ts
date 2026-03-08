@@ -168,7 +168,6 @@ class WidgetStorageService {
     retryCount = 0
   ): Promise<StorageResult> {
     if (!this.isOnline) {
-      console.log('[WidgetStorageService] Offline - saving to local storage')
       const saved = this.saveToLocalStorage(userId, layout)
       return {
         success: saved,
@@ -203,7 +202,6 @@ class WidgetStorageService {
       const result = await this.saveToDatabase(userId, layout)
       
       if (!result.success && retryCount < MAX_RETRIES) {
-        console.log(`[WidgetStorageService] Retry ${retryCount + 1}/${MAX_RETRIES}`)
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)))
         return this.performSave(userId, layout, retryCount + 1)
       }
@@ -211,7 +209,6 @@ class WidgetStorageService {
       return result
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
-        console.log(`[WidgetStorageService] Retry ${retryCount + 1}/${MAX_RETRIES} after error`)
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)))
         return this.performSave(userId, layout, retryCount + 1)
       }
@@ -276,7 +273,6 @@ class WidgetStorageService {
       
       const localLayout = this.loadFromLocalStorage(userId)
       if (localLayout) {
-        console.log('[WidgetStorageService] Loaded from local storage fallback')
         return localLayout
       }
       

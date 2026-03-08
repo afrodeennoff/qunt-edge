@@ -97,8 +97,31 @@
 
 # Console Log Removal Sweep (2026-03-08)
 
-- [ ] Locate `console.log(...)` usage in scoped runtime paths only (`app/**`, `components/**`, `context/**`, `store/**`, `server/**`) while excluding tests/e2e and non-scoped files.
-- [ ] Remove `console.log(...)` lines while preserving behavior and leaving `console.warn/error` untouched.
-- [ ] Remove now-empty `if` branches when the only statement removed was `console.log(...)`.
-- [ ] Re-scan scoped paths to confirm zero remaining `console.log(...)`.
-- [ ] Add review notes with edited files and removal count.
+- [x] Locate `console.log(...)` usage in scoped runtime paths only (`app/**`, `components/**`, `context/**`, `store/**`, `server/**`) while excluding tests/e2e and non-scoped files.
+- [x] Remove `console.log(...)` lines while preserving behavior and leaving `console.warn/error` untouched.
+- [x] Remove now-empty `if` branches when the only statement removed was `console.log(...)`.
+- [x] Re-scan scoped paths to confirm zero remaining `console.log(...)`.
+- [x] Add review notes with edited files and removal count.
+
+## Review (Console Log Removal Sweep)
+
+- Verified scoped re-scan with grep on `app`, `components`, `context`, `store`, and `server` returns no remaining `console.log(` matches.
+- Kept `console.warn` and `console.error` intact.
+- Removed console-only branches where applicable (for example comment-notification else branch in community actions).
+- Removal count from initial scoped scan totals `181` statements (`app: 170`, `components: 2`, `context: 9`, `store: 0`, `server: 0`).
+
+# Console Log Removal (Targeted Runtime Files, 2026-03-08)
+
+- [x] Remove `console.log(...)` from `hooks/use-tradovate-token-manager.ts`.
+- [x] Remove `console.log(...)` from `lib/widget-migration-service.ts`.
+- [x] Remove `console.log(...)` from `lib/widget-storage-service.ts`.
+- [x] Remove `console.log(...)` from `lib/widget-persistence-manager.ts`.
+- [x] Remove `console.log(...)` from `lib/browser-sandbox.ts`.
+- [x] Re-scan targeted files to confirm zero remaining `console.log(...)` matches.
+
+## Review (Targeted Runtime Console Log Removal)
+
+- Kept `console.warn(...)` and `console.error(...)` unchanged.
+- Kept runtime behavior unchanged; only `console.log(...)` lines were removed.
+- Re-scan with grep on the five targeted files returns no `console.log(` matches.
+- Total removed in this task: `29` (`4 + 1 + 4 + 4 + 16`).

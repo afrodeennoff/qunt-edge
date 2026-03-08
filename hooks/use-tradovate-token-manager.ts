@@ -9,22 +9,18 @@ export function useTradovateTokenManager() {
   }>({ isValid: false });
 
   const startTokenRenewal = useCallback((environment: 'demo' | 'live' = 'demo') => {
-    console.log('Token renewal started for environment:', environment);
     setIsRenewalActive(true);
   }, []);
 
   const stopTokenRenewal = useCallback(() => {
-    console.log('Token renewal stopped');
     setIsRenewalActive(false);
   }, []);
 
   const checkTokenExpiration = useCallback(() => {
-    console.log('Checking token expiration');
     // This would be implemented based on your token checking logic
   }, []);
 
   const renewTokenNow = useCallback(() => {
-    console.log('Manual token renewal requested');
     // This would trigger a manual token renewal
   }, []);
 

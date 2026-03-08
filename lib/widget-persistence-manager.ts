@@ -52,8 +52,6 @@ class WidgetPersistenceManager {
     } = {}
   ): Promise<SaveResult> {
     try {
-      console.log('[WidgetPersistenceManager] Starting save process...')
-
       const validation = widgetValidator.validateLayout(layout.desktop)
       if (!validation.valid) {
         console.error('[WidgetPersistenceManager] Validation failed:', validation.errors)
@@ -107,8 +105,6 @@ class WidgetPersistenceManager {
     changeType: 'manual' | 'auto' | 'migration' | 'conflict_resolution' = 'manual'
   ): Promise<SaveResult> {
     try {
-      console.log('[WidgetPersistenceManager] Performing save...')
-
       const checksum = widgetVersionService.generateChecksum(layout)
       const deviceId = widgetVersionService['getOrCreateDeviceId']()
 
@@ -183,8 +179,6 @@ class WidgetPersistenceManager {
 
   async loadLayout(userId: string): Promise<DashboardLayoutWithWidgets | null> {
     try {
-      console.log('[WidgetPersistenceManager] Loading layout...')
-
       const layout = await widgetStorageService.load(userId)
 
       if (!layout) {
@@ -340,8 +334,6 @@ class WidgetPersistenceManager {
   }
 
   async sync(userId: string): Promise<SaveResult> {
-    console.log('[WidgetPersistenceManager] Syncing...')
-
     const result = await widgetStorageService.sync(userId)
 
     if (result.success) {

@@ -70,8 +70,6 @@ class WidgetMigrationService {
     try {
       for (const migration of this.migrations) {
         if (migration.version > currentVersion && migration.version <= this.currentVersion) {
-          console.log(`[WidgetMigration] Applying migration v${migration.version}: ${migration.description}`)
-
           currentLayout = migration.migrate(currentLayout)
           currentVersion = migration.version
           changes.push(`v${migration.version}: ${migration.description}`)
