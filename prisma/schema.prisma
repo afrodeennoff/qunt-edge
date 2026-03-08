@@ -370,6 +370,8 @@ model Payout {
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountNumber])
+  @@index([accountId])
+  @@index([status])
   @@schema("public")
 }
 
