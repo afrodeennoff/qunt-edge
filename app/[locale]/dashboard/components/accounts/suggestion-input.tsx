@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { cn } from "@/lib/utils"
-import { Check, ChevronDown, X } from "lucide-react"
+import { ChevronDown, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 interface EnhancedInputProps {
@@ -26,11 +26,17 @@ export default function EnhancedInput({
   className,
 }: EnhancedInputProps) {
   const [value, setValue] = useState(initialValue)
-  const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [isValid, setIsValid] = useState<boolean | null>(null)
-  const [validationMessage, setValidationMessage] = useState<string>("")
+  const initialValidation = useMemo(() => {
+    if (!initialValue || !validate) {
+      return { valid: null as boolean | null, message: "" }
+    }
+    const result = validate(initialValue)
+    return { valid: result.valid, message: result.message || "" }
+  }, [initialValue, validate])
+  const [isValid, setIsValid] = useState<boolean | null>(initialValidation.valid)
+  const [validationMessage, setValidationMessage] = useState<string>(initialValidation.message)
   const [confirmed, setConfirmed] = useState(false)
   const [skipNextBlur, setSkipNextBlur] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
@@ -78,18 +84,7 @@ export default function EnhancedInput({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [value, skipNextBlur])
-
-  // Filter suggestions based on input
-  useEffect(() => {
-    const filtered = suggestions.filter((suggestion) => suggestion.toLowerCase().includes(value.toLowerCase()))
-    setFilteredSuggestions(filtered)
-  }, [value, suggestions])
-
-  // Reset selectedIndex when filtered suggestions change
-  useEffect(() => {
-    setSelectedIndex(-1)
-  }, [filteredSuggestions])
+  }, [value, skipNextBlur, validateInput])
 
   // Handle confirmation animation
   useEffect(() => {
@@ -103,18 +98,10 @@ export default function EnhancedInput({
     }
   }, [confirmed])
 
-  // Pre-validate initial value if provided
-  useEffect(() => {
-    if (initialValue && validate && !hasInteracted) {
-      const result = validate(initialValue)
-      setIsValid(result.valid)
-      setValidationMessage(result.message || "")
-    }
-  }, [initialValue, validate, hasInteracted])
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setValue(newValue)
+    setSelectedIndex(-1)
     if (onChange) onChange(newValue)
     setIsValid(null)
     setHasInteracted(true)
@@ -219,6 +206,11 @@ export default function EnhancedInput({
     setHasInteracted(true)
     inputRef.current?.focus()
   }
+
+  const filteredSuggestions = useMemo(
+    () => suggestions.filter((suggestion) => suggestion.toLowerCase().includes(value.toLowerCase())),
+    [value, suggestions]
+  )
 
   return (
     <div ref={containerRef} className={cn("relative w-full max-w-xs", className)}>

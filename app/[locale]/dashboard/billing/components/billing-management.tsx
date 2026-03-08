@@ -1,37 +1,18 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Check, AlertCircle, CheckCircle2, CalendarDays, Clock, CreditCard, History, Receipt, FileText } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertCircle, CheckCircle2, CalendarDays, Clock, CreditCard, History, Receipt, FileText } from "lucide-react"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { updateSubscription, collectSubscriptionFeedback, type SubscriptionWithPrice } from "../../../../../server/billing"
+import { updateSubscription, collectSubscriptionFeedback } from "../../../../../server/billing"
 import { toast } from "sonner"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import PricingPlans from "@/components/pricing-plans"
 import Link from "next/link"
 import { useSubscriptionStore } from "@/store/subscription-store"
-
-interface PlanPrice {
-  yearly: number
-  monthly: number
-}
-
-interface Plan {
-  name: string
-  description: string
-  price: PlanPrice
-  features: string[]
-  isPopular?: boolean
-  isComingSoon?: boolean
-}
-
-type Plans = {
-  [key: string]: Plan
-}
 
 export default function BillingManagement() {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
