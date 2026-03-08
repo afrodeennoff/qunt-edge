@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { Check, ChevronDown, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -45,6 +45,18 @@ export default function EnhancedInput({
       isMounted.current = false
     }
   }, [])
+
+  const validateInput = useCallback((inputValue: string) => {
+    if (!validate) {
+      setIsValid(true)
+      return true
+    }
+
+    const result = validate(inputValue)
+    setIsValid(result.valid)
+    setValidationMessage(result.message || "")
+    return result.valid
+  }, [validate])
 
   // Handle click outside to hide suggestions
   useEffect(() => {
@@ -99,18 +111,6 @@ export default function EnhancedInput({
       setValidationMessage(result.message || "")
     }
   }, [initialValue, validate, hasInteracted])
-
-  const validateInput = (inputValue: string) => {
-    if (!validate) {
-      setIsValid(true)
-      return true
-    }
-
-    const result = validate(inputValue)
-    setIsValid(result.valid)
-    setValidationMessage(result.message || "")
-    return result.valid
-  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
