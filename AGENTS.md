@@ -2412,3 +2412,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Kept external partner branding as the only allowed literal-color exception.
 - **Key Files:** `styles/tokens.css`, `app/globals.css`, `tailwind.config.ts`, `lib/color-tokens.ts`, `scripts/check-color-contract.mjs`, `package.json`, `AGENTS.md`
 - **Verification:** Run `npm run check:color-contract` and review violations output + allowlist deltas.
+
+### 2026-03-08: Freeze Recovery + Typecheck Stub Hardening
+- **What changed:** Added global error recovery UI, tightened chunk-load recovery handling, and ensured Next typecheck stubs are always present.
+- **What I want:** Users should recover from stale chunks or runtime crashes without manual hard reloads, and typecheck should run reliably after clean builds.
+- **What I don't want:** Silent freezes from missing chunks, broken navigation that requires force refresh, or typecheck failures caused by missing .next cache-life stubs.
+- **How we fixed that:**
+  - Added a global error boundary page () with reload/try-again actions.
+  - Expanded chunk error detection and hardened sessionStorage guards in  so auto-reload works even if storage is blocked.
+  - Added timeout guards to subscription refresh paths and reused the shared subscription loader in DataProvider.
+  - Updated  to always write cache-life stubs for both  and .
+- **Key Files:** , , , , .
+- **Verification:** [clean-build] removed tsconfig.tsbuildinfo
+[clean-build] removed .next
+[typecheck] Ensured cache-life.d.ts stubs
+Generating route types...
+✓ Types generated successfully
+[typecheck] Ensured cache-life.d.ts stubs passes.
