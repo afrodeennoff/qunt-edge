@@ -126,6 +126,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Data Provider File Split (Hook Re-exports)
+- **What changed:** Added focused provider hook files for trades, filters, derived stats, and actions.
+- **What I want:** Clearer module boundaries and easier incremental migration away from the monolithic data-provider file.
+- **What I don't want:** Confusion over which slice hook to use or accidental reliance on a giant provider file for simple imports.
+- **How we fixed that:** Created `context/providers/*-provider.tsx` modules that re-export the slice hooks and types from `context/data-provider.tsx` without changing runtime behavior.
+- **Key Files:** `context/providers/trades-provider.tsx`, `context/providers/filters-provider.tsx`, `context/providers/derived-provider.tsx`, `context/providers/actions-provider.tsx`.
+- **Verification:** Not run in this environment; hook imports should resolve to existing slice contexts.
+
+
 ### 2026-03-08: Performance Rescue (Memoized Charts + Widgets)
 - **What changed:** Memoized remaining dashboard chart + widget components to reduce re-render churn.
 - **What I want:** Ensure charts/widgets do not re-render unless their props change.

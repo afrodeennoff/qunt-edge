@@ -1,6 +1,5 @@
 # Performance Fix Plan (Immediate)
 
-- [ ] Memoize all remaining dashboard widgets/charts (React.memo).
-- [ ] Audit remaining useData() usages and migrate to slice hooks if possible.
-- [ ] Update AGENTS.md with additional memoization entry.
-- [ ] Record verification status.
+- [x] Added provider hook re-export files for trades/filters/derived/actions.
+- [ ] Migrate imports to new provider hooks as needed.
+- [ ] Verify dashboard behavior after import updates.

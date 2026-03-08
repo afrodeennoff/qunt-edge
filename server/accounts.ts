@@ -15,10 +15,16 @@ interface FetchTradesResult {
   flattenedTrades: Trade[];
 }
 
-export async function fetchGroupedTradesAction(userId: string): Promise<FetchTradesResult> {
+export async function fetchGroupedTradesAction(_userId?: string): Promise<FetchTradesResult> {
+  // Always use authenticated userId - ignore caller-provided userId for security
+  const authenticatedUserId = await getDatabaseUserId();
+  if (!authenticatedUserId) {
+    throw new Error('Unauthorized: Must be authenticated');
+  }
+  
   const trades = await prisma.trade.findMany({
     where: {
-      userId: userId
+      userId: authenticatedUserId
     },
     orderBy: [
       { accountNumber: 'asc' },
