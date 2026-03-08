@@ -124,6 +124,17 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Implemented environment-driven AI client selection for GLM integration.
 
 ## 🎨 UI/UX & Design System
+
+
+### 2026-03-08: Performance Rescue (Memoized Stats + Lazy Widgets)
+- **What changed:** Memoized statistics widgets and switched widget registry to lazy-load dashboard widgets via `next/dynamic`.
+- **What I want:** Reduce dashboard re-render cost and initial JS load by only loading active widgets and preventing repeated stat widget renders.
+- **What I don't want:** All widgets re-rendering on filter changes or every widget JS bundle loading upfront.
+- **How we fixed that:**
+  - Wrapped all statistics widgets with `React.memo`.
+  - Replaced static widget imports in `widget-registry.tsx` with `dynamic` imports (named exports handled via `.then(m => ({ default: m.X }))`).
+- **Key Files:** `app/[locale]/dashboard/components/statistics/*.tsx`, `app/[locale]/dashboard/config/widget-registry.tsx`.
+- **Verification:** Not run in this environment; requires manual dashboard load + widget edit to confirm dynamic widgets render correctly.
 - **2026-02-14: Dashboard Navigation Recovery.**
   - Restored legacy `Navbar` in `app/[locale]/dashboard/layout.tsx`.
   - **Insight:** The modern sidebar refactor accidentally hid `Edit Layout` and `Lock Grid` controls; reverting to the legacy navbar ensures these tools remain accessible for layout management.

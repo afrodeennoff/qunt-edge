@@ -1,6 +1,6 @@
 # Performance Fix Plan (Immediate)
 
-- [x] Reduce widget animation cost in widget-canvas.
-- [ ] Add React.memo to top 10 heavy chart widgets.
-- [ ] Verify widget rendering after memoization.
-- [ ] Update AGENTS.md with performance fix entry.
+- [x] Memoize statistics widgets (React.memo).
+- [x] Lazy-load widget registry components (next/dynamic).
+- [x] Update AGENTS.md with performance fix entry.
+- [ ] Verify dashboard widget rendering after changes.
