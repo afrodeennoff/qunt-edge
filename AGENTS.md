@@ -126,6 +126,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Provider Hook Migration (Import Cleanup)
+- **What changed:** Migrated dashboard hook imports to dedicated provider files and aligned provider files to re-export existing slice hooks.
+- **What I want:** Clearer separation of trades/filters/derived/actions imports without changing runtime behavior.
+- **What I don't want:** Broad refactors that risk behavior changes during performance work.
+- **How we fixed that:** Rewrote provider files to re-export `useDashboard*` hooks and updated imports across app/components/context to consume the new provider modules.
+- **Key Files:** `context/providers/*.tsx`, various dashboard components importing slice hooks.
+- **Verification:** Not run in this environment; requires TypeScript + dashboard smoke check.
+
+
 ### 2026-03-08: Data Provider File Split (Hook Re-exports)
 - **What changed:** Added focused provider hook files for trades, filters, derived stats, and actions.
 - **What I want:** Clearer module boundaries and easier incremental migration away from the monolithic data-provider file.
@@ -173,6 +182,29 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Full landing page redesign using `shadcn` components for better pricing clarity and conversion hierarchy.
 
 ## 🚀 Recent Feature Updates
+
+### 2026-03-08: App Lag Audit (Runtime Bottleneck Analysis)
+- **What changed:** Completed a full lag/slow-performance audit across dashboard runtime architecture, provider flows, render hot paths, and current quality/perf gates.
+- **What I want:** Identify real runtime bottlenecks (re-render churn, duplicate fetch work, oversized client surfaces) instead of guessing from bundle size alone.
+- **What I don't want:** Misdiagnosing lag as a bundle-budget issue when route payloads are already within budget.
+- **How we fixed that:**
+  - Ran verification gates: `npm run -s typecheck`, `npm run -s check:route-budgets`, `npm run -s analyze:bundle`, `npm run -s lint`.
+  - Confirmed route payloads are within threshold while lint/runtime signals still indicate heavy UI complexity (`1513` warnings, many dashboard complexity/hook warnings).
+  - Identified duplicate/overlapping dashboard data flows:
+    - server fetch in `app/[locale]/dashboard/page.tsx`,
+    - client fetch in `context/data-provider.tsx` mount effect,
+    - additional trade fetch path in `context/trades-context.tsx` (including refresh path that calls trade API multiple times).
+  - Identified rerender hotspots:
+    - monolithic `context/data-provider.tsx` (`2070` lines),
+    - broad context subscriptions for narrow fields (for example `useDashboardTrades()` for `isMobile` in widget wrappers),
+    - low `React.memo` coverage in dashboard components.
+  - Identified heavy UI surfaces (large component files and high map/filter/sort density) and widget-canvas animation/grid overhead.
+- **Key Files:** `context/data-provider.tsx`, `context/trades-context.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, `app/[locale]/dashboard/components/tables/trade-table-review.tsx`, `app/[locale]/dashboard/components/accounts/accounts-overview.tsx`, `app/[locale]/dashboard/page.tsx`, `docs/audits/artifacts/bundle-summary.json`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> exits `0`.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact updated at `docs/audits/artifacts/bundle-summary.json`.
+  - `npm run -s lint` -> exits `0` with `1513` warnings (`0` errors).
 
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.

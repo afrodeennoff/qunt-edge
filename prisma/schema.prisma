@@ -291,6 +291,7 @@ model Account {
   @@index([nextPaymentDate])
   @@index([userId, isPerformance, createdAt])
   @@index([userId, number]) // Performance scan index
+  @@index([userId, groupId])
   @@schema("public")
 }
 
@@ -337,6 +338,7 @@ model Trade {
   @@index([userId, closeDate])
   @@index([userId, accountNumber, instrument])
   @@index([userId, accountNumber, entryDate, pnl])
+  @@index([userId, instrument])
   @@schema("public")
 }
 
