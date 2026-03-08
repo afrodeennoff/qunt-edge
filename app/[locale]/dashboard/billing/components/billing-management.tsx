@@ -67,7 +67,7 @@ export default function BillingManagement() {
       } else {
         throw new Error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error("Error", {
         description: `Failed to ${action} subscription. Please try again.`,
       })

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, useCallback, useMemo } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { ChevronDown, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -28,18 +28,20 @@ export default function EnhancedInput({
   const [value, setValue] = useState(initialValue)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const initialValidation = useMemo(() => {
+  const [isValid, setIsValid] = useState<boolean | null>(() => {
     if (!initialValue || !validate) {
-      return { valid: null as boolean | null, message: "" }
+      return null
     }
-    const result = validate(initialValue)
-    return { valid: result.valid, message: result.message || "" }
-  }, [initialValue, validate])
-  const [isValid, setIsValid] = useState<boolean | null>(initialValidation.valid)
-  const [validationMessage, setValidationMessage] = useState<string>(initialValidation.message)
+    return validate(initialValue).valid
+  })
+  const [validationMessage, setValidationMessage] = useState<string>(() => {
+    if (!initialValue || !validate) {
+      return ""
+    }
+    return validate(initialValue).message || ""
+  })
   const [confirmed, setConfirmed] = useState(false)
   const [skipNextBlur, setSkipNextBlur] = useState(false)
-  const [hasInteracted, setHasInteracted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLUListElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -104,12 +106,10 @@ export default function EnhancedInput({
     setSelectedIndex(-1)
     if (onChange) onChange(newValue)
     setIsValid(null)
-    setHasInteracted(true)
   }
 
   const handleInputFocus = () => {
     setShowSuggestions(true)
-    setHasInteracted(true)
   }
 
   const handleInputBlur = () => {
@@ -132,9 +132,6 @@ export default function EnhancedInput({
   }
 
   const confirmSelection = (selectedValue: string) => {
-    // Mark as interacted
-    setHasInteracted(true)
-
     // Set flag to skip the next blur validation
     setSkipNextBlur(true)
 
@@ -170,8 +167,6 @@ export default function EnhancedInput({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    setHasInteracted(true)
-
     if (e.key === "ArrowDown") {
       e.preventDefault()
       setSelectedIndex((prev) => (prev < filteredSuggestions.length - 1 ? prev + 1 : prev))
@@ -203,14 +198,10 @@ export default function EnhancedInput({
     setIsValid(null)
     setSelectedIndex(-1)
     setShowSuggestions(true)
-    setHasInteracted(true)
     inputRef.current?.focus()
   }
 
-  const filteredSuggestions = useMemo(
-    () => suggestions.filter((suggestion) => suggestion.toLowerCase().includes(value.toLowerCase())),
-    [value, suggestions]
-  )
+  const filteredSuggestions = suggestions.filter((suggestion) => suggestion.toLowerCase().includes(value.toLowerCase()))
 
   return (
     <div ref={containerRef} className={cn("relative w-full max-w-xs", className)}>
