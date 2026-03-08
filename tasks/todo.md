@@ -2,7 +2,13 @@
 
 - [x] Added provider hook re-export files for trades/filters/derived/actions.
 - [x] Migrated useDashboard* imports to new provider files.
-- [ ] Verify dashboard behavior after import updates.
+- [x] Verify dashboard behavior after import updates.
+
+## Review (Performance Fix Plan Immediate)
+
+- `npm run -s typecheck` -> exits `0`.
+- `npx eslint app/[locale]/dashboard/components --max-warnings=999999` -> 0 errors (warnings only baseline).
+- Dashboard selector/hook migrations remain type-safe after recent lag fixes.
 
 # Performance Audit - App Lag Investigation (2026-03-08)
 

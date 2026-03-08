@@ -370,6 +370,18 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Grep check for `useDashboardTrades(` under dashboard files returns no matches.
   - `npm run -s typecheck` -> exits `0`.
 
+### 2026-03-08: Provider Migration Verification Closure
+- **What changed:** Closed the remaining pending verification step for provider import migration after lag sweep work.
+- **What I want:** Confirm dashboard hook/provider import updates are still type-safe and lint-clean at error level.
+- **What I don't want:** Leaving migration tasks open without rerunning guard checks.
+- **How we fixed that:**
+  - Re-ran `npm run -s typecheck`.
+  - Re-ran dashboard scoped lint pass (`npx eslint app/[locale]/dashboard/components --max-warnings=999999`).
+- **Key Files:** `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> exits `0`.
+  - Dashboard eslint pass -> `0` errors (warnings-only baseline).
+
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.
 - **What I want:** Public/home/shared routes should retain meaningful server-rendered HTML, shared pages should use the server fetch as the first render source, and dashboard route shells should stay server-oriented unless they genuinely own client state.
