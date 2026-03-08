@@ -131,8 +131,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }, [userId, setLayouts, layouts, activeLayout, isMobile, isCustomizing, persistLayout])
 
     const addWidget = useCallback(async (type: WidgetType, size: WidgetSize = 'medium') => {
-        console.log('[DashboardContext] addWidget', { type, size, userId, hasLayouts: !!layouts })
-
         if (!layouts) {
             console.error('[DashboardContext] addWidget failed: missing layouts')
             return
@@ -167,7 +165,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         const updatedWidgets = [...currentItems, newWidget]
         const newLayouts = { ...layouts, [activeLayout]: updatedWidgets, updatedAt: new Date() }
 
-        console.log('[DashboardContext] Updating state for addWidget')
         setLayouts(newLayouts)
         toast.success(t('widgets.widgetAdded'), { description: t('widgets.widgetAddedDescription') })
 
@@ -175,8 +172,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }, [layouts, activeLayout, persistLayout, setLayouts, t, userId])
 
     const removeWidget = useCallback(async (i: string) => {
-        console.log('[DashboardContext] removeWidget', { widgetId: i, userId, hasLayouts: !!layouts })
-
         if (!layouts) {
             console.error('[DashboardContext] removeWidget failed: missing layouts')
             return
@@ -185,7 +180,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         const updatedWidgets = layouts[activeLayout].filter(widget => widget.i !== i)
         const newLayouts = { ...layouts, [activeLayout]: updatedWidgets, updatedAt: new Date() }
 
-        console.log('[DashboardContext] Updating state for removeWidget')
         setLayouts(newLayouts)
 
         void persistLayout(newLayouts)

@@ -144,7 +144,6 @@ export default async function Image({
             },
         })
     } catch (e: unknown) {
-        console.log(e instanceof Error ? e.message : "Unknown error")
         return new Response("Failed to generate the image", { status: 500 })
     }
 } 

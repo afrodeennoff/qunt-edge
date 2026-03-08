@@ -8,7 +8,6 @@ import { useI18n } from "@/locales/client"
 
 // Helper function to convert files to data URLs
 async function convertFilesToDataURLs(files: FileList) {
-  console.log('Converting files to data URLs:', Array.from(files).map(f => f.name))
   return Promise.all(
     Array.from(files).map(
       file =>
@@ -17,10 +16,8 @@ async function convertFilesToDataURLs(files: FileList) {
           mediaType: string;
           url: string;
         }>((resolve, reject) => {
-          console.log('Processing file:', file.name, file.type, file.size)
           const reader = new FileReader();
           reader.onload = () => {
-            console.log('File reader loaded for:', file.name)
             resolve({
               type: 'file',
               mediaType: file.type,
@@ -59,19 +56,15 @@ export function ChatInput({
   const t = useI18n();
 
   const handleFileUpload = () => {
-    console.log('File upload triggered')
     if (fileInputRef.current) {
       fileInputRef.current.accept = "image/*"
-      console.log('File input accept set to:', fileInputRef.current.accept)
       fileInputRef.current.click()
-      console.log('File input clicked')
     } else {
       console.error('File input ref is null')
     }
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File change event triggered', e.target.files)
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files)
       
@@ -87,10 +80,8 @@ export function ChatInput({
         file.name.toLowerCase().endsWith('.xlsx')
       )
       
-      console.log('Files selected:', supportedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })))
       try {
         const fileParts = await convertFilesToDataURLs(supportedFiles as any)
-        console.log('Converted file parts:', fileParts)
         onFilesChange?.(fileParts)
       } catch (error) {
         console.error('Error converting files:', error)
@@ -224,10 +215,8 @@ export function ChatInput({
     )
 
     if (supportedFiles.length > 0) {
-      console.log('Files dropped:', supportedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })))
       try {
         const fileParts = await convertFilesToDataURLs(supportedFiles as any)
-        console.log('Converted dropped files:', fileParts)
         onFilesChange?.([...files, ...fileParts])
       } catch (error) {
         console.error('Error converting dropped files:', error)

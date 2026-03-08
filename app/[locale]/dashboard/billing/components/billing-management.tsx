@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, D
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { updateSubscription, collectSubscriptionFeedback, type SubscriptionWithPrice } from "../../../../../server/billing"
+import { SubscriptionStatus } from "@/prisma/generated/prisma"
 import { toast } from "sonner"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import PricingPlans from "@/components/pricing-plans"
@@ -144,15 +145,15 @@ export default function BillingManagement() {
                     {subscription?.status ? (() => {
                       const status = subscription.status as SubscriptionStatus
                       switch (status) {
-                        case 'ACTIVE':
+                        case SubscriptionStatus.ACTIVE:
                           return t('billing.status.active')
-                        case 'CANCELLED':
+                        case SubscriptionStatus.CANCELLED:
                           return t('billing.status.canceled')
-                        case 'PENDING':
+                        case SubscriptionStatus.PENDING:
                           return t('billing.status.incomplete')
-                        case 'PAST_DUE':
+                        case SubscriptionStatus.PAST_DUE:
                           return t('billing.status.past_due')
-                        case 'TRIAL_EXPIRED':
+                        case SubscriptionStatus.TRIAL_EXPIRED:
                           return t('billing.status.incomplete_expired')
                         default:
                           return t('billing.notApplicable')

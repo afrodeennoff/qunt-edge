@@ -318,14 +318,6 @@ export function EquityChartMessage({
   timezone,
   totalTrades,
 }: EquityChartMessageProps) {
-  console.log(`[EquityChartMessage] Rendering chart with:`, {
-    chartData,
-    accountNumbers,
-    showIndividual,
-    dateRange,
-    timezone,
-    totalTrades,
-  });
   const t = useI18n();
 
   const accountColorMap = React.useMemo(

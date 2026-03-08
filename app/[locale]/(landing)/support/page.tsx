@@ -108,9 +108,6 @@ const ChatBotDemo = () => {
       transport: new DefaultChatTransport({
         api: '/api/ai/support',
       }) ,
-      onFinish: async ({ message }) => {
-        console.log(JSON.stringify(message, null, 2));
-      },
       onError: (error) => {
         console.error('Chat error:', error);
         // Add error message to chat
