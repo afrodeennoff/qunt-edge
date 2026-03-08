@@ -1899,6 +1899,15 @@ export const DataProvider: React.FC<{
     ]
   );
 
+  const uiStateValue = useMemo<DashboardUiState>(
+    () => ({
+      isLoading,
+      isMobile,
+      isSharedView,
+    }),
+    [isLoading, isMobile, isSharedView]
+  );
+
   const filtersValue = useMemo<DashboardFiltersState>(
     () => ({
       instruments,
@@ -2014,17 +2023,23 @@ export const DataProvider: React.FC<{
   );
 
   return (
-    <DashboardDataStateContext.Provider value={dataStateValue}>
-      <DashboardFiltersContext.Provider value={filtersValue}>
-        <DashboardDerivedContext.Provider value={derivedValue}>
-          <DashboardActionsContext.Provider value={actionsValue}>
-            <DataContext.Provider value={contextValue}>
-              {children}
-            </DataContext.Provider>
-          </DashboardActionsContext.Provider>
-        </DashboardDerivedContext.Provider>
-      </DashboardFiltersContext.Provider>
-    </DashboardDataStateContext.Provider>
+    <DashboardUiStateContext.Provider value={uiStateValue}>
+      <DashboardTradesListContext.Provider value={trades}>
+        <DashboardAccountsListContext.Provider value={accounts}>
+          <DashboardDataStateContext.Provider value={dataStateValue}>
+            <DashboardFiltersContext.Provider value={filtersValue}>
+              <DashboardDerivedContext.Provider value={derivedValue}>
+                <DashboardActionsContext.Provider value={actionsValue}>
+                  <DataContext.Provider value={contextValue}>
+                    {children}
+                  </DataContext.Provider>
+                </DashboardActionsContext.Provider>
+              </DashboardDerivedContext.Provider>
+            </DashboardFiltersContext.Provider>
+          </DashboardDataStateContext.Provider>
+        </DashboardAccountsListContext.Provider>
+      </DashboardTradesListContext.Provider>
+    </DashboardUiStateContext.Provider>
   );
 };
 
@@ -2045,7 +2060,7 @@ export const useDashboardTrades = () => {
 };
 
 export const useDashboardIsMobile = () => {
-  const context = useContext(DashboardDataStateContext);
+  const context = useContext(DashboardUiStateContext);
   if (!context) {
     throw new Error("useDashboardIsMobile must be used within a DataProvider");
   }
@@ -2053,7 +2068,7 @@ export const useDashboardIsMobile = () => {
 };
 
 export const useDashboardIsLoading = () => {
-  const context = useContext(DashboardDataStateContext);
+  const context = useContext(DashboardUiStateContext);
   if (!context) {
     throw new Error("useDashboardIsLoading must be used within a DataProvider");
   }
@@ -2061,11 +2076,27 @@ export const useDashboardIsLoading = () => {
 };
 
 export const useDashboardIsSharedView = () => {
-  const context = useContext(DashboardDataStateContext);
+  const context = useContext(DashboardUiStateContext);
   if (!context) {
     throw new Error("useDashboardIsSharedView must be used within a DataProvider");
   }
   return context.isSharedView;
+};
+
+export const useDashboardTradeItems = () => {
+  const context = useContext(DashboardTradesListContext);
+  if (!context) {
+    throw new Error("useDashboardTradeItems must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardAccountsList = () => {
+  const context = useContext(DashboardAccountsListContext);
+  if (!context) {
+    throw new Error("useDashboardAccountsList must be used within a DataProvider");
+  }
+  return context;
 };
 
 export const useDashboardFilters = () => {

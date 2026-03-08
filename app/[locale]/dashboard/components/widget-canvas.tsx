@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Minus, Maximize2, GripVertical } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { useDashboardActions, useDashboardFilters, useDashboardIsMobile, useDashboardStats, useDashboardTrades } from '@/context/data-provider'
+import { useDashboardActions, useDashboardFilters, useDashboardIsMobile, useDashboardStats, useDashboardTradeItems } from '@/context/data-provider'
 import { useI18n } from "@/locales/client"
 import { WIDGET_REGISTRY, getWidgetComponent } from '../config/widget-registry'
 import { useAutoScroll } from '../../../../hooks/use-auto-scroll'
@@ -331,7 +331,7 @@ export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
   const user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useDashboardActions()
-  const { trades } = useDashboardTrades()
+  const trades = useDashboardTradeItems()
   const { instruments, accountNumbers, dateRange } = useDashboardFilters()
   const searchParams = useSearchParams()
   const {

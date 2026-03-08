@@ -149,24 +149,32 @@ model ReferralRedemption {
 }
 
 model Subscription {
-  id                String  @id @unique @default(uuid())
-  email             String  @unique
-  plan              String
-  status            String  @default("ACTIVE")
-  cancelAtPeriodEnd Boolean @default(false)
-  interval          String?
+   id                String  @id @unique @default(uuid())
+   email             String  @unique
+   plan              String
+   status            SubscriptionStatus @default(ACTIVE)
+   cancelAtPeriodEnd Boolean @default(false)
+   interval          String?
 
-  userId      String    @unique
-  endDate     DateTime?
-  trialEndsAt DateTime?
+   userId      String    @unique
+   endDate     DateTime?
+   trialEndsAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
 
-  user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+   user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([email])
-  @@schema("public")
+   @@index([email])
+   @@schema("public")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  PENDING
+  TRIAL_EXPIRED
 }
 
 model DashboardLayout {
@@ -364,7 +372,7 @@ model Payout {
   accountNumber String
 
   amount Decimal
-  status String  @default("PENDING")
+  status PayoutStatus  @default(PENDING)
 
   date      DateTime
   createdAt DateTime @default(now())
@@ -375,6 +383,13 @@ model Payout {
   @@index([accountId])
   @@index([status])
   @@schema("public")
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  REFUSED
+  CANCELLED
 }
 
 model Order {
@@ -1225,6 +1240,7 @@ model AiRequestLog {
   @@index([createdAt])
   @@index([feature, createdAt])
   @@index([userId, createdAt])
+  @@index([success])
   @@schema("public")
 }
 
