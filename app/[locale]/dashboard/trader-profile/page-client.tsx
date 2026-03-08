@@ -21,7 +21,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-import { useDashboardStats, useDashboardTrades } from "@/context/data-provider"
+import {
+  useDashboardAccountsList,
+  useDashboardIsLoading,
+  useDashboardStats,
+} from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { CalendarIcon, ChevronDown, CircleDot, Zap } from "lucide-react"
 import { endOfDay, format, startOfDay, subDays, subMonths, subYears } from "date-fns"
@@ -136,7 +140,8 @@ function isDateWithinRange(value: Date, range?: DateRange) {
 
 export default function TraderProfilePage() {
   const { formattedTrades } = useDashboardStats()
-  const { isLoading, accounts } = useDashboardTrades()
+  const isLoading = useDashboardIsLoading()
+  const accounts = useDashboardAccountsList()
   const user = useUserStore((state) => state.user)
   const supabaseUser = useUserStore((state) => state.supabaseUser)
   const [benchmark, setBenchmark] = useState<BenchmarkMetrics | null>(null)

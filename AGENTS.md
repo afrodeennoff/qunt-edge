@@ -135,6 +135,19 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 - **Verification:** `npm run -s typecheck`, `npm run -s lint -- --max-warnings=999999`, `npm run -s build`.
 
 
+### 2026-03-08: Runtime Stabilization Sweep (Console Logs + Typecheck Recovery)
+- **What changed:** Removed runtime `console.log(...)` noise across app/context/hooks/lib runtime files and restored clean typecheck after interim schema/type drift.
+- **What I want:** Quiet production logs, preserved `warn/error` diagnostics, and a reliable green typecheck while performance/security fixes continue.
+- **What I don't want:** Debug logging in runtime paths, type regressions from partial enum/schema refactors, or false completion claims without verification.
+- **How we fixed that:**
+  - Removed `console.log(...)` from scoped runtime surfaces (`app/**`, `components/**`, `context/**`, targeted `hooks/**` and `lib/**`) while keeping `console.warn/error`.
+  - Fixed `billing-management` status handling by switching UI status guards to normalized string matching instead of Prisma enum import coupling.
+  - Fixed `suggestion-input` hook-order issue by stabilizing `validateInput` with `useCallback` and correcting memo placement.
+  - Reverted incomplete schema enum refactor path to maintain current codebase compatibility and regenerated Prisma client.
+- **Key Files:** `app/api/**`, `app/[locale]/dashboard/billing/components/billing-management.tsx`, `app/[locale]/dashboard/components/accounts/suggestion-input.tsx`, `hooks/use-tradovate-token-manager.ts`, `lib/widget-*.ts`, `lib/browser-sandbox.ts`, `prisma/schema.prisma`, `tasks/todo.md`.
+- **Verification:** `npm run -s typecheck` exits `0`; scoped grep confirms runtime `console.log(` removal in targeted paths.
+
+
 ### 2026-03-08: Team Analytics Typecheck Fix
 - **What changed:** Removed duplicated analytics variables and ensured averageRr/bestMember values are defined once during team analytics update.
 - **What I want:** Restore clean build/typecheck for team analytics route.
