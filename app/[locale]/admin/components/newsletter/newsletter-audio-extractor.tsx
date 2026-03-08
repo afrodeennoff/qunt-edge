@@ -21,8 +21,6 @@ export function AudioExtractor({ onAudioExtracted }: AudioExtractorProps) {
     setError(null)
     
     try {
-      console.log('Starting audio extraction for file:', file.name, file.type, file.size)
-      
       // Create input from the video file
       const input = new Input({
         source: new BlobSource(file),
@@ -30,31 +28,24 @@ export function AudioExtractor({ onAudioExtracted }: AudioExtractorProps) {
       })
 
       // Check if the file has audio tracks
-      console.log('Checking for audio tracks...')
       const audioTrack = await input.getPrimaryAudioTrack()
-      console.log('Audio track found:', audioTrack)
       
       if (!audioTrack) {
         throw new Error('No audio track found in the video file')
       }
 
       // Create output for WAV audio (more compatible than MP3)
-      console.log('Creating output format...')
       const output = new Output({
         format: new WavOutputFormat(),
         target: new BufferTarget(),
       })
 
       // Perform the conversion - Mediabunny should automatically handle audio extraction
-      console.log('Initializing conversion...')
       const conversion = await Conversion.init({ input, output })
-      console.log('Conversion initialized, executing...')
       await conversion.execute()
-      console.log('Conversion completed')
 
       // Get the resulting audio buffer
       const buffer = output.target.buffer
-      console.log('Buffer generated:', buffer ? buffer.byteLength : 'null')
       
       if (!buffer) {
         throw new Error('Failed to generate audio file - no buffer created')
@@ -68,7 +59,6 @@ export function AudioExtractor({ onAudioExtracted }: AudioExtractorProps) {
       
       if (onAudioExtracted) {
         onAudioExtracted(buffer, audioFileName)
-        console.log('Audio extraction completed successfully, passed to parent component')
       }
 
     } catch (error) {

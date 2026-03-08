@@ -43,7 +43,6 @@ export async function fetchTranscriptServer(videoId: string): Promise<string | n
 
   try {
     const transcript = await YoutubeTranscript.fetchTranscript(videoId)
-    console.log(transcript)
 
     if (!transcript || transcript.length === 0) {
       return null
@@ -226,12 +225,10 @@ export async function findVideoIdForPostDateAction(postDate: string): Promise<st
     for (const [, video] of videoMap.entries()) {
       const videoDate = new Date(video.publishedAt);
       if (isSameWeek(postDateObj, videoDate)) {
-        console.log(`Matched post date ${postDate} with video published on ${video.publishedAt} (${video.title})`);
         return video.videoId;
       }
     }
 
-    console.log(`No video found for post date ${postDate}`);
     return null;
   } catch (error) {
     console.error('Error finding video for post date:', error);
