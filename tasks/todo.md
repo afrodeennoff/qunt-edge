@@ -75,3 +75,30 @@
 - Typecheck: OK
 - Lint: OK
 - Build: FAILED
+
+# Full Lag Fix Sweep (2026-03-08)
+
+- [x] Remove remaining broad dashboard-context subscriptions (`useDashboardTrades`) from dashboard components.
+- [x] Ensure debug panel uses narrow selector hooks only.
+- [x] Confirm heavy dashboard surfaces are memoized (`AccountsOverview`, `TradeTableReview`).
+- [x] Run targeted lint on touched lag-path components.
+- [x] Run full typecheck to validate current workspace state.
+
+## Review (Full Lag Fix Sweep)
+
+- `useDashboardTrades()` usage in dashboard components is now eliminated (no matches under `app/[locale]/dashboard/components`).
+- `DataDebug` now consumes granular hooks (`useDashboardTradeItems`, `useDashboardAccountsList`, `useDashboardIsLoading`) and narrow user selectors.
+- Verified heavy surfaces are memoized:
+  - `app/[locale]/dashboard/components/accounts/accounts-overview.tsx` exports `memo(AccountsOverviewComponent)`.
+  - `app/[locale]/dashboard/components/tables/trade-table-review.tsx` exports `React.memo(TradeTableReviewComponent)`.
+- Verification:
+  - `npx eslint app/[locale]/dashboard/components/data-debug.tsx app/[locale]/dashboard/components/accounts/accounts-overview.tsx app/[locale]/dashboard/components/tables/trade-table-review.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> fails on pre-existing unrelated typing issues in modified backend files currently in workspace (`server/subscription*`, `server/shared.ts`, billing/admin route status typing drift).
+
+# Console Log Removal Sweep (2026-03-08)
+
+- [ ] Locate `console.log(...)` usage in scoped runtime paths only (`app/**`, `components/**`, `context/**`, `store/**`, `server/**`) while excluding tests/e2e and non-scoped files.
+- [ ] Remove `console.log(...)` lines while preserving behavior and leaving `console.warn/error` untouched.
+- [ ] Remove now-empty `if` branches when the only statement removed was `console.log(...)`.
+- [ ] Re-scan scoped paths to confirm zero remaining `console.log(...)`.
+- [ ] Add review notes with edited files and removal count.

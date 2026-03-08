@@ -1,6 +1,7 @@
 'use server'
 
 import { TickDetails } from '@/prisma/generated/prisma'
+import { Prisma } from '@/prisma/generated/prisma'
 import { normalizeTradesForClient, Trade } from '@/lib/data-types'
 import { revalidatePath, unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
@@ -58,8 +59,8 @@ export async function createShared(data: SharedParams): Promise<string> {
               from: data.dateRange.from.toISOString(),
               ...(data.dateRange.to && { to: data.dateRange.to.toISOString() })
             },
-            desktop: data.desktop || [],
-            mobile: data.mobile || [],
+            desktop: (data.desktop || []) as Prisma.InputJsonValue,
+            mobile: (data.mobile || []) as Prisma.InputJsonValue,
             expiresAt: data.expiresAt,
             slug,
           },

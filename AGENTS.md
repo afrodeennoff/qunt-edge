@@ -288,6 +288,25 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s typecheck` -> exits `0`.
   - `npm run -s build` -> fails on pre-existing Prisma schema issue (`@@schema` missing on enums in `prisma/schema.prisma`), unrelated to touched files.
 
+### 2026-03-08: Runtime Lag Sweep (Remaining Broad Subscriptions)
+- **What changed:** Completed a sweep to remove remaining broad dashboard-trades subscriptions from dashboard components and validated memoization status on heavy surfaces.
+- **What I want:** Avoid broad dashboard state subscriptions in UI surfaces that only need small slices, to reduce avoidable rerender fan-out under live updates.
+- **What I don't want:** Debug/UI support components subscribing to `useDashboardTrades()` and rerendering for unrelated account/trade/state changes.
+- **How we fixed that:**
+  - Eliminated remaining `useDashboardTrades()` usage from dashboard components.
+  - `app/[locale]/dashboard/components/data-debug.tsx` now consumes granular hooks:
+    - `useDashboardTradeItems()`
+    - `useDashboardAccountsList()`
+    - `useDashboardIsLoading()`
+  - Confirmed heavy dashboard surfaces remain memoized:
+    - `AccountsOverview` exported via `memo(AccountsOverviewComponent)`
+    - `TradeTableReview` exported via `React.memo(TradeTableReviewComponent)`
+- **Key Files:** `app/[locale]/dashboard/components/data-debug.tsx`, `app/[locale]/dashboard/components/accounts/accounts-overview.tsx`, `app/[locale]/dashboard/components/tables/trade-table-review.tsx`, `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - `rg -n "useDashboardTrades\(" app/[locale]/dashboard/components --glob "*.tsx"` -> no matches.
+  - `npx eslint app/[locale]/dashboard/components/data-debug.tsx app/[locale]/dashboard/components/accounts/accounts-overview.tsx app/[locale]/dashboard/components/tables/trade-table-review.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> fails on pre-existing unrelated backend typing drift in currently modified workspace files (`server/subscription-manager.ts`, `server/subscription.ts`, `server/shared.ts`, billing/admin subscription status typing).
+
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.
 - **What I want:** Public/home/shared routes should retain meaningful server-rendered HTML, shared pages should use the server fetch as the first render source, and dashboard route shells should stay server-oriented unless they genuinely own client state.

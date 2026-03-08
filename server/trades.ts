@@ -93,6 +93,14 @@ type SerializableTrade = Partial<PrismaTrade> & {
 }
 
 function serializeTrade(trade: SerializableTrade): SerializedTrade {
+  const entryDate = trade.entryDate
+    ? (trade.entryDate instanceof Date ? trade.entryDate.toISOString() : new Date(trade.entryDate).toISOString())
+    : new Date(0).toISOString()
+
+  const closeDate = trade.closeDate
+    ? (trade.closeDate instanceof Date ? trade.closeDate.toISOString() : new Date(trade.closeDate).toISOString())
+    : null
+
   return {
     ...trade,
     entryPrice: trade.entryPrice?.toString() || "0",
@@ -101,8 +109,8 @@ function serializeTrade(trade: SerializableTrade): SerializedTrade {
     commission: trade.commission?.toString() || "0",
     quantity: trade.quantity?.toString() || "0",
     timeInPosition: trade.timeInPosition?.toString() || "0",
-    entryDate: trade.entryDate instanceof Date ? trade.entryDate.toISOString() : new Date(trade.entryDate).toISOString(),
-    closeDate: trade.closeDate ? (trade.closeDate instanceof Date ? trade.closeDate.toISOString() : new Date(trade.closeDate).toISOString()) : null,
+    entryDate,
+    closeDate,
   } as SerializedTrade
 }
 

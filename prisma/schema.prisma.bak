@@ -148,17 +148,6 @@ model ReferralRedemption {
   @@schema("public")
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  PAST_DUE
-  PENDING
-  TRIAL_EXPIRED
-
-  @@schema("public")
-}
-
-
 model Subscription {
    id                String  @id @unique @default(uuid())
    email             String  @unique
