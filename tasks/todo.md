@@ -142,3 +142,15 @@
 - Verification:
   - `npx eslint app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/dashboard/trader-profile/page-client.tsx` -> 0 errors (warnings only).
   - `npm run -s typecheck` -> exits `0`.
+
+# Root-Cause Closure Verification (2026-03-08)
+
+- [x] Re-verify no broad dashboard trade-context hook usage remains in dashboard route files.
+- [x] Re-verify dashboard route shells stay server-wrapper + client-island where applicable.
+- [x] Re-run typecheck to confirm workspace compiles after lag-closure changes.
+
+## Review (Root-Cause Closure Verification)
+
+- `useDashboardTrades(` search in `app/[locale]/dashboard/**/*.tsx` returns zero matches.
+- `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, and `app/[locale]/dashboard/trader-profile/page.tsx` are server wrappers delegating client work to dedicated `page-client.tsx` files.
+- `npm run -s typecheck` exits `0`.

@@ -354,6 +354,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npx eslint app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/dashboard/trader-profile/page-client.tsx` -> 0 errors (warnings only).
   - `npm run -s typecheck` -> exits `0`.
 
+### 2026-03-08: Lag Root-Cause Closure Verification
+- **What changed:** Performed a final closure pass to verify the lag root-cause fixes are fully applied across dashboard route files.
+- **What I want:** Ensure there are no remaining broad dashboard trade-context subscriptions and route shells remain server-oriented with client islands.
+- **What I don't want:** Hidden regressions where broad hooks (`useDashboardTrades`) reappear or route entries regress into unnecessary client-heavy shells.
+- **How we fixed that:**
+  - Re-verified `useDashboardTrades(` has zero callsites under `app/[locale]/dashboard/**/*.tsx`.
+  - Re-confirmed server-wrapper route entries:
+    - `app/[locale]/dashboard/page.tsx`
+    - `app/[locale]/dashboard/behavior/page.tsx`
+    - `app/[locale]/dashboard/trader-profile/page.tsx`
+  - Re-ran typecheck as final guard.
+- **Key Files:** `app/[locale]/dashboard/page.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, `app/[locale]/dashboard/trader-profile/page.tsx`, `app/[locale]/dashboard/trader-profile/page-client.tsx`, `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - Grep check for `useDashboardTrades(` under dashboard files returns no matches.
+  - `npm run -s typecheck` -> exits `0`.
+
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.
 - **What I want:** Public/home/shared routes should retain meaningful server-rendered HTML, shared pages should use the server fetch as the first render source, and dashboard route shells should stay server-oriented unless they genuinely own client state.
