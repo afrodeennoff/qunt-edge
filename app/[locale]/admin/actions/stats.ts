@@ -28,7 +28,7 @@ function getSupabaseAdminClient() {
 export async function getUserStats() {
   await assertAdminAccess()
   const supabase = getSupabaseAdminClient()
-  let allUsers: any[] = []
+  let allUsers: User[] = []
   let page = 1
   const perPage = 1000
   let hasMore = true
@@ -72,7 +72,7 @@ export async function getUserStats() {
     dailyData,
     allUsers: allUsers.map(user => ({
       id: user.id,
-      email: user.email,
+      email: user.email || '',
       created_at: user.created_at
     }))
   }
@@ -127,7 +127,7 @@ export async function getFreeUsers() {
     const userTrades = trades.filter((trade: PrismaTrade) => trade.userId === userId)
     return {
       email: user?.email || '',
-      trades: normalizeTradesForClient(userTrades as any)
+      trades: normalizeTradesForClient(userTrades)
     }
   }).filter(user => user.email !== '')
 
