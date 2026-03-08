@@ -12,7 +12,7 @@ import {
   renameAccountAction,
   renameInstrumentAction
 } from "@/server/accounts"
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import { toast } from 'sonner'
 import { User } from '@supabase/supabase-js'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -40,7 +40,7 @@ export function DataManagementCard() {
   const trades = useTradesStore((state) => state.trades)
   const setTradesStore = useTradesStore((state) => state.setTrades)
 
-  const { refreshTradesOnly } = useData()
+  const { refreshTradesOnly } = useDashboardActions()
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [renameLoading, setRenameLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)

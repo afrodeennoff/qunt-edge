@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { getRithmicData, updateLastSyncTime } from "@/lib/rithmic-storage";
-import { useData } from "@/context/data-provider";
+import { useDashboardActions } from "@/context/data-provider";
 import { toast } from "sonner";
 import { useI18n } from "@/locales/client";
 import { useRithmicSyncStore, RithmicMessage } from "@/store/rithmic-sync-store";
@@ -87,7 +87,7 @@ export function RithmicSyncContextProvider({
     useState<NodeJS.Timeout | null>(null);
 
   const t = useI18n();
-  const { refreshTradesOnly } = useData();
+  const { refreshTradesOnly } = useDashboardActions();
 
   const isLoading = useUserStore((state) => state.isLoading);
   const trades = useTradesStore((state) => state.trades);

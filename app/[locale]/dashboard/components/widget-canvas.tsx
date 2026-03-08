@@ -308,12 +308,30 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
 })
 WidgetWrapper.displayName = "WidgetWrapper"
 
+function DebugDataBadge({
+  tradesCount,
+  isFiltered,
+}: {
+  tradesCount: number;
+  isFiltered: boolean;
+}) {
+  const { formattedTrades } = useDashboardStats();
+
+  return (
+    <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
+      T:{tradesCount} F:{formattedTrades.length}
+      {isFiltered && (
+        <span className="ml-2 text-foreground/40">filtered</span>
+      )}
+    </div>
+  );
+}
+
 export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
   const user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useDashboardActions()
   const { trades } = useDashboardTrades()
-  const { formattedTrades } = useDashboardStats()
   const { instruments, accountNumbers, dateRange } = useDashboardFilters()
   const searchParams = useSearchParams()
   const {
@@ -323,6 +341,10 @@ export default function WidgetCanvas() {
   const t = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const showDataDebug = searchParams.get("debugData") === "1"
+  const isFiltered =
+    instruments.length > 0 ||
+    accountNumbers.length > 0 ||
+    Boolean(dateRange?.from || dateRange?.to)
   const pendingSaveRef = useRef<DashboardLayoutWithWidgets | null>(null)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -342,6 +364,8 @@ export default function WidgetCanvas() {
   }, [layouts, activeWidgets])
 
   const currentLayout = activeWidgets
+  const shouldAnimateWidgets =
+    !shouldReduceMotion && !isCustomizing && currentLayout.length <= 12
 
   // Define handleOutsideClick with stable reference
   const handleOutsideClick = useCallback((e: MouseEvent) => {
@@ -605,20 +629,20 @@ export default function WidgetCanvas() {
                 >
                   <motion.div
                     className="h-full min-h-0"
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-                    animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    initial={shouldAnimateWidgets ? { opacity: 0, y: 18, scale: 0.985 } : false}
+                    animate={shouldAnimateWidgets ? { opacity: 1, y: 0, scale: 1 } : undefined}
                     transition={
-                      shouldReduceMotion
-                        ? undefined
-                        : {
+                      shouldAnimateWidgets
+                        ? {
                           delay: Math.min(0.035 * index, 0.42),
                           type: "spring",
                           stiffness: 165,
                           damping: 21,
                           mass: 0.88,
                         }
+                        : undefined
                     }
-                    whileHover={shouldReduceMotion || isCustomizing ? undefined : { scale: 1.01 }}
+                    whileHover={shouldAnimateWidgets ? { scale: 1.01 } : undefined}
                   >
                     <WidgetWrapper
                       onRemove={() => removeWidget(widget.i)}
@@ -634,12 +658,10 @@ export default function WidgetCanvas() {
                           : "bg-black/95 hover:border-white/20"
                       )}>
                         {showDataDebug && !isCustomizing && (
-                          <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
-                            T:{trades.length} F:{formattedTrades.length}
-                            {(instruments.length > 0 || accountNumbers.length > 0 || Boolean(dateRange?.from || dateRange?.to)) && (
-                              <span className="ml-2 text-foreground/40">filtered</span>
-                            )}
-                          </div>
+                          <DebugDataBadge
+                            tradesCount={trades.length}
+                            isFiltered={isFiltered}
+                          />
                         )}
                         <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
                         <div className="relative h-full w-full">

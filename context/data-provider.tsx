@@ -931,8 +931,21 @@ export const DataProvider: React.FC<{
     return () => window.clearTimeout(timer);
   }, [trades, supabaseUser?.id]);
 
-  const formattedTrades = useMemo(() => {
+  const sortedTrades = useMemo(() => {
     if (!Array.isArray(trades) || trades.length === 0) {
+      return [];
+    }
+
+    return trades
+      .filter((trade) => isValid(new Date(trade.entryDate)))
+      .sort(
+        (first, second) =>
+          new Date(first.entryDate).getTime() - new Date(second.entryDate).getTime()
+      );
+  }, [trades]);
+
+  const formattedTrades = useMemo(() => {
+    if (!Array.isArray(sortedTrades) || sortedTrades.length === 0) {
       return [];
     }
 
@@ -979,7 +992,35 @@ export const DataProvider: React.FC<{
 
     const timezoneName = timezone || "UTC";
 
-    return trades
+    const hasFilters =
+      Boolean(hiddenAccountNumbers) ||
+      instrumentFilterSet !== null ||
+      accountFilterSet !== null ||
+      fromTime !== null ||
+      toTime !== null ||
+      singleDayTimestamp !== null ||
+      pnlRange.min !== undefined ||
+      pnlRange.max !== undefined ||
+      tickFilterValue !== null ||
+      Boolean(timeRange.range) ||
+      weekdayFilter.days.length > 0 ||
+      hourFilter.hour !== null ||
+      tagFilterSet !== null ||
+      accountResetTimes.size > 0;
+
+    if (!hasFilters) {
+      return sortedTrades;
+    }
+
+    const requiresDate =
+      fromTime !== null ||
+      toTime !== null ||
+      singleDayTimestamp !== null ||
+      weekdayFilter.days.length > 0 ||
+      hourFilter.hour !== null ||
+      accountResetTimes.size > 0;
+
+    return sortedTrades
       .filter((trade) => {
         if (hiddenAccountNumbers?.has(trade.accountNumber)) return false;
 
@@ -988,27 +1029,33 @@ export const DataProvider: React.FC<{
         if (!isValid(rawDate)) return false;
 
         let entryDate = rawDate;
-        try {
-          entryDate = toZonedTime(rawDate, timezoneName);
-        } catch {
-          entryDate = rawDate;
+        if (requiresDate) {
+          try {
+            entryDate = toZonedTime(rawDate, timezoneName);
+          } catch {
+            entryDate = rawDate;
+          }
+
+          if (!isValid(entryDate)) return false;
         }
 
-        if (!isValid(entryDate)) return false;
-
-        const resetTime = accountResetTimes.get(trade.accountNumber);
-        if (resetTime !== undefined && startOfDay(entryDate).getTime() < resetTime) {
+        if (requiresDate) {
+          const resetTime = accountResetTimes.get(trade.accountNumber);
+          if (resetTime !== undefined && startOfDay(entryDate).getTime() < resetTime) {
             return false;
+          }
         }
 
         if (instrumentFilterSet && !instrumentFilterSet.has(trade.instrument)) return false;
         if (accountFilterSet && !accountFilterSet.has(trade.accountNumber)) return false;
 
-        const entryTime = entryDate.getTime();
-        if (fromTime !== null && entryTime < fromTime) return false;
-        if (toTime !== null && entryTime > toTime) return false;
-        if (singleDayTimestamp !== null && startOfDay(entryDate).getTime() !== singleDayTimestamp) {
-          return false;
+        if (requiresDate) {
+          const entryTime = entryDate.getTime();
+          if (fromTime !== null && entryTime < fromTime) return false;
+          if (toTime !== null && entryTime > toTime) return false;
+          if (singleDayTimestamp !== null && startOfDay(entryDate).getTime() !== singleDayTimestamp) {
+            return false;
+          }
         }
 
         const tradePnl = Number(trade.pnl);
@@ -1034,12 +1081,14 @@ export const DataProvider: React.FC<{
           return false;
         }
 
-        if (weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entryDate.getDay())) {
-          return false;
-        }
+        if (requiresDate) {
+          if (weekdayFilter.days.length > 0 && !weekdayFilter.days.includes(entryDate.getDay())) {
+            return false;
+          }
 
-        if (hourFilter.hour !== null && entryDate.getHours() !== hourFilter.hour) {
-          return false;
+          if (hourFilter.hour !== null && entryDate.getHours() !== hourFilter.hour) {
+            return false;
+          }
         }
 
         if (tagFilterSet) {
@@ -1048,13 +1097,9 @@ export const DataProvider: React.FC<{
         }
 
         return true;
-      })
-      .sort(
-        (first, second) =>
-          new Date(first.entryDate).getTime() - new Date(second.entryDate).getTime()
-      );
+      });
   }, [
-    trades,
+    sortedTrades,
     groups,
     accounts,
     instruments,

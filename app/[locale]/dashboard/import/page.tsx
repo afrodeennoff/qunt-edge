@@ -8,7 +8,7 @@ import {
 } from "../components/import/tradovate/actions";
 import { useI18n } from "@/locales/client";
 import { useSyncContext } from "@/context/sync-context"
-import { useData } from "@/context/data-provider"
+import { useDashboardActions } from "@/context/data-provider"
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ export default function ImportCallbackPage() {
   const searchParams = useSearchParams();
   const tradovateStore = useTradovateSyncStore();
   const { tradovate } = useSyncContext();
-  const { refreshAllData } = useData();
+  const { refreshAllData } = useDashboardActions();
   const t = useI18n();
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(

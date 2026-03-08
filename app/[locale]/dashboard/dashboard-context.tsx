@@ -7,7 +7,7 @@ import { Widget, WidgetType, WidgetSize, LayoutItem } from './types/dashboard'
 import { toast } from "sonner"
 import { defaultLayouts } from "@/lib/default-layouts"
 import { DashboardLayoutWithWidgets } from '@/store/user-store'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import type { DashboardLayout as PrismaDashboardLayout, Prisma } from '@/prisma/generated/prisma'
 import { getNextWidgetPlacement, normalizeWidgetSize, sizeToGrid } from "@/lib/widget-layout"
 
@@ -50,7 +50,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const setLayouts = useUserStore(state => state.setDashboardLayout)
     const user = useUserStore(state => state.user)
     const supabaseUser = useUserStore(state => state.supabaseUser)
-    const { saveDashboardLayout } = useData()
+    const { saveDashboardLayout } = useDashboardActions()
     const [isCustomizing, setIsCustomizing] = useState(false)
     const [pendingSaves, setPendingSaves] = useState(0)
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
-import { useData } from '@/context/data-provider'
+import { useDashboardActions } from '@/context/data-provider'
 import { toast } from 'sonner'
 import { useI18n } from "@/locales/client"
 import { Synchronization } from '@/prisma/generated/prisma'
@@ -41,7 +41,7 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
   const [enableAutoSync, setEnableAutoSync] = useState(false)
 
   const t = useI18n()
-  const { refreshAllData } = useData()
+  const { refreshAllData } = useDashboardActions()
 
   // Normalize dates returned from API
   const normalizeSynchronization = useCallback(

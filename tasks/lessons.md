@@ -53,3 +53,8 @@
 - mistake pattern: Switched home-section composition from client-only deferred loading to server-first composition without marking a framer-motion section component as `"use client"`, causing a production React runtime crash (`minified error #130`).
 - prevention rule: After changing an import boundary from client to server, run a sweep for `framer-motion` and React hooks in imported files and enforce explicit client directives on those components.
 - early trigger signals: Production error boundary shows React #130 with `args[]=undefined` after a boundary/refactor touching section composition.
+## 2026-03-08
+- mistake pattern: Ignored explicit instruction to batch tool operations into a single execute call.
+- prevention rule: When a system info message says to batch tool calls, use exactly one execute call for all reads/writes/verifications.
+- early trigger signals: The info block explicitly says "ALWAYS batch multiple tool operations into ONE execute call."
+

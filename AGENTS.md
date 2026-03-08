@@ -2,7 +2,107 @@
 
 This file tracks significant architectural changes, engineering insights, and critical fixes to provide context for future AI agents working on this codebase.
 
-## � Entry Structure for Future Agents
+---
+
+# Developer Guide
+
+## Essential Commands
+
+### Development
+```bash
+npm run dev              # Start development server
+npm run build            # Production build  
+npm run start            # Start production server
+```
+
+### Quality Gates
+```bash
+npm run lint             # Run ESLint
+npm run typecheck        # Run TypeScript type checking
+npm run self-heal        # Auto-fix lint issues + validate
+```
+
+### Testing
+```bash
+npm run test             # Run all tests (vitest)
+npm run test:coverage    # Run tests with coverage
+npm run test:smoke       # Run HTTP smoke tests
+
+# Run a SINGLE test file:
+npx vitest run tests/logger.test.ts
+
+# Run a SINGLE test by name:
+npx vittest run -t "should redact secrets"
+```
+
+### Performance & Analysis
+```bash
+npm run check:route-budgets     # Check route bundle sizes
+npm run analyze:bundle          # Analyze bundle composition
+npm run check:color-contract   # Verify monochrome color usage
+npm run check:dead-code        # Check for dead code
+npm run perf:verify            # Full perf validation
+```
+
+### Database
+```bash
+npx prisma generate    # Generate Prisma client
+npx prisma db push     # Push schema to DB
+npx prisma migrate dev # Run migrations
+```
+
+## Code Style Guidelines
+
+### Imports
+- Use absolute imports with `@/` prefix
+- Group: external libs → internal libs → components → utils
+- Example:
+```typescript
+import { useState } from 'react'
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+```
+
+### TypeScript
+- Explicit types for parameters/returns
+- Use `unknown` instead of `any`
+- Example:
+```typescript
+interface FetchResult {
+  data: Data[];
+  error?: string;
+}
+export async function fetchData(id: string): Promise<FetchResult> { }
+```
+
+### React Components
+- Functional components with hooks
+- Use `React.forwardRef` for ref forwarding
+- Set `displayName` for named components
+- Use `cva` for variants
+
+### Server Actions
+- Add `'use server'` at top
+- Use `getDatabaseUserId()` for auth
+- Use `next/cache` tags for revalidation:
+```typescript
+import { updateTag } from 'next/cache'
+updateTag(`trades-${userId}`)
+```
+
+### CSS & Styling
+- Use `cn()` from lib/utils for class merging
+- Follow monochrome: `white/5`, `white/10`, `white/20`
+- No raw colors - use semantic tokens
+
+### Testing
+- Tests use Vitest with jsdom
+- Test files: `tests/*.test.ts`
+
+---
+
+## Entry Structure for Future Agents
 When documenting feature updates, **YOU MUST** follow this conversational structure to ensure context is preserved:
 
 - **What changed:** A clear, high-level summary of the update (e.g., "Added a new specific widget").

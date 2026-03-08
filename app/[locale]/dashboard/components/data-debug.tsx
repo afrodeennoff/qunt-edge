@@ -1,6 +1,6 @@
 "use client"
 
-import { useData } from "@/context/data-provider"
+import { useDashboardActions, useDashboardStats, useDashboardTrades } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -9,7 +9,9 @@ import { clearAllCache } from "@/lib/indexeddb/trades-cache"
 import { cn } from "@/lib/utils"
 
 export function DataDebug() {
-    const { trades, formattedTrades, refreshAllData, isLoading } = useData()
+    const { trades, isLoading, accounts } = useDashboardTrades()
+  const { formattedTrades } = useDashboardStats()
+  const { refreshAllData } = useDashboardActions()
     const { user, supabaseUser } = useUserStore(state => state)
     const [isOpen, setIsOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
@@ -64,7 +66,7 @@ export function DataDebug() {
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
                             <span className="text-white/40 uppercase font-black tracking-tighter">Accounts</span>
-                            <span className="text-white/90 font-mono">{useData().accounts.length}</span>
+                            <span className="text-white/90 font-mono">{accounts.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
                             <span className="text-white/40 uppercase font-black tracking-tighter">Environment</span>
