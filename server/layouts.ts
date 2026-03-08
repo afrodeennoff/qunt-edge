@@ -44,7 +44,7 @@ export async function loadDashboardLayoutAction(): Promise<Layouts | null> {
 
     if (!dashboard) return null
 
-    const parse = (json: any): Widget[] => {
+    const parse = (json: unknown): Widget[] => {
       if (Array.isArray(json)) return json as unknown as Widget[]
       return []
     }

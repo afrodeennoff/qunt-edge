@@ -81,7 +81,18 @@ export interface PaginatedTrades {
   }
 }
 
-function serializeTrade(trade: any): SerializedTrade {
+type SerializableTrade = Partial<PrismaTrade> & {
+  entryPrice?: { toString: () => string } | string | number
+  closePrice?: { toString: () => string } | string | number
+  pnl?: { toString: () => string } | string | number
+  commission?: { toString: () => string } | string | number
+  quantity?: { toString: () => string } | string | number
+  timeInPosition?: { toString: () => string } | string | number
+  entryDate?: Date | string
+  closeDate?: Date | string | null
+}
+
+function serializeTrade(trade: SerializableTrade): SerializedTrade {
   return {
     ...trade,
     entryPrice: trade.entryPrice?.toString() || "0",

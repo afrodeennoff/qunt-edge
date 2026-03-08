@@ -18,8 +18,8 @@ export interface SharedParams {
     from: Date
     to?: Date
   }
-  desktop?: any[]
-  mobile?: any[]
+  desktop?: unknown[]
+  mobile?: unknown[]
   expiresAt?: Date
   viewCount?: number
   createdAt?: Date
@@ -177,8 +177,8 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
             from: fromDate,
             ...(toDate && { to: toDate })
           },
-          desktop: shared.desktop as any[],
-          mobile: shared.mobile as any[],
+          desktop: shared.desktop as unknown[],
+          mobile: shared.mobile as unknown[],
           expiresAt: shared.expiresAt || undefined,
           tickDetails,
         },

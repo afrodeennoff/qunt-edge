@@ -144,22 +144,16 @@ export default function BillingManagement() {
                     {subscription?.status ? (() => {
                       const status = subscription.status as SubscriptionStatus
                       switch (status) {
-                        case 'active':
+                        case 'ACTIVE':
                           return t('billing.status.active')
-                        case 'canceled':
+                        case 'CANCELLED':
                           return t('billing.status.canceled')
-                        case 'incomplete':
-                          return t('billing.status.incomplete')
-                        case 'incomplete_expired':
-                          return t('billing.status.incomplete_expired')
-                        case 'past_due':
-                          return t('billing.status.past_due')
-                        case 'paused':
-                          return t('billing.status.paused')
                         case 'PENDING':
                           return t('billing.status.incomplete')
-                        case 'unpaid':
-                          return t('billing.status.unpaid')
+                        case 'PAST_DUE':
+                          return t('billing.status.past_due')
+                        case 'TRIAL_EXPIRED':
+                          return t('billing.status.incomplete_expired')
                         default:
                           return t('billing.notApplicable')
                       }

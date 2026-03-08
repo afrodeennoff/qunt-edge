@@ -38,17 +38,17 @@ export async function getWebsiteURL() {
  * When Supabase API returns HTML error pages instead of JSON, this provides
  * a more meaningful error message.
  */
-function handleAuthError(error: any): never {
+function handleAuthError(error: unknown): never {
   // Check if this is a JSON parsing error (indicates HTML response)
   if (
-    error?.message?.includes('Unexpected token') ||
-    error?.message?.includes('is not valid JSON') ||
-    error?.originalError?.message?.includes('Unexpected token') ||
-    error?.originalError?.message?.includes('is not valid JSON')
+    (error as { message?: string })?.message?.includes('Unexpected token') ||
+    (error as { message?: string })?.message?.includes('is not valid JSON') ||
+    (error as { originalError?: { message?: string } })?.originalError?.message?.includes('Unexpected token') ||
+    (error as { originalError?: { message?: string } })?.originalError?.message?.includes('is not valid JSON')
   ) {
     console.error('[Auth] Supabase API returned non-JSON response:', {
-      error: error.message,
-      originalError: error.originalError?.message,
+      error: (error as { message?: string })?.message,
+      originalError: (error as { originalError?: { message?: string } })?.originalError?.message,
     })
     throw new Error(
       'Authentication service is temporarily unavailable. The service returned an invalid response. Please try again in a few moments.'
