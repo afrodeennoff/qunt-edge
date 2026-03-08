@@ -51,13 +51,27 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
     poweredByHeader: false,
     reactStrictMode: true,
     serverExternalPackages: [],
+    // Bundle optimization - tree shake heavy libraries
     experimental: {
       ...(cpus ? { cpus } : {}),
+      // Optimize package imports for better tree shaking
+      optimizePackageImports: [
+        'recharts',
+        '@tanstack/react-table',
+        '@tanstack/react-query',
+        'date-fns',
+        'date-fns-tz',
+        'lucide-react',
+        'framer-motion',
+        'decimal.js',
+      ],
     },
     turbopack: {
       root: projectRoot,
     },
     outputFileTracingRoot: projectRoot,
+    // Enable standalone output for better Docker deployment
+    output: process.env.NEXT_STANDALONE === 'true' ? 'standalone' : undefined,
     images: {
       formats: ["image/avif", "image/webp"],
       minimumCacheTTL: 60 * 60 * 24 * 7,
@@ -71,6 +85,12 @@ export function createOptimizedNextConfig(): OptimizedNextConfigResult {
       deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
       imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
       qualities: [50, 65, 75, 85],
+    },
+    // Reduce logging in production
+    logging: {
+      fetches: {
+        fullUrl: process.env.NODE_ENV === 'development',
+      },
     },
   };
 
