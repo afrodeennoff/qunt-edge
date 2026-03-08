@@ -834,7 +834,7 @@ export class WebhookService {
         await prisma.teamSubscription.updateMany({
           where: { email },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt
           }
         })
@@ -842,7 +842,7 @@ export class WebhookService {
         await prisma.businessSubscription.updateMany({
           where: { email },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt
           }
         })
@@ -850,7 +850,7 @@ export class WebhookService {
         await prisma.subscription.update({
           where: { email },
           data: {
-            status: 'TRIAL',
+            status: 'PENDING',
             trialEndsAt,
           },
         })

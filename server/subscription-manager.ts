@@ -7,7 +7,7 @@ export interface SubscriptionDetails {
   userId: string
   email: string
   plan: string
-  status: 'ACTIVE' | 'CANCELLED' | 'TRIAL' | 'PAST_DUE' | 'PAUSED'
+  status: 'ACTIVE' | 'CANCELLED' | 'PENDING' | 'PAST_DUE' | 'TRIAL_EXPIRED' | 'PAUSED'
   interval?: 'month' | 'quarter' | 'year' | 'lifetime'
   currentPeriodStart?: Date
   currentPeriodEnd?: Date
@@ -58,7 +58,7 @@ export class SubscriptionManager {
         trialEndsAt = new Date(now)
         trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS)
         endDate = trialEndsAt
-        status = 'TRIAL'
+        status = 'PENDING'
       } else {
         endDate = this.calculateEndDate(data.interval)
       }
@@ -67,7 +67,7 @@ export class SubscriptionManager {
         where: { userId: data.userId },
         update: {
           plan: data.plan.toUpperCase(),
-          status,
+          status: status as 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'PENDING' | 'TRIAL_EXPIRED',
           interval: data.interval,
           endDate,
           trialEndsAt,
@@ -76,7 +76,7 @@ export class SubscriptionManager {
           userId: data.userId,
           email: data.email,
           plan: data.plan.toUpperCase(),
-          status,
+          status: status as 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'PENDING' | 'TRIAL_EXPIRED',
           interval: data.interval,
           endDate,
           trialEndsAt,
@@ -436,7 +436,7 @@ export class SubscriptionManager {
             await prisma.subscription.update({
               where: { id: subscription.id },
               data: {
-                status: 'PAUSED',
+                status: 'PENDING' as any,
               },
             })
 
