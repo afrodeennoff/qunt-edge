@@ -112,7 +112,6 @@ export function RithmicSyncConnection({ setIsOpen }: RithmicSyncConnectionProps)
 
     // Disconnect existing WebSocket connection if any
     if (isConnected) {
-      console.log('Disconnecting existing WebSocket connection before new connection attempt')
       disconnect()
     }
 
@@ -390,7 +389,6 @@ export function RithmicSyncConnection({ setIsOpen }: RithmicSyncConnectionProps)
   // Update effect to use context step
   useEffect(() => {
     if (isConnected && selectedAccounts.length > 0) {
-      console.log('Active connection detected, resuming processing view')
       setStep('processing')
     }
   }, [isConnected, selectedAccounts, setStep])
@@ -424,7 +422,6 @@ export function RithmicSyncConnection({ setIsOpen }: RithmicSyncConnectionProps)
     // Use all available accounts if allAccounts is true
     const accountsToSync = allAccounts ? availableAccounts.map(acc => acc.account_id) : selectedAccounts
     const startDate = calculateStartDate(accountsToSync)
-    console.log('Connecting to WebSocket:', wsUrl)
     connect(wsUrl, token, accountsToSync, startDate)
   }, [
     token,
@@ -772,5 +769,4 @@ export function RithmicSyncWrapper({ setIsOpen }: RithmicSyncWrapperProps) {
     </div>
   )
 }
-
 

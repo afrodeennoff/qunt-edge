@@ -202,18 +202,6 @@ export default function RithmicOrderProcessor({ csvData, headers, processedTrade
         const commissionRate = parseFloat(order["Commission Fill Rate"])
         const orderCommission = commissionRate * quantity
         const orderId = order["Order Number"]
-
-        console.log({
-          orderId,
-          symbol,
-          quantity,
-          price,
-          side,
-          timestamp,
-          commissionRate,
-          orderCommission,
-          openPositions,
-        });
         
         const contractSpec = tickDetails.find(detail => detail.ticker === symbol) || { tickSize: 1/64, tickValue: 15.625 }
 
@@ -324,7 +312,6 @@ export default function RithmicOrderProcessor({ csvData, headers, processedTrade
       });
     });
 
-    console.log('processedTrades', processedTrades);
     setProcessedTrades(processedTrades);
     setIncompleteTrades(incompleteTradesArray);
 

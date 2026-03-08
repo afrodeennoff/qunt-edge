@@ -16,20 +16,6 @@ import PricingPlans from "@/components/pricing-plans"
 import Link from "next/link"
 import { useSubscriptionStore } from "@/store/subscription-store"
 
-type SubscriptionStatus = 
-  | "active"
-  | "trialing"
-  | "past_due"
-  | "canceled"
-  | "expired"
-  | "incomplete"
-  | "incomplete_expired"
-  | "paused"
-  | "unpaid"
-  | "completed"
-  | "drafted"
-  | "canceling"
-
 interface PlanPrice {
   yearly: number
   monthly: number

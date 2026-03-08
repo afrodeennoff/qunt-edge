@@ -36,8 +36,6 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
     setSegments([])
     
     try {
-      console.log('Starting audio splitting for file:', file.name, file.type, file.size)
-      
       // Create input from the video/audio file
       const input = new Input({
         source: new BlobSource(file),
@@ -45,9 +43,7 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
       })
 
       // Check if the file has audio tracks
-      console.log('Checking for audio tracks...')
       const audioTrack = await input.getPrimaryAudioTrack()
-      console.log('Audio track found:', audioTrack)
       
       if (!audioTrack) {
         throw new Error('No audio track found in the file')
@@ -55,12 +51,10 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
 
       // Get the duration of the audio track
       const duration = await audioTrack.computeDuration()
-      console.log('Audio duration:', duration, 'seconds')
 
       // Calculate number of 10-second segments
       const segmentDuration = 10 // 10 seconds
       const numberOfSegments = Math.ceil(duration / segmentDuration)
-      console.log('Number of segments to create:', numberOfSegments)
 
       const createdSegments: AudioSegment[] = []
 
@@ -68,8 +62,7 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
       for (let i = 0; i < numberOfSegments; i++) {
         const startTime = i * segmentDuration
         const endTime = Math.min(startTime + segmentDuration, duration)
-        
-        console.log(`Creating segment ${i + 1}/${numberOfSegments}: ${startTime}s - ${endTime}s`)
+
         
         // Create output for WAV audio
         const output = new Output({
@@ -111,8 +104,6 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
         const progressPercent = ((i + 1) / numberOfSegments) * 100
         setProgress(progressPercent)
         setCurrentSegment(i + 1)
-        
-        console.log(`Segment ${i + 1} created successfully`)
       }
 
       setSegments(createdSegments)
@@ -120,8 +111,6 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
       if (onSegmentsCreated) {
         onSegmentsCreated(createdSegments)
       }
-
-      console.log('Audio splitting completed successfully')
 
     } catch (error) {
       console.error('Error splitting audio:', error)

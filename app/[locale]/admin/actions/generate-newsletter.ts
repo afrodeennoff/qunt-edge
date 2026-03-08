@@ -51,8 +51,6 @@ Merci de respecter ces consignes.`,
       temperature: 0.7,
     })
 
-
-    console.log(output)
     return {
       success: true,
       content: output

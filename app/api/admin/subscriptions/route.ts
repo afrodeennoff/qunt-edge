@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     const where: Prisma.SubscriptionWhereInput = {}
 
     if (status) {
-      where.status = status.toUpperCase()
+      where.status = status.toUpperCase() as 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'PENDING' | 'TRIAL_EXPIRED'
     }
 
     if (plan) {
