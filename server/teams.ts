@@ -368,7 +368,7 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
       prisma.$queryRaw<Array<{ userId: string; totalPnl: number }>>`
         SELECT "userId", SUM(CAST("pnl" AS NUMERIC)) as "totalPnl"
         FROM "public"."Trade"
-        WHERE "userId" IN (${prisma.join(userIds)})
+        WHERE "userId" IN (${Prisma.join(userIds)})
         GROUP BY "userId"
         ORDER BY "totalPnl" DESC
         LIMIT 1
@@ -377,6 +377,7 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
 
     const totalPnl = Number(tradeStats._sum.pnl || 0);
     const totalTrades = tradeStats._count.id || 0;
+    const averageRr = 0;
     
     // Get winning trades count
     const winningTradesResult = await prisma.trade.count({
@@ -413,20 +414,8 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
         totalTrades,
         winRate,
         averageRr,
-        bestMemberId: bestMember?.userId,
-        bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
-        }, 0) : 0
-      },
-      update: {
-        totalPnl,
-        totalTrades,
-        winRate,
-        averageRr,
-        bestMemberId: bestMember?.userId,
-        bestMemberPnl: bestMember ? bestMember.user.accounts.reduce((sum: number, acc: any) => {
-          return sum + acc.trades.reduce((accSum: number, t: any) => accSum + Number(t.pnl ?? 0), 0)
-        }, 0) : 0
+        bestMemberId,
+        bestMemberPnl
       }
     })
 

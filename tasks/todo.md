@@ -26,3 +26,18 @@
 - Lint: 0 errors, 1513 warnings (baseline).
 - Build: compiled successfully.
 - Follow-up: fix server/teams.ts type errors before final sign-off.
+
+# Runtime Lag Fix Pass (2026-03-08)
+
+- [x] Remove duplicate dashboard provider stack in `dashboard-tab-shell` (Trades/Accounts/Filters providers).
+- [x] Remove duplicate server prefetch pipeline from `app/[locale]/dashboard/page.tsx`.
+- [x] Add narrow selector hooks (`useDashboardIsMobile`, `useDashboardIsLoading`, `useDashboardIsSharedView`).
+- [x] Migrate mobile/loading/shared-view consumers to selector hooks.
+- [x] Convert behavior route to server wrapper + client island (`page.tsx` -> `page-client.tsx`).
+- [ ] Verify with typecheck/build and re-run targeted perf gates.
+
+## Review (Runtime Lag Fix Pass)
+
+- Goal: eliminate duplicate data fetch/context mount work and reduce broad rerender subscriptions.
+- Risk to monitor: dashboard first render now fully depends on `DataProvider` client load path (no server-seeded trade payload in page shell).
+- Verification pending: run `npm run -s typecheck` and `npm run -s build` after this patch set.
