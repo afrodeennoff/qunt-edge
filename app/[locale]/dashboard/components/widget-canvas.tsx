@@ -308,18 +308,18 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
 })
 WidgetWrapper.displayName = "WidgetWrapper"
 
-function DebugDataBadge({
-  tradesCount,
-  isFiltered,
-}: {
-  tradesCount: number;
-  isFiltered: boolean;
-}) {
+function DebugDataBadge() {
+  const trades = useDashboardTradeItems();
   const { formattedTrades } = useDashboardStats();
+  const { instruments, accountNumbers, dateRange } = useDashboardFilters();
+  const isFiltered =
+    instruments.length > 0 ||
+    accountNumbers.length > 0 ||
+    Boolean(dateRange?.from || dateRange?.to);
 
   return (
     <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
-      T:{tradesCount} F:{formattedTrades.length}
+      T:{trades.length} F:{formattedTrades.length}
       {isFiltered && (
         <span className="ml-2 text-foreground/40">filtered</span>
       )}
@@ -331,8 +331,6 @@ export default function WidgetCanvas() {
   const { isMobile, dashboardLayout: layouts, setDashboardLayout: setLayouts } = useUserStore(state => state)
   const user = useUserStore(state => state.user)
   const { saveDashboardLayout } = useDashboardActions()
-  const trades = useDashboardTradeItems()
-  const { instruments, accountNumbers, dateRange } = useDashboardFilters()
   const searchParams = useSearchParams()
   const {
     isCustomizing,
@@ -341,10 +339,6 @@ export default function WidgetCanvas() {
   const t = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const showDataDebug = searchParams.get("debugData") === "1"
-  const isFiltered =
-    instruments.length > 0 ||
-    accountNumbers.length > 0 ||
-    Boolean(dateRange?.from || dateRange?.to)
   const pendingSaveRef = useRef<DashboardLayoutWithWidgets | null>(null)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -659,10 +653,7 @@ export default function WidgetCanvas() {
                           : "bg-black/95 hover:border-white/20"
                       )}>
                         {showDataDebug && !isCustomizing && (
-                          <DebugDataBadge
-                            tradesCount={trades.length}
-                            isFiltered={isFiltered}
-                          />
+                          <DebugDataBadge />
                         )}
                         <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
                         <div className="relative h-full w-full">

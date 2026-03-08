@@ -396,22 +396,6 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
     const bestMemberId = bestMemberResult[0]?.userId || null;
     const bestMemberPnl = Number(bestMemberResult[0]?._sum?.pnl || 0);
 
-    const totalPnl = Number(tradeStats._sum.pnl || 0);
-    const totalTrades = tradeStats._count.id || 0;
-    const averageRr = 0;
-
-    // Get winning trades count
-    const winningTradesResult = await prisma.trade.count({
-      where: {
-        userId: { in: userIds },
-        pnl: { gt: 0 }
-      }
-    });
-
-    const winRate = totalTrades > 0 ? (winningTradesResult / totalTrades) * 100 : 0;
-    const bestMemberId = bestMemberResult[0]?.userId || null;
-    const bestMemberPnl = Number(bestMemberResult[0]?.totalPnl || 0);
-
     // Upsert analytics
     const analytics = await prisma.teamAnalytics.upsert({
       where: {

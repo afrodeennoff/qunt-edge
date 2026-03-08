@@ -126,6 +126,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Team Analytics Typecheck Fix
+- **What changed:** Removed duplicated analytics variables and ensured averageRr/bestMember values are defined once during team analytics update.
+- **What I want:** Restore clean build/typecheck for team analytics route.
+- **What I don't want:** Duplicate variable declarations triggering Turbopack errors.
+- **How we fixed that:** Normalized the analytics block to a single set of computed values and kept a single upsert update path.
+- **Key Files:** `server/teams.ts`.
+- **Verification:** `npm run -s typecheck`, `npm run -s lint -- --max-warnings=999999`, `npm run -s build`.
+
+
 ### 2026-03-08: Typecheck Fix (server/teams.ts)
 - **What changed:** Fixed Prisma join usage, removed duplicate update block, and defined averageRr fallback for team analytics updates.
 - **What I want:** Restore successful typecheck after performance fixes.
