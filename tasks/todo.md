@@ -43,3 +43,9 @@
 - Verification:
   - `npm run -s typecheck` fails in `server/teams.ts` (pre-existing unrelated errors).
   - `npm run -s build` compiles but fails during page data collection with missing `.next/server/pages-manifest.json` (environment/build-system issue, not from touched files).
+
+## Review
+- Verification: ran typecheck/lint/build.
+- Typecheck: OK
+- Lint: OK
+- Build: FAILED

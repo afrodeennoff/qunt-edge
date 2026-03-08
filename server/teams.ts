@@ -399,7 +399,7 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
     const totalPnl = Number(tradeStats._sum.pnl || 0);
     const totalTrades = tradeStats._count.id || 0;
     const averageRr = 0;
-    
+
     // Get winning trades count
     const winningTradesResult = await prisma.trade.count({
       where: {
@@ -426,7 +426,7 @@ export async function updateTeamAnalytics(teamId: string, userId: string) {
         totalPnl,
         totalTrades,
         winRate,
-        averageRr: 0,
+        averageRr,
         bestMemberId,
         bestMemberPnl
       },

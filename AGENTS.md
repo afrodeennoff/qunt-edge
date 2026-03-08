@@ -126,6 +126,15 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Typecheck Fix (server/teams.ts)
+- **What changed:** Fixed Prisma join usage, removed duplicate update block, and defined averageRr fallback for team analytics updates.
+- **What I want:** Restore successful typecheck after performance fixes.
+- **What I don't want:** Build and typecheck failures from undefined symbols or duplicate keys.
+- **How we fixed that:** Swapped `prisma.join` -> `Prisma.join`, removed duplicate update block, and used computed `averageRr` fallback.
+- **Key Files:** `server/teams.ts`, `tasks/todo.md`.
+- **Verification:** `npm run -s typecheck`, `npm run -s lint -- --max-warnings=999999`, `npm run -s build`.
+
+
 ### 2026-03-08: Performance Verification Attempt (Typecheck Failure)
 - **What changed:** Ran typecheck/lint/build after performance fixes.
 - **What I want:** Confirm performance changes are type-safe and build-safe.
@@ -214,6 +223,36 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s check:route-budgets` -> all monitored routes within budget.
   - `npm run -s analyze:bundle` -> artifact updated at `docs/audits/artifacts/bundle-summary.json`.
   - `npm run -s lint` -> exits `0` with `1513` warnings (`0` errors).
+
+### 2026-03-08: Runtime Lag Fix Pass (Duplicate Data Flow + Narrow Selectors)
+- **What changed:** Removed duplicate dashboard provider/data flow layers, narrowed high-frequency context subscriptions, and converted behavior route shell to server-wrapper + client island.
+- **What I want:** Reduce avoidable fetch/state churn and rerender fan-out in the dashboard shell so interactions feel faster under live trade/filter updates.
+- **What I don't want:** Dashboard mounting multiple overlapping trade/account/filter providers or components subscribing to broad trade context when they only need tiny flags (`isMobile`, `isLoading`, `isSharedView`).
+- **How we fixed that:**
+  - Removed redundant provider stack from `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`:
+    - deleted `TradesProvider`, `AccountsProvider`, and `FiltersProvider` wrappers.
+    - dashboard tabs now consume the existing `DataProvider` from layout-level `DashboardProviders`.
+  - Simplified `app/[locale]/dashboard/page.tsx`:
+    - removed duplicate server prefetch pipeline for trades/accounts/groups/layout.
+    - page now only resolves auth + tab and renders `DashboardTabShell`.
+  - Added narrow selector hooks in `context/data-provider.tsx`:
+    - `useDashboardIsMobile()`
+    - `useDashboardIsLoading()`
+    - `useDashboardIsSharedView()`
+  - Migrated narrow consumers to selector hooks:
+    - `app/[locale]/dashboard/components/add-widget-sheet.tsx`
+    - `app/[locale]/dashboard/components/filters/filter-dropdown.tsx`
+    - `app/[locale]/dashboard/components/filters/filter-command-menu.tsx`
+    - `app/[locale]/dashboard/components/navbar.tsx`
+    - `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`
+    - `app/[locale]/dashboard/components/charts/equity-chart.tsx`
+    - `app/[locale]/dashboard/components/widget-canvas.tsx` (wrapper-level mobile subscription)
+  - Converted behavior route entry to server wrapper:
+    - `app/[locale]/dashboard/behavior/page.tsx` now renders `page-client.tsx` only.
+- **Key Files:** `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`, `app/[locale]/dashboard/page.tsx`, `context/data-provider.tsx`, `app/[locale]/dashboard/components/add-widget-sheet.tsx`, `app/[locale]/dashboard/components/filters/filter-dropdown.tsx`, `app/[locale]/dashboard/components/filters/filter-command-menu.tsx`, `app/[locale]/dashboard/components/navbar.tsx`, `app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx`, `app/[locale]/dashboard/components/charts/equity-chart.tsx`, `app/[locale]/dashboard/components/widget-canvas.tsx`, `app/[locale]/dashboard/behavior/page.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> fails on pre-existing unrelated `server/teams.ts` errors.
+  - `npm run -s build` -> compiles, then fails at page-data stage with missing `.next/server/pages-manifest.json` in this environment.
 
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.

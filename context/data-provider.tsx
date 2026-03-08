@@ -120,6 +120,12 @@ export interface DashboardDataState {
   accounts: Account[];
 }
 
+interface DashboardUiState {
+  isLoading: boolean;
+  isMobile: boolean;
+  isSharedView: boolean;
+}
+
 export interface DashboardFiltersState {
   instruments: string[];
   setInstruments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -202,6 +208,13 @@ type DataContextType = DashboardDataState &
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 const DashboardDataStateContext = createContext<DashboardDataState | undefined>(
+  undefined
+);
+const DashboardUiStateContext = createContext<DashboardUiState | undefined>(
+  undefined
+);
+const DashboardTradesListContext = createContext<Trade[] | undefined>(undefined);
+const DashboardAccountsListContext = createContext<Account[] | undefined>(
   undefined
 );
 const DashboardFiltersContext = createContext<DashboardFiltersState | undefined>(

@@ -21,7 +21,6 @@ export async function saveMindset(
   date?: string
 ) {
   try {
-    console.log('saveMindset', date)
     const userId = await getDatabaseUserId()
 
     // Convert date string to Date at midday UTC
@@ -242,7 +241,6 @@ export async function saveJournal(
   date?: string
 ) {
   try {
-    console.log('saveJournal', date)
     const userId = await getDatabaseUserId()
 
     // Convert date string to Date at midday UTC

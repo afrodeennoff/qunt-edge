@@ -5,9 +5,6 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export async function getTagsAction(userId: string) {
-  console.log('getTags', userId)
-
-
   try {
     const tags = await prisma.tag.findMany({
       where: {
@@ -30,7 +27,6 @@ export async function createTagAction(formData: {
   description?: string
   color: string
 }) {
-  console.log('createTag', formData)
   const userId = await getDatabaseUserId()
 
   try {
@@ -54,7 +50,6 @@ export async function updateTagAction(id: string, formData: {
   description?: string
   color: string
 }) {
-  console.log('updateTag', id, formData)
   const userId = await getDatabaseUserId()
 
   try {
