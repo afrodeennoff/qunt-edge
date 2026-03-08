@@ -126,6 +126,24 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 ## 🎨 UI/UX & Design System
 
 
+### 2026-03-08: Performance Rescue (Memoized Charts + Widgets)
+- **What changed:** Memoized remaining dashboard chart + widget components to reduce re-render churn.
+- **What I want:** Ensure charts/widgets do not re-render unless their props change.
+- **What I don't want:** Filter or layout changes causing every chart/widget to re-render.
+- **How we fixed that:** Wrapped dashboard chart and widget components with `React.memo`.
+- **Key Files:** `app/[locale]/dashboard/components/charts/*.tsx`, `app/[locale]/dashboard/components/widgets/*.tsx`, `app/[locale]/dashboard/components/calendar/*.tsx`.
+- **Verification:** Not run in this environment; requires dashboard render check.
+
+
+### 2026-03-08: Performance Rescue (Memoized Charts + Widgets)
+- **What changed:** Memoized remaining dashboard chart + widget components to reduce re-render churn.
+- **What I want:** Ensure charts/widgets do not re-render unless their props change.
+- **What I don't want:** Filter or layout changes causing every chart/widget to re-render.
+- **How we fixed that:** Wrapped dashboard chart and widget components with `React.memo`.
+- **Key Files:** `app/[locale]/dashboard/components/charts/*.tsx`, `app/[locale]/dashboard/components/widgets/*.tsx`.
+- **Verification:** Not run in this environment; requires dashboard render check.
+
+
 ### 2026-03-08: Performance Rescue (Memoized Stats + Lazy Widgets)
 - **What changed:** Memoized statistics widgets and switched widget registry to lazy-load dashboard widgets via `next/dynamic`.
 - **What I want:** Reduce dashboard re-render cost and initial JS load by only loading active widgets and preventing repeated stat widget renders.

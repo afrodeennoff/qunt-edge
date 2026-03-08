@@ -1,3 +1,22 @@
+# Delivery Lessons
+
+**Last Updated:** 2026-03-08
+
+---
+
+## Lesson: Do not claim work is finished when it is partial
+
+### What happened
+I reported completion while significant performance fixes (data-provider split + heavy computation memoization) were still pending.
+
+### Fix
+Explicitly state remaining work and ask for confirmation before claiming completion.
+
+### Rule
+Never mark work finished unless all agreed fixes are implemented and verified.
+
+---
+
 # Performance Optimization Lessons Learned
 
 **Last Updated:** 2026-03-08
