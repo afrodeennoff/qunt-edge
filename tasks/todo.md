@@ -125,3 +125,20 @@
 - Kept runtime behavior unchanged; only `console.log(...)` lines were removed.
 - Re-scan with grep on the five targeted files returns no `console.log(` matches.
 - Total removed in this task: `29` (`4 + 1 + 4 + 4 + 16`).
+
+# End-to-End Lag Root-Cause Fix (2026-03-08)
+
+- [x] Remove final broad dashboard trade-context subscription usage from dashboard route surfaces.
+- [x] Convert trader-profile route shell to server wrapper + dedicated client island.
+- [x] Narrow trader-profile data reads to selector hooks (`accounts`, `isLoading`) instead of broad trade context.
+- [x] Run targeted lint checks on touched trader-profile files.
+- [x] Run full typecheck after changes.
+
+## Review (End-to-End Lag Root-Cause Fix)
+
+- Root cause addressed: broad dashboard context subscriptions and client-heavy route shells causing unnecessary rerenders/hydration work.
+- Trader profile now follows server-wrapper pattern (`page.tsx` -> `page-client.tsx`) to reduce client entrypoint overhead.
+- Dashboard now has zero `useDashboardTrades()` callsites under `app/[locale]/dashboard`.
+- Verification:
+  - `npx eslint app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/dashboard/trader-profile/page-client.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> exits `0`.

@@ -338,6 +338,22 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npx eslint app/[locale]/dashboard/components/data-debug.tsx app/[locale]/dashboard/components/accounts/accounts-overview.tsx app/[locale]/dashboard/components/tables/trade-table-review.tsx` -> 0 errors (warnings only).
   - `npm run -s typecheck` -> fails on pre-existing unrelated backend typing drift in currently modified workspace files (`server/subscription-manager.ts`, `server/subscription.ts`, `server/shared.ts`, billing/admin subscription status typing).
 
+### 2026-03-08: Trader Profile Lag Closure (Server Wrapper + Narrow Selectors)
+- **What changed:** Finalized dashboard lag cleanup by removing the remaining broad trade-context usage in trader-profile and converting trader-profile route entry to server-wrapper + client island.
+- **What I want:** Eliminate avoidable rerender fan-out from broad context reads and keep dashboard route entries server-oriented unless they own client state.
+- **What I don't want:** `useDashboardTrades()` broad subscriptions for simple flags/data and large client route entry files when a server wrapper is sufficient.
+- **How we fixed that:**
+  - Updated trader-profile client page to use narrow selectors:
+    - `useDashboardAccountsList()`
+    - `useDashboardIsLoading()`
+    - preserved `useDashboardStats()` for formatted trades.
+  - Replaced `app/[locale]/dashboard/trader-profile/page.tsx` with a minimal server wrapper that renders `page-client.tsx`.
+  - Re-verified dashboard grep for `useDashboardTrades(` now returns no matches under dashboard route files.
+- **Key Files:** `app/[locale]/dashboard/trader-profile/page.tsx`, `app/[locale]/dashboard/trader-profile/page-client.tsx`, `tasks/todo.md`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/dashboard/trader-profile/page-client.tsx` -> 0 errors (warnings only).
+  - `npm run -s typecheck` -> exits `0`.
+
 ### 2026-03-07: Client/Server Render Boundary Cleanup
 - **What changed:** Reworked provider ownership, shared-page bootstrapping, home-page SSR, and dashboard scroll reset so route shells stop doing unnecessary client work.
 - **What I want:** Public/home/shared routes should retain meaningful server-rendered HTML, shared pages should use the server fetch as the first render source, and dashboard route shells should stay server-oriented unless they genuinely own client state.
