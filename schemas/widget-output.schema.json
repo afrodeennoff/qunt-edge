@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.example.com/widget-output.schema.json",
+  "title": "Widget Output Schema",
+  "description": "Unified schema for validating widget output data across all widget types",
+  "type": "object",
+  "properties": {
+    "widgetId": {
+      "type": "string",
+      "description": "Widget instance identifier matching the input"
+    },
+    "widgetType": {
+      "type": "string",
+      "description": "Type of widget producing the output"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "partial", "error"],
+      "description": "Status of the widget operation"
+    },
+    "data": {
+      "type": "object",
+      "description": "Widget output data payload",
+      "properties": {
+        "renderData": {
+          "type": "object",
+          "description": "Data prepared for rendering",
+          "additionalProperties": true
+        },
+        "metrics": {
+          "type": "object",
+          "description": "Calculated metrics and statistics",
+          "properties": {
+            "value": { "type": "number" },
+            "label": { "type": "string" },
+            "trend": {
+              "type": "object",
+              "properties": {
+                "direction": { "enum": ["up", "down", "neutral"] },
+                "percentage": { "type": "number" },
+                "period": { "type": "string" }
+              }
+            },
+            "comparison": {
+              "type": "object",
+              "properties": {
+                "previous": { "type": "number" },
+                "change": { "type": "number" },
+                "changePercent": { "type": "number" }
+              }
+            }
+          }
+        },
+        "chartData": {
+          "type": "array",
+          "description": "Data formatted for chart rendering",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "type": "number" },
+              "date": { "type": "string", "format": "date-time" },
+              "category": { "type": "string" }
+            }
+          }
+        },
+        "tableData": {
+          "type": "array",
+          "description": "Data formatted for table display",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "description": "Error information if status is 'error'",
+      "properties": {
+        "code": { "type": "string", "description": "Error code from WIDGET_ERROR_CODE enum" },
+        "message": { "type": "string", "description": "Human-readable error message" },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"],
+          "description": "Risk level of the error"
+        },
+        "remediationHint": { "type": "string", "description": "Suggested remediation steps" },
+        "details": {
+          "type": "object",
+          "description": "Additional error details",
+          "additionalProperties": true
+        }
+      },
+      "required": ["code", "message", "riskLevel"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "processingTimeMs": { "type": "number" },
+        "dataVersion": { "type": "string" },
+        "cacheHit": { "type": "boolean" },
+        "riskEvaluation": {
+          "type": "object",
+          "properties": {
+            "decision": { "enum": ["green", "amber", "red"] },
+            "riskScore": { "type": "number" },
+            "policyCompliant": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  },
+  "required": ["widgetId", "widgetType", "status", "metadata"],
+  "if": {
+    "properties": { "status": { "const": "error" } }
+  },
+  "then": {
+    "required": ["error"]
+  },
+  "else": {
+    "required": ["data"]
+  }
+}

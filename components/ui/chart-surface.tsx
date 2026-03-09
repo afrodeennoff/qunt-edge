@@ -1,0 +1,117 @@
+"use client"
+
+import * as React from "react"
+
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+
+export type ChartSurfaceState = "ready" | "loading" | "empty" | "error"
+
+interface ChartSurfaceProps {
+  title?: React.ReactNode
+  subtitle?: React.ReactNode
+  actions?: React.ReactNode
+  info?: React.ReactNode
+  state?: ChartSurfaceState
+  emptyMessage?: React.ReactNode
+  errorMessage?: React.ReactNode
+  size?: "tiny" | "small" | "small-long" | "medium" | "large" | "extra-large"
+  className?: string
+  headerClassName?: string
+  bodyClassName?: string
+  children?: React.ReactNode
+}
+
+export function ChartSurface({
+  title,
+  subtitle,
+  actions,
+  info,
+  state = "ready",
+  emptyMessage = "No trades yet.",
+  errorMessage = "Unable to load chart.",
+  size = "medium",
+  className,
+  headerClassName,
+  bodyClassName,
+  children,
+}: ChartSurfaceProps) {
+  const isSmall = size === "small" || size === "tiny"
+  const hasHeader = Boolean(title || subtitle || actions || info)
+  const shouldPadBody = hasHeader || state !== "ready"
+
+  const renderBody = () => {
+    if (state === "loading") {
+      return (
+        <div className="space-y-3 p-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-[220px] w-full" />
+        </div>
+      )
+    }
+
+    if (state === "error") {
+      return (
+        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-destructive">
+          {errorMessage}
+        </div>
+      )
+    }
+
+    if (state === "empty") {
+      return (
+        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-white/55">
+          {emptyMessage}
+        </div>
+      )
+    }
+
+    return children
+  }
+
+  return (
+    <div
+      data-chart-surface="v2"
+      className={cn("h-full flex flex-col overflow-hidden rounded-xl bg-transparent", className)}
+    >
+      {hasHeader && (
+        <div
+          className={cn(
+            "flex shrink-0 items-center border-b border-white/10",
+            isSmall ? "h-10 px-2.5" : "h-12 px-3.5",
+            headerClassName
+          )}
+        >
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="min-w-0 flex items-center gap-1.5">
+              {title ? (
+                <span
+                  className={cn(
+                    "line-clamp-1 text-fg-primary",
+                    isSmall ? "text-[13px] font-semibold" : "text-sm font-semibold"
+                  )}
+                >
+                  {title}
+                </span>
+              ) : null}
+              {info}
+              {subtitle ? (
+                <span className="hidden text-[11px] text-fg-muted sm:inline">{subtitle}</span>
+              ) : null}
+            </div>
+            {actions ? <div className="shrink-0">{actions}</div> : null}
+          </div>
+        </div>
+      )}
+      <div
+        className={cn(
+          "flex flex-col flex-1 min-h-0",
+          shouldPadBody ? (isSmall ? "p-1.5" : "p-2.5 sm:p-3") : "p-0",
+          bodyClassName
+        )}
+      >
+        {renderBody()}
+      </div>
+    </div>
+  )
+}

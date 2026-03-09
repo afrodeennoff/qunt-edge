@@ -1,0 +1,1954 @@
+"use client";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+import {
+  Trade as PrismaTrade,
+  Group as PrismaGroup,
+  Account as PrismaAccount,
+  Payout as PrismaPayout,
+  DashboardLayout as PrismaDashboardLayout,
+  Subscription as PrismaSubscription,
+  Tag,
+  User as PrismaUser,
+  FinancialEvent,
+  Mood,
+  TickDetails,
+} from "@/prisma/generated/prisma";
+import { SharedParams } from "@/server/shared";
+import {
+  getUserData,
+  getDashboardLayout,
+  loadSharedData,
+  updateIsFirstConnectionAction,
+} from "@/server/user-data";
+import {
+  getTradesAction,
+  getTradeImagesAction,
+  groupTradesAction,
+  ungroupTradesAction,
+  updateTradesAction,
+  saveDashboardLayoutAction,
+  SerializedTrade,
+} from "@/server/database";
+import {
+  deletePayoutAction,
+  deleteAccountAction,
+  setupAccountAction,
+  savePayoutAction,
+  calculateAccountBalanceAction,
+  calculateAccountMetricsAction,
+  deleteTradesByIdsAction,
+} from "@/server/accounts";
+import { computeMetricsForAccounts } from "@/lib/account-metrics";
+import {
+  saveGroupAction,
+  deleteGroupAction,
+  moveAccountToGroupAction,
+  renameGroupAction,
+} from "@/server/groups";
+import { createClient } from "@/lib/supabase";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+
+import { signOut, getUserId, updateUserLanguage } from "@/server/auth";
+import { DashboardLayoutWithWidgets, useUserStore } from "@/store/user-store";
+import { useTickDetailsStore } from "@/store/tick-details-store";
+import { useFinancialEventsStore } from "@/store/financial-events-store";
+import { useTradesStore } from "@/store/trades-store";
+import { getTradesCache, setTradesCache, getUserDataCache, setUserDataCache } from "@/lib/indexeddb/trades-cache"
+import { deleteTagAction } from "@/server/tags";
+import { useCurrentLocale } from "@/locales/client";
+import { useMoodStore } from "@/store/mood-store";
+import { useSubscriptionStore } from "@/store/subscription-store";
+import { getSubscriptionData } from "@/server/billing";
+import { defaultLayouts } from "@/lib/default-layouts";
+
+import {
+  generateMockTrades
+} from "@/lib/mock-trades";
+import { isValid } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+import { formatCalendarData, cn, groupBy, calculateTradingDays } from "@/lib/utils";
+import { useParams } from "next/navigation";
+import { logger } from "@/lib/logger";
+import {
+  getFormattedTrades,
+  getSortedTrades,
+  getStatisticsWithProfitFactor,
+} from "@/context/providers/derived-selectors";
+
+import {
+  StatisticsProps,
+  CalendarData,
+  DateRange,
+  TickRange,
+  PnlRange,
+  TimeRange,
+  TickFilter,
+  WeekdayFilter,
+  HourFilter,
+  TagFilter,
+  Group,
+  AccountDecimalFields,
+  AccountPayout,
+  AccountBase,
+  Account,
+  AccountInput,
+  GroupInput,
+  Trade,
+  TradeInput,
+  normalizeTradeForClient,
+  normalizeTradesForClient,
+  normalizePayoutForClient,
+  normalizeAccountForClient,
+  normalizeAccountsForClient,
+  normalizeGroupsForClient,
+} from "@/lib/data-types";
+
+// Combined Context Type
+export interface DashboardDataState {
+  isLoading: boolean;
+  isMobile: boolean;
+  isSharedView: boolean;
+  sharedParams: SharedParams | null;
+  setSharedParams: React.Dispatch<React.SetStateAction<SharedParams | null>>;
+  isFirstConnection: boolean;
+  setIsFirstConnection: (isFirstConnection: boolean) => void;
+  trades: Trade[];
+  accounts: Account[];
+}
+
+interface DashboardUiState {
+  isLoading: boolean;
+  isMobile: boolean;
+  isSharedView: boolean;
+}
+
+export interface DashboardFiltersState {
+  instruments: string[];
+  setInstruments: React.Dispatch<React.SetStateAction<string[]>>;
+  accountNumbers: string[];
+  setAccountNumbers: React.Dispatch<React.SetStateAction<string[]>>;
+  dateRange: DateRange | undefined;
+  setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  tickRange: TickRange;
+  setTickRange: React.Dispatch<React.SetStateAction<TickRange>>;
+  pnlRange: PnlRange;
+  setPnlRange: React.Dispatch<React.SetStateAction<PnlRange>>;
+  timeRange: TimeRange;
+  setTimeRange: React.Dispatch<React.SetStateAction<TimeRange>>;
+  tickFilter: TickFilter;
+  setTickFilter: React.Dispatch<React.SetStateAction<TickFilter>>;
+  weekdayFilter: WeekdayFilter;
+  setWeekdayFilter: React.Dispatch<React.SetStateAction<WeekdayFilter>>;
+  hourFilter: HourFilter;
+  setHourFilter: React.Dispatch<React.SetStateAction<HourFilter>>;
+  tagFilter: TagFilter;
+  setTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
+}
+
+export interface DashboardDerivedState {
+  formattedTrades: Trade[];
+  statistics: StatisticsProps;
+  calendarData: CalendarData;
+}
+
+export interface DashboardActions {
+  refreshTrades: () => Promise<void>;
+  refreshTradesOnly: (options?: { force?: boolean }) => Promise<void>;
+  refreshUserDataOnly: (options?: { force?: boolean; includeSubscription?: boolean }) => Promise<void>;
+  refreshAllData: (options?: { force?: boolean }) => Promise<void>;
+  isPlusUser: () => boolean;
+  changeIsFirstConnection: (isFirstConnection: boolean) => void;
+
+  // Mutations
+  // Trades
+  updateTrades: (
+    tradeIds: string[],
+    update: Partial<Trade>
+  ) => Promise<void>;
+  deleteTrades: (tradeIds: string[]) => Promise<void>;
+  groupTrades: (tradeIds: string[]) => Promise<void>;
+  ungroupTrades: (tradeIds: string[]) => Promise<void>;
+  getTradeImages: (tradeId: string) => Promise<{
+    imageBase64: string | null;
+    imageBase64Second: string | null;
+  } | null>;
+
+  // Accounts
+  deleteAccount: (account: Account) => Promise<void>;
+  saveAccount: (account: Account) => Promise<void>;
+
+  // Groups
+  saveGroup: (name: string) => Promise<Group | undefined>;
+  renameGroup: (groupId: string, name: string) => Promise<void>;
+  deleteGroup: (groupId: string) => Promise<void>;
+  moveAccountToGroup: (
+    accountId: string,
+    targetGroupId: string | null
+  ) => Promise<void>;
+  moveAccountsToGroup: (
+    accountIds: string[],
+    targetGroupId: string | null
+  ) => Promise<void>;
+
+  // Payouts
+  savePayout: (payout: PrismaPayout | AccountPayout) => Promise<void>;
+  deletePayout: (payoutId: string) => Promise<void>;
+
+  // Dashboard layout
+  saveDashboardLayout: (layout: PrismaDashboardLayout) => Promise<void>;
+}
+type DataContextType = DashboardDataState &
+  DashboardFiltersState &
+  DashboardDerivedState &
+  DashboardActions;
+
+const DataContext = createContext<DataContextType | undefined>(undefined);
+const DashboardDataStateContext = createContext<DashboardDataState | undefined>(
+  undefined
+);
+const DashboardUiStateContext = createContext<DashboardUiState | undefined>(
+  undefined
+);
+const DashboardTradesListContext = createContext<Trade[] | undefined>(undefined);
+const DashboardAccountsListContext = createContext<Account[] | undefined>(
+  undefined
+);
+const DashboardFiltersContext = createContext<DashboardFiltersState | undefined>(
+  undefined
+);
+const DashboardDerivedContext = createContext<DashboardDerivedState | undefined>(
+  undefined
+);
+const DashboardActionsContext = createContext<DashboardActions | undefined>(
+  undefined
+);
+
+// Add this hook before the UserDataProvider component
+function useIsMobileDetection() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 768px)").matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mobileQuery = window.matchMedia("(max-width: 768px)");
+    const checkMobile = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile(e.matches);
+
+    // Check immediately
+    checkMobile(mobileQuery);
+
+    // Add listener for changes
+    mobileQuery.addEventListener("change", checkMobile);
+    return () => mobileQuery.removeEventListener("change", checkMobile);
+  }, []);
+
+  return isMobile;
+}
+
+export const DataProvider: React.FC<{
+  children: React.ReactNode;
+  isSharedView?: boolean;
+  initialSharedSlug?: string;
+  initialSharedData?: {
+    params: SharedParams;
+    trades: Trade[];
+    groups: GroupInput[];
+  } | null;
+  adminView?: {
+    userId: string;
+  };
+}> = ({
+  children,
+  isSharedView = false,
+  initialSharedSlug,
+  initialSharedData = null,
+  adminView = null,
+}) => {
+  const supabase = useMemo(() => createClient(), []);
+  const params = useParams();
+  const isMobile = useIsMobileDetection();
+
+  // Get store values
+  const setUser = useUserStore((state) => state.setUser);
+  const setSubscription = useUserStore((state) => state.setSubscription);
+  const setTags = useUserStore((state) => state.setTags);
+  const setAccounts = useUserStore((state) => state.setAccounts);
+  const setGroups = useUserStore((state) => state.setGroups);
+  const setDashboardLayout = useUserStore((state) => state.setDashboardLayout);
+  const setMoods = useMoodStore((state) => state.setMoods);
+  const supabaseUser = useUserStore((state) => state.supabaseUser);
+  const timezone = useUserStore((state) => state.timezone);
+  const groups = useUserStore((state) => state.groups);
+  const accounts = useUserStore((state) => state.accounts);
+  const setSupabaseUser = useUserStore((state) => state.setSupabaseUser);
+  const setTickDetails = useTickDetailsStore((state) => state.setTickDetails);
+  const tickDetails = useTickDetailsStore((state) => state.tickDetails);
+  const setEvents = useFinancialEventsStore((state) => state.setEvents);
+  const trades = useTradesStore((state) => state.trades);
+  const setTrades = useTradesStore((state) => state.setTrades);
+  const dashboardLayout = useUserStore((state) => state.dashboardLayout);
+  const locale = useCurrentLocale();
+  const isLoading = useUserStore((state) => state.isLoading);
+  const setIsLoading = useUserStore((state) => state.setIsLoading);
+
+  // Subscription store
+  const setSubscriptionData = useSubscriptionStore(
+    (state) => state.setSubscription
+  );
+  const setSubscriptionLoading = useSubscriptionStore(
+    (state) => state.setIsLoading
+  );
+  const setSubscriptionError = useSubscriptionStore(
+    (state) => state.setError
+  );
+  const bootstrappedSharedSlugRef = useRef<string | null>(null);
+
+  const buildSharedAccountNumbers = useCallback(
+    (sharedData: NonNullable<typeof initialSharedData>) =>
+      sharedData.params.accountNumbers.length > 0
+        ? sharedData.params.accountNumbers
+        : Array.from(new Set(sharedData.trades.map((trade) => trade.accountNumber))),
+    []
+  );
+
+  const buildSharedParams = useCallback(
+    (sharedData: NonNullable<typeof initialSharedData>) => ({
+      ...sharedData.params,
+      accountNumbers: buildSharedAccountNumbers(sharedData),
+    }),
+    [buildSharedAccountNumbers]
+  );
+
+  const prepareSharedTrades = useCallback(
+    (incomingTrades: Trade[]) =>
+      incomingTrades
+        .filter((trade) => isValid(new Date(trade.entryDate)))
+        .map((trade) => {
+          let utcDateStr = "";
+          try {
+            utcDateStr = formatInTimeZone(
+              new Date(trade.entryDate),
+              timezone || "UTC",
+              "yyyy-MM-dd"
+            );
+          } catch (error) {
+            logger.error({ tradeId: trade.id, error }, "Error formatting trade date");
+          }
+
+          return {
+            ...trade,
+            utcDateStr,
+          };
+        }),
+    [timezone]
+  );
+
+  // Local states
+  const [sharedParams, setSharedParams] = useState<SharedParams | null>(() =>
+    initialSharedData ? buildSharedParams(initialSharedData) : null
+  );
+
+  // Filter states
+  const [instruments, setInstruments] = useState<string[]>([]);
+  const [accountNumbers, setAccountNumbers] = useState<string[]>(() =>
+    initialSharedData ? buildSharedAccountNumbers(initialSharedData) : []
+  );
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [tickRange, setTickRange] = useState<TickRange>({
+    min: undefined,
+    max: undefined,
+  });
+  const [pnlRange, setPnlRange] = useState<PnlRange>({
+    min: undefined,
+    max: undefined,
+  });
+  const [timeRange, setTimeRange] = useState<TimeRange>({ range: null });
+  const [tickFilter, setTickFilter] = useState<TickFilter>({ value: null });
+  const [weekdayFilter, setWeekdayFilter] = useState<WeekdayFilter>({
+    days: [],
+  });
+  const [hourFilter, setHourFilter] = useState<HourFilter>({ hour: null });
+  const [tagFilter, setTagFilter] = useState<TagFilter>({ tags: [] });
+  const [isFirstConnection, setIsFirstConnection] = useState(false);
+
+  // Sanitize trades to prevent NaN/Infinity poisoning from bad cache/data
+  const sanitizeTradesForState = useCallback((incomingTrades: Trade[]) => {
+    if (!Array.isArray(incomingTrades)) return [];
+    return incomingTrades
+      .map((t) => ({
+        ...t,
+        pnl: Number.isFinite(Number(t.pnl)) ? Number(t.pnl) : 0,
+        entryPrice: Number.isFinite(Number(t.entryPrice)) ? Number(t.entryPrice) : 0,
+        quantity: Number.isFinite(Number(t.quantity)) ? Number(t.quantity) : 0,
+        commission: Number.isFinite(Number(t.commission)) ? Number(t.commission) : 0,
+      }))
+      .filter((t) => isValid(new Date(t.entryDate)));
+  }, []);
+
+  const withTimeout = useCallback(
+    async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`[DataProvider] Timeout after ${ms}ms: ${label}`));
+        }, ms);
+      });
+
+      try {
+        return await Promise.race([promise, timeoutPromise]);
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
+    },
+    []
+  );
+
+  const fetchAllTrades = useCallback(
+    async (userId: string | null = null, force: boolean = false): Promise<Trade[]> => {
+      const allTrades: Trade[] = [];
+      let page = 1;
+      let hasMore = true;
+      const pageSize = 500;
+
+      while (hasMore) {
+        const response = await withTimeout(
+          getTradesAction(userId, page, pageSize, force && page === 1),
+          15000,
+          `getTradesAction(page=${page})`
+        );
+        const pageTrades = Array.isArray(response?.trades)
+          ? normalizeTradesForClient(response.trades as (PrismaTrade | SerializedTrade)[])
+          : [];
+
+        allTrades.push(...pageTrades);
+        hasMore = Boolean(response?.metadata?.hasMore) && pageTrades.length > 0;
+        page += 1;
+      }
+
+      return allTrades;
+    },
+    [withTimeout]
+  );
+
+  const syncSharedDataState = useCallback(
+    (sharedData: NonNullable<typeof initialSharedData>) => {
+      const hydratedSharedParams = buildSharedParams(sharedData);
+      const sharedGroups = normalizeGroupsForClient(sharedData.groups || []);
+      const sharedAccounts = normalizeAccountsForClient(
+        (sharedData.groups?.flatMap((group) => group.accounts) || []) as AccountInput[]
+      );
+
+      setTrades(sanitizeTradesForState(prepareSharedTrades(sharedData.trades)));
+      setSharedParams(hydratedSharedParams);
+      setAccountNumbers(hydratedSharedParams.accountNumbers);
+      setDashboardLayout(defaultLayouts);
+      setGroups(sharedGroups);
+      setAccounts(sharedAccounts);
+
+      if (sharedData.params.tickDetails) {
+        setTickDetails(sharedData.params.tickDetails);
+      }
+
+      return sharedAccounts;
+    },
+    [
+      buildSharedParams,
+      prepareSharedTrades,
+      sanitizeTradesForState,
+      setAccounts,
+      setDashboardLayout,
+      setGroups,
+      setTickDetails,
+      setTrades,
+    ]
+  );
+
+  const hydrateSharedAccountMetrics = useCallback(
+    async (sharedAccounts: Account[]) => {
+      let accountsWithMetrics = sharedAccounts;
+      try {
+        accountsWithMetrics = await withTimeout(
+          calculateAccountMetricsAction(sharedAccounts),
+          15000,
+          "calculateAccountMetricsAction(shared)"
+        );
+      } catch (error) {
+        logger.warn({ error }, "Account metrics timed out for shared view; continuing without metrics");
+      }
+
+      setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+    },
+    [setAccounts, withTimeout]
+  );
+
+  // Load data from the server
+  const loadData = useCallback(async () => {
+    logger.debug({ isSharedView }, "DataProvider: loadData triggered");
+    // Prevent multiple simultaneous loads
+    try {
+      setIsLoading(true);
+
+      if (isSharedView) {
+        if (initialSharedData) {
+          const sharedAccounts = syncSharedDataState(initialSharedData);
+          await hydrateSharedAccountMetrics(sharedAccounts);
+          setIsLoading(false);
+          return;
+        }
+
+        const sharedData = await withTimeout(
+          loadSharedData(params.slug as string),
+          15000,
+          "loadSharedData"
+        );
+        if (!sharedData.error) {
+          const sharedAccounts = syncSharedDataState({
+            params: sharedData.params,
+            trades: sharedData.trades as Trade[],
+            groups: (sharedData.groups || []) as GroupInput[],
+          });
+          await hydrateSharedAccountMetrics(sharedAccounts);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (adminView) {
+        const adminTrades = await withTimeout(
+          fetchAllTrades(adminView.userId as string, false),
+          20000,
+          "fetchAllTrades(admin)"
+        );
+        setTrades(sanitizeTradesForState(adminTrades));
+        // RESET ALL OTHER STATES
+        setUser(null);
+        setSubscription(null);
+        setTags([]);
+        setGroups([]);
+        setMoods([]);
+        setEvents([]);
+        setTickDetails([]);
+        setAccounts([]);
+        setGroups([]);
+        setDashboardLayout({
+          id: "admin-layout",
+          userId: "admin",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          desktop: defaultLayouts.desktop,
+          mobile: defaultLayouts.mobile,
+        });
+        return;
+      }
+
+      // Step 1: Get Supabase user
+      const {
+        data: { user },
+      } = await withTimeout(supabase.auth.getUser(), 15000, "supabase.auth.getUser");
+
+      if (!user?.id) {
+        await signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      setSupabaseUser(user);
+
+      // CRITICAL: Get dashboard layout first
+      // But check if the layout is already in the state
+      if (!dashboardLayout) {
+        const userId = await withTimeout(getUserId(), 15000, "getUserId(for layout)");
+        const dashboardLayoutResponse = await withTimeout(
+          getDashboardLayout(userId),
+          15000,
+          "getDashboardLayout"
+        );
+        if (dashboardLayoutResponse) {
+          setDashboardLayout(
+            dashboardLayoutResponse as unknown as DashboardLayoutWithWidgets
+          );
+        } else {
+          // If no layout exists in database, use default layout
+          setDashboardLayout(defaultLayouts);
+        }
+      }
+
+      // Step 2: Fetch trades (with caching server side)
+      const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
+      if (userId && !isSharedView) {
+        // Try local cache first
+        const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
+        if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
+          logger.debug({ userId, count: cachedTrades.length }, "Using local IndexedDB cache for trades");
+          setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
+
+          // Refresh in background if not in dev or if we want freshest data
+          fetchAllTrades(userId, false).then(freshTrades => {
+            if (freshTrades && freshTrades.length > 0) {
+              setTrades(sanitizeTradesForState(freshTrades));
+              setTradesCache(userId, freshTrades).catch((err) => logger.error({ err }, "Failed to set trades cache"));
+            }
+          }).catch((err) => logger.error({ err }, "Failed to refresh trades from cache"));
+        } else {
+          if (!userId) return;
+          logger.debug({ userId }, "Refreshing trades for user");
+
+          const safeTrades = await withTimeout(
+            fetchAllTrades(userId, false),
+            20000,
+            "fetchAllTrades(user)"
+          );
+          logger.info({ userId, count: safeTrades.length }, "Fresh trades fetched");
+
+          // Only use mock data in development — never show fake data in production
+          const tradesToUse = safeTrades.length > 0
+            ? safeTrades
+            : process.env.NODE_ENV === 'development'
+              ? generateMockTrades(userId || "demo-user")
+              : [];
+          logger.debug({ serverTrades: safeTrades.length, usingTrades: tradesToUse.length, isMock: safeTrades.length === 0 && tradesToUse.length > 0 }, "Trades loaded");
+          setTrades(sanitizeTradesForState(tradesToUse));
+          if (tradesToUse.length > 0) {
+            setTradesCache(userId, tradesToUse).catch((err) => logger.error({ err }, "Failed to set trades cache"));
+          }
+        }
+      } else {
+        const safeTrades = await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
+        setTrades(sanitizeTradesForState(safeTrades));
+      }
+
+      // Step 3: Fetch user data
+      // Check local cache for user data
+      if (userId && !isSharedView) {
+        const cachedUserData = await withTimeout(getUserDataCache(userId), 2000, "getUserDataCache");
+        if (cachedUserData) {
+          logger.debug({ userId }, "Using local IndexedDB cache for user data");
+          // Apply cached data immediately
+          const normalizedAccounts = normalizeAccountsForClient(cachedUserData.accounts);
+          setAccounts(normalizedAccounts);
+          setUser(cachedUserData.userData);
+          setSubscription(cachedUserData.subscription as PrismaSubscription | null);
+          setTags(cachedUserData.tags);
+          setGroups(normalizeGroupsForClient(cachedUserData.groups));
+          setMoods(cachedUserData.moodHistory);
+          setEvents(cachedUserData.financialEvents);
+          setTickDetails(cachedUserData.tickDetails);
+        }
+      }
+
+      const data = await withTimeout(getUserData(), 20000, "getUserData");
+      logger.debug({ hasData: !!data, accountsCount: data?.accounts?.length || 0, tagsCount: data?.tags?.length || 0 }, "User data response");
+
+      if (!data) {
+        await signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      // Calculate metrics for each account
+      const normalizedAccounts = normalizeAccountsForClient(
+        (data.accounts || []) as AccountInput[]
+      );
+      let accountsWithMetrics = normalizedAccounts;
+      try {
+        accountsWithMetrics = await withTimeout(
+          calculateAccountMetricsAction(normalizedAccounts),
+          20000,
+          "calculateAccountMetricsAction"
+        );
+      } catch (e) {
+        logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
+      }
+      setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+
+      setUser(data.userData);
+      setSubscription(data.subscription as PrismaSubscription | null);
+      setTags(data.tags);
+      setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
+      setMoods(data.moodHistory);
+      setEvents(data.financialEvents);
+      setTickDetails(data.tickDetails);
+      setIsFirstConnection(data.userData?.isFirstConnection || false);
+
+      // Save to local cache in background
+      if (userId && !isSharedView) {
+        setUserDataCache(userId, {
+          userData: data.userData,
+          subscription: data.subscription as PrismaSubscription | null,
+          tickDetails: data.tickDetails,
+          tags: data.tags,
+          accounts: normalizeAccountsForClient((data.accounts || []) as AccountInput[]),
+          groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
+          financialEvents: data.financialEvents,
+          moodHistory: data.moodHistory
+        }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
+      }
+    } catch (error) {
+      logger.error({ error }, "FATAL: Error loading data");
+      // Only fallback to mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        const currentUserId = (await getUserId().catch(() => null)) || "error-fallback";
+        logger.warn({ userId: currentUserId }, "Falling back to mock data due to error");
+        setTrades(sanitizeTradesForState(generateMockTrades(currentUserId)));
+      } else {
+        setTrades([]);
+      }
+      setAccounts([]);
+      setGroups([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    isSharedView,
+    initialSharedData,
+    params?.slug,
+    fetchAllTrades,
+    hydrateSharedAccountMetrics,
+    setIsLoading,
+    syncSharedDataState,
+    withTimeout,
+    supabase,
+  ]);
+
+  useLayoutEffect(() => {
+    if (!isSharedView || !initialSharedData || !initialSharedSlug) return;
+    if (bootstrappedSharedSlugRef.current === initialSharedSlug) return;
+
+    bootstrappedSharedSlugRef.current = initialSharedSlug;
+    const sharedAccounts = syncSharedDataState(initialSharedData);
+    setIsLoading(false);
+    hydrateSharedAccountMetrics(sharedAccounts).catch((error) => {
+      logger.error({ error }, "Failed to hydrate shared account metrics");
+    });
+  }, [
+    hydrateSharedAccountMetrics,
+    initialSharedData,
+    initialSharedSlug,
+    isSharedView,
+    setIsLoading,
+    syncSharedDataState,
+  ]);
+
+  // Load data on mount and when isSharedView changes
+  useEffect(() => {
+    let mounted = true;
+
+    const loadDataIfMounted = async () => {
+      if (!mounted) return;
+      if (isSharedView && initialSharedData) {
+        return;
+      }
+      await loadData();
+      if (isSharedView) return;
+      await loadSubscriptionData();
+    };
+
+    loadDataIfMounted();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isSharedView, initialSharedData, loadData]);
+
+  // Persist language changes without blocking UI
+  useEffect(() => {
+    const updateLanguage = async () => {
+      if (!supabaseUser?.id || !locale) return;
+      // Fire and forget; do not block UI
+      await updateUserLanguage(locale).catch((e) => {
+        logger.error({ error: e, locale }, "Failed to update user language");
+      });
+    };
+    updateLanguage();
+  }, [locale, supabaseUser?.id]);
+
+  const loadSubscriptionData = useCallback(async () => {
+    try {
+      setSubscriptionLoading(true);
+      const subscriptionData = await withTimeout(
+        getSubscriptionData(),
+        15000,
+        "getSubscriptionData"
+      );
+      setSubscriptionData(subscriptionData);
+      setSubscriptionError(null);
+    } catch (error) {
+      logger.error({ error }, "Error loading Whop subscription");
+      setSubscriptionError(
+        error instanceof Error ? error.message : "Failed to load subscription"
+      );
+      setSubscriptionData(null);
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  }, [withTimeout, setSubscriptionData, setSubscriptionError, setSubscriptionLoading]);
+
+  const refreshTradesOnly = useCallback(
+    async (options?: { force?: boolean; withLoading?: boolean }) => {
+      if (!supabaseUser?.id) return;
+      const { force = false, withLoading = true } = options || {};
+
+      if (withLoading) setIsLoading(true);
+
+      try {
+        const userId = await getUserId();
+        if (!userId) return;
+
+        // Dev-only: serve trades from IndexedDB to avoid DB hits when possible
+        if (process.env.NODE_ENV === "development" && !force) {
+          const cachedTrades = await getTradesCache(userId);
+          if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
+            setTrades(sanitizeTradesForState(cachedTrades));
+            if (withLoading) setIsLoading(false);
+            return;
+          }
+        }
+
+        const safeTrades = await fetchAllTrades(userId, force);
+        const tradesToUse =
+          process.env.NODE_ENV === "development" && safeTrades.length === 0
+            ? generateMockTrades(userId)
+            : safeTrades;
+        setTrades(sanitizeTradesForState(tradesToUse));
+
+        if (process.env.NODE_ENV === "development") {
+          // Best-effort cache write; do not block UI on failure
+          setTradesCache(userId, tradesToUse).catch((err) =>
+            logger.error({ err }, "Failed to cache trades in IndexedDB"),
+          );
+        }
+      } catch (error) {
+        logger.error({ error }, "Error refreshing trades");
+      } finally {
+        if (withLoading) setIsLoading(false);
+      }
+    },
+    [supabaseUser?.id, setTrades, fetchAllTrades]
+  );
+
+  const refreshUserDataOnly = useCallback(
+    async (
+      options?: { force?: boolean; includeSubscription?: boolean; withLoading?: boolean }
+    ) => {
+      if (!supabaseUser?.id) return;
+      const {
+        force = false,
+        includeSubscription = false,
+        withLoading = true,
+      } = options || {};
+
+      if (withLoading) setIsLoading(true);
+
+      try {
+        const data = await withTimeout(
+          getUserData(force),
+          20000,
+          "getUserData(refresh)"
+        );
+
+        if (!data) {
+          await signOut();
+          return;
+        }
+
+        const normalizedAccounts = normalizeAccountsForClient(
+          (data.accounts || []) as AccountInput[]
+        );
+        const accountsWithMetrics = await withTimeout(
+          calculateAccountMetricsAction(normalizedAccounts),
+          20000,
+          "calculateAccountMetricsAction(refresh)"
+        );
+        setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+
+        setUser(data.userData);
+        setSubscription(data.subscription as PrismaSubscription | null);
+        setTags(data.tags);
+        setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
+        setMoods(data.moodHistory);
+        setEvents(data.financialEvents);
+        setTickDetails(data.tickDetails);
+        setIsFirstConnection(data.userData?.isFirstConnection || false);
+
+        if (includeSubscription) {
+          await loadSubscriptionData();
+        }
+      } catch (error) {
+        logger.error({ error }, "Error refreshing user data");
+      } finally {
+        if (withLoading) setIsLoading(false);
+      }
+    },
+    [
+      supabaseUser?.id,
+      setAccounts,
+      setUser,
+      setSubscription,
+      setTags,
+      setGroups,
+      setMoods,
+      setEvents,
+      setTickDetails,
+      setIsFirstConnection,
+      loadSubscriptionData,
+      withTimeout,
+    ]
+  );
+
+  const refreshAllData = useCallback(
+    async (options?: { force?: boolean }) => {
+      if (!supabaseUser?.id) return;
+      const force = options?.force ?? false;
+
+      setIsLoading(true);
+      try {
+        await refreshTradesOnly({ force, withLoading: false });
+        await refreshUserDataOnly({
+          force,
+          includeSubscription: true,
+          withLoading: false,
+        });
+        logger.info("Successfully refreshed trades and user data");
+      } catch (error) {
+        logger.error({ error }, "Error refreshing all data");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [refreshTradesOnly, refreshUserDataOnly, supabaseUser?.id]
+  );
+
+  // Dev-only: persist trades store into IndexedDB so reloads avoid DB hits
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    if (!supabaseUser?.id) return;
+    if (!Array.isArray(trades)) return;
+    if (trades.length === 0) return; // avoid caching empty and blocking future fetches
+
+    const timer = window.setTimeout(() => {
+      setTradesCache(supabaseUser.id, trades).catch((err) =>
+        logger.error({ err }, "Failed to sync trades to IndexedDB"),
+      );
+    }, 200);
+
+    return () => window.clearTimeout(timer);
+  }, [trades, supabaseUser?.id]);
+
+  const sortedTrades = useMemo(() => {
+    return getSortedTrades(trades);
+  }, [trades]);
+
+  const formattedTrades = useMemo(() => {
+    return getFormattedTrades({
+      sortedTrades,
+      groups,
+      accounts,
+      instruments,
+      accountNumbers,
+      dateRange,
+      pnlRange,
+      tickFilter,
+      tickDetails,
+      timeRange,
+      weekdayFilter,
+      hourFilter,
+      tagFilter,
+      timezone,
+    });
+  }, [
+    sortedTrades,
+    groups,
+    accounts,
+    instruments,
+    accountNumbers,
+    dateRange?.from,
+    dateRange?.to,
+    pnlRange.min,
+    pnlRange.max,
+    tickFilter?.value,
+    tickDetails,
+    timeRange.range,
+    weekdayFilter.days,
+    hourFilter.hour,
+    tagFilter.tags,
+    timezone,
+  ]);
+
+  const statistics = useMemo(() => {
+    return getStatisticsWithProfitFactor(formattedTrades, accounts);
+  }, [formattedTrades, accounts]);
+
+  const calendarData = useMemo(
+    () => formatCalendarData(formattedTrades, accounts),
+    [formattedTrades, accounts]
+  );
+
+  const isPlusUser = () => {
+    // Use Whop subscription store for more accurate subscription status
+    const whopSubscription = useSubscriptionStore.getState().subscription;
+    if (whopSubscription) {
+      const planName = whopSubscription.plan?.name?.toLowerCase() || "";
+      return planName.includes("plus") || planName.includes("pro");
+    }
+
+    // Fallback to database subscription
+    const dbSubscription = useUserStore.getState().subscription;
+    return Boolean(
+      dbSubscription?.status === "ACTIVE" &&
+      ["PLUS", "PRO"].includes(
+        dbSubscription?.plan?.split("_")[0].toUpperCase() || ""
+      )
+    );
+  };
+
+  const saveAccount = useCallback(
+    async (newAccount: Account) => {
+      if (!supabaseUser?.id) return;
+
+      try {
+        // Get the current account to preserve other properties
+        const { accounts } = useUserStore.getState();
+        const currentAccount = accounts.find(
+          (acc) => acc.number === newAccount.number
+        ) as Account;
+        // If the account is not found, create it
+        if (!currentAccount) {
+          // Never send client-only fields to server
+          const { trades: _trades, ...serverAccount } = newAccount;
+          const considerBuffer = newAccount.considerBuffer ?? true;
+          const createdAccount = await setupAccountAction(
+            serverAccount as Account
+          );
+
+          // Recalculate metrics for the new account (optimistic, client-side)
+          const accountsWithMetrics = computeMetricsForAccounts(
+            [
+              {
+                ...createdAccount,
+                considerBuffer: createdAccount.considerBuffer ?? considerBuffer,
+              },
+            ],
+            trades
+          );
+          const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
+
+          setAccounts([...accounts, accountWithMetrics]);
+
+          // If the new account has a groupId, update the groups state to include it
+          if (accountWithMetrics.groupId) {
+            setGroups(
+              groups.map((group) => {
+                if (group.id === accountWithMetrics.groupId) {
+                  return {
+                    ...group,
+                    accounts: [...group.accounts, accountWithMetrics],
+                  };
+                }
+                return group;
+              })
+            );
+          }
+          return;
+        }
+
+        // Update the account in the database
+        // Strip client-only fields
+        const { trades: _trades2, ...serverAccount2 } = newAccount;
+        const considerBuffer = newAccount.considerBuffer ?? true;
+        const updatedAccount = await setupAccountAction(
+          serverAccount2 as Account
+        );
+
+        // Recalculate metrics for the updated account (optimistic, client-side)
+        const accountsWithMetrics = computeMetricsForAccounts(
+          [
+            {
+              ...updatedAccount,
+              considerBuffer: updatedAccount.considerBuffer ?? considerBuffer,
+            },
+          ],
+          trades
+        );
+        const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
+
+        // Check if groupId changed
+        const oldGroupId = currentAccount.groupId;
+        const newGroupId = accountWithMetrics.groupId;
+        const groupIdChanged = oldGroupId !== newGroupId;
+
+        // Update the account in the local state with recalculated metrics
+        const updatedAccounts = accounts.map((account: Account) => {
+          if (account.number === accountWithMetrics.number) {
+            return accountWithMetrics;
+          }
+          return account;
+        });
+        setAccounts(updatedAccounts);
+
+        // Update groups state if groupId changed
+        if (groupIdChanged) {
+          // Get fresh groups from store to avoid stale closure references
+          const currentGroups = useUserStore.getState().groups;
+
+          // Check if the target group exists in the groups array
+          const targetGroupExists = currentGroups.some(
+            (g) => g.id === newGroupId
+          );
+
+          if (targetGroupExists) {
+            // Update existing groups
+            setGroups(
+              currentGroups.map((group) => {
+                // If this is the new target group, add the account only if it's not already there
+                if (group.id === newGroupId) {
+                  const accountExists = group.accounts.some(
+                    (acc: Account) =>
+                      acc.id === accountWithMetrics.id ||
+                      acc.number === accountWithMetrics.number
+                  );
+                  return {
+                    ...group,
+                    accounts: accountExists
+                      ? group.accounts
+                      : [...group.accounts, accountWithMetrics],
+                  };
+                }
+                // For all other groups (including the old group), remove the account if it exists
+                return {
+                  ...group,
+                  accounts: group.accounts.filter(
+                    (acc: Account) =>
+                      acc.id !== accountWithMetrics.id &&
+                      acc.number !== accountWithMetrics.number
+                  ),
+                };
+              })
+            );
+          } else if (newGroupId) {
+            // If the group doesn't exist yet (just created), we need to add it
+            // This can happen if a group was just created and saveAccount is called immediately
+            // Try to fetch the group from the database, or create a minimal group object
+            try {
+              const { getGroupsAction } = await import("@/server/groups");
+              const allGroups = await getGroupsAction();
+              const foundGroup = allGroups.find((g) => g.id === newGroupId);
+
+              if (foundGroup) {
+                // Use the actual group from database
+                const updatedGroups = currentGroups.map((group) => ({
+                  ...group,
+                  accounts: group.accounts.filter(
+                    (acc: Account) =>
+                      acc.id !== accountWithMetrics.id &&
+                      acc.number !== accountWithMetrics.number
+                  ),
+                }));
+                setGroups([
+                  ...updatedGroups,
+                  ...normalizeGroupsForClient([{ ...foundGroup, accounts: [accountWithMetrics] } as Group]),
+                ]);
+              } else {
+                // Fallback: create minimal group object (shouldn't happen, but just in case)
+                const newGroup = {
+                  id: newGroupId,
+                  name: "New Group", // Temporary name
+                  userId: supabaseUser.id,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  accounts: [accountWithMetrics],
+                };
+
+                const updatedGroups = currentGroups.map((group) => ({
+                  ...group,
+                  accounts: group.accounts.filter(
+                    (acc: Account) =>
+                      acc.id !== accountWithMetrics.id &&
+                      acc.number !== accountWithMetrics.number
+                  ),
+                }));
+
+                setGroups([...updatedGroups, newGroup]);
+              }
+            } catch (error) {
+              logger.error({ error }, "Error fetching group");
+              // Fallback: create minimal group object
+              const newGroup = {
+                id: newGroupId,
+                name: "New Group",
+                userId: supabaseUser.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                accounts: [accountWithMetrics],
+              };
+
+              const updatedGroups = currentGroups.map((group) => ({
+                ...group,
+                accounts: group.accounts.filter(
+                  (acc: Account) =>
+                    acc.id !== accountWithMetrics.id &&
+                    acc.number !== accountWithMetrics.number
+                ),
+              }));
+
+              setGroups([...updatedGroups, newGroup]);
+            }
+          } else {
+            // Removing from group (groupId is null)
+            setGroups(
+              currentGroups.map((group) => ({
+                ...group,
+                accounts: group.accounts.filter(
+                  (acc: Account) =>
+                    acc.id !== accountWithMetrics.id &&
+                    acc.number !== accountWithMetrics.number
+                ),
+              }))
+            );
+          }
+        }
+      } catch (error) {
+        logger.error({ error }, "Error updating account");
+        throw error;
+      }
+    },
+    [supabaseUser?.id, accounts, setAccounts, groups, setGroups, trades]
+  );
+
+  // Add createGroup function
+  const saveGroup = useCallback(
+    async (name: string) => {
+      if (!supabaseUser?.id) return;
+      try {
+        const newGroup = await saveGroupAction(name);
+        // Explicitly include accounts in the input if needed, though group action returns them.
+        const normalizedNewGroup = normalizeGroupsForClient([newGroup as GroupInput])[0] as Group;
+        setGroups([...groups, normalizedNewGroup]);
+        return normalizedNewGroup;
+      } catch (error) {
+        logger.error({ error }, "Error creating group");
+        throw error;
+      }
+    },
+    [supabaseUser?.id, groups, setGroups]
+  );
+
+  const renameGroup = useCallback(
+    async (groupId: string, name: string) => {
+      if (!supabaseUser?.id) return;
+      try {
+        setGroups(
+          groups.map((group) =>
+            group.id === groupId ? { ...group, name } : group
+          )
+        );
+        await renameGroupAction(groupId, name);
+      } catch (error) {
+        logger.error({ error }, "Error renaming group");
+        throw error;
+      }
+    },
+    [supabaseUser?.id, groups, setGroups]
+  );
+
+  // Add deleteGroup function
+  const deleteGroup = useCallback(
+    async (groupId: string) => {
+      try {
+        // Remove groupdId from accounts
+        const updatedAccounts = accounts.map((account: Account) => {
+          if (account.groupId === groupId) {
+            return { ...account, groupId: null };
+          }
+          return account;
+        });
+        setAccounts(updatedAccounts);
+        setGroups(groups.filter((group) => group.id !== groupId));
+        await deleteGroupAction(groupId);
+      } catch (error) {
+        logger.error({ error }, "Error deleting group");
+        throw error;
+      }
+    },
+    [accounts, setAccounts, groups, setGroups]
+  );
+
+  // Add moveAccountToGroup function
+  const moveAccountToGroup = useCallback(
+    async (accountId: string, targetGroupId: string | null) => {
+      const { accounts: previousAccounts, groups: previousGroups } = useUserStore.getState();
+      try {
+        const { accounts: currentAccounts, groups: currentGroups } =
+          useUserStore.getState();
+        if (!currentAccounts || currentAccounts.length === 0) {
+          logger.warn("No accounts available to move");
+          return;
+        }
+
+        // Update accounts state using the freshest snapshot
+        const updatedAccounts = currentAccounts.map((account: Account) => {
+          if (account.id === accountId) {
+            return { ...account, groupId: targetGroupId };
+          }
+          return account;
+        });
+        setAccounts(updatedAccounts);
+
+        // Update groups state using the freshest snapshot
+        const accountToMove = currentAccounts.find(
+          (acc: Account) => acc.id === accountId
+        );
+        if (accountToMove) {
+          // We have to ensure that the target group is created
+          if (targetGroupId) {
+            const targetGroup = currentGroups.find(
+              (group) => group.id === targetGroupId
+            );
+            if (!targetGroup) {
+              const newGroup = await saveGroup(targetGroupId);
+              if (newGroup) {
+                setGroups(
+                  currentGroups.map((group) =>
+                    group.id === targetGroupId
+                      ? {
+                        ...group,
+                        accounts: [...group.accounts, accountToMove],
+                      }
+                      : group
+                  )
+                );
+              }
+            } else {
+              setGroups(
+                currentGroups.map((group) => {
+                  // If this is the target group, add the account only if it's not already there
+                  if (group.id === targetGroupId) {
+                    const accountExists = group.accounts.some(
+                      (acc: Account) => acc.id === accountId
+                    );
+                    return {
+                      ...group,
+                      accounts: accountExists
+                        ? group.accounts
+                        : [...group.accounts, accountToMove],
+                    };
+                  }
+                  // For all other groups, remove the account if it exists
+                  return {
+                    ...group,
+                    accounts: group.accounts.filter(
+                      (acc: Account) => acc.id !== accountId
+                    ),
+                  };
+                })
+              );
+            }
+          }
+        }
+
+        await moveAccountToGroupAction(accountId, targetGroupId);
+      } catch (error) {
+        logger.error({ error }, "Error moving account to group, rolling back");
+        setAccounts(previousAccounts);
+        setGroups(previousGroups);
+        throw error;
+      }
+    },
+    [setAccounts, setGroups, saveGroup]
+  );
+
+  const moveAccountsToGroup = useCallback(
+    async (accountIds: string[], targetGroupId: string | null) => {
+      const { accounts: previousAccounts, groups: previousGroups } = useUserStore.getState();
+      try {
+        const { accounts: currentAccounts, groups: currentGroups } =
+          useUserStore.getState();
+        if (
+          !currentAccounts ||
+          currentAccounts.length === 0 ||
+          accountIds.length === 0
+        )
+          return;
+
+        const idSet = new Set(accountIds);
+        const accountsToMove = currentAccounts.filter((acc: Account) =>
+          idSet.has(acc.id)
+        );
+
+        // Update accounts state using the freshest snapshot
+        const updatedAccounts = currentAccounts.map((account: Account) =>
+          idSet.has(account.id)
+            ? { ...account, groupId: targetGroupId }
+            : account
+        );
+        setAccounts(updatedAccounts);
+
+        // Update groups state using the freshest snapshot
+        setGroups(
+          currentGroups.map((group) => {
+            const remainingAccounts = group.accounts.filter(
+              (acc: Account) => !idSet.has(acc.id)
+            );
+            if (group.id === targetGroupId) {
+              const missingToAdd = accountsToMove.filter(
+                (acc) =>
+                  !remainingAccounts.some((existing) => existing.id === acc.id)
+              );
+              return {
+                ...group,
+                accounts: [...remainingAccounts, ...missingToAdd],
+              };
+            }
+            return { ...group, accounts: remainingAccounts };
+          })
+        );
+
+        await Promise.all(
+          accountIds.map((id) => moveAccountToGroupAction(id, targetGroupId))
+        );
+      } catch (error) {
+        logger.error({ error }, "Error moving accounts to group, rolling back");
+        setAccounts(previousAccounts);
+        setGroups(previousGroups);
+        throw error;
+      }
+    },
+    [setAccounts, setGroups]
+  );
+
+  // Add savePayout function
+  const savePayout = useCallback(
+    async (payout: PrismaPayout | AccountPayout) => {
+      if (!supabaseUser?.id || isSharedView) return;
+
+      // Capture state for rollback
+      const previousAccounts = [...accounts];
+
+      try {
+        const normalizedPayout = normalizePayoutForClient(payout as any);
+
+        // Update the account with the new/updated payout immediately
+        const updatedAccounts = accounts.map((account: Account) => {
+          if (account.number === payout.accountNumber) {
+            const existingPayouts = account.payouts || [];
+            const isUpdate =
+              payout.id && existingPayouts.some((p) => p.id === payout.id);
+
+            if (isUpdate) {
+              return {
+                ...account,
+                payouts: existingPayouts.map((p) =>
+                  p.id === payout.id ? normalizedPayout : p
+                ),
+              };
+            } else {
+              return {
+                ...account,
+                payouts: [...existingPayouts, normalizedPayout],
+              };
+            }
+          }
+          return account;
+        });
+
+        // Recalculate metrics for the affected account (optimistic, client-side)
+        const affectedAccount = updatedAccounts.find(
+          (acc) => acc.number === payout.accountNumber
+        );
+
+        if (affectedAccount) {
+          const accountsWithMetrics = computeMetricsForAccounts(
+            [affectedAccount],
+            trades
+          );
+          const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
+          setAccounts(
+            updatedAccounts.map((acc) =>
+              acc.number === payout.accountNumber ? accountWithMetrics : acc
+            )
+          );
+        } else {
+          setAccounts(updatedAccounts);
+        }
+
+        // Perform server action in background
+        await savePayoutAction(payout as any);
+      } catch (error) {
+        logger.error({ error }, "Error saving payout, rolling back");
+        setAccounts(previousAccounts);
+        throw error;
+      }
+    },
+    [supabaseUser?.id, isSharedView, accounts, setAccounts, trades]
+  );
+
+  // Add deleteAccount function
+  const deleteAccount = useCallback(
+    async (account: Account) => {
+      if (!supabaseUser?.id || isSharedView) return;
+
+      const previousAccounts = [...accounts];
+      try {
+        // Update local state immediately
+        setAccounts(accounts.filter((acc: Account) => acc.id !== account.id));
+        // Delete from database
+        await deleteAccountAction(account);
+      } catch (error) {
+        logger.error({ error }, "Error deleting account, rolling back");
+        setAccounts(previousAccounts);
+        throw error;
+      }
+    },
+    [supabaseUser?.id, isSharedView, accounts, setAccounts]
+  );
+
+  // Add deletePayout function
+  const deletePayout = useCallback(
+    async (payoutId: string) => {
+      if (!supabaseUser?.id || isSharedView) return;
+
+      try {
+        // Find the account that has this payout
+        const affectedAccount = accounts.find((account: Account) =>
+          account.payouts?.some((p) => p.id === payoutId)
+        );
+
+        // Update accounts with removed payout
+        const updatedAccounts = accounts.map((account: Account) => ({
+          ...account,
+          payouts: account.payouts?.filter((p) => p.id !== payoutId) || [],
+        }));
+
+        // Delete from database
+        await deletePayoutAction(payoutId);
+
+        // Recalculate metrics for the affected account (optimistic, client-side)
+        if (affectedAccount) {
+          const accountToRecalculate = updatedAccounts.find(
+            (acc) => acc.id === affectedAccount.id
+          );
+          if (accountToRecalculate) {
+            const accountsWithMetrics = computeMetricsForAccounts(
+              [accountToRecalculate],
+              trades
+            );
+            const accountWithMetrics = normalizeAccountForClient(accountsWithMetrics[0]);
+
+            // Update accounts with recalculated metrics
+            setAccounts(
+              updatedAccounts.map((acc) =>
+                acc.id === affectedAccount.id ? accountWithMetrics : acc
+              )
+            );
+          } else {
+            setAccounts(updatedAccounts);
+          }
+        } else {
+          setAccounts(updatedAccounts);
+        }
+      } catch (error) {
+        logger.error({ error }, "Error deleting payout");
+        throw error;
+      }
+    },
+    [supabaseUser?.id, isSharedView, accounts, setAccounts, trades]
+  );
+
+  const changeIsFirstConnection = useCallback(
+    async (isFirstConnection: boolean) => {
+      if (!supabaseUser?.id) return;
+      // Update the user in the database
+      setIsFirstConnection(isFirstConnection);
+      await updateIsFirstConnectionAction(isFirstConnection);
+    },
+    [supabaseUser?.id, setIsFirstConnection]
+  );
+
+  const updateTrades = useCallback(
+    async (tradeIds: string[], update: Partial<Trade>) => {
+      if (!supabaseUser?.id) return;
+      if (tradeIds.length === 0) return;
+
+      const previousTrades = [...trades];
+
+      try {
+        const updatedTrades = trades.map((trade: Trade) =>
+          tradeIds.includes(trade.id)
+            ? {
+              ...trade,
+              ...update,
+            }
+            : trade
+        );
+        setTrades(updatedTrades);
+        // Cast to any to bypass strict Decimal vs Number mismatch in server action signature
+        const updatedCount = await updateTradesAction(tradeIds, update as any);
+        if (updatedCount === 0 || updatedCount !== tradeIds.length) {
+          throw new Error(
+            `Failed to persist trade updates (updated ${updatedCount}/${tradeIds.length})`,
+          );
+        }
+      } catch (error) {
+        logger.error({ error }, "Error updating trades, rolling back");
+        setTrades(previousTrades);
+        throw error;
+      }
+    },
+    [supabaseUser?.id, trades, setTrades]
+  );
+
+  const groupTrades = useCallback(
+    async (tradeIds: string[]) => {
+      if (!supabaseUser?.id) return;
+      const previousTrades = [...trades];
+      try {
+        const targetGroupId = tradeIds[0];
+        setTrades(
+          trades.map((trade: Trade) =>
+            tradeIds.includes(trade.id) ? { ...trade, groupId: targetGroupId } : trade
+          )
+        );
+        await groupTradesAction(tradeIds);
+      } catch (error) {
+        logger.error({ error }, "Error grouping trades, rolling back");
+        setTrades(previousTrades);
+        throw error;
+      }
+    },
+    [supabaseUser?.id, trades, setTrades]
+  );
+
+  const ungroupTrades = useCallback(
+    async (tradeIds: string[]) => {
+      if (!supabaseUser?.id) return;
+      const previousTrades = [...trades];
+      try {
+        setTrades(
+          trades.map((trade: Trade) =>
+            tradeIds.includes(trade.id) ? { ...trade, groupId: null } : trade
+          )
+        );
+        await ungroupTradesAction(tradeIds);
+      } catch (error) {
+        logger.error({ error }, "Error ungrouping trades, rolling back");
+        setTrades(previousTrades);
+        throw error;
+      }
+    },
+    [supabaseUser?.id, trades, setTrades]
+  );
+
+  const deleteTrades = useCallback(
+    async (tradeIds: string[]) => {
+      if (!supabaseUser?.id) return;
+
+      // Optimistically remove trades from local state immediately
+      // Use startTransition to mark the expensive recalculation as non-urgent
+      // This keeps the UI responsive while formattedTrades recalculates
+      const remainingTrades = trades.filter(
+        (trade) => !tradeIds.includes(trade.id)
+      );
+
+      // Update state in a transition so it doesn't block the UI
+      setTrades(remainingTrades);
+
+      try {
+        // Delete from database
+        await deleteTradesByIdsAction(tradeIds);
+      } catch (error) {
+        // On error, refresh to restore the correct state
+        logger.error({ error }, "Error deleting trades");
+        await refreshAllData();
+        throw error;
+      }
+    },
+    [supabaseUser?.id, trades, setTrades, refreshAllData]
+  );
+
+  const getTradeImages = useCallback(
+    async (tradeId: string) => {
+      if (!supabaseUser?.id) return null;
+      try {
+        return await getTradeImagesAction(tradeId);
+      } catch (error) {
+        logger.error({ error }, "Error fetching trade images");
+        return null;
+      }
+    },
+    [supabaseUser?.id]
+  );
+
+  const saveDashboardLayout = useCallback(
+    async (layout: PrismaDashboardLayout) => {
+      if (!supabaseUser?.id) return;
+
+      try {
+        setDashboardLayout(layout as unknown as DashboardLayoutWithWidgets);
+        await saveDashboardLayoutAction(layout);
+      } catch (error: unknown) {
+        logger.error({ error }, "Error saving dashboard layout");
+        throw error;
+      }
+    },
+    [supabaseUser?.id, setDashboardLayout]
+  );
+
+  const dataStateValue = useMemo<DashboardDataState>(
+    () => ({
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      setSharedParams,
+      isFirstConnection,
+      setIsFirstConnection,
+      trades,
+      accounts,
+    }),
+    [
+      isLoading,
+      isMobile,
+      isSharedView,
+      sharedParams,
+      setSharedParams,
+      isFirstConnection,
+      setIsFirstConnection,
+      trades,
+      accounts,
+    ]
+  );
+
+  const uiStateValue = useMemo<DashboardUiState>(
+    () => ({
+      isLoading,
+      isMobile,
+      isSharedView,
+    }),
+    [isLoading, isMobile, isSharedView]
+  );
+
+  const filtersValue = useMemo<DashboardFiltersState>(
+    () => ({
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
+      timeRange,
+      setTimeRange,
+      tickFilter,
+      setTickFilter,
+      weekdayFilter,
+      setWeekdayFilter,
+      hourFilter,
+      setHourFilter,
+      tagFilter,
+      setTagFilter,
+    }),
+    [
+      instruments,
+      setInstruments,
+      accountNumbers,
+      setAccountNumbers,
+      dateRange,
+      setDateRange,
+      tickRange,
+      setTickRange,
+      pnlRange,
+      setPnlRange,
+      timeRange,
+      setTimeRange,
+      tickFilter,
+      setTickFilter,
+      weekdayFilter,
+      setWeekdayFilter,
+      hourFilter,
+      setHourFilter,
+      tagFilter,
+      setTagFilter,
+    ]
+  );
+
+  const derivedValue = useMemo<DashboardDerivedState>(
+    () => ({
+      formattedTrades,
+      statistics,
+      calendarData,
+    }),
+    [formattedTrades, statistics, calendarData]
+  );
+
+  const actionsValue = useMemo<DashboardActions>(
+    () => ({
+      isPlusUser,
+      refreshTrades: refreshAllData,
+      refreshTradesOnly,
+      refreshUserDataOnly,
+      refreshAllData,
+      changeIsFirstConnection,
+      updateTrades,
+      deleteTrades,
+      groupTrades,
+      ungroupTrades,
+      getTradeImages,
+      deleteAccount,
+      saveAccount,
+      saveGroup,
+      renameGroup,
+      deleteGroup,
+      moveAccountToGroup,
+      moveAccountsToGroup,
+      savePayout,
+      deletePayout,
+      saveDashboardLayout,
+    }),
+    [
+      isPlusUser,
+      refreshAllData,
+      refreshTradesOnly,
+      refreshUserDataOnly,
+      changeIsFirstConnection,
+      updateTrades,
+      deleteTrades,
+      groupTrades,
+      ungroupTrades,
+      getTradeImages,
+      deleteAccount,
+      saveAccount,
+      saveGroup,
+      renameGroup,
+      deleteGroup,
+      moveAccountToGroup,
+      moveAccountsToGroup,
+      savePayout,
+      deletePayout,
+      saveDashboardLayout,
+    ]
+  );
+
+  const contextValue = useMemo<DataContextType>(
+    () => ({
+      ...dataStateValue,
+      ...filtersValue,
+      ...derivedValue,
+      ...actionsValue,
+    }),
+    [dataStateValue, filtersValue, derivedValue, actionsValue]
+  );
+
+  return (
+    <DashboardUiStateContext.Provider value={uiStateValue}>
+      <DashboardTradesListContext.Provider value={trades}>
+        <DashboardAccountsListContext.Provider value={accounts}>
+          <DashboardDataStateContext.Provider value={dataStateValue}>
+            <DashboardFiltersContext.Provider value={filtersValue}>
+              <DashboardDerivedContext.Provider value={derivedValue}>
+                <DashboardActionsContext.Provider value={actionsValue}>
+                  <DataContext.Provider value={contextValue}>
+                    {children}
+                  </DataContext.Provider>
+                </DashboardActionsContext.Provider>
+              </DashboardDerivedContext.Provider>
+            </DashboardFiltersContext.Provider>
+          </DashboardDataStateContext.Provider>
+        </DashboardAccountsListContext.Provider>
+      </DashboardTradesListContext.Provider>
+    </DashboardUiStateContext.Provider>
+  );
+};
+
+export const useData = () => {
+  const context = useContext(DataContext);
+  if (!context) {
+    throw new Error("useData must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardTrades = () => {
+  const context = useContext(DashboardDataStateContext);
+  if (!context) {
+    throw new Error("useDashboardTrades must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardIsMobile = () => {
+  const context = useContext(DashboardUiStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsMobile must be used within a DataProvider");
+  }
+  return context.isMobile;
+};
+
+export const useDashboardIsLoading = () => {
+  const context = useContext(DashboardUiStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsLoading must be used within a DataProvider");
+  }
+  return context.isLoading;
+};
+
+export const useDashboardIsSharedView = () => {
+  const context = useContext(DashboardUiStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsSharedView must be used within a DataProvider");
+  }
+  return context.isSharedView;
+};
+
+export const useDashboardTradeItems = () => {
+  const context = useContext(DashboardTradesListContext);
+  if (!context) {
+    throw new Error("useDashboardTradeItems must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardAccountsList = () => {
+  const context = useContext(DashboardAccountsListContext);
+  if (!context) {
+    throw new Error("useDashboardAccountsList must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardFilters = () => {
+  const context = useContext(DashboardFiltersContext);
+  if (!context) {
+    throw new Error("useDashboardFilters must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardStats = () => {
+  const context = useContext(DashboardDerivedContext);
+  if (!context) {
+    throw new Error("useDashboardStats must be used within a DataProvider");
+  }
+  return context;
+};
+
+export const useDashboardActions = () => {
+  const context = useContext(DashboardActionsContext);
+  if (!context) {
+    throw new Error("useDashboardActions must be used within a DataProvider");
+  }
+  return context;
+};

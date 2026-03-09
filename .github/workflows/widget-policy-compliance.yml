@@ -1,0 +1,61 @@
+name: Widget Policy Compliance Check
+
+on:
+  pull_request:
+    paths:
+      - 'app/**/widgets/**'
+      - 'lib/widget-policy-engine/**'
+      - 'schemas/**'
+      - '.github/scripts/check-manifests.js'
+      - '.github/workflows/widget-policy-compliance.yml'
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  widget-policy:
+    name: Widget Policy Sanity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate schema files exist and are valid JSON
+        run: |
+          node -e "
+            const fs = require('fs');
+            const schemas = [
+              'schemas/widget-input.schema.json',
+              'schemas/widget-output.schema.json',
+              'schemas/widget-policy-manifest.schema.json'
+            ];
+            for (const schema of schemas) {
+              const raw = fs.readFileSync(schema, 'utf8');
+              const parsed = JSON.parse(raw);
+              if (!parsed.$schema) {
+                throw new Error(schema + ' missing $schema field');
+              }
+              console.log('ok:', schema);
+            }
+          "
+
+      - name: Check widget manifests
+        run: node .github/scripts/check-manifests.js
+
+      - name: Run targeted widget-policy tests when present
+        run: |
+          if [ -d "lib/widget-policy-engine" ]; then
+            npx vitest run --passWithNoTests "lib/widget-policy-engine/**/*.test.ts" "lib/widget-policy-engine/**/*.test.tsx"
+          else
+            echo "widget-policy-engine not present, skipping targeted tests"
+          fi

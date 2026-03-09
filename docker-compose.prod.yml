@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: quntedge:prod
+    container_name: quntedge-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEXT_STANDALONE: "1"
+    ports:
+      - "3000:3000"
+    volumes:
+      - next_cache:/app/.next/cache
+
+  migrate:
+    image: node:20-slim
+    container_name: deltalytix-migrate
+    working_dir: /app
+    profiles:
+      - migrate
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    command: sh -c "npm ci && npx prisma migrate deploy"
+
+volumes:
+  next_cache:

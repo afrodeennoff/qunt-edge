@@ -1,0 +1,1309 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public"]
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id                 String           @id @default(cuid())
+  email              String           @unique
+  auth_user_id       String           @unique
+  isFirstConnection  Boolean          @default(true)
+  isBeta             Boolean          @default(false)
+  language           String           @default("en")
+  etpToken           String?
+  etpTokenHash       String?          @unique
+  etpTokenExpiresAt  DateTime?
+  thorToken          String?
+  thorTokenHash      String?          @unique
+  thorTokenExpiresAt DateTime?
+  referral           Referral?        @relation("UserReferral")
+  referralRedemption ReferralRedemption? @relation("UserReferralRedemption")
+  subscription       Subscription?    @relation("UserSubscription")
+  dashboardLayout    DashboardLayout? @relation("UserDashboardLayout")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts              Account[]              @relation("UserAccounts")
+  businesses            Business[]             @relation("UserBusinesses")
+  teams                 Team[]                 @relation("UserTeams")
+  teamMemberships       TeamMember[]           @relation("UserTeamMemberships")
+  organizations         Organization[]         @relation("UserOrganizations")
+  teamSubscriptions     TeamSubscription[]     @relation("UserTeamSubscriptions")
+  businessSubscriptions BusinessSubscription[] @relation("UserBusinessSubscriptions")
+  comments              Comment[]              @relation("UserComments")
+  groups                Group[]                @relation("UserGroups")
+  moods                 Mood[]                 @relation("UserMoods")
+  notifications         Notification[]         @relation("UserNotifications")
+  orders                Order[]                @relation("UserOrders")
+  posts                 Post[]                 @relation("UserPosts")
+  synchronizations      Synchronization[]      @relation("UserSynchronizations")
+  tags                  Tag[]                  @relation("UserTags")
+  votes                 Vote[]                 @relation("UserVotes")
+  paymentTransactions   PaymentTransaction[]   @relation("UserPaymentTransactions")
+  invoices              Invoice[]              @relation("UserInvoices")
+  refunds               Refund[]               @relation("UserRefunds")
+  subscriptionEvents    SubscriptionEvent[]    @relation("UserSubscriptionEvents")
+  paymentMethods        PaymentMethod[]        @relation("UserPaymentMethods")
+  usageMetrics          UsageMetric[]          @relation("UserUsageMetrics")
+  aiRequestLogs         AiRequestLog[]         @relation("UserAiRequestLogs")
+  authAttempts          AuthAttempt[]          @relation("UserAuthAttempts")
+  oauthStates           OAuthState[]           @relation("UserOAuthStates")
+  recoveryCodes         RecoveryCode[]         @relation("UserRecoveryCodes")
+
+  @@index([email])
+  @@schema("public")
+}
+
+model OAuthState {
+  id        String    @id @default(uuid())
+  userId    String
+  provider  String
+  stateHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation("UserOAuthStates", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, provider])
+  @@index([expiresAt])
+  @@schema("public")
+}
+
+model AuthAttempt {
+  id             String    @id @default(uuid())
+  userId         String?
+  emailHash      String
+  ipPrefix       String
+  actionType     String
+  failCount      Int       @default(0)
+  firstFailureAt DateTime?
+  lastFailureAt  DateTime?
+  lockedUntil    DateTime?
+  lastSuccessAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User? @relation("UserAuthAttempts", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([emailHash, ipPrefix, actionType])
+  @@index([lockedUntil])
+  @@index([emailHash])
+  @@schema("public")
+}
+
+model RecoveryCode {
+  id        String    @id @default(uuid())
+  userId    String
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation("UserRecoveryCodes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, codeHash])
+  @@index([userId])
+  @@schema("public")
+}
+
+model Referral {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  slug            String   @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserReferral", fields: [userId], references: [id], onDelete: Cascade)
+  redemptions ReferralRedemption[] @relation("ReferralOwner")
+
+  @@index([userId])
+  @@index([slug])
+  @@schema("public")
+}
+
+model ReferralRedemption {
+  id             String   @id @default(uuid())
+  referralId     String
+  referredUserId String   @unique
+  createdAt      DateTime @default(now())
+
+  referral     Referral @relation("ReferralOwner", fields: [referralId], references: [id], onDelete: Cascade)
+  referredUser User     @relation("UserReferralRedemption", fields: [referredUserId], references: [id], onDelete: Cascade)
+
+  @@unique([referralId, referredUserId])
+  @@index([referralId])
+  @@index([referredUserId])
+  @@schema("public")
+}
+
+model Subscription {
+   id                String  @id @unique @default(uuid())
+   email             String  @unique
+   plan              String
+   status            SubscriptionStatus @default(ACTIVE)
+   cancelAtPeriodEnd Boolean @default(false)
+   interval          String?
+
+   userId      String    @unique
+   endDate     DateTime?
+   trialEndsAt DateTime?
+
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+
+   user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+
+   @@index([email])
+   @@schema("public")
+}
+
+model DashboardLayout {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  desktop Json @default("[]")
+  mobile  Json @default("[]")
+
+  version  Int     @default(1)
+  checksum String?
+  deviceId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation("UserDashboardLayout", fields: [userId], references: [auth_user_id], onDelete: Cascade)
+  versionHistory LayoutVersion[]
+
+  @@index([userId])
+  @@schema("public")
+}
+
+model LayoutVersion {
+  id       String @id @default(uuid())
+  layoutId String
+
+  desktop Json @default("[]")
+  mobile  Json @default("[]")
+
+  version     Int
+  checksum    String
+  description String?
+
+  deviceId   String
+  changeType String @default("manual") // manual, auto, migration, conflict_resolution
+
+  createdAt DateTime @default(now())
+
+  layout DashboardLayout @relation(fields: [layoutId], references: [id], onDelete: Cascade)
+
+  @@index([layoutId])
+  @@index([layoutId, version])
+  @@schema("public")
+}
+
+// ============================================================================
+// TRADING CORE
+// ============================================================================
+
+model Account {
+  id     String @id @unique @default(uuid())
+  number String
+  userId String
+
+  propfirm        String  @default("")
+  accountSize     String?
+  accountSizeName String?
+
+  startingBalance   Decimal  @default(0)
+  balanceRequired   Decimal?
+  drawdownThreshold Decimal  @default(0)
+  dailyLoss         Decimal  @default(0)
+  profitTarget      Decimal  @default(0)
+  buffer            Decimal  @default(0)
+  considerBuffer    Boolean  @default(true)
+
+  trailingDrawdown   Boolean  @default(false)
+  trailingStopProfit Decimal?
+  trailing           String?
+
+  isPerformance Boolean @default(false)
+  evaluation    Boolean @default(true)
+
+  payoutCount   Int      @default(0)
+  minPayout     Decimal?
+  maxPayout     String?
+  profitSharing Decimal?
+  payoutBonus   Decimal?
+  payoutPolicy  String?
+
+  consistencyPercentage   Decimal? @default(30)
+  minTradingDaysForPayout Int?
+  minDays                 Int?
+  minPnlToCountAsDay      Decimal?
+
+  activationFees  Decimal?
+  price           Decimal?
+  priceWithPromo  Decimal?
+  promoPercentage Decimal?
+  promoType       PromoType?
+
+  tradingNewsAllowed Boolean @default(true)
+  rulesDailyLoss     String?
+
+  autoRenewal             Boolean           @default(false)
+  paymentFrequency        PaymentFrequency?
+  renewalNotice           Int?
+  nextPaymentDate         DateTime?
+  renewalNoticeLastSentAt DateTime?
+
+  isRecursively     String?
+  maxFundedAccounts Int?
+
+  resetDate                       DateTime?
+  shouldConsiderTradesBeforeReset Boolean   @default(true)
+
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  trades  Trade[]
+  payouts Payout[]
+
+  user User @relation("UserAccounts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([number, userId])
+  @@index([userId])
+  @@index([number])
+  @@index([groupId])
+  @@index([nextPaymentDate])
+  @@index([userId, isPerformance, createdAt])
+  @@index([userId, number]) // Performance scan index
+  @@index([userId, groupId])
+  @@schema("public")
+}
+
+model Trade {
+  id            String @id @unique @default(uuid())
+  accountNumber String
+  userId        String
+
+  instrument String
+  side       String? @default("")
+  quantity   Decimal
+
+  entryPrice Decimal
+  closePrice Decimal
+  pnl        Decimal
+  commission Decimal @default(0)
+
+  entryId String? @default("")
+  closeId String? @default("")
+
+  entryDate DateTime
+  closeDate DateTime
+
+  timeInPosition Decimal @default(0)
+
+  comment String?
+  tags    String[] @default([])
+  groupId String?  @default("")
+
+  imageBase64       String?
+  imageBase64Second String?
+  images            String[] @default([])
+  videoUrl          String?
+
+  createdAt DateTime @default(now())
+
+  account Account @relation(fields: [accountNumber, userId], references: [number, userId], onDelete: Cascade)
+
+  @@index([accountNumber])
+  @@index([groupId])
+  @@index([entryDate])
+  @@index([closeDate])
+  @@index([userId, entryDate])
+  @@index([userId, closeDate])
+  @@index([userId, accountNumber, instrument])
+  @@index([userId, accountNumber, entryDate, pnl])
+  @@index([userId, instrument])
+  @@schema("public")
+}
+
+model Group {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts Account[]
+  user     User      @relation("UserGroups", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@schema("public")
+}
+
+model Payout {
+  id            String @id @default(uuid())
+  accountId     String
+  accountNumber String
+
+  amount Decimal
+  status String  @default("PENDING")
+
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountNumber])
+  @@index([accountId])
+  @@index([status])
+  @@schema("public")
+}
+
+model Order {
+  id        String @id @default(uuid())
+  accountId String
+  orderId   String
+  userId    String
+
+  symbol         String
+  instrumentType String
+  orderAction    String
+
+  quantity           Decimal
+  averageFilledPrice Decimal
+  isOpeningOrder     Boolean
+
+  time DateTime
+
+  createdAt DateTime @default(now())
+
+  user User @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([orderId])
+  @@index([userId])
+  @@unique([userId, orderId])
+  @@schema("public")
+}
+
+model Synchronization {
+  id        String @id @default(uuid())
+  userId    String
+  service   String
+  accountId String
+
+  lastSyncedAt  DateTime
+  dailySyncTime DateTime?
+
+  token           String?
+  tokenCiphertext String?
+  tokenIv         String?
+  tokenTag        String?
+  tokenKeyVersion String?
+  tokenExpiresAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserSynchronizations", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, service, accountId])
+  @@index([userId])
+  @@index([service])
+  @@index([userId, accountId]) // Optimization for rapid synchronization checkups
+  @@schema("public")
+}
+
+// ============================================================================
+// ANALYTICS & MARKET DATA
+// ============================================================================
+
+model TickDetails {
+  id        String  @id @unique @default(uuid())
+  ticker    String
+  tickValue Decimal
+  tickSize  Decimal
+
+  @@schema("public")
+}
+
+model TradeAnalytics {
+  id      String @id @default(uuid())
+  tradeId String @unique
+
+  mae                Decimal  @default(0)
+  mfe                Decimal  @default(0)
+  entryPriceFromData Decimal?
+  priceDifference    Decimal?
+  riskRewardRatio    Decimal?
+  efficiency         Decimal?
+
+  dataSource String @default("DATABENTO")
+
+  computedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tradeId])
+  @@index([computedAt])
+  @@schema("public")
+}
+
+model TraderBenchmarkSnapshot {
+  id         String   @id @default("global")
+  riskReward Decimal  @default(0)
+  drawdown   Decimal  @default(0)
+  winRate    Decimal  @default(0)
+  avgReturn  Decimal  @default(0)
+  sampleSize Int      @default(0)
+  computedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@schema("public")
+}
+
+model HistoricalData {
+  id             String   @id @default(uuid())
+  symbol         String
+  databentSymbol String
+  timestamp      DateTime
+
+  open   Decimal
+  high   Decimal
+  low    Decimal
+  close  Decimal
+  volume Decimal
+
+  dataSource String   @default("DATABENTO")
+  createdAt  DateTime @default(now())
+
+  @@unique([symbol, databentSymbol, timestamp])
+  @@index([symbol])
+  @@index([databentSymbol])
+  @@index([timestamp])
+  @@schema("public")
+}
+
+model FinancialEvent {
+  id    String   @id @default(uuid())
+  title String
+  date  DateTime
+
+  importance  String
+  type        String
+  description String?
+
+  sourceUrl String?
+  country   String?
+  lang      String  @default("fr")
+  timezone  String  @default("UTC")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([title, date, lang, timezone])
+  @@index([date])
+  @@schema("public")
+}
+
+// ============================================================================
+// COLLABORATION
+// ============================================================================
+
+model Business {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+
+  traderIds String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessSubscription BusinessSubscription?
+  invitations          BusinessInvitation[]
+  managers             BusinessManager[]
+
+  user User @relation("UserBusinesses", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@schema("public")
+}
+
+model BusinessSubscription {
+  id       String  @id @unique @default(uuid())
+  email    String  @unique
+  plan     String
+  status   String  @default("ACTIVE")
+  interval String?
+
+  userId      String    @unique
+  businessId  String    @unique
+  endDate     DateTime?
+  trialEndsAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user     User     @relation("UserBusinessSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId])
+  @@index([businessId])
+  @@schema("public")
+}
+
+model BusinessInvitation {
+  id         String @id @default(uuid())
+  businessId String
+  email      String
+  invitedBy  String
+  status     String @default("PENDING")
+
+  expiresAt DateTime @default(dbgenerated("(now() + '7 days'::interval)"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, email])
+  @@index([businessId])
+  @@index([email])
+  @@index([status])
+  @@schema("public")
+}
+
+model BusinessManager {
+  id         String @id @default(uuid())
+  businessId String
+  managerId  String
+  access     String @default("viewer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, managerId])
+  @@index([businessId])
+  @@index([managerId])
+  @@schema("public")
+}
+
+model Team {
+  id             String  @id @default(uuid())
+  name           String
+  userId         String
+  organizationId String?
+
+  traderIds String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization     Organization?     @relation(fields: [organizationId], references: [id])
+  teamSubscription TeamSubscription?
+  members          TeamMember[]
+  invitations      TeamInvitation[]
+  managers         TeamManager[]
+  analytics        TeamAnalytics[]
+
+  user User @relation("UserTeams", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@index([organizationId])
+  @@schema("public")
+}
+
+model TeamSubscription {
+  id       String  @id @unique @default(uuid())
+  email    String  @unique
+  plan     String
+  status   String  @default("ACTIVE")
+  interval String?
+
+  userId      String    @unique
+  teamId      String    @unique
+  endDate     DateTime?
+  trialEndsAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation("UserTeamSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId])
+  @@index([teamId])
+  @@schema("public")
+}
+
+model TeamInvitation {
+  id        String     @id @default(uuid())
+  teamId    String
+  email     String
+  invitedBy String
+  status    String     @default("PENDING")
+  role      MemberRole @default(TRADER)
+
+  expiresAt DateTime @default(dbgenerated("(now() + '7 days'::interval)"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, email])
+  @@index([teamId])
+  @@index([email])
+  @@index([status])
+  @@schema("public")
+}
+
+model TeamManager {
+  id        String @id @default(uuid())
+  teamId    String
+  managerId String
+  access    String @default("viewer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, managerId])
+  @@index([teamId])
+  @@index([managerId])
+  @@schema("public")
+}
+
+model TeamMember {
+  id     String     @id @default(cuid())
+  teamId String
+  userId String
+  role   MemberRole @default(TRADER)
+
+  joinedAt   DateTime @default(now())
+  isActive   Boolean  @default(true)
+  accountIds String[] @default([])
+  settings   Json?    @default("{}")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation("UserTeamMemberships", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@index([role])
+  @@schema("public")
+}
+
+model TeamAnalytics {
+  id     String @id @default(cuid())
+  teamId String
+  period String @default("monthly")
+
+  totalPnl      Decimal  @default(0)
+  totalTrades   Int      @default(0)
+  winRate       Decimal  @default(0)
+  averageRr     Decimal  @default(0)
+  bestMemberId  String?
+  bestMemberPnl Decimal?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, period])
+  @@index([teamId])
+  @@schema("public")
+}
+
+model Organization {
+  id   String @id @default(cuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teams Team[]
+  users User[] @relation("UserOrganizations")
+
+  @@index([name])
+  @@schema("public")
+}
+
+// ============================================================================
+// USER CONTENT
+// ============================================================================
+
+model Post {
+  id      String     @id @default(uuid())
+  title   String
+  content String
+  type    PostType   @default(FEATURE_REQUEST)
+  status  PostStatus @default(OPEN)
+  userId  String
+
+  screenshots String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments Comment[]
+  user     User      @relation("UserPosts", fields: [userId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@schema("public")
+}
+
+model Comment {
+  id       String  @id @default(uuid())
+  content  String
+  postId   String
+  userId   String
+  parentId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user    User      @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+  @@schema("public")
+}
+
+model Vote {
+  id     String   @id @default(uuid())
+  type   VoteType
+  postId String
+  userId String
+
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation("UserVotes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+  @@schema("public")
+}
+
+model Mood {
+  id     String   @id @default(uuid())
+  userId String
+  day    DateTime
+  mood   String
+
+  emotionValue         Int      @default(50)
+  hasTradingExperience Boolean?
+
+  conversation   Json?
+  journalContent String?
+  selectedNews   String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserMoods", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([userId])
+  @@index([day])
+  @@schema("public")
+}
+
+model Tag {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  color       String? @default("#CBD5E1")
+  userId      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserTags", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@schema("public")
+}
+
+model Notification {
+  id          String @id @default(cuid())
+  userId      String
+  title       String
+  description String
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@schema("public")
+}
+
+// ============================================================================
+// SHARED CONTENT & MARKETING
+// ============================================================================
+
+model Shared {
+  id     String @id @default(uuid())
+  userId String
+  slug   String @unique
+
+  title       String?
+  description String?
+  dateRange   Json
+
+  desktop Json @default("[]")
+  mobile  Json @default("[]")
+
+  accountNumbers String[]
+
+  isPublic  Boolean   @default(true)
+  expiresAt DateTime?
+  viewCount Int       @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([slug])
+  @@schema("public")
+}
+
+model Newsletter {
+  email     String  @id @unique
+  isActive  Boolean @default(true)
+  firstName String?
+  lastName  String?
+
+  @@index([email])
+  @@schema("public")
+}
+
+model SubscriptionFeedback {
+  id                 String  @id @default(uuid())
+  email              String
+  event              String
+  cancellationReason String?
+  feedback           String?
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@schema("public")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum PostType {
+  FEATURE_REQUEST
+  BUG_REPORT
+  DISCUSSION
+
+  @@schema("public")
+}
+
+enum PostStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CLOSED
+
+  @@schema("public")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+
+  @@schema("public")
+}
+
+enum PaymentFrequency {
+  MONTHLY
+  QUARTERLY
+  BIANNUAL
+  ANNUAL
+  CUSTOM
+
+  @@schema("public")
+}
+
+enum PromoType {
+  DIRECT
+  PERCENTAGE
+
+  @@schema("public")
+}
+
+enum MemberRole {
+  ADMIN
+  TRADER
+  ANALYST
+  VIEWER
+
+  @@schema("public")
+}
+
+// ============================================================================
+// PAYMENT & BILLING SYSTEM
+// ============================================================================
+
+model PaymentTransaction {
+  id     String @id @default(uuid())
+  userId String
+  email  String
+
+  whopTransactionId String  @unique
+  whopMembershipId  String?
+
+  amount   Decimal
+  currency String            @default("USD")
+  status   TransactionStatus @default(PENDING)
+
+  type TransactionType @default(SUBSCRIPTION)
+
+  metadata     Json?
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserPaymentTransactions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([whopTransactionId])
+  @@index([status])
+  @@index([createdAt])
+  @@schema("public")
+}
+
+model Invoice {
+  id     String @id @default(uuid())
+  userId String
+  email  String
+
+  whopInvoiceId    String  @unique
+  whopMembershipId String?
+
+  amountDue  Decimal
+  amountPaid Decimal       @default(0)
+  currency   String        @default("USD")
+  status     InvoiceStatus @default(DRAFT)
+
+  dueDate DateTime?
+  paidAt  DateTime?
+
+  lines Json @default("[]")
+
+  invoicePdf       String?
+  hostedInvoiceUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserInvoices", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([whopInvoiceId])
+  @@index([status])
+  @@index([dueDate])
+  @@schema("public")
+}
+
+model Refund {
+  id     String @id @default(uuid())
+  userId String
+  email  String
+
+  whopRefundId  String @unique
+  whopPaymentId String
+
+  transactionId String
+  amount        Decimal
+  currency      String       @default("USD")
+  status        RefundStatus @default(PENDING)
+
+  reason   String?
+  metadata Json?
+
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation("UserRefunds", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([whopRefundId])
+  @@index([status])
+  @@index([createdAt])
+  @@schema("public")
+}
+
+model SubscriptionEvent {
+  id     String @id @default(uuid())
+  userId String
+  email  String
+
+  subscriptionId String
+  eventType      SubscriptionEventType
+  eventData      Json
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  user User @relation("UserSubscriptionEvents", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([subscriptionId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@schema("public")
+}
+
+model PaymentMethod {
+  id     String @id @default(uuid())
+  userId String
+  email  String
+
+  whopMethodId String @unique
+
+  type        String
+  last4       String?
+  brand       String?
+  expiryMonth Int?
+  expiryYear  Int?
+
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserPaymentMethods", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([whopMethodId])
+  @@schema("public")
+}
+
+model Promotion {
+  id   String @id @default(uuid())
+  code String @unique
+  name String
+
+  type  PromotionType
+  value Decimal
+
+  durationType     DurationType
+  durationInMonths Int?
+
+  maxRedemptions     Int?
+  currentRedemptions Int  @default(0)
+
+  planRestrictions String[] @default([])
+
+  validFrom  DateTime
+  validUntil DateTime?
+
+  isActive Boolean @default(true)
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@index([validFrom, validUntil])
+  @@schema("public")
+}
+
+model UsageMetric {
+  id     String @id @default(uuid())
+  userId String
+  email  String
+
+  metricType  String
+  metricValue Decimal
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  user User @relation("UserUsageMetrics", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, metricType, periodStart])
+  @@index([userId])
+  @@index([email])
+  @@index([metricType])
+  @@index([periodStart, periodEnd])
+  @@schema("public")
+}
+
+model ProcessedWebhook {
+  id          String   @id @default(uuid())
+  webhookId   String
+  type        String
+  processedAt DateTime @default(now())
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  @@unique([webhookId, type])
+  @@index([processedAt])
+  @@index([type])
+  @@schema("public")
+}
+
+model AiRequestLog {
+  id       String  @id @default(uuid())
+  userId   String?
+  route    String
+  feature  String
+  model    String
+  provider String
+
+  promptTokens     Int?
+  completionTokens Int?
+  totalTokens      Int?
+
+  latencyMs      Int
+  toolCallsCount Int     @default(0)
+  finishReason   String?
+
+  success       Boolean
+  errorCategory String?
+  errorCode     String?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation("UserAiRequestLogs", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([feature, createdAt])
+  @@index([userId, createdAt])
+  @@index([success])
+  @@schema("public")
+}
+
+// ============================================================================
+// PAYMENT ENUMS
+// ============================================================================
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+
+  @@schema("public")
+}
+
+enum TransactionType {
+  SUBSCRIPTION
+  ONE_TIME
+  REFUND
+  CHARGEBACK
+  ADJUSTMENT
+
+  @@schema("public")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+
+  @@schema("public")
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+
+  @@schema("public")
+}
+
+enum SubscriptionEventType {
+  CREATED
+  ACTIVATED
+  DEACTIVATED
+  CANCELLED
+  TRIAL_STARTED
+  TRIAL_ENDED
+  PLAN_UPGRADED
+  PLAN_DOWNGRADED
+  RENEWED
+  PAYMENT_FAILED
+  PAYMENT_SUCCEEDED
+  REFUND_INITIATED
+  REFUND_PROCESSED
+  GRACE_PERIOD_STARTED
+  GRACE_PERIOD_ENDED
+
+  @@schema("public")
+}
+
+enum PromotionType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_TRIAL
+
+  @@schema("public")
+}
+
+enum DurationType {
+  ONCE
+  FOREVER
+  REPEATING
+
+  @@schema("public")
+}

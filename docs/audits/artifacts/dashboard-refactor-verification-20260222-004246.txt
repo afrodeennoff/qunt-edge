@@ -1,0 +1,6 @@
+timestamp=20260222-004246
+typecheck=pass
+build=pass
+analyze_bundle=pass
+route_budgets=pass
+lighthouse=blocked_offline_npm_registry

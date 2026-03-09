@@ -1,0 +1,390 @@
+{
+  "generatedAt": "2026-03-08T11:25:29.862Z",
+  "budgets": {
+    "defaultRouteBudgetKb": 300,
+    "homeRouteBudgetKb": 80,
+    "dashboardRouteBudgetKb": 80
+  },
+  "largestFiles": [],
+  "routes": [
+    {
+      "route": "/_app",
+      "kind": "pages",
+      "bytes": 0,
+      "kb": 0,
+      "budgetKb": 300,
+      "withinBudget": true,
+      "files": []
+    }
+  ],
+  "appRoutesByClientManifestSize": [
+    {
+      "route": "/[locale]/dashboard/data",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/data/page_client-reference-manifest.js",
+      "bytes": 64900,
+      "kb": 63.38,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/behavior",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/behavior/page_client-reference-manifest.js",
+      "bytes": 57100,
+      "kb": 55.76,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/strategies",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/strategies/page_client-reference-manifest.js",
+      "bytes": 55434,
+      "kb": 54.13,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/trader-profile",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/trader-profile/page_client-reference-manifest.js",
+      "bytes": 55315,
+      "kb": 54.02,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/reports",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/reports/page_client-reference-manifest.js",
+      "bytes": 55206,
+      "kb": 53.91,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/settings",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/settings/page_client-reference-manifest.js",
+      "bytes": 54931,
+      "kb": 53.64,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/billing",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/billing/page_client-reference-manifest.js",
+      "bytes": 54582,
+      "kb": 53.3,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/page_client-reference-manifest.js",
+      "bytes": 54520,
+      "kb": 53.24,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/dashboard/import",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/dashboard/import/page_client-reference-manifest.js",
+      "bytes": 54503,
+      "kb": 53.23,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(home)",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(home)/page_client-reference-manifest.js",
+      "bytes": 50137,
+      "kb": 48.96,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/dashboard/trader/[slug]",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/dashboard/trader/[slug]/page_client-reference-manifest.js",
+      "bytes": 45447,
+      "kb": 44.38,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/manage",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/manage/page_client-reference-manifest.js",
+      "bytes": 40520,
+      "kb": 39.57,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin/newsletter-builder",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/admin/newsletter-builder/page_client-reference-manifest.js",
+      "bytes": 37831,
+      "kb": 36.94,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/updates/[slug]",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/updates/[slug]/page_client-reference-manifest.js",
+      "bytes": 34509,
+      "kb": 33.7,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/propfirms",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/propfirms/page_client-reference-manifest.js",
+      "bytes": 33192,
+      "kb": 32.41,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/community/post/[id]",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/community/post/[id]/page_client-reference-manifest.js",
+      "bytes": 32936,
+      "kb": 32.16,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/shared/[slug]",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/shared/[slug]/page_client-reference-manifest.js",
+      "bytes": 32672,
+      "kb": 31.91,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/community",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/community/page_client-reference-manifest.js",
+      "bytes": 30836,
+      "kb": 30.11,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/dashboard/[slug]",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/dashboard/[slug]/page_client-reference-manifest.js",
+      "bytes": 28234,
+      "kb": 27.57,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/dashboard/[slug]/traders",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/dashboard/[slug]/traders/page_client-reference-manifest.js",
+      "bytes": 28223,
+      "kb": 27.56,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/dashboard/[slug]/members",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/dashboard/[slug]/members/page_client-reference-manifest.js",
+      "bytes": 27923,
+      "kb": 27.27,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/dashboard",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/dashboard/page_client-reference-manifest.js",
+      "bytes": 27872,
+      "kb": 27.22,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/dashboard/[slug]/analytics",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/dashboard/[slug]/analytics/page_client-reference-manifest.js",
+      "bytes": 27758,
+      "kb": 27.11,
+      "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/support",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/support/page_client-reference-manifest.js",
+      "bytes": 27541,
+      "kb": 26.9,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/(landing)",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/(landing)/page_client-reference-manifest.js",
+      "bytes": 26330,
+      "kb": 25.71,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin/welcome-email",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/admin/welcome-email/page_client-reference-manifest.js",
+      "bytes": 26233,
+      "kb": 25.62,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin/weekly-recap",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/admin/weekly-recap/page_client-reference-manifest.js",
+      "bytes": 25970,
+      "kb": 25.36,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/updates",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/updates/page_client-reference-manifest.js",
+      "bytes": 25864,
+      "kb": 25.26,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/pricing",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/pricing/page_client-reference-manifest.js",
+      "bytes": 25802,
+      "kb": 25.2,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/disclaimers",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/disclaimers/page_client-reference-manifest.js",
+      "bytes": 25793,
+      "kb": 25.19,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/terms",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/terms/page_client-reference-manifest.js",
+      "bytes": 25789,
+      "kb": 25.18,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/referral",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/referral/page_client-reference-manifest.js",
+      "bytes": 25778,
+      "kb": 25.17,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/faq",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/faq/page_client-reference-manifest.js",
+      "bytes": 25737,
+      "kb": 25.13,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/docs",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/docs/page_client-reference-manifest.js",
+      "bytes": 25619,
+      "kb": 25.02,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/maintenance",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/maintenance/page_client-reference-manifest.js",
+      "bytes": 22798,
+      "kb": 22.26,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/newsletter",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/newsletter/page_client-reference-manifest.js",
+      "bytes": 22797,
+      "kb": 22.26,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/admin/page_client-reference-manifest.js",
+      "bytes": 22796,
+      "kb": 22.26,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/privacy",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/privacy/page_client-reference-manifest.js",
+      "bytes": 22794,
+      "kb": 22.26,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(landing)/about",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(landing)/about/page_client-reference-manifest.js",
+      "bytes": 22792,
+      "kb": 22.26,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin/send-email",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/admin/send-email/page_client-reference-manifest.js",
+      "bytes": 22415,
+      "kb": 21.89,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/(authentication)/authentication",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/(authentication)/authentication/page_client-reference-manifest.js",
+      "bytes": 19911,
+      "kb": 19.44,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/teams/join",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/teams/join/page_client-reference-manifest.js",
+      "bytes": 18685,
+      "kb": 18.25,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/embed",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/embed/page_client-reference-manifest.js",
+      "bytes": 16284,
+      "kb": 15.9,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/[...not-found]",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/[locale]/[...not-found]/page_client-reference-manifest.js",
+      "bytes": 13169,
+      "kb": 12.86,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/_not-found",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/_not-found/page_client-reference-manifest.js",
+      "bytes": 10131,
+      "kb": 9.89,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/_global-error",
+      "file": "/Users/timon/Downloads/qunt-edge-main/.next/server/app/_global-error/page_client-reference-manifest.js",
+      "bytes": 6107,
+      "kb": 5.96,
+      "budgetKb": 300,
+      "withinBudget": true
+    }
+  ]
+}

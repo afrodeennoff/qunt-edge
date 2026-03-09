@@ -1,0 +1,136 @@
+"use client"
+
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardProps,
+} from "./card"
+import { Button } from "./button"
+import { LucideIcon } from "lucide-react"
+
+export interface ActionCardProps extends CardProps {
+  title: string
+  description?: string
+  icon?: LucideIcon
+  primaryAction?: {
+    label: string
+    onClick: () => void
+    variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
+  }
+  secondaryAction?: {
+    label: string
+    onClick: () => void
+  }
+  size?: "sm" | "md" | "lg"
+  tone?: "default" | "success" | "warning" | "error"
+}
+
+const ActionCard = React.forwardRef<HTMLDivElement, ActionCardProps>(
+  ({
+    title,
+    description,
+    icon: Icon,
+    primaryAction,
+    secondaryAction,
+    size = "md",
+    tone = "default",
+    className,
+    ...props
+  }, ref) => {
+    const sizeClasses = {
+      sm: {
+        icon: "h-8 w-8",
+        iconInner: "h-4 w-4",
+        title: "text-base",
+        description: "text-xs",
+        button: "text-xs h-8 px-3"
+      },
+      md: {
+        icon: "h-12 w-12",
+        iconInner: "h-6 w-6",
+        title: "text-lg",
+        description: "text-sm",
+        button: "text-sm h-9 px-4"
+      },
+      lg: {
+        icon: "h-16 w-16",
+        iconInner: "h-8 w-8",
+        title: "text-xl",
+        description: "text-base",
+        button: "text-base h-10 px-6"
+      }
+    }
+
+    const currentSize = sizeClasses[size]
+
+    const toneColors = {
+      default: "bg-white/5 text-white border border-white/10",
+      success: "bg-white text-black border border-white font-bold",
+      warning: "bg-zinc-800 text-white border border-zinc-700",
+      error: "bg-zinc-900 text-white/70 border border-zinc-800"
+    }
+
+    return (
+      <Card
+        ref={ref}
+        className={className}
+        {...props}
+      >
+        <CardHeader size={size} className="space-y-3">
+          <div className="flex items-start gap-4">
+            {Icon && (
+              <div className={cn(
+                "rounded-xl flex items-center justify-center shrink-0",
+                currentSize.icon,
+                toneColors[tone]
+              )}>
+                <Icon className={currentSize.iconInner} />
+              </div>
+            )}
+            <div className="flex-1 space-y-1 min-w-0">
+              <CardTitle className={cn(currentSize.title, "line-clamp-2")}>
+                {title}
+              </CardTitle>
+              {description && (
+                <CardDescription className={cn(currentSize.description, "line-clamp-3")}>
+                  {description}
+                </CardDescription>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+
+        {(primaryAction || secondaryAction) && (
+          <CardFooter size={size} className="gap-2">
+            {secondaryAction && (
+              <Button
+                variant="outline"
+                className={cn("flex-1", currentSize.button)}
+                onClick={secondaryAction.onClick}
+              >
+                {secondaryAction.label}
+              </Button>
+            )}
+            {primaryAction && (
+              <Button
+                variant={primaryAction.variant || "default"}
+                className={cn("flex-1", currentSize.button)}
+                onClick={primaryAction.onClick}
+              >
+                {primaryAction.label}
+              </Button>
+            )}
+          </CardFooter>
+        )}
+      </Card>
+    )
+  }
+)
+ActionCard.displayName = "ActionCard"
+
+export { ActionCard }

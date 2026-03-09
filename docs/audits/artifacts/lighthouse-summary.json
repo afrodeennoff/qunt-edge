@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-03-06T10:13:35.247Z",
+  "baseUrl": "http://127.0.0.1:3001",
+  "thresholds": {
+    "desktopScoreMin": 0.9,
+    "mobileScoreMin": 0.75,
+    "desktopTbtMaxMs": 200,
+    "mobileTbtMaxMs": 1200,
+    "desktopLcpMaxMs": 1800,
+    "mobileLcpMaxMs": 3500,
+    "mobileClsMax": 0.1
+  },
+  "results": [
+    {
+      "url": "http://127.0.0.1:3001/en",
+      "mode": "mobile",
+      "score": 0.61,
+      "tbt": 3136.1628,
+      "lcp": 3566.0231999999996,
+      "cls": 0,
+      "failures": [
+        "mobile score 0.61 < 0.75",
+        "mobile TBT 3136.1628ms > 1200ms",
+        "mobile LCP 3566.0231999999996ms > 3500ms"
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3001/en",
+      "mode": "desktop",
+      "score": 0.74,
+      "tbt": 659.9792500000001,
+      "lcp": 816.1660000000002,
+      "cls": 0,
+      "failures": [
+        "desktop score 0.74 < 0.9",
+        "desktop TBT 659.9792500000001ms > 200ms"
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3001/en/pricing",
+      "mode": "mobile",
+      "score": 0.55,
+      "tbt": 4621.000000000001,
+      "lcp": 4063.2823499999986,
+      "cls": 0,
+      "failures": [
+        "mobile score 0.55 < 0.75",
+        "mobile TBT 4621.000000000001ms > 1200ms",
+        "mobile LCP 4063.2823499999986ms > 3500ms"
+      ]
+    },
+    {
+      "url": "http://127.0.0.1:3001/en/pricing",
+      "mode": "desktop",
+      "score": 0.73,
+      "tbt": 662.295925,
+      "lcp": 893.6325999999997,
+      "cls": 0.02193223010244287,
+      "failures": [
+        "desktop score 0.73 < 0.9",
+        "desktop TBT 662.295925ms > 200ms"
+      ]
+    }
+  ]
+}

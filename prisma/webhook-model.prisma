@@ -1,0 +1,14 @@
+model ProcessedWebhook {
+  id          String   @id @default(uuid())
+  webhookId   String
+  type        String
+  processedAt DateTime @default(now())
+  metadata    String?
+
+  createdAt   DateTime @default(now())
+
+  @@unique([webhookId, type])
+  @@index([processedAt])
+  @@index([type])
+  @@schema("public")
+}

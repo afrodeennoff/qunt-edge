@@ -1,0 +1,247 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 20
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+  PERF_BASE_URL: http://127.0.0.1:3000
+  LIGHTHOUSE_DESKTOP_MIN: 0.9
+  LIGHTHOUSE_MOBILE_MIN: 0.75
+  LIGHTHOUSE_TBT_MAX_MS: 1200
+  LIGHTHOUSE_DESKTOP_TBT_MAX_MS: 200
+  LIGHTHOUSE_DESKTOP_LCP_MAX_MS: 1800
+  LIGHTHOUSE_MOBILE_LCP_MAX_MS: 3500
+  PERF_HEADER_STRICT: 'true'
+  LINT_WARNING_MAX: '1546'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..60}; do
+            node -e "const net=require('node:net'); const s=net.createConnection({host:'127.0.0.1',port:5432},()=>{s.end();process.exit(0)}); s.on('error',()=>process.exit(1)); setTimeout(()=>{s.destroy();process.exit(1)},1000);" && exit 0
+            sleep 1
+          done
+          echo "::error::Postgres service did not become ready in time"
+          exit 1
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Warning Budget Check
+        run: npm run check:warning-budget
+
+      - name: Route Security Contract Check
+        run: npm run check:route-security
+
+      - name: Color Contract Check
+        run: npm run check:color-contract
+
+      - name: Clean Build Artifacts
+        run: npm run clean:build-artifacts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Prisma Schema Validate
+        run: npx prisma validate
+
+      - name: Migration Directory Check
+        run: |
+          test -d prisma/migrations
+          test -n "$(ls -A prisma/migrations)"
+
+      - name: Unit Tests with Coverage
+        run: npm run test:coverage
+
+      - name: Enforce Coverage Threshold (≥80%)
+        run: |
+          COVERAGE_FILE="coverage/coverage-summary.json"
+          if [ ! -f "$COVERAGE_FILE" ]; then
+            echo "::warning::Coverage summary not found – skipping threshold check"
+            exit 0
+          fi
+          LINE_PCT=$(node -e "const c=require('./$COVERAGE_FILE');console.log(c.total.lines.pct)")
+          BRANCH_PCT=$(node -e "const c=require('./$COVERAGE_FILE');console.log(c.total.branches.pct)")
+          echo "Line Coverage: ${LINE_PCT}%  |  Branch Coverage: ${BRANCH_PCT}%"
+          node -e "const c=require('./$COVERAGE_FILE');if(c.total.lines.pct<80||c.total.branches.pct<60){process.exit(1)}"
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Build
+        run: npm run build
+
+      - name: Route Budget Check
+        run: npm run check:route-budgets
+
+      - name: Bundle Analysis
+        run: npm run analyze:bundle
+
+      - name: Start production server
+        run: |
+          npm run start > /tmp/qunt-start.log 2>&1 &
+          echo $! > /tmp/qunt-start.pid
+          for i in {1..40}; do
+            if curl -sSf $PERF_BASE_URL/en >/dev/null; then
+              echo "Server ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Server did not become ready in time"
+          tail -n 200 /tmp/qunt-start.log || true
+          exit 1
+
+      - name: Header Cache Policy Check
+        run: npm run perf:headers
+
+      - name: Baseline Performance Snapshot
+        run: npm run perf:baseline
+
+      - name: Lighthouse Performance Gate
+        run: npm run perf:lighthouse
+
+      - name: Stop production server
+        if: always()
+        run: |
+          if [ -f /tmp/qunt-start.pid ]; then
+            kill "$(cat /tmp/qunt-start.pid)" || true
+          fi
+          pkill -f "next start" || true
+
+      - name: Upload Performance Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-artifacts
+          path: |
+            docs/audits/artifacts/bundle-summary.json
+            docs/audits/artifacts/performance-baseline.json
+            docs/audits/artifacts/lighthouse-*.json
+            docs/audits/artifacts/lighthouse-summary.json
+            /tmp/qunt-start.log
+
+      - name: Security Audit Report
+        run: npm audit --json > npm-audit-report.json || true
+
+      - name: Security Audit (high+)
+        run: npm audit --audit-level=high
+
+      - name: Check for Secrets in Code
+        run: |
+          # Basic secret pattern check — flags obvious leaks
+          PATTERNS='(SUPABASE_SERVICE_ROLE_KEY|ENCRYPTION_KEY|WHOP_WEBHOOK_SECRET|password\s*=\s*["\x27][^"\x27]{8,})'
+          if grep -rIE "$PATTERNS" --include='*.ts' --include='*.tsx' --include='*.js' --include='*.json' \
+             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=coverage \
+             --exclude='.env.example' --exclude='package-lock.json' . ; then
+            echo "::error::Potential secrets found in source code!"
+            exit 1
+          fi
+
+      - name: Upload Security Audit Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+
+  payment-integration:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      RUN_PAYMENT_INTEGRATION_TESTS: 'true'
+      WHOP_API_KEY: ${{ secrets.WHOP_API_KEY }}
+      WHOP_WEBHOOK_SECRET: ${{ secrets.WHOP_WEBHOOK_SECRET }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Validate Payment Test Secrets
+        run: |
+          missing=()
+          [ -z "$WHOP_API_KEY" ] && missing+=("WHOP_API_KEY")
+          [ -z "$WHOP_WEBHOOK_SECRET" ] && missing+=("WHOP_WEBHOOK_SECRET")
+          [ -z "$ENCRYPTION_KEY" ] && missing+=("ENCRYPTION_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required payment integration secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Sync Prisma Schema
+        run: npx prisma db push
+
+      - name: Payment Integration Tests
+        run: npm run test:payment
