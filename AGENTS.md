@@ -170,6 +170,20 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
   - `npm run -s perf:lighthouse` -> blocked in this environment by Chrome interstitial/runtime load failure.
 
+### 2026-03-10: Home Motion Runtime Trim Follow-Up (`AnalysisDemo`)
+- **What changed:** Removed remaining `framer-motion` usage from `AnalysisDemo` while preserving existing copy, chart behavior, and mobile fallback KPI cards.
+- **What I want:** Further reduce home-page main-thread/hydration overhead in a high-visibility section without changing data flow or CTA behavior.
+- **What I don't want:** Keeping decorative animation wrappers around static surfaces or introducing regressions in mobile/desktop content parity.
+- **How we fixed that:**
+  - Removed `motion`/`AnimatePresence` imports and wrappers from `app/[locale]/(home)/components/AnalysisDemo.tsx`.
+  - Kept desktop log rotation behavior (`setInterval`) and static progress bar semantics intact while rendering through plain elements.
+  - Preserved dynamic chart loading and the mobile KPI-card fallback path unchanged.
+- **Key Files:** `app/[locale]/(home)/components/AnalysisDemo.tsx`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(home)/components/AnalysisDemo.tsx` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s typecheck` -> passes when re-run sequentially (parallel run can trip existing `.next` clean/regenerate race in this workspace).
+
 
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.

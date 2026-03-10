@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 const mockData = [
@@ -37,7 +36,6 @@ const AnalysisDemoChart = dynamic(() => import('./analysis-demo-chart'), {
 export default function AnalysisDemo() {
   const [logIndex, setLogIndex] = useState(0)
   const isMobile = useIsMobile()
-  const shouldAnimate = !isMobile
 
   useEffect(() => {
     if (isMobile) return
@@ -67,13 +65,7 @@ export default function AnalysisDemo() {
           </p>
         </div>
 
-        <motion.div
-          initial={shouldAnimate ? { opacity: 0, y: 22 } : false}
-          whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
-          viewport={shouldAnimate ? { once: true } : undefined}
-          transition={shouldAnimate ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
-          className="marketing-panel overflow-hidden rounded-[28px]"
-        >
+        <div className="marketing-panel overflow-hidden rounded-[28px]">
           <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="border-b border-[hsl(var(--mk-border)/0.24)] p-5 sm:p-7 lg:border-b-0 lg:border-r">
               <div className="mb-6 flex items-center justify-between">
@@ -111,48 +103,23 @@ export default function AnalysisDemo() {
             <div className="bg-[hsl(var(--mk-surface-muted)/0.42)] p-5 sm:p-6">
               <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Journal Signals</p>
               <div className={cn("mt-4 space-y-3", isMobile ? "min-h-0" : "min-h-[220px]")}>
-                <AnimatePresence mode="wait">
-                  {shouldAnimate ? (
-                    <motion.div
-                      key={logIndex}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.35 }}
-                      className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]"
-                    >
-                      {activeLog}
-                    </motion.div>
-                  ) : (
-                    <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]">
-                      {activeLog}
-                    </div>
-                  )}
-                </AnimatePresence>
+                <div className="rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4 text-sm leading-relaxed text-[hsl(var(--mk-text))] [font-family:var(--home-copy)]">
+                  {activeLog}
+                </div>
               </div>
 
               <div className="mt-5 rounded-2xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface)/0.72)] p-4">
                 <p className="text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">Anomaly Probability</p>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-[hsl(var(--mk-border)/0.22)]">
-                  {shouldAnimate ? (
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: '72%' }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-                      className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
-                    />
-                  ) : (
-                    <div
-                      style={{ width: '72%' }}
-                      className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
-                    />
-                  )}
+                  <div
+                    style={{ width: '72%' }}
+                    className="h-full rounded-full bg-[hsl(var(--brand-primary))]"
+                  />
                 </div>
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )
