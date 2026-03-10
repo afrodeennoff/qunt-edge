@@ -560,11 +560,11 @@ export const DataProvider: React.FC<{
       }
 
       setSupabaseUser(user);
+      const userId = await withTimeout(getUserId(), 15000, "getUserId");
 
       // CRITICAL: Get dashboard layout first
       // But check if the layout is already in the state
-      if (!dashboardLayout) {
-        const userId = await withTimeout(getUserId(), 15000, "getUserId(for layout)");
+      if (!dashboardLayout && userId) {
         const dashboardLayoutResponse = await withTimeout(
           getDashboardLayout(userId),
           15000,
@@ -581,7 +581,6 @@ export const DataProvider: React.FC<{
       }
 
       // Step 2: Fetch trades (with caching server side)
-      const userId = await withTimeout(getUserId(), 15000, "getUserId(for trades)");
       if (userId && !isSharedView) {
         // Try local cache first
         const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");

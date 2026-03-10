@@ -153,7 +153,22 @@ export default function TraderProfilePage() {
 
   useEffect(() => {
     let alive = true
+    let timer: number | null = null
+
+    const scheduleNext = (delayMs: number) => {
+      if (!alive) return
+      if (timer) window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        void load()
+      }, delayMs)
+    }
+
     const load = async () => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+        scheduleNext(60_000)
+        return
+      }
+
       setIsBenchmarkLoading(true)
       try {
         const res = await fetch("/api/trader-profile/benchmark", {
@@ -169,13 +184,23 @@ export default function TraderProfilePage() {
         if (alive) setBenchmark(null)
       } finally {
         if (alive) setIsBenchmarkLoading(false)
+        scheduleNext(60_000)
       }
     }
-    load()
-    const timer = window.setInterval(load, 30_000)
+
+    const onVisibilityChange = () => {
+      if (!alive) return
+      if (document.visibilityState === "visible") {
+        void load()
+      }
+    }
+
+    void load()
+    document.addEventListener("visibilitychange", onVisibilityChange)
     return () => {
       alive = false
-      window.clearInterval(timer)
+      if (timer) window.clearTimeout(timer)
+      document.removeEventListener("visibilitychange", onVisibilityChange)
     }
   }, [])
 

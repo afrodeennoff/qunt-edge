@@ -44,10 +44,13 @@ export function TradesProvider({
   const fetchTrades = useCallback(async (userId: string, force: boolean = false) => {
     try {
       const response = await getTradesAction(userId, 1, 500, force, true);
-        const normalizedTrades = normalizeTradesForClient(response.trades as (PrismaTrade | SerializedTrade)[]);
-        setTrades(normalizedTrades);
+      const normalizedTrades = normalizeTradesForClient(response.trades as (PrismaTrade | SerializedTrade)[]);
+      setTrades(normalizedTrades);
       setTotalTrades(response.metadata.total);
-      return response.statistics;
+      return {
+        statistics: response.statistics,
+        normalizedTrades,
+      };
     } catch (error) {
       logger.error({ error }, "Failed to fetch trades");
       return null;
@@ -67,13 +70,11 @@ export function TradesProvider({
             setTrades(cached as Trade[]);
           }
           
-          // Fetch fresh
-          await fetchTrades(userId, force);
-          
-          // Update cache
-          const fresh = await getTradesAction(userId, 1, 500, false, false);
-          const normalized = normalizeTradesForClient(fresh.trades as (PrismaTrade | SerializedTrade)[]);
-          await setTradesCache(userId, normalized);
+          // Fetch fresh and update cache from the same response (avoid duplicate fetch)
+          const freshResult = await fetchTrades(userId, force);
+          if (freshResult?.normalizedTrades) {
+            await setTradesCache(userId, freshResult.normalizedTrades);
+          }
         }
       }
     } finally {

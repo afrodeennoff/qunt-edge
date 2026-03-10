@@ -125,6 +125,65 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🎨 UI/UX & Design System
 
+### 2026-03-10: One-Shot Lag + Cache Stabilization Sweep (No UX Contract Changes)
+- **What changed:** Applied a focused one-shot performance/caching stabilization pass across dashboard data flows, cache invalidation consistency, and background runtime overhead while preserving existing user-facing behavior.
+- **What I want:** Reduce avoidable rerender/fetch churn and stale-cache windows without removing existing interactions, layouts, or dashboard workflows.
+- **What I don't want:** Breaking widget/table/accounts UX contracts, introducing forced refresh behavior, or changing route-level private/public cache guarantees.
+- **How we fixed that:**
+  - Removed duplicate trades refresh fetch path in `context/trades-context.tsx` by reusing a single `getTradesAction` response for UI + cache writes.
+  - Reduced load-time auth/user-id lookup churn in `context/data-provider.tsx` by resolving `userId` once per load sequence and reusing it for layout/trade/user-data branches.
+  - Optimized trade sorting path in `context/providers/derived-selectors.ts` to avoid repeated Date parsing during sort/filter preparation.
+  - Lowered background runtime pressure:
+    - `app/[locale]/dashboard/components/global-sync-button.tsx`: slowed next-sync ticker updates from 1s to 5s, paused updates when tab hidden, removed infinite pulsing glow animation loop.
+    - `app/[locale]/dashboard/trader-profile/page-client.tsx`: replaced fixed 30s benchmark polling interval with visibility-aware scheduled refresh (60s cadence + immediate refresh on tab visibility restore).
+    - `components/motion/global-motion-effects.tsx`: disabled global scroll/progress motion effects on non-desktop viewports.
+    - `components/motion/smooth-scroll-provider.tsx`: disabled smooth-scroll listener wiring on mobile widths.
+  - Standardized cache freshness invalidation in mutation paths:
+    - `server/groups.ts`: added user-scoped `updateTag(...)` invalidation for user-data/trades/dashboard tags after group/account/trade-grouping mutations.
+    - `server/shared.ts`: added shared-view tag invalidation on create/delete and reduced shared-view revalidate window from 1h to 5m.
+  - Preserved current public/private cache-header policy model and verified no regressions.
+- **Key Files:** `context/trades-context.tsx`, `context/data-provider.tsx`, `context/providers/derived-selectors.ts`, `app/[locale]/dashboard/components/global-sync-button.tsx`, `app/[locale]/dashboard/trader-profile/page-client.tsx`, `components/motion/global-motion-effects.tsx`, `components/motion/smooth-scroll-provider.tsx`, `server/groups.ts`, `server/shared.ts`, `app/[locale]/(home)/components/DeferredHomeSections.tsx`, `app/[locale]/(landing)/pricing/pricing-page-client.tsx`.
+- **Verification:**
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+  - `npm run -s perf:headers` -> expected private/public cache policy split holds.
+  - `npm run -s perf:baseline` -> baseline artifact regenerated.
+  - `npm run -s perf:lighthouse` -> still failing current strict thresholds (mobile TBT/LCP + desktop TBT), but values improved from prior worst-case spikes and now show the remaining hotspot scope.
+  - `npm run -s typecheck` remains flaky in this workspace due `.next/types/cache-life.d.ts` clean/regenerate race from current script flow; build/type generation during build succeeds.
+
+### 2026-03-10: Home Motion Runtime Trim (Static Section Pass)
+- **What changed:** Removed non-essential `framer-motion` wrappers from key home marketing sections and cleaned follow-up lint issues from prior motion-removal edits.
+- **What I want:** Lower home-page runtime overhead and hydration work without changing copy, layout structure, CTA paths, or dashboard behavior.
+- **What I don't want:** Decorative in-view animation wrappers keeping unnecessary client runtime cost on static marketing content, or leaving unused callback vars/imports after motion cleanup.
+- **How we fixed that:**
+  - Converted `CTA` and `PricingSection` from `motion.div` wrappers to static containers and removed `framer-motion` imports.
+  - Kept pricing CTA behavior unchanged (`Pro AI` still uses `buildWhopCheckoutUrl`, `Desk` still routes to support, `Starter` keeps auth onboarding).
+  - Cleaned map callback signatures in already-converted sections to remove unused iterator variables introduced during staged motion cleanup (`WhyChooseUs`, `AIFuturesSection`, `ComparisonSection`).
+  - Preserved interactive/client components where still needed (`AIFuturesSection` tabs, `AnalysisDemo` behavior), limiting this pass to low-risk static wrapper removal.
+- **Key Files:** `app/[locale]/(home)/components/CTA.tsx`, `app/[locale]/(home)/components/PricingSection.tsx`, `app/[locale]/(home)/components/WhyChooseUs.tsx`, `app/[locale]/(home)/components/AIFuturesSection.tsx`, `app/[locale]/(home)/components/ComparisonSection.tsx`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(home)/components/WhyChooseUs.tsx app/[locale]/(home)/components/AIFuturesSection.tsx app/[locale]/(home)/components/ComparisonSection.tsx app/[locale]/(home)/components/CTA.tsx app/[locale]/(home)/components/PricingSection.tsx` -> passes (no errors).
+  - `npm run -s typecheck` -> passes (route types generated).
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+  - `npm run -s perf:lighthouse` -> blocked in this environment by Chrome interstitial/runtime load failure.
+
+### 2026-03-10: Home Motion Runtime Trim Follow-Up (`AnalysisDemo`)
+- **What changed:** Removed remaining `framer-motion` usage from `AnalysisDemo` while preserving existing copy, chart behavior, and mobile fallback KPI cards.
+- **What I want:** Further reduce home-page main-thread/hydration overhead in a high-visibility section without changing data flow or CTA behavior.
+- **What I don't want:** Keeping decorative animation wrappers around static surfaces or introducing regressions in mobile/desktop content parity.
+- **How we fixed that:**
+  - Removed `motion`/`AnimatePresence` imports and wrappers from `app/[locale]/(home)/components/AnalysisDemo.tsx`.
+  - Kept desktop log rotation behavior (`setInterval`) and static progress bar semantics intact while rendering through plain elements.
+  - Preserved dynamic chart loading and the mobile KPI-card fallback path unchanged.
+- **Key Files:** `app/[locale]/(home)/components/AnalysisDemo.tsx`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(home)/components/AnalysisDemo.tsx` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s typecheck` -> passes when re-run sequentially (parallel run can trip existing `.next` clean/regenerate race in this workspace).
+
 
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.
