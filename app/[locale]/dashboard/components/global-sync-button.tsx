@@ -9,7 +9,6 @@ import { useDashboardActions } from "@/context/data-provider"
 import { toast } from "sonner"
 import { useScopedI18n } from "@/locales/client"
 import { getAllRithmicData } from "@/lib/rithmic-storage"
-import { motion, AnimatePresence } from "framer-motion"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -74,6 +73,9 @@ export function GlobalSyncButton() {
 
     useEffect(() => {
         const updateNextSync = () => {
+            if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+                return
+            }
             const rithmicData = getAllRithmicData()
             const latestRithmicSync = Math.max(...Object.values(rithmicData).map(d => new Date(d.lastSyncTime).getTime()), 0)
 
@@ -99,7 +101,7 @@ export function GlobalSyncButton() {
             }
         }
 
-        const interval = setInterval(updateNextSync, 1000)
+        const interval = setInterval(updateNextSync, 5000)
         updateNextSync()
         return () => clearInterval(interval)
     }, [rithmicInterval, tradovate.syncInterval, tradovate.accounts])
@@ -120,13 +122,7 @@ export function GlobalSyncButton() {
                             "w-4 h-4 transition-transform duration-700",
                             isAnySyncing ? "animate-spin" : "group-hover:rotate-180"
                         )} />
-                        {isAnySyncing && (
-                            <motion.div
-                                className="absolute inset-0 bg-primary/20 blur-sm rounded-full"
-                                animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                            />
-                        )}
+                        {isAnySyncing && <div className="absolute inset-0 bg-primary/15 blur-sm rounded-full" />}
                     </div>
 
                     <div className="flex flex-col items-start leading-none gap-0.5">

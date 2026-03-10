@@ -27,6 +27,11 @@ function scrollToHash(hash: string) {
 
 export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   useEffect(() => {
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches
+    if (!isDesktop) {
+      return
+    }
+
     const reduceMotion = window.matchMedia(REDUCED_MOTION_QUERY).matches
     const html = document.documentElement
     const body = document.body
@@ -98,4 +103,3 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
 
   return <>{children}</>
 }
-

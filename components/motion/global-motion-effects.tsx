@@ -1,9 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion"
 
 export function GlobalMotionEffects() {
   const prefersReducedMotion = useReducedMotion()
+  const [isDesktop, setIsDesktop] = useState(true)
   const { scrollYProgress } = useScroll()
   const progress = useSpring(scrollYProgress, {
     stiffness: 140,
@@ -12,7 +14,15 @@ export function GlobalMotionEffects() {
   })
   const glowOpacity = useTransform(progress, [0, 0.3, 1], [0.2, 0.55, 0.25])
 
-  if (prefersReducedMotion) {
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)")
+    const sync = () => setIsDesktop(media.matches)
+    sync()
+    media.addEventListener("change", sync)
+    return () => media.removeEventListener("change", sync)
+  }, [])
+
+  if (prefersReducedMotion || !isDesktop) {
     return null
   }
 
@@ -23,4 +33,3 @@ export function GlobalMotionEffects() {
     </div>
   )
 }
-

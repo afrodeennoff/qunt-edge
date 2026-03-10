@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { Group as PrismaGroup, Account as PrismaAccount } from '@/prisma/generated/prisma'
 import { logger } from '@/lib/logger'
@@ -9,6 +9,13 @@ import { resolveWritableUserId } from './trades'
 
 export interface GroupWithAccounts extends PrismaGroup {
   accounts: PrismaAccount[]
+}
+
+function invalidateGroupRelatedCaches(userId: string) {
+  updateTag(`user-data-${userId}`)
+  updateTag(`trades-${userId}`)
+  updateTag(`dashboard-layout-${userId}`)
+  updateTag(`dashboard-${userId}`)
 }
 
 export async function getGroupsAction(): Promise<GroupWithAccounts[]> {
@@ -45,6 +52,7 @@ export async function renameGroupAction(groupId: string, name: string): Promise<
         accounts: true,
       },
     })
+    invalidateGroupRelatedCaches(userId)
     return group
   } catch (error) {
     console.error('Error renaming group:', error)
@@ -73,6 +81,7 @@ export async function saveGroupAction(name: string): Promise<GroupWithAccounts> 
         accounts: true,
       },
     })
+    invalidateGroupRelatedCaches(userId)
     return group
   } catch (error) {
     console.error('Error creating group:', error)
@@ -98,6 +107,7 @@ export async function updateGroupAction(groupId: string, name: string): Promise<
         accounts: true,
       },
     })
+    invalidateGroupRelatedCaches(userId)
     return group
   } catch (error) {
     console.error('Error updating group:', error)
@@ -119,6 +129,7 @@ export async function deleteGroupAction(groupId: string): Promise<void> {
     await prisma.group.delete({
       where: { id: existingGroup.id },
     })
+    invalidateGroupRelatedCaches(userId)
   } catch (error) {
     console.error('Error deleting group:', error)
     throw error
@@ -150,6 +161,7 @@ export async function moveAccountToGroupAction(accountId: string, targetGroupId:
       where: { id: account.id },
       data: { groupId: targetGroupId },
     })
+    invalidateGroupRelatedCaches(userId)
   } catch (error) {
     console.error('Error moving account to group:', error)
     throw error
@@ -166,6 +178,7 @@ export async function groupTradesAction(tradeIds: string[]): Promise<boolean> {
       data: { groupId }
     })
 
+    invalidateGroupRelatedCaches(userId)
     revalidatePath('/')
     return true
   } catch (error) {
@@ -182,6 +195,7 @@ export async function ungroupTradesAction(tradeIds: string[]): Promise<boolean> 
       data: { groupId: "" }
     })
 
+    invalidateGroupRelatedCaches(userId)
     revalidatePath('/')
     return true
   } catch (error) {

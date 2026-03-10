@@ -1,6 +1,3 @@
-'use client'
-
-import { motion } from 'framer-motion'
 import { BarChart3, Brain, CalendarCheck2, Database, LayoutDashboard, ShieldCheck } from 'lucide-react'
 
 const items = [
@@ -53,12 +50,8 @@ export default function Features() {
             const Icon = item.icon
 
             return (
-              <motion.article
+              <article
                 key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.58, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
                 className="marketing-panel rounded-2xl p-6"
               >
                 <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.8)] text-[hsl(var(--brand-primary))]">
@@ -66,7 +59,7 @@ export default function Features() {
                 </div>
                 <h3 className="text-lg font-semibold tracking-[-0.01em] [font-family:var(--home-display)]">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item.desc}</p>
-              </motion.article>
+              </article>
             )
           })}
         </div>

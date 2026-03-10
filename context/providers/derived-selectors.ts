@@ -33,12 +33,17 @@ export function getSortedTrades(trades: Trade[]): Trade[] {
     return []
   }
 
-  return trades
-    .filter((trade) => isValid(new Date(trade.entryDate)))
-    .sort(
-      (first, second) =>
-        new Date(first.entryDate).getTime() - new Date(second.entryDate).getTime()
-    )
+  const tradesWithTs: Array<{ trade: Trade; ts: number }> = []
+
+  for (const trade of trades) {
+    const ts = new Date(trade.entryDate).getTime()
+    if (Number.isFinite(ts)) {
+      tradesWithTs.push({ trade, ts })
+    }
+  }
+
+  tradesWithTs.sort((first, second) => first.ts - second.ts)
+  return tradesWithTs.map((item) => item.trade)
 }
 
 interface FormatTradesOptions {

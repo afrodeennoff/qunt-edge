@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -57,13 +56,7 @@ export default function PricingSection() {
   return (
     <section id="pricing" className="relative border-y border-[hsl(var(--mk-border)/0.24)] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-12 text-center"
-        >
+        <div className="mb-12 text-center">
           <Badge variant="outline" className="mb-4 border-[hsl(var(--brand-primary)/0.32)] bg-[hsl(var(--brand-primary)/0.08)] text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-copy)]">
             Pricing
           </Badge>
@@ -75,18 +68,11 @@ export default function PricingSection() {
             Start free. Upgrade when you want deeper diagnostics, tighter coaching loops, and desk-grade review workflows.
           </p>
           <p className="mt-4 text-xs text-muted-foreground [font-family:var(--home-copy)]">Billed monthly. Cancel anytime.</p>
-        </motion.div>
+        </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {plans.map((plan, idx) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="flex"
-            >
+          {plans.map((plan) => (
+            <div key={plan.name} className="flex">
               <Card
                 className={cn(
                   "marketing-panel flex w-full flex-col rounded-3xl border-[hsl(var(--mk-border)/0.32)] transition-all duration-300 hover:border-[hsl(var(--brand-primary)/0.35)]",
@@ -146,7 +132,7 @@ export default function PricingSection() {
                   <p className="text-center text-xs text-muted-foreground [font-family:var(--home-copy)]">{plan.note}</p>
                 </CardFooter>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
