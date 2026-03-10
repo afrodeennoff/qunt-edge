@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger'
 import { paymentService } from './payment-service'
 import { whop } from '@/lib/whop'
 import { normalizeSubscriptionStatus, SubscriptionStatus } from '@/lib/subscription-status'
+import { Prisma } from '@/prisma/generated/prisma'
 
 type SubscriptionUpdateData = {
   plan?: string
@@ -550,7 +551,7 @@ export class SubscriptionManager {
           email: data.email,
           subscriptionId: data.subscriptionId,
           eventType: data.eventType as any,
-          eventData: data.eventData,
+          eventData: data.eventData as Prisma.InputJsonValue,
         },
       })
     } catch (error) {

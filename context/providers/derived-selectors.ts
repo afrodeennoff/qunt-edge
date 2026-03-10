@@ -13,7 +13,7 @@ import type {
   WeekdayFilter,
 } from '@/lib/data-types'
 
-type TickDetailsMap = Record<string, { tickValue?: number | string } | undefined>
+type TickDetailsMap = Record<string, { tickValue?: unknown; tickSize?: unknown } | undefined>
 
 export function getTimeRangeKey(timeInPosition: number): string {
   const minutes = timeInPosition / 60

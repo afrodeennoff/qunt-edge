@@ -1,11 +1,18 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { logger, withLogContext } from "@/lib/logger"
 
 describe("logger", () => {
-  const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {})
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let writeMock: any
+
+  beforeEach(() => {
+    writeMock = vi.fn()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.spyOn(process.stdout as any, "write").mockImplementation(writeMock)
+  })
 
   afterEach(() => {
-    consoleSpy.mockClear()
+    vi.restoreAllMocks()
   })
 
   it("redacts sensitive values in development output", () => {
@@ -14,7 +21,7 @@ describe("logger", () => {
       safeField: "visible",
     })
 
-    const output = consoleSpy.mock.calls[0]?.[0]
+    const output = writeMock.mock.calls[0]?.[0] as string
     expect(typeof output).toBe("string")
     expect(output).not.toContain("1234567890abcdef")
     expect(output).toContain("12***ef")
@@ -33,7 +40,7 @@ describe("logger", () => {
       }
     )
 
-    const output = consoleSpy.mock.calls[0]?.[0]
+    const output = writeMock.mock.calls[0]?.[0] as string
     expect(typeof output).toBe("string")
     expect(output).toContain("req-123")
     expect(output).toContain("correlationId")
