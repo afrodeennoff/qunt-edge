@@ -1,7 +1,3 @@
-'use client'
-
-import { motion } from 'framer-motion'
-
 const steps = [
   { name: 'Sync Data', text: 'Ingest broker fills, account history, and journal context into one timeline.' },
   { name: 'Define Rules', text: 'Capture your setup criteria, risk constraints, and expected behavior standards.' },
@@ -25,12 +21,8 @@ export default function HowItWorks() {
         <div className="relative grid gap-4 md:grid-cols-5">
           <div className="pointer-events-none absolute left-[10%] right-[10%] top-6 hidden h-px bg-white/10 md:block" />
           {steps.map((step, i) => (
-            <motion.article
+            <article
               key={step.name}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.07, duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
               className="marketing-panel relative rounded-2xl p-5 text-center"
             >
               <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.8)] text-sm font-semibold text-[hsl(var(--brand-primary))] [font-family:var(--home-display)]">
@@ -38,7 +30,7 @@ export default function HowItWorks() {
               </div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.14em] [font-family:var(--home-copy)]">{step.name}</h3>
               <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{step.text}</p>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>

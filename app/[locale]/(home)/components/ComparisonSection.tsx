@@ -1,6 +1,3 @@
-'use client'
-
-import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, X } from 'lucide-react'
@@ -32,13 +29,7 @@ export default function ComparisonSection() {
   return (
     <section className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 text-center sm:mb-12"
-        >
+        <div className="mb-8 text-center sm:mb-12">
           <Badge variant="outline" className="border-[hsl(var(--brand-primary)/0.32)] bg-[hsl(var(--brand-primary)/0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-copy)]">
             Difference From Others
           </Badge>
@@ -46,7 +37,7 @@ export default function ComparisonSection() {
             Why we’re different
             <span className="block text-[hsl(var(--brand-primary))]">from standard trading analytics tools</span>
           </h2>
-        </motion.div>
+        </div>
 
         <Card variant="glass" className="overflow-hidden rounded-3xl border-[hsl(var(--mk-border)/0.35)] shadow-lg shadow-black/20">
           <CardHeader className="border-b border-[hsl(var(--mk-border)/0.2)] bg-[hsl(var(--mk-surface-muted)/0.5)]">
@@ -63,13 +54,9 @@ export default function ComparisonSection() {
                   </tr>
                 </thead>
                 <tbody>
-                  {comparisonRows.map((row, idx) => (
-                    <motion.tr
+                  {comparisonRows.map((row) => (
+                    <tr
                       key={row.item}
-                      initial={{ opacity: 0, y: 8 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.35, delay: idx * 0.05 }}
                       className="border-b border-[hsl(var(--mk-border)/0.14)]"
                     >
                       <td className="px-4 py-4 text-sm font-medium [font-family:var(--home-display)]">{row.item}</td>
@@ -85,7 +72,7 @@ export default function ComparisonSection() {
                           <span className="[font-family:var(--home-copy)]">{row.others}</span>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>

@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'framer-motion'
+"use client"
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -45,16 +43,10 @@ const automationFeatures = [
 function FeatureGrid({ items }: { items: typeof intelligenceFeatures }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((item, idx) => {
+      {items.map((item) => {
         const Icon = item.icon
         return (
-          <motion.div
-            key={item.title}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: idx * 0.06 }}
-          >
+          <div key={item.title}>
             <Card variant="glass" className="h-full rounded-2xl border-[hsl(var(--mk-border)/0.3)]">
               <CardHeader>
                 <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.75)] text-[hsl(var(--brand-primary))]">
@@ -66,7 +58,7 @@ function FeatureGrid({ items }: { items: typeof intelligenceFeatures }) {
                 </CardDescription>
               </CardHeader>
             </Card>
-          </motion.div>
+          </div>
         )
       })}
     </div>
@@ -77,13 +69,7 @@ export default function AIFuturesSection() {
   return (
     <section className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 text-center sm:mb-12"
-        >
+        <div className="mb-8 text-center sm:mb-12">
           <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] [font-family:var(--home-copy)]">
             Must-Have AI Features
           </Badge>
@@ -91,7 +77,7 @@ export default function AIFuturesSection() {
             AI that improves
             <span className="block text-[hsl(var(--brand-primary))]">decision quality, not just reporting</span>
           </h2>
-        </motion.div>
+        </div>
 
         <Tabs defaultValue="intelligence" className="w-full">
           <TabsList className="h-auto w-full justify-start rounded-xl border border-[hsl(var(--mk-border)/0.25)] bg-[hsl(var(--mk-surface-muted)/0.55)] p-1">
