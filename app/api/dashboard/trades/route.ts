@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const result = await getTradesAction(null, page, pageSize)
+    const result = await getTradesAction(user.id, page, pageSize)
     return NextResponse.json(result, {
       headers: {
         "Cache-Control": "no-store, max-age=0",

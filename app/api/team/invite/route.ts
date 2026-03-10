@@ -9,7 +9,7 @@ import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit"
 import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate"
 
 export const dynamic = 'force-dynamic'
-const inviteRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "team-invite" })
+const inviteRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "team-invite", requireDistributedInProduction: true })
 const inviteSchema = z.object({
   teamId: z.string().min(1),
   email: z.string().email(),

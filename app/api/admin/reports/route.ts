@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { assertAdminAccess, toErrorResponse } from '@/server/authz'
+import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
 
 type DateFilter = { gte?: Date; lte?: Date }
+
+const adminReportsRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "admin-reports", requireDistributedInProduction: true })
 
 function buildDateFilter(startDate: string | null, endDate: string | null): DateFilter {
   const dateFilter: DateFilter = {}
@@ -15,6 +18,15 @@ function buildDateFilter(startDate: string | null, endDate: string | null): Date
 export async function GET(req: NextRequest) {
   const requestId = crypto.randomUUID()
   try {
+    const limit = await adminReportsRateLimit(req)
+    if (!limit.success) {
+      return createRateLimitResponse({
+        limit: limit.limit,
+        remaining: limit.remaining,
+        resetTime: limit.resetTime,
+      })
+    }
+
     await assertAdminAccess(requestId)
 
     const { searchParams } = new URL(req.url)
