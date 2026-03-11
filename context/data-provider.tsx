@@ -110,6 +110,7 @@ import {
 // Combined Context Type
 export interface DashboardDataState {
   isLoading: boolean;
+  isRevalidating: boolean;
   isMobile: boolean;
   isSharedView: boolean;
   sharedParams: SharedParams | null;
@@ -122,6 +123,7 @@ export interface DashboardDataState {
 
 interface DashboardUiState {
   isLoading: boolean;
+  isRevalidating: boolean;
   isMobile: boolean;
   isSharedView: boolean;
 }
@@ -308,6 +310,7 @@ export const DataProvider: React.FC<{
   const setSubscriptionError = useSubscriptionStore(
     (state) => state.setError
   );
+  const [isRevalidating, setIsRevalidating] = useState(false);
   const bootstrappedSharedSlugRef = useRef<string | null>(null);
 
   const buildSharedAccountNumbers = useCallback(
@@ -612,73 +615,78 @@ export const DataProvider: React.FC<{
       }
 
       const refreshFromServer = async () => {
-        const data = await withTimeout(getUserData(), 20000, "getUserData");
-
-        if (!data) {
-          await signOut();
-          return;
-        }
-
-        const safeTrades =
-          userId && !isSharedView
-            ? await withTimeout(fetchAllTrades(userId, false), 20000, "fetchAllTrades(user)")
-            : await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
-
-        const tradesToUse =
-          safeTrades.length > 0
-            ? safeTrades
-            : process.env.NODE_ENV === "development" && userId
-              ? generateMockTrades(userId)
-              : [];
-        setTrades(sanitizeTradesForState(tradesToUse));
-
-        if (userId && tradesToUse.length > 0) {
-          setTradesCache(userId, tradesToUse).catch((err) =>
-            logger.error({ err }, "Failed to set trades cache")
-          );
-        }
-
-        const normalizedAccounts = normalizeAccountsForClient(
-          (data.accounts || []) as AccountInput[]
-        );
-
-        setUser(data.userData);
-        setSubscription(data.subscription as PrismaSubscription | null);
-        setTags(data.tags);
-        setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
-        setMoods(data.moodHistory);
-        setEvents(data.financialEvents);
-        setTickDetails(data.tickDetails);
-        setIsFirstConnection(data.userData?.isFirstConnection || false);
-
-        if (!hasLocalSnapshot) {
-          setAccounts(normalizedAccounts);
-          setIsLoading(false);
-        }
-
-        let accountsWithMetrics = normalizedAccounts;
+        setIsRevalidating(true);
         try {
-          accountsWithMetrics = await withTimeout(
-            calculateAccountMetricsAction(normalizedAccounts),
-            20000,
-            "calculateAccountMetricsAction"
-          );
-        } catch (e) {
-          logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
-        }
-        setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+          const data = await withTimeout(getUserData(), 20000, "getUserData");
 
-        if (userId && !isSharedView) {
-          setUserDataCache(userId, {
-            userData: data.userData,
-            subscription: data.subscription as PrismaSubscription | null,
-            tickDetails: data.tickDetails,
-            tags: data.tags,
-            accounts: normalizeAccountsForClient((data.accounts || []) as AccountInput[]),
-            groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
-            financialEvents: data.financialEvents,
-            moodHistory: data.moodHistory,
-          }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
+          if (!data) {
+            await signOut();
+            return;
+          }
+
+          const safeTrades =
+            userId && !isSharedView
+              ? await withTimeout(fetchAllTrades(userId, false), 20000, "fetchAllTrades(user)")
+              : await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
+
+          const tradesToUse =
+            safeTrades.length > 0
+              ? safeTrades
+              : process.env.NODE_ENV === "development" && userId
+                ? generateMockTrades(userId)
+                : [];
+          setTrades(sanitizeTradesForState(tradesToUse));
+
+          if (userId && tradesToUse.length > 0) {
+            setTradesCache(userId, tradesToUse).catch((err) =>
+              logger.error({ err }, "Failed to set trades cache")
+            );
+          }
+
+          const normalizedAccounts = normalizeAccountsForClient(
+            (data.accounts || []) as AccountInput[]
+          );
+
+          setUser(data.userData);
+          setSubscription(data.subscription as PrismaSubscription | null);
+          setTags(data.tags);
+          setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
+          setMoods(data.moodHistory);
+          setEvents(data.financialEvents);
+          setTickDetails(data.tickDetails);
+          setIsFirstConnection(data.userData?.isFirstConnection || false);
+
+          if (!hasLocalSnapshot) {
+            setAccounts(normalizedAccounts);
+            setIsLoading(false);
+          }
+
+          let accountsWithMetrics = normalizedAccounts;
+          try {
+            accountsWithMetrics = await withTimeout(
+              calculateAccountMetricsAction(normalizedAccounts),
+              20000,
+              "calculateAccountMetricsAction"
+            );
+          } catch (e) {
+            logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
+          }
+          setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+
+          if (userId && !isSharedView) {
+            setUserDataCache(userId, {
+              userData: data.userData,
+              subscription: data.subscription as PrismaSubscription | null,
+              tickDetails: data.tickDetails,
+              tags: data.tags,
+              accounts: normalizeAccountsForClient((data.accounts || []) as AccountInput[]),
+              groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
+              financialEvents: data.financialEvents,
+              moodHistory: data.moodHistory,
+            }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
+          }
+        } finally {
+          setIsRevalidating(false);
         }
       };
 
@@ -1874,6 +1882,7 @@ export const DataProvider: React.FC<{
   const dataStateValue = useMemo<DashboardDataState>(
     () => ({
       isLoading,
+      isRevalidating,
       isMobile,
       isSharedView,
       sharedParams,
@@ -1885,6 +1894,7 @@ export const DataProvider: React.FC<{
     }),
     [
       isLoading,
+      isRevalidating,
       isMobile,
       isSharedView,
       sharedParams,
@@ -1899,10 +1909,11 @@ export const DataProvider: React.FC<{
   const uiStateValue = useMemo<DashboardUiState>(
     () => ({
       isLoading,
+      isRevalidating,
       isMobile,
       isSharedView,
     }),
-    [isLoading, isMobile, isSharedView]
+    [isLoading, isRevalidating, isMobile, isSharedView]
   );
 
   const filtersValue = useMemo<DashboardFiltersState>(
@@ -2070,6 +2081,14 @@ export const useDashboardIsLoading = () => {
     throw new Error("useDashboardIsLoading must be used within a DataProvider");
   }
   return context.isLoading;
+};
+
+export const useDashboardIsRevalidating = () => {
+  const context = useContext(DashboardUiStateContext);
+  if (!context) {
+    throw new Error("useDashboardIsRevalidating must be used within a DataProvider");
+  }
+  return context.isRevalidating;
 };
 
 export const useDashboardIsSharedView = () => {

@@ -3,7 +3,7 @@
 import { TickDetails } from '@/prisma/generated/prisma'
 import { Prisma } from '@/prisma/generated/prisma'
 import { normalizeTradesForClient, Trade } from '@/lib/data-types'
-import { revalidatePath, unstable_cache, updateTag } from 'next/cache'
+import { unstable_cache, updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { GroupWithAccounts } from './groups'
 import { createSecureSlug } from '@/lib/security/slug'
@@ -67,7 +67,6 @@ export async function createShared(data: SharedParams): Promise<string> {
         })
 
         updateTag(`shared-view-${slug}`)
-        revalidatePath('/shared/[slug]', 'page')
         return slug
       } catch (error) {
         if ((error as { code?: string })?.code === 'P2002') {
@@ -246,7 +245,6 @@ export async function deleteShared(slug: string, userId: string) {
     })
 
     updateTag(`shared-view-${slug}`)
-    revalidatePath('/shared/[slug]', 'page')
   } catch (error) {
     console.error('Error deleting shared:', error)
     throw error

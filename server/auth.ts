@@ -386,7 +386,11 @@ export async function setPasswordAction(newPassword: string) {
  * - Throws on missing user or id, account conflicts, Prisma integrity/validation issues, or
  *   unexpected errors. NEXT_REDIRECT errors are re-thrown to allow Next.js redirects.
  */
-export async function ensureUserInDatabase(user: User, locale?: string) {
+export async function ensureUserInDatabase(
+  user: User,
+  locale?: string,
+  options?: { skipDefaultLayout?: boolean }
+) {
   if (!user) {
     await signOutSilently();
     throw new Error('User data is required');
@@ -451,13 +455,15 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
         },
       });
 
-      // Create default dashboard layout for new user
-      try {
-        const { createDefaultDashboardLayout } = await import('@/server/database');
-        await createDefaultDashboardLayout(user.id);
-      } catch (layoutError) {
-        console.error('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
-        // Don't throw here - user creation succeeded, layout can be created later
+      // Create default dashboard layout for new user unless explicitly skipped
+      if (!options?.skipDefaultLayout) {
+        try {
+          const { createDefaultDashboardLayout } = await import('@/server/database');
+          await createDefaultDashboardLayout(user.id);
+        } catch (layoutError) {
+          console.error('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
+          // Don't throw here - user creation succeeded, layout can be created later
+        }
       }
 
       return newUser;

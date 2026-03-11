@@ -95,7 +95,7 @@ export async function GET(request: Request) {
           const { data: { user } } = await supabase.auth.getUser()
           if (user) {
             await ensureUserInDatabaseWithBudget(
-              () => ensureUserInDatabase(user, locale),
+              () => ensureUserInDatabase(user, locale, { skipDefaultLayout: true }),
               800
             )
           }

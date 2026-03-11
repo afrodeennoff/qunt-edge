@@ -234,6 +234,54 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s check:route-budgets` -> all monitored routes within budget.
   - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
 
+### 2026-03-11: Phase 1-8 Completion Sweep (Auth Path + Hydration + Provider Scope + Invalidation)
+- **What changed:** Completed a broader phase sweep to harden login critical path behavior, make dashboard hydration state more explicit, reduce non-import sync provider overhead, and remove remaining server-side broad path revalidation in shared flows.
+- **What I want:** Faster and more predictable login-to-dashboard handoff with clear background-refresh semantics, plus fewer unnecessary runtime effects and invalidation fan-out across the app.
+- **What I don't want:** Callback-path layout creation adding avoidable auth latency, hidden background work mounting on routes that do not need it, and broad path revalidation causing stale/over-invalidation side effects.
+- **How we fixed that:**
+  - `server/auth.ts` + `app/api/auth/callback/route.ts`:
+    - added `ensureUserInDatabase(..., options)` with `skipDefaultLayout` and used it in callback flow to reduce redirect-path work while preserving user-record bootstrap.
+  - `components/providers/dashboard-providers.tsx`:
+    - gated `SyncContextProvider` mount to import route surfaces so non-import dashboard routes avoid mounting sync stack entirely.
+  - `context/data-provider.tsx`:
+    - added explicit `isRevalidating` state in dashboard data/ui contexts and wrapped `refreshFromServer` with begin/end revalidation markers.
+    - retained cache-first + background reconcile flow and kept hydration fetches `includeStats=false`.
+  - `server/shared.ts`:
+    - removed remaining `revalidatePath('/shared/[slug]')` calls and rely on shared tag invalidation (`updateTag('shared-view-*')`).
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `components/providers/dashboard-providers.tsx`, `context/data-provider.tsx`, `server/shared.ts`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(authentication)/components/user-auth-form.tsx app/[locale]/dashboard/page.tsx app/api/auth/callback/route.ts server/auth.ts components/providers/dashboard-providers.tsx context/data-provider.tsx context/rithmic-sync-context.tsx context/tradovate-sync-context.tsx server/groups.ts server/layouts.ts server/trades.ts server/journal.ts server/tags.ts server/thor.ts server/shared.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+
+### 2026-03-11: Phase 1-8 Finalization (Callback Path Trim + Revalidation State + Shared Invalidation + Dashboard Runtime Gate)
+- **What changed:** Finalized the remaining phase items by reducing callback-path layout overhead, tightening provider scope and hydration-state signaling, removing shared-path broad revalidation, and adding a dashboard runtime perf gate script to CI tooling.
+- **What I want:** Keep login-to-dashboard handoff fast, make background hydration status explicit, avoid over-broad shared route invalidation, and enforce dashboard runtime checks in automated performance workflows.
+- **What I don't want:** Callback-path layout creation slowing redirects, sync providers mounting on non-import pages, hidden background refresh with no observable state, or CI missing dashboard runtime regressions.
+- **How we fixed that:**
+  - `server/auth.ts` + `app/api/auth/callback/route.ts`:
+    - added `ensureUserInDatabase(..., { skipDefaultLayout })` option and used it in callback flow to skip default layout creation during redirect-critical auth callback.
+  - `components/providers/dashboard-providers.tsx`:
+    - gated `SyncContextProvider` mount by route (`/dashboard/import`) so non-import dashboard routes do not mount sync provider stack.
+  - `context/data-provider.tsx`:
+    - added `isRevalidating` state to data/ui contexts and wrapped `refreshFromServer` with explicit begin/end revalidation state updates.
+    - retained hydration fetch optimization (`includeStats=false`) and user-data-first reconciliation order.
+  - `server/shared.ts`:
+    - removed remaining `revalidatePath('/shared/[slug]')` calls and rely on shared tag invalidation only.
+  - Rendering boundary and perf tooling:
+    - converted import callback route to server wrapper + client island (`app/[locale]/dashboard/import/page.tsx` + `page-client.tsx`).
+    - added `context/providers/ui-provider.tsx` for explicit UI-state provider access (loading/revalidating/mobile/shared).
+    - added `scripts/perf-dashboard-runtime.mjs`, wired `perf:dashboard-runtime` into `package.json` and CI workflow (`.github/workflows/ci.yml`) to gate dashboard runtime/redirect behavior.
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `components/providers/dashboard-providers.tsx`, `context/data-provider.tsx`, `server/shared.ts`, `app/[locale]/dashboard/import/page.tsx`, `app/[locale]/dashboard/import/page-client.tsx`, `context/providers/ui-provider.tsx`, `scripts/perf-dashboard-runtime.mjs`, `package.json`, `.github/workflows/ci.yml`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint server/auth.ts app/api/auth/callback/route.ts components/providers/dashboard-providers.tsx context/data-provider.tsx server/shared.ts scripts/perf-dashboard-runtime.mjs app/[locale]/dashboard/import/page.tsx app/[locale]/dashboard/import/page-client.tsx` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+
 
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.

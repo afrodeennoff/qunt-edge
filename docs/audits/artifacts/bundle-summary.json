@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-11T07:14:53.988Z",
+  "generatedAt": "2026-03-11T15:30:30.611Z",
   "budgets": {
     "defaultRouteBudgetKb": 300,
     "homeRouteBudgetKb": 80,
@@ -85,8 +85,8 @@
     {
       "route": "/[locale]/dashboard/import",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/dashboard/import/page_client-reference-manifest.js",
-      "bytes": 54564,
-      "kb": 53.29,
+      "bytes": 54578,
+      "kb": 53.3,
       "budgetKb": 80,
       "withinBudget": true
     },

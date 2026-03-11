@@ -34,9 +34,10 @@
     "test:payment:ui": "vitest --config vitest.payment.config.ts --ui",
     "test:payment:coverage": "vitest --config vitest.payment.config.ts --coverage",
     "perf:lighthouse": "node scripts/perf-lighthouse.mjs",
+    "perf:dashboard-runtime": "node scripts/perf-dashboard-runtime.mjs",
     "perf:headers": "node scripts/perf-header-check.mjs",
     "perf:baseline": "node scripts/perf-baseline.mjs",
-    "perf:ci": "npm run check:dead-code && npm run check:route-security && npm run check:route-budgets && npm run analyze:bundle && PERF_HEADER_STRICT=true npm run perf:headers && npm run perf:baseline && npm run perf:lighthouse"
+    "perf:ci": "npm run check:dead-code && npm run check:route-security && npm run check:route-budgets && npm run analyze:bundle && PERF_HEADER_STRICT=true npm run perf:headers && npm run perf:baseline && npm run perf:dashboard-runtime && npm run perf:lighthouse"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.10",
