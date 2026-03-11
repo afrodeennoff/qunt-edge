@@ -297,7 +297,6 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npx eslint components/providers/dashboard-providers.tsx .github/workflows/ci.yml` -> provider file lint clean; workflow file outside eslint scope.
   - `npm run -s typecheck` -> passes.
 
-
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.
 - **What I want:** Clean typecheck/build for team analytics routes.

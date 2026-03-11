@@ -584,7 +584,6 @@ export const DataProvider: React.FC<{
       }
 
       let hasLocalSnapshot = false;
-
       if (userId && !isSharedView) {
         const [cachedTrades, cachedUserData] = await Promise.all([
           withTimeout(getTradesCache(userId), 2000, "getTradesCache"),
