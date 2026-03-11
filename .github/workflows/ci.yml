@@ -139,6 +139,8 @@ jobs:
         run: npm run perf:baseline
 
       - name: Dashboard Runtime Gate
+        env:
+          PERF_DASHBOARD_AUTH_COOKIE: ${{ secrets.PERF_DASHBOARD_AUTH_COOKIE }}
         run: npm run perf:dashboard-runtime
 
       - name: Lighthouse Performance Gate

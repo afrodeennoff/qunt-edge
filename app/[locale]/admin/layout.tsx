@@ -8,7 +8,6 @@ import { useCurrentLocale } from "@/locales/client";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { RootProviders } from "@/components/providers/root-providers";
 import { AuthTimeout } from "@/components/auth/auth-timeout";
-import { GlobalSyncButton } from "@/app/[locale]/dashboard/components/global-sync-button";
 
 export default function RootLayout(
   props: Readonly<{
@@ -49,7 +48,6 @@ export default function RootLayout(
                 <SidebarTrigger className="text-zinc-500 hover:text-white" />
                 <h1 className="text-sm font-bold text-white tracking-wide uppercase whitespace-nowrap">Admin Panel</h1>
               </div>
-              <GlobalSyncButton />
             </header>
             <main className="flex-1 overflow-y-auto p-6 relative z-0">
               {children}

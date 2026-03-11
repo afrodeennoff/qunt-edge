@@ -282,6 +282,21 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s check:route-budgets` -> all monitored routes within budget.
   - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
 
+### 2026-03-11: Review Follow-Up (Sync Provider Boundary Safety + CI Auth Runtime Hook)
+- **What changed:** Applied code-review follow-up fixes to prevent sync-context consumer crashes on non-import routes and improve CI dashboard runtime gate coverage.
+- **What I want:** Keep dashboard runtime safe on all tabs while still reducing unnecessary sync work, and allow authenticated runtime checks in CI when credentials are available.
+- **What I don't want:** `useSyncContext()` consumers throwing outside `/dashboard/import` due missing provider, or runtime gate silently never checking authenticated dashboard behavior in CI-capable environments.
+- **How we fixed that:**
+  - `components/providers/dashboard-providers.tsx`:
+    - restored unconditional `SyncContextProvider` mount so existing `useSyncContext()` consumers remain valid across dashboard routes.
+    - retained prior runtime pressure reduction via route/visibility guards inside `rithmic`/`tradovate` sync contexts (instead of removing provider boundary).
+  - `.github/workflows/ci.yml`:
+    - wired optional `PERF_DASHBOARD_AUTH_COOKIE` secret into the dashboard runtime gate step so authenticated checks run automatically when available.
+- **Key Files:** `components/providers/dashboard-providers.tsx`, `.github/workflows/ci.yml`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint components/providers/dashboard-providers.tsx .github/workflows/ci.yml` -> provider file lint clean; workflow file outside eslint scope.
+  - `npm run -s typecheck` -> passes.
+
 
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.
@@ -406,6 +421,19 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Full landing page redesign using `shadcn` components for better pricing clarity and conversion hierarchy.
 
 ## 🚀 Recent Feature Updates
+
+### 2026-03-11: Dashboard Crash Hotfix (`useSyncContext` Provider Boundary)
+- **What changed:** Fixed the runtime crash that blocked dashboard/admin loading with `useSyncContext must be used within a SyncContextProvider`.
+- **What I want:** Dashboard surfaces should never crash from sync-context boundary mismatches; shared headers should only render sync controls where sync providers actually exist.
+- **What I don't want:** Conditional provider mounts or cross-route component reuse causing hard runtime failures and blank error screens.
+- **How we fixed that:**
+  - Kept `SyncContextProvider` mounted unconditionally inside `DashboardProviders`.
+  - Removed `GlobalSyncButton` usage from admin layout, where dashboard sync/data providers are not mounted.
+  - Preserved strict hook behavior (`useSyncContext` still throws outside provider) so real boundary mistakes remain visible during development.
+- **Key Files:** `components/providers/dashboard-providers.tsx`, `app/[locale]/admin/layout.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> passes.
+  - `npx eslint components/providers/dashboard-providers.tsx app/[locale]/admin/layout.tsx` -> passes (0 errors).
 
 ### 2026-03-08: Consolidated Remediation Sweep (Logs + Typing + Memo + Hook Hygiene)
 - **What changed:** Ran a single repo-wide remediation pass focused on safe mechanical hardening across runtime logs, straightforward typing cleanup, memoization, hook cleanup, and config safety.
