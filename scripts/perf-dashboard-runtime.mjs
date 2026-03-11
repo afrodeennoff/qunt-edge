@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 
 const BASE_URL = process.env.PERF_BASE_URL ?? 'http://127.0.0.1:3000'
 const DASHBOARD_PATH = process.env.PERF_DASHBOARD_PATH ?? '/en/dashboard'
@@ -7,9 +7,21 @@ const REDIRECT_MAX_MS = Number(process.env.PERF_DASHBOARD_REDIRECT_MAX_MS ?? 900
 const AUTH_MAX_MS = Number(process.env.PERF_DASHBOARD_AUTH_MAX_MS ?? 1800)
 
 function curlMetrics(url, cookie = '') {
-  const headerPart = cookie ? `-H "Cookie: ${cookie}"` : ''
-  const command = `curl -s -o /dev/null ${headerPart} -w "code=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}" "${url}"`
-  const output = execSync(command, { encoding: 'utf8' }).trim()
+  const args = [
+    '-s',
+    '-o',
+    '/dev/null',
+    '-w',
+    'code=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}',
+  ]
+
+  if (cookie) {
+    args.push('-H', `Cookie: ${cookie}`)
+  }
+
+  args.push(url)
+
+  const output = execFileSync('curl', args, { encoding: 'utf8' }).trim()
   const entries = Object.fromEntries(output.split(' ').map((pair) => pair.split('=')))
   return {
     code: Number(entries.code),

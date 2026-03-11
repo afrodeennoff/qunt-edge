@@ -7,6 +7,7 @@ import {
   handleTradovateCallback,
 } from "../components/import/tradovate/actions";
 import { useI18n } from "@/locales/client";
+import { useCurrentLocale } from "@/locales/client";
 import { useSyncContext } from "@/context/sync-context"
 import { useDashboardActions } from "@/context/data-provider"
 import {
@@ -23,7 +24,10 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 export default function ImportCallbackPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tradovateStore = useTradovateSyncStore();
+  const locale = useCurrentLocale();
+  const oauthState = useTradovateSyncStore((state) => state.oauthState);
+  const clearOAuthState = useTradovateSyncStore((state) => state.clearOAuthState);
+  const clearAll = useTradovateSyncStore((state) => state.clearAll);
   const { tradovate } = useSyncContext();
   const { refreshAllData } = useDashboardActions();
   const t = useI18n();
@@ -77,7 +81,7 @@ export default function ImportCallbackPageClient() {
         }
 
         const storedOAuthState =
-          tradovateStore.oauthState ??
+          oauthState ??
           (typeof sessionStorage !== "undefined"
             ? sessionStorage.getItem("tradovate_oauth_state")
             : null);
@@ -114,7 +118,7 @@ export default function ImportCallbackPageClient() {
           return;
         }
 
-        tradovateStore.clearOAuthState();
+        clearOAuthState();
         if (typeof sessionStorage !== "undefined") {
           sessionStorage.removeItem("tradovate_oauth_state");
         }
@@ -129,7 +133,7 @@ export default function ImportCallbackPageClient() {
         setStatus("success");
 
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push(`/${locale}/dashboard`);
         }, 1000);
       } catch (error) {
         let errorMessage = "Unknown error occurred";
@@ -147,12 +151,21 @@ export default function ImportCallbackPageClient() {
     };
 
     handleCallback();
-  }, [searchParams, tradovateStore, router, storeHydrated, tradovate, refreshAllData]);
+  }, [
+    searchParams,
+    oauthState,
+    clearOAuthState,
+    router,
+    storeHydrated,
+    tradovate,
+    refreshAllData,
+    locale,
+  ]);
 
   const handleRetry = () => {
     hasProcessed.current = false;
-    tradovateStore.clearAll();
-    router.push("/dashboard");
+    clearAll();
+    router.push(`/${locale}/dashboard`);
   };
 
   return (
@@ -211,7 +224,7 @@ export default function ImportCallbackPageClient() {
                   {t("tradovateSync.callback.retry")}
                 </Button>
                 <Button
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => router.push(`/${locale}/dashboard`)}
                   variant="secondary"
                   className="w-full"
                 >

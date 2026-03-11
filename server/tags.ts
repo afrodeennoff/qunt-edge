@@ -2,12 +2,12 @@
 
 import { getDatabaseUserId } from './auth'
 import { prisma } from '@/lib/prisma'
-import { updateTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 
 function invalidateTagRelatedCaches(userId: string) {
-  updateTag(`user-data-${userId}`)
-  updateTag(`trades-${userId}`)
-  updateTag(`dashboard-${userId}`)
+  revalidateTag(`user-data-${userId}`, 'max')
+  revalidateTag(`trades-${userId}`, 'max')
+  revalidateTag(`dashboard-${userId}`, 'max')
 }
 
 export async function getTagsAction(userId: string) {

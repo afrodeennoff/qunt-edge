@@ -125,7 +125,8 @@ export async function revalidateCache(tags: string[]) {
   })
 }
 
-async function invalidateTradeRelatedCaches(): Promise<void> {
+async function invalidateTradeRelatedCaches(userId: string): Promise<void> {
+  updateTag(`trades-${userId}`)
   await Promise.all([
     invalidateCacheNamespace('ai-trades'),
     invalidateCacheNamespace('behavior-insights'),
@@ -280,9 +281,8 @@ export async function saveTradesAction(
       })
     })
 
-    updateTag(`trades-${userId}`)
     updateTag(`user-data-${userId}`)
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
 
     if (result.count === 0) {
       logger.info('[saveTrades] No trades added. Duplicate check.')
@@ -588,8 +588,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
       })
     }
 
-    updateTag(`trades-${userId}`)
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     return tradesIds.length
   } catch (error) {
     logger.error('[updateTrades] Error', { error })
@@ -608,7 +607,7 @@ export async function updateTradeCommentAction(tradeId: string, comment: string 
       where: { id: tradeId, userId },
       data: { comment }
     })
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
   } catch (error) {
     logger.error("[updateTradeComment] Error", { error })
     throw error
@@ -626,7 +625,7 @@ export async function updateTradeVideoUrlAction(tradeId: string, videoUrl: strin
       where: { id: tradeId, userId },
       data: { videoUrl }
     })
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
   } catch (error) {
     logger.error("[updateTradeVideoUrl] Error", { error })
     throw error
@@ -654,7 +653,7 @@ export async function addTagToTrade(tradeId: string, tag: string) {
       }
     })
 
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     return updatedTrade
   } catch (error) {
     console.error('Failed to add tag:', error)
@@ -683,7 +682,7 @@ export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
       }
     })
 
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     return updatedTrade
   } catch (error) {
     console.error('Failed to remove tag:', error)
@@ -716,7 +715,7 @@ export async function deleteTagFromAllTrades(tag: string) {
       )
     )
 
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     revalidateTag(userId, { expire: 0 })
     return { success: true }
   } catch (error) {
@@ -747,7 +746,7 @@ export async function updateTradeImage(
       }
     })
 
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     return trades
   } catch (error) {
     console.error('Failed to update trade image:', error)
@@ -796,7 +795,7 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
       )
     )
 
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     return { success: true, tradesUpdated: trades.length }
   } catch (error) {
     console.error('Failed to add tags to trades for day:', error)

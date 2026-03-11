@@ -43,7 +43,13 @@ export async function getAllTradesForAi(
   let truncated = false;
 
   while (page <= maxPages) {
-    const paginated = await getTradesAction(null, page, pageSize);
+    const paginated = await getTradesAction(
+      null,
+      page,
+      pageSize,
+      forceRefresh && page === 1,
+      false,
+    );
     allTrades.push(...paginated.trades);
 
     if (!paginated.metadata.hasMore) {

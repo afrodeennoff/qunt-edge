@@ -702,6 +702,7 @@ export function RithmicSyncContextProvider({
       resetProcessingState,
       clearMessageHistory,
       setAvailableAccounts,
+      trades,
       setIsAutoSyncing,
     ]
   );

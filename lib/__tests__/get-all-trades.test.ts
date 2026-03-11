@@ -54,7 +54,7 @@ describe("getAllTradesForAi", () => {
     expect(result.truncated).toBe(false);
     expect(result.fetchedPages).toBe(1);
     expect(result.dataQualityWarning).toBeUndefined();
-    expect(getTradesActionMock).toHaveBeenCalledWith(null, 1, 100);
+    expect(getTradesActionMock).toHaveBeenCalledWith(null, 1, 100, false, false);
   });
 
   it("marks result as truncated when max page cap is reached", async () => {
@@ -68,7 +68,7 @@ describe("getAllTradesForAi", () => {
     expect(result.truncated).toBe(true);
     expect(result.fetchedPages).toBe(2);
     expect(result.dataQualityWarning).toContain("capped subset");
-    expect(getTradesActionMock).toHaveBeenNthCalledWith(1, null, 1, 100);
-    expect(getTradesActionMock).toHaveBeenNthCalledWith(2, null, 2, 100);
+    expect(getTradesActionMock).toHaveBeenNthCalledWith(1, null, 1, 100, false, false);
+    expect(getTradesActionMock).toHaveBeenNthCalledWith(2, null, 2, 100, false, false);
   });
 });

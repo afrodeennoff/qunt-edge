@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { GroupWithAccounts } from './groups'
 import { createSecureSlug } from '@/lib/security/slug'
 import { isSharedAccessible } from '@/lib/security/shared-access'
+import { getDatabaseUserId } from './auth'
 
 export interface SharedParams {
   userId: string
@@ -34,6 +35,8 @@ interface DateRange {
 
 export async function createShared(data: SharedParams): Promise<string> {
   try {
+    const userId = await getDatabaseUserId()
+
     // Validate date range
     if (!data.dateRange?.from) {
       throw new Error('Start date is required')
@@ -50,7 +53,7 @@ export async function createShared(data: SharedParams): Promise<string> {
       try {
         await prisma.shared.create({
           data: {
-            userId: data.userId,
+            userId,
             title: data.title,
             description: data.description,
             isPublic: data.isPublic,
@@ -216,8 +219,9 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   }
 }
 
-export async function getUserShared(userId: string) {
+export async function getUserShared() {
   try {
+    const userId = await getDatabaseUserId()
     const sharedTrades = await prisma.shared.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -230,8 +234,9 @@ export async function getUserShared(userId: string) {
   }
 }
 
-export async function deleteShared(slug: string, userId: string) {
+export async function deleteShared(slug: string) {
   try {
+    const userId = await getDatabaseUserId()
     const shared = await prisma.shared.findUnique({
       where: { slug },
     })

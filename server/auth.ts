@@ -374,17 +374,25 @@ export async function setPasswordAction(newPassword: string) {
  * - user: Supabase `User` object (required). Must contain a valid `id`.
  * - locale: Optional locale string from the client (e.g. 'en', 'fr'). When provided, it is
  *   persisted to the `language` field for the user record.
+ * - options: Optional behavior flags.
+ *   - skipDefaultLayout?: when `true`, skips default dashboard layout creation for newly
+ *     created users. Defaults to `false` (layout is created).
  *
  * Returns:
  * - The up-to-date Prisma `user` record.
  *
  * Side effects:
  * - May sign the user out on integrity or identification errors.
- * - May create a default dashboard layout for new users.
+ * - May create a default dashboard layout for new users unless
+ *   `options.skipDefaultLayout` is `true`.
  *
  * Errors:
  * - Throws on missing user or id, account conflicts, Prisma integrity/validation issues, or
  *   unexpected errors. NEXT_REDIRECT errors are re-thrown to allow Next.js redirects.
+ *
+ * Notes:
+ * - `options.skipDefaultLayout` changes side effects only (layout creation). The returned
+ *   Prisma user record semantics are unchanged.
  */
 export async function ensureUserInDatabase(
   user: User,
