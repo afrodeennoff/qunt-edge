@@ -1,6 +1,5 @@
 import { createClient, ensureUserInDatabase, getWebsiteURL } from '@/server/auth'
 import { NextResponse } from 'next/server'
-// The client you created from the Server-Side Auth instructions
 
 function isNextRedirectError(error: unknown): boolean {
   return (
@@ -10,25 +9,6 @@ function isNextRedirectError(error: unknown): boolean {
     typeof (error as { digest?: unknown }).digest === 'string' &&
     (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
   )
-}
-
-async function ensureUserInDatabaseWithBudget(
-  ensureFn: () => Promise<unknown>,
-  timeoutMs: number
-) {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null
-  try {
-    await Promise.race([
-      ensureFn(),
-      new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => {
-          reject(new Error(`ensureUserInDatabase timeout after ${timeoutMs}ms`))
-        }, timeoutMs)
-      }),
-    ])
-  } finally {
-    if (timeoutId) clearTimeout(timeoutId)
-  }
 }
 
 export async function GET(request: Request) {
@@ -94,10 +74,8 @@ export async function GET(request: Request) {
         try {
           const { data: { user } } = await supabase.auth.getUser()
           if (user) {
-            await ensureUserInDatabaseWithBudget(
-              () => ensureUserInDatabase(user, locale, { skipDefaultLayout: true }),
-              800
-            )
+            // Skip timeout - user creation is critical for auth to work
+            await ensureUserInDatabase(user, locale, { skipDefaultLayout: true })
           }
         } catch (e) {
           if (isNextRedirectError(e)) {

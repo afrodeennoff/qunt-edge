@@ -115,12 +115,16 @@ export async function renderEmail(content: WeeklyRecapContent, analysis: { resul
 }
 
 export async function loadInitialContent(email?: string, userId?: string) {
-  await assertAdminAccess()
-  // If no userId is provided, use the default admin user
-  const targetUserId = userId || process.env.ALLOWED_ADMIN_USER_ID
+  const admin = await assertAdminAccess()
+  
+  // Only allow admin to query other users' data; otherwise use admin's own userId
+  // This prevents unauthorized enumeration of user data
+  const targetUserId = userId && admin.userId === process.env.ALLOWED_ADMIN_USER_ID 
+    ? userId 
+    : admin.userId
 
   if (!targetUserId) {
-    throw new Error('No user ID provided and no default admin user configured')
+    throw new Error('Unable to determine target user')
   }
 
   try {

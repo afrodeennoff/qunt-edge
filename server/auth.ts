@@ -450,15 +450,17 @@ export async function ensureUserInDatabase(
               language: shouldUpdateLanguage ? (locale as string) : existingUserByAuthId.language
             },
           });
-          await ensureDashboardLayoutBackfill(user.id);
-          return updatedUser;
-        } catch (updateError) {
-          console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
-          throw new Error('Failed to update user');
-        }
+        await ensureDashboardLayoutBackfill(user.id);
+        return updatedUser;
+      } catch (updateError) {
+        console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
+        throw new Error('Failed to update user');
       }
+    }
+    if (!options?.skipDefaultLayout) {
       await ensureDashboardLayoutBackfill(user.id);
-      return existingUserByAuthId;
+    }
+    return existingUserByAuthId;
     }
 
     // If user doesn't exist by auth_user_id, check if email exists

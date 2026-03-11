@@ -10,7 +10,8 @@ function invalidateTagRelatedCaches(userId: string): void {
   updateTag(`dashboard-${userId}`)
 }
 
-export async function getTagsAction(userId: string) {
+export async function getTagsAction() {
+  const userId = await getDatabaseUserId()
   try {
     const tags = await prisma.tag.findMany({
       where: {

@@ -201,6 +201,9 @@ export async function deleteTradesByIdsAction(tradeIds: string[]): Promise<void>
       userId
     }
   })
+  updateTag(`trades-${userId}`)
+  updateTag(`user-data-${userId}`)
+  updateTag(`dashboard-${userId}`)
 }
 
 export async function setupAccountAction(account: Account): Promise<Account> {
@@ -232,6 +235,20 @@ export async function setupAccountAction(account: Account): Promise<Account> {
 
   // Only include considerBuffer when explicitly provided to avoid overriding unintentionally
   const considerBufferUpdate = considerBuffer === undefined ? {} : { considerBuffer }
+
+  // Security: Validate groupId ownership before connecting
+  if (groupId) {
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      select: { userId: true }
+    })
+    if (!group) {
+      throw new Error('Group not found')
+    }
+    if (group.userId !== userId) {
+      throw new Error('Unauthorized: cannot connect to another user\'s group')
+    }
+  }
 
   // Build group relation payloads separately for update vs create
   // - Update: allow disconnect when groupId is explicitly null
@@ -380,34 +397,67 @@ export async function savePayoutAction(payout: Payout) {
       throw new Error('Account not found')
     }
 
-    const result = await prisma.payout.upsert({
-      where: {
-        id: payout.id
-      },
-      create: {
-        id: crypto.randomUUID(),
-        accountNumber: payout.accountNumber,
-        date: payout.date,
-        amount: payout.amount,
-        status: payout.status,
-        account: {
-          connect: {
-            id: account.id
+    // Security: Verify ownership if updating existing payout
+    if (payout.id) {
+      const existingPayout = await prisma.payout.findFirst({
+        where: {
+          id: payout.id,
+          account: {
+            userId: userId
           }
         }
-      },
-      update: {
-        accountNumber: payout.accountNumber,
-        date: payout.date,
-        amount: payout.amount,
-        status: payout.status,
-        account: {
-          connect: {
-            id: account.id
-          }
+      })
+      if (existingPayout && existingPayout.accountNumber !== payout.accountNumber) {
+        throw new Error('Cannot modify payout for different account')
+      }
+    }
+
+    // Use updateMany with ownership check, or create if not found
+    const existingPayout = payout.id 
+      ? await prisma.payout.findFirst({ where: { id: payout.id } })
+      : null
+
+    let result
+    if (existingPayout) {
+      // Verify ownership before update
+      if (existingPayout.accountNumber !== payout.accountNumber) {
+        const payoutAccount = await prisma.account.findUnique({
+          where: { id: existingPayout.accountNumber }
+        })
+        if (payoutAccount?.userId !== userId) {
+          throw new Error('Unauthorized to modify this payout')
         }
-      },
-    })
+      }
+      result = await prisma.payout.update({
+        where: { id: payout.id },
+        data: {
+          accountNumber: payout.accountNumber,
+          date: payout.date,
+          amount: payout.amount,
+          status: payout.status,
+          account: {
+            connect: {
+              id: account.id
+            }
+          }
+        },
+      })
+    } else {
+      result = await prisma.payout.create({
+        data: {
+          id: payout.id || crypto.randomUUID(),
+          accountNumber: payout.accountNumber,
+          date: payout.date,
+          amount: payout.amount,
+          status: payout.status,
+          account: {
+            connect: {
+              id: account.id
+            }
+          }
+        },
+      })
+    }
     updateTag(`user-data-${userId}`)
     return result
   } catch (error) {

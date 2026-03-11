@@ -3,10 +3,24 @@
 import { DashboardLayout, Prisma } from '@/prisma/generated/prisma'
 import { updateTag } from 'next/cache'
 import { Widget, Layouts } from '@/app/[locale]/dashboard/types/dashboard'
-import { createClient, getUserId } from './auth'
+import { createClient, getUserId, getDatabaseUserId } from './auth'
 import { prisma } from '@/lib/prisma'
 import { defaultLayouts } from '@/lib/default-layouts'
 import { logger } from '@/lib/logger'
+
+async function assertLayoutOwnership(layoutId: string): Promise<DashboardLayout> {
+  const userId = await getDatabaseUserId()
+  const layout = await prisma.dashboardLayout.findUnique({
+    where: { id: layoutId }
+  })
+  if (!layout) {
+    throw new Error('Layout not found')
+  }
+  if (layout.userId !== userId) {
+    throw new Error('Unauthorized access to layout')
+  }
+  return layout
+}
 
 interface SaveLayoutResult {
   success: boolean
@@ -189,6 +203,9 @@ export async function createLayoutVersionAction(
   }
 ): Promise<void> {
   try {
+    // Verify ownership before creating version
+    await assertLayoutOwnership(layoutId)
+
     await prisma.layoutVersion.create({
       data: {
         layoutId,
@@ -233,6 +250,9 @@ export async function getLayoutVersionHistoryAction(
   createdAt: Date
 }>> {
   try {
+    // Verify ownership before reading history
+    await assertLayoutOwnership(layoutId)
+
     const versions = await prisma.layoutVersion.findMany({
       where: { layoutId },
       orderBy: { version: 'desc' },
@@ -271,6 +291,9 @@ export async function getLayoutVersionByNumberAction(
   createdAt: Date
 } | null> {
   try {
+    // Verify ownership before reading version
+    await assertLayoutOwnership(layoutId)
+
     const version = await prisma.layoutVersion.findUnique({
       where: {
         id: await prisma.layoutVersion.findFirst({
@@ -304,6 +327,9 @@ export async function cleanupOldLayoutVersionsAction(
   keepCount = 50
 ): Promise<void> {
   try {
+    // Verify ownership before cleanup
+    await assertLayoutOwnership(layoutId)
+
     const totalCount = await prisma.layoutVersion.count({ where: { layoutId } })
 
     if (totalCount <= keepCount) return
