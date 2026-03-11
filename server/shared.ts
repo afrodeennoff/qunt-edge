@@ -28,12 +28,14 @@ export interface SharedParams {
   tickDetails?: TickDetails[]
 }
 
+type SharedCreateParams = Omit<SharedParams, 'userId'>
+
 interface DateRange {
   from: string;
   to?: string;
 }
 
-export async function createShared(data: SharedParams): Promise<string> {
+export async function createShared(data: SharedCreateParams): Promise<string> {
   try {
     const userId = await getDatabaseUserId()
 

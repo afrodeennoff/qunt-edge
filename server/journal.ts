@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { getDatabaseUserId } from './auth';
 import { Mood } from '@/prisma/generated/prisma';
 
@@ -17,8 +17,8 @@ export type MindsetData = {
 };
 
 function invalidateJournalRelatedCaches(userId: string) {
-  revalidateTag(`user-data-${userId}`, 'max')
-  revalidateTag(`dashboard-${userId}`, 'max')
+  updateTag(`user-data-${userId}`)
+  updateTag(`dashboard-${userId}`)
 }
 
 export async function saveMindset(

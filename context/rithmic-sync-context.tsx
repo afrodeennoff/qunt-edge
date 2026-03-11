@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from "react";
 import { getRithmicData, updateLastSyncTime } from "@/lib/rithmic-storage";
@@ -92,6 +93,11 @@ export function RithmicSyncContextProvider({
 
   const isLoading = useUserStore((state) => state.isLoading);
   const trades = useTradesStore((state) => state.trades);
+  const tradesRef = useRef(trades);
+
+  useEffect(() => {
+    tradesRef.current = trades;
+  }, [trades]);
 
   // Use store for state management
   const {
@@ -613,15 +619,15 @@ export function RithmicSyncContextProvider({
         // Get most recent date for each account
         const mostRecentDates = accountsToSync
           .map((accountId: string) => {
-            const accountTrades = trades.filter(
+            const accountTrades = tradesRef.current.filter(
               (trade) => trade.accountNumber === accountId
             );
             if (accountTrades.length === 0) return null;
             return Math.max(
-              ...accountTrades.map((trade) =>
-                new Date(trade.entryDate).getTime()
-              )
-            );
+                ...accountTrades.map((trade) =>
+                  new Date(trade.entryDate).getTime()
+                )
+              );
           })
           .filter(Boolean) as number[];
 
@@ -702,7 +708,6 @@ export function RithmicSyncContextProvider({
       resetProcessingState,
       clearMessageHistory,
       setAvailableAccounts,
-      trades,
       setIsAutoSyncing,
     ]
   );

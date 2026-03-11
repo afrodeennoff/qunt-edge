@@ -312,6 +312,11 @@ export const DataProvider: React.FC<{
   );
   const [isRevalidating, setIsRevalidating] = useState(false);
   const bootstrappedSharedSlugRef = useRef<string | null>(null);
+  const dashboardLayoutRef = useRef(dashboardLayout);
+
+  useEffect(() => {
+    dashboardLayoutRef.current = dashboardLayout;
+  }, [dashboardLayout]);
 
   const buildSharedAccountNumbers = useCallback(
     (sharedData: NonNullable<typeof initialSharedData>) =>
@@ -567,7 +572,7 @@ export const DataProvider: React.FC<{
 
       // CRITICAL: Get dashboard layout first
       // But check if the layout is already in the state
-      if (!dashboardLayout && userId) {
+      if (!dashboardLayoutRef.current && userId) {
         const dashboardLayoutResponse = await withTimeout(
           getDashboardLayout(userId),
           15000,
@@ -585,10 +590,23 @@ export const DataProvider: React.FC<{
 
       let hasLocalSnapshot = false;
       if (userId && !isSharedView) {
-        const [cachedTrades, cachedUserData] = await Promise.all([
+        const [cachedTradesResult, cachedUserDataResult] = await Promise.allSettled([
           withTimeout(getTradesCache(userId), 2000, "getTradesCache"),
           withTimeout(getUserDataCache(userId), 2000, "getUserDataCache"),
         ]);
+
+        const cachedTrades =
+          cachedTradesResult.status === "fulfilled" ? cachedTradesResult.value : undefined;
+        const cachedUserData =
+          cachedUserDataResult.status === "fulfilled" ? cachedUserDataResult.value : undefined;
+
+        if (cachedTradesResult.status === "rejected") {
+          logger.warn({ error: cachedTradesResult.reason }, "Trades cache read failed");
+        }
+
+        if (cachedUserDataResult.status === "rejected") {
+          logger.warn({ error: cachedUserDataResult.reason }, "User data cache read failed");
+        }
 
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           hasLocalSnapshot = true;
@@ -714,7 +732,6 @@ export const DataProvider: React.FC<{
     }
   }, [
     adminView,
-    dashboardLayout,
     isSharedView,
     initialSharedData,
     params?.slug,

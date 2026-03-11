@@ -409,6 +409,25 @@ export async function ensureUserInDatabase(
     throw new Error('User ID is required');
   }
 
+  const ensureDashboardLayoutBackfill = async (): Promise<void> => {
+    try {
+      const existingLayout = await prisma.dashboardLayout.findUnique({
+        where: { userId: user.id },
+        select: { id: true },
+      });
+
+      if (!existingLayout) {
+        const { createDefaultDashboardLayout } = await import('@/server/database');
+        await createDefaultDashboardLayout(user.id);
+      }
+    } catch (layoutError) {
+      console.error(
+        '[ensureUserInDatabase] WARNING: Failed to backfill default dashboard layout:',
+        layoutError
+      );
+    }
+  };
+
   try {
     // First try to find user by auth_user_id
     const existingUserByAuthId = await prisma.user.findUnique({
@@ -431,12 +450,14 @@ export async function ensureUserInDatabase(
               language: shouldUpdateLanguage ? (locale as string) : existingUserByAuthId.language
             },
           });
+          await ensureDashboardLayoutBackfill();
           return updatedUser;
         } catch (updateError) {
           console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
           throw new Error('Failed to update user');
         }
       }
+      await ensureDashboardLayoutBackfill();
       return existingUserByAuthId;
     }
 

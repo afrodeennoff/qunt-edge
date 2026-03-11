@@ -421,6 +421,36 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-11: Review Follow-Up (Cache Invalidation Semantics + Sync Churn + Shared Input Contract)
+- **What changed:** Applied review-driven follow-up fixes to preserve immediate mutation freshness, reduce dashboard load callback churn, stabilize sync scheduling dependencies, and align shared-create input contracts with server-owned identity.
+- **What I want:** User mutations should reflect immediately, dashboard bootstrap should avoid unnecessary reload passes, sync intervals should not reset on every trade update, and shared creation should not require ignored caller `userId` fields.
+- **What I don't want:** Stale read-after-write windows from SWR-style tag revalidation, `loadData` recreation churn from layout-state coupling, or misleading input types suggesting caller-controlled shared ownership.
+- **How we fixed that:**
+  - `server/tags.ts`, `server/journal.ts`: switched from `revalidateTag(..., 'max')` back to immediate `updateTag(...)` invalidation for mutation paths.
+  - `context/data-provider.tsx`: added `dashboardLayoutRef` and used it in `loadData` so layout checks read current state without depending on `dashboardLayout` in the callback dependency list.
+  - `context/rithmic-sync-context.tsx`: added `tradesRef` for sync date calculations and removed direct `trades` dependency from `performSyncForCredential` callback dependencies.
+  - `server/shared.ts`: introduced `SharedCreateParams = Omit<SharedParams, 'userId'>` and kept ownership resolution server-side via `getDatabaseUserId()`.
+  - `app/[locale]/dashboard/components/share-button.tsx`: removed stale `userId` field from `createShared(...)` call.
+  - `lib/__tests__/get-all-trades.test.ts`: mocked auth/redis dependencies for request-scope-safe tests and added fail-closed auth-resolution test coverage.
+- **Key Files:** `server/tags.ts`, `server/journal.ts`, `context/data-provider.tsx`, `context/rithmic-sync-context.tsx`, `server/shared.ts`, `app/[locale]/dashboard/components/share-button.tsx`, `lib/__tests__/get-all-trades.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx vitest run lib/__tests__/get-all-trades.test.ts` -> passes (`3` tests).
+  - `npm run -s typecheck` -> passes.
+  - `npx eslint <touched files>` -> warnings-only baseline (`0` errors).
+
+### 2026-03-11: Reliability Hardening (Cache Read Fallbacks + Per-User AI Trade Cache + Layout Backfill)
+- **What changed:** Hardened three reliability paths: dashboard cache hydration no longer fails closed on local cache read errors, AI all-trades caching is now strictly per-authenticated-user, and existing users now backfill missing dashboard layouts.
+- **What I want:** Keep login/dashboard flows resilient when browser cache APIs fail, prevent cross-user cache key collisions in AI trade analysis, and ensure users eventually get a default layout even if initial creation was skipped.
+- **What I don't want:** `Promise.all` cache read rejections blocking `refreshFromServer()`, trades cached under shared `unknown-user` keys, or legacy users stuck without dashboard layout records.
+- **How we fixed that:**
+  - `context/data-provider.tsx`: switched local cache bootstrap reads from `Promise.all` to `Promise.allSettled` for `withTimeout(getTradesCache(...))` and `withTimeout(getUserDataCache(...))`; rejected results now degrade to `undefined` with warning logs so `loadData` can continue into server refresh.
+  - `lib/ai/get-all-trades.ts`: removed `getUserId().catch(() => "unknown-user")` fallback and now require authenticated `userId`; replaced `getTradesAction(null, ...)` with `getTradesAction(userId, ...)` so Redis keys remain user-scoped.
+  - `server/auth.ts`: in `ensureUserInDatabase`, added existing-user dashboard layout backfill check (`prisma.dashboardLayout.findUnique({ where: { userId } })`) and best-effort `createDefaultDashboardLayout(user.id)` call when missing; initial `skipDefaultLayout` behavior for new-user creation remains unchanged.
+- **Key Files:** `context/data-provider.tsx`, `lib/ai/get-all-trades.ts`, `server/auth.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint context/data-provider.tsx lib/ai/get-all-trades.ts server/auth.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+
 ### 2026-03-11: Dashboard Crash Hotfix (`useSyncContext` Provider Boundary)
 - **What changed:** Fixed the runtime crash that blocked dashboard/admin loading with `useSyncContext must be used within a SyncContextProvider`.
 - **What I want:** Dashboard surfaces should never crash from sync-context boundary mismatches; shared headers should only render sync controls where sync providers actually exist.

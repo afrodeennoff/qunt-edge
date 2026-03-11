@@ -3,9 +3,21 @@ import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
 import type { PaginatedTrades } from "@/server/database";
 
 const getTradesActionMock = vi.fn();
+const getUserIdMock = vi.fn();
+const getRedisJsonMock = vi.fn();
+const setRedisJsonMock = vi.fn();
 
 vi.mock("@/server/database", () => ({
   getTradesAction: (...args: unknown[]) => getTradesActionMock(...args),
+}));
+
+vi.mock("@/server/auth", () => ({
+  getUserId: () => getUserIdMock(),
+}));
+
+vi.mock("@/lib/redis-cache", () => ({
+  getRedisJson: (...args: unknown[]) => getRedisJsonMock(...args),
+  setRedisJson: (...args: unknown[]) => setRedisJsonMock(...args),
 }));
 
 function buildPage(total: number, page: number, hasMore: boolean): PaginatedTrades {
@@ -43,6 +55,13 @@ function buildPage(total: number, page: number, hasMore: boolean): PaginatedTrad
 describe("getAllTradesForAi", () => {
   beforeEach(() => {
     getTradesActionMock.mockReset();
+    getUserIdMock.mockReset();
+    getRedisJsonMock.mockReset();
+    setRedisJsonMock.mockReset();
+
+    getUserIdMock.mockResolvedValue("u-1");
+    getRedisJsonMock.mockResolvedValue(null);
+    setRedisJsonMock.mockResolvedValue(undefined);
   });
 
   it("returns full data without truncation when pagination ends", async () => {
@@ -54,7 +73,7 @@ describe("getAllTradesForAi", () => {
     expect(result.truncated).toBe(false);
     expect(result.fetchedPages).toBe(1);
     expect(result.dataQualityWarning).toBeUndefined();
-    expect(getTradesActionMock).toHaveBeenCalledWith(null, 1, 100, false, false);
+    expect(getTradesActionMock).toHaveBeenCalledWith("u-1", 1, 100, false, false);
   });
 
   it("marks result as truncated when max page cap is reached", async () => {
@@ -68,7 +87,15 @@ describe("getAllTradesForAi", () => {
     expect(result.truncated).toBe(true);
     expect(result.fetchedPages).toBe(2);
     expect(result.dataQualityWarning).toContain("capped subset");
-    expect(getTradesActionMock).toHaveBeenNthCalledWith(1, null, 1, 100, false, false);
-    expect(getTradesActionMock).toHaveBeenNthCalledWith(2, null, 2, 100, false, false);
+    expect(getTradesActionMock).toHaveBeenNthCalledWith(1, "u-1", 1, 100, false, false);
+    expect(getTradesActionMock).toHaveBeenNthCalledWith(2, "u-1", 2, 100, false, false);
+  });
+
+  it("fails closed when authenticated user cannot be resolved", async () => {
+    getUserIdMock.mockRejectedValueOnce(new Error("auth unavailable"));
+
+    await expect(getAllTradesForAi({ pageSize: 100, maxPages: 1 })).rejects.toThrow(
+      "auth unavailable",
+    );
   });
 });

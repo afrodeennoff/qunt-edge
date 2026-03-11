@@ -28,7 +28,7 @@ export async function getAllTradesForAi(
   const pageSize = Math.max(1, Math.floor(options.pageSize ?? DEFAULT_PAGE_SIZE));
   const maxPages = Math.max(1, Math.floor(options.maxPages ?? MAX_PAGES));
   const forceRefresh = options.forceRefresh ?? false;
-  const userId = await getUserId().catch(() => "unknown-user");
+  const userId = await getUserId();
   const cacheKey = `user:${userId}:ps:${pageSize}:mp:${maxPages}`;
 
   if (!forceRefresh) {
@@ -44,7 +44,7 @@ export async function getAllTradesForAi(
 
   while (page <= maxPages) {
     const paginated = await getTradesAction(
-      null,
+      userId,
       page,
       pageSize,
       forceRefresh && page === 1,
