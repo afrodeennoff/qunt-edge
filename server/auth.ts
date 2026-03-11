@@ -409,16 +409,16 @@ export async function ensureUserInDatabase(
     throw new Error('User ID is required');
   }
 
-  const ensureDashboardLayoutBackfill = async (): Promise<void> => {
+  const ensureDashboardLayoutBackfill = async (targetUserId: string): Promise<void> => {
     try {
       const existingLayout = await prisma.dashboardLayout.findUnique({
-        where: { userId: user.id },
+        where: { userId: targetUserId },
         select: { id: true },
       });
 
       if (!existingLayout) {
         const { createDefaultDashboardLayout } = await import('@/server/database');
-        await createDefaultDashboardLayout(user.id);
+        await createDefaultDashboardLayout(targetUserId);
       }
     } catch (layoutError) {
       console.error(
@@ -450,14 +450,14 @@ export async function ensureUserInDatabase(
               language: shouldUpdateLanguage ? (locale as string) : existingUserByAuthId.language
             },
           });
-          await ensureDashboardLayoutBackfill();
+          await ensureDashboardLayoutBackfill(user.id);
           return updatedUser;
         } catch (updateError) {
           console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
           throw new Error('Failed to update user');
         }
       }
-      await ensureDashboardLayoutBackfill();
+      await ensureDashboardLayoutBackfill(user.id);
       return existingUserByAuthId;
     }
 
@@ -486,13 +486,7 @@ export async function ensureUserInDatabase(
 
       // Create default dashboard layout for new user unless explicitly skipped
       if (!options?.skipDefaultLayout) {
-        try {
-          const { createDefaultDashboardLayout } = await import('@/server/database');
-          await createDefaultDashboardLayout(user.id);
-        } catch (layoutError) {
-          console.error('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
-          // Don't throw here - user creation succeeded, layout can be created later
-        }
+        await ensureDashboardLayoutBackfill(newUser.id)
       }
 
       return newUser;

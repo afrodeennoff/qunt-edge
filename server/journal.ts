@@ -16,7 +16,7 @@ export type MindsetData = {
   journalContent: string;
 };
 
-function invalidateJournalRelatedCaches(userId: string) {
+function invalidateJournalRelatedCaches(userId: string): void {
   updateTag(`user-data-${userId}`)
   updateTag(`dashboard-${userId}`)
 }

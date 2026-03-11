@@ -421,6 +421,27 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-11: Review Follow-Up (Cache Snapshot Guard + Rithmic Route Teardown + Layout Ownership Check)
+- **What changed:** Applied another review-driven hardening pass for cache snapshot consistency, route-exit socket teardown, and dashboard-layout ownership checks in bootstrap flow.
+- **What I want:** Users should not see stale trades from prior sessions when user-data cache exists without trade cache, Rithmic websocket connections should close when leaving import routes, and cached layouts should be validated against the current user before skipping fetch.
+- **What I don't want:** Cached user-data hydrate paths leaving old trades mounted, lingering websocket connections after route transitions, or synthetic/admin layout state being reused across user contexts.
+- **How we fixed that:**
+  - `context/data-provider.tsx`:
+    - added explicit `setTrades([])` when `cachedUserData` exists but `cachedTrades` is missing/empty.
+    - tightened layout fetch guard to refetch when layout is missing **or** `dashboardLayoutRef.current.userId !== userId`.
+  - `context/rithmic-sync-context.tsx`:
+    - import ordering normalized (external -> internal).
+    - auto-sync interval effect now calls `disconnect()` immediately when route is inactive, ensuring socket teardown on navigation away.
+  - `server/auth.ts`:
+    - refactored `ensureDashboardLayoutBackfill` helper to accept `targetUserId` and reused it for both existing-user and new-user paths (removed duplicate import/call block).
+  - `server/journal.ts`, `server/tags.ts`:
+    - added explicit `: void` return types for invalidation helpers.
+    - retained `updateTag(...)` immediate invalidation semantics for mutation consistency with current repo policy.
+- **Key Files:** `context/data-provider.tsx`, `context/rithmic-sync-context.tsx`, `server/auth.ts`, `server/journal.ts`, `server/tags.ts`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> passes.
+  - `npx eslint context/data-provider.tsx context/rithmic-sync-context.tsx server/tags.ts server/journal.ts server/auth.ts` -> warnings-only baseline (`0` errors).
+
 ### 2026-03-11: Review Follow-Up (Cache Invalidation Semantics + Sync Churn + Shared Input Contract)
 - **What changed:** Applied review-driven follow-up fixes to preserve immediate mutation freshness, reduce dashboard load callback churn, stabilize sync scheduling dependencies, and align shared-create input contracts with server-owned identity.
 - **What I want:** User mutations should reflect immediately, dashboard bootstrap should avoid unnecessary reload passes, sync intervals should not reset on every trade update, and shared creation should not require ignored caller `userId` fields.

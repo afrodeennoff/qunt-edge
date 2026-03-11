@@ -572,7 +572,10 @@ export const DataProvider: React.FC<{
 
       // CRITICAL: Get dashboard layout first
       // But check if the layout is already in the state
-      if (!dashboardLayoutRef.current && userId) {
+      if (
+        userId &&
+        (!dashboardLayoutRef.current || dashboardLayoutRef.current.userId !== userId)
+      ) {
         const dashboardLayoutResponse = await withTimeout(
           getDashboardLayout(userId),
           15000,
@@ -611,6 +614,9 @@ export const DataProvider: React.FC<{
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
           hasLocalSnapshot = true;
           setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
+        } else if (cachedUserData) {
+          hasLocalSnapshot = true;
+          setTrades([]);
         }
 
         if (cachedUserData) {

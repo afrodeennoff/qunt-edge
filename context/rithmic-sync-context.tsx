@@ -9,15 +9,15 @@ import {
   useRef,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { getRithmicData, updateLastSyncTime } from "@/lib/rithmic-storage";
 import { useDashboardActions } from "@/context/data-provider";
-import { toast } from "sonner";
 import { useI18n } from "@/locales/client";
 import { useRithmicSyncStore, RithmicMessage } from "@/store/rithmic-sync-store";
 import { useTradesStore } from "@/store/trades-store";
 import { getUserId } from "@/server/auth";
 import { useUserStore } from "@/store/user-store";
-import { usePathname } from "next/navigation";
 
 interface RithmicCredentials {
   username: string;
@@ -853,7 +853,10 @@ export function RithmicSyncContextProvider({
 
   // Auto-sync checking interval
   useEffect(() => {
-    if (!isSyncRouteActive) return;
+    if (!isSyncRouteActive) {
+      disconnect();
+      return;
+    }
     if (!autoSyncEnabled) return;
 
     const intervalMs = 1 * 60 * 1000; // 1 minute
@@ -867,7 +870,7 @@ export function RithmicSyncContextProvider({
     return () => {
       clearInterval(intervalId);
     };
-  }, [isSyncRouteActive, autoSyncEnabled, checkAndPerformSyncs]);
+  }, [isSyncRouteActive, autoSyncEnabled, checkAndPerformSyncs, disconnect]);
 
   return (
     <RithmicSyncContext.Provider

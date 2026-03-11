@@ -4,7 +4,7 @@ import { getDatabaseUserId } from './auth'
 import { prisma } from '@/lib/prisma'
 import { updateTag } from 'next/cache'
 
-function invalidateTagRelatedCaches(userId: string) {
+function invalidateTagRelatedCaches(userId: string): void {
   updateTag(`user-data-${userId}`)
   updateTag(`trades-${userId}`)
   updateTag(`dashboard-${userId}`)
