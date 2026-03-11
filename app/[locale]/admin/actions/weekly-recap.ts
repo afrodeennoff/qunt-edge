@@ -6,6 +6,14 @@ import { generateTradingAnalysis } from "@/app/api/email/weekly-summary/[userid]
 import { getUserData, computeTradingStats } from "@/app/api/email/weekly-summary/[userid]/actions/user-data"
 import { assertAdminAccess } from '@/server/authz'
 
+function parseCsvEnv(value?: string): string[] {
+  if (!value) return []
+  return value
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+}
+
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
   const supabaseServiceKey =
@@ -119,9 +127,9 @@ export async function loadInitialContent(email?: string, userId?: string) {
   
   // Only allow admin to query other users' data; otherwise use admin's own userId
   // This prevents unauthorized enumeration of user data
-  const targetUserId = userId && admin.userId === process.env.ALLOWED_ADMIN_USER_ID 
-    ? userId 
-    : admin.userId
+  const allowedAdminIds = parseCsvEnv(process.env.ALLOWED_ADMIN_USER_ID)
+  const isAllowedAdmin = allowedAdminIds.includes(admin.userId.toLowerCase())
+  const targetUserId = userId && isAllowedAdmin ? userId : admin.userId
 
   if (!targetUserId) {
     throw new Error('Unable to determine target user')

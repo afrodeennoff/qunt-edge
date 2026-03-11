@@ -97,6 +97,13 @@ const routeBudgets = routeEntries.map(({ route, files, kind }) => {
 
 const sortedRoutes = routeBudgets.sort((a, b) => b.bytes - a.bytes);
 
+function normalizePath(filePath) {
+  if (filePath.startsWith(ROOT)) {
+    return filePath.replace(ROOT, '');
+  }
+  return '/' + filePath.split('/').pop();
+}
+
 function collectClientReferenceManifests(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files = [];
@@ -111,7 +118,7 @@ function collectClientReferenceManifests(dir) {
       const relative = path.relative(APP_SERVER_DIR, fullPath);
       files.push({
         route: `/${relative.replace(/\/page_client-reference-manifest\.js$/, "").replace(/\\/g, "/")}`,
-        file: fullPath,
+        file: normalizePath(fullPath),
         bytes: fileSize(fullPath),
         kb: bytesToKb(fileSize(fullPath)),
       });

@@ -30,7 +30,7 @@ export function getTrustedClientIp(req: HeaderCarrier): string {
     return cfIp
   }
 
-  // Vercel sets x-vercel-forward-for with real client IP for requests from Vercel network
+  // Vercel sets x-vercel-forwarded-for with real client IP for requests from Vercel network
   const vercelIp = normalizeHeaderIp(req.headers.get('x-vercel-forwarded-for'))
   if (vercelIp && vercelIp !== 'undefined' && vercelIp !== 'null') {
     return vercelIp
@@ -44,13 +44,12 @@ export function getTrustedClientIp(req: HeaderCarrier): string {
 
   // x-forwarded-for should only be trusted from known proxy infrastructure
   // In production behind Cloudflare/Vercel, this header is already handled by the proxy
-  const forwardedIp = normalizeHeaderIp(req.headers.get('x-forwarded-for'))
-  if (forwardedIp && forwardedIp !== 'undefined' && forwardedIp !== 'null') {
+  const rawForwardedFor = req.headers.get('x-forwarded-for')
+  if (rawForwardedFor) {
+    const parts = rawForwardedFor.split(',').map(p => p.trim()).filter(Boolean)
     // Only trust if request appears to come from a proxy (has multiple IPs)
-    // Otherwise, fall back to unknown to avoid client-spoofed IPs
-    const parts = forwardedIp.split(',')
-    if (parts.length > 1) {
-      return parts[0].trim()
+    if (parts.length > 1 && parts[0] !== 'undefined' && parts[0] !== 'null') {
+      return parts[0]
     }
   }
 

@@ -405,29 +405,22 @@ export async function savePayoutAction(payout: Payout) {
           account: {
             userId: userId
           }
-        }
+        },
+        select: {
+          id: true,
+          accountNumber: true,
+        },
       })
-      if (existingPayout && existingPayout.accountNumber !== payout.accountNumber) {
+      if (!existingPayout) {
+        throw new Error('Payout not found or unauthorized')
+      }
+      if (existingPayout.accountNumber !== payout.accountNumber) {
         throw new Error('Cannot modify payout for different account')
       }
     }
 
-    // Use updateMany with ownership check, or create if not found
-    const existingPayout = payout.id 
-      ? await prisma.payout.findFirst({ where: { id: payout.id } })
-      : null
-
     let result
-    if (existingPayout) {
-      // Verify ownership before update
-      if (existingPayout.accountNumber !== payout.accountNumber) {
-        const payoutAccount = await prisma.account.findUnique({
-          where: { id: existingPayout.accountNumber }
-        })
-        if (payoutAccount?.userId !== userId) {
-          throw new Error('Unauthorized to modify this payout')
-        }
-      }
+    if (payout.id) {
       result = await prisma.payout.update({
         where: { id: payout.id },
         data: {
