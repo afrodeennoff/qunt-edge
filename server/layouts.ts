@@ -1,7 +1,7 @@
 'use server'
 
 import { DashboardLayout, Prisma } from '@/prisma/generated/prisma'
-import { revalidatePath, updateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { Widget, Layouts } from '@/app/[locale]/dashboard/types/dashboard'
 import { createClient, getUserId } from './auth'
 import { prisma } from '@/lib/prisma'
@@ -137,7 +137,6 @@ export async function saveDashboardLayoutAction(layouts: DashboardLayout): Promi
       })
 
       updateTag(`dashboard-${userId}`)
-      revalidatePath('/')
 
       logger.info('[saveDashboardLayout] Success', { userId })
       return { success: true }
@@ -405,7 +404,6 @@ export async function saveDashboardLayoutWithVersionAction(
     })
 
     updateTag(`dashboard-${userId}`)
-    revalidatePath('/')
 
     logger.info('[saveDashboardLayoutWithVersion] Success', { userId })
     return { success: true }

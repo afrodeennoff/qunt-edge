@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { useDashboardActions } from '@/context/data-provider'
+import { usePathname } from 'next/navigation'
 import { toast } from 'sonner'
 import { useI18n } from "@/locales/client"
 import { Synchronization } from '@/prisma/generated/prisma'
@@ -42,6 +43,8 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
 
   const t = useI18n()
   const { refreshAllData } = useDashboardActions()
+  const pathname = usePathname()
+  const isSyncRouteActive = pathname?.includes('/dashboard/import') ?? false
 
   // Normalize dates returned from API
   const normalizeSynchronization = useCallback(
@@ -237,6 +240,7 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
 
   // Auto-sync checking
   const checkAndPerformSyncs = useCallback(async () => {
+    if (!isSyncRouteActive) return
     if (!enableAutoSync || isAutoSyncing) return
 
     try {
@@ -257,15 +261,17 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
     } catch (error) {
       console.warn('Error during tradovate auto-sync check:', error)
     }
-  }, [enableAutoSync, isAutoSyncing, accounts, syncInterval, performSyncForAccount]);
+  }, [isSyncRouteActive, enableAutoSync, isAutoSyncing, accounts, syncInterval, performSyncForAccount]);
 
   // Auto-sync checking interval
   useEffect(() => {
+    if (!isSyncRouteActive) return
     if (!enableAutoSync) return
 
     const intervalMs = 1 * 60 * 1000  // 1 minute
 
     const intervalId = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return
       checkAndPerformSyncs()
     }, intervalMs)
 
@@ -273,12 +279,13 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
     return () => {
       clearInterval(intervalId)
     }
-  }, [enableAutoSync])
+  }, [isSyncRouteActive, enableAutoSync, checkAndPerformSyncs])
 
   // Load accounts on mount
   useEffect(() => {
+    if (!isSyncRouteActive) return
     loadAccounts()
-  }, [loadAccounts])
+  }, [isSyncRouteActive, loadAccounts])
 
   return (
     <TradovateSyncContext.Provider value={{

@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, updateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { Group as PrismaGroup, Account as PrismaAccount } from '@/prisma/generated/prisma'
 import { logger } from '@/lib/logger'
@@ -179,7 +179,6 @@ export async function groupTradesAction(tradeIds: string[]): Promise<boolean> {
     })
 
     invalidateGroupRelatedCaches(userId)
-    revalidatePath('/')
     return true
   } catch (error) {
     logger.error('[groupTrades] Error', { error })
@@ -196,7 +195,6 @@ export async function ungroupTradesAction(tradeIds: string[]): Promise<boolean> 
     })
 
     invalidateGroupRelatedCaches(userId)
-    revalidatePath('/')
     return true
   } catch (error) {
     logger.error('[ungroupTrades] Error', { error })

@@ -259,7 +259,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         try {
             await signInWithPasswordAction(values.email, values.password || '')
             toast.success(t('success'), { description: t('auth.signIn') })
-            router.refresh()
             router.push(nextUrl ? withLocalePrefix(nextUrl, locale) : `/${locale}/dashboard`)
             setLastAuthPreference('password')
         } catch (error) {
@@ -299,7 +298,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             toast.success("Successfully verified. Redirecting...", {
                 description: "Successfully verified. Redirecting...",
             })
-            router.refresh()
             router.push(nextUrl ? withLocalePrefix(nextUrl, locale) : `/${locale}/dashboard`)
         } catch (error) {
             console.error(error)

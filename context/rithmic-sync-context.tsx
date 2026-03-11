@@ -16,6 +16,7 @@ import { useRithmicSyncStore, RithmicMessage } from "@/store/rithmic-sync-store"
 import { useTradesStore } from "@/store/trades-store";
 import { getUserId } from "@/server/auth";
 import { useUserStore } from "@/store/user-store";
+import { usePathname } from "next/navigation";
 
 interface RithmicCredentials {
   username: string;
@@ -803,10 +804,13 @@ export function RithmicSyncContextProvider({
 
   // Auto-sync checking
   const { autoSyncEnabled } = useRithmicSyncStore();
+  const pathname = usePathname();
+  const isSyncRouteActive = pathname?.includes("/dashboard/import") ?? false;
 
   const checkAndPerformSyncs = useCallback(async () => {
     // If we are still loading trades, return
     if (isLoading) return;
+    if (!isSyncRouteActive) return;
     // If auto-sync is disabled, return
     if (!autoSyncEnabled) return;
     // If we are already syncing, return
@@ -839,13 +843,17 @@ export function RithmicSyncContextProvider({
     } catch (error) {
       console.warn("Error during rithmic auto-sync check:", error);
     }
-  }, [syncInterval, autoSyncEnabled, isAutoSyncing, performSyncForCredential]);
+  }, [isLoading, isSyncRouteActive, syncInterval, autoSyncEnabled, isAutoSyncing, performSyncForCredential]);
 
   // Auto-sync checking interval
   useEffect(() => {
+    if (!isSyncRouteActive) return;
+    if (!autoSyncEnabled) return;
+
     const intervalMs = 1 * 60 * 1000; // 1 minute
 
     const intervalId = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
       checkAndPerformSyncs();
     }, intervalMs);
 
@@ -853,7 +861,7 @@ export function RithmicSyncContextProvider({
     return () => {
       clearInterval(intervalId);
     };
-  }, [checkAndPerformSyncs]);
+  }, [isSyncRouteActive, autoSyncEnabled, checkAndPerformSyncs]);
 
   return (
     <RithmicSyncContext.Provider

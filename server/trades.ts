@@ -2,7 +2,7 @@
 
 import { Trade as PrismaTrade, Prisma } from '@/prisma/generated/prisma'
 import { Trade as NormalizedTrade } from '@/lib/data-types'
-import { revalidatePath, revalidateTag, updateTag, unstable_cache } from 'next/cache'
+import { revalidateTag, updateTag, unstable_cache } from 'next/cache'
 import { getDatabaseUserId, getUserId } from './auth'
 import { isAfter } from 'date-fns'
 import { prisma } from '@/lib/prisma'
@@ -609,7 +609,6 @@ export async function updateTradeCommentAction(tradeId: string, comment: string 
       data: { comment }
     })
     await invalidateTradeRelatedCaches()
-    revalidatePath('/')
   } catch (error) {
     logger.error("[updateTradeComment] Error", { error })
     throw error
@@ -628,7 +627,6 @@ export async function updateTradeVideoUrlAction(tradeId: string, videoUrl: strin
       data: { videoUrl }
     })
     await invalidateTradeRelatedCaches()
-    revalidatePath('/')
   } catch (error) {
     logger.error("[updateTradeVideoUrl] Error", { error })
     throw error
@@ -657,7 +655,6 @@ export async function addTagToTrade(tradeId: string, tag: string) {
     })
 
     await invalidateTradeRelatedCaches()
-    revalidatePath('/')
     return updatedTrade
   } catch (error) {
     console.error('Failed to add tag:', error)
@@ -687,7 +684,6 @@ export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
     })
 
     await invalidateTradeRelatedCaches()
-    revalidatePath('/')
     return updatedTrade
   } catch (error) {
     console.error('Failed to remove tag:', error)
@@ -752,7 +748,6 @@ export async function updateTradeImage(
     })
 
     await invalidateTradeRelatedCaches()
-    revalidatePath('/')
     return trades
   } catch (error) {
     console.error('Failed to update trade image:', error)
@@ -802,7 +797,6 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
     )
 
     await invalidateTradeRelatedCaches()
-    revalidatePath('/')
     return { success: true, tradesUpdated: trades.length }
   } catch (error) {
     console.error('Failed to add tags to trades for day:', error)

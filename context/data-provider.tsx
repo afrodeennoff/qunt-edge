@@ -419,7 +419,7 @@ export const DataProvider: React.FC<{
 
       while (hasMore) {
         const response = await withTimeout(
-          getTradesAction(userId, page, pageSize, force && page === 1),
+          getTradesAction(userId, page, pageSize, force && page === 1, false),
           15000,
           `getTradesAction(page=${page})`
         );
@@ -580,58 +580,22 @@ export const DataProvider: React.FC<{
         }
       }
 
-      // Step 2: Fetch trades (with caching server side)
+      let hasLocalSnapshot = false;
+
       if (userId && !isSharedView) {
-        // Try local cache first
-        const cachedTrades = await withTimeout(getTradesCache(userId), 2000, "getTradesCache");
+        const [cachedTrades, cachedUserData] = await Promise.all([
+          withTimeout(getTradesCache(userId), 2000, "getTradesCache"),
+          withTimeout(getUserDataCache(userId), 2000, "getUserDataCache"),
+        ]);
+
         if (cachedTrades && Array.isArray(cachedTrades) && cachedTrades.length > 0) {
-          logger.debug({ userId, count: cachedTrades.length }, "Using local IndexedDB cache for trades");
+          hasLocalSnapshot = true;
           setTrades(sanitizeTradesForState(cachedTrades as Trade[]));
-
-          // Refresh in background if not in dev or if we want freshest data
-          fetchAllTrades(userId, false).then(freshTrades => {
-            if (freshTrades && freshTrades.length > 0) {
-              setTrades(sanitizeTradesForState(freshTrades));
-              setTradesCache(userId, freshTrades).catch((err) => logger.error({ err }, "Failed to set trades cache"));
-            }
-          }).catch((err) => logger.error({ err }, "Failed to refresh trades from cache"));
-        } else {
-          if (!userId) return;
-          logger.debug({ userId }, "Refreshing trades for user");
-
-          const safeTrades = await withTimeout(
-            fetchAllTrades(userId, false),
-            20000,
-            "fetchAllTrades(user)"
-          );
-          logger.info({ userId, count: safeTrades.length }, "Fresh trades fetched");
-
-          // Only use mock data in development — never show fake data in production
-          const tradesToUse = safeTrades.length > 0
-            ? safeTrades
-            : process.env.NODE_ENV === 'development'
-              ? generateMockTrades(userId || "demo-user")
-              : [];
-          logger.debug({ serverTrades: safeTrades.length, usingTrades: tradesToUse.length, isMock: safeTrades.length === 0 && tradesToUse.length > 0 }, "Trades loaded");
-          setTrades(sanitizeTradesForState(tradesToUse));
-          if (tradesToUse.length > 0) {
-            setTradesCache(userId, tradesToUse).catch((err) => logger.error({ err }, "Failed to set trades cache"));
-          }
         }
-      } else {
-        const safeTrades = await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
-        setTrades(sanitizeTradesForState(safeTrades));
-      }
 
-      // Step 3: Fetch user data
-      // Check local cache for user data
-      if (userId && !isSharedView) {
-        const cachedUserData = await withTimeout(getUserDataCache(userId), 2000, "getUserDataCache");
         if (cachedUserData) {
-          logger.debug({ userId }, "Using local IndexedDB cache for user data");
-          // Apply cached data immediately
-          const normalizedAccounts = normalizeAccountsForClient(cachedUserData.accounts);
-          setAccounts(normalizedAccounts);
+          hasLocalSnapshot = true;
+          setAccounts(normalizeAccountsForClient(cachedUserData.accounts));
           setUser(cachedUserData.userData);
           setSubscription(cachedUserData.subscription as PrismaSubscription | null);
           setTags(cachedUserData.tags);
@@ -639,56 +603,93 @@ export const DataProvider: React.FC<{
           setMoods(cachedUserData.moodHistory);
           setEvents(cachedUserData.financialEvents);
           setTickDetails(cachedUserData.tickDetails);
+          setIsFirstConnection(cachedUserData.userData?.isFirstConnection || false);
+        }
+
+        if (hasLocalSnapshot) {
+          setIsLoading(false);
         }
       }
 
-      const data = await withTimeout(getUserData(), 20000, "getUserData");
-      logger.debug({ hasData: !!data, accountsCount: data?.accounts?.length || 0, tagsCount: data?.tags?.length || 0 }, "User data response");
+      const refreshFromServer = async () => {
+        const data = await withTimeout(getUserData(), 20000, "getUserData");
 
-      if (!data) {
-        await signOut();
-        setIsLoading(false);
+        if (!data) {
+          await signOut();
+          return;
+        }
+
+        const safeTrades =
+          userId && !isSharedView
+            ? await withTimeout(fetchAllTrades(userId, false), 20000, "fetchAllTrades(user)")
+            : await withTimeout(fetchAllTrades(null, false), 20000, "fetchAllTrades(anonymous)");
+
+        const tradesToUse =
+          safeTrades.length > 0
+            ? safeTrades
+            : process.env.NODE_ENV === "development" && userId
+              ? generateMockTrades(userId)
+              : [];
+        setTrades(sanitizeTradesForState(tradesToUse));
+
+        if (userId && tradesToUse.length > 0) {
+          setTradesCache(userId, tradesToUse).catch((err) =>
+            logger.error({ err }, "Failed to set trades cache")
+          );
+        }
+
+        const normalizedAccounts = normalizeAccountsForClient(
+          (data.accounts || []) as AccountInput[]
+        );
+
+        setUser(data.userData);
+        setSubscription(data.subscription as PrismaSubscription | null);
+        setTags(data.tags);
+        setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
+        setMoods(data.moodHistory);
+        setEvents(data.financialEvents);
+        setTickDetails(data.tickDetails);
+        setIsFirstConnection(data.userData?.isFirstConnection || false);
+
+        if (!hasLocalSnapshot) {
+          setAccounts(normalizedAccounts);
+          setIsLoading(false);
+        }
+
+        let accountsWithMetrics = normalizedAccounts;
+        try {
+          accountsWithMetrics = await withTimeout(
+            calculateAccountMetricsAction(normalizedAccounts),
+            20000,
+            "calculateAccountMetricsAction"
+          );
+        } catch (e) {
+          logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
+        }
+        setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+
+        if (userId && !isSharedView) {
+          setUserDataCache(userId, {
+            userData: data.userData,
+            subscription: data.subscription as PrismaSubscription | null,
+            tickDetails: data.tickDetails,
+            tags: data.tags,
+            accounts: normalizeAccountsForClient((data.accounts || []) as AccountInput[]),
+            groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
+            financialEvents: data.financialEvents,
+            moodHistory: data.moodHistory,
+          }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
+        }
+      };
+
+      if (hasLocalSnapshot) {
+        void refreshFromServer().catch((error) => {
+          logger.error({ error }, "Background refresh failed");
+        });
         return;
       }
 
-      // Calculate metrics for each account
-      const normalizedAccounts = normalizeAccountsForClient(
-        (data.accounts || []) as AccountInput[]
-      );
-      let accountsWithMetrics = normalizedAccounts;
-      try {
-        accountsWithMetrics = await withTimeout(
-          calculateAccountMetricsAction(normalizedAccounts),
-          20000,
-          "calculateAccountMetricsAction"
-        );
-      } catch (e) {
-        logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
-      }
-      setAccounts(normalizeAccountsForClient(accountsWithMetrics));
-
-      setUser(data.userData);
-      setSubscription(data.subscription as PrismaSubscription | null);
-      setTags(data.tags);
-      setGroups(normalizeGroupsForClient(data.groups as GroupInput[]));
-      setMoods(data.moodHistory);
-      setEvents(data.financialEvents);
-      setTickDetails(data.tickDetails);
-      setIsFirstConnection(data.userData?.isFirstConnection || false);
-
-      // Save to local cache in background
-      if (userId && !isSharedView) {
-        setUserDataCache(userId, {
-          userData: data.userData,
-          subscription: data.subscription as PrismaSubscription | null,
-          tickDetails: data.tickDetails,
-          tags: data.tags,
-          accounts: normalizeAccountsForClient((data.accounts || []) as AccountInput[]),
-          groups: normalizeGroupsForClient((data.groups || []) as GroupInput[]),
-          financialEvents: data.financialEvents,
-          moodHistory: data.moodHistory
-        }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
-      }
+      await refreshFromServer();
     } catch (error) {
       logger.error({ error }, "FATAL: Error loading data");
       // Only fallback to mock data in development

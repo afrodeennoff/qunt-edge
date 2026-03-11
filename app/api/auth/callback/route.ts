@@ -12,6 +12,25 @@ function isNextRedirectError(error: unknown): boolean {
   )
 }
 
+async function ensureUserInDatabaseWithBudget(
+  ensureFn: () => Promise<unknown>,
+  timeoutMs: number
+) {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  try {
+    await Promise.race([
+      ensureFn(),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`ensureUserInDatabase timeout after ${timeoutMs}ms`))
+        }, timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
@@ -75,7 +94,10 @@ export async function GET(request: Request) {
         try {
           const { data: { user } } = await supabase.auth.getUser()
           if (user) {
-            await ensureUserInDatabase(user, locale)
+            await ensureUserInDatabaseWithBudget(
+              () => ensureUserInDatabase(user, locale),
+              800
+            )
           }
         } catch (e) {
           if (isNextRedirectError(e)) {

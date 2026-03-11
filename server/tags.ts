@@ -2,7 +2,13 @@
 
 import { getDatabaseUserId } from './auth'
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
+
+function invalidateTagRelatedCaches(userId: string) {
+  updateTag(`user-data-${userId}`)
+  updateTag(`trades-${userId}`)
+  updateTag(`dashboard-${userId}`)
+}
 
 export async function getTagsAction(userId: string) {
   try {
@@ -37,7 +43,7 @@ export async function createTagAction(formData: {
       },
     })
 
-    revalidatePath('/dashboard')
+    invalidateTagRelatedCaches(userId)
     return { tag }
   } catch (error) {
     console.error('Failed to create tag:', error)
@@ -105,7 +111,7 @@ export async function updateTagAction(id: string, formData: {
       )
     })
 
-    revalidatePath('/dashboard')
+    invalidateTagRelatedCaches(userId)
     return { success: true }
   } catch (error) {
     console.error('Failed to update tag:', error)
@@ -165,7 +171,7 @@ export async function deleteTagAction(id: string) {
       })
     })
 
-    revalidatePath('/dashboard')
+    invalidateTagRelatedCaches(userId)
     return { success: true }
   } catch (error) {
     console.error('Failed to delete tag:', error)
@@ -212,7 +218,7 @@ export async function syncTradeTagsToTagTableAction() {
       })
     }
 
-    revalidatePath('/dashboard')
+    invalidateTagRelatedCaches(userId)
     return { 
       tagsCreated: tagsToCreate.length,
       totalUniqueTags: uniqueTradeTags.length

@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { getDatabaseUserId } from './auth';
 import { Mood } from '@/prisma/generated/prisma';
 
@@ -15,6 +15,11 @@ export type MindsetData = {
   selectedNews: string[];
   journalContent: string;
 };
+
+function invalidateJournalRelatedCaches(userId: string) {
+  updateTag(`user-data-${userId}`)
+  updateTag(`dashboard-${userId}`)
+}
 
 export async function saveMindset(
   data: MindsetData,
@@ -65,7 +70,7 @@ export async function saveMindset(
           updatedAt: now,
         },
       })
-      revalidatePath('/')
+      invalidateJournalRelatedCaches(userId)
       return updatedMood
     }
 
@@ -81,7 +86,7 @@ export async function saveMindset(
       },
     })
 
-    revalidatePath('/')
+    invalidateJournalRelatedCaches(userId)
     return newMood
   } catch (error) {
     console.error('Error saving mindset:', error)
@@ -127,7 +132,7 @@ export async function saveMood(
           updatedAt: now,
         },
       })
-      revalidatePath('/')
+      invalidateJournalRelatedCaches(userId)
       return updatedMood
     }
 
@@ -141,7 +146,7 @@ export async function saveMood(
       },
     })
 
-    revalidatePath('/')
+    invalidateJournalRelatedCaches(userId)
     return newMood
   } catch (error) {
     console.error('Error saving mood:', error)
@@ -228,7 +233,7 @@ export async function deleteMindset(date: string) {
         where: { id: existingMood.id },
       })
 
-      revalidatePath('/[locale]/(dashboard)', 'page')
+      invalidateJournalRelatedCaches(userId)
     }
   } catch (error) {
     console.error('Error deleting mood:', error)
@@ -273,7 +278,7 @@ export async function saveJournal(
           updatedAt: now,
         },
       })
-      revalidatePath('/')
+      invalidateJournalRelatedCaches(userId)
       return updatedMood
     }
 
@@ -288,7 +293,7 @@ export async function saveJournal(
       },
     })
 
-    revalidatePath('/')
+    invalidateJournalRelatedCaches(userId)
     return newMood
   } catch (error) {
     console.error('Error saving journal:', error)

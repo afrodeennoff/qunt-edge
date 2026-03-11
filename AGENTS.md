@@ -184,6 +184,56 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s build` -> passes with full route generation.
   - `npm run -s typecheck` -> passes when re-run sequentially (parallel run can trip existing `.next` clean/regenerate race in this workspace).
 
+### 2026-03-11: One-Shot Login-to-Dashboard Background Load + Cache/Flow Hardening
+- **What changed:** Implemented a single-pass runtime hardening sweep focused on faster post-login handoff, non-blocking dashboard hydration, reduced background sync pressure, and tighter mutation cache invalidation behavior.
+- **What I want:** Users should land on dashboard faster after auth and see data hydrate progressively in the background instead of waiting behind one long blocking load chain.
+- **What I don't want:** Slow callback redirects, dashboard page-level auth duplicate checks, global auto-sync loops doing unnecessary work on hidden tabs, or broad root-path cache revalidation for small trade/group/layout mutations.
+- **How we fixed that:**
+  - Authentication/redirect path:
+    - `app/[locale]/(authentication)/components/user-auth-form.tsx`: removed redundant `router.refresh()` before post-auth `router.push(...)` in password/OTP flows to reduce extra navigation work.
+    - `app/api/auth/callback/route.ts`: wrapped `ensureUserInDatabase(...)` in a bounded budget helper (`Promise.race` timeout) so callback redirect is less likely to stall on user bootstrap delays.
+  - Dashboard route flow:
+    - `app/[locale]/dashboard/page.tsx`: removed duplicate server auth check and hardcoded `/en/authentication` redirect; dashboard layout remains the single auth gate.
+  - Data provider background hydration:
+    - `context/data-provider.tsx`: added cache-first snapshot hydration for trades + user data, then moved server reconciliation into `refreshFromServer` with parallel fetches (`fetchAllTrades` + `getUserData`) and non-blocking background refresh when cache exists.
+    - Preserved account-metrics calculation but decoupled it from cache-first first paint so users can interact earlier.
+  - Background sync pressure reduction:
+    - `context/rithmic-sync-context.tsx`: interval now only mounts when auto-sync is enabled and skips hidden-tab ticks.
+    - `context/tradovate-sync-context.tsx`: hidden-tab interval guard and corrected effect dependencies for sync ticker callback freshness.
+  - Cache invalidation tightening:
+    - Removed broad `revalidatePath('/')` calls in mutation-heavy flows and rely on tag invalidation paths already present.
+    - Files updated: `server/trades.ts`, `server/groups.ts`, `server/layouts.ts`.
+- **Key Files:** `app/[locale]/(authentication)/components/user-auth-form.tsx`, `app/api/auth/callback/route.ts`, `app/[locale]/dashboard/page.tsx`, `context/data-provider.tsx`, `context/rithmic-sync-context.tsx`, `context/tradovate-sync-context.tsx`, `server/trades.ts`, `server/groups.ts`, `server/layouts.ts`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(authentication)/components/user-auth-form.tsx app/[locale]/dashboard/page.tsx app/api/auth/callback/route.ts context/data-provider.tsx context/rithmic-sync-context.tsx context/tradovate-sync-context.tsx server/groups.ts server/layouts.ts server/trades.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+  - `npm run -s perf:headers` -> requires running app server at `127.0.0.1:3000`; command failed with `ECONNREFUSED` in this run (no server process started), unrelated to compile/type state.
+
+### 2026-03-11: Stability Follow-Up (Journal/Tags/Thor Invalidation + First-Load Race Guard)
+- **What changed:** Completed a follow-up hardening pass to close remaining broad cache invalidations and reduce first-login hydration race risk in the dashboard bootstrap path.
+- **What I want:** Keep post-login dashboard hydration fast and reliable while ensuring user mutations (journal/tags/token generation) invalidate only the right user-scoped caches.
+- **What I don't want:** Broad path-level revalidation churn (`revalidatePath('/')`), stale user-data views after journal/tag updates, or first-load failures caused by user-bootstrap/trades-fetch ordering races.
+- **How we fixed that:**
+  - `context/data-provider.tsx`:
+    - changed paginated trades fetch calls to `getTradesAction(..., includeStats=false)` for hydration fetches to avoid unnecessary stats-side query work on page 1.
+    - reordered `refreshFromServer` to fetch `getUserData()` before `fetchAllTrades(...)` to reduce first-login race risk where writable user records may lag callback redirect timing.
+  - `server/journal.ts`:
+    - replaced `revalidatePath(...)` calls with user-scoped tag invalidation helper (`updateTag('user-data-*')`, `updateTag('dashboard-*')`) across mindset/mood/journal create/update/delete paths.
+  - `server/tags.ts`:
+    - replaced dashboard path revalidation with user-scoped tag invalidation helper (`user-data`, `trades`, `dashboard`) for create/update/delete/sync flows.
+  - `server/thor.ts`:
+    - replaced dashboard path revalidation after token generation with user-scoped `updateTag('user-data-*')` invalidation.
+- **Key Files:** `context/data-provider.tsx`, `server/journal.ts`, `server/tags.ts`, `server/thor.ts`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(authentication)/components/user-auth-form.tsx app/[locale]/dashboard/page.tsx app/api/auth/callback/route.ts context/data-provider.tsx context/rithmic-sync-context.tsx context/tradovate-sync-context.tsx server/groups.ts server/layouts.ts server/trades.ts server/journal.ts server/tags.ts server/thor.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+
 
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.
