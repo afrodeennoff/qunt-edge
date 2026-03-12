@@ -29,9 +29,24 @@ describe('AI Router Integration', () => {
       expect(config.enabled).toBe(true)
       expect(config.openrouter.apiKey).toBe('test-key')
       expect(config.openrouter.baseUrl).toBe('https://openrouter.ai/api/v1')
-      expect(config.openrouter.models.free).toBe('meta-llama/llama-3.1-8b-instruct:free')
-      expect(config.openrouter.models.auto).toBe('meta-llama/llama-3.1-8b-instruct')
-      expect(config.liquid.models.lfm).toBe('liquid/lfm-40b:free')
+      expect(config.openrouter.models.byokFree).toEqual([
+        'groq/llama-3.1-8b-instant',
+        'zai/glm-4.7-flash',
+        'cerebras/llama-3.1-8b',
+        'together/mixtral-8x7b',
+        'deepinfra/qwen2-7b',
+      ])
+      expect(config.openrouter.models.free).toBe('openrouter/free')
+      expect(config.openrouter.models.auto).toBe('openrouter/auto')
+      expect(config.liquid.models.lfm).toBe('liquid/lfm2-8b-a1b')
+      expect(config.openrouter.provider.order).toEqual([
+        'groq',
+        'cerebras',
+        'zai',
+        'together',
+        'deepinfra',
+        'openrouter',
+      ])
       expect(config.cache.ttlSeconds).toBe(300)
       expect(config.circuitBreaker.failureThreshold).toBe(5)
       expect(config.circuitBreaker.recoveryTimeoutMs).toBe(60000)

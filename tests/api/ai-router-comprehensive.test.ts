@@ -73,9 +73,9 @@ vi.mock("openai", () => ({
 describe("AI Router - Comprehensive Integration Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.OPENAI_API_KEY = "test-glm-key";
-    process.env.AI_ROUTER_ENABLED = "false";
     process.env.OPENROUTER_API_KEY = "test-openrouter-key";
+    process.env.OPENAI_API_KEY = "test-openai-key";
+    process.env.AI_ROUTER_ENABLED = "false";
 
     convertToModelMessagesMock.mockResolvedValue([{ role: "user", content: "hello" }]);
     streamTextMock.mockReturnValue({

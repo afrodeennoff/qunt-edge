@@ -3,12 +3,14 @@ import { CircuitBreaker } from './circuit';
 import { TenantSafeCache } from './cache';
 import { getRouterConfig } from './config';
 import { logAiWarn } from '@/lib/ai/error-utils';
+import { createHash } from 'crypto';
 
 export interface RouterCompletionOptions {
   userId: string;
   feature: string;
   messages: OpenRouterMessage[];
   temperature?: number;
+  requestedModel?: string;
 }
 
 export interface RouterCompletionResult {
@@ -21,11 +23,19 @@ export class FallbackRouter {
   private openrouter = new OpenRouterClient();
   private circuitBreaker = new CircuitBreaker();
   private cache = new TenantSafeCache();
-  private config = getRouterConfig();
   
   async createCompletion(options: RouterCompletionOptions): Promise<RouterCompletionResult> {
-    // Check cache first - include message count to prevent collisions
-    const cacheKey = `${options.messages.length}:${options.messages.map(m => m.content).join('\n')}`;
+    const config = getRouterConfig();
+    // Include role/model/temperature to avoid cross-request collisions.
+    const cacheKeyPayload = JSON.stringify({
+      requestedModel: options.requestedModel ?? null,
+      temperature: options.temperature ?? null,
+      messages: options.messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
+    });
+    const cacheKey = createHash('sha256').update(cacheKeyPayload).digest('hex');
     const cached = await this.cache.get(options.userId, options.feature, cacheKey);
     
     if (cached) {
@@ -36,12 +46,35 @@ export class FallbackRouter {
       };
     }
     
-    // Define provider chain
+    const requestedModel = options.requestedModel?.trim();
+    const byokFirstModels = requestedModel
+      ? [requestedModel, ...config.openrouter.models.byokFree]
+      : config.openrouter.models.byokFree;
+    const providerHints = {
+      order: config.openrouter.provider.order,
+      sort: config.openrouter.provider.sort,
+      max_price: {
+        input: config.openrouter.provider.maxPrice.input,
+        output: config.openrouter.provider.maxPrice.output,
+      },
+    } as const;
+
+    // Deduplicate while preserving order.
+    const seen = new Set<string>();
+    const byokChain = byokFirstModels
+      .filter((model) => {
+        if (!model || seen.has(model)) return false;
+        seen.add(model);
+        return true;
+      })
+      .map((model) => ({ name: 'openrouter-byok', model, provider: providerHints }));
+
     const providers = [
-      { name: 'openrouter', model: this.config.openrouter.models.free },
-      { name: 'openrouter', model: this.config.openrouter.models.auto },
-      // This is still served via OpenRouter model routing; keep provider label truthful.
-      { name: 'openrouter', model: this.config.liquid.models.lfm },
+      ...byokChain,
+      { name: 'openrouter-free', model: config.openrouter.models.free },
+      { name: 'openrouter-auto', model: config.openrouter.models.auto },
+      ...(requestedModel ? [{ name: 'openrouter-requested-fallback', model: requestedModel }] : []),
+      { name: 'openrouter-liquid', model: config.liquid.models.lfm },
     ];
     
     // Try each provider in sequence
@@ -55,6 +88,7 @@ export class FallbackRouter {
             model: provider.model,
             messages: options.messages,
             temperature: options.temperature,
+            provider: 'provider' in provider ? provider.provider : undefined,
           })
         );
         

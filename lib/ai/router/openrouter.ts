@@ -23,6 +23,14 @@ export interface OpenRouterCompletionOptions {
   messages: OpenRouterMessage[];
   temperature?: number;
   max_tokens?: number;
+  provider?: {
+    order?: string[];
+    sort?: 'price';
+    max_price?: {
+      input?: number;
+      output?: number;
+    };
+  };
 }
 
 export interface OpenRouterCompletionResult {
@@ -31,17 +39,16 @@ export interface OpenRouterCompletionResult {
 }
 
 export class OpenRouterClient {
-  private config = getRouterConfig();
-  
   async createCompletion(options: OpenRouterCompletionOptions): Promise<OpenRouterCompletionResult> {
-    if (!this.config.openrouter.apiKey) {
+    const config = getRouterConfig();
+    if (!config.openrouter.apiKey) {
       throw new Error('OpenRouter API key not configured');
     }
 
-    const response = await fetch(`${this.config.openrouter.baseUrl}/chat/completions`, {
+    const response = await fetch(`${config.openrouter.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.config.openrouter.apiKey}`,
+        'Authorization': `Bearer ${config.openrouter.apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://quntedge.com',
         'X-Title': 'Qunt Edge',
@@ -51,6 +58,7 @@ export class OpenRouterClient {
         messages: options.messages,
         temperature: options.temperature,
         max_tokens: options.max_tokens,
+        provider: options.provider,
       }),
     });
 

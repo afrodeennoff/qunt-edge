@@ -41,6 +41,10 @@ const envSchema = z.object({
   UPSTASH_REDIS_REST_TOKEN: optionalMinString(1),
   OPENROUTER_API_KEY: optionalMinString(1),
   AI_ROUTER_ENABLED: optionalString(),
+  AI_ROUTER_BYOK_FREE_MODELS: optionalString(),
+  AI_ROUTER_PROVIDER_ORDER: optionalString(),
+  AI_ROUTER_MAX_PRICE_INPUT: optionalString(),
+  AI_ROUTER_MAX_PRICE_OUTPUT: optionalString(),
 });
 
 type AppEnv = z.infer<typeof envSchema>;

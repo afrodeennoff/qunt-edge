@@ -59,7 +59,8 @@ import { POST } from "@/app/api/ai/support/route";
 describe("ai support route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.OPENAI_API_KEY = "test-key";
+    process.env.OPENROUTER_API_KEY = "test-key";
+    delete process.env.OPENAI_API_KEY;
     convertToModelMessagesMock.mockResolvedValue([{ role: "user", content: "hello" }]);
     getRouterConfigMock.mockReturnValue({ enabled: false, openrouter: { apiKey: undefined } });
   });
@@ -91,6 +92,7 @@ describe("ai support route", () => {
 
   it("supports router-only configuration without OPENAI_API_KEY", async () => {
     delete process.env.OPENAI_API_KEY;
+    process.env.OPENROUTER_API_KEY = "test-key";
     getRouterConfigMock.mockReturnValue({ enabled: true, openrouter: { apiKey: "router-key" } });
     createCompletionWithRouterMock.mockResolvedValue({
       content: "router response",

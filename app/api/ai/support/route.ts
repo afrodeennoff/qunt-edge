@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const webSearchFallback = webSearch && !webSearchModel;
     const routerConfig = getRouterConfig();
     const isRouterUsable = routerConfig.enabled && Boolean(routerConfig.openrouter.apiKey);
-    const hasDirectProvider = Boolean(process.env.OPENAI_API_KEY);
+    const hasDirectProvider = Boolean(process.env.OPENROUTER_API_KEY);
 
     if (!isRouterUsable && !hasDirectProvider) {
       return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
           'chat',
           userId,
           routerMessages,
-          { temperature: 0.3 }
+          { temperature: 0.3, model: selectedModel }
         );
 
         void logAiRequest({
