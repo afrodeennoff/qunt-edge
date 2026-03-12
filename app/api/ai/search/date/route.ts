@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const startedAt = Date.now();
 
   // Apply AI route guard (auth + entitlements + rate limit + budget)
-  const guard = await guardAiRequest(req, 'analysis', dateSearchRateLimit)
+  const guard = await guardAiRequest(req, 'search', dateSearchRateLimit)
   if (!guard.ok) return guard.response
   const { userId } = guard
 

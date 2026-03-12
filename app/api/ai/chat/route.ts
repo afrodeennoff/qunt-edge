@@ -48,6 +48,22 @@ const chatRequestSchema = z.object({
 type ParsedChatRequest = z.infer<typeof chatRequestSchema>;
 type ParsedChatMessage = ParsedChatRequest["messages"][number];
 
+const availableChatTools = {
+  getJournalEntries,
+  getPreviousConversation,
+  getMostTradedInstruments,
+  getLastTradesData,
+  getTradesDetails,
+  getTradesSummary,
+  getCurrentWeekSummary,
+  getPreviousWeekSummary,
+  getWeekSummaryForDate,
+  getFinancialNews,
+  generateEquityChart,
+};
+
+type ChatToolName = keyof typeof availableChatTools;
+
 function getErrorCode(error: unknown): string | null {
   if (!error || typeof error !== 'object') return null
   if (!('code' in error)) return null
@@ -109,24 +125,20 @@ function getToolingPolicy(intent: ChatIntent) {
         "getPreviousWeekSummary",
         "getWeekSummaryForDate",
         "generateEquityChart",
-        "getPerformanceTrends",
-        "getOverallPerformanceMetrics",
-        "getInstrumentPerformance",
-        "getTimeOfDayPerformance",
-      ],
+      ] as ChatToolName[],
     };
   }
 
   if (intent === "news_context") {
     return {
       requiresTool: true,
-      allowedToolNames: ["getFinancialNews"],
+      allowedToolNames: ["getFinancialNews"] as ChatToolName[],
     };
   }
 
   return {
     requiresTool: false,
-    allowedToolNames: null as string[] | null,
+    allowedToolNames: null as ChatToolName[] | null,
   };
 }
 
@@ -250,26 +262,14 @@ export async function POST(req: NextRequest) {
     const dataQualityPrompt =
       `\n\nDATA QUALITY RULE: If a tool output contains 'dataQualityWarning' or 'truncated: true', clearly disclose that the analysis may be incomplete.`;
 
-    const availableTools = withToolGuards({
-      getJournalEntries,
-      getPreviousConversation,
-      getMostTradedInstruments,
-      getLastTradesData,
-      getTradesDetails,
-      getTradesSummary,
-      getCurrentWeekSummary,
-      getPreviousWeekSummary,
-      getWeekSummaryForDate,
-      getFinancialNews,
-      generateEquityChart,
-    });
+    const availableTools = withToolGuards(availableChatTools);
 
     const scopedTools =
       toolPolicy.allowedToolNames === null
         ? availableTools
         : Object.fromEntries(
             Object.entries(availableTools).filter(([toolName]) =>
-              toolPolicy.allowedToolNames?.includes(toolName),
+              toolPolicy.allowedToolNames?.includes(toolName as ChatToolName),
             ),
           );
 
