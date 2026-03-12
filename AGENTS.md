@@ -6,6 +6,30 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-12: AI Router Implementation (OpenRouter Fallback System)
+- **What changed:** Implemented a production-ready AI Router system that provides intelligent fallback routing between multiple AI providers (BYOK → OpenRouter Free → OpenRouter Auto → Liquid LFM), with circuit breaker pattern, per-user caching, budget reservation, and feature flag rollout support.
+- **What I want:** Enable automatic failover and cost optimization for AI features while maintaining strict tenant isolation, security controls, and existing API contracts. The system should gracefully degrade when providers fail and provide consistent response formats.
+- **What I don't want:** Breaking existing AI routes, exposing provider keys in logs/responses, cross-user cache pollution, or bypassing existing security guardrails (auth, rate limits, budget enforcement).
+- **How we fixed that:**
+  - Created router configuration module (`lib/ai/router/config.ts`) with environment-based feature flag (`AI_ROUTER_ENABLED`) and provider chain configuration.
+  - Built OpenRouter API client (`lib/ai/router/openrouter.ts`) with proper error handling and response transformation.
+  - Implemented Redis-backed circuit breaker (`lib/ai/router/circuit.ts`) with configurable failure thresholds and recovery timeouts.
+  - Created tenant-safe caching system (`lib/ai/router/cache.ts`) with per-user cache keys (`ai:exact:${userId}:${feature}:${hash}`) and TTL management.
+  - Added atomic budget reservation system (`lib/ai/router/reservations.ts`) using Redis for distributed budget enforcement.
+  - Built fallback chain logic (`lib/ai/router/fallback.ts`) with automatic provider switching and cost estimation.
+  - Exposed public router interface (`lib/ai/router/index.ts`) with singleton pattern and type exports.
+  - Integrated router with existing AI client (`lib/ai/client.ts`) to check feature flag and conditionally route requests.
+  - Added router integration to support route (`app/api/ai/support/route.ts`) with proper UIMessage part extraction and fallback to original OpenAI client.
+  - Created comprehensive integration tests (`tests/lib/ai-router-integration.test.ts`) covering all router components.
+  - Added detailed documentation (`docs/ai-router.md`) with architecture diagrams, usage examples, testing procedures, and troubleshooting guides.
+- **Key Files:** `lib/ai/router/config.ts`, `lib/ai/router/openrouter.ts`, `lib/ai/router/circuit.ts`, `lib/ai/router/cache.ts`, `lib/ai/router/reservations.ts`, `lib/ai/router/fallback.ts`, `lib/ai/router/index.ts`, `lib/ai/client.ts`, `app/api/ai/support/route.ts`, `tests/lib/ai-router-integration.test.ts`, `docs/ai-router.md`, `AGENTS.md`
+- **Verification:**
+  - `npm test tests/lib/ai-router-integration.test.ts` -> passes (integration tests for all router components).
+  - `npm run typecheck` -> passes (no type conflicts after proper UIMessage part handling).
+  - Manual testing with `AI_ROUTER_ENABLED=true` shows proper provider chaining and fallback behavior.
+  - Router respects existing security guardrails (auth, rate limits, budget enforcement) and maintains per-user isolation.
+  - Feature flag allows safe rollout without affecting existing AI routes.
+
 ### 2026-03-12: UI Color Consistency + Contrast Polish Sweep (Community/Admin/Dashboard)
 - **What changed:** Ran a focused production-readiness sweep for color consistency and readability, then patched high-impact UI surfaces with token-aligned classes and stronger contrast states.
 - **What I want:** Badge/status chips, admin form surfaces, and dense dashboard controls should stay legible and visually consistent with the monochrome token system across routes and themes.

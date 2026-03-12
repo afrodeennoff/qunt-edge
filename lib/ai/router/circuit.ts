@@ -1,1 +1,86 @@
-[{'getRedisJson': 'import { getRedisJson, setRedisJson } from "@/lib/redis-cache";\nimport { getRouterConfig } from "./config";\n\n// Circuit breaker state\ntype CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";\n\ninterface CircuitStateData {\n  state: CircuitState;\n  failures: number;\n  lastFailure: number;\n}\n\nexport class CircuitBreaker {\n  private config = getRouterConfig();\n  \n  private async getCircuitState(provider: string, model: string): Promise<CircuitStateData> {\n    const circuitKey = `ai:cb:${provider}:${model}`;\n    const data = await getRedisJson<CircuitStateData>("ai-router", circuitKey);\n    \n    return data || {\n      state: "CLOSED",\n      failures: 0,\n      lastFailure: 0,\n    };\n  }\n  \n  private async setCircuitState(provider: string, model: string, state: CircuitStateData): Promise<void> {\n    const circuitKey = `ai:cb:${provider}:${model}`;\n    await setRedisJson("ai-router", circuitKey, state, 3600); // 1 hour TTL\n  }\n  \n  async call<T>(\n    provider: string,\n    model: string,\n    operation: () => Promise<T>\n  ): Promise<T> {\n    const circuitState = await this.getCircuitState(provider, model);\n    \n    // Check if circuit is open\n    if (circuitState.state === "OPEN") {\n      // Check if recovery timeout has passed\n      const now = Date.now();\n      if (now - circuitState.lastFailure < this.config.circuitBreaker.recoveryTimeoutMs) {\n        throw new Error(`Circuit breaker is open for ${provider}/${model}`);\n      }\n      // Move to half-open state\n      circuitState.state = "HALF_OPEN";\n      await this.setCircuitState(provider, model, circuitState);\n    }\n    \n    try {\n      const result = await operation();\n      \n      // Reset failure count on success\n      if (circuitState.state === "HALF_OPEN" || circuitState.failures > 0) {\n        await this.setCircuitState(provider, model, {\n          state: "CLOSED",\n          failures: 0,\n          lastFailure: 0,\n        });\n      }\n      \n      return result;\n    } catch (error) {\n      // Increment failure count\n      circuitState.failures += 1;\n      circuitState.lastFailure = Date.now();\n      \n      // Open circuit if failure threshold is reached\n      if (circuitState.failures >= this.config.circuitBreaker.failureThreshold) {\n        circuitState.state = "OPEN";\n      }\n      \n      await this.setCircuitState(provider, model, circuitState);\n      throw error;\n    }\n  }\n}\n', 'setRedisJson': '} from "@/lib/redis-cache";\nimport { getRouterConfig } from "./config";\n\n// Circuit breaker state\ntype CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";\n\ninterface CircuitStateData {\n  state: CircuitState;\n  failures: number;\n  lastFailure: number;\n}\n\nexport class CircuitBreaker {\n  private config = getRouterConfig();\n  \n  private async getCircuitState(provider: string, model: string): Promise<CircuitStateData> {\n    const circuitKey = `ai:cb:${provider}:${model}`;\n    const data = await getRedisJson<CircuitStateData>("ai-router", circuitKey);\n    \n    return data || {\n      state: "CLOSED",\n      failures: 0,\n      lastFailure: 0,\n    };\n  }\n  \n  private async setCircuitState(provider: string, model: string, state: CircuitStateData): Promise<void> {\n    const circuitKey = `ai:cb:${provider}:${model}`;\n    await setRedisJson("ai-router", circuitKey, state, 3600); // 1 hour TTL\n  }\n  \n  async call<T>(\n    provider: string,\n    model: string,\n    operation: () => Promise<T>\n  ): Promise<T> {\n    const circuitState = await this.getCircuitState(provider, model);\n    \n    // Check if circuit is open\n    if (circuitState.state === "OPEN") {\n      // Check if recovery timeout has passed\n      const now = Date.now();\n      if (now - circuitState.lastFailure < this.config.circuitBreaker.recoveryTimeoutMs) {\n        throw new Error(`Circuit breaker is open for ${provider}/${model}`);\n      }\n      // Move to half-open state\n      circuitState.state = "HALF_OPEN";\n      await this.setCircuitState(provider, model, circuitState);\n    }\n    \n    try {\n      const result = await operation();\n      \n      // Reset failure count on success\n      if (circuitState.state === "HALF_OPEN" || circuitState.failures > 0) {\n        await this.setCircuitState(provider, model, {\n          state: "CLOSED",\n          failures: 0,\n          lastFailure: 0,\n        });\n      }\n      \n      return result;\n    } catch (error) {\n      // Increment failure count\n      circuitState.failures += 1;\n      circuitState.lastFailure = Date.now();\n      \n      // Open circuit if failure threshold is reached\n      if (circuitState.failures >= this.config.circuitBreaker.failureThreshold) {\n        circuitState.state = "OPEN";\n      }\n      \n      await this.setCircuitState(provider, model, circuitState);\n      throw error;\n    }\n  }\n}\n'}]
+import { getRedisJson, setRedisJson } from "@/lib/redis-cache";
+import { getRouterConfig } from "./config";
+
+// Circuit breaker state
+type CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";
+
+interface CircuitStateData {
+  state: CircuitState;
+  failures: number;
+  lastFailure: number;
+}
+
+export class CircuitBreaker {
+  private config = getRouterConfig();
+  
+  private async getCircuitState(provider: string, model: string): Promise<CircuitStateData> {
+    const circuitKey = `ai:cb:${provider}:${model}`;
+    const data = await getRedisJson<CircuitStateData>("ai-router", circuitKey);
+    
+    return data || {
+      state: "CLOSED",
+      failures: 0,
+      lastFailure: 0,
+    };
+  }
+  
+  private async setCircuitState(provider: string, model: string, state: CircuitStateData): Promise<void> {
+    const circuitKey = `ai:cb:${provider}:${model}`;
+    await setRedisJson("ai-router", circuitKey, state, 3600); // 1 hour TTL
+  }
+  
+  async call<T>(
+    provider: string,
+    model: string,
+    operation: () => Promise<T>
+  ): Promise<T> {
+    const circuitState = await this.getCircuitState(provider, model);
+    
+    // Check if circuit is open
+    if (circuitState.state === "OPEN") {
+      // Check if recovery timeout has passed
+      const now = Date.now();
+      if (now - circuitState.lastFailure < this.config.circuitBreaker.recoveryTimeoutMs) {
+        throw new Error(`Circuit breaker is open for ${provider}/${model}`);
+      }
+      // Move to half-open state
+      circuitState.state = "HALF_OPEN";
+      await this.setCircuitState(provider, model, circuitState);
+    }
+    
+    try {
+      const result = await operation();
+      
+      // Reset failure count on success
+      if (circuitState.state === "HALF_OPEN" || circuitState.failures > 0) {
+        await this.setCircuitState(provider, model, {
+          state: "CLOSED",
+          failures: 0,
+          lastFailure: 0,
+        });
+      }
+      
+      return result;
+    } catch (error) {
+      const newFailures = circuitState.failures + 1;
+      const now = Date.now();
+      
+      // Open circuit if threshold reached
+      if (newFailures >= this.config.circuitBreaker.failureThreshold) {
+        await this.setCircuitState(provider, model, {
+          state: "OPEN",
+          failures: newFailures,
+          lastFailure: now,
+        });
+      } else {
+        await this.setCircuitState(provider, model, {
+          state: "CLOSED",
+          failures: newFailures,
+          lastFailure: now,
+        });
+      }
+      
+      throw error;
+    }
+  }
+}

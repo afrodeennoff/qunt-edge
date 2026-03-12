@@ -333,3 +333,6 @@ const inMemorySweep = setInterval(() => {
 }, 60_000)
 
 inMemorySweep.unref?.()
+
+// Export runRedisCommand for use in other modules
+export { runRedisCommand }

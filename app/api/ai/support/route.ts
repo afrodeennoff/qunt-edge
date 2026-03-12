@@ -7,54 +7,12 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { apiError } from "@/lib/api-response";
 import { guardAiRequest } from "@/lib/ai/route-guard";
-import { aiRouter } from "@/lib/ai/router";
-import { getRouterConfig } from "@/lib/ai/router/config";
-
-const routerConfig = getRouterConfig();
+import { aiRouter, type RouterCompletionOptions } from "@/lib/ai/router";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Router-enabled AI client factory
-function createRouterModel(model: string) {
-  return {
-    chat: {
-      completions: {
-        create: async (options: any) => {
-          const result = await aiRouter.createCompletion({
-            userId: options.userId || 'anonymous',
-            feature: 'support',
-            budgetLimit: 1.0,
-            messages: options.messages,
-            temperature: options.temperature,
-          });
-          
-          return {
-            id: 'router-' + Date.now(),
-            choices: [
-              {
-                message: {
-                  content: result.content,
-                  role: 'assistant',
-                },
-              },
-            ],
-          };
-        },
-      },
-    },
-  };
-}
-
-// Function to get the appropriate AI client based on router configuration
-function getAIClient(userId: string) {
-  if (routerConfig.enabled) {
-    return createRouterModel;
-  }
-  return customOpenai;
-}
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -94,10 +52,43 @@ export async function POST(req: NextRequest) {
       messages.shift();
     }
 
+    // Try AI Router if enabled
+    let routerResult: string | undefined;
+    try {
+      // Extract text content from UIMessage parts
+      const routerMessages = messages.map(m => ({
+        role: m.role,
+        content: m.parts
+          .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+          .map(p => p.text)
+          .join('\n')
+      }));
+
+      const routerOptions: RouterCompletionOptions = {
+        userId,
+        feature: 'support',
+        budgetLimit: 100, // Default budget limit for support
+        messages: routerMessages,
+        temperature: 0.3
+      };
+      const result = await aiRouter.createCompletion(routerOptions);
+      routerResult = result.content;
+    } catch (routerError) {
+      console.warn('[Support] AI Router failed, falling back to direct API:', routerError);
+    }
+
+    // If router succeeded, return the result
+    if (routerResult) {
+      return new Response(JSON.stringify({ 
+        choices: [{ message: { content: routerResult } }] 
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const modelMessages = await convertToModelMessages(messages);
-    const aiClient = getAIClient(userId);
     const result = streamText({
-      model: webSearch && webSearchModel ? customOpenai(webSearchModel) : aiClient(selectedModel),
+      model: webSearch && webSearchModel ? customOpenai(webSearchModel) : customOpenai(selectedModel),
       system: `${webSearchFallback ? "[WEB_SEARCH_FALLBACK_ACTIVE] Web search is unavailable for this environment; answer without external browsing.\n\n" : ""}You are an AI chatbot support assistant for Qunt Edge, a trading journaling platform. Your role is to gather information and direct users to the appropriate support channels.
 
 ## CRITICAL LIMITATIONS
