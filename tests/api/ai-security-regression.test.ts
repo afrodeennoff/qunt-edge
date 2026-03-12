@@ -4,13 +4,11 @@ const {
   createRouteClientMock,
   getUserMock,
   canAccessAiFeatureMock,
-  assertWithinAiBudgetMock,
   limiterMock,
 } = vi.hoisted(() => ({
   createRouteClientMock: vi.fn(),
   getUserMock: vi.fn(),
   canAccessAiFeatureMock: vi.fn(),
-  assertWithinAiBudgetMock: vi.fn(),
   limiterMock: vi.fn(),
 }))
 
@@ -20,10 +18,6 @@ vi.mock("@/lib/supabase/route-client", () => ({
 
 vi.mock("@/lib/ai/entitlements", () => ({
   canAccessAiFeature: canAccessAiFeatureMock,
-}))
-
-vi.mock("@/lib/ai/usage-budget", () => ({
-  assertWithinAiBudget: assertWithinAiBudgetMock,
 }))
 
 vi.mock("@/lib/ai/prompt-safety", () => ({
@@ -96,12 +90,6 @@ describe("AI Security Regression", () => {
       resetTime: Date.now() + 60_000,
     })
 
-    assertWithinAiBudgetMock.mockResolvedValue({
-      allowed: true,
-      limit: 2_000_000,
-      used: 10_000,
-      remaining: 1_990_000,
-    })
   })
 
   it("anonymous request returns 401", async () => {
@@ -138,26 +126,6 @@ describe("AI Security Regression", () => {
     expect(result.ok).toBe(false)
     if (!result.ok) {
       expect(result.response.status).toBe(403)
-    }
-  })
-
-  it("over budget returns 429", async () => {
-    assertWithinAiBudgetMock.mockResolvedValue({
-      allowed: false,
-      limit: 150_000,
-      used: 160_000,
-      remaining: 0,
-    })
-
-    const result = await guardAiRequest(
-      new Request("http://localhost/api/ai/chat", { method: "POST" }),
-      "chat",
-      limiterMock,
-    )
-
-    expect(result.ok).toBe(false)
-    if (!result.ok) {
-      expect(result.response.status).toBe(429)
     }
   })
 

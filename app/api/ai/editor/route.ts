@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
   const policy = getAiPolicy("editor");
   const startedAt = Date.now();
 
-  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  // Apply AI route guard (auth + entitlements + rate limit)
   const guard = await guardAiRequest(req, 'editor', editorRateLimit)
   if (!guard.ok) return guard.response
   const { userId } = guard

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const startedAt = Date.now();
   let selectedModel = policy.model;
 
-  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  // Apply AI route guard (auth + entitlements + rate limit)
   const guard = await guardAiRequest(req, 'support', supportRateLimit)
   if (!guard.ok) return guard.response
   const { userId } = guard
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
           'chat',
           userId,
           routerMessages,
-          { temperature: 0.3, budgetLimit: 100 }
+          { temperature: 0.3 }
         );
 
         void logAiRequest({

@@ -4,13 +4,11 @@ const {
   createRouteClientMock,
   getUserMock,
   canAccessAiFeatureMock,
-  assertWithinAiBudgetMock,
   limiterMock,
 } = vi.hoisted(() => ({
   createRouteClientMock: vi.fn(),
   getUserMock: vi.fn(),
   canAccessAiFeatureMock: vi.fn(),
-  assertWithinAiBudgetMock: vi.fn(),
   limiterMock: vi.fn(),
 }))
 
@@ -20,10 +18,6 @@ vi.mock("@/lib/supabase/route-client", () => ({
 
 vi.mock("@/lib/ai/entitlements", () => ({
   canAccessAiFeature: canAccessAiFeatureMock,
-}))
-
-vi.mock("@/lib/ai/usage-budget", () => ({
-  assertWithinAiBudget: assertWithinAiBudgetMock,
 }))
 
 import { guardAiRequest } from "@/lib/ai/route-guard"
@@ -61,12 +55,6 @@ describe("guardAiRequest", () => {
       resetTime: Date.now() + 60_000,
     })
 
-    assertWithinAiBudgetMock.mockResolvedValue({
-      allowed: true,
-      limit: 2_000_000,
-      used: 10_000,
-      remaining: 1_990_000,
-    })
   })
 
   it("returns 401 when unauthenticated", async () => {
@@ -85,7 +73,6 @@ describe("guardAiRequest", () => {
 
     expect(canAccessAiFeatureMock).not.toHaveBeenCalled()
     expect(limiterMock).not.toHaveBeenCalled()
-    expect(assertWithinAiBudgetMock).not.toHaveBeenCalled()
   })
 
   it("returns 403 when entitlement denies access", async () => {
@@ -108,7 +95,6 @@ describe("guardAiRequest", () => {
     }
 
     expect(limiterMock).not.toHaveBeenCalled()
-    expect(assertWithinAiBudgetMock).not.toHaveBeenCalled()
   })
 
   it("returns 429 when rate limited", async () => {
@@ -128,27 +114,6 @@ describe("guardAiRequest", () => {
     }
 
     expect(limiterMock).toHaveBeenCalledWith(req, { subject: "user-1" })
-    expect(assertWithinAiBudgetMock).not.toHaveBeenCalled()
-  })
-
-  it("returns 429 when over budget", async () => {
-    assertWithinAiBudgetMock.mockResolvedValue({
-      allowed: false,
-      limit: 150_000,
-      used: 160_000,
-      remaining: 0,
-    })
-
-    const result = await guardAiRequest(
-      new Request("http://localhost/api/ai/chat", { method: "POST" }),
-      "chat",
-      limiterMock,
-    )
-
-    expect(result.ok).toBe(false)
-    if (!result.ok) {
-      expect(result.response.status).toBe(429)
-    }
   })
 
   it("returns ok with user context when all checks pass", async () => {
@@ -163,6 +128,5 @@ describe("guardAiRequest", () => {
       userId: "user-1",
       email: "user@example.com",
     })
-    expect(assertWithinAiBudgetMock).toHaveBeenCalledWith("user-1", true)
   })
 })

@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   const startedAt = Date.now();
   let toolCallsCount = 0;
 
-  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  // Apply AI route guard (auth + entitlements + rate limit)
   const guard = await guardAiRequest(req, 'analysis', globalAnalysisRateLimit)
   if (!guard.ok) return guard.response
   const { userId } = guard

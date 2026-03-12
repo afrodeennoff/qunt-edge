@@ -1,5 +1,4 @@
 import { canAccessAiFeature, type AiGuardFeature } from '@/lib/ai/entitlements'
-import { assertWithinAiBudget } from '@/lib/ai/usage-budget'
 import { apiError } from '@/lib/api-response'
 import { createRouteClient } from '@/lib/supabase/route-client'
 
@@ -61,27 +60,6 @@ export async function guardAiRequest(
         limit: rateLimitResult.limit,
         remaining: rateLimitResult.remaining,
         resetTime: rateLimitResult.resetTime,
-      }),
-    }
-  }
-
-  let budget: { allowed: boolean; limit: number; used: number; remaining: number }
-  try {
-    budget = await assertWithinAiBudget(user.id, entitlement.isActive)
-  } catch {
-    return {
-      ok: false,
-      response: apiError('SERVICE_UNAVAILABLE', 'AI budget service temporarily unavailable.', 503),
-    }
-  }
-
-  if (!budget.allowed) {
-    return {
-      ok: false,
-      response: apiError('RATE_LIMITED', 'Monthly AI usage budget exceeded.', 429, {
-        limit: budget.limit,
-        used: budget.used,
-        remaining: budget.remaining,
       }),
     }
   }

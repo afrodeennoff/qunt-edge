@@ -113,7 +113,6 @@ describe('AI Router Integration', () => {
       await expect(router.createCompletion({
         userId: 'test-user',
         feature: 'test',
-        budgetLimit: 1.0,
         messages: [{ role: 'user', content: 'Hello' }],
       })).rejects.toThrow('All providers failed')
     })
@@ -133,7 +132,6 @@ describe('AI Router Integration', () => {
       await expect(aiRouter.createCompletion({
         userId: 'test-user',
         feature: 'test',
-        budgetLimit: 1,
         messages: [{ role: 'user', content: 'hi' }],
       })).rejects.toThrow('AI Router is not enabled')
     })

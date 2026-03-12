@@ -4,14 +4,12 @@ const {
   createRouteClientMock,
   getUserMock,
   canAccessAiFeatureMock,
-  assertWithinAiBudgetMock,
   limiterMock,
   prismaMock,
 } = vi.hoisted(() => ({
   createRouteClientMock: vi.fn(),
   getUserMock: vi.fn(),
   canAccessAiFeatureMock: vi.fn(),
-  assertWithinAiBudgetMock: vi.fn(),
   limiterMock: vi.fn(),
   prismaMock: {
     aiUsageLedger: {
@@ -27,10 +25,6 @@ vi.mock("@/lib/supabase/route-client", () => ({
 
 vi.mock("@/lib/ai/entitlements", () => ({
   canAccessAiFeature: canAccessAiFeatureMock,
-}))
-
-vi.mock("@/lib/ai/usage-budget", () => ({
-  assertWithinAiBudget: assertWithinAiBudgetMock,
 }))
 
 vi.mock("@/lib/prisma", () => ({
@@ -138,81 +132,6 @@ describe("ai-budget-enforcement", () => {
         remaining: 0,
       })
       expect(details?.retryAfter).toBe(30)
-    })
-  })
-
-  describe("returns 429 when monthly token budget exhausted", () => {
-    it("returns 429 status code when budget is exhausted", async () => {
-      assertWithinAiBudgetMock.mockResolvedValue({
-        allowed: false,
-        limit: 150_000,
-        used: 150_000,
-        remaining: 0,
-      })
-
-      const result = await guardAiRequest(
-        new Request("http://localhost/api/ai/chat", { method: "POST" }),
-        "chat",
-        limiterMock,
-      )
-
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.response.status).toBe(429)
-        const body = await parseResponseBody(result.response)
-        expect(body.error.code).toBe("RATE_LIMITED")
-        expect(body.error.details).toBeDefined()
-        const details = body.error.details as { limit: number; used: number; remaining: number } | undefined
-        expect(details?.limit).toBe(150000)
-        expect(details?.used).toBe(150000)
-        expect(details?.remaining).toBe(0)
-      }
-    })
-
-    it("includes budget metadata when budget is exceeded", async () => {
-      assertWithinAiBudgetMock.mockResolvedValue({
-        allowed: false,
-        limit: 2_000_000,
-        used: 2_100_000,
-        remaining: 0,
-      })
-
-      const result = await guardAiRequest(
-        new Request("http://localhost/api/ai/analysis/accounts", { method: "POST" }),
-        "analysis",
-        limiterMock,
-      )
-
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        const body = await parseResponseBody(result.response)
-        const details = body.error.details as { limit: number; used: number; remaining: number } | undefined
-        expect(details?.limit).toBe(2000000)
-        expect(details?.used).toBe(2100000)
-        expect(details?.remaining).toBe(0)
-      }
-    })
-  })
-
-  describe("logs budget denials with consistent error category", () => {
-    it("categorizes budget exceeded errors correctly", async () => {
-      assertWithinAiBudgetMock.mockResolvedValue({
-        allowed: false,
-        limit: 100_000,
-        used: 120_000,
-        remaining: 0,
-      })
-
-      const result = await guardAiRequest(
-        new Request("http://localhost/api/ai/chat", { method: "POST" }),
-        "chat",
-        limiterMock,
-      )
-
-      expect(result.ok).toBe(false)
-      // The current implementation returns RATE_LIMITED for budget exceeded
-      // which is intentional (same status code as rate limiting)
-      expect(result.ok).toBe(false)
     })
   })
 

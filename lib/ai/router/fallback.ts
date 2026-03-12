@@ -1,14 +1,12 @@
 import { OpenRouterClient, OpenRouterMessage } from './openrouter';
 import { CircuitBreaker } from './circuit';
 import { TenantSafeCache } from './cache';
-import { BudgetReservation } from './reservations';
 import { getRouterConfig } from './config';
 import { logAiWarn } from '@/lib/ai/error-utils';
 
 export interface RouterCompletionOptions {
   userId: string;
   feature: string;
-  budgetLimit: number;
   messages: OpenRouterMessage[];
   temperature?: number;
 }
@@ -49,18 +47,6 @@ export class FallbackRouter {
     // Try each provider in sequence
     for (const provider of providers) {
       try {
-        // Check budget before making request
-        const estimatedCost = this.estimateCost(options.messages, provider.model);
-        const reservationSuccess = await BudgetReservation.reserve(
-          options.userId, 
-          estimatedCost, 
-          options.budgetLimit
-        );
-        
-        if (!reservationSuccess) {
-          throw new Error('Budget limit exceeded');
-        }
-        
         // Make API call through circuit breaker
         const result = await this.circuitBreaker.call(
           provider.name,
@@ -95,21 +81,5 @@ export class FallbackRouter {
     }
     
     throw new Error('All providers failed');
-  }
-  
-  private estimateCost(messages: OpenRouterMessage[], model: string): number {
-    // Simple cost estimation based on token count
-    // In a real implementation, this would be more sophisticated
-    const tokenCount = messages.reduce((acc, message) => 
-      acc + message.content.length / 4, 0); // Rough approximation
-    
-    // Different models have different costs
-    if (model.includes('free')) {
-      return 0; // Free tier
-    }
-    
-    // Approximate cost per 1k tokens
-    const costPer1kTokens = model.includes('liquid') ? 0.0001 : 0.0005;
-    return (tokenCount / 1000) * costPer1kTokens;
   }
 }

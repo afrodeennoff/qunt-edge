@@ -24,7 +24,7 @@ const ALLOWED_AUDIO_TYPES = new Set([
 export async function POST(request: NextRequest) {
   const startedAt = Date.now()
 
-  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  // Apply AI route guard (auth + entitlements + rate limit)
   const guard = await guardAiRequest(request, 'transcribe', transcribeRateLimit)
   if (!guard.ok) return guard.response
   const { userId } = guard

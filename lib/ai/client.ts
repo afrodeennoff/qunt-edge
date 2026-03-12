@@ -55,7 +55,7 @@ export async function createCompletionWithRouter(
   feature: AiFeature,
   userId: string,
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
-  options: { temperature?: number; budgetLimit?: number } = {}
+  options: { temperature?: number } = {}
 ): Promise<{ content: string; provider: string; model: string }> {
   const routerConfig = getRouterConfig();
   const { model } = getAiPolicy(feature);
@@ -98,7 +98,6 @@ export async function createCompletionWithRouter(
     const result = await aiRouter.createCompletion({
       userId,
       feature,
-      budgetLimit: options.budgetLimit || 100,
       messages,
       temperature: options.temperature || 0.3,
     });

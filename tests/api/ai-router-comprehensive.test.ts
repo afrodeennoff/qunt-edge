@@ -155,14 +155,4 @@ describe("AI Router - Comprehensive Integration Tests", () => {
     expect(logAiRequestMock).toHaveBeenCalled();
   });
 
-  it("budget reservation supports deterministic concurrent in-memory reservations", async () => {
-    const { BudgetReservation } = await import("@/lib/ai/router/reservations");
-    const reservations = await Promise.all(
-      Array.from({ length: 10 }, () => BudgetReservation.reserve("u-concurrent", 0.1, 1)),
-    );
-
-    expect(reservations.filter(Boolean)).toHaveLength(10);
-    const balance = await BudgetReservation.getBalance("u-concurrent");
-    expect(balance).toBeCloseTo(1, 8);
-  });
 });
