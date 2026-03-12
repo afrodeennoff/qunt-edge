@@ -6,8 +6,8 @@ import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { apiError } from "@/lib/api-response";
-import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
-import { createRouteClient } from "@/lib/supabase/route-client";
+import { rateLimit } from "@/lib/rate-limit";
+import { guardAiRequest } from "@/lib/ai/route-guard";
 
 export const maxDuration = 30;
 const mappingsRateLimit = rateLimit({ limit: 20, window: 60_000, identifier: "ai-mappings" });
@@ -265,24 +265,11 @@ export async function POST(req: NextRequest) {
   const policy = getAiPolicy("mappings");
   const startedAt = Date.now();
 
-  try {
-    const supabase = createRouteClient(req);
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user?.id) {
-      return apiError("UNAUTHORIZED", "Authentication required", 401);
-    }
+  const guard = await guardAiRequest(req, 'mappings', mappingsRateLimit);
+  if (!guard.ok) return guard.response;
+  const { userId } = guard;
 
-    const limit = await mappingsRateLimit(req);
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      });
-    }
+  try {
 
     const body = await req.json();
     const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
