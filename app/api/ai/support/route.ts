@@ -7,7 +7,8 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { apiError } from "@/lib/api-response";
 import { guardAiRequest } from "@/lib/ai/route-guard";
-import { aiRouter, type RouterCompletionOptions } from "@/lib/ai/router";
+import { getAiLanguageModel, createCompletionWithRouter } from "@/lib/ai/client";
+import { getRouterConfig } from "@/lib/ai/router/config";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
