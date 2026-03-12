@@ -144,10 +144,13 @@ export async function POST(req: NextRequest) {
 
     return result.toTextStreamResponse();
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: error.errors }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
+      return apiError("VALIDATION_FAILED", "Invalid analysis request payload", 400, {
+        issues: error.errors,
       });
     }
     void logAiRequest({
@@ -162,9 +165,6 @@ export async function POST(req: NextRequest) {
       sampleRate: 1,
     });
     console.error("Error in instrument analysis route:", error);
-    return new Response(JSON.stringify({ error: "Failed to process instrument analysis" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return apiError("INTERNAL_ERROR", "Failed to process instrument analysis", 500);
   }
 }

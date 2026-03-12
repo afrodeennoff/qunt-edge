@@ -9,6 +9,7 @@ import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { apiError } from "@/lib/api-response";
 
 export const maxDuration = 90;
 const editorRateLimit = rateLimit({ limit: 15, window: 60_000, identifier: "ai-editor" });
@@ -149,50 +150,35 @@ export async function POST(req: NextRequest) {
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return new Response(
-        JSON.stringify({
-          error: "Invalid request parameters",
-          details: error.errors,
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      return apiError("VALIDATION_FAILED", "Invalid request parameters", 400, {
+        issues: error.errors,
+      });
     }
 
     if (isRateLimitError(error)) {
-      return new Response(
-        JSON.stringify({
-          error: "Rate limit exceeded",
-          message: "AI service is temporarily busy. Please try again in a moment.",
+      return apiError(
+        "RATE_LIMITED",
+        "AI service is temporarily busy. Please try again in a moment.",
+        429,
+        {
           type: "rate_limit_exceeded",
           retryAfter: 60,
-        }),
-        {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            "Retry-After": "60",
-          },
         },
+        { "Retry-After": "60" },
       );
     }
 
     if (isProvider4xxError(error)) {
-      return new Response(
-        JSON.stringify({
-          error: "Service temporarily unavailable",
-          message: "AI service is temporarily unavailable. Please try again later.",
-          type: "service_unavailable",
-        }),
-        {
-          status: 503,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+      return apiError(
+        "SERVICE_UNAVAILABLE",
+        "AI service is temporarily unavailable. Please try again later.",
+        503,
+        { type: "service_unavailable" },
       );
     }
 
@@ -209,16 +195,9 @@ export async function POST(req: NextRequest) {
     });
 
     console.error("Error in editor AI route:", error);
-    return new Response(
-      JSON.stringify({
-        error: "Failed to process AI request",
-        message: "An unexpected error occurred. Please try again.",
-        type: "internal_error",
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    return apiError("INTERNAL_ERROR", "An unexpected error occurred. Please try again.", 500, {
+      type: "internal_error",
+      context: "Failed to process AI request",
+    });
   }
 }

@@ -6,6 +6,7 @@ import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { apiError } from "@/lib/api-response";
 
 // Analysis Tools
 import { generateAnalysisComponent } from "../accounts/generate-analysis-component";
@@ -149,10 +150,13 @@ export async function POST(req: NextRequest) {
 
     return result.toTextStreamResponse();
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: error.errors }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
+      return apiError("VALIDATION_FAILED", "Invalid analysis request payload", 400, {
+        issues: error.errors,
       });
     }
     void logAiRequest({
@@ -167,9 +171,6 @@ export async function POST(req: NextRequest) {
       sampleRate: 1,
     });
     console.error("Error in time of day analysis route:", error);
-    return new Response(JSON.stringify({ error: "Failed to process time of day analysis" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return apiError("INTERNAL_ERROR", "Failed to process time of day analysis", 500);
   }
 }

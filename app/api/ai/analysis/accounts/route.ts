@@ -8,6 +8,7 @@ import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { apiError } from "@/lib/api-response";
 
 export const maxDuration = 300;
 const accountsAnalysisRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "ai-analysis-accounts" });
@@ -159,10 +160,13 @@ export async function POST(req: NextRequest) {
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: error.errors }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
+      return apiError("VALIDATION_FAILED", "Invalid analysis request payload", 400, {
+        issues: error.errors,
       });
     }
 
@@ -179,12 +183,6 @@ export async function POST(req: NextRequest) {
     });
 
     console.error("Error in account analysis route:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to process account analysis" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    return apiError("INTERNAL_ERROR", "Failed to process account analysis", 500);
   }
 }

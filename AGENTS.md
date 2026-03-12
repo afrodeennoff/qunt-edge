@@ -6,6 +6,70 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-12: AI Route Error-Contract Consistency Sweep (Editor/Support/Transcribe/Analysis)
+- **What changed:** Standardized non-success API errors across scoped AI routes to a single envelope shape `{ error: { code, message, details? } }` and aligned malformed input handling to consistent 4xx semantics.
+- **What I want:** Client consumers should be able to parse one predictable error contract across AI endpoints without per-route branching for legacy string payloads.
+- **What I don't want:** Mixed error payload formats (`error: "..."` vs nested objects), inconsistent validation responses, or malformed JSON falling through to generic 500s.
+- **How we fixed that:**
+  - Migrated scoped route error paths to `apiError(...)` in:
+    - `app/api/ai/editor/route.ts`
+    - `app/api/ai/support/route.ts`
+    - `app/api/ai/transcribe/route.ts`
+    - `app/api/ai/analysis/accounts/route.ts`
+    - `app/api/ai/analysis/global/route.ts`
+    - `app/api/ai/analysis/instrument/route.ts`
+    - `app/api/ai/analysis/time-of-day/route.ts`
+  - Added explicit malformed JSON handling (`SyntaxError` -> `BAD_REQUEST`, `400`) in JSON routes.
+  - Normalized validation failures to `VALIDATION_FAILED` with structured `details.issues` payloads.
+  - Kept success streaming behavior unchanged (`toUIMessageStreamResponse` / `toTextStreamResponse`).
+  - Added regression coverage in `tests/api/ai-error-contracts.test.ts` for editor/support/transcribe + all scoped analysis routes.
+- **Key Files:** `app/api/ai/editor/route.ts`, `app/api/ai/support/route.ts`, `app/api/ai/transcribe/route.ts`, `app/api/ai/analysis/accounts/route.ts`, `app/api/ai/analysis/global/route.ts`, `app/api/ai/analysis/instrument/route.ts`, `app/api/ai/analysis/time-of-day/route.ts`, `tests/api/ai-error-contracts.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx vitest run tests/api/ai-error-contracts.test.ts tests/api/ai-budget-enforcement.test.ts` -> passes (`14/14`).
+  - `npx eslint <touched AI routes + new test>` -> warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> currently fails in workspace on pre-existing unrelated `aiUsageLedger` and `ai-full-history-ux` typing errors.
+
+### 2026-03-12: Team Trader Access Control + Trade Identity Enforcement Hardening
+- **What changed:** Added explicit access-control checks for team trader actions and hardened `getTradesAction` so caller-provided user IDs can no longer escalate across accounts.
+- **What I want:** Team trader reads and VaR summaries should only be available to authenticated users who are the trader, on the trader's team, team owner, or assigned manager; trade queries should always execute under authenticated identity.
+- **What I don't want:** Unauthenticated reads of trader details/metrics, cross-team trader data exposure, or caller-controlled `userId` values bypassing ownership boundaries in trade reads.
+- **How we fixed that:**
+  - Added session-backed user resolution in `app/[locale]/teams/actions/user.ts` via `createClient` + `supabase.auth.getUser()` mapping to DB user id.
+  - Added `canAccessTrader(requestUserId, traderId)` with team-aware authorization logic:
+    - self access,
+    - team owner access,
+    - teammate access via `traderIds`,
+    - manager access via `TeamManager.managerId` relation.
+  - Enforced this guard in both `getTraderById` (returns `null` when unauthorized) and `getTraderVarSummary` (returns `{ success: false, error: "Unauthorized" }`).
+  - Updated `server/trades.ts#getTradesAction` to default to `getDatabaseUserId()` and reject mismatched caller-provided `userId` with `Forbidden` after `resolveWritableUserId(...)` comparison.
+  - Added targeted regression coverage in `tests/trader-var-action.test.ts` for unauthenticated and unauthorized access paths.
+- **Key Files:** `app/[locale]/teams/actions/user.ts`, `server/trades.ts`, `tests/trader-var-action.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx vitest run tests/trader-var-action.test.ts` -> passes (`6/6`).
+  - `npx eslint "app/[locale]/teams/actions/user.ts" "server/trades.ts"` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+
+### 2026-03-12: Skeleton Loading System Implementation (Task 2.1)
+- **What changed:** Implemented comprehensive skeleton loading system for dashboard tabs with Suspense boundaries and feature flag control.
+- **What I want:** Users should see immediate visual feedback when loading dashboard tabs, reducing perceived latency and improving user experience through progressive loading.
+- **What I don't want:** Dashboard waiting silently with no visual feedback before showing content, or skeleton loading causing layout shifts when content arrives.
+- **How we fixed that:**
+  - Enhanced `components/ui/skeleton.tsx` with specialized skeleton components: `DashboardHeaderSkeleton`, `WidgetGridSkeleton`, `TableSkeleton`, and `AccountsSkeleton`.
+  - Created `app/[locale]/dashboard/components/skeletons/dashboard-skeleton.tsx` that composes appropriate skeletons based on active tab (widgets, table, accounts, chart).
+  - Updated `app/[locale]/dashboard/components/dashboard-tab-shell.tsx` to wrap tab content in `<Suspense>` boundary with conditional skeleton fallback.
+  - Integrated with existing feature flag system: skeletons only render when `NEXT_PUBLIC_ENABLE_SKELETON_LOADING=true`.
+  - All skeletons use monochrome design system (`bg-white/5`) with `animate-pulse` animation for consistent visual style.
+  - Created test script `scripts/test-skeleton-loading.mjs` that validates skeleton components, Suspense integration, and feature flag configuration (27 checks, 100% pass rate).
+  - Added comprehensive documentation at `docs/skeleton-loading-system.md` with architecture, testing, and rollback instructions.
+- **Key Files:** `components/ui/skeleton.tsx`, `app/[locale]/dashboard/components/skeletons/dashboard-skeleton.tsx`, `app/[locale]/dashboard/components/dashboard-tab-shell.tsx`, `scripts/test-skeleton-loading.mjs`, `docs/skeleton-loading-system.md`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint components/ui/skeleton.tsx app/[locale]/dashboard/components/skeletons/dashboard-skeleton.tsx app/[locale]/dashboard/components/dashboard-tab-shell.tsx` passes (0 errors)
+  - `node scripts/test-skeleton-loading.mjs` passes: 27/27 tests (100% success rate)
+  - Skeleton components exist and export correctly
+  - Suspense boundary properly wraps tab content
+  - Feature flag integration working correctly
+  - Animation classes applied consistently (`animate-pulse`, `bg-white/5`, `rounded-md`)
+
 ### 2026-03-12: Prisma Connection Pool Optimization (Task 1.1)
 - **What changed:** Increased Prisma connection pool from 2 to 20 connections in production, added min pool of 5, implemented pool monitoring at 80% capacity, and updated timeout settings for production-grade performance.
 - **What I want:** Enable production-grade concurrent query handling to support ~200-400 queries per second and prevent pool exhaustion under load.

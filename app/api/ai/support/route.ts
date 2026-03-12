@@ -135,8 +135,14 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
       sendReasoning: false,
     });
   } catch (error: unknown) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return apiError("VALIDATION_FAILED", "Invalid support request payload", 400, error.errors);
+      return apiError("VALIDATION_FAILED", "Invalid support request payload", 400, {
+        issues: error.errors,
+      });
     }
 
     const err = error as { statusCode?: number; type?: string };
@@ -145,56 +151,34 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
 
     // Handle rate limit errors specifically
     if (err?.statusCode === 429 || err?.type === "rate_limit_exceeded") {
-      return new Response(
-        JSON.stringify({
-          error: "Rate limit exceeded",
-          message:
-            "We are experiencing high demand. Please try again in a few minutes or contact support directly.",
-          type: "rate_limit_exceeded",
-          retryAfter: 300, // 5 minutes
-        }),
+      return apiError(
+        "RATE_LIMITED",
+        "We are experiencing high demand. Please try again in a few minutes or contact support directly.",
+        429,
         {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            "Retry-After": "300",
-          },
+          type: "rate_limit_exceeded",
+          retryAfter: 300,
         },
+        { "Retry-After": "300" },
       );
     }
 
     // Handle other AI/API errors
     if (typeof err?.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 500) {
-      return new Response(
-        JSON.stringify({
-          error: "Service temporarily unavailable",
-          message:
-            "Our AI service is temporarily unavailable. Please try again later or contact support directly.",
-          type: "service_unavailable",
-        }),
-        {
-          status: 503,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+      return apiError(
+        "SERVICE_UNAVAILABLE",
+        "Our AI service is temporarily unavailable. Please try again later or contact support directly.",
+        503,
+        { type: "service_unavailable" },
       );
     }
 
     // Handle server errors
-    return new Response(
-      JSON.stringify({
-        error: "Internal server error",
-        message:
-          "An unexpected error occurred. Please try again later or contact support.",
-        type: "internal_error",
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
+    return apiError(
+      "INTERNAL_ERROR",
+      "An unexpected error occurred. Please try again later or contact support.",
+      500,
+      { type: "internal_error" },
     );
   }
 }
