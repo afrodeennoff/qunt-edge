@@ -3,11 +3,13 @@ import { getRouterConfig } from './config';
 
 export class AIRouter {
   private fallbackRouter = new FallbackRouter();
-  private config = getRouterConfig();
   
   async createCompletion(options: RouterCompletionOptions): Promise<RouterCompletionResult> {
+    // Check config dynamically each time
+    const config = getRouterConfig();
+    
     // Only use router if enabled
-    if (!this.config.enabled) {
+    if (!config.enabled) {
       throw new Error('AI Router is not enabled');
     }
     
