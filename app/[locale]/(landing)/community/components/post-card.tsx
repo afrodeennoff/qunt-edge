@@ -61,14 +61,14 @@ interface PostComment {
 const typeColors: Record<PostType, string> = {
   [PostType.FEATURE_REQUEST]: 'bg-semantic-info-bg text-semantic-info dark:bg-semantic-info-bg dark:text-semantic-info',
   [PostType.BUG_REPORT]: 'bg-semantic-error-bg text-semantic-error dark:bg-semantic-error-bg dark:text-semantic-error',
-  [PostType.DISCUSSION]: 'bg-white text-white dark:bg-white dark:text-white',
+  [PostType.DISCUSSION]: 'border border-border bg-secondary text-secondary-foreground',
 }
 
 const statusColors: Record<PostStatus, string> = {
-  [PostStatus.OPEN]: 'bg-white text-white dark:bg-white dark:text-white',
+  [PostStatus.OPEN]: 'border border-border bg-secondary text-secondary-foreground',
   [PostStatus.IN_PROGRESS]: 'bg-semantic-warning-bg text-semantic-warning dark:bg-semantic-warning-bg dark:text-semantic-warning',
   [PostStatus.COMPLETED]: 'bg-semantic-info-bg text-semantic-info dark:bg-semantic-info-bg dark:text-semantic-info',
-  [PostStatus.CLOSED]: 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100',
+  [PostStatus.CLOSED]: 'border border-border bg-muted text-muted-foreground',
 }
 
 export function PostCard({ post, isExpanded = false, isAuthor }: Props) {
@@ -113,17 +113,17 @@ export function PostCard({ post, isExpanded = false, isAuthor }: Props) {
 
     try {
       // Optimistic update
-      const existingVote = optimisticVotes.find(v => v.userId === post.userId)
+      const existingVote = optimisticVotes.find(v => v.userId === user.id)
       let newVotes
 
       if (existingVote) {
         if (existingVote.type === type) {
           // Remove vote
-          newVotes = optimisticVotes.filter(v => v.userId !== post.userId)
+          newVotes = optimisticVotes.filter(v => v.userId !== user.id)
         } else {
           // Change vote type
           newVotes = optimisticVotes.map((v: Vote) =>
-            v.userId === post.userId ? { ...v, type } : v
+            v.userId === user.id ? { ...v, type } : v
           )
         }
       } else {
@@ -132,7 +132,7 @@ export function PostCard({ post, isExpanded = false, isAuthor }: Props) {
           id: 'temp',
           type,
           postId: post.id,
-          userId: post.userId,
+          userId: user.id,
           createdAt: new Date(),
         }]
       }
@@ -244,7 +244,7 @@ export function PostCard({ post, isExpanded = false, isAuthor }: Props) {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="gap-2" aria-label="Post actions" title="Post actions">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

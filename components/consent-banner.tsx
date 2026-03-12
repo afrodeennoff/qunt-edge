@@ -154,6 +154,8 @@ export function ConsentBanner() {
                     ...settings,
                     analytics_storage: false,
                     ad_storage: false,
+                    ad_user_data: false,
+                    ad_personalization: false,
                     personalization_storage: false,
                   })}
                 >
@@ -177,13 +179,13 @@ export function ConsentBanner() {
           <>
             {showDetails && <div className="fixed inset-0 z-9998 bg-black/20 backdrop-blur-xs" />}
             <Dialog open={showDetails} onOpenChange={setShowDetails}>
-              <DialogContent className="fixed left-[50%] top-[50%] z-9999 translate-x-[-50%] translate-y-[-50%] bg-white rounded-lg shadow-xl max-w-[480px] w-[90vw] max-h-[80vh] overflow-hidden border-0">
+              <DialogContent className="fixed left-[50%] top-[50%] z-9999 max-h-[80vh] w-[90vw] max-w-[480px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border border-border bg-card shadow-xl">
                 <DialogHeader className="p-6 pb-4">
-                  <DialogTitle className="text-lg font-medium text-gray-900">
+                  <DialogTitle className="text-lg font-medium text-foreground">
                     {/* @ts-ignore */}
                     {t('landing.consent.preferences.title')}
                   </DialogTitle>
-                  <DialogDescription className="text-sm text-gray-600 mt-2 leading-relaxed">
+                  <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {/* @ts-ignore */}
                     {t('landing.consent.preferences.description')}{' '}
                     <a href="#" className="text-semantic-info underline">{/* @ts-ignore */}{t('landing.consent.preferences.learnMore')}</a>.
@@ -194,17 +196,18 @@ export function ConsentBanner() {
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <input
+                        id="consent-necessary-desktop"
                         type="checkbox"
                         checked={true}
                         disabled
-                        className="mt-1 h-4 w-4 rounded border-gray-300 bg-gray-100"
+                        className="mt-1 h-4 w-4 rounded border-border bg-muted"
                       />
                       <div>
-                        <label className="text-sm font-medium text-gray-900">
+                        <label htmlFor="consent-necessary-desktop" className="text-sm font-medium text-foreground">
                           {/* @ts-ignore */}
                           {t('landing.consent.preferences.strictlyNecessary.title')}
                         </label>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {/* @ts-ignore */}
                           {t('landing.consent.preferences.strictlyNecessary.description')}
                         </p>
@@ -213,17 +216,18 @@ export function ConsentBanner() {
 
                     <div className="flex items-start gap-3">
                       <input
+                        id="consent-analytics-desktop"
                         type="checkbox"
                         checked={settings.analytics_storage}
                         onChange={(e) => setSettings({ ...settings, analytics_storage: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-gray-300"
+                        className="mt-1 h-4 w-4 rounded border-border bg-background"
                       />
                       <div>
-                        <label className="text-sm font-medium text-gray-900">
+                        <label htmlFor="consent-analytics-desktop" className="text-sm font-medium text-foreground">
                           {/* @ts-ignore */}
                           {t('landing.consent.preferences.analytics.title')}
                         </label>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {/* @ts-ignore */}
                           {t('landing.consent.preferences.analytics.description')}
                         </p>
@@ -232,17 +236,18 @@ export function ConsentBanner() {
 
                     <div className="flex items-start gap-3">
                       <input
+                        id="consent-marketing-desktop"
                         type="checkbox"
                         checked={settings.ad_storage}
                         onChange={(e) => setSettings({ ...settings, ad_storage: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-gray-300"
+                        className="mt-1 h-4 w-4 rounded border-border bg-background"
                       />
                       <div>
-                        <label className="text-sm font-medium text-gray-900">
+                        <label htmlFor="consent-marketing-desktop" className="text-sm font-medium text-foreground">
                           {/* @ts-ignore */}
                           {t('landing.consent.preferences.marketing.title')}
                         </label>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {/* @ts-ignore */}
                           {t('landing.consent.preferences.marketing.description')}
                         </p>
@@ -253,7 +258,7 @@ export function ConsentBanner() {
                   <div className="mt-6">
                     <Button
                       onClick={handleSavePreferences}
-                      className="w-full bg-black text-white hover:bg-black/90 rounded-lg h-11"
+                      className="h-11 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       {/* @ts-ignore */}
                       {t('landing.consent.preferences.done')}
@@ -265,13 +270,13 @@ export function ConsentBanner() {
           </>
         ) : (
           <Drawer open={showDetails} onOpenChange={setShowDetails}>
-            <DrawerContent className="z-10000 bg-white rounded-t-lg">
+            <DrawerContent className="z-10000 rounded-t-lg border border-border bg-card">
               <div className="h-[80vh] flex flex-col">
                 <DrawerHeader className="text-left px-6 py-6">
-                  <DrawerTitle className="text-lg font-medium text-gray-900">
+                  <DrawerTitle className="text-lg font-medium text-foreground">
                     {t('landing.consent.preferences.title')}
                   </DrawerTitle>
-                  <DrawerDescription className="text-sm text-gray-600 mt-2 leading-relaxed">
+                  <DrawerDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {/* @ts-ignore */}
                     {t('landing.consent.preferences.description')}{' '}
                     <a href="#" className="text-semantic-info underline">{/* @ts-ignore */}{t('landing.consent.preferences.learnMore')}</a>.
@@ -282,16 +287,17 @@ export function ConsentBanner() {
                   <div className="space-y-4 pb-6">
                     <div className="flex items-start gap-3">
                       <input
+                        id="consent-necessary-mobile"
                         type="checkbox"
                         checked={true}
                         disabled
-                        className="mt-1 h-4 w-4 rounded border-gray-300 bg-gray-100"
+                        className="mt-1 h-4 w-4 rounded border-border bg-muted"
                       />
                       <div>
-                        <label className="text-sm font-medium text-gray-900">
+                        <label htmlFor="consent-necessary-mobile" className="text-sm font-medium text-foreground">
                           {t('landing.consent.preferences.strictlyNecessary.title')}
                         </label>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {t('landing.consent.preferences.strictlyNecessary.description')}
                         </p>
                       </div>
@@ -299,16 +305,17 @@ export function ConsentBanner() {
 
                     <div className="flex items-start gap-3">
                       <input
+                        id="consent-analytics-mobile"
                         type="checkbox"
                         checked={settings.analytics_storage}
                         onChange={(e) => setSettings({ ...settings, analytics_storage: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-gray-300"
+                        className="mt-1 h-4 w-4 rounded border-border bg-background"
                       />
                       <div>
-                        <label className="text-sm font-medium text-gray-900">
+                        <label htmlFor="consent-analytics-mobile" className="text-sm font-medium text-foreground">
                           {t('landing.consent.preferences.analytics.title')}
                         </label>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {t('landing.consent.preferences.analytics.description')}
                         </p>
                       </div>
@@ -316,16 +323,17 @@ export function ConsentBanner() {
 
                     <div className="flex items-start gap-3">
                       <input
+                        id="consent-marketing-mobile"
                         type="checkbox"
                         checked={settings.ad_storage}
                         onChange={(e) => setSettings({ ...settings, ad_storage: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-gray-300"
+                        className="mt-1 h-4 w-4 rounded border-border bg-background"
                       />
                       <div>
-                        <label className="text-sm font-medium text-gray-900">
+                        <label htmlFor="consent-marketing-mobile" className="text-sm font-medium text-foreground">
                           {t('landing.consent.preferences.marketing.title')}
                         </label>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {t('landing.consent.preferences.marketing.description')}
                         </p>
                       </div>
@@ -336,7 +344,7 @@ export function ConsentBanner() {
                 <DrawerFooter className="px-6 pb-6">
                   <Button
                     onClick={handleSavePreferences}
-                    className="w-full bg-black text-white hover:bg-black/90 rounded-lg h-11"
+                    className="h-11 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {t('landing.consent.preferences.done')}
                   </Button>

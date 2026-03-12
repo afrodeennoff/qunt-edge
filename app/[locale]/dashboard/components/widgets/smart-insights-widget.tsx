@@ -45,7 +45,7 @@ export function SmartInsightsWidget({ size = 'medium' }: SmartInsightsWidgetProp
         if (!user?.id) return
         setLoading(true)
         try {
-            const data = await getSmartInsights(user.id)
+            const data = await getSmartInsights()
             setInsights([...data].sort((a, b) => (b.confidence || 0) - (a.confidence || 0)))
         } catch (error) {
             console.error('Failed to load insights', error)

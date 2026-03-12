@@ -30,7 +30,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const isInteractive = clickable || typeof onClick === "function"
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (clickable && (e.key === "Enter" || e.key === " ")) {
+      if (isInteractive && (e.key === "Enter" || e.key === " ")) {
         e.preventDefault()
         onClick?.(e as unknown as React.MouseEvent<HTMLDivElement>)
       }
@@ -39,8 +39,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <div
         ref={ref}
-        role={clickable ? "button" : undefined}
-        tabIndex={clickable ? 0 : undefined}
+        role={isInteractive ? "button" : undefined}
+        tabIndex={isInteractive ? 0 : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
         className={cn(
           "relative rounded-xl border bg-card text-card-foreground shadow-sm",
@@ -55,9 +55,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           },
           {
             "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md": hover,
-            "cursor-pointer": clickable,
+            "cursor-pointer": isInteractive,
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2":
-              clickable,
+              isInteractive,
           },
           {
             "text-sm": size === "sm",
@@ -73,10 +73,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           <div className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-2 py-0.5 backdrop-blur-sm">
             <div className={cn(
               "status-dot",
-              status === "live" && "bg-white",
-              status === "synced" && "bg-zinc-300",
-              status === "idle" && "bg-slate-500",
-              status === "error" && "bg-semantic-error-bg"
+              status === "live" && "status-dot-live",
+              status === "synced" && "status-dot-synced",
+              status === "idle" && "status-dot-idle",
+              status === "error" && "status-dot-error"
             )} />
             <span className="text-[10px] font-semibold uppercase leading-none tracking-widest text-muted-foreground">
               {status}

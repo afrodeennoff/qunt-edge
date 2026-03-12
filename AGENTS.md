@@ -6,6 +6,25 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-12: UI Color Consistency + Contrast Polish Sweep (Community/Admin/Dashboard)
+- **What changed:** Ran a focused production-readiness sweep for color consistency and readability, then patched high-impact UI surfaces with token-aligned classes and stronger contrast states.
+- **What I want:** Badge/status chips, admin form surfaces, and dense dashboard controls should stay legible and visually consistent with the monochrome token system across routes and themes.
+- **What I don't want:** White-on-white badges, mixed legacy `gray/slate/zinc` color paths in shared components, or low-contrast controls (`text-white/10`) that look disabled/broken.
+- **How we fixed that:**
+  - Fixed broken badge contrast in community post cards by replacing white-on-white status/type classes with tokenized secondary/muted surfaces.
+  - Unified shared `Card` status dots to existing semantic status-dot classes (`status-dot-live/synced/idle/error`) instead of ad-hoc hue utilities.
+  - Aligned dashboard top-nav heading color to semantic foreground tokens.
+  - Refactored consent preferences modal/drawer palette from hardcoded `gray/white` classes to semantic token classes (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary`).
+  - Normalized admin newsletter editor surfaces/inputs/buttons to tokenized classes for consistent contrast and interaction states.
+  - Increased readability in dense daily-summary controls (mode toggles, timeframe select, score labels, close icon, target input placeholder/border) by raising low-contrast text variants.
+  - Added missing a11y semantics in high-traffic controls (icon button labels, focus-visible rings, checkbox label associations).
+  - Fixed two audit-discovered production risks while in scope: community vote optimistic-state identity now keys off authenticated user id, and consent reject action now also disables `ad_user_data`/`ad_personalization`.
+- **Key Files:** `app/[locale]/(landing)/community/components/post-card.tsx`, `components/ui/card.tsx`, `app/[locale]/dashboard/components/top-nav.tsx`, `components/consent-banner.tsx`, `app/[locale]/admin/components/newsletter/newsletter-editor.tsx`, `app/[locale]/dashboard/components/daily-summary-modal.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint app/[locale]/(landing)/community/components/post-card.tsx components/ui/card.tsx app/[locale]/dashboard/components/top-nav.tsx components/consent-banner.tsx app/[locale]/admin/components/newsletter/newsletter-editor.tsx app/[locale]/dashboard/components/daily-summary-modal.tsx` -> passes (`0` errors).
+  - `npm run -s check:color-contract` -> passes.
+  - `npm run -s typecheck` -> passes.
+
 ### 2026-03-12: AI Route Error-Contract Consistency Sweep (Editor/Support/Transcribe/Analysis)
 - **What changed:** Standardized non-success API errors across scoped AI routes to a single envelope shape `{ error: { code, message, details? } }` and aligned malformed input handling to consistent 4xx semantics.
 - **What I want:** Client consumers should be able to parse one predictable error contract across AI endpoints without per-route branching for legacy string payloads.

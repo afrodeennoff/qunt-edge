@@ -2,9 +2,63 @@
 
 import { computeVarSummary, type TraderVarSummary } from "@/lib/analytics/var";
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/server/auth";
+
+async function getRequestUserId(): Promise<string | null> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.id) return null
+
+  const mappedUser = await prisma.user.findUnique({
+    where: { auth_user_id: user.id },
+    select: { id: true },
+  })
+
+  if (mappedUser?.id) return mappedUser.id
+
+  const fallbackUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { id: true },
+  })
+
+  return fallbackUser?.id ?? null
+}
+
+async function canAccessTrader(requestUserId: string, traderId: string): Promise<boolean> {
+  if (requestUserId === traderId) {
+    return true
+  }
+
+  const team = await prisma.team.findFirst({
+    where: {
+      traderIds: { has: traderId },
+      OR: [
+        { userId: requestUserId },
+        { traderIds: { has: requestUserId } },
+        { managers: { some: { managerId: requestUserId } } },
+      ],
+    },
+    select: { id: true },
+  })
+
+  return Boolean(team)
+}
 
 export async function getTraderById(slug: string) {
   try {
+    const requestUserId = await getRequestUserId()
+    if (!requestUserId) {
+      return null
+    }
+
+    const hasAccess = await canAccessTrader(requestUserId, slug)
+    if (!hasAccess) {
+      return null
+    }
+
     const trader = await prisma.user.findUnique({
       where: { id: slug },
       select: {
@@ -64,6 +118,16 @@ function inferPortfolioValueFromTrades(trades: Array<{ pnl: unknown; commission:
 
 export async function getTraderVarSummary(traderId: string): Promise<TraderVarSummaryResponse> {
   try {
+    const requestUserId = await getRequestUserId()
+    if (!requestUserId) {
+      return { success: false, error: "Unauthorized" }
+    }
+
+    const hasAccess = await canAccessTrader(requestUserId, traderId)
+    if (!hasAccess) {
+      return { success: false, error: "Unauthorized" }
+    }
+
     const trader = await prisma.user.findUnique({
       where: { id: traderId },
       select: {

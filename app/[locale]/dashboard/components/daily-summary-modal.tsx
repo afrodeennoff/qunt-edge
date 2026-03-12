@@ -268,20 +268,26 @@ export function DailySummaryModal() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                <div className="group flex items-center gap-2 cursor-pointer transition-all hover:bg-white/5 px-3 py-1.5 rounded-lg border border-transparent hover:border-white/5" onClick={(e) => { e.stopPropagation(); setIsEditingHandle(true); }}>
+                                <button
+                                    type="button"
+                                    className="group flex items-center gap-2 cursor-pointer rounded-lg border border-transparent px-3 py-1.5 transition-all hover:border-white/5 hover:bg-white/5"
+                                    onClick={(e) => { e.stopPropagation(); setIsEditingHandle(true); }}
+                                    aria-label="Edit handle"
+                                >
                                     {isEditingHandle ? (
-                                        <input autoFocus className="bg-transparent border-none outline-none text-xs font-bold text-white text-right w-24 uppercase tracking-wider" value={handle} onChange={(e) => setHandle(e.target.value)} onBlur={() => setIsEditingHandle(false)} />
+                                        <input autoFocus className="w-24 border-none bg-transparent text-right text-xs font-bold uppercase tracking-wider text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" value={handle} onChange={(e) => setHandle(e.target.value)} onBlur={() => setIsEditingHandle(false)} />
                                     ) : (
                                         <span className="text-xs font-bold text-white/80 group-hover:text-white uppercase tracking-wider transition-colors">@{handle}</span>
                                     )}
-                                </div>
+                                </button>
                                 <div className="flex items-center bg-zinc-900 rounded-lg p-0.5 border border-white/5">
-                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('currency'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'currency' ? "bg-white/10 text-white shadow-sm" : "text-white/30 hover:text-white/60")}>$</button>
-                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('percent'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'percent' ? "bg-white/10 text-white shadow-sm" : "text-white/30 hover:text-white/60")}>%</button>
+                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('currency'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'currency' ? "bg-white/10 text-white shadow-sm" : "text-white/60 hover:text-white/90")}>$</button>
+                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('percent'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'percent' ? "bg-white/10 text-white shadow-sm" : "text-white/60 hover:text-white/90")}>%</button>
                                 </div>
                                 <button
                                     onClick={() => setIsOpen(false)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-white transition-colors"
+                                    aria-label="Close summary"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -299,7 +305,7 @@ export function DailySummaryModal() {
                                         <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">{timeframe === 'total' ? 'Lifetime' : timeframe} PnL</span>
 
                                         <div className="ml-auto flex items-center gap-2">
-                                            <select className="bg-transparent text-[10px] uppercase font-bold text-white/10 outline-none cursor-pointer hover:text-white/40 transition-colors" value={timeframe} onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}>
+                                            <select className="cursor-pointer rounded bg-transparent text-[10px] font-bold uppercase text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" value={timeframe} onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}>
                                                 <option value="daily" className="bg-zinc-950 text-white">Daily</option>
                                                 <option value="weekly" className="bg-zinc-950 text-white">Weekly</option>
                                                 <option value="monthly" className="bg-zinc-950 text-white">Monthly</option>
@@ -323,10 +329,18 @@ export function DailySummaryModal() {
                                     animate={{ opacity: 1, height: 'auto', marginTop: 32 }}
                                     className="grid grid-cols-2 gap-4 overflow-hidden"
                                 >
-                                    <motion.div
-                                        onClick={() => setBlurWeekly(!blurWeekly)}
-                                        className={cn(
-                                            "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
+                                     <motion.div
+                                         onClick={() => setBlurWeekly(!blurWeekly)}
+                                         role="button"
+                                         tabIndex={0}
+                                         onKeyDown={(e) => {
+                                             if (e.key === 'Enter' || e.key === ' ') {
+                                                 e.preventDefault()
+                                                 setBlurWeekly(!blurWeekly)
+                                             }
+                                         }}
+                                         className={cn(
+                                             "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
                                             blurWeekly
                                                 ? "bg-zinc-950/40 border-white/5 blur-xl scale-[0.98] select-none"
                                                 : "bg-zinc-900/30 border-white/10 hover:bg-zinc-900/60 hover:border-white/20"
@@ -343,10 +357,18 @@ export function DailySummaryModal() {
                                         </div>
                                     </motion.div>
 
-                                    <motion.div
-                                        onClick={() => setBlurMonthly(!blurMonthly)}
-                                        className={cn(
-                                            "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
+                                     <motion.div
+                                         onClick={() => setBlurMonthly(!blurMonthly)}
+                                         role="button"
+                                         tabIndex={0}
+                                         onKeyDown={(e) => {
+                                             if (e.key === 'Enter' || e.key === ' ') {
+                                                 e.preventDefault()
+                                                 setBlurMonthly(!blurMonthly)
+                                             }
+                                         }}
+                                         className={cn(
+                                             "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
                                             blurMonthly
                                                 ? "bg-zinc-950/40 border-white/5 blur-xl scale-[0.98] select-none"
                                                 : "bg-zinc-900/30 border-white/10 hover:bg-zinc-900/60 hover:border-white/20"
@@ -377,11 +399,11 @@ export function DailySummaryModal() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-zinc-900/30 border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-zinc-900/50 transition-colors backdrop-blur-sm">
                                         <div className="text-2xl font-black text-white/90 mb-1">{scoreVal}</div>
-                                        <div className="text-[9px] text-white/40 uppercase tracking-[0.2em] font-bold">Score</div>
+                                        <div className="text-[9px] text-white/60 uppercase tracking-[0.2em] font-bold">Score</div>
                                     </div>
                                     <div className="bg-zinc-900/30 border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-zinc-900/50 transition-colors backdrop-blur-sm">
                                         <div className="text-2xl font-black text-white/90 mb-1">{stats.winRate}%</div>
-                                        <div className="text-[9px] text-white/40 uppercase tracking-[0.2em] font-bold">Win Rate</div>
+                                        <div className="text-[9px] text-white/60 uppercase tracking-[0.2em] font-bold">Win Rate</div>
                                     </div>
                                 </div>
                             </div>
@@ -398,7 +420,7 @@ export function DailySummaryModal() {
                                             <input
                                                 autoFocus
                                                 type="number"
-                                                className="bg-transparent border-b border-white/20 outline-none text-white w-24 text-sm font-bold placeholder:text-white/20"
+                                                className="w-24 border-b border-white/40 bg-transparent text-sm font-bold text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                                                 defaultValue={customTarget}
                                                 onBlur={(e) => {
                                                     const val = parseFloat(e.target.value)
@@ -409,9 +431,14 @@ export function DailySummaryModal() {
                                             />
                                         </div>
                                     ) : (
-                                        <span onClick={() => setIsEditingTarget(true)} className="text-sm font-bold text-white/90 cursor-pointer hover:text-white transition-colors">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsEditingTarget(true)}
+                                            className="text-sm font-bold text-white/90 transition-colors hover:text-white"
+                                            aria-label="Edit total goal target"
+                                        >
                                             ${customTarget.toLocaleString()}
-                                        </span>
+                                        </button>
                                     )}
                                 </div>
                                 <span className={cn("text-sm font-bold", toSafeNumber(stats.total.pnl) < 0 ? "text-white/40" : "text-white")}>{Math.round(totalGoalProgress)}%</span>
@@ -459,6 +486,7 @@ export function DailySummaryModal() {
                                 THEMES[t].primary.replace('text-', 'bg-'),
                                 currentTheme === t ? "ring-2 ring-white ring-offset-2 ring-offset-black" : "opacity-30 hover:opacity-100"
                             )}
+                            aria-label={`Use ${THEMES[t].name} theme`}
                         />
                     ))}
                 </div>

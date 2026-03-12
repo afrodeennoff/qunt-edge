@@ -59,6 +59,12 @@ export function TeamsSidebar() {
       group: "Resources"
     },
     {
+      href: `${localePrefix}/propfirmperk`,
+      icon: <Globe className="size-4.5" />,
+      label: "Deals",
+      group: "Resources"
+    },
+    {
       href: `${localePrefix}/dashboard`,
       icon: <ArrowLeft className="size-4.5" />,
       label: "Main Dashboard",

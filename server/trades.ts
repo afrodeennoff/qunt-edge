@@ -412,8 +412,18 @@ export async function getTradesAction(
   forceRefresh: boolean = false,
   includeStats: boolean = true
 ): Promise<PaginatedTrades & { statistics?: PrecomputedStats }> {
-  const currentUserId = await resolveWritableUserId(userId || await getUserId())
-  if (!currentUserId) throw new Error('User not found')
+  const authenticatedUserId = await getDatabaseUserId()
+  if (!authenticatedUserId) throw new Error('User not found')
+
+  let currentUserId = authenticatedUserId
+
+  if (userId) {
+    const resolvedUserId = await resolveWritableUserId(userId)
+    if (resolvedUserId !== authenticatedUserId) {
+      throw new Error('Forbidden')
+    }
+    currentUserId = resolvedUserId
+  }
 
   const tag = `trades-${currentUserId}`
 

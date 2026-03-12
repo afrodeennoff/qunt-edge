@@ -91,6 +91,7 @@ export function AIModelSidebar() {
 
                 { label: 'Team', href: withLocale('/teams/dashboard'), icon: <Building2 className="size-4" />, group: 'Social' },
                 { label: 'Prop Firms', href: withLocale('/propfirms'), icon: <Globe className="size-4" />, group: 'Social' },
+                { label: 'Deals', href: withLocale('/propfirmperk'), icon: <Globe className="size-4" />, group: 'Social' },
             );
         }
 

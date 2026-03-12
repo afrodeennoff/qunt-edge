@@ -37,6 +37,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
         { name: t('footer.product.features'), href: `/${locale}/#features` },
         { name: t('footer.product.pricing'), href: `/${locale}/pricing` },
         { name: t('landing.navbar.propFirms'), href: `/${locale}/propfirms` },
+        { name: t('landing.navbar.propFirmPerk'), href: `/${locale}/propfirmperk` },
         { name: t('footer.product.teams'), href: `/${locale}/teams` },
         { name: t('footer.product.support'), href: `/${locale}/support` },
         { name: t('footer.company.about'), href: `/${locale}/about` },

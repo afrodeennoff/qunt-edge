@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma";
+import { getDatabaseUserId } from "@/server/auth";
 import { subMonths } from "date-fns";
 
 export type InsightActionTarget =
@@ -34,8 +35,9 @@ function roundPct(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-export async function getSmartInsights(userId: string): Promise<SmartInsight[]> {
+export async function getSmartInsights(): Promise<SmartInsight[]> {
     try {
+        const userId = await getDatabaseUserId();
         const endDate = new Date();
         const startDate = subMonths(endDate, 3);
 

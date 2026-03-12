@@ -152,6 +152,7 @@ export default {
         navbar: {
             features: 'Features',
             propFirms: 'Prop Firms Catalogue',
+            propFirmPerk: 'Deals',
             dataImport: 'Data Import',
             performanceVisualization: 'Performance Visualization',
             dailyPerformance: 'Daily Performance',
