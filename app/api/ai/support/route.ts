@@ -17,39 +17,41 @@ const customOpenai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Router-enabled AI client
-const routerEnabledOpenai = {
-  chat: {
-    completions: {
-      create: async (options: any) => {
-        const result = await aiRouter.createCompletion({
-          userId: options.userId || 'anonymous',
-          feature: 'support',
-          budgetLimit: 1.0, // Default budget limit
-          messages: options.messages,
-          temperature: options.temperature,
-        });
-        
-        return {
-          id: 'router-' + Date.now(),
-          choices: [
-            {
-              message: {
-                content: result.content,
-                role: 'assistant',
+// Router-enabled AI client factory
+function createRouterModel(model: string) {
+  return {
+    chat: {
+      completions: {
+        create: async (options: any) => {
+          const result = await aiRouter.createCompletion({
+            userId: options.userId || 'anonymous',
+            feature: 'support',
+            budgetLimit: 1.0,
+            messages: options.messages,
+            temperature: options.temperature,
+          });
+          
+          return {
+            id: 'router-' + Date.now(),
+            choices: [
+              {
+                message: {
+                  content: result.content,
+                  role: 'assistant',
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
+        },
       },
     },
-  },
-};
+  };
+}
 
 // Function to get the appropriate AI client based on router configuration
 function getAIClient(userId: string) {
   if (routerConfig.enabled) {
-    return routerEnabledOpenai;
+    return createRouterModel;
   }
   return customOpenai;
 }
