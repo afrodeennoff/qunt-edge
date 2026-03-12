@@ -1,0 +1,1 @@
+['\\n\n---\n\nPlan complete and saved to `docs/superpowers/plans/2026-03-12-ai-provider-routing.md`. Ready to execute?']
