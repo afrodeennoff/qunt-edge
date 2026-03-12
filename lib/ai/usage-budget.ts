@@ -13,7 +13,55 @@ function getUtcMonthWindow(now = new Date()): { start: Date; end: Date } {
 
 export async function getMonthlyAiUsage(userId: string): Promise<number> {
   const { start, end } = getUtcMonthWindow()
-  const aggregate = await prisma.aiRequestLog.aggregate({
+
+  const [ledgerAggregate, firstLedgerEntry] = await prisma.$transaction([
+    prisma.aiUsageLedger.aggregate({
+      _sum: {
+        totalTokens: true,
+      },
+      where: {
+        userId,
+        createdAt: {
+          gte: start,
+          lt: end,
+        },
+      },
+    }),
+    prisma.aiUsageLedger.findFirst({
+      where: {
+        userId,
+        createdAt: {
+          gte: start,
+          lt: end,
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      select: {
+        createdAt: true,
+      },
+    }),
+  ])
+
+  if (!firstLedgerEntry) {
+    const legacyAggregate = await prisma.aiRequestLog.aggregate({
+      _sum: {
+        totalTokens: true,
+      },
+      where: {
+        userId,
+        createdAt: {
+          gte: start,
+          lt: end,
+        },
+      },
+    })
+
+    return legacyAggregate._sum.totalTokens ?? 0
+  }
+
+  const legacyAggregate = await prisma.aiRequestLog.aggregate({
     _sum: {
       totalTokens: true,
     },
@@ -21,12 +69,12 @@ export async function getMonthlyAiUsage(userId: string): Promise<number> {
       userId,
       createdAt: {
         gte: start,
-        lt: end,
+        lt: firstLedgerEntry.createdAt,
       },
     },
   })
 
-  return aggregate._sum.totalTokens ?? 0
+  return (ledgerAggregate._sum.totalTokens ?? 0) + (legacyAggregate._sum.totalTokens ?? 0)
 }
 
 export async function assertWithinAiBudget(

@@ -6,12 +6,19 @@ const {
   canAccessAiFeatureMock,
   assertWithinAiBudgetMock,
   limiterMock,
+  prismaMock,
 } = vi.hoisted(() => ({
   createRouteClientMock: vi.fn(),
   getUserMock: vi.fn(),
   canAccessAiFeatureMock: vi.fn(),
   assertWithinAiBudgetMock: vi.fn(),
   limiterMock: vi.fn(),
+  prismaMock: {
+    aiUsageLedger: {
+      create: vi.fn(),
+    },
+    $executeRaw: vi.fn(),
+  },
 }))
 
 vi.mock("@/lib/supabase/route-client", () => ({
@@ -26,14 +33,13 @@ vi.mock("@/lib/ai/usage-budget", () => ({
   assertWithinAiBudget: assertWithinAiBudgetMock,
 }))
 
-vi.mock("@/lib/ai/telemetry", () => ({
-  logAiRequest: vi.fn().mockResolvedValue(undefined),
-  categorizeAiError: vi.fn().mockReturnValue("budget_exceeded"),
-  extractUsage: vi.fn().mockReturnValue({}),
+vi.mock("@/lib/prisma", () => ({
+  prisma: prismaMock,
 }))
 
 import { guardAiRequest } from "@/lib/ai/route-guard"
 import { aiError, aiBudgetError } from "@/lib/ai/errors"
+import { logAiRequest } from "@/lib/ai/telemetry"
 
 interface ErrorBody {
   error: {
@@ -86,6 +92,9 @@ describe("ai-budget-enforcement", () => {
       remaining: 29,
       resetTime: Date.now() + 60_000,
     })
+
+    prismaMock.aiUsageLedger.create.mockResolvedValue(undefined)
+    prismaMock.$executeRaw.mockResolvedValue(1)
   })
 
   describe("aiError helper", () => {
@@ -270,6 +279,33 @@ describe("ai-budget-enforcement", () => {
         const body = await parseResponseBody(result.response)
         expect(body.error.code).toBe("RATE_LIMITED")
       }
+    })
+  })
+
+  describe("deterministic budget accounting", () => {
+    it("records token usage even when success telemetry is sampled out", async () => {
+      await logAiRequest({
+        userId: "user-1",
+        route: "/api/ai/chat",
+        feature: "chat",
+        model: "glm-4.7-flash",
+        provider: "openai-compatible",
+        usage: { totalTokens: 321 },
+        latencyMs: 42,
+        success: true,
+        sampleRate: 0,
+      })
+
+      expect(prismaMock.aiUsageLedger.create).toHaveBeenCalledWith({
+        data: {
+          userId: "user-1",
+          route: "/api/ai/chat",
+          feature: "chat",
+          totalTokens: 321,
+        },
+      })
+
+      expect(prismaMock.$executeRaw).not.toHaveBeenCalled()
     })
   })
 })

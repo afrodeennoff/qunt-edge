@@ -97,7 +97,36 @@ function shouldLogSuccess(sampleRate: number): boolean {
   return Math.random() < sampleRate;
 }
 
+function normalizeTokenCount(totalTokens: number | undefined): number | null {
+  if (typeof totalTokens !== "number" || !Number.isFinite(totalTokens)) return null;
+  const normalized = Math.round(totalTokens);
+  if (normalized <= 0) return null;
+  return normalized;
+}
+
+async function recordDeterministicBudgetUsage(input: AiRequestLogInput): Promise<void> {
+  const totalTokens = normalizeTokenCount(input.usage?.totalTokens);
+  if (!input.userId || totalTokens === null) {
+    return;
+  }
+
+  try {
+    await prisma.aiUsageLedger.create({
+      data: {
+        userId: input.userId,
+        route: input.route,
+        feature: input.feature,
+        totalTokens,
+      },
+    });
+  } catch (error) {
+    console.error("[AI Telemetry] Failed to persist deterministic AI usage", error);
+  }
+}
+
 export async function logAiRequest(input: AiRequestLogInput): Promise<void> {
+  await recordDeterministicBudgetUsage(input);
+
   const sampleRate = input.sampleRate ?? 1;
   if (input.success && !shouldLogSuccess(sampleRate)) {
     return;

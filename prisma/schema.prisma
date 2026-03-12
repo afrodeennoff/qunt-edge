@@ -57,6 +57,7 @@ model User {
   paymentMethods        PaymentMethod[]        @relation("UserPaymentMethods")
   usageMetrics          UsageMetric[]          @relation("UserUsageMetrics")
   aiRequestLogs         AiRequestLog[]         @relation("UserAiRequestLogs")
+  aiUsageLedgerEntries  AiUsageLedger[]
   authAttempts          AuthAttempt[]          @relation("UserAuthAttempts")
   oauthStates           OAuthState[]           @relation("UserOAuthStates")
   recoveryCodes         RecoveryCode[]         @relation("UserRecoveryCodes")
@@ -1226,6 +1227,24 @@ model AiRequestLog {
   @@index([feature, createdAt])
   @@index([userId, createdAt])
   @@index([success])
+  @@schema("public")
+}
+
+model AiUsageLedger {
+  id     String @id @default(uuid())
+  userId String
+
+  route      String
+  feature    String
+  totalTokens Int
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([feature, createdAt])
+  @@index([userId, createdAt])
   @@schema("public")
 }
 
