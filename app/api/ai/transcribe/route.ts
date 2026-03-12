@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
-import { createRouteClient } from '@/lib/supabase/route-client'
+import { rateLimit } from '@/lib/rate-limit'
+import { guardAiRequest } from '@/lib/ai/route-guard'
 
 const transcribeRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: 'ai-transcribe' })
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024
@@ -19,27 +19,17 @@ const ALLOWED_AUDIO_TYPES = new Set([
 ])
 
 export async function POST(request: NextRequest) {
+  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  const guard = await guardAiRequest(request, 'transcribe', transcribeRateLimit)
+  if (!guard.ok) return guard.response
+  const { userId } = guard
+
   try {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: 'Service unavailable', message: 'Transcription service is not configured' },
         { status: 503 }
       )
-    }
-
-    const supabase = createRouteClient(request)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const limit = await transcribeRateLimit(request)
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      })
     }
 
     const lengthHeader = request.headers.get('content-length')

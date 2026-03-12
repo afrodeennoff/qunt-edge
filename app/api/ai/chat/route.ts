@@ -18,8 +18,8 @@ import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { apiError } from "@/lib/api-response";
-import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
-import { createRouteClient } from "@/lib/supabase/route-client";
+import { rateLimit } from "@/lib/rate-limit";
+import { guardAiRequest } from "@/lib/ai/route-guard";
 
 export const maxDuration = 60;
 const MAX_CHAT_BODY_BYTES = 1024 * 1024;
@@ -170,13 +170,12 @@ export async function POST(req: NextRequest) {
   const policy = getAiPolicy("chat");
   const startedAt = Date.now();
 
-  try {
-    const supabase = createRouteClient(req)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user?.id) {
-      return apiError("UNAUTHORIZED", "Authentication required", 401)
-    }
+  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  const guard = await guardAiRequest(req, 'chat', chatRateLimit)
+  if (!guard.ok) return guard.response
+  const { userId } = guard
 
+  try {
     const lengthHeader = req.headers.get("content-length");
     const contentLength = lengthHeader ? Number(lengthHeader) : 0;
 
@@ -186,15 +185,6 @@ export async function POST(req: NextRequest) {
         `Request body exceeds ${Math.round(MAX_CHAT_BODY_BYTES / 1024)}KB.`,
         413,
       );
-    }
-
-    const limit = await chatRateLimit(req);
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      });
     }
 
     const body = await req.json();
