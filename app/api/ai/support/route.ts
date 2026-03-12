@@ -7,11 +7,52 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { apiError } from "@/lib/api-response";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { aiRouter } from "@/lib/ai/router";
+import { getRouterConfig } from "@/lib/ai/router/config";
+
+const routerConfig = getRouterConfig();
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Router-enabled AI client
+const routerEnabledOpenai = {
+  chat: {
+    completions: {
+      create: async (options: any) => {
+        const result = await aiRouter.createCompletion({
+          userId: options.userId || 'anonymous',
+          feature: 'support',
+          budgetLimit: 1.0, // Default budget limit
+          messages: options.messages,
+          temperature: options.temperature,
+        });
+        
+        return {
+          id: 'router-' + Date.now(),
+          choices: [
+            {
+              message: {
+                content: result.content,
+                role: 'assistant',
+              },
+            },
+          ],
+        };
+      },
+    },
+  },
+};
+
+// Function to get the appropriate AI client based on router configuration
+function getAIClient(userId: string) {
+  if (routerConfig.enabled) {
+    return routerEnabledOpenai;
+  }
+  return customOpenai;
+}
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -52,8 +93,9 @@ export async function POST(req: NextRequest) {
     }
 
     const modelMessages = await convertToModelMessages(messages);
+    const aiClient = getAIClient(userId);
     const result = streamText({
-      model: webSearch && webSearchModel ? customOpenai(webSearchModel) : customOpenai(selectedModel),
+      model: webSearch && webSearchModel ? customOpenai(webSearchModel) : aiClient(selectedModel),
       system: `${webSearchFallback ? "[WEB_SEARCH_FALLBACK_ACTIVE] Web search is unavailable for this environment; answer without external browsing.\n\n" : ""}You are an AI chatbot support assistant for Qunt Edge, a trading journaling platform. Your role is to gather information and direct users to the appropriate support channels.
 
 ## CRITICAL LIMITATIONS
