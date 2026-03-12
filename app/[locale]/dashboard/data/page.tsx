@@ -18,7 +18,7 @@ export default function DashboardPage() {
               <DataManagementCard />
             </UnifiedSurface>
           </TabsContent>
-          <TabsContent value="trades" className="mt-0 h-[calc(100vh-var(--navbar-height)-var(--tabs-height)-16px)]">
+          <TabsContent value="trades" className="mt-0 h-[calc(100dvh-var(--navbar-height)-var(--tabs-height)-16px)] pb-[max(env(safe-area-inset-bottom),0.5rem)]">
             <UnifiedSurface className="h-full">
               <TradeTableReview />
             </UnifiedSurface>

@@ -313,6 +313,7 @@ export const DataProvider: React.FC<{
   const [isRevalidating, setIsRevalidating] = useState(false);
   const bootstrappedSharedSlugRef = useRef<string | null>(null);
   const dashboardLayoutRef = useRef(dashboardLayout);
+  const activeUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     dashboardLayoutRef.current = dashboardLayout;
@@ -562,6 +563,14 @@ export const DataProvider: React.FC<{
       } = await withTimeout(supabase.auth.getUser(), 15000, "supabase.auth.getUser");
 
       if (!user?.id) {
+        activeUserIdRef.current = null;
+        setTrades([]);
+        setAccounts([]);
+        setGroups([]);
+        setTags([]);
+        setMoods([]);
+        setEvents([]);
+        setTickDetails([]);
         await signOut();
         setIsLoading(false);
         return;
@@ -569,6 +578,17 @@ export const DataProvider: React.FC<{
 
       setSupabaseUser(user);
       const userId = await withTimeout(getUserId(), 15000, "getUserId");
+      if (activeUserIdRef.current && activeUserIdRef.current !== userId) {
+        // Prevent transient cross-user UI bleed before the next user's snapshot loads.
+        setTrades([]);
+        setAccounts([]);
+        setGroups([]);
+        setTags([]);
+        setMoods([]);
+        setEvents([]);
+        setTickDetails([]);
+      }
+      activeUserIdRef.current = userId;
 
       // Parallel: layout fetch + cache reads
       let hasLocalSnapshot = false;

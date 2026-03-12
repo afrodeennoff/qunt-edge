@@ -61,6 +61,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
+    },
+    {
+      url: 'https://qunt-edge.vercel.app/propfirmperk/compare',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: 'https://qunt-edge.vercel.app/propfirmperk/guides',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: 'https://qunt-edge.vercel.app/propfirmperk/calculator',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: 'https://qunt-edge.vercel.app/propfirmperk/faq',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
     }
   ]
 }

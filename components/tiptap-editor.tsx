@@ -204,8 +204,18 @@ export function TiptapEditor({
           : "";
         const ext = (mimeExt || nameExt || "bin").toLowerCase();
 
-        // Store by stable hash-based path so duplicates across sessions reuse the same object
-        const filePath = `${user?.id}/journal/${hashHex}.${ext}`;
+        const {
+          data: { user: storageUser },
+          error: storageUserError,
+        } = await supabase.auth.getUser();
+        const storageUserId =
+          storageUser?.id || user?.auth_user_id || user?.id || null;
+        if (storageUserError || !storageUserId) {
+          throw new Error("Authentication required for image upload");
+        }
+
+        // Store by user-scoped hash path so identical files from different users never conflict.
+        const filePath = `${storageUserId}/journal/${hashHex}.${ext}`;
 
         const { error } = await supabase.storage
           .from("trade-images")
@@ -242,7 +252,7 @@ export function TiptapEditor({
         throw error;
       }
     },
-    [user?.id, t],
+    [user?.auth_user_id, user?.id, t],
   );
 
   // Handle AI dropdown actions

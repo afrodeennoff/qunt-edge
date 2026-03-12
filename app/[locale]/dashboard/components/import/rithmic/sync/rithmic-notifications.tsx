@@ -228,7 +228,7 @@ export function RithmicSyncNotifications() {
     : 0
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-md w-full">
+    <div className="fixed inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50 flex flex-col gap-2 sm:inset-x-auto sm:bottom-[calc(env(safe-area-inset-bottom)+1rem)] sm:right-4 sm:w-full sm:max-w-md">
       <Alert
         key={notifications.progress.id}
         className={cn(

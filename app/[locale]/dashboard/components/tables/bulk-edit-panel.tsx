@@ -123,7 +123,8 @@ export function BulkEditPanel({
 
   return (
     <Card className={cn(
-      "fixed bottom-4 right-4 w-96 z-50 shadow-2xl border-2 transition-all duration-150 ease-out",
+      "fixed left-2 right-2 z-50 max-h-[calc(100dvh-env(safe-area-inset-bottom)-0.5rem)] overflow-y-auto border-2 shadow-2xl transition-all duration-150 ease-out sm:bottom-[calc(env(safe-area-inset-bottom)+1rem)] sm:left-auto sm:right-4 sm:w-96",
+      "bottom-[calc(env(safe-area-inset-bottom)+0.5rem)]",
       isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
       className
     )}>

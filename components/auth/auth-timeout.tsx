@@ -42,20 +42,26 @@ export function AuthTimeout() {
         resetTimer()
 
         // Events that reset the inactivity timer
-        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']
+        const events: Array<{ name: keyof DocumentEventMap; options?: AddEventListenerOptions }> = [
+            { name: 'mousedown' },
+            { name: 'mousemove' },
+            { name: 'keypress' },
+            { name: 'scroll', options: { passive: true } },
+            { name: 'touchstart', options: { passive: true } },
+        ]
 
         const activityHandler = () => resetTimer()
 
-        events.forEach(event => {
-            document.addEventListener(event, activityHandler)
+        events.forEach(({ name, options }) => {
+            document.addEventListener(name, activityHandler, options)
         })
 
         return () => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
             }
-            events.forEach(event => {
-                document.removeEventListener(event, activityHandler)
+            events.forEach(({ name, options }) => {
+                document.removeEventListener(name, activityHandler, options)
             })
         }
     }, [user, resetTimer])

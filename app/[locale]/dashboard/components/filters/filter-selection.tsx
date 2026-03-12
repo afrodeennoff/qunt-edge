@@ -29,15 +29,6 @@ export function FilterSection({ type, items, searchTerm, handleSelect, isItemDis
     ? items.filter(item => item.value.toLowerCase().includes(searchTerm.toLowerCase()))
     : items
 
-  function handleScroll(e: React.WheelEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const scrollArea = e.currentTarget
-    const delta = e.deltaY
-    scrollArea.scrollTop += delta
-  }
-
   return (
     <div className="flex flex-col h-full">
       <CommandItem
@@ -50,15 +41,11 @@ export function FilterSection({ type, items, searchTerm, handleSelect, isItemDis
         />
         <span className="text-sm font-medium">{selectAllText[type]}</span>
       </CommandItem>
-      <ScrollArea 
+      <ScrollArea
         className="flex-1"
-        onWheel={handleScroll}
         style={{ overscrollBehavior: 'contain' }}
       >
-        <div 
-          className="p-2"
-          onTouchMove={e => e.stopPropagation()}
-        >
+        <div className="p-2">
           {filteredSectionItems.map(item => (
             <CommandItem 
               key={item.value} 

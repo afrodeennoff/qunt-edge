@@ -126,4 +126,33 @@ describe('saveTradesAction', () => {
     expect(result.error).toBe('DUPLICATE_TRADES')
     expect(result.numberOfTradesAdded).toBe(0)
   })
+
+  it('allows same trade payload for different users by generating user-scoped IDs', async () => {
+    getUserIdMock.mockResolvedValue('auth-user-a')
+    prismaMock.user.findUnique.mockImplementation(async ({ where }: { where: Record<string, string> }) => {
+      if (where.id === 'auth-user-a') return null
+      if (where.id === 'auth-user-b') return null
+      if (where.auth_user_id === 'auth-user-a') return { id: 'db-user-a' }
+      if (where.auth_user_id === 'auth-user-b') return { id: 'db-user-b' }
+      return null
+    })
+
+    const createManyTrades = vi.fn().mockResolvedValue({ count: 1 })
+    prismaMock.$transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) =>
+      cb({
+        account: { findMany: vi.fn().mockResolvedValue([]), createMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        trade: { createMany: createManyTrades },
+      }),
+    )
+
+    await saveTradesAction([baseTrade], { userId: 'auth-user-a' })
+    await saveTradesAction([baseTrade], { userId: 'auth-user-b' })
+
+    const firstPayload = createManyTrades.mock.calls[0]?.[0]?.data?.[0]
+    const secondPayload = createManyTrades.mock.calls[1]?.[0]?.data?.[0]
+
+    expect(firstPayload.userId).toBe('db-user-a')
+    expect(secondPayload.userId).toBe('db-user-b')
+    expect(firstPayload.id).not.toBe(secondPayload.id)
+  })
 })

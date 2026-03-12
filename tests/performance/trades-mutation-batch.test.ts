@@ -89,4 +89,14 @@ describe("updateTradesAction batching", () => {
     expect(transaction.mock.calls[1]?.[0]).toHaveLength(100)
     expect(transaction.mock.calls[2]?.[0]).toHaveLength(50)
   })
+
+  it("rejects updates when any trade id is not owned by the authenticated user", async () => {
+    findManyTrades.mockResolvedValue([{ id: "trade-1" }])
+
+    await expect(
+      updateTradesAction(["trade-1", "trade-2"], { pnl: 42 }),
+    ).rejects.toThrow("Forbidden")
+
+    expect(updateManyTrades).not.toHaveBeenCalled()
+  })
 })

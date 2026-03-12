@@ -443,7 +443,7 @@ export default function DashboardBehaviorPage() {
               <Bot className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">AI Trading Coach</h2>
             </div>
-            <div className="h-[620px] min-h-[500px]">
+            <div className="h-[min(620px,68dvh)] min-h-[420px] sm:min-h-[500px]">
               <ChatWidget size="large" />
             </div>
           </section>
@@ -453,7 +453,7 @@ export default function DashboardBehaviorPage() {
               <MessageSquareText className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">Mindset & Journal</h2>
             </div>
-            <div className="h-[calc(100vh-240px)] min-h-[640px]">
+            <div className="h-[min(780px,calc(100dvh-220px))] min-h-[420px] sm:min-h-[640px]">
               <MindsetWidget size="large" />
             </div>
           </section>

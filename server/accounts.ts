@@ -86,9 +86,11 @@ export async function removeAccountFromTradesAction(accountNumber: string): Prom
   invalidateAllUserCaches(userId)
 }
 
-export async function deleteInstrumentGroupAction(accountNumber: string, instrumentGroup: string, userId: string): Promise<void> {
-  const currentUserId = await getDatabaseUserId()
-  const effectiveUserId = currentUserId ?? userId
+export async function deleteInstrumentGroupAction(accountNumber: string, instrumentGroup: string): Promise<void> {
+  const effectiveUserId = await getDatabaseUserId()
+  if (!effectiveUserId) {
+    throw new Error('Unauthorized')
+  }
   await prisma.trade.deleteMany({
     where: {
       accountNumber: accountNumber,
@@ -106,6 +108,9 @@ export async function deleteInstrumentGroupAction(accountNumber: string, instrum
 
 export async function updateCommissionForGroupAction(accountNumber: string, instrumentGroup: string, newCommission: number): Promise<void> {
   const userId = await getDatabaseUserId()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
   // We have to update the commission for all trades in the group and compute based on the quantity
   const trades = await prisma.trade.findMany({
     where: {
@@ -117,9 +122,10 @@ export async function updateCommissionForGroupAction(accountNumber: string, inst
   // For each trade, update the commission
   for (const trade of trades) {
     const updatedCommission = new Prisma.Decimal(newCommission).times(new Prisma.Decimal(trade.quantity))
-    await prisma.trade.update({
+    await prisma.trade.updateMany({
       where: {
-        id: trade.id
+        id: trade.id,
+        userId
       },
       data: {
         commission: updatedCommission
@@ -208,12 +214,18 @@ export async function renameAccountAction(oldAccountNumber: string, newAccountNu
 
 export async function deleteTradesByIdsAction(tradeIds: string[]): Promise<void> {
   const userId = await getDatabaseUserId()
-  await prisma.trade.deleteMany({
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+  const deleted = await prisma.trade.deleteMany({
     where: {
       id: { in: tradeIds },
       userId
     }
   })
+  if (deleted.count !== tradeIds.length) {
+    throw new Error('Forbidden')
+  }
   updateTag(`trades-${userId}`)
   updateTag(`user-data-${userId}`)
   updateTag(`dashboard-${userId}`)
@@ -483,6 +495,9 @@ export async function savePayoutAction(payout: Payout) {
 export async function deletePayoutAction(payoutId: string) {
   try {
     const userId = await getDatabaseUserId()
+    if (!userId) {
+      throw new Error('Unauthorized')
+    }
     const payout = await prisma.payout.findFirst({
       where: { id: payoutId, account: { userId: userId } },
       include: {
@@ -495,9 +510,17 @@ export async function deletePayoutAction(payoutId: string) {
     }
 
     // Delete the payout
-    await prisma.payout.delete({
-      where: { id: payoutId }
+    const deleted = await prisma.payout.deleteMany({
+      where: {
+        id: payoutId,
+        account: {
+          userId
+        }
+      }
     });
+    if (deleted.count !== 1) {
+      throw new Error('Payout not found');
+    }
 
     // Decrement the payoutCount on the account
     await prisma.account.update({

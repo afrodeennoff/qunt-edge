@@ -607,7 +607,7 @@ export function AccountGroupBoard() {
         <Separator />
 
         <Command shouldFilter={false} className="w-full">
-          <CommandList className="max-h-[640px] overflow-y-auto px-2 pb-3 pt-1">
+          <CommandList className="max-h-[min(640px,65dvh)] overflow-y-auto px-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-1">
             <CommandEmpty>{t("filters.noResults")}</CommandEmpty>
 
             {groupsForBoard.map(group => {

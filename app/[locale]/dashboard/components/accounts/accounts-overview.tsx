@@ -391,7 +391,7 @@ function PayoutDialog({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[400px] sm:w-[540px] flex flex-col h-full max-h-screen">
+      <SheetContent className="flex h-[100dvh] w-full max-h-[100dvh] max-w-full flex-col pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:w-[540px] sm:max-w-[540px]">
         <SheetHeader className="shrink-0">
           <SheetTitle>{existingPayout ? t('propFirm.payout.edit') : t('propFirm.payout.add')}</SheetTitle>
           <SheetDescription>
@@ -1529,7 +1529,7 @@ function AccountsOverviewComponent({
           open={!!selectedAccountForTable}
           onOpenChange={(open) => !open && setSelectedAccountForTable(null)}
         >
-          <DialogContent className="max-w-7xl h-[80vh] flex flex-col overflow-y-auto">
+          <DialogContent className="flex max-h-[calc(100dvh-1rem)] h-[min(80dvh,56rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col overflow-y-auto pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:w-full sm:max-w-7xl">
             <DialogHeader className="pb-4 border-b">
               <div className="flex items-center justify-between">
                 <div>

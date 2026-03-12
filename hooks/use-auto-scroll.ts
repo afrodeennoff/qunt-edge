@@ -146,7 +146,6 @@ export function useAutoScroll(isEnabled: boolean) {
           -webkit-user-select: none !important;
           -moz-user-select: none !important;
           -ms-user-select: none !important;
-          touch-action: none !important;
           -webkit-touch-callout: none !important;
         }
         body.dragging * {
@@ -162,7 +161,7 @@ export function useAutoScroll(isEnabled: boolean) {
     }
 
     document.addEventListener('touchstart', handleTouchStart, { passive: true })
-    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchmove', handleTouchMove, { passive: true })
     document.addEventListener('touchend', handleTouchEnd, { passive: true })
     document.addEventListener('touchcancel', handleTouchEnd, { passive: true })
 

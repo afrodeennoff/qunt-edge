@@ -544,6 +544,14 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
   if (!userId) return 0
 
   try {
+    const ownedTrades = await prisma.trade.findMany({
+      where: { id: { in: tradesIds }, userId },
+      select: { id: true }
+    })
+    if (ownedTrades.length !== tradesIds.length) {
+      throw new Error('Forbidden')
+    }
+
     if (update.entryDateOffset || update.closeDateOffset || update.instrumentTrim || update.instrumentPrefix || update.instrumentSuffix) {
       const trades = await prisma.trade.findMany({
         where: { id: { in: tradesIds }, userId },
@@ -599,14 +607,17 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
       if (standardUpdates.quantity !== undefined) data.quantity = new Prisma.Decimal(standardUpdates.quantity)
       if (standardUpdates.timeInPosition !== undefined) data.timeInPosition = standardUpdates.timeInPosition !== null ? new Prisma.Decimal(standardUpdates.timeInPosition) : null
 
-      await prisma.trade.updateMany({
+      const updated = await prisma.trade.updateMany({
         where: { id: { in: tradesIds }, userId },
         data,
       })
+      if (updated.count !== tradesIds.length) {
+        throw new Error('Forbidden')
+      }
     }
 
     await invalidateTradeRelatedCaches(userId)
-    return tradesIds.length
+    return ownedTrades.length
   } catch (error) {
     logger.error('[updateTrades] Error', { error })
     throw error
@@ -651,6 +662,9 @@ export async function updateTradeVideoUrlAction(tradeId: string, videoUrl: strin
 
 export async function addTagToTrade(tradeId: string, tag: string) {
   const userId = await getDatabaseUserId()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
   try {
     const trade = await prisma.trade.findFirst({
       where: { id: tradeId, userId },
@@ -661,13 +675,19 @@ export async function addTagToTrade(tradeId: string, tag: string) {
       throw new Error('Trade not found')
     }
 
-    const updatedTrade = await prisma.trade.update({
-      where: { id: tradeId },
+    const updated = await prisma.trade.updateMany({
+      where: { id: tradeId, userId },
       data: {
         tags: {
           push: tag.trim()
         }
       }
+    })
+    if (updated.count !== 1) {
+      throw new Error('Trade not found')
+    }
+    const updatedTrade = await prisma.trade.findFirst({
+      where: { id: tradeId, userId }
     })
 
     await invalidateTradeRelatedCaches(userId)
@@ -680,6 +700,9 @@ export async function addTagToTrade(tradeId: string, tag: string) {
 
 export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
   const userId = await getDatabaseUserId()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
   try {
     const trade = await prisma.trade.findFirst({
       where: { id: tradeId, userId },
@@ -690,13 +713,19 @@ export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
       throw new Error('Trade not found')
     }
 
-    const updatedTrade = await prisma.trade.update({
-      where: { id: tradeId },
+    const updated = await prisma.trade.updateMany({
+      where: { id: tradeId, userId },
       data: {
         tags: {
           set: trade.tags.filter(tag => tag !== tagToRemove)
         }
       }
+    })
+    if (updated.count !== 1) {
+      throw new Error('Trade not found')
+    }
+    const updatedTrade = await prisma.trade.findFirst({
+      where: { id: tradeId, userId }
     })
 
     await invalidateTradeRelatedCaches(userId)
@@ -709,6 +738,9 @@ export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
 
 export async function deleteTagFromAllTrades(tag: string) {
   const userId = await getDatabaseUserId()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
   try {
     const trades = await prisma.trade.findMany({
       where: {
@@ -721,8 +753,8 @@ export async function deleteTagFromAllTrades(tag: string) {
 
     await Promise.all(
       trades.map(trade =>
-        prisma.trade.update({
-          where: { id: trade.id },
+        prisma.trade.updateMany({
+          where: { id: trade.id, userId },
           data: {
             tags: {
               set: trade.tags.filter(t => t !== tag)
@@ -747,6 +779,9 @@ export async function updateTradeImage(
   field: 'imageBase64' | 'imageBase64Second' = 'imageBase64'
 ) {
   const userId = await getDatabaseUserId()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
   try {
     const trades = await prisma.trade.findMany({
       where: { id: { in: tradeIds }, userId }
@@ -773,6 +808,9 @@ export async function updateTradeImage(
 
 export async function addTagsToTradesForDay(date: string, tags: string[]) {
   const userId = await getDatabaseUserId()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
   try {
     const targetDate = new Date(date + 'T00:00:00Z')
     const nextDay = new Date(targetDate)
@@ -801,8 +839,8 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
 
     await Promise.all(
       trades.map(trade =>
-        prisma.trade.update({
-          where: { id: trade.id },
+        prisma.trade.updateMany({
+          where: { id: trade.id, userId },
           data: {
             tags: {
               set: Array.from(new Set([...trade.tags, ...tags]))

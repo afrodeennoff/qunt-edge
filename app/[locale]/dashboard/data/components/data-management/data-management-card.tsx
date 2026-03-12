@@ -114,7 +114,7 @@ export function DataManagementCard() {
 
   const handleDeleteInstrument = useCallback(async (accountNumber: string, instrumentGroup: string) => {
     try {
-      await deleteInstrumentGroupAction(accountNumber, instrumentGroup, user!.id)
+      await deleteInstrumentGroupAction(accountNumber, instrumentGroup)
       // Optimistically drop matching trades locally
       setTradesStore(
         trades.filter(
@@ -134,7 +134,7 @@ export function DataManagementCard() {
         description: t('dataManagement.toast.deleteErrorDesc'),
       })
     }
-  }, [user, trades, refreshTradesOnly, setTradesStore, t])
+  }, [trades, refreshTradesOnly, setTradesStore, t])
 
   const [commissionLoading, setCommissionLoading] = useState<Record<string, boolean>>({})
   const [pendingCommissionUpdates, setPendingCommissionUpdates] = useState<Record<string, { accountNumber: string; instrumentGroup: string; newCommission: number }>>({})
