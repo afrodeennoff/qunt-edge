@@ -449,6 +449,26 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm test` -> passes (`41` passed files, `1` skipped; `163` passed tests, `46` skipped).
   - `npx eslint <touched files>` -> warnings-only baseline (`0` errors).
 
+### 2026-03-12: Performance Follow-Up (Batched Trade Mutations + Visibility-Aware Sync)
+- **What changed:** Completed the remaining performance remediation work by batching transformed trade writes server-side and reducing background sync churn with visibility-aware scheduling.
+- **What I want:** Avoid mutation-time DB pressure spikes on large transformed trade payloads and reduce unnecessary sync interval work while tabs are hidden.
+- **What I don't want:** Unbounded parallel update bursts (`Promise.all` over large lists), frequent one-minute sync loops in hidden tabs, or regressions without targeted coverage.
+- **How we fixed that:**
+  - `server/trades.ts`:
+    - replaced unbounded transformed-update `Promise.all(...)` writes with bounded `$transaction` batching (`TRADE_UPDATE_BATCH_SIZE = 100`).
+  - `context/rithmic-sync-context.tsx`:
+    - slowed auto-sync interval from 1 minute to 5 minutes.
+    - added `visibilitychange` handling to trigger refresh when tab becomes visible.
+  - `context/tradovate-sync-context.tsx`:
+    - slowed auto-sync interval from 1 minute to 5 minutes.
+    - added matching `visibilitychange` refresh behavior.
+  - Added regression coverage:
+    - `tests/performance/trades-mutation-batch.test.ts` verifies transformed trade updates execute in bounded transaction batches.
+- **Key Files:** `server/trades.ts`, `context/rithmic-sync-context.tsx`, `context/tradovate-sync-context.tsx`, `tests/performance/trades-mutation-batch.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx vitest run tests/performance/trades-mutation-batch.test.ts` -> passes.
+  - `npm run -s typecheck` -> passes.
+
 ### 2026-03-11: Review Follow-Up (Cache Snapshot Guard + Rithmic Route Teardown + Layout Ownership Check)
 - **What changed:** Applied another review-driven hardening pass for cache snapshot consistency, route-exit socket teardown, and dashboard-layout ownership checks in bootstrap flow.
 - **What I want:** Users should not see stale trades from prior sessions when user-data cache exists without trade cache, Rithmic websocket connections should close when leaving import routes, and cached layouts should be validated against the current user before skipping fetch.

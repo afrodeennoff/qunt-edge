@@ -529,6 +529,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
   instrumentPrefix?: string
   instrumentSuffix?: string
 }): Promise<number> {
+  const TRADE_UPDATE_BATCH_SIZE = 100
   const userId = await resolveWritableUserId(await getUserId())
   if (!userId) return 0
 
@@ -539,7 +540,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
         select: { id: true, entryDate: true, closeDate: true, instrument: true }
       })
 
-      await Promise.all(trades.map(async (trade) => {
+      const updateOps = trades.map((trade) => {
         const data: any = {}
 
         if (update.entryDateOffset) {
@@ -563,9 +564,15 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
         if (newInst !== trade.instrument) data.instrument = newInst
 
         if (Object.keys(data).length > 0) {
-          await prisma.trade.update({ where: { id: trade.id }, data })
+          return prisma.trade.update({ where: { id: trade.id }, data })
         }
-      }))
+        return null
+      }).filter((op): op is ReturnType<typeof prisma.trade.update> => op !== null)
+
+      for (let index = 0; index < updateOps.length; index += TRADE_UPDATE_BATCH_SIZE) {
+        const batch = updateOps.slice(index, index + TRADE_UPDATE_BATCH_SIZE)
+        await prisma.$transaction(batch)
+      }
     }
 
     const {

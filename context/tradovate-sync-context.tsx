@@ -268,16 +268,29 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
     if (!isSyncRouteActive) return
     if (!enableAutoSync) return
 
-    const intervalMs = 1 * 60 * 1000  // 1 minute
+    const intervalMs = 5 * 60 * 1000  // 5 minutes
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        void checkAndPerformSyncs()
+      }
+    }
 
     const intervalId = setInterval(() => {
       if (typeof document !== 'undefined' && document.hidden) return
       checkAndPerformSyncs()
     }, intervalMs)
 
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+    }
+
     // Cleanup on unmount
     return () => {
       clearInterval(intervalId)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+      }
     }
   }, [isSyncRouteActive, enableAutoSync, checkAndPerformSyncs])
 
