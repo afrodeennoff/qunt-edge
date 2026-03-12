@@ -22,37 +22,34 @@ end
 `;
 
 export class BudgetReservation {
-  private static memoryStore = new Map<string, number>();
-  
+  // HIGH #4: Remove in-memory fallback - fail closed if Redis is unavailable
+
   static async reserve(userId: string, amount: number, limit: number): Promise<boolean> {
     const budgetKey = `router:budget_usd:${userId}`;
-    
-    if (isRedisConfigured()) {
-      // Use Redis for atomic operations in production
-      const result = await runRedisCommand(['INCRBYFLOAT', budgetKey, amount.toString()]);
-      const newBalance = Number(result);
-      
-      if (newBalance > limit) {
-        // Rollback the increment
-        await runRedisCommand(['INCRBYFLOAT', budgetKey, (-amount).toString()]);
-        return false;
-      }
-      
+
+    // HIGH #4: Budget service fails closed without Redis
+    if (!isRedisConfigured()) {
+      throw new Error('Budget service unavailable - Redis required');
+    }
+
+    // CRITICAL #2: Use atomic Lua script to prevent race conditions
+    const result = await runRedisCommand([
+      'EVAL',
+      RESERVE_BUDGET_SCRIPT,
+      '1',
+      budgetKey,
+      amount.toString(),
+      limit.toString()
+    ]);
+
+    const success = Number(result) === 1;
+
+    if (success) {
       // Set expiration for the key (1 day)
       await runRedisCommand(['EXPIRE', budgetKey, '86400']);
-      
-      return true;
     }
-    
-    // Fallback to in-memory store
-    const currentBalance = this.memoryStore.get(budgetKey) || 0;
-    
-    if (currentBalance + amount <= limit) {
-      this.memoryStore.set(budgetKey, currentBalance + amount);
-      return true;
-    }
-    
-    return false;
+
+    return success;
   }
   
   static async getBalance(userId: string): Promise<number> {

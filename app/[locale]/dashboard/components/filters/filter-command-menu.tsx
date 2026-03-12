@@ -20,6 +20,14 @@ import { useUserStore } from "@/store/user-store"
 import { useParams } from "next/navigation"
 import { toast } from "sonner"
 import { Kbd, KbdGroup } from "@/components/ui/kbd"
+import { z } from "zod/v3"
+
+// Add schema for date parse validation
+const dateParseSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  weekdays: z.array(z.string()).optional(),
+})
 
 interface FilterCommandMenuProps {
   className?: string
@@ -164,23 +172,27 @@ export function FilterCommandMenu({ className, variant = "navbar" }: FilterComma
       })
 
       if (!response.ok) {
-        throw new Error('Failed to parse date')
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData?.error?.message || 'Failed to parse date'
+        toast.error(errorMessage)
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
-      
+      const validatedData = dateParseSchema.parse(data)
+
       // Handle weekday filter
-      if (data.weekdays && Array.isArray(data.weekdays) && data.weekdays.length > 0) {
-        setWeekdayFilter({ days: data.weekdays })
+      if (validatedData.weekdays && Array.isArray(validatedData.weekdays) && validatedData.weekdays.length > 0) {
+        setWeekdayFilter({ days: validatedData.weekdays.map(Number) })
         // Clear search value after successful parse
         setSearchValue("")
         toast.success(t('filters.commandMenu.weekdayFilterApplied'))
-      } 
+      }
       // Handle date range filter
-      else if (data.from && data.to) {
+      else if (validatedData.from && validatedData.to) {
         setDateRange({
-          from: new Date(data.from),
-          to: new Date(data.to),
+          from: new Date(validatedData.from),
+          to: new Date(validatedData.to),
         })
         // Clear search value after successful parse
         setSearchValue("")

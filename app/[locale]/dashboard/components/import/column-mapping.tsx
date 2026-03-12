@@ -115,7 +115,16 @@ export default function ColumnMapping({ headers, csvData, mappings, setMappings,
       })
 
       if (!response.ok) {
-        throw new Error(`AI mapping request failed (${response.status})`)
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData?.error?.message || `AI mapping request failed (${response.status})`
+        const errorCode = errorData?.error?.code
+
+        if (errorCode === 'RATE_LIMIT_EXCEEDED') {
+          console.error('Rate limit exceeded for AI mapping')
+          return
+        }
+
+        throw new Error(errorMessage)
       }
 
       const payload = await response.json()

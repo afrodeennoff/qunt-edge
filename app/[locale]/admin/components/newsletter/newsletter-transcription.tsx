@@ -8,6 +8,13 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Loader2, Mic, FileText, Download, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
+import { z } from 'zod/v3'
+
+// Add schema for transcription validation
+const transcriptionSchema = z.object({
+  transcription: z.string(),
+  language: z.string().optional(),
+})
 
 interface AudioSegment {
   buffer: ArrayBuffer
@@ -65,17 +72,21 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
           })
 
           if (!response.ok) {
-            throw new Error(`API error: ${response.status}`)
+            const errorData = await response.json().catch(() => ({}))
+            const errorMessage = errorData?.error?.message || `API error: ${response.status}`
+            console.error('Transcription failed:', errorMessage)
+            throw new Error(errorMessage)
           }
 
           const data = await response.json()
-          
+          const validatedData = transcriptionSchema.parse(data)
+
           // Calculate duration (approximate based on buffer size)
           const duration = segment.buffer.byteLength / (16000 * 2) // Assuming 16kHz, 16-bit audio
 
           const result: TranscriptionResult = {
-            text: data.transcription || 'Transcription non disponible',
-            language: 'fr',
+            text: validatedData.transcription || 'Transcription non disponible',
+            language: validatedData.language || 'fr',
             duration,
             segmentIndex: segment.index
           }

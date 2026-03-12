@@ -47,15 +47,21 @@ export function getAiLanguageModel(feature: AiFeature) {
 /**
  * Creates a language model that attempts free tier providers first,
  * then falls back to GLM if all free providers fail.
+ *
+ * Note: This returns the GLM model as a base for AI SDK compatibility.
+ * For actual router behavior with free tier attempts, routes should call
+ * createCompletionWithRouter() explicitly before falling back to this model.
  */
 function createRouterBackedModel(feature: AiFeature, fallbackModel: string) {
+  console.log(`[AI Router] Creating router-backed model for ${feature} - GLM will be used if router fallback occurs`);
+
   const provider = createOpenAI({
     baseURL,
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  // Return the GLM model as base - router attempts happen at completion time
-  // This ensures compatibility with AI SDK while still attempting free tiers
+  // Return the GLM model as base for AI SDK compatibility
+  // Routes should use createCompletionWithRouter() for explicit free tier attempts
   return provider(fallbackModel);
 }
 
