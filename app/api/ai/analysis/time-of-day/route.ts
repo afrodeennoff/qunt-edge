@@ -1,12 +1,11 @@
 import { streamText, stepCountIs } from "ai";
 import { NextRequest } from "next/server";
 import { z } from 'zod/v3';
-import { apiError } from "@/lib/api-response";
-import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
-import { createRouteClient } from "@/lib/supabase/route-client";
+import { rateLimit } from "@/lib/rate-limit";
 import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
+import { guardAiRequest } from "@/lib/ai/route-guard";
 
 // Analysis Tools
 import { generateAnalysisComponent } from "../accounts/generate-analysis-component";
@@ -85,24 +84,12 @@ export async function POST(req: NextRequest) {
   const startedAt = Date.now();
   let toolCallsCount = 0;
 
-  try {
-    const supabase = createRouteClient(req);
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user?.id) {
-      return apiError("UNAUTHORIZED", "Authentication required", 401);
-    }
+  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  const guard = await guardAiRequest(req, 'analysis', timeOfDayAnalysisRateLimit)
+  if (!guard.ok) return guard.response
+  const { userId } = guard
 
-    const limit = await timeOfDayAnalysisRateLimit(req);
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      });
-    }
+  try {
 
     const { username, locale, timezone } = await req.json();
 

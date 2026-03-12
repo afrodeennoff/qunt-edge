@@ -36,20 +36,19 @@ export function getTrustedClientIp(req: HeaderCarrier): string {
     return vercelIp
   }
 
-  // x-real-ip is typically set by reverse proxies and is harder to spoof
-  const realIp = normalizeHeaderIp(req.headers.get('x-real-ip'))
-  if (realIp && realIp !== 'undefined' && realIp !== 'null') {
-    return realIp
-  }
+  if (process.env.NODE_ENV !== 'production') {
+    // Local dev/test fallback headers (less trusted, but useful outside managed proxies)
+    const realIp = normalizeHeaderIp(req.headers.get('x-real-ip'))
+    if (realIp && realIp !== 'undefined' && realIp !== 'null') {
+      return realIp
+    }
 
-  // x-forwarded-for should only be trusted from known proxy infrastructure
-  // In production behind Cloudflare/Vercel, this header is already handled by the proxy
-  const rawForwardedFor = req.headers.get('x-forwarded-for')
-  if (rawForwardedFor) {
-    const parts = rawForwardedFor.split(',').map(p => p.trim()).filter(Boolean)
-    // Only trust if request appears to come from a proxy (has multiple IPs)
-    if (parts.length > 1 && parts[0] !== 'undefined' && parts[0] !== 'null') {
-      return parts[0]
+    const rawForwardedFor = req.headers.get('x-forwarded-for')
+    if (rawForwardedFor) {
+      const parts = rawForwardedFor.split(',').map(p => p.trim()).filter(Boolean)
+      if (parts.length > 1 && parts[0] !== 'undefined' && parts[0] !== 'null') {
+        return parts[0]
+      }
     }
   }
 
@@ -150,9 +149,14 @@ export function rateLimit({
   window?: number
   identifier?: string
 } = {}) {
-  return async (req: HeaderCarrier): Promise<{ success: boolean; limit: number; remaining: number; resetTime: number }> => {
+  return async (
+    req: HeaderCarrier,
+    opts?: { subject?: string },
+  ): Promise<{ success: boolean; limit: number; remaining: number; resetTime: number }> => {
     const ip = getTrustedClientIp(req)
-    const key = `${identifier}:${ip}`
+    const key = opts?.subject
+      ? `${identifier}:${opts.subject}:${ip}`
+      : `${identifier}:${ip}`
     const result = await incrementCounter(key, window)
 
     if (result.count > limit) {

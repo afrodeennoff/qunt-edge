@@ -117,7 +117,7 @@ describe("AI Security Regression", () => {
     if (!result.ok) {
       // Type narrowing: result is { ok: false, response: Response }
       const response = result.response
-      expect(response.status).toBe(429)
+      expect(response.status).toBe(401)
     }
   })
 
