@@ -7,8 +7,8 @@ import { getDayData } from "./tools/get-trading-summary";
 import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
-import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
-import { createRouteClient } from "@/lib/supabase/route-client";
+import { rateLimit } from "@/lib/rate-limit";
+import { guardAiRequest } from "@/lib/ai/route-guard";
 
 export const maxDuration = 90;
 const editorRateLimit = rateLimit({ limit: 15, window: 60_000, identifier: "ai-editor" });
@@ -82,25 +82,12 @@ export async function POST(req: NextRequest) {
   const policy = getAiPolicy("editor");
   const startedAt = Date.now();
 
+  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  const guard = await guardAiRequest(req, 'editor', editorRateLimit)
+  if (!guard.ok) return guard.response
+  const { userId } = guard
+
   try {
-    const supabase = createRouteClient(req)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user?.id) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const limit = await editorRateLimit(req)
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      })
-    }
-
     const body = await req.json();
     const { prompt, locale = "en", action = "explain", date } = body;
 

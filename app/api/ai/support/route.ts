@@ -3,10 +3,10 @@ import { NextRequest } from "next/server";
 import { askForEmailForm } from "./tools/ask-for-email-form";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod/v3";
-import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
-import { createRouteClient } from "@/lib/supabase/route-client";
+import { rateLimit } from "@/lib/rate-limit";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { apiError } from "@/lib/api-response";
+import { guardAiRequest } from "@/lib/ai/route-guard";
 
 const customOpenai = createOpenAI({
   baseURL: "https://api.z.ai/api/paas/v4",
@@ -29,27 +29,14 @@ const SUPPORT_MODEL_ALLOWLIST = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
+  // Apply AI route guard (auth + entitlements + rate limit + budget)
+  const guard = await guardAiRequest(req, 'support', supportRateLimit)
+  if (!guard.ok) return guard.response
+  const { userId } = guard
+
   try {
     if (!process.env.OPENAI_API_KEY) {
       return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
-    }
-
-    const supabase = createRouteClient(req)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user?.id) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized", message: "Authentication required" }),
-        { status: 401, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    const limit = await supportRateLimit(req);
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      });
     }
 
     const body = await req.json();

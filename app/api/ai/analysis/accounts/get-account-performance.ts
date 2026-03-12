@@ -1,4 +1,5 @@
-import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
+import { getAiTrades } from "@/lib/ai/trade-access";
+import { getUserId } from "@/server/auth";
 import { getGroupsAction } from "@/server/groups";
 import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
@@ -241,9 +242,9 @@ export const getAccountPerformance = tool({
   execute: async ({ startDate, endDate, minTrades = 1 }: { startDate?: string, endDate?: string, minTrades?: number }) => {
     const safeMinTrades = Math.min(1000, Math.max(1, Math.floor(minTrades)));
 
-    const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
-    let trades = normalizeTrades(allTrades);
+    const userId = await getUserId();
+    const { trades: allTrades, truncated, dataQualityWarning } = await getAiTrades({ userId, profile: 'analysis' });
+    let trades = normalizeTrades(allTrades || []);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
@@ -268,8 +269,8 @@ export const getAccountPerformance = tool({
     
     return {
       ...analysis,
-      truncated: tradesResult.truncated,
-      dataQualityWarning: tradesResult.dataQualityWarning,
+      truncated,
+      dataQualityWarning,
     };
   }
 }); 

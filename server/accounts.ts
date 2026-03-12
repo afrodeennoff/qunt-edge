@@ -7,6 +7,9 @@ import { Account, Trade as NormalizedTrade, TradeInput } from '@/lib/data-types'
 import { decimalToNumber } from '@/lib/trade-types'
 import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { cacheQuery } from '@/lib/cache/query-cache'
+import { invalidateAllUserCaches } from '@/lib/cache/cache-invalidation'
+import { FEATURE_FLAGS } from '@/lib/feature-flags'
 
 type GroupedTrades = Record<string, Record<string, Trade[]>>
 
@@ -65,6 +68,8 @@ export async function removeAccountsFromTradesAction(accountNumbers: string[]): 
   })
   updateTag(`trades-${userId}`)
   updateTag(`user-data-${userId}`)
+  // Invalidate all user-related caches
+  invalidateAllUserCaches(userId)
 }
 
 export async function removeAccountFromTradesAction(accountNumber: string): Promise<void> {
@@ -77,6 +82,8 @@ export async function removeAccountFromTradesAction(accountNumber: string): Prom
   })
   updateTag(`trades-${userId}`)
   updateTag(`user-data-${userId}`)
+  // Invalidate all user-related caches
+  invalidateAllUserCaches(userId)
 }
 
 export async function deleteInstrumentGroupAction(accountNumber: string, instrumentGroup: string, userId: string): Promise<void> {
@@ -92,6 +99,8 @@ export async function deleteInstrumentGroupAction(accountNumber: string, instrum
   if (effectiveUserId) {
     updateTag(`trades-${effectiveUserId}`)
     updateTag(`user-data-${effectiveUserId}`)
+    // Invalidate all user-related caches
+    invalidateAllUserCaches(effectiveUserId)
   }
 }
 
@@ -119,6 +128,8 @@ export async function updateCommissionForGroupAction(accountNumber: string, inst
   }
   updateTag(`trades-${userId}`)
   updateTag(`user-data-${userId}`)
+  // Invalidate all user-related caches
+  invalidateAllUserCaches(userId)
 }
 
 export async function renameAccountAction(oldAccountNumber: string, newAccountNumber: string): Promise<void> {
@@ -184,6 +195,8 @@ export async function renameAccountAction(oldAccountNumber: string, newAccountNu
 
     updateTag(`trades-${userId}`)
     updateTag(`user-data-${userId}`)
+    // Invalidate all user-related caches
+    invalidateAllUserCaches(userId)
   } catch (error) {
     console.error('Error renaming account:', error)
     if (error instanceof Error) {
@@ -201,6 +214,11 @@ export async function deleteTradesByIdsAction(tradeIds: string[]): Promise<void>
       userId
     }
   })
+  updateTag(`trades-${userId}`)
+  updateTag(`user-data-${userId}`)
+  updateTag(`dashboard-${userId}`)
+  // Invalidate all user-related caches
+  invalidateAllUserCaches(userId)
 }
 
 export async function setupAccountAction(account: Account): Promise<Account> {
@@ -232,6 +250,20 @@ export async function setupAccountAction(account: Account): Promise<Account> {
 
   // Only include considerBuffer when explicitly provided to avoid overriding unintentionally
   const considerBufferUpdate = considerBuffer === undefined ? {} : { considerBuffer }
+
+  // Security: Validate groupId ownership before connecting
+  if (groupId) {
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      select: { userId: true }
+    })
+    if (!group) {
+      throw new Error('Group not found')
+    }
+    if (group.userId !== userId) {
+      throw new Error('Unauthorized: cannot connect to another user\'s group')
+    }
+  }
 
   // Build group relation payloads separately for update vs create
   // - Update: allow disconnect when groupId is explicitly null
@@ -318,6 +350,8 @@ export async function setupAccountAction(account: Account): Promise<Account> {
   } as unknown as Account
   updateTag(`user-data-${userId}`)
   updateTag(`trades-${userId}`)
+  // Invalidate all user-related caches
+  invalidateAllUserCaches(userId)
   return result
 }
 
@@ -331,6 +365,8 @@ export async function deleteAccountAction(account: Account) {
   })
   updateTag(`user-data-${userId}`)
   updateTag(`trades-${userId}`)
+  // Invalidate all user-related caches
+  invalidateAllUserCaches(userId)
 }
 
 export async function getAccountsAction() {
@@ -380,35 +416,63 @@ export async function savePayoutAction(payout: Payout) {
       throw new Error('Account not found')
     }
 
-    const result = await prisma.payout.upsert({
-      where: {
-        id: payout.id
-      },
-      create: {
-        id: crypto.randomUUID(),
-        accountNumber: payout.accountNumber,
-        date: payout.date,
-        amount: payout.amount,
-        status: payout.status,
-        account: {
-          connect: {
-            id: account.id
+    // Security: Verify ownership if updating existing payout
+    if (payout.id) {
+      const existingPayout = await prisma.payout.findFirst({
+        where: {
+          id: payout.id,
+          account: {
+            userId: userId
           }
-        }
-      },
-      update: {
-        accountNumber: payout.accountNumber,
-        date: payout.date,
-        amount: payout.amount,
-        status: payout.status,
-        account: {
-          connect: {
-            id: account.id
+        },
+        select: {
+          id: true,
+          accountNumber: true,
+        },
+      })
+      if (!existingPayout) {
+        throw new Error('Payout not found or unauthorized')
+      }
+      if (existingPayout.accountNumber !== payout.accountNumber) {
+        throw new Error('Cannot modify payout for different account')
+      }
+    }
+
+    let result
+    if (payout.id) {
+      result = await prisma.payout.update({
+        where: { id: payout.id },
+        data: {
+          accountNumber: payout.accountNumber,
+          date: payout.date,
+          amount: payout.amount,
+          status: payout.status,
+          account: {
+            connect: {
+              id: account.id
+            }
           }
-        }
-      },
-    })
+        },
+      })
+    } else {
+      result = await prisma.payout.create({
+        data: {
+          id: payout.id || crypto.randomUUID(),
+          accountNumber: payout.accountNumber,
+          date: payout.date,
+          amount: payout.amount,
+          status: payout.status,
+          account: {
+            connect: {
+              id: account.id
+            }
+          }
+        },
+      })
+    }
     updateTag(`user-data-${userId}`)
+    // Invalidate all user-related caches
+    invalidateAllUserCaches(userId)
     return result
   } catch (error) {
     console.error('Error adding payout:', error)
@@ -448,6 +512,8 @@ export async function deletePayoutAction(payoutId: string) {
     });
 
     updateTag(`user-data-${userId}`)
+    // Invalidate all user-related caches
+    invalidateAllUserCaches(userId)
     return true;
   } catch (error) {
     console.error('Failed to delete payout:', error);
@@ -471,6 +537,8 @@ export async function renameInstrumentAction(accountNumber: string, oldInstrumen
     })
     updateTag(`trades-${userId}`)
     updateTag(`user-data-${userId}`)
+    // Invalidate all user-related caches
+    invalidateAllUserCaches(userId)
   } catch (error) {
     console.error('Error renaming instrument:', error)
     if (error instanceof Error) {
@@ -654,4 +722,38 @@ export async function calculateAccountMetricsAction(
 
   // Delegate to shared utility so both server and client compute identically
   return computeMetricsForAccounts(accounts, normalizedTrades)
+}
+
+/**
+ * Get account metrics with caching
+ *
+ * This function caches computed metrics to reduce database load.
+ * Cache is automatically invalidated when trades/accounts are modified.
+ *
+ * @param accounts - Array of accounts to compute metrics for
+ * @returns Accounts with computed metrics
+ */
+export async function getAccountMetrics(accounts: Account[]): Promise<Account[]> {
+  const userId = await getDatabaseUserId()
+  const shouldCache = FEATURE_FLAGS.ENABLE_QUERY_CACHING
+
+  const computeMetrics = async () => {
+    return calculateAccountMetricsAction(accounts)
+  }
+
+  // Use cache only if feature flag is enabled
+  if (shouldCache) {
+    const cachedCompute = cacheQuery(
+      computeMetrics,
+      ['account-metrics', userId],
+      {
+        revalidateIn: 60, // Cache for 1 minute
+        tags: [`account-metrics-${userId}`]
+      }
+    )
+    return cachedCompute()
+  }
+
+  // Bypass cache if feature flag is disabled
+  return computeMetrics()
 }

@@ -1,4 +1,4 @@
-import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
+import { getAiTrades } from "@/lib/ai/trade-access";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { parseISO, eachDayOfInterval } from 'date-fns';
@@ -36,8 +36,8 @@ export const generateEquityChart = tool({
     maxAccounts = 8 
   }) => {
 
-    const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
+    const tradesResult = await getAiTrades({ profile: 'analysis' });
+    const allTrades = tradesResult.trades || [];
     let trades = allTrades;
     
     // Filter by account numbers if specified

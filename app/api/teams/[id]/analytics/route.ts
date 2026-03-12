@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server"
 import { getTeamById, getTeamAnalytics, updateTeamAnalytics } from "@/server/teams"
 import { createRouteClient } from "@/lib/supabase/route-client"
+import { z } from "zod"
+
+const teamIdSchema = z.string().min(1).max(128).regex(/^[a-zA-Z0-9_-]+$/)
+const periodSchema = z.enum(["daily", "weekly", "monthly"])
 
 export async function GET(
   req: Request,
@@ -17,9 +21,17 @@ export async function GET(
       )
     }
 
-    const teamId = (await params).id
+    const teamIdResult = teamIdSchema.safeParse((await params).id)
+    if (!teamIdResult.success) {
+      return NextResponse.json({ error: 'Invalid team id' }, { status: 400 })
+    }
+    const teamId = teamIdResult.data
     const url = new URL(req.url)
-    const period = url.searchParams.get('period') as 'daily' | 'weekly' | 'monthly' || 'monthly'
+    const periodResult = periodSchema.safeParse(url.searchParams.get('period') ?? 'monthly')
+    if (!periodResult.success) {
+      return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
+    }
+    const period = periodResult.data
 
     const team = await getTeamById(teamId, user.id)
 
@@ -62,7 +74,11 @@ export async function PUT(
       )
     }
 
-    const teamId = (await params).id
+    const teamIdResult = teamIdSchema.safeParse((await params).id)
+    if (!teamIdResult.success) {
+      return NextResponse.json({ error: 'Invalid team id' }, { status: 400 })
+    }
+    const teamId = teamIdResult.data
     const result = await updateTeamAnalytics(teamId, user.id)
 
     if (!result.success) {

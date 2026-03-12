@@ -6,8 +6,8 @@ import { getAccountPerformance } from "./get-account-performance";
 import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
-import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
-import { createRouteClient } from "@/lib/supabase/route-client";
+import { rateLimit } from "@/lib/rate-limit";
+import { guardAiRequest } from "@/lib/ai/route-guard";
 
 export const maxDuration = 300;
 const accountsAnalysisRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "ai-analysis-accounts" });
@@ -79,24 +79,11 @@ export async function POST(req: NextRequest) {
   const policy = getAiPolicy("analysis");
   const startedAt = Date.now();
 
-  try {
-    const supabase = createRouteClient(req)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user?.id) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+  const guard = await guardAiRequest(req, 'analysis', accountsAnalysisRateLimit);
+  if (!guard.ok) return guard.response;
+  const { userId } = guard;
 
-    const limit = await accountsAnalysisRateLimit(req)
-    if (!limit.success) {
-      return createRateLimitResponse({
-        limit: limit.limit,
-        remaining: limit.remaining,
-        resetTime: limit.resetTime,
-      })
-    }
+  try {
 
     const {
       messages,

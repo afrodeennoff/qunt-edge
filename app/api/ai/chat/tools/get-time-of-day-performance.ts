@@ -1,4 +1,5 @@
-import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
+import { getAiTrades } from "@/lib/ai/trade-access";
+import { getUserId } from "@/server/auth";
 import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
 import { z } from 'zod/v3';
@@ -258,9 +259,9 @@ export const getTimeOfDayPerformance = tool({
   }),
   execute: async ({ startDate, endDate, timezone = 'UTC' }: { startDate?: string, endDate?: string, timezone?: string }) => {
 
-    const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
-    let trades = normalizeTrades(allTrades);
+    const userId = await getUserId();
+    const { trades: allTrades, truncated, dataQualityWarning } = await getAiTrades({ userId, profile: 'analysis' });
+    let trades = normalizeTrades(allTrades || []);
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
@@ -275,8 +276,8 @@ export const getTimeOfDayPerformance = tool({
     const analysis = analyzeTimeOfDay(trades, timezone);
     return {
       ...analysis,
-      truncated: tradesResult.truncated,
-      dataQualityWarning: tradesResult.dataQualityWarning,
+      truncated,
+      dataQualityWarning,
     };
   }
 }); 

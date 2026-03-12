@@ -1,6 +1,6 @@
 import { groupBy } from "@/lib/utils";
 import { normalizeTrades, type AnalyticsTrade } from "@/lib/ai/trade-normalization";
-import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
+import { getAiTrades } from "@/lib/ai/trade-access";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 import { startOfWeek, endOfWeek, format } from "date-fns";
@@ -47,8 +47,8 @@ export const getCurrentWeekSummary = tool({
         const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
 
-        const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
+        const tradesResult = await getAiTrades({ profile: 'summary' });
+    const allTrades = tradesResult.trades || [];
         const filteredTrades = normalizeTrades(allTrades).filter(trade => {
             const tradeDate = trade.entryDate;
             return tradeDate >= currentWeekStart && tradeDate <= currentWeekEnd;

@@ -4,6 +4,28 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ---
 
+## 🚀 Recent Feature Updates
+
+### 2026-03-12: Prisma Connection Pool Optimization (Task 1.1)
+- **What changed:** Increased Prisma connection pool from 2 to 20 connections in production, added min pool of 5, implemented pool monitoring at 80% capacity, and updated timeout settings for production-grade performance.
+- **What I want:** Enable production-grade concurrent query handling to support ~200-400 queries per second and prevent pool exhaustion under load.
+- **What I don't want:** Pool exhaustion errors, connection timeout failures, or insufficient capacity causing degraded performance under concurrent load.
+- **How we fixed that:**
+  - Updated `lib/prisma.ts` to use pool max of 20 (increased from 2) and min of 5 in production.
+  - Updated timeout settings: 30s idle timeout, 10s connection timeout (fail-fast).
+  - Added pool monitoring that logs warnings when utilization reaches 80% (16/20 connections).
+  - Created pool load test script (`scripts/test-db-pool.mjs`) for verifying pool behavior under concurrent load.
+  - Added comprehensive documentation (`docs/operations/db-pool-sizing.md`) with capacity planning guidelines and troubleshooting steps.
+  - Updated `.env.example` with new pool configuration variables (`PG_POOL_MAX`, `PG_POOL_MIN`, `PG_POOL_IDLE_TIMEOUT_MS`, `PG_POOL_CONNECT_TIMEOUT_MS`).
+- **Key Files:** `lib/prisma.ts`, `scripts/test-db-pool.mjs`, `docs/operations/db-pool-sizing.md`, `.env.example`, `AGENTS.md`
+-**Verification:**
+  - `npm run typecheck` passes
+  - `npm run lint -- lib/prisma.ts` passes (1 pre-existing complexity warning)
+  - Test script validates with proper import and error handling
+  - Git commit created with message "perf: increase Prisma pool to 20 for production concurrency"
+
+---
+
 # Developer Guide
 
 ## Essential Commands
@@ -184,6 +206,118 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - `npm run -s build` -> passes with full route generation.
   - `npm run -s typecheck` -> passes when re-run sequentially (parallel run can trip existing `.next` clean/regenerate race in this workspace).
 
+### 2026-03-11: One-Shot Login-to-Dashboard Background Load + Cache/Flow Hardening
+- **What changed:** Implemented a single-pass runtime hardening sweep focused on faster post-login handoff, non-blocking dashboard hydration, reduced background sync pressure, and tighter mutation cache invalidation behavior.
+- **What I want:** Users should land on dashboard faster after auth and see data hydrate progressively in the background instead of waiting behind one long blocking load chain.
+- **What I don't want:** Slow callback redirects, dashboard page-level auth duplicate checks, global auto-sync loops doing unnecessary work on hidden tabs, or broad root-path cache revalidation for small trade/group/layout mutations.
+- **How we fixed that:**
+  - Authentication/redirect path:
+    - `app/[locale]/(authentication)/components/user-auth-form.tsx`: removed redundant `router.refresh()` before post-auth `router.push(...)` in password/OTP flows to reduce extra navigation work.
+    - `app/api/auth/callback/route.ts`: wrapped `ensureUserInDatabase(...)` in a bounded budget helper (`Promise.race` timeout) so callback redirect is less likely to stall on user bootstrap delays.
+  - Dashboard route flow:
+    - `app/[locale]/dashboard/page.tsx`: removed duplicate server auth check and hardcoded `/en/authentication` redirect; dashboard layout remains the single auth gate.
+  - Data provider background hydration:
+    - `context/data-provider.tsx`: added cache-first snapshot hydration for trades + user data, then moved server reconciliation into `refreshFromServer` with parallel fetches (`fetchAllTrades` + `getUserData`) and non-blocking background refresh when cache exists.
+    - Preserved account-metrics calculation but decoupled it from cache-first first paint so users can interact earlier.
+  - Background sync pressure reduction:
+    - `context/rithmic-sync-context.tsx`: interval now only mounts when auto-sync is enabled and skips hidden-tab ticks.
+    - `context/tradovate-sync-context.tsx`: hidden-tab interval guard and corrected effect dependencies for sync ticker callback freshness.
+  - Cache invalidation tightening:
+    - Removed broad `revalidatePath('/')` calls in mutation-heavy flows and rely on tag invalidation paths already present.
+    - Files updated: `server/trades.ts`, `server/groups.ts`, `server/layouts.ts`.
+- **Key Files:** `app/[locale]/(authentication)/components/user-auth-form.tsx`, `app/api/auth/callback/route.ts`, `app/[locale]/dashboard/page.tsx`, `context/data-provider.tsx`, `context/rithmic-sync-context.tsx`, `context/tradovate-sync-context.tsx`, `server/trades.ts`, `server/groups.ts`, `server/layouts.ts`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(authentication)/components/user-auth-form.tsx app/[locale]/dashboard/page.tsx app/api/auth/callback/route.ts context/data-provider.tsx context/rithmic-sync-context.tsx context/tradovate-sync-context.tsx server/groups.ts server/layouts.ts server/trades.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+  - `npm run -s perf:headers` -> requires running app server at `127.0.0.1:3000`; command failed with `ECONNREFUSED` in this run (no server process started), unrelated to compile/type state.
+
+### 2026-03-11: Stability Follow-Up (Journal/Tags/Thor Invalidation + First-Load Race Guard)
+- **What changed:** Completed a follow-up hardening pass to close remaining broad cache invalidations and reduce first-login hydration race risk in the dashboard bootstrap path.
+- **What I want:** Keep post-login dashboard hydration fast and reliable while ensuring user mutations (journal/tags/token generation) invalidate only the right user-scoped caches.
+- **What I don't want:** Broad path-level revalidation churn (`revalidatePath('/')`), stale user-data views after journal/tag updates, or first-load failures caused by user-bootstrap/trades-fetch ordering races.
+- **How we fixed that:**
+  - `context/data-provider.tsx`:
+    - changed paginated trades fetch calls to `getTradesAction(..., includeStats=false)` for hydration fetches to avoid unnecessary stats-side query work on page 1.
+    - reordered `refreshFromServer` to fetch `getUserData()` before `fetchAllTrades(...)` to reduce first-login race risk where writable user records may lag callback redirect timing.
+  - `server/journal.ts`:
+    - replaced `revalidatePath(...)` calls with user-scoped tag invalidation helper (`updateTag('user-data-*')`, `updateTag('dashboard-*')`) across mindset/mood/journal create/update/delete paths.
+  - `server/tags.ts`:
+    - replaced dashboard path revalidation with user-scoped tag invalidation helper (`user-data`, `trades`, `dashboard`) for create/update/delete/sync flows.
+  - `server/thor.ts`:
+    - replaced dashboard path revalidation after token generation with user-scoped `updateTag('user-data-*')` invalidation.
+- **Key Files:** `context/data-provider.tsx`, `server/journal.ts`, `server/tags.ts`, `server/thor.ts`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(authentication)/components/user-auth-form.tsx app/[locale]/dashboard/page.tsx app/api/auth/callback/route.ts context/data-provider.tsx context/rithmic-sync-context.tsx context/tradovate-sync-context.tsx server/groups.ts server/layouts.ts server/trades.ts server/journal.ts server/tags.ts server/thor.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+
+### 2026-03-11: Phase 1-8 Completion Sweep (Auth Path + Hydration + Provider Scope + Invalidation)
+- **What changed:** Completed a broader phase sweep to harden login critical path behavior, make dashboard hydration state more explicit, reduce non-import sync provider overhead, and remove remaining server-side broad path revalidation in shared flows.
+- **What I want:** Faster and more predictable login-to-dashboard handoff with clear background-refresh semantics, plus fewer unnecessary runtime effects and invalidation fan-out across the app.
+- **What I don't want:** Callback-path layout creation adding avoidable auth latency, hidden background work mounting on routes that do not need it, and broad path revalidation causing stale/over-invalidation side effects.
+- **How we fixed that:**
+  - `server/auth.ts` + `app/api/auth/callback/route.ts`:
+    - added `ensureUserInDatabase(..., options)` with `skipDefaultLayout` and used it in callback flow to reduce redirect-path work while preserving user-record bootstrap.
+  - `components/providers/dashboard-providers.tsx`:
+    - gated `SyncContextProvider` mount to import route surfaces so non-import dashboard routes avoid mounting sync stack entirely.
+  - `context/data-provider.tsx`:
+    - added explicit `isRevalidating` state in dashboard data/ui contexts and wrapped `refreshFromServer` with begin/end revalidation markers.
+    - retained cache-first + background reconcile flow and kept hydration fetches `includeStats=false`.
+  - `server/shared.ts`:
+    - removed remaining `revalidatePath('/shared/[slug]')` calls and rely on shared tag invalidation (`updateTag('shared-view-*')`).
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `components/providers/dashboard-providers.tsx`, `context/data-provider.tsx`, `server/shared.ts`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint app/[locale]/(authentication)/components/user-auth-form.tsx app/[locale]/dashboard/page.tsx app/api/auth/callback/route.ts server/auth.ts components/providers/dashboard-providers.tsx context/data-provider.tsx context/rithmic-sync-context.tsx context/tradovate-sync-context.tsx server/groups.ts server/layouts.ts server/trades.ts server/journal.ts server/tags.ts server/thor.ts server/shared.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+
+### 2026-03-11: Phase 1-8 Finalization (Callback Path Trim + Revalidation State + Shared Invalidation + Dashboard Runtime Gate)
+- **What changed:** Finalized the remaining phase items by reducing callback-path layout overhead, tightening provider scope and hydration-state signaling, removing shared-path broad revalidation, and adding a dashboard runtime perf gate script to CI tooling.
+- **What I want:** Keep login-to-dashboard handoff fast, make background hydration status explicit, avoid over-broad shared route invalidation, and enforce dashboard runtime checks in automated performance workflows.
+- **What I don't want:** Callback-path layout creation slowing redirects, sync providers mounting on non-import pages, hidden background refresh with no observable state, or CI missing dashboard runtime regressions.
+- **How we fixed that:**
+  - `server/auth.ts` + `app/api/auth/callback/route.ts`:
+    - added `ensureUserInDatabase(..., { skipDefaultLayout })` option and used it in callback flow to skip default layout creation during redirect-critical auth callback.
+  - `components/providers/dashboard-providers.tsx`:
+    - gated `SyncContextProvider` mount by route (`/dashboard/import`) so non-import dashboard routes do not mount sync provider stack.
+  - `context/data-provider.tsx`:
+    - added `isRevalidating` state to data/ui contexts and wrapped `refreshFromServer` with explicit begin/end revalidation state updates.
+    - retained hydration fetch optimization (`includeStats=false`) and user-data-first reconciliation order.
+  - `server/shared.ts`:
+    - removed remaining `revalidatePath('/shared/[slug]')` calls and rely on shared tag invalidation only.
+  - Rendering boundary and perf tooling:
+    - converted import callback route to server wrapper + client island (`app/[locale]/dashboard/import/page.tsx` + `page-client.tsx`).
+    - added `context/providers/ui-provider.tsx` for explicit UI-state provider access (loading/revalidating/mobile/shared).
+    - added `scripts/perf-dashboard-runtime.mjs`, wired `perf:dashboard-runtime` into `package.json` and CI workflow (`.github/workflows/ci.yml`) to gate dashboard runtime/redirect behavior.
+- **Key Files:** `server/auth.ts`, `app/api/auth/callback/route.ts`, `components/providers/dashboard-providers.tsx`, `context/data-provider.tsx`, `server/shared.ts`, `app/[locale]/dashboard/import/page.tsx`, `app/[locale]/dashboard/import/page-client.tsx`, `context/providers/ui-provider.tsx`, `scripts/perf-dashboard-runtime.mjs`, `package.json`, `.github/workflows/ci.yml`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint server/auth.ts app/api/auth/callback/route.ts components/providers/dashboard-providers.tsx context/data-provider.tsx server/shared.ts scripts/perf-dashboard-runtime.mjs app/[locale]/dashboard/import/page.tsx app/[locale]/dashboard/import/page-client.tsx` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+  - `npm run -s build` -> passes with full route generation.
+  - `npm run -s check:route-budgets` -> all monitored routes within budget.
+  - `npm run -s analyze:bundle` -> artifact regenerated at `docs/audits/artifacts/bundle-summary.json`.
+
+### 2026-03-11: Review Follow-Up (Sync Provider Boundary Safety + CI Auth Runtime Hook)
+- **What changed:** Applied code-review follow-up fixes to prevent sync-context consumer crashes on non-import routes and improve CI dashboard runtime gate coverage.
+- **What I want:** Keep dashboard runtime safe on all tabs while still reducing unnecessary sync work, and allow authenticated runtime checks in CI when credentials are available.
+- **What I don't want:** `useSyncContext()` consumers throwing outside `/dashboard/import` due missing provider, or runtime gate silently never checking authenticated dashboard behavior in CI-capable environments.
+- **How we fixed that:**
+  - `components/providers/dashboard-providers.tsx`:
+    - restored unconditional `SyncContextProvider` mount so existing `useSyncContext()` consumers remain valid across dashboard routes.
+    - retained prior runtime pressure reduction via route/visibility guards inside `rithmic`/`tradovate` sync contexts (instead of removing provider boundary).
+  - `.github/workflows/ci.yml`:
+    - wired optional `PERF_DASHBOARD_AUTH_COOKIE` secret into the dashboard runtime gate step so authenticated checks run automatically when available.
+- **Key Files:** `components/providers/dashboard-providers.tsx`, `.github/workflows/ci.yml`, `AGENTS.md`.
+- **Verification:**
+  - `npx eslint components/providers/dashboard-providers.tsx .github/workflows/ci.yml` -> provider file lint clean; workflow file outside eslint scope.
+  - `npm run -s typecheck` -> passes.
 
 ### 2026-03-08: Team Analytics Duplicate Fix
 - **What changed:** Removed duplicate analytics calculation block and aligned best-member PnL with groupBy result shape.
@@ -308,6 +442,118 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
   - Full landing page redesign using `shadcn` components for better pricing clarity and conversion hierarchy.
 
 ## 🚀 Recent Feature Updates
+
+### 2026-03-12: Three-Track Remediation Sweep (Security + Provider Boundaries + Polling)
+- **What changed:** Executed a coordinated remediation sweep that combined security hardening on API endpoints, explicit dashboard provider boundaries for lower render coupling, and targeted sync polling reduction.
+- **What I want:** Close high-risk auth/config/input issues immediately, reduce dashboard rerender fan-out by narrowing provider surfaces, and trim unnecessary background interval work without changing UX contracts.
+- **What I don't want:** Hardcoded checkout provider fallbacks in production paths, weak input handling on unsubscribe/team/email routes, broad dashboard consumers tied to monolithic provider hooks, or frequent ticker updates doing low-value work.
+- **How we fixed that:**
+  - Security/API hardening:
+    - `app/api/whop/checkout/route.ts`, `app/api/whop/checkout-team/route.ts`: removed hardcoded `WHOP_COMPANY_ID` fallback; fail closed with `500` when missing.
+    - `app/api/trader-profile/benchmark/route.ts`: early auth-failure handling now returns `401` before DB work.
+    - `app/api/email/unsubscribe/route.ts`: added strict malformed payload checks (email/token format) with `400` handling before token/db operations.
+    - `app/api/teams/[id]/analytics/route.ts`: added strict `teamId`/`period` validation.
+    - `app/api/email/weekly-summary/[userid]/route.ts`: added UUID validation for `userid` route param.
+  - Provider-boundary architecture:
+    - Added concrete providers: `context/providers/data-state-provider.tsx`, `context/providers/data-actions-provider.tsx`, `context/providers/data-derived-provider.tsx`.
+    - Wired boundaries in `components/providers/dashboard-providers.tsx` and migrated high-churn consumers (`widget-canvas`, filter menus, navbar) to narrow provider hooks.
+  - Polling/runtime trim:
+    - `app/[locale]/dashboard/components/global-sync-button.tsx`: reduced next-sync ticker interval from `5s` to `30s`.
+  - Added regression coverage:
+    - `tests/api/whop-checkout-security.test.ts`
+    - `tests/api/trader-benchmark-route.test.ts`
+    - `tests/api/unsubscribe-route.test.ts`
+    - `tests/context/provider-boundary-regression.test.tsx`
+- **Key Files:** `app/api/whop/checkout/route.ts`, `app/api/whop/checkout-team/route.ts`, `app/api/trader-profile/benchmark/route.ts`, `app/api/email/unsubscribe/route.ts`, `app/api/teams/[id]/analytics/route.ts`, `app/api/email/weekly-summary/[userid]/route.ts`, `components/providers/dashboard-providers.tsx`, `context/providers/data-state-provider.tsx`, `context/providers/data-actions-provider.tsx`, `context/providers/data-derived-provider.tsx`, `app/[locale]/dashboard/components/global-sync-button.tsx`, `tests/api/whop-checkout-security.test.ts`, `tests/api/trader-benchmark-route.test.ts`, `tests/api/unsubscribe-route.test.ts`, `tests/context/provider-boundary-regression.test.tsx`, `docs/superpowers/plans/2026-03-12-three-track-remediation-plan.md`.
+- **Verification:**
+  - `npx vitest run tests/api/whop-checkout-security.test.ts tests/api/trader-benchmark-route.test.ts tests/api/unsubscribe-route.test.ts tests/context/provider-boundary-regression.test.tsx` -> passes.
+  - `npm run typecheck` -> passes.
+  - `npm test` -> passes (`41` passed files, `1` skipped; `163` passed tests, `46` skipped).
+  - `npx eslint <touched files>` -> warnings-only baseline (`0` errors).
+
+### 2026-03-12: Performance Follow-Up (Batched Trade Mutations + Visibility-Aware Sync)
+- **What changed:** Completed the remaining performance remediation work by batching transformed trade writes server-side and reducing background sync churn with visibility-aware scheduling.
+- **What I want:** Avoid mutation-time DB pressure spikes on large transformed trade payloads and reduce unnecessary sync interval work while tabs are hidden.
+- **What I don't want:** Unbounded parallel update bursts (`Promise.all` over large lists), frequent one-minute sync loops in hidden tabs, or regressions without targeted coverage.
+- **How we fixed that:**
+  - `server/trades.ts`:
+    - replaced unbounded transformed-update `Promise.all(...)` writes with bounded `$transaction` batching (`TRADE_UPDATE_BATCH_SIZE = 100`).
+  - `context/rithmic-sync-context.tsx`:
+    - slowed auto-sync interval from 1 minute to 5 minutes.
+    - added `visibilitychange` handling to trigger refresh when tab becomes visible.
+  - `context/tradovate-sync-context.tsx`:
+    - slowed auto-sync interval from 1 minute to 5 minutes.
+    - added matching `visibilitychange` refresh behavior.
+  - Added regression coverage:
+    - `tests/performance/trades-mutation-batch.test.ts` verifies transformed trade updates execute in bounded transaction batches.
+- **Key Files:** `server/trades.ts`, `context/rithmic-sync-context.tsx`, `context/tradovate-sync-context.tsx`, `tests/performance/trades-mutation-batch.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx vitest run tests/performance/trades-mutation-batch.test.ts` -> passes.
+  - `npm run -s typecheck` -> passes.
+
+### 2026-03-11: Review Follow-Up (Cache Snapshot Guard + Rithmic Route Teardown + Layout Ownership Check)
+- **What changed:** Applied another review-driven hardening pass for cache snapshot consistency, route-exit socket teardown, and dashboard-layout ownership checks in bootstrap flow.
+- **What I want:** Users should not see stale trades from prior sessions when user-data cache exists without trade cache, Rithmic websocket connections should close when leaving import routes, and cached layouts should be validated against the current user before skipping fetch.
+- **What I don't want:** Cached user-data hydrate paths leaving old trades mounted, lingering websocket connections after route transitions, or synthetic/admin layout state being reused across user contexts.
+- **How we fixed that:**
+  - `context/data-provider.tsx`:
+    - added explicit `setTrades([])` when `cachedUserData` exists but `cachedTrades` is missing/empty.
+    - tightened layout fetch guard to refetch when layout is missing **or** `dashboardLayoutRef.current.userId !== userId`.
+  - `context/rithmic-sync-context.tsx`:
+    - import ordering normalized (external -> internal).
+    - auto-sync interval effect now calls `disconnect()` immediately when route is inactive, ensuring socket teardown on navigation away.
+  - `server/auth.ts`:
+    - refactored `ensureDashboardLayoutBackfill` helper to accept `targetUserId` and reused it for both existing-user and new-user paths (removed duplicate import/call block).
+  - `server/journal.ts`, `server/tags.ts`:
+    - added explicit `: void` return types for invalidation helpers.
+    - retained `updateTag(...)` immediate invalidation semantics for mutation consistency with current repo policy.
+- **Key Files:** `context/data-provider.tsx`, `context/rithmic-sync-context.tsx`, `server/auth.ts`, `server/journal.ts`, `server/tags.ts`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> passes.
+  - `npx eslint context/data-provider.tsx context/rithmic-sync-context.tsx server/tags.ts server/journal.ts server/auth.ts` -> warnings-only baseline (`0` errors).
+
+### 2026-03-11: Review Follow-Up (Cache Invalidation Semantics + Sync Churn + Shared Input Contract)
+- **What changed:** Applied review-driven follow-up fixes to preserve immediate mutation freshness, reduce dashboard load callback churn, stabilize sync scheduling dependencies, and align shared-create input contracts with server-owned identity.
+- **What I want:** User mutations should reflect immediately, dashboard bootstrap should avoid unnecessary reload passes, sync intervals should not reset on every trade update, and shared creation should not require ignored caller `userId` fields.
+- **What I don't want:** Stale read-after-write windows from SWR-style tag revalidation, `loadData` recreation churn from layout-state coupling, or misleading input types suggesting caller-controlled shared ownership.
+- **How we fixed that:**
+  - `server/tags.ts`, `server/journal.ts`: switched from `revalidateTag(..., 'max')` back to immediate `updateTag(...)` invalidation for mutation paths.
+  - `context/data-provider.tsx`: added `dashboardLayoutRef` and used it in `loadData` so layout checks read current state without depending on `dashboardLayout` in the callback dependency list.
+  - `context/rithmic-sync-context.tsx`: added `tradesRef` for sync date calculations and removed direct `trades` dependency from `performSyncForCredential` callback dependencies.
+  - `server/shared.ts`: introduced `SharedCreateParams = Omit<SharedParams, 'userId'>` and kept ownership resolution server-side via `getDatabaseUserId()`.
+  - `app/[locale]/dashboard/components/share-button.tsx`: removed stale `userId` field from `createShared(...)` call.
+  - `lib/__tests__/get-all-trades.test.ts`: mocked auth/redis dependencies for request-scope-safe tests and added fail-closed auth-resolution test coverage.
+- **Key Files:** `server/tags.ts`, `server/journal.ts`, `context/data-provider.tsx`, `context/rithmic-sync-context.tsx`, `server/shared.ts`, `app/[locale]/dashboard/components/share-button.tsx`, `lib/__tests__/get-all-trades.test.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx vitest run lib/__tests__/get-all-trades.test.ts` -> passes (`3` tests).
+  - `npm run -s typecheck` -> passes.
+  - `npx eslint <touched files>` -> warnings-only baseline (`0` errors).
+
+### 2026-03-11: Reliability Hardening (Cache Read Fallbacks + Per-User AI Trade Cache + Layout Backfill)
+- **What changed:** Hardened three reliability paths: dashboard cache hydration no longer fails closed on local cache read errors, AI all-trades caching is now strictly per-authenticated-user, and existing users now backfill missing dashboard layouts.
+- **What I want:** Keep login/dashboard flows resilient when browser cache APIs fail, prevent cross-user cache key collisions in AI trade analysis, and ensure users eventually get a default layout even if initial creation was skipped.
+- **What I don't want:** `Promise.all` cache read rejections blocking `refreshFromServer()`, trades cached under shared `unknown-user` keys, or legacy users stuck without dashboard layout records.
+- **How we fixed that:**
+  - `context/data-provider.tsx`: switched local cache bootstrap reads from `Promise.all` to `Promise.allSettled` for `withTimeout(getTradesCache(...))` and `withTimeout(getUserDataCache(...))`; rejected results now degrade to `undefined` with warning logs so `loadData` can continue into server refresh.
+  - `lib/ai/get-all-trades.ts`: removed `getUserId().catch(() => "unknown-user")` fallback and now require authenticated `userId`; replaced `getTradesAction(null, ...)` with `getTradesAction(userId, ...)` so Redis keys remain user-scoped.
+  - `server/auth.ts`: in `ensureUserInDatabase`, added existing-user dashboard layout backfill check (`prisma.dashboardLayout.findUnique({ where: { userId } })`) and best-effort `createDefaultDashboardLayout(user.id)` call when missing; initial `skipDefaultLayout` behavior for new-user creation remains unchanged.
+- **Key Files:** `context/data-provider.tsx`, `lib/ai/get-all-trades.ts`, `server/auth.ts`, `AGENTS.md`
+- **Verification:**
+  - `npx eslint context/data-provider.tsx lib/ai/get-all-trades.ts server/auth.ts` -> passes with warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+
+### 2026-03-11: Dashboard Crash Hotfix (`useSyncContext` Provider Boundary)
+- **What changed:** Fixed the runtime crash that blocked dashboard/admin loading with `useSyncContext must be used within a SyncContextProvider`.
+- **What I want:** Dashboard surfaces should never crash from sync-context boundary mismatches; shared headers should only render sync controls where sync providers actually exist.
+- **What I don't want:** Conditional provider mounts or cross-route component reuse causing hard runtime failures and blank error screens.
+- **How we fixed that:**
+  - Kept `SyncContextProvider` mounted unconditionally inside `DashboardProviders`.
+  - Removed `GlobalSyncButton` usage from admin layout, where dashboard sync/data providers are not mounted.
+  - Preserved strict hook behavior (`useSyncContext` still throws outside provider) so real boundary mistakes remain visible during development.
+- **Key Files:** `components/providers/dashboard-providers.tsx`, `app/[locale]/admin/layout.tsx`, `AGENTS.md`
+- **Verification:**
+  - `npm run -s typecheck` -> passes.
+  - `npx eslint components/providers/dashboard-providers.tsx app/[locale]/admin/layout.tsx` -> passes (0 errors).
 
 ### 2026-03-08: Consolidated Remediation Sweep (Logs + Typing + Memo + Hook Hygiene)
 - **What changed:** Ran a single repo-wide remediation pass focused on safe mechanical hardening across runtime logs, straightforward typing cleanup, memoization, hook cleanup, and config safety.

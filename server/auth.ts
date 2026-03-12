@@ -374,19 +374,31 @@ export async function setPasswordAction(newPassword: string) {
  * - user: Supabase `User` object (required). Must contain a valid `id`.
  * - locale: Optional locale string from the client (e.g. 'en', 'fr'). When provided, it is
  *   persisted to the `language` field for the user record.
+ * - options: Optional behavior flags.
+ *   - skipDefaultLayout?: when `true`, skips default dashboard layout creation for newly
+ *     created users. Defaults to `false` (layout is created).
  *
  * Returns:
  * - The up-to-date Prisma `user` record.
  *
  * Side effects:
  * - May sign the user out on integrity or identification errors.
- * - May create a default dashboard layout for new users.
+ * - May create a default dashboard layout for new users unless
+ *   `options.skipDefaultLayout` is `true`.
  *
  * Errors:
  * - Throws on missing user or id, account conflicts, Prisma integrity/validation issues, or
  *   unexpected errors. NEXT_REDIRECT errors are re-thrown to allow Next.js redirects.
+ *
+ * Notes:
+ * - `options.skipDefaultLayout` changes side effects only (layout creation). The returned
+ *   Prisma user record semantics are unchanged.
  */
-export async function ensureUserInDatabase(user: User, locale?: string) {
+export async function ensureUserInDatabase(
+  user: User,
+  locale?: string,
+  options?: { skipDefaultLayout?: boolean }
+) {
   if (!user) {
     await signOutSilently();
     throw new Error('User data is required');
@@ -396,6 +408,25 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
     await signOutSilently();
     throw new Error('User ID is required');
   }
+
+  const ensureDashboardLayoutBackfill = async (targetUserId: string): Promise<void> => {
+    try {
+      const existingLayout = await prisma.dashboardLayout.findUnique({
+        where: { userId: targetUserId },
+        select: { id: true },
+      });
+
+      if (!existingLayout) {
+        const { createDefaultDashboardLayout } = await import('@/server/database');
+        await createDefaultDashboardLayout(targetUserId);
+      }
+    } catch (layoutError) {
+      console.error(
+        '[ensureUserInDatabase] WARNING: Failed to backfill default dashboard layout:',
+        layoutError
+      );
+    }
+  };
 
   try {
     // First try to find user by auth_user_id
@@ -419,13 +450,17 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
               language: shouldUpdateLanguage ? (locale as string) : existingUserByAuthId.language
             },
           });
-          return updatedUser;
-        } catch (updateError) {
-          console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
-          throw new Error('Failed to update user');
-        }
+        await ensureDashboardLayoutBackfill(user.id);
+        return updatedUser;
+      } catch (updateError) {
+        console.error('[ensureUserInDatabase] ERROR: Failed to update user record:', updateError);
+        throw new Error('Failed to update user');
       }
-      return existingUserByAuthId;
+    }
+    if (!options?.skipDefaultLayout) {
+      await ensureDashboardLayoutBackfill(user.id);
+    }
+    return existingUserByAuthId;
     }
 
     // If user doesn't exist by auth_user_id, check if email exists
@@ -451,13 +486,9 @@ export async function ensureUserInDatabase(user: User, locale?: string) {
         },
       });
 
-      // Create default dashboard layout for new user
-      try {
-        const { createDefaultDashboardLayout } = await import('@/server/database');
-        await createDefaultDashboardLayout(user.id);
-      } catch (layoutError) {
-        console.error('[ensureUserInDatabase] WARNING: Failed to create default dashboard layout:', layoutError);
-        // Don't throw here - user creation succeeded, layout can be created later
+      // Create default dashboard layout for new user unless explicitly skipped
+      if (!options?.skipDefaultLayout) {
+        await ensureDashboardLayoutBackfill(newUser.id)
       }
 
       return newUser;

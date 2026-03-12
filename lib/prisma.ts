@@ -1,6 +1,7 @@
 import { PrismaClient } from '@/prisma/generated/prisma'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
+import { logger } from './logger'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -117,22 +118,37 @@ const shouldRejectUnauthorized = (connectionString: string): boolean => {
 // DIRECT_URL is intended for migrations/admin operations.
 const connectionString = normalizeSupabasePoolerMode(selectRuntimeConnectionString())
 const parsedPoolMax = Number.parseInt(process.env.PG_POOL_MAX ?? '', 10)
-const defaultPoolMax = isProduction ? (isNextBuildPhase ? 1 : 2) : 5
+const parsedPoolMin = Number.parseInt(process.env.PG_POOL_MIN ?? '', 10)
+
+// Production-grade pool settings: max 20, min 5 for production
+const defaultPoolMax = isProduction ? (isNextBuildPhase ? 1 : 20) : 5
+const defaultPoolMin = isProduction ? 5 : 2
+
 const poolMax = Number.isFinite(parsedPoolMax) && parsedPoolMax > 0
   ? Math.min(parsedPoolMax, MAX_POOL_LIMIT)
   : defaultPoolMax
 
+const poolMin = Number.isFinite(parsedPoolMin) && parsedPoolMin > 0 && parsedPoolMin <= poolMax
+  ? parsedPoolMin
+  : defaultPoolMin
+
 if (Number.isFinite(parsedPoolMax) && parsedPoolMax > MAX_POOL_LIMIT) {
   console.warn(`[Prisma] PG_POOL_MAX=${parsedPoolMax} exceeds safe cap ${MAX_POOL_LIMIT}; using ${MAX_POOL_LIMIT}.`)
 }
+
+// Production-grade timeout settings
+const defaultIdleTimeout = isProduction ? 30000 : 10000  // 30s in prod, 10s in dev
+const defaultConnTimeout = isProduction ? 10000 : 15000  // 10s fail-fast in prod
+
 const parsedIdleTimeout = Number.parseInt(process.env.PG_POOL_IDLE_TIMEOUT_MS ?? '', 10)
-const idleTimeoutMillis = Number.isFinite(parsedIdleTimeout) && parsedIdleTimeout > 0 ? parsedIdleTimeout : 10000
+const idleTimeoutMillis = Number.isFinite(parsedIdleTimeout) && parsedIdleTimeout > 0 ? parsedIdleTimeout : defaultIdleTimeout
 const parsedConnTimeout = Number.parseInt(process.env.PG_POOL_CONNECT_TIMEOUT_MS ?? '', 10)
-const connectionTimeoutMillis = Number.isFinite(parsedConnTimeout) && parsedConnTimeout > 0 ? parsedConnTimeout : 15000
+const connectionTimeoutMillis = Number.isFinite(parsedConnTimeout) && parsedConnTimeout > 0 ? parsedConnTimeout : defaultConnTimeout
 
 const poolConfig: pg.PoolConfig = {
   connectionString: forceIPv4ConnectionString(connectionString),
   max: poolMax,
+  min: poolMin,
   idleTimeoutMillis,
   connectionTimeoutMillis,
 }
@@ -162,6 +178,7 @@ if (isProduction && !isNextBuildPhase) {
       }
     })(),
     max: poolConfig.max,
+    min: poolConfig.min,
     idleTimeoutMillis: poolConfig.idleTimeoutMillis,
     connectionTimeoutMillis: poolConfig.connectionTimeoutMillis,
     ssl: Boolean(poolConfig.ssl),
@@ -172,6 +189,31 @@ if (isProduction && !isNextBuildPhase) {
 
 pool.on('error', (err) => {
   console.error('[Prisma] Unexpected error on idle client', err)
+})
+
+// Monitor pool utilization - log when at 80% capacity
+pool.on('acquire', () => {
+  const totalCount = pool.totalCount
+  const idleCount = pool.idleCount
+  const activeConnections = totalCount - idleCount
+
+  // Log warning when pool is at 80% capacity (16/20 connections)
+  if (activeConnections >= Math.ceil(poolMax * 0.8)) {
+    const utilization = ((activeConnections / poolMax) * 100).toFixed(0)
+
+    // Use logger.warn for production logging
+    if (isProduction) {
+      logger.warn('[DB Pool] High connection usage', {
+        active: activeConnections,
+        max: poolMax,
+        utilization: `${utilization}%`,
+        idle: idleCount,
+        total: totalCount
+      })
+    } else {
+      console.warn(`[DB Pool] High connection usage: ${activeConnections}/${poolMax} active (${utilization}% utilization)`)
+    }
+  }
 })
 
 const adapter = new PrismaPg(pool)

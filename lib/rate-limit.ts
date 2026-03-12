@@ -20,14 +20,39 @@ function normalizeHeaderIp(value: string | null): string | null {
   return first || null
 }
 
+// getTrustedClientIp returns the client IP for rate limiting.
+// Priority: Cloudflare (cf-connecting-ip) > Vercel (x-vercel-forwarded-for) > Standard headers
+// Note: x-forwarded-for can be spoofed by clients - only trust it from known proxies
 export function getTrustedClientIp(req: HeaderCarrier): string {
-  return (
-    normalizeHeaderIp(req.headers.get('x-vercel-forwarded-for')) ||
-    normalizeHeaderIp(req.headers.get('cf-connecting-ip')) ||
-    normalizeHeaderIp(req.headers.get('x-forwarded-for')) ||
-    normalizeHeaderIp(req.headers.get('x-real-ip')) ||
-    'unknown'
-  )
+  // Cloudflare is the most trusted - it sets cf-connecting-ip from actual client connection
+  const cfIp = normalizeHeaderIp(req.headers.get('cf-connecting-ip'))
+  if (cfIp && cfIp !== 'undefined' && cfIp !== 'null') {
+    return cfIp
+  }
+
+  // Vercel sets x-vercel-forwarded-for with real client IP for requests from Vercel network
+  const vercelIp = normalizeHeaderIp(req.headers.get('x-vercel-forwarded-for'))
+  if (vercelIp && vercelIp !== 'undefined' && vercelIp !== 'null') {
+    return vercelIp
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    // Local dev/test fallback headers (less trusted, but useful outside managed proxies)
+    const realIp = normalizeHeaderIp(req.headers.get('x-real-ip'))
+    if (realIp && realIp !== 'undefined' && realIp !== 'null') {
+      return realIp
+    }
+
+    const rawForwardedFor = req.headers.get('x-forwarded-for')
+    if (rawForwardedFor) {
+      const parts = rawForwardedFor.split(',').map(p => p.trim()).filter(Boolean)
+      if (parts.length > 1 && parts[0] !== 'undefined' && parts[0] !== 'null') {
+        return parts[0]
+      }
+    }
+  }
+
+  return 'unknown'
 }
 
 function cleanupExpiredEntries(now = Date.now()): void {
@@ -96,13 +121,19 @@ async function incrementUpstash(key: string, window: number): Promise<IncrementR
 }
 
 async function incrementCounter(key: string, window: number): Promise<IncrementResult> {
+  // In production, NEVER fall back to in-memory limiter - this creates a bypass vector
+  // where attackers can circumvent rate limits by overwhelming the distributed backend.
   if (process.env.NODE_ENV === 'production') {
+    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+      throw new Error('Rate limiting requires UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production')
+    }
     try {
       const upstash = await incrementUpstash(key, window)
       if (upstash) return upstash
-    } catch {
-      // Fall through to in-memory limiter so rate limiting still works if the
-      // distributed backend is temporarily unavailable.
+    } catch (error) {
+      // In production, fail closed - don't allow requests through if rate limiting is broken
+      console.error('[rate-limit] Upstash error in production:', error)
+      throw new Error('Rate limiting temporarily unavailable')
     }
   }
 
@@ -118,9 +149,14 @@ export function rateLimit({
   window?: number
   identifier?: string
 } = {}) {
-  return async (req: HeaderCarrier): Promise<{ success: boolean; limit: number; remaining: number; resetTime: number }> => {
+  return async (
+    req: HeaderCarrier,
+    opts?: { subject?: string },
+  ): Promise<{ success: boolean; limit: number; remaining: number; resetTime: number }> => {
     const ip = getTrustedClientIp(req)
-    const key = `${identifier}:${ip}`
+    const key = opts?.subject
+      ? `${identifier}:${opts.subject}:${ip}`
+      : `${identifier}:${ip}`
     const result = await incrementCounter(key, window)
 
     if (result.count > limit) {

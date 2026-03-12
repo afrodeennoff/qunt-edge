@@ -1,5 +1,6 @@
 import { parsePositionTime } from "@/lib/utils";
-import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
+import { getAiTrades } from "@/lib/ai/trade-access";
+import { getUserId } from "@/server/auth";
 import { tool } from "ai";
 import { z } from 'zod/v3';
 
@@ -27,9 +28,9 @@ export const getLastTradesData = tool({
         if (parsedEnd && Number.isNaN(parsedEnd.getTime())) {
             throw new Error("Invalid endDate format");
         }
-        const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
-        let trades = allTrades;
+        const userId = await getUserId();
+        const { trades: allTrades, truncated, dataQualityWarning } = await getAiTrades({ userId, profile: 'detail' });
+        let trades = allTrades || [];
         if (accountNumber) {
             trades = trades.filter(trade => trade.accountNumber === accountNumber);
         }
@@ -47,8 +48,8 @@ export const getLastTradesData = tool({
         }));
         return {
             items,
-            truncated: tradesResult.truncated,
-            dataQualityWarning: tradesResult.dataQualityWarning,
+            truncated,
+            dataQualityWarning,
         };
     }
 })

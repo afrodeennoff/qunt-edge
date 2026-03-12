@@ -6,12 +6,19 @@ export type AiErrorCategory =
   | "tool_failure"
   | "model_timeout"
   | "rate_limit"
+  | "budget_exceeded"
   | "internal";
 
 export interface AiUsage {
   promptTokens?: number;
   completionTokens?: number;
   totalTokens?: number;
+}
+
+export interface AiBudgetMetadata {
+  budgetLimit?: number;
+  budgetUsed?: number;
+  budgetRemaining?: number;
 }
 
 export interface AiRequestLogInput {
@@ -28,6 +35,7 @@ export interface AiRequestLogInput {
   errorCategory?: AiErrorCategory | null;
   errorCode?: string | null;
   sampleRate?: number;
+  budgetMetadata?: AiBudgetMetadata;
 }
 
 function toNumber(value: unknown): number | null {
@@ -71,6 +79,9 @@ export function categorizeAiError(error: unknown): AiErrorCategory {
   if (status === 408 || code.includes("timeout") || message.includes("timeout")) {
     return "model_timeout";
   }
+  if (code.includes("budget") || message.includes("budget")) {
+    return "budget_exceeded";
+  }
   if (code.includes("validation") || message.includes("invalid") || status === 400) {
     return "validation";
   }
@@ -110,7 +121,10 @@ export async function logAiRequest(input: AiRequestLogInput): Promise<void> {
         "success",
         "errorCategory",
         "errorCode",
-        "createdAt"
+        "createdAt",
+        "budgetLimit",
+        "budgetUsed",
+        "budgetRemaining"
       ) VALUES (
         ${randomUUID()},
         ${input.userId ?? null},
@@ -127,7 +141,10 @@ export async function logAiRequest(input: AiRequestLogInput): Promise<void> {
         ${input.success},
         ${input.errorCategory ?? null},
         ${input.errorCode ?? null},
-        ${new Date()}
+        ${new Date()},
+        ${input.budgetMetadata?.budgetLimit ?? null},
+        ${input.budgetMetadata?.budgetUsed ?? null},
+        ${input.budgetMetadata?.budgetRemaining ?? null}
       )
     `;
   } catch (error) {

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { verifyUnsubscribeToken } from "@/lib/unsubscribe-token"
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const TOKEN_REGEX = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -11,7 +14,14 @@ export async function GET(request: Request) {
     if (!email || !token) {
       return NextResponse.json(
         { error: 'Invalid unsubscribe link' },
-        { status: 401 }
+        { status: 400 }
+      )
+    }
+
+    if (!EMAIL_REGEX.test(email) || !TOKEN_REGEX.test(token)) {
+      return NextResponse.json(
+        { error: 'Malformed unsubscribe payload' },
+        { status: 400 }
       )
     }
 

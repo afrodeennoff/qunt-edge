@@ -2,7 +2,7 @@
 
 import { Trade as PrismaTrade, Prisma } from '@/prisma/generated/prisma'
 import { Trade as NormalizedTrade } from '@/lib/data-types'
-import { revalidatePath, revalidateTag, updateTag, unstable_cache } from 'next/cache'
+import { revalidateTag, updateTag, unstable_cache } from 'next/cache'
 import { getDatabaseUserId, getUserId } from './auth'
 import { isAfter } from 'date-fns'
 import { prisma } from '@/lib/prisma'
@@ -125,7 +125,8 @@ export async function revalidateCache(tags: string[]) {
   })
 }
 
-async function invalidateTradeRelatedCaches(): Promise<void> {
+async function invalidateTradeRelatedCaches(userId: string): Promise<void> {
+  updateTag(`trades-${userId}`)
   await Promise.all([
     invalidateCacheNamespace('ai-trades'),
     invalidateCacheNamespace('behavior-insights'),
@@ -280,9 +281,8 @@ export async function saveTradesAction(
       })
     })
 
-    updateTag(`trades-${userId}`)
     updateTag(`user-data-${userId}`)
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
 
     if (result.count === 0) {
       logger.info('[saveTrades] No trades added. Duplicate check.')
@@ -529,6 +529,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
   instrumentPrefix?: string
   instrumentSuffix?: string
 }): Promise<number> {
+  const TRADE_UPDATE_BATCH_SIZE = 100
   const userId = await resolveWritableUserId(await getUserId())
   if (!userId) return 0
 
@@ -539,7 +540,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
         select: { id: true, entryDate: true, closeDate: true, instrument: true }
       })
 
-      await Promise.all(trades.map(async (trade) => {
+      const updateOps = trades.map((trade) => {
         const data: any = {}
 
         if (update.entryDateOffset) {
@@ -563,9 +564,15 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
         if (newInst !== trade.instrument) data.instrument = newInst
 
         if (Object.keys(data).length > 0) {
-          await prisma.trade.update({ where: { id: trade.id }, data })
+          return prisma.trade.update({ where: { id: trade.id }, data })
         }
-      }))
+        return null
+      }).filter((op): op is ReturnType<typeof prisma.trade.update> => op !== null)
+
+      for (let index = 0; index < updateOps.length; index += TRADE_UPDATE_BATCH_SIZE) {
+        const batch = updateOps.slice(index, index + TRADE_UPDATE_BATCH_SIZE)
+        await prisma.$transaction(batch)
+      }
     }
 
     const {
@@ -588,8 +595,7 @@ export async function updateTradesAction(tradesIds: string[], update: Partial<No
       })
     }
 
-    updateTag(`trades-${userId}`)
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     return tradesIds.length
   } catch (error) {
     logger.error('[updateTrades] Error', { error })
@@ -608,8 +614,7 @@ export async function updateTradeCommentAction(tradeId: string, comment: string 
       where: { id: tradeId, userId },
       data: { comment }
     })
-    await invalidateTradeRelatedCaches()
-    revalidatePath('/')
+    await invalidateTradeRelatedCaches(userId)
   } catch (error) {
     logger.error("[updateTradeComment] Error", { error })
     throw error
@@ -627,8 +632,7 @@ export async function updateTradeVideoUrlAction(tradeId: string, videoUrl: strin
       where: { id: tradeId, userId },
       data: { videoUrl }
     })
-    await invalidateTradeRelatedCaches()
-    revalidatePath('/')
+    await invalidateTradeRelatedCaches(userId)
   } catch (error) {
     logger.error("[updateTradeVideoUrl] Error", { error })
     throw error
@@ -656,8 +660,7 @@ export async function addTagToTrade(tradeId: string, tag: string) {
       }
     })
 
-    await invalidateTradeRelatedCaches()
-    revalidatePath('/')
+    await invalidateTradeRelatedCaches(userId)
     return updatedTrade
   } catch (error) {
     console.error('Failed to add tag:', error)
@@ -686,8 +689,7 @@ export async function removeTagFromTrade(tradeId: string, tagToRemove: string) {
       }
     })
 
-    await invalidateTradeRelatedCaches()
-    revalidatePath('/')
+    await invalidateTradeRelatedCaches(userId)
     return updatedTrade
   } catch (error) {
     console.error('Failed to remove tag:', error)
@@ -720,7 +722,7 @@ export async function deleteTagFromAllTrades(tag: string) {
       )
     )
 
-    await invalidateTradeRelatedCaches()
+    await invalidateTradeRelatedCaches(userId)
     revalidateTag(userId, { expire: 0 })
     return { success: true }
   } catch (error) {
@@ -751,8 +753,7 @@ export async function updateTradeImage(
       }
     })
 
-    await invalidateTradeRelatedCaches()
-    revalidatePath('/')
+    await invalidateTradeRelatedCaches(userId)
     return trades
   } catch (error) {
     console.error('Failed to update trade image:', error)
@@ -801,8 +802,7 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
       )
     )
 
-    await invalidateTradeRelatedCaches()
-    revalidatePath('/')
+    await invalidateTradeRelatedCaches(userId)
     return { success: true, tradesUpdated: trades.length }
   } catch (error) {
     console.error('Failed to add tags to trades for day:', error)

@@ -1,5 +1,5 @@
 import { SerializedTrade } from "@/server/database";
-import { getAllTradesForAi } from "@/lib/ai/get-all-trades";
+import { getAiTrades } from "@/lib/ai/trade-access";
 import Decimal from "decimal.js";
 import { tool } from "ai";
 import { z } from 'zod/v3';
@@ -185,13 +185,13 @@ export const getPerformanceTrends = tool({
   }),
   execute: async ({ startDate, endDate }: { startDate?: string, endDate?: string }) => {
 
-    const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
+    const tradesResult = await getAiTrades({ profile: 'analysis' });
+    const allTrades = tradesResult.trades || [];
     let trades = allTrades;
 
     // Filter trades by date range if provided
     if (startDate || endDate) {
-      trades = trades.filter(trade => {
+      trades = trades.filter((trade: SerializedTrade) => {
         const tradeDate = new Date(trade.entryDate);
         const start = startDate ? new Date(startDate) : new Date('1970-01-01');
         const end = endDate ? new Date(endDate) : new Date('2100-01-01');
@@ -199,7 +199,7 @@ export const getPerformanceTrends = tool({
       });
     }
 
-    const trends = analyzeTrends(trades as SerializedTrade[]);
+    const trends = analyzeTrends(trades);
     return {
       ...trends,
       truncated: tradesResult.truncated,

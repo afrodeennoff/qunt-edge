@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-03-12T13:22:44.609Z",
+  "environment": "development",
+  "commit": "a8d96b49c5df4c9c6ec3fbf11932ade855012a18",
+  "branch": "fix/dashboard-sync-context-crash-pr2",
+  "build": {
+    "totalSize": 0,
+    "routeCount": 0,
+    "pageCount": 0,
+    "appRoutes": []
+  },
+  "bundles": {
+    "totalSize": 0,
+    "largestRoutes": [
+      {
+        "path": "0",
+        "size": 0
+      }
+    ]
+  },
+  "lighthouse": {
+    "lastRun": "2026-03-10T12:55:04.179Z",
+    "summary": {
+      "mobile-http://localhost:3000/en": {
+        "mode": "mobile",
+        "url": "http://localhost:3000/en",
+        "score": 0.63,
+        "lcp": 3676.7335,
+        "tbt": 1677.3047500000002,
+        "cls": 0
+      },
+      "desktop-http://localhost:3000/en": {
+        "mode": "desktop",
+        "url": "http://localhost:3000/en",
+        "score": 0.85,
+        "lcp": 861.8945999999996,
+        "tbt": 335.17545000000007,
+        "cls": 0
+      },
+      "mobile-http://localhost:3000/en/pricing": {
+        "mode": "mobile",
+        "url": "http://localhost:3000/en/pricing",
+        "score": 0.58,
+        "lcp": 4516.4936,
+        "tbt": 1427.4383000000003,
+        "cls": 0
+      },
+      "desktop-http://localhost:3000/en/pricing": {
+        "mode": "desktop",
+        "url": "http://localhost:3000/en/pricing",
+        "score": 0.85,
+        "lcp": 952.2891,
+        "tbt": 331.21965,
+        "cls": 0.02193223010244287
+      }
+    }
+  },
+  "runtime": {
+    "baselineCaptured": true,
+    "ttfbMedian": 0.463228,
+    "totalMedian": 0.463803
+  },
+  "database": {
+    "poolConfig": {
+      "maxConnections": "not set",
+      "minConnections": "not set",
+      "sslMode": "not set",
+      "rejectUnauthorized": "not set"
+    }
+  },
+  "cache": {
+    "policies": []
+  },
+  "errors": {
+    "sentryConfigured": false
+  }
+}

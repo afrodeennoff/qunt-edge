@@ -3,11 +3,12 @@
 import { TickDetails } from '@/prisma/generated/prisma'
 import { Prisma } from '@/prisma/generated/prisma'
 import { normalizeTradesForClient, Trade } from '@/lib/data-types'
-import { revalidatePath, unstable_cache, updateTag } from 'next/cache'
+import { unstable_cache, updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { GroupWithAccounts } from './groups'
 import { createSecureSlug } from '@/lib/security/slug'
 import { isSharedAccessible } from '@/lib/security/shared-access'
+import { getDatabaseUserId } from './auth'
 
 export interface SharedParams {
   userId: string
@@ -27,13 +28,17 @@ export interface SharedParams {
   tickDetails?: TickDetails[]
 }
 
+type SharedCreateParams = Omit<SharedParams, 'userId'>
+
 interface DateRange {
   from: string;
   to?: string;
 }
 
-export async function createShared(data: SharedParams): Promise<string> {
+export async function createShared(data: SharedCreateParams): Promise<string> {
   try {
+    const userId = await getDatabaseUserId()
+
     // Validate date range
     if (!data.dateRange?.from) {
       throw new Error('Start date is required')
@@ -50,7 +55,7 @@ export async function createShared(data: SharedParams): Promise<string> {
       try {
         await prisma.shared.create({
           data: {
-            userId: data.userId,
+            userId,
             title: data.title,
             description: data.description,
             isPublic: data.isPublic,
@@ -67,7 +72,6 @@ export async function createShared(data: SharedParams): Promise<string> {
         })
 
         updateTag(`shared-view-${slug}`)
-        revalidatePath('/shared/[slug]', 'page')
         return slug
       } catch (error) {
         if ((error as { code?: string })?.code === 'P2002') {
@@ -217,8 +221,9 @@ export async function getShared(slug: string): Promise<{ params: SharedParams, t
   }
 }
 
-export async function getUserShared(userId: string) {
+export async function getUserShared() {
   try {
+    const userId = await getDatabaseUserId()
     const sharedTrades = await prisma.shared.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -231,8 +236,9 @@ export async function getUserShared(userId: string) {
   }
 }
 
-export async function deleteShared(slug: string, userId: string) {
+export async function deleteShared(slug: string) {
   try {
+    const userId = await getDatabaseUserId()
     const shared = await prisma.shared.findUnique({
       where: { slug },
     })
@@ -246,7 +252,6 @@ export async function deleteShared(slug: string, userId: string) {
     })
 
     updateTag(`shared-view-${slug}`)
-    revalidatePath('/shared/[slug]', 'page')
   } catch (error) {
     console.error('Error deleting shared:', error)
     throw error

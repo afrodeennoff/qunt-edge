@@ -147,7 +147,13 @@ function responseFromSnapshot(snapshot: BenchmarkSnapshotPayload) {
 
 export async function GET() {
   try {
-    const currentUserId = await getDatabaseUserId()
+    let currentUserId: string
+    try {
+      currentUserId = await getDatabaseUserId()
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     if (!currentUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

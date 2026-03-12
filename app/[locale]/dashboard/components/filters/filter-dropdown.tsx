@@ -16,14 +16,14 @@ import { useI18n } from "@/locales/client"
 import { PnlFilter } from "./pnl-filter"
 import { InstrumentFilter } from "./instrument-filter"
 import { AccountFilter } from "./account-filter"
-import { useDashboardIsMobile } from "@/context/data-provider"
+import { useDataIsMobile } from "@/context/providers/data-state-provider"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { useModalStateStore } from "../../../../../store/modal-state-store"
 
 export function FilterDropdown() {
   const t = useI18n()
-  const isMobile = useDashboardIsMobile()
+  const isMobile = useDataIsMobile()
   const [open, setOpen] = useState(false)
   const { accountGroupBoardOpen } = useModalStateStore()
   const effectiveOpen = accountGroupBoardOpen ? false : open

@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from './auth'
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { generateSecureToken } from '@/lib/api-auth'
 
@@ -23,7 +23,7 @@ export async function generateThorToken() {
     }
     const token = await generateSecureToken(dbUser.id, 'thor')
 
-    revalidatePath('/dashboard')
+    updateTag(`user-data-${dbUser.id}`)
     return { token }
   } catch (error) {
     console.error('Failed to generate Thor token:', error)

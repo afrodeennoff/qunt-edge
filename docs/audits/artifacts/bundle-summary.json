@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-10T16:35:26.835Z",
+  "generatedAt": "2026-03-11T18:51:13.617Z",
   "budgets": {
     "defaultRouteBudgetKb": 300,
     "homeRouteBudgetKb": 80,
@@ -85,16 +85,16 @@
     {
       "route": "/[locale]/dashboard/import",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/dashboard/import/page_client-reference-manifest.js",
-      "bytes": 54564,
-      "kb": 53.29,
+      "bytes": 54578,
+      "kb": 53.3,
       "budgetKb": 80,
       "withinBudget": true
     },
     {
       "route": "/[locale]/teams/manage",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/teams/manage/page_client-reference-manifest.js",
-      "bytes": 41529,
-      "kb": 40.56,
+      "bytes": 42375,
+      "kb": 41.38,
       "budgetKb": 300,
       "withinBudget": true
     },
@@ -107,19 +107,19 @@
       "withinBudget": true
     },
     {
-      "route": "/[locale]/admin/newsletter-builder",
-      "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/newsletter-builder/page_client-reference-manifest.js",
-      "bytes": 37634,
-      "kb": 36.75,
-      "budgetKb": 300,
-      "withinBudget": true
-    },
-    {
       "route": "/[locale]/teams/dashboard/trader/[slug]",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/teams/dashboard/trader/[slug]/page_client-reference-manifest.js",
       "bytes": 37217,
       "kb": 36.34,
       "budgetKb": 80,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin/newsletter-builder",
+      "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/newsletter-builder/page_client-reference-manifest.js",
+      "bytes": 36614,
+      "kb": 35.76,
+      "budgetKb": 300,
       "withinBudget": true
     },
     {
@@ -219,26 +219,10 @@
       "withinBudget": true
     },
     {
-      "route": "/[locale]/admin/welcome-email",
-      "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/welcome-email/page_client-reference-manifest.js",
-      "bytes": 25897,
-      "kb": 25.29,
-      "budgetKb": 300,
-      "withinBudget": true
-    },
-    {
       "route": "/[locale]/(landing)/updates",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/(landing)/updates/page_client-reference-manifest.js",
       "bytes": 25855,
       "kb": 25.25,
-      "budgetKb": 300,
-      "withinBudget": true
-    },
-    {
-      "route": "/[locale]/admin/weekly-recap",
-      "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/weekly-recap/page_client-reference-manifest.js",
-      "bytes": 25842,
-      "kb": 25.24,
       "budgetKb": 300,
       "withinBudget": true
     },
@@ -291,6 +275,22 @@
       "withinBudget": true
     },
     {
+      "route": "/[locale]/admin/welcome-email",
+      "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/welcome-email/page_client-reference-manifest.js",
+      "bytes": 25387,
+      "kb": 24.79,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
+      "route": "/[locale]/admin/weekly-recap",
+      "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/weekly-recap/page_client-reference-manifest.js",
+      "bytes": 25332,
+      "kb": 24.74,
+      "budgetKb": 300,
+      "withinBudget": true
+    },
+    {
       "route": "/[locale]/(landing)/maintenance",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/(landing)/maintenance/page_client-reference-manifest.js",
       "bytes": 22779,
@@ -325,16 +325,16 @@
     {
       "route": "/[locale]/admin",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/page_client-reference-manifest.js",
-      "bytes": 22616,
-      "kb": 22.09,
+      "bytes": 22276,
+      "kb": 21.75,
       "budgetKb": 300,
       "withinBudget": true
     },
     {
       "route": "/[locale]/admin/send-email",
       "file": "/Users/timon/Downloads/qunt-edge/.next/server/app/[locale]/admin/send-email/page_client-reference-manifest.js",
-      "bytes": 22188,
-      "kb": 21.67,
+      "bytes": 21848,
+      "kb": 21.34,
       "budgetKb": 300,
       "withinBudget": true
     },

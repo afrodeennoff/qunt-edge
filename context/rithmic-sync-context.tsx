@@ -6,11 +6,13 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { getRithmicData, updateLastSyncTime } from "@/lib/rithmic-storage";
 import { useDashboardActions } from "@/context/data-provider";
-import { toast } from "sonner";
 import { useI18n } from "@/locales/client";
 import { useRithmicSyncStore, RithmicMessage } from "@/store/rithmic-sync-store";
 import { useTradesStore } from "@/store/trades-store";
@@ -91,6 +93,11 @@ export function RithmicSyncContextProvider({
 
   const isLoading = useUserStore((state) => state.isLoading);
   const trades = useTradesStore((state) => state.trades);
+  const tradesRef = useRef(trades);
+
+  useEffect(() => {
+    tradesRef.current = trades;
+  }, [trades]);
 
   // Use store for state management
   const {
@@ -612,15 +619,15 @@ export function RithmicSyncContextProvider({
         // Get most recent date for each account
         const mostRecentDates = accountsToSync
           .map((accountId: string) => {
-            const accountTrades = trades.filter(
+            const accountTrades = tradesRef.current.filter(
               (trade) => trade.accountNumber === accountId
             );
             if (accountTrades.length === 0) return null;
             return Math.max(
-              ...accountTrades.map((trade) =>
-                new Date(trade.entryDate).getTime()
-              )
-            );
+                ...accountTrades.map((trade) =>
+                  new Date(trade.entryDate).getTime()
+                )
+              );
           })
           .filter(Boolean) as number[];
 
@@ -803,10 +810,13 @@ export function RithmicSyncContextProvider({
 
   // Auto-sync checking
   const { autoSyncEnabled } = useRithmicSyncStore();
+  const pathname = usePathname();
+  const isSyncRouteActive = pathname?.includes("/dashboard/import") ?? false;
 
   const checkAndPerformSyncs = useCallback(async () => {
     // If we are still loading trades, return
     if (isLoading) return;
+    if (!isSyncRouteActive) return;
     // If auto-sync is disabled, return
     if (!autoSyncEnabled) return;
     // If we are already syncing, return
@@ -839,21 +849,41 @@ export function RithmicSyncContextProvider({
     } catch (error) {
       console.warn("Error during rithmic auto-sync check:", error);
     }
-  }, [syncInterval, autoSyncEnabled, isAutoSyncing, performSyncForCredential]);
+  }, [isLoading, isSyncRouteActive, syncInterval, autoSyncEnabled, isAutoSyncing, performSyncForCredential]);
 
   // Auto-sync checking interval
   useEffect(() => {
-    const intervalMs = 1 * 60 * 1000; // 1 minute
+    if (!isSyncRouteActive) {
+      disconnect();
+      return;
+    }
+    if (!autoSyncEnabled) return;
+
+    const intervalMs = 5 * 60 * 1000; // 5 minutes
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        void checkAndPerformSyncs();
+      }
+    };
 
     const intervalId = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
       checkAndPerformSyncs();
     }, intervalMs);
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
 
     // Cleanup on unmount
     return () => {
       clearInterval(intervalId);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
     };
-  }, [checkAndPerformSyncs]);
+  }, [isSyncRouteActive, autoSyncEnabled, checkAndPerformSyncs, disconnect]);
 
   return (
     <RithmicSyncContext.Provider

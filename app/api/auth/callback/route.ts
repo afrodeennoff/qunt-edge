@@ -1,6 +1,5 @@
 import { createClient, ensureUserInDatabase, getWebsiteURL } from '@/server/auth'
 import { NextResponse } from 'next/server'
-// The client you created from the Server-Side Auth instructions
 
 function isNextRedirectError(error: unknown): boolean {
   return (
@@ -75,7 +74,8 @@ export async function GET(request: Request) {
         try {
           const { data: { user } } = await supabase.auth.getUser()
           if (user) {
-            await ensureUserInDatabase(user, locale)
+            // Skip timeout - user creation is critical for auth to work
+            await ensureUserInDatabase(user, locale, { skipDefaultLayout: true })
           }
         } catch (e) {
           if (isNextRedirectError(e)) {
