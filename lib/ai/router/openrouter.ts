@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { getRouterConfig } from './config';
+import { sanitizeAiError } from '@/lib/ai/error-utils';
 
 const OpenRouterResponseSchema = z.object({
   id: z.string(),
@@ -54,12 +55,38 @@ export class OpenRouterClient {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`);
+      // Never include raw provider response bodies in thrown errors to avoid leaking prompt data.
+      let message = `OpenRouter API error: ${response.status} ${response.statusText}`;
+      try {
+        const parsedError = (await response.json()) as {
+          error?: { message?: string; code?: string | number };
+        };
+        const providerMessage = parsedError?.error?.message?.trim();
+        const providerCode = parsedError?.error?.code != null ? String(parsedError.error.code) : null;
+        if (providerCode) {
+          message += ` [code=${providerCode}]`;
+        }
+        if (providerMessage) {
+          message += ` ${providerMessage.slice(0, 160)}`;
+        }
+      } catch {
+        // Ignore parse failures and keep generic error string.
+      }
+      throw new Error(message);
     }
 
     const data = await response.json();
-    const parsed = OpenRouterResponseSchema.parse(data);
+    let parsed: z.infer<typeof OpenRouterResponseSchema>;
+    try {
+      parsed = OpenRouterResponseSchema.parse(data);
+    } catch (error) {
+      const details = sanitizeAiError(error);
+      throw new Error(`OpenRouter response schema validation failed: ${details.message}`);
+    }
+
+    if (!parsed.choices.length) {
+      throw new Error('OpenRouter response missing completion choices');
+    }
     
     return {
       id: parsed.id,

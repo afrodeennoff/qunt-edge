@@ -9,6 +9,7 @@ import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetr
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
 import { apiError } from "@/lib/api-response";
+import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 export const maxDuration = 300;
 const accountsAnalysisRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "ai-analysis-accounts" });
@@ -152,7 +153,7 @@ export async function POST(req: NextRequest) {
           toolCallsCount,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: (error as any)?.code ?? null,
+          errorCode: getAiErrorCode(error),
           sampleRate: 1,
         });
       },
@@ -178,11 +179,11 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: (error as any)?.code ?? null,
+      errorCode: getAiErrorCode(error),
       sampleRate: 1,
     });
 
-    console.error("Error in account analysis route:", error);
+    logAiError("Error in account analysis route", error, { userId });
     return apiError("INTERNAL_ERROR", "Failed to process account analysis", 500);
   }
 }

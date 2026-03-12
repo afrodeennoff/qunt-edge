@@ -3,8 +3,19 @@ import type { AiFeature } from "@/lib/ai/policy";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { aiRouter } from "@/lib/ai/router";
 import { getRouterConfig } from "@/lib/ai/router/config";
+import { logAiError } from "@/lib/ai/error-utils";
 
-const baseURL = process.env.AI_BASE_URL || "https://api.z.ai/api/paas/v4";
+const baseURL = process.env.AI_BASE_URL || (() => {
+  // MEDIUM: Fail explicitly in development if AI_BASE_URL is not configured
+  if (process.env.NODE_ENV === 'development') {
+    throw new Error(
+      'AI_BASE_URL must be configured in development. ' +
+      'Set it in your .env.local file. ' +
+      'Example: AI_BASE_URL=https://api.z.ai/api/paas/v4'
+    );
+  }
+  return "https://api.z.ai/api/paas/v4";
+})();
 let hasWarnedMissingApiKey = false;
 let hasWarnedMissingBaseUrl = false;
 
@@ -14,8 +25,8 @@ const aiClient = createOpenAI({
 });
 
 /**
- * Creates a language model that uses the AI Router for free tier providers
- * with automatic fallback to GLM (OpenAI-compatible) provider.
+ * Returns a direct OpenAI-compatible language model (GLM via AI_BASE_URL).
+ * Router attempts are intentionally handled only by createCompletionWithRouter().
  */
 export function getAiLanguageModel(feature: AiFeature) {
   if (!process.env.OPENAI_API_KEY && !hasWarnedMissingApiKey) {
@@ -29,40 +40,11 @@ export function getAiLanguageModel(feature: AiFeature) {
   }
 
   const { model } = getAiPolicy(feature);
-  const routerConfig = getRouterConfig();
-
-  // If router is disabled, use GLM directly (original behavior)
-  if (!routerConfig.enabled) {
-    console.log(`[AI] Using GLM provider for feature: ${feature}, model: ${model}`);
-    return aiClient(model);
-  }
-
-  // Router is enabled - use free tier providers with GLM fallback
-  console.log(`[AI Router] Enabled for feature: ${feature} - attempting free tiers first`);
-  
-  // Create a custom model that routes through free tiers
-  return createRouterBackedModel(feature, model);
+  return aiClient(model);
 }
 
-/**
- * Creates a language model that attempts free tier providers first,
- * then falls back to GLM if all free providers fail.
- *
- * Note: This returns the GLM model as a base for AI SDK compatibility.
- * For actual router behavior with free tier attempts, routes should call
- * createCompletionWithRouter() explicitly before falling back to this model.
- */
-function createRouterBackedModel(feature: AiFeature, fallbackModel: string) {
-  console.log(`[AI Router] Creating router-backed model for ${feature} - GLM will be used if router fallback occurs`);
-
-  const provider = createOpenAI({
-    baseURL,
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
-  // Return the GLM model as base for AI SDK compatibility
-  // Routes should use createCompletionWithRouter() for explicit free tier attempts
-  return provider(fallbackModel);
+export function getAiLanguageModelById(model: string) {
+  return aiClient(model);
 }
 
 /**
@@ -76,20 +58,43 @@ export async function createCompletionWithRouter(
   options: { temperature?: number; budgetLimit?: number } = {}
 ): Promise<{ content: string; provider: string; model: string }> {
   const routerConfig = getRouterConfig();
+  const { model } = getAiPolicy(feature);
   
-  // If router is disabled, use GLM directly
+  // Router disabled: use direct GLM completion (OpenAI-compatible API).
   if (!routerConfig.enabled) {
-    const { model } = getAiPolicy(feature);
-    console.log(`[AI] Router disabled - using GLM: ${model}`);
-    
-    // Direct GLM call would happen here
-    // For now, throw to indicate router should be enabled
-    throw new Error("AI Router is not enabled - please set AI_ROUTER_ENABLED=true");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is required for direct GLM fallback");
+    }
+
+    const response = await fetch(`${baseURL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: options.temperature ?? 0.3,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`GLM completion failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("GLM completion returned empty content");
+    }
+
+    return { content, provider: "openai-compatible", model };
   }
 
   try {
-    console.log(`[AI Router] Attempting free tier providers for feature: ${feature}`);
-    
     const result = await aiRouter.createCompletion({
       userId,
       feature,
@@ -98,15 +103,13 @@ export async function createCompletionWithRouter(
       temperature: options.temperature || 0.3,
     });
 
-    console.log(`[AI Router] Success! Provider: ${result.provider}, Model: ${result.model}`);
-    
     return {
       content: result.content,
       provider: result.provider,
       model: result.model,
     };
   } catch (error) {
-    console.error("[AI Router] All providers failed, falling back to GLM:", error);
+    logAiError("[AI Router] Completion failed", error, { feature, userId });
     throw error;
   }
 }

@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const createRouteClientMock = vi.fn();
-
-vi.mock("@/lib/supabase/route-client", () => ({
-  createRouteClient: (...args: unknown[]) => createRouteClientMock(...args),
+vi.mock("@/lib/ai/route-guard", () => ({
+  guardAiRequest: vi.fn(async () => ({ ok: true, userId: "u_1", email: "u_1@example.com" })),
 }));
 
 import { POST } from "@/app/api/ai/transcribe/route";
@@ -12,11 +10,6 @@ describe("ai transcribe route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.OPENAI_API_KEY = "test-key";
-    createRouteClientMock.mockReturnValue({
-      auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u_1" } }, error: null }),
-      },
-    });
   });
 
   it("returns 413 on oversized content-length before parsing form-data", async () => {

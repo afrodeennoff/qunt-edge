@@ -10,6 +10,7 @@ import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetr
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
 import { apiError } from "@/lib/api-response";
+import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 export const maxDuration = 90;
 const editorRateLimit = rateLimit({ limit: 15, window: 60_000, identifier: "ai-editor" });
@@ -142,7 +143,7 @@ export async function POST(req: NextRequest) {
           toolCallsCount,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code ?? '') || null : null,
+          errorCode: getAiErrorCode(error),
           sampleRate: 1,
         });
       },
@@ -190,11 +191,11 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code ?? '') || null : null,
+      errorCode: getAiErrorCode(error),
       sampleRate: 1,
     });
 
-    console.error("Error in editor AI route:", error);
+    logAiError("Error in editor AI route", error, { userId });
     return apiError("INTERNAL_ERROR", "An unexpected error occurred. Please try again.", 500, {
       type: "internal_error",
       context: "Failed to process AI request",

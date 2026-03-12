@@ -7,6 +7,7 @@ import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 export const maxDuration = 30;
 const dateSearchRateLimit = rateLimit({ limit: 30, window: 60_000, identifier: "ai-search-date" });
@@ -149,11 +150,11 @@ Return the appropriate filter type (date range OR weekday).`,
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
+      errorCode: getAiErrorCode(error),
       sampleRate: 1,
     });
 
-    console.error("Error in date parsing route:", error);
+    logAiError("Error in date parsing route", error, { userId });
     return apiError("INTERNAL_ERROR", "Failed to parse date query", 500);
   }
 }

@@ -1,8 +1,9 @@
-import { OpenRouterClient, OpenRouterCompletionOptions, OpenRouterMessage } from './openrouter';
+import { OpenRouterClient, OpenRouterMessage } from './openrouter';
 import { CircuitBreaker } from './circuit';
 import { TenantSafeCache } from './cache';
 import { BudgetReservation } from './reservations';
 import { getRouterConfig } from './config';
+import { logAiWarn } from '@/lib/ai/error-utils';
 
 export interface RouterCompletionOptions {
   userId: string;
@@ -25,8 +26,8 @@ export class FallbackRouter {
   private config = getRouterConfig();
   
   async createCompletion(options: RouterCompletionOptions): Promise<RouterCompletionResult> {
-    // Check cache first
-    const cacheKey = options.messages.map(m => m.content).join('\n');
+    // Check cache first - include message count to prevent collisions
+    const cacheKey = `${options.messages.length}:${options.messages.map(m => m.content).join('\n')}`;
     const cached = await this.cache.get(options.userId, options.feature, cacheKey);
     
     if (cached) {
@@ -41,7 +42,8 @@ export class FallbackRouter {
     const providers = [
       { name: 'openrouter', model: this.config.openrouter.models.free },
       { name: 'openrouter', model: this.config.openrouter.models.auto },
-      { name: 'liquid', model: this.config.liquid.models.lfm },
+      // This is still served via OpenRouter model routing; keep provider label truthful.
+      { name: 'openrouter', model: this.config.liquid.models.lfm },
     ];
     
     // Try each provider in sequence
@@ -84,7 +86,10 @@ export class FallbackRouter {
           model: provider.model,
         };
       } catch (error) {
-        console.warn(`Provider ${provider.name}/${provider.model} failed:`, error);
+        logAiWarn('[AI Router] Provider attempt failed', error, {
+          provider: provider.name,
+          model: provider.model,
+        });
         // Continue to next provider
       }
     }

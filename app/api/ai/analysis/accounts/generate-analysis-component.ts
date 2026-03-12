@@ -2,6 +2,7 @@ import { Output, generateText, tool } from "ai";
 import { z } from "zod/v3";
 import { AccountAnalysisSchema, type AccountAnalysis } from "./get-account-performance";
 import { getAiLanguageModel } from "@/lib/ai/client";
+import { logAiError } from "@/lib/ai/error-utils";
 
 const AnalysisOutputSchema = z.object({
   summary: z.string().describe("Brief overview of the overall portfolio performance"),
@@ -107,7 +108,7 @@ Please provide a comprehensive structured analysis that would be valuable for a 
         },
       };
     } catch (error) {
-      console.error("Error generating structured AI analysis:", error);
+      logAiError("Error generating structured AI analysis", error);
       return {
         locale,
         username,

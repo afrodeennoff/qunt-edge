@@ -7,6 +7,7 @@ import { getAiLanguageModel } from "@/lib/ai/client";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 // Analysis Tools
 import { generateAnalysisComponent } from "../accounts/generate-analysis-component";
@@ -136,7 +137,7 @@ export async function POST(req: NextRequest) {
           toolCallsCount,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
+          errorCode: getAiErrorCode(error),
           sampleRate: 1,
         });
       },
@@ -161,10 +162,10 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
+      errorCode: getAiErrorCode(error),
       sampleRate: 1,
     });
-    console.error("Error in instrument analysis route:", error);
+    logAiError("Error in instrument analysis route", error, { userId });
     return apiError("INTERNAL_ERROR", "Failed to process instrument analysis", 500);
   }
 }

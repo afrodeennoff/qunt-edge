@@ -21,6 +21,7 @@ import { apiError } from "@/lib/api-response";
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
 import { enforcePromptSafety, sanitizeUserMessages } from "@/lib/ai/prompt-safety";
+import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 export const maxDuration = 60;
 const MAX_CHAT_BODY_BYTES = 1024 * 1024;
@@ -63,14 +64,6 @@ const availableChatTools = {
 };
 
 type ChatToolName = keyof typeof availableChatTools;
-
-function getErrorCode(error: unknown): string | null {
-  if (!error || typeof error !== 'object') return null
-  if (!('code' in error)) return null
-  const value = (error as { code?: unknown }).code
-  if (value == null) return null
-  return String(value)
-}
 
 function extractLastUserText(messages: ParsedChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
@@ -296,7 +289,7 @@ export async function POST(req: NextRequest) {
           latencyMs: Date.now() - startedAt,
           success: false,
           errorCategory: categorizeAiError(error),
-          errorCode: getErrorCode(error),
+          errorCode: getAiErrorCode(error),
           toolCallsCount,
           sampleRate: 1,
         });
@@ -319,7 +312,7 @@ export async function POST(req: NextRequest) {
 
     return result.toUIMessageStreamResponse({
       onError: (error) => {
-        console.error("[Chat Route] UI Stream error:", error);
+        logAiError("[Chat Route] UI Stream error", error, { userId });
         return "An error occurred during the chat response";
       },
     });
@@ -336,11 +329,11 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: getErrorCode(error),
+      errorCode: getAiErrorCode(error),
       sampleRate: 1,
     });
 
-    console.error("Error in chat route:", error);
+    logAiError("Error in chat route", error, { userId });
     return apiError("INTERNAL_ERROR", "Failed to process chat", 500);
   }
 }

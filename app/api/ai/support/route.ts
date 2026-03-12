@@ -1,20 +1,27 @@
-import { convertToModelMessages, streamText, UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  UIMessage,
+} from "ai";
 import { NextRequest } from "next/server";
 import { askForEmailForm } from "./tools/ask-for-email-form";
 import { z } from "zod/v3";
-import { createOpenAI } from "@ai-sdk/openai";
 import { rateLimit } from "@/lib/rate-limit";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { apiError } from "@/lib/api-response";
 import { guardAiRequest } from "@/lib/ai/route-guard";
-import { getAiLanguageModel, createCompletionWithRouter } from "@/lib/ai/client";
+import { getAiLanguageModelById, createCompletionWithRouter } from "@/lib/ai/client";
 import { getRouterConfig } from "@/lib/ai/router/config";
-import { assertWithinAiBudget } from "@/lib/ai/usage-budget";
-
-const customOpenai = createOpenAI({
-  baseURL: "https://api.z.ai/api/paas/v4",
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
+import {
+  estimateTokenCountFromMessages,
+  getAiErrorCode,
+  logAiError,
+  logAiWarn,
+  sanitizeAiError,
+} from "@/lib/ai/error-utils";
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 const supportRateLimit = rateLimit({ limit: 12, window: 60_000, identifier: "ai-support" });
@@ -31,75 +38,89 @@ const SUPPORT_MODEL_ALLOWLIST = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
+  const policy = getAiPolicy("chat");
+  const startedAt = Date.now();
+  let selectedModel = policy.model;
+
   // Apply AI route guard (auth + entitlements + rate limit + budget)
   const guard = await guardAiRequest(req, 'support', supportRateLimit)
   if (!guard.ok) return guard.response
-  const { userId } = guard  // entitlement is checked inside guardAiRequest
+  const { userId } = guard
 
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
-    }
-
     const body = await req.json();
     const { messages, model, webSearch } = requestSchema.parse(body);
-    const policy = getAiPolicy("chat");
-    const selectedModel = model && SUPPORT_MODEL_ALLOWLIST.has(model) ? model : policy.model;
+    selectedModel = model && SUPPORT_MODEL_ALLOWLIST.has(model) ? model : policy.model;
     const webSearchModel = process.env.AI_SUPPORT_WEBSEARCH_MODEL;
     const webSearchFallback = webSearch && !webSearchModel;
+    const routerConfig = getRouterConfig();
+    const isRouterUsable = routerConfig.enabled && Boolean(routerConfig.openrouter.apiKey);
+    const hasDirectProvider = Boolean(process.env.OPENAI_API_KEY);
+
+    if (!isRouterUsable && !hasDirectProvider) {
+      return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
+    }
 
     // Remove first message if it's assistant message
     if (messages.length > 0 && messages[0].role === "assistant") {
       messages.shift();
     }
 
-    // Try AI Router if enabled
-    const routerConfig = getRouterConfig();
-    let routerResult: string | undefined;
+    const routerMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = messages.map((m) => {
+      const validParts = m.parts?.filter(
+        (p): p is { type: 'text'; text: string } => p?.type === 'text' && typeof p?.text === 'string'
+      ) ?? [];
+      return {
+        role: m.role === 'user' ? 'user' : m.role === 'assistant' ? 'assistant' : 'system',
+        content: validParts.map((p) => p.text).join('\n'),
+      };
+    });
 
-    if (routerConfig.enabled) {
+    if (isRouterUsable) {
       try {
-        // Get actual budget from user's entitlement
-        const budgetCheck = await assertWithinAiBudget(userId, true);
-        const actualBudget = budgetCheck.limit;
-
-        // Extract text content from UIMessage parts with proper type guards
-        const routerMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = messages.map(m => {
-          const validParts = m.parts?.filter(
-            (p): p is { type: 'text'; text: string } =>
-              p?.type === 'text' && typeof p?.text === 'string'
-          ) ?? [];
-
-          return {
-            role: m.role === 'user' ? 'user' : m.role === 'assistant' ? 'assistant' : 'system',
-            content: validParts.map(p => p.text).join('\n')
-          };
-        });
-
-        const result = await createCompletionWithRouter(
+        const routerResult = await createCompletionWithRouter(
           'chat',
           userId,
           routerMessages,
-          { temperature: 0.3, budgetLimit: actualBudget }
+          { temperature: 0.3, budgetLimit: 100 }
         );
-        routerResult = result.content;
-      } catch (routerError) {
-        console.warn('[Support] AI Router failed, falling back to direct API:', routerError);
-      }
-    }
 
-    // If router succeeded, return the result
-    if (routerResult) {
-      return new Response(JSON.stringify({ 
-        choices: [{ message: { content: routerResult } }] 
-      }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+        void logAiRequest({
+          userId,
+          route: "/api/ai/support",
+          feature: "chat",
+          model: routerResult.model,
+          provider: routerResult.provider,
+          usage: { totalTokens: estimateTokenCountFromMessages(routerMessages, routerResult.content) },
+          latencyMs: Date.now() - startedAt,
+          success: true,
+          sampleRate: policy.logSampleRate,
+          finishReason: "stop",
+        });
+
+        const stream = createUIMessageStream({
+          execute: ({ writer }) => {
+            const textId = `router-${Date.now()}`;
+            writer.write({ type: "start" });
+            writer.write({ type: "text-start", id: textId });
+            writer.write({ type: "text-delta", id: textId, delta: routerResult.content });
+            writer.write({ type: "text-end", id: textId });
+            writer.write({ type: "finish", finishReason: "stop" });
+          },
+        });
+
+        return createUIMessageStreamResponse({ stream });
+      } catch (routerError) {
+        logAiWarn("[Support] AI Router failed; falling back to direct provider", routerError, { userId });
+        if (!hasDirectProvider) {
+          throw routerError;
+        }
+      }
     }
 
     const modelMessages = await convertToModelMessages(messages);
     const result = streamText({
-      model: webSearch && webSearchModel ? getAiLanguageModel("chat") : getAiLanguageModel("chat"),
+      model: webSearch && webSearchModel ? getAiLanguageModelById(webSearchModel) : getAiLanguageModelById(selectedModel),
       system: `${webSearchFallback ? "[WEB_SEARCH_FALLBACK_ACTIVE] Web search is unavailable for this environment; answer without external browsing.\n\n" : ""}You are an AI chatbot support assistant for Qunt Edge, a trading journaling platform. Your role is to gather information and direct users to the appropriate support channels.
 
 ## CRITICAL LIMITATIONS
@@ -174,6 +195,34 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
         askForEmailForm,
       },
       temperature: 0.3,
+      onFinish: (finalResult) => {
+        void logAiRequest({
+          userId,
+          route: "/api/ai/support",
+          feature: "chat",
+          model: selectedModel,
+          provider: policy.provider,
+          usage: extractUsage(finalResult.usage),
+          latencyMs: Date.now() - startedAt,
+          finishReason: finalResult.finishReason ?? null,
+          success: true,
+          sampleRate: policy.logSampleRate,
+        });
+      },
+      onError: ({ error }) => {
+        void logAiRequest({
+          userId,
+          route: "/api/ai/support",
+          feature: "chat",
+          model: selectedModel,
+          provider: policy.provider,
+          latencyMs: Date.now() - startedAt,
+          success: false,
+          errorCategory: categorizeAiError(error),
+          errorCode: getAiErrorCode(error),
+          sampleRate: 1,
+        });
+      },
     });
 
     return result.toUIMessageStreamResponse({
@@ -191,12 +240,24 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
       });
     }
 
-    const err = error as { statusCode?: number; type?: string };
+    void logAiRequest({
+      userId,
+      route: "/api/ai/support",
+      feature: "chat",
+      model: selectedModel,
+      provider: policy.provider,
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: getAiErrorCode(error),
+      sampleRate: 1,
+    });
 
-    console.error("Support API Error:", error);
+    const err = sanitizeAiError(error);
+    logAiError("Support API Error", error, { userId });
 
     // Handle rate limit errors specifically
-    if (err?.statusCode === 429 || err?.type === "rate_limit_exceeded") {
+    if (err.statusCode === 429 || err.type === "rate_limit_exceeded") {
       return apiError(
         "RATE_LIMITED",
         "We are experiencing high demand. Please try again in a few minutes or contact support directly.",
@@ -210,7 +271,7 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
     }
 
     // Handle other AI/API errors
-    if (typeof err?.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 500) {
+    if (typeof err.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 500) {
       return apiError(
         "SERVICE_UNAVAILABLE",
         "Our AI service is temporarily unavailable. Please try again later or contact support directly.",

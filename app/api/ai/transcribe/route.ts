@@ -3,6 +3,8 @@ import OpenAI from 'openai'
 import { rateLimit } from '@/lib/rate-limit'
 import { guardAiRequest } from '@/lib/ai/route-guard'
 import { apiError } from '@/lib/api-response'
+import { categorizeAiError, logAiRequest } from '@/lib/ai/telemetry'
+import { estimateTokenCountFromText, getAiErrorCode, logAiError } from '@/lib/ai/error-utils'
 
 const transcribeRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: 'ai-transcribe' })
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024
@@ -20,6 +22,8 @@ const ALLOWED_AUDIO_TYPES = new Set([
 ])
 
 export async function POST(request: NextRequest) {
+  const startedAt = Date.now()
+
   // Apply AI route guard (auth + entitlements + rate limit + budget)
   const guard = await guardAiRequest(request, 'transcribe', transcribeRateLimit)
   if (!guard.ok) return guard.response
@@ -84,13 +88,40 @@ export async function POST(request: NextRequest) {
       response_format: 'text',
     })
 
+    const transcriptionText = String(transcription ?? '')
+    void logAiRequest({
+      userId,
+      route: '/api/ai/transcribe',
+      feature: 'transcribe',
+      model: 'whisper-1',
+      provider: 'openai-compatible',
+      usage: { totalTokens: estimateTokenCountFromText(transcriptionText) },
+      latencyMs: Date.now() - startedAt,
+      success: true,
+      sampleRate: 1,
+      finishReason: 'stop',
+    })
+
     return NextResponse.json({
       transcription: transcription,
       fileName: audioFile.name,
     })
 
-  } catch (error) {
-    console.error('Transcription error:', error)
+  } catch (error: unknown) {
+    void logAiRequest({
+      userId,
+      route: '/api/ai/transcribe',
+      feature: 'transcribe',
+      model: 'whisper-1',
+      provider: 'openai-compatible',
+      latencyMs: Date.now() - startedAt,
+      success: false,
+      errorCategory: categorizeAiError(error),
+      errorCode: getAiErrorCode(error),
+      sampleRate: 1,
+    })
+
+    logAiError('Transcription error', error, { userId })
     return apiError('INTERNAL_ERROR', 'Failed to transcribe audio', 500)
   }
 }

@@ -8,6 +8,7 @@ import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetr
 import { apiError } from "@/lib/api-response";
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 export const maxDuration = 30;
 const mappingsRateLimit = rateLimit({ limit: 20, window: 60_000, identifier: "ai-mappings" });
@@ -334,7 +335,7 @@ export async function POST(req: NextRequest) {
       return apiError("VALIDATION_FAILED", "Invalid mappings request payload", 400, error.errors);
     }
 
-    console.error("Error in mappings route:", error);
+    logAiError("Error in mappings route", error, { userId });
 
     void logAiRequest({
       route: "/api/ai/mappings",
@@ -344,7 +345,7 @@ export async function POST(req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       success: false,
       errorCategory: categorizeAiError(error),
-      errorCode: error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code ?? "") || null : null,
+      errorCode: getAiErrorCode(error),
       sampleRate: 1,
     });
 

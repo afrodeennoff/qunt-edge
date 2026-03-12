@@ -39,7 +39,7 @@ describe('AI Router Integration', () => {
   })
 
   describe('Budget Reservation', () => {
-    it('should allow reservation within budget', async () => {
+    it('should allow reservation within budget with in-memory fallback', async () => {
       const { BudgetReservation } = await import('@/lib/ai/router/reservations')
       const result = await BudgetReservation.reserve('user-1', 0.5, 1.0)
       expect(result).toBe(true)
@@ -47,23 +47,19 @@ describe('AI Router Integration', () => {
 
     it('should reject reservation exceeding budget', async () => {
       const { BudgetReservation } = await import('@/lib/ai/router/reservations')
-      const result = await BudgetReservation.reserve('user-2', 1.5, 1.0)
+      await BudgetReservation.reserve('user-2', 0.8, 1.0)
+      const result = await BudgetReservation.reserve('user-2', 0.3, 1.0)
       expect(result).toBe(false)
     })
 
-    it('should track balance correctly', async () => {
+    it('should track and reset balance', async () => {
       const { BudgetReservation } = await import('@/lib/ai/router/reservations')
       await BudgetReservation.reserve('user-3', 0.3, 1.0)
       const balance = await BudgetReservation.getBalance('user-3')
       expect(balance).toBe(0.3)
-    })
-
-    it('should reset budget correctly', async () => {
-      const { BudgetReservation } = await import('@/lib/ai/router/reservations')
-      await BudgetReservation.reserve('user-4', 0.5, 1.0)
-      await BudgetReservation.resetBudget('user-4')
-      const balance = await BudgetReservation.getBalance('user-4')
-      expect(balance).toBe(0)
+      await BudgetReservation.resetBudget('user-3')
+      const resetBalance = await BudgetReservation.getBalance('user-3')
+      expect(resetBalance).toBe(0)
     })
   })
 
@@ -125,10 +121,21 @@ describe('AI Router Integration', () => {
 
   describe('AI Router Public Interface', () => {
     it('should throw error when router is disabled', async () => {
-      // Skip this test for now - the getEnv() caching makes it difficult to test
-      // The functionality is already tested by other tests
-      // This test would require clearing the env cache or more complex mocking
-      expect(true).toBe(true) // Placeholder to keep test suite happy
+      vi.resetModules()
+      vi.doMock('@/lib/env', () => ({
+        getEnv: vi.fn(() => ({
+          NODE_ENV: 'test',
+          AI_ROUTER_ENABLED: 'false',
+          OPENROUTER_API_KEY: 'test-key',
+        })),
+      }))
+      const { aiRouter } = await import('@/lib/ai/router')
+      await expect(aiRouter.createCompletion({
+        userId: 'test-user',
+        feature: 'test',
+        budgetLimit: 1,
+        messages: [{ role: 'user', content: 'hi' }],
+      })).rejects.toThrow('AI Router is not enabled')
     })
   })
 })
