@@ -4,6 +4,28 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ---
 
+## 🚀 Recent Feature Updates
+
+### 2026-03-12: Prisma Connection Pool Optimization (Task 1.1)
+- **What changed:** Increased Prisma connection pool from 2 to 20 connections in production, added min pool of 5, implemented pool monitoring at 80% capacity, and updated timeout settings for production-grade performance.
+- **What I want:** Enable production-grade concurrent query handling to support ~200-400 queries per second and prevent pool exhaustion under load.
+- **What I don't want:** Pool exhaustion errors, connection timeout failures, or insufficient capacity causing degraded performance under concurrent load.
+- **How we fixed that:**
+  - Updated `lib/prisma.ts` to use pool max of 20 (increased from 2) and min of 5 in production.
+  - Updated timeout settings: 30s idle timeout, 10s connection timeout (fail-fast).
+  - Added pool monitoring that logs warnings when utilization reaches 80% (16/20 connections).
+  - Created pool load test script (`scripts/test-db-pool.mjs`) for verifying pool behavior under concurrent load.
+  - Added comprehensive documentation (`docs/operations/db-pool-sizing.md`) with capacity planning guidelines and troubleshooting steps.
+  - Updated `.env.example` with new pool configuration variables (`PG_POOL_MAX`, `PG_POOL_MIN`, `PG_POOL_IDLE_TIMEOUT_MS`, `PG_POOL_CONNECT_TIMEOUT_MS`).
+- **Key Files:** `lib/prisma.ts`, `scripts/test-db-pool.mjs`, `docs/operations/db-pool-sizing.md`, `.env.example`, `AGENTS.md`
+-**Verification:**
+  - `npm run typecheck` passes
+  - `npm run lint -- lib/prisma.ts` passes (1 pre-existing complexity warning)
+  - Test script validates with proper import and error handling
+  - Git commit created with message "perf: increase Prisma pool to 20 for production concurrency"
+
+---
+
 # Developer Guide
 
 ## Essential Commands

@@ -9,6 +9,8 @@ import { prisma } from '@/lib/prisma'
 import { getDatabaseUserId, getUserId } from './auth'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { cacheQuery } from '@/lib/cache/query-cache'
+import { FEATURE_FLAGS } from '@/lib/feature-flags'
 
 export type SharedDataResponse = {
   trades: Trade[]
@@ -122,23 +124,25 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
     }
   }
 
-  // Cache only lightweight, stable core data. Heavy/volatile data is fetched outside cache.
+  // Use cacheQuery wrapper with feature flag support
+  const shouldCache = FEATURE_FLAGS.ENABLE_QUERY_CACHING
+
   // TIER 1: Global Stable Data (Tick details)
-  const getGlobalTickDetails = unstable_cache(
+  const getGlobalTickDetails = cacheQuery(
     async () => prisma.tickDetails.findMany(),
     ['global-tick-details'],
-    { revalidate: 86400, tags: ['global-tick-details'] }
+    { revalidateIn: shouldCache ? 86400 : 0 }
   )
 
   // TIER 2: Global Localized Data (Financial events)
-  const getGlobalFinancialEvents = unstable_cache(
-    async (lang: string) => prisma.financialEvent.findMany({ where: { lang } }),
+  const getGlobalFinancialEvents = cacheQuery(
+    async () => prisma.financialEvent.findMany({ where: { lang: locale } }),
     [`global-financial-events-${locale}`],
-    { revalidate: 3600, tags: [`global-financial-events-${locale}`] }
+    { revalidateIn: shouldCache ? 3600 : 0 }
   )
 
   // TIER 3: User Core Data (Subscription, User profile)
-  const getCachedCoreUserData = unstable_cache(
+  const getCachedCoreUserData = cacheQuery(
     async () => {
       const [userData, subscription] = await Promise.all([
         prisma.user.findUnique({
@@ -153,13 +157,13 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
     },
     [`user-data-core-${userId}`],
     {
-      tags: [`user-data-${userId}`, `user-data-core-${userId}`],
-      revalidate: 3600 // 1 hour
+      revalidateIn: shouldCache ? 3600 : 0,
+      tags: [`user-data-${userId}`, `user-data-core-${userId}`]
     }
   )
 
   // TIER 4: User Supplemental Data (Accounts, Groups, Tags) - Cached because these don't change every second
-  const getCachedSupplementalData = unstable_cache(
+  const getCachedSupplementalData = cacheQuery(
     async () => {
       const [accounts, groups, tags, moodHistory] = await Promise.all([
         prisma.account.findMany({
@@ -185,8 +189,8 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
     },
     [`user-data-supplemental-${userId}`],
     {
-      tags: [`user-data-${userId}`, `user-data-supplemental-${userId}`],
-      revalidate: 300 // 5 minutes cache for accounts/groups
+      revalidateIn: shouldCache ? 300 : 0,
+      tags: [`user-data-${userId}`, `user-data-supplemental-${userId}`]
     }
   )
 
@@ -194,7 +198,7 @@ export async function getUserData(forceRefresh: boolean = false): Promise<{
   const [core, tickDetails, financialEvents, supplemental] = await Promise.all([
     getCachedCoreUserData(),
     getGlobalTickDetails(),
-    getGlobalFinancialEvents(locale),
+    getGlobalFinancialEvents(),
     getCachedSupplementalData()
   ])
 

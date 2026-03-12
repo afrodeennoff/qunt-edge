@@ -1,5 +1,6 @@
 import { getAllTradesForAi, type AiTradesFetchResult } from './get-all-trades'
 import type { SerializedTrade } from '@/server/trades'
+import { getUserId } from '@/server/auth'
 
 /**
  * Access profile levels for AI trade analysis.
@@ -11,7 +12,7 @@ export type TradeAccessProfile = 'summary' | 'analysis' | 'detail'
  * Parameters for fetching trades with profile-based access control.
  */
 export interface GetAiTradesParams {
-  userId: string
+  userId?: string
   profile: TradeAccessProfile
   forceRefresh?: boolean
 }
@@ -170,12 +171,14 @@ function projectTradeFields(
  * Get trades with safe projection based on access profile.
  * Implements request-scoped memoization to avoid redundant fetches.
  * 
- * @param params - Parameters including userId, profile, and optional forceRefresh
+ * @param params - Parameters including userId (optional), profile, and optional forceRefresh
  * @returns Trades with profile-based field projection and computed aggregates
  */
 export async function getAiTrades(params: GetAiTradesParams): Promise<AiTradesResult> {
-  const { userId, profile, forceRefresh = false } = params
-  const cacheKey = `${userId}:${profile}:${forceRefresh}`
+  const { profile, forceRefresh = false } = params
+  // Use provided userId or fall back to session (for backward compatibility)
+  const resolvedUserId = params.userId ?? await getUserId()
+  const cacheKey = `${resolvedUserId}:${profile}:${forceRefresh}`
 
   // Check memoization cache first
   const cache = getRequestCache()

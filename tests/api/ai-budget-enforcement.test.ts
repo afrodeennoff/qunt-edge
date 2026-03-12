@@ -153,12 +153,10 @@ describe("ai-budget-enforcement", () => {
         const body = await parseResponseBody(result.response)
         expect(body.error.code).toBe("RATE_LIMITED")
         expect(body.error.details).toBeDefined()
-        const details = body.error.details as { budget?: { limit: number; used: number; remaining: number } } | undefined
-        expect(details?.budget).toEqual({
-          limit: 150_000,
-          used: 150_000,
-          remaining: 0,
-        })
+        const details = body.error.details as { limit: number; used: number; remaining: number } | undefined
+        expect(details?.limit).toBe(150000)
+        expect(details?.used).toBe(150000)
+        expect(details?.remaining).toBe(0)
       }
     })
 
@@ -179,10 +177,10 @@ describe("ai-budget-enforcement", () => {
       expect(result.ok).toBe(false)
       if (!result.ok) {
         const body = await parseResponseBody(result.response)
-        const details = body.error.details as { budget?: { limit: number; used: number; remaining: number } } | undefined
-        expect(details?.budget?.limit).toBe(2_000_000)
-        expect(details?.budget?.used).toBe(2_100_000)
-        expect(details?.budget?.remaining).toBe(0)
+        const details = body.error.details as { limit: number; used: number; remaining: number } | undefined
+        expect(details?.limit).toBe(2000000)
+        expect(details?.used).toBe(2100000)
+        expect(details?.remaining).toBe(0)
       }
     })
   })

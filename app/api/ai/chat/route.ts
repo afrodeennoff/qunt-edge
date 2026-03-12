@@ -20,6 +20,7 @@ import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetr
 import { apiError } from "@/lib/api-response";
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
+import { enforcePromptSafety, sanitizeUserMessages } from "@/lib/ai/prompt-safety";
 
 export const maxDuration = 60;
 const MAX_CHAT_BODY_BYTES = 1024 * 1024;
@@ -188,6 +189,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    
+    // Apply prompt safety checks to user messages
+    if (body.messages) {
+      const sanitized = sanitizeUserMessages(body.messages)
+      const safety = enforcePromptSafety(sanitized)
+      if (!safety.safe) {
+        return safety.response!
+      }
+      body.messages = safety.messages as typeof body.messages
+    }
+
     const { messages, username, locale, timezone } = chatRequestSchema.parse(body);
 
     if (messages.length > MAX_CHAT_MESSAGES) {
