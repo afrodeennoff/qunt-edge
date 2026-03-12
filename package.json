@@ -37,6 +37,7 @@
     "perf:dashboard-runtime": "node scripts/perf-dashboard-runtime.mjs",
     "perf:headers": "node scripts/perf-header-check.mjs",
     "perf:baseline": "node scripts/perf-baseline.mjs",
+    "perf:capture-baseline": "node scripts/perf-capture-baseline.mjs",
     "perf:ci": "npm run check:dead-code && npm run check:route-security && npm run check:route-budgets && npm run analyze:bundle && PERF_HEADER_STRICT=true npm run perf:headers && npm run perf:baseline && npm run perf:dashboard-runtime && npm run perf:lighthouse"
   },
   "dependencies": {
