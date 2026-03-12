@@ -19,11 +19,6 @@ export interface RouterConfig {
       };
     };
   };
-  liquid: {
-    models: {
-      lfm: string;
-    };
-  };
   cache: {
     ttlSeconds: number;
   };
@@ -63,11 +58,6 @@ export function getRouterConfig(): RouterConfig {
           input: Number.isFinite(maxPriceInput) ? maxPriceInput : 0.05,
           output: Number.isFinite(maxPriceOutput) ? maxPriceOutput : 0.05,
         },
-      },
-    },
-    liquid: {
-      models: {
-        lfm: 'liquid/lfm2-8b-a1b',
       },
     },
     cache: {

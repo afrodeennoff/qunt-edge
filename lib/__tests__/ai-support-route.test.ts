@@ -112,7 +112,15 @@ describe("ai support route", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(createCompletionWithRouterMock).toHaveBeenCalled();
+    expect(createCompletionWithRouterMock).toHaveBeenCalledWith(
+      "chat",
+      "u_1",
+      expect.any(Array),
+      expect.objectContaining({
+        temperature: 0.3,
+        model: "glm-4.7-flash",
+      }),
+    );
     expect(createUIMessageStreamResponseMock).toHaveBeenCalledWith(
       expect.objectContaining({ stream: "stream" }),
     );

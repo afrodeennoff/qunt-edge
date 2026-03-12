@@ -118,7 +118,15 @@ describe("AI Router - Comprehensive Integration Tests", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(createCompletionWithRouterMock).toHaveBeenCalled();
+    expect(createCompletionWithRouterMock).toHaveBeenCalledWith(
+      "chat",
+      "test-user-1",
+      expect.any(Array),
+      expect.objectContaining({
+        temperature: 0.3,
+        model: "glm-4.7-flash",
+      }),
+    );
     expect(createUIMessageStreamResponseMock).toHaveBeenCalled();
   });
 

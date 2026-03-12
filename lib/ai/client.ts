@@ -19,6 +19,8 @@ const aiClient = createOpenAI({
   },
 });
 
+type RouterAwareModel = ReturnType<typeof aiClient>;
+
 function normalizeModelForOpenRouter(model: string): string {
   const trimmed = model.trim();
   if (!trimmed || trimmed.includes("/")) return trimmed;
@@ -32,8 +34,9 @@ function normalizeModelForOpenRouter(model: string): string {
 }
 
 /**
- * Returns a direct OpenAI-compatible language model via OpenRouter.
- * Router attempts are intentionally handled only by createCompletionWithRouter().
+ * Returns a router-aware OpenAI-compatible language model via OpenRouter.
+ * When AI router is enabled, model calls use the canonical fallback chain:
+ * BYOK pool -> openrouter/free -> openrouter/auto -> requested model.
  */
 export function getAiLanguageModel(feature: AiFeature) {
   if (!aiApiKey && !hasWarnedMissingApiKey) {
@@ -47,11 +50,67 @@ export function getAiLanguageModel(feature: AiFeature) {
   }
 
   const { model } = getAiPolicy(feature);
-  return aiClient(normalizeModelForOpenRouter(model));
+  return getAiLanguageModelById(normalizeModelForOpenRouter(model));
 }
 
 export function getAiLanguageModelById(model: string) {
-  return aiClient(normalizeModelForOpenRouter(model));
+  const normalizedModel = normalizeModelForOpenRouter(model);
+  const routerConfig = getRouterConfig();
+  if (!routerConfig.enabled) {
+    return aiClient(normalizedModel);
+  }
+
+  const chain = buildRouterModelChain(normalizedModel, routerConfig);
+  return createFallbackModel(chain);
+}
+
+function buildRouterModelChain(model: string, routerConfig: ReturnType<typeof getRouterConfig>): string[] {
+  const seen = new Set<string>();
+  const chain = [
+    ...routerConfig.openrouter.models.byokFree,
+    routerConfig.openrouter.models.free,
+    routerConfig.openrouter.models.auto,
+    model,
+  ];
+  return chain.filter((id) => {
+    const trimmed = id.trim();
+    if (!trimmed || seen.has(trimmed)) return false;
+    seen.add(trimmed);
+    return true;
+  });
+}
+
+function createFallbackModel(modelChain: string[]): RouterAwareModel {
+  const baseModel = aiClient(modelChain[0]) as unknown as Record<string, unknown>;
+  const fallbackModel = {
+    ...baseModel,
+    modelId: modelChain[0],
+    async doGenerate(options: unknown) {
+      let lastError: unknown;
+      for (const modelId of modelChain) {
+        try {
+          const candidate = aiClient(modelId) as unknown as { doGenerate: (o: unknown) => Promise<unknown> };
+          return await candidate.doGenerate(options);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError ?? new Error("All fallback models failed");
+    },
+    async doStream(options: unknown) {
+      let lastError: unknown;
+      for (const modelId of modelChain) {
+        try {
+          const candidate = aiClient(modelId) as unknown as { doStream: (o: unknown) => Promise<unknown> };
+          return await candidate.doStream(options);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError ?? new Error("All fallback models failed");
+    },
+  };
+  return fallbackModel as unknown as RouterAwareModel;
 }
 
 /**

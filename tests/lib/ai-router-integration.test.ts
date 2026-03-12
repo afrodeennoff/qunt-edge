@@ -38,7 +38,6 @@ describe('AI Router Integration', () => {
       ])
       expect(config.openrouter.models.free).toBe('openrouter/free')
       expect(config.openrouter.models.auto).toBe('openrouter/auto')
-      expect(config.liquid.models.lfm).toBe('liquid/lfm2-8b-a1b')
       expect(config.openrouter.provider.order).toEqual([
         'groq',
         'cerebras',

@@ -47,9 +47,7 @@ export class FallbackRouter {
     }
     
     const requestedModel = options.requestedModel?.trim();
-    const byokFirstModels = requestedModel
-      ? [requestedModel, ...config.openrouter.models.byokFree]
-      : config.openrouter.models.byokFree;
+    const byokFirstModels = config.openrouter.models.byokFree;
     const providerHints = {
       order: config.openrouter.provider.order,
       sort: config.openrouter.provider.sort,
@@ -73,8 +71,9 @@ export class FallbackRouter {
       ...byokChain,
       { name: 'openrouter-free', model: config.openrouter.models.free },
       { name: 'openrouter-auto', model: config.openrouter.models.auto },
-      ...(requestedModel ? [{ name: 'openrouter-requested-fallback', model: requestedModel }] : []),
-      { name: 'openrouter-liquid', model: config.liquid.models.lfm },
+      ...(requestedModel && !seen.has(requestedModel)
+        ? [{ name: 'openrouter-requested-fallback', model: requestedModel }]
+        : []),
     ];
     
     // Try each provider in sequence
