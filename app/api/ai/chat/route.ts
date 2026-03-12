@@ -195,7 +195,13 @@ export async function POST(req: NextRequest) {
       const sanitized = sanitizeUserMessages(body.messages)
       const safety = enforcePromptSafety(sanitized)
       if (!safety.safe) {
-        return safety.response!
+        return new Response(
+          JSON.stringify(safety.response!.body),
+          { 
+            status: safety.response!.status,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        )
       }
       body.messages = safety.messages as typeof body.messages
     }
