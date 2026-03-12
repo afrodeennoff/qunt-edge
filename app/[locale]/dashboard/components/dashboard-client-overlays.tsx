@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useRithmicSyncStore } from "@/store/rithmic-sync-store";
 
 const Modals = dynamic(() => import("@/components/modals"), {
   ssr: false,
@@ -19,6 +21,10 @@ const RithmicSyncNotifications = dynamic(
 
 export function DashboardClientOverlays() {
   const [ready, setReady] = useState(false);
+  const pathname = usePathname();
+  const isImportRoute = pathname?.endsWith("/dashboard/import") || pathname?.endsWith("/dashboard/import/");
+  const { autoSyncEnabled: rithmicAutoEnabled } = useRithmicSyncStore();
+  const hasActiveSync = isImportRoute || rithmicAutoEnabled;
 
   useEffect(() => {
     const schedule: (cb: IdleRequestCallback) => number =
@@ -40,7 +46,7 @@ export function DashboardClientOverlays() {
 
   return (
     <>
-      <RithmicSyncNotifications />
+      {hasActiveSync && <RithmicSyncNotifications />}
       <Modals />
     </>
   );

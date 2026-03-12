@@ -108,6 +108,8 @@ export function FilterCommandMenu({ className, variant = "navbar" }: FilterComma
   // Detect if search input contains date-related keywords
   const containsDateKeywords = useCallback((query: string): boolean => {
     const lowerQuery = query.toLowerCase().trim()
+    if (!lowerQuery) return false
+    
     const dateKeywords = [
       'today', 'yesterday', 'tomorrow',
       'week', 'month', 'year',

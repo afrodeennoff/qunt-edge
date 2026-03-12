@@ -456,7 +456,7 @@ export default function TraderProfilePage() {
 
       <div className="relative mx-auto grid w-full max-w-[1600px] gap-3 sm:gap-4 xl:grid-cols-[1.35fr_1fr]">
         <section className="space-y-3 sm:space-y-4">
-          <Card className="border border-white/5 bg-white/[0.02] backdrop-blur-xl p-3.5 shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
+          <Card className="border border-white/5 bg-white/[0.02] p-3.5 sm:backdrop-blur-xl sm:shadow-2xl transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-primary/5">
             <div className="flex items-start gap-4">
               <Avatar className="h-20 w-20 border border-white/10 bg-white/5 shadow-xl ring-2 ring-white/5 transition-transform duration-500 hover:scale-105 hover:ring-primary/30">
                 <AvatarImage src={profileAvatar ?? undefined} alt={`${profileName} avatar`} />

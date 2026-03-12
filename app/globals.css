@@ -46,7 +46,7 @@
   select,
   [role="button"],
   [role="tab"] {
-    transition-property: background-color, border-color, color, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-property: opacity, color, background-color;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 180ms;
   }

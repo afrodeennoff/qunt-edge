@@ -92,14 +92,6 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
     setIsSizePopoverOpen(false)
   }
 
-  // Add touch event handlers for mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isCustomizing) {
-      // Prevent default touch behavior when customizing
-      e.preventDefault()
-    }
-  }
-
   const isValidSize = (widgetType: WidgetType, size: WidgetSize) => {
     const config = WIDGET_REGISTRY[widgetType]
     if (!config) return true // Allow any size for deprecated widgets
@@ -115,7 +107,6 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
     <div
       ref={widgetRef}
       className="relative h-full min-h-0 w-full group isolate overflow-hidden"
-      onTouchStart={handleTouchStart}
     >
       <div
         data-widget-shell="true"

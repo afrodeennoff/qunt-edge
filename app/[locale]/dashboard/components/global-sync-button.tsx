@@ -53,10 +53,10 @@ export function GlobalSyncButton() {
                 await manualSync('rithmic', id)
             }
 
-            // 2. Sync Tradovate
-            await tradovate.performSyncForAllAccounts()
+            // 2. Sync Tradovate with skipRefresh to avoid duplicate refresh
+            await tradovate.performSyncForAllAccounts({ skipRefresh: true })
 
-            // 3. Refresh client data from DB
+            // 3. Single refresh client data from DB (deduped)
             await refreshAllData({ force: true })
 
             toast.success(t('refreshSuccess'), { id: toastId })

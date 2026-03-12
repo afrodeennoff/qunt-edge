@@ -380,12 +380,12 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(
         }
       }}>
         <DialogTrigger asChild>
-          <Button 
+          <Button
             ref={ref}
             variant={variant}
             className={cn(
               "h-10 rounded-full flex items-center justify-center transition-transform active:scale-95",
-              isMobile ? "w-10 p-0" : "min-w-[120px] gap-3 px-4"
+              isMobile ? "h-11 w-11 p-0" : "min-w-[120px] gap-3 px-4"
             )}
           >
             <Share className="h-4 w-4 shrink-0" />
@@ -428,7 +428,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(
                               variant="ghost"
                               size="icon"
                               onClick={handleCopyUrl}
-                              className="h-7 w-7"
+                              className="h-7 w-7 md:h-11 md:w-11"
                             >
                               <Copy className="h-4 w-4" />
                               <span className="sr-only">{t("share.copyUrl")}</span>
@@ -437,7 +437,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(
                               variant="ghost"
                               size="icon"
                               onClick={() => window.open(shareUrl, '_blank')}
-                              className="h-7 w-7"
+                              className="h-7 w-7 md:h-11 md:w-11"
                             >
                               <ExternalLink className="h-4 w-4" />
                               <span className="sr-only">{t("share.openInNewTab")}</span>

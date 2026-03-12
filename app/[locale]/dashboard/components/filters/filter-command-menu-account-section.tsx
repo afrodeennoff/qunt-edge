@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CommandItem } from "@/components/ui/command"
@@ -119,7 +119,8 @@ export function AccountSection({ searchValue }: AccountSectionProps) {
 
   const isGroupSelected = (groupAccounts: Account[]) => {
     const selectableItems = groupAccounts.filter(item => !isItemDisabled(item))
-    return selectableItems.length > 0 && selectableItems.every(item => isItemSelected(item))
+    if (selectableItems.length === 0) return false
+    return selectableItems.every(item => isItemSelected(item))
   }
 
   const isGroupIndeterminate = (groupAccounts: Account[]) => {

@@ -194,13 +194,13 @@ export function ConsentBanner() {
 
                 <div className="px-6 pb-6">
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 min-h-[44px]">
                       <input
                         id="consent-necessary-desktop"
                         type="checkbox"
                         checked={true}
                         disabled
-                        className="mt-1 h-4 w-4 rounded border-border bg-muted"
+                        className="mt-1 h-5 w-5 rounded border-border bg-muted"
                       />
                       <div>
                         <label htmlFor="consent-necessary-desktop" className="text-sm font-medium text-foreground">
@@ -214,13 +214,13 @@ export function ConsentBanner() {
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 min-h-[44px]">
                       <input
                         id="consent-analytics-desktop"
                         type="checkbox"
                         checked={settings.analytics_storage}
                         onChange={(e) => setSettings({ ...settings, analytics_storage: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-border bg-background"
+                        className="mt-1 h-5 w-5 rounded border-border bg-background"
                       />
                       <div>
                         <label htmlFor="consent-analytics-desktop" className="text-sm font-medium text-foreground">
@@ -234,13 +234,13 @@ export function ConsentBanner() {
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 min-h-[44px]">
                       <input
                         id="consent-marketing-desktop"
                         type="checkbox"
                         checked={settings.ad_storage}
                         onChange={(e) => setSettings({ ...settings, ad_storage: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-border bg-background"
+                        className="mt-1 h-5 w-5 rounded border-border bg-background"
                       />
                       <div>
                         <label htmlFor="consent-marketing-desktop" className="text-sm font-medium text-foreground">

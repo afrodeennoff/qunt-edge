@@ -39,11 +39,11 @@ export function FilterDropdown() {
         }}
       >
         <DropdownMenuTrigger asChild>
-          <Button 
+          <Button
             variant="ghost"
             className={cn(
               "h-10 rounded-full flex items-center justify-center transition-transform active:scale-95",
-              isMobile ? "w-10 p-0" : "min-w-[120px] gap-3 px-4"
+              isMobile ? "h-11 w-11 p-0" : "min-w-[120px] gap-3 px-4"
             )}
           >
             <Filter className="h-4 w-4 shrink-0" />

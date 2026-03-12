@@ -24,10 +24,10 @@ const buttonVariants = cva(
           "font-mono rounded-sm border border-white/10 bg-black text-foreground shadow-none hover:border-white/40 hover:bg-white/5 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:ring-offset-0 active:translate-y-px",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        default: "h-9 px-4 py-2 md:min-h-[44px] md:min-w-[44px]",
+        sm: "h-8 rounded-md px-3 text-xs md:min-h-[44px] md:min-w-[44px]",
+        lg: "h-10 rounded-md px-8 md:min-h-[44px] md:min-w-[44px]",
+        icon: "h-9 w-9 md:min-h-[44px] md:min-w-[44px]",
       },
     },
     defaultVariants: {

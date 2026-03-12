@@ -556,7 +556,7 @@ export const DataProvider: React.FC<{
         return;
       }
 
-      // Step 1: Get Supabase user
+      // Step 1: Parallelize auth resolution, layout fetch, and cache reads
       const {
         data: { user },
       } = await withTimeout(supabase.auth.getUser(), 15000, "supabase.auth.getUser");
@@ -570,34 +570,32 @@ export const DataProvider: React.FC<{
       setSupabaseUser(user);
       const userId = await withTimeout(getUserId(), 15000, "getUserId");
 
-      // CRITICAL: Get dashboard layout first
-      // But check if the layout is already in the state
-      if (
-        userId &&
-        (!dashboardLayoutRef.current || dashboardLayoutRef.current.userId !== userId)
-      ) {
-        const dashboardLayoutResponse = await withTimeout(
-          getDashboardLayout(userId),
-          15000,
-          "getDashboardLayout"
-        );
-        if (dashboardLayoutResponse) {
-          setDashboardLayout(
-            dashboardLayoutResponse as unknown as DashboardLayoutWithWidgets
-          );
-        } else {
-          // If no layout exists in database, use default layout
-          setDashboardLayout(defaultLayouts);
-        }
-      }
-
+      // Parallel: layout fetch + cache reads
       let hasLocalSnapshot = false;
       if (userId && !isSharedView) {
-        const [cachedTradesResult, cachedUserDataResult] = await Promise.allSettled([
+        const [dashboardLayoutResult, cachedTradesResult, cachedUserDataResult] = await Promise.allSettled([
+          // Only fetch layout if not already loaded for this user
+          (!dashboardLayoutRef.current || dashboardLayoutRef.current.userId !== userId)
+            ? withTimeout(getDashboardLayout(userId), 15000, "getDashboardLayout")
+            : Promise.resolve(undefined),
           withTimeout(getTradesCache(userId), 2000, "getTradesCache"),
           withTimeout(getUserDataCache(userId), 2000, "getUserDataCache"),
         ]);
 
+        // Handle layout result
+        if (dashboardLayoutResult.status === "fulfilled" && dashboardLayoutResult.value !== undefined) {
+          const dashboardLayoutResponse = dashboardLayoutResult.value;
+          if (dashboardLayoutResponse) {
+            setDashboardLayout(
+              dashboardLayoutResponse as unknown as DashboardLayoutWithWidgets
+            );
+          } else {
+            // If no layout exists in database, use default layout
+            setDashboardLayout(defaultLayouts);
+          }
+        }
+
+        // Handle cache results
         const cachedTrades =
           cachedTradesResult.status === "fulfilled" ? cachedTradesResult.value : undefined;
         const cachedUserData =
@@ -684,18 +682,8 @@ export const DataProvider: React.FC<{
             setIsLoading(false);
           }
 
-          let accountsWithMetrics = normalizedAccounts;
-          try {
-            accountsWithMetrics = await withTimeout(
-              calculateAccountMetricsAction(normalizedAccounts),
-              20000,
-              "calculateAccountMetricsAction"
-            );
-          } catch (e) {
-            logger.warn({ error: e }, "Account metrics timed out; continuing without metrics");
-          }
-          setAccounts(normalizeAccountsForClient(accountsWithMetrics));
-
+          // Defer heavy metrics calculation to background
+          // Don't block initial load on metrics
           if (userId && !isSharedView) {
             setUserDataCache(userId, {
               userData: data.userData,
@@ -707,6 +695,15 @@ export const DataProvider: React.FC<{
               financialEvents: data.financialEvents,
               moodHistory: data.moodHistory,
             }).catch((err) => logger.error({ err }, "Failed to set user data cache"));
+
+            // Calculate metrics in background after cache write
+            calculateAccountMetricsAction(normalizedAccounts)
+              .then((accountsWithMetrics) => {
+                setAccounts(normalizeAccountsForClient(accountsWithMetrics));
+              })
+              .catch((e) => {
+                logger.warn({ error: e }, "Account metrics calculation failed; continuing without metrics");
+              });
           }
         } finally {
           setIsRevalidating(false);

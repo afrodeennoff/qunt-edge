@@ -16,7 +16,7 @@ interface TradovateSyncResult {
 interface TradovateSyncContextType {
   // Core sync management
   performSyncForAccount: (accountId: string, options?: { skipToast?: boolean, skipRefresh?: boolean }) => Promise<{ success: boolean; message: string; savedCount?: number } | undefined>
-  performSyncForAllAccounts: () => Promise<void>
+  performSyncForAllAccounts: (options?: { skipRefresh?: boolean }) => Promise<void>
 
   // State management
   isAutoSyncing: boolean
@@ -189,7 +189,7 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
   }, [accounts, t, refreshAllData, loadAccounts])
 
   // Perform sync for all accounts
-  const performSyncForAllAccounts = useCallback(async () => {
+  const performSyncForAllAccounts = useCallback(async (options?: { skipRefresh?: boolean }) => {
     if (isAutoSyncing) {
       return
     }
@@ -221,8 +221,10 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
         await new Promise(resolve => setTimeout(resolve, 500))
       }
 
-      // Final thorough refresh
-      await refreshAllData({ force: true })
+      // Final thorough refresh (unless skipped)
+      if (!options?.skipRefresh) {
+        await refreshAllData({ force: true })
+      }
 
       if (totalNewTrades > 0) {
         toast.success(t('tradovateSync.bulk.complete', { successCount, totalNewTrades }), { id: toastId })

@@ -243,12 +243,12 @@ export function DailySummaryModal() {
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-full aspect-[7/4] bg-background text-white rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative flex flex-col"
+                    className="w-full aspect-[7/4] bg-background text-white rounded-3xl overflow-hidden border border-white/10 relative flex flex-col sm:shadow-2xl sm:blur-[80px]"
                     ref={cardRef}
                 >
                     {/* Refined Background Mesh */}
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/[0.08] via-transparent to-transparent opacity-50 pointer-events-none" />
-                    <div className={cn("absolute inset-0 opacity-15 pointer-events-none blur-[80px]", theme.bgAccent)} />
+                    <div className={cn("absolute inset-0 opacity-15 pointer-events-none blur-[40px] sm:blur-[80px]", theme.bgAccent)} />
 
                     <div className="relative z-10 flex-1 flex flex-col p-6 md:p-8">
                         {/* Header */}
