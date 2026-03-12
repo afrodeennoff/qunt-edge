@@ -57,6 +57,11 @@ function baselineAllMigrations() {
   }
 }
 
+function parseFailedMigrationName(output) {
+  const match = output.match(/The `([^`]+)` migration started at .* failed/);
+  return match?.[1] ?? null;
+}
+
 run("npx", ["prisma", "generate"], "Prisma client generated");
 
 const rawUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
@@ -76,12 +81,27 @@ if (migrationUrl) {
     );
     baselineAllMigrations();
     run("npx", ["prisma", "migrate", "deploy"], "Prisma migrations deployed after baseline");
-  } else if (deploy.output.includes("P3009") && deploy.output.includes("20260213091500_supabase_storage_scaling")) {
-    console.log(
-      "[sync-stack] Detected P3009 for supabase_storage_scaling. Repairing migration state...",
-    );
-    run("npx", ["prisma", "migrate", "resolve", "--applied", "20260213091500_supabase_storage_scaling"]);
-    run("npx", ["prisma", "migrate", "deploy"], "Prisma migrations deployed after repair");
+  } else if (deploy.output.includes("P3009")) {
+    const failedMigration = parseFailedMigrationName(deploy.output);
+    const autoApplyRepairMigrations = new Set([
+      "20260213091500_supabase_storage_scaling",
+      "20260226120000_restrict_storage_list_objects_rpc",
+    ]);
+
+    if (failedMigration && autoApplyRepairMigrations.has(failedMigration)) {
+      console.log(
+        `[sync-stack] Detected P3009 for ${failedMigration}. Marking as applied and retrying deploy...`,
+      );
+      run("npx", ["prisma", "migrate", "resolve", "--applied", failedMigration]);
+      run("npx", ["prisma", "migrate", "deploy"], "Prisma migrations deployed after P3009 repair");
+    } else {
+      console.error(
+        `[sync-stack] P3009 detected${
+          failedMigration ? ` for ${failedMigration}` : ""
+        }. Manual resolution required (use prisma migrate resolve --rolled-back/--applied).`,
+      );
+      process.exit(deploy.status);
+    }
   } else {
     process.exit(deploy.status);
   }
