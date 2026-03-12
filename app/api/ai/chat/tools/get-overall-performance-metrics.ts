@@ -143,8 +143,8 @@ export const getOverallPerformanceMetrics = tool({
   }),
   execute: async ({ startDate, endDate }: { startDate?: string, endDate?: string }) => {
 
-    const tradesResult = await getAiTrades({ profile: 'summary' });
-    const allTrades = tradesResult.trades || [];
+    const tradesResult = await getAiTrades({ profile: 'analysis' });
+    const allTrades = tradesResult.trades;
     let trades = allTrades;
 
     // Filter trades by date range if provided

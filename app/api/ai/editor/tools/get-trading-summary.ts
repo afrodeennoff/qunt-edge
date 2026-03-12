@@ -44,8 +44,8 @@ export const getDayData = tool({
         date: z.string().datetime()
     }),
     execute: async ({ date }) => {
-        const tradesResult = await getAiTrades({ profile: 'summary' });
-    const allTrades = tradesResult.trades || [];
+        const tradesResult = await getAiTrades({ profile: 'analysis' });
+    const allTrades = tradesResult.trades;
         const filteredTrades = normalizeTrades(allTrades).filter(trade => {
             const tradeDate = trade.entryDate;
             return isSameDay(tradeDate, new Date(date));

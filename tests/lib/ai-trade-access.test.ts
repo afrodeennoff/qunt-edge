@@ -73,7 +73,8 @@ describe('trade-access', () => {
 
       const result = await getAiTrades({ userId: 'test', profile: 'summary' })
 
-      expect(result.trades).toBeUndefined()
+      expect(result.profile).toBe('summary')
+      expect('trades' in result).toBe(false)
       expect(result.aggregates).toBeDefined()
       expect(result.aggregates?.count).toBe(2)
       expect(result.aggregates?.totalPnl).toBe(500) // 1000 + (-500)
@@ -89,6 +90,7 @@ describe('trade-access', () => {
 
       const result = await getAiTrades({ userId: 'test', profile: 'analysis' })
 
+      expect(result.profile).toBe('analysis')
       expect(result.trades).toBeDefined()
       expect(result.trades?.length).toBe(2)
 
@@ -123,6 +125,7 @@ describe('trade-access', () => {
 
       const result = await getAiTrades({ userId: 'test', profile: 'detail' })
 
+      expect(result.profile).toBe('detail')
       expect(result.trades).toBeDefined()
       expect(result.trades?.length).toBe(2)
 

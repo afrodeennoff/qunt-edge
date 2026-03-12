@@ -47,13 +47,13 @@ export const getTradesSummary = tool({
   }),
   execute: async ({ startDate, endDate }: { startDate: string, endDate: string }) => {
     const userId = await getUserId();
-    const { trades: allTrades, truncated, dataQualityWarning } = await getAiTrades({ userId, profile: 'summary' });
+    const { trades: allTrades, truncated, dataQualityWarning } = await getAiTrades({ userId, profile: 'analysis' });
     const start = new Date(startDate);
     const end = new Date(endDate);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
       throw new Error("Invalid startDate or endDate format");
     }
-    const filteredTrades = (allTrades || []).filter((trade: SerializedTrade) => {
+    const filteredTrades = allTrades.filter((trade: SerializedTrade) => {
       const tradeDate = new Date(trade.entryDate);
       return tradeDate >= start && tradeDate <= end;
     });

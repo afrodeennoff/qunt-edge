@@ -47,8 +47,8 @@ export const getCurrentWeekSummary = tool({
         const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
 
-        const tradesResult = await getAiTrades({ profile: 'summary' });
-    const allTrades = tradesResult.trades || [];
+        const tradesResult = await getAiTrades({ profile: 'analysis' });
+    const allTrades = tradesResult.trades;
         const filteredTrades = normalizeTrades(allTrades).filter(trade => {
             const tradeDate = trade.entryDate;
             return tradeDate >= currentWeekStart && tradeDate <= currentWeekEnd;

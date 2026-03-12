@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { readFile } from "node:fs/promises"
+import path from "node:path"
 
 // Use vi.hoisted to define test data that can be referenced in mocks
 const { mockTrades, getAllTradesForAiMock } = vi.hoisted(() => ({
@@ -125,7 +127,7 @@ describe("AI Full History UX", () => {
     expect(result.aggregates?.totalPnl).toBe(300)
     
     // Should NOT have individual trades for summary profile
-    expect(result.trades).toBeUndefined()
+    expect('trades' in result).toBe(false)
     
     // Should still have metadata about data quality
     expect(result.fetchedPages).toBe(1)
@@ -187,26 +189,36 @@ describe("AI Full History UX", () => {
     const { getAiTrades: getAiTradesFresh } = await import("@/lib/ai/trade-access")
 
     // Test all profiles to ensure sensitive fields are always excluded
-    const profiles = ["summary", "analysis", "detail"] as const
+    const summaryResult = await getAiTradesFresh({
+      userId: "test-user-id",
+      profile: "summary",
+      forceRefresh: true,
+    })
+    expect(summaryResult.aggregates).toBeDefined()
+    expect("trades" in summaryResult).toBe(false)
 
-    for (const profile of profiles) {
-      const result = await getAiTradesFresh({
-        userId: "test-user-id",
-        profile,
-        forceRefresh: true,
-      })
-
-      // For summary profile, trades are undefined anyway
-      if (result.trades) {
-        for (const trade of result.trades) {
-          expect(trade).not.toHaveProperty("imageBase64")
-          expect(trade).not.toHaveProperty("imageBase64Second")
-        }
-      }
-
-      // Aggregates should always be available
-      expect(result.aggregates).toBeDefined()
+    const analysisResult = await getAiTradesFresh({
+      userId: "test-user-id",
+      profile: "analysis",
+      forceRefresh: true,
+    })
+    for (const trade of analysisResult.trades) {
+      expect(trade).not.toHaveProperty("imageBase64")
+      expect(trade).not.toHaveProperty("imageBase64Second")
     }
+
+    const detailResult = await getAiTradesFresh({
+      userId: "test-user-id",
+      profile: "detail",
+      forceRefresh: true,
+    })
+    for (const trade of detailResult.trades) {
+      expect(trade).not.toHaveProperty("imageBase64")
+      expect(trade).not.toHaveProperty("imageBase64Second")
+    }
+
+    expect(analysisResult.aggregates).toBeDefined()
+    expect(detailResult.aggregates).toBeDefined()
   })
 
   it("truncated flag is preserved from fetch result", async () => {
@@ -233,5 +245,25 @@ describe("AI Full History UX", () => {
     expect(result.truncated).toBe(true)
     expect(result.fetchedPages).toBe(10)
     expect(result.dataQualityWarning).toBe("Data truncated due to volume limits")
+  })
+
+  it("row-dependent AI tools use analysis profile instead of summary", async () => {
+    const toolFiles = [
+      "app/api/ai/chat/tools/get-current-week-summary.ts",
+      "app/api/ai/chat/tools/get-previous-week-summary.ts",
+      "app/api/ai/chat/tools/get-week-summary-for-date.ts",
+      "app/api/ai/chat/tools/get-overall-performance-metrics.ts",
+      "app/api/ai/chat/tools/get-trades-summary.ts",
+      "app/api/ai/editor/tools/get-trading-summary.ts",
+    ]
+
+    await Promise.all(
+      toolFiles.map(async (relativePath) => {
+        const absolutePath = path.resolve(process.cwd(), relativePath)
+        const source = await readFile(absolutePath, "utf8")
+        expect(source).toContain("profile: 'analysis'")
+        expect(source).not.toContain("profile: 'summary'")
+      }),
+    )
   })
 })

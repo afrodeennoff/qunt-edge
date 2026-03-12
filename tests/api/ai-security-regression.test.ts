@@ -211,7 +211,7 @@ describe("AI Security Regression", () => {
       profile: "summary",
     })
 
-    expect(summaryResult.trades).toBeUndefined()
+    expect('trades' in summaryResult).toBe(false)
     expect(summaryResult.aggregates).toBeDefined()
     expect(summaryResult.aggregates?.count).toBe(1)
 

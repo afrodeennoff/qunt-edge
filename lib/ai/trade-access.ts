@@ -17,6 +17,14 @@ export interface GetAiTradesParams {
   forceRefresh?: boolean
 }
 
+type SummaryGetAiTradesParams = Omit<GetAiTradesParams, 'profile'> & {
+  profile: 'summary'
+}
+
+type RowGetAiTradesParams = Omit<GetAiTradesParams, 'profile'> & {
+  profile: 'analysis' | 'detail'
+}
+
 /**
  * Aggregate metrics computed from trade history.
  */
@@ -42,6 +50,25 @@ export interface AiTradesResult {
   dataQualityWarning?: string
 }
 
+export interface SummaryAiTradesResult {
+  profile: 'summary'
+  aggregates: TradeAggregates
+  truncated?: boolean
+  fetchedPages?: number
+  dataQualityWarning?: string
+}
+
+export interface RowAiTradesResult {
+  profile: 'analysis' | 'detail'
+  trades: SerializedTrade[]
+  aggregates: TradeAggregates
+  truncated?: boolean
+  fetchedPages?: number
+  dataQualityWarning?: string
+}
+
+export type ProfiledAiTradesResult = SummaryAiTradesResult | RowAiTradesResult
+
 /**
  * Fields to exclude from all profiles for security.
  */
@@ -56,21 +83,21 @@ const ANALYSIS_EXCLUDED_FIELDS = ['videoUrl', 'comment', ...SENSITIVE_FIELDS] as
  * Request-scoped memoization cache.
  * Uses WeakMap to allow garbage collection when request context is gone.
  */
-const requestCache = new WeakMap<Request, Map<string, AiTradesResult>>()
+const requestCache = new WeakMap<Request, Map<string, ProfiledAiTradesResult>>()
 
 /**
  * Get the request-scoped cache for memoization.
  */
-function getRequestCache(): Map<string, AiTradesResult> {
+function getRequestCache(): Map<string, ProfiledAiTradesResult> {
   // In serverless/edge environments, we use a module-level Map as fallback
   // since WeakMap requires an object key which may not be available
   if (typeof globalThis !== 'undefined') {
     const globalKey = '__trade_access_cache__'
-    const cache = (globalThis as unknown as Record<string, Map<string, AiTradesResult>>)[globalKey]
+    const cache = (globalThis as unknown as Record<string, Map<string, ProfiledAiTradesResult>>)[globalKey]
     if (cache) return cache
     
-    const newCache = new Map<string, AiTradesResult>()
-    ;(globalThis as unknown as Record<string, Map<string, AiTradesResult>>)[globalKey] = newCache
+    const newCache = new Map<string, ProfiledAiTradesResult>()
+    ;(globalThis as unknown as Record<string, Map<string, ProfiledAiTradesResult>>)[globalKey] = newCache
     return newCache
   }
   return new Map()
@@ -140,12 +167,8 @@ function computeAggregates(trades: SerializedTrade[]): TradeAggregates {
  */
 function projectTradeFields(
   trades: SerializedTrade[],
-  profile: TradeAccessProfile,
+  profile: 'analysis' | 'detail',
 ): SerializedTrade[] {
-  if (profile === 'summary') {
-    return [] // Summary doesn't return individual trades
-  }
-
   return trades.map((trade) => {
     const projected = { ...trade }
 
@@ -174,7 +197,9 @@ function projectTradeFields(
  * @param params - Parameters including userId (optional), profile, and optional forceRefresh
  * @returns Trades with profile-based field projection and computed aggregates
  */
-export async function getAiTrades(params: GetAiTradesParams): Promise<AiTradesResult> {
+export async function getAiTrades(params: SummaryGetAiTradesParams): Promise<SummaryAiTradesResult>
+export async function getAiTrades(params: RowGetAiTradesParams): Promise<RowAiTradesResult>
+export async function getAiTrades(params: GetAiTradesParams): Promise<ProfiledAiTradesResult> {
   const { profile, forceRefresh = false } = params
   // Use provided userId or fall back to session (for backward compatibility)
   const resolvedUserId = params.userId ?? await getUserId()
@@ -197,21 +222,26 @@ export async function getAiTrades(params: GetAiTradesParams): Promise<AiTradesRe
   // Compute aggregates (available for all profiles)
   const aggregates = computeAggregates(fetchResult.trades)
 
-  // Apply profile-based projection
-  const projectedTrades = projectTradeFields(fetchResult.trades, profile)
-
-  // Build result based on profile
-  const result: AiTradesResult = {
-    aggregates,
-    truncated: fetchResult.truncated,
-    fetchedPages: fetchResult.fetchedPages,
-    dataQualityWarning: fetchResult.dataQualityWarning,
-  }
-
-  // Add trades based on profile
-  if (profile !== 'summary') {
-    result.trades = projectedTrades
-  }
+  // Build result based on profile contract:
+  // - summary: aggregates-only
+  // - analysis/detail: projected rows + aggregates
+  const result: ProfiledAiTradesResult =
+    profile === 'summary'
+      ? {
+          profile,
+          aggregates,
+          truncated: fetchResult.truncated,
+          fetchedPages: fetchResult.fetchedPages,
+          dataQualityWarning: fetchResult.dataQualityWarning,
+        }
+      : {
+          profile,
+          trades: projectTradeFields(fetchResult.trades, profile),
+          aggregates,
+          truncated: fetchResult.truncated,
+          fetchedPages: fetchResult.fetchedPages,
+          dataQualityWarning: fetchResult.dataQualityWarning,
+        }
 
   // Memoize result
   cache.set(cacheKey, result)
