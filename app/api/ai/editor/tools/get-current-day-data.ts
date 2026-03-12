@@ -42,8 +42,8 @@ export const getCurrentDayData = tool({
     description: 'Get trades database for the current day.',
     inputSchema: z.object({}),
     execute: async () => {
-        const tradesResult = await getAllTradesForAi();
-    const allTrades = tradesResult.trades;
+        const tradesResult = await getAiTrades({ profile: 'detail' });
+    const allTrades = tradesResult.trades || [];
         const filteredTrades = normalizeTrades(allTrades).filter(trade => {
             const tradeDate = trade.entryDate;
             return isToday(tradeDate);
