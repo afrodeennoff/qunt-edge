@@ -180,8 +180,8 @@ export function enforcePromptSafety(
     }
   }
 
-  // High risk: block entirely (> 0.7)
-  if (highestScore > 0.7) {
+  // High risk: block entirely (> 0.5) - MEDIUM: Lowered threshold from 0.7 to 0.5
+  if (highestScore > 0.5) {
     return {
       safe: false,
       response: {
