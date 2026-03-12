@@ -421,6 +421,34 @@ When documenting feature updates, **YOU MUST** follow this conversational struct
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-12: Three-Track Remediation Sweep (Security + Provider Boundaries + Polling)
+- **What changed:** Executed a coordinated remediation sweep that combined security hardening on API endpoints, explicit dashboard provider boundaries for lower render coupling, and targeted sync polling reduction.
+- **What I want:** Close high-risk auth/config/input issues immediately, reduce dashboard rerender fan-out by narrowing provider surfaces, and trim unnecessary background interval work without changing UX contracts.
+- **What I don't want:** Hardcoded checkout provider fallbacks in production paths, weak input handling on unsubscribe/team/email routes, broad dashboard consumers tied to monolithic provider hooks, or frequent ticker updates doing low-value work.
+- **How we fixed that:**
+  - Security/API hardening:
+    - `app/api/whop/checkout/route.ts`, `app/api/whop/checkout-team/route.ts`: removed hardcoded `WHOP_COMPANY_ID` fallback; fail closed with `500` when missing.
+    - `app/api/trader-profile/benchmark/route.ts`: early auth-failure handling now returns `401` before DB work.
+    - `app/api/email/unsubscribe/route.ts`: added strict malformed payload checks (email/token format) with `400` handling before token/db operations.
+    - `app/api/teams/[id]/analytics/route.ts`: added strict `teamId`/`period` validation.
+    - `app/api/email/weekly-summary/[userid]/route.ts`: added UUID validation for `userid` route param.
+  - Provider-boundary architecture:
+    - Added concrete providers: `context/providers/data-state-provider.tsx`, `context/providers/data-actions-provider.tsx`, `context/providers/data-derived-provider.tsx`.
+    - Wired boundaries in `components/providers/dashboard-providers.tsx` and migrated high-churn consumers (`widget-canvas`, filter menus, navbar) to narrow provider hooks.
+  - Polling/runtime trim:
+    - `app/[locale]/dashboard/components/global-sync-button.tsx`: reduced next-sync ticker interval from `5s` to `30s`.
+  - Added regression coverage:
+    - `tests/api/whop-checkout-security.test.ts`
+    - `tests/api/trader-benchmark-route.test.ts`
+    - `tests/api/unsubscribe-route.test.ts`
+    - `tests/context/provider-boundary-regression.test.tsx`
+- **Key Files:** `app/api/whop/checkout/route.ts`, `app/api/whop/checkout-team/route.ts`, `app/api/trader-profile/benchmark/route.ts`, `app/api/email/unsubscribe/route.ts`, `app/api/teams/[id]/analytics/route.ts`, `app/api/email/weekly-summary/[userid]/route.ts`, `components/providers/dashboard-providers.tsx`, `context/providers/data-state-provider.tsx`, `context/providers/data-actions-provider.tsx`, `context/providers/data-derived-provider.tsx`, `app/[locale]/dashboard/components/global-sync-button.tsx`, `tests/api/whop-checkout-security.test.ts`, `tests/api/trader-benchmark-route.test.ts`, `tests/api/unsubscribe-route.test.ts`, `tests/context/provider-boundary-regression.test.tsx`, `docs/superpowers/plans/2026-03-12-three-track-remediation-plan.md`.
+- **Verification:**
+  - `npx vitest run tests/api/whop-checkout-security.test.ts tests/api/trader-benchmark-route.test.ts tests/api/unsubscribe-route.test.ts tests/context/provider-boundary-regression.test.tsx` -> passes.
+  - `npm run typecheck` -> passes.
+  - `npm test` -> passes (`41` passed files, `1` skipped; `163` passed tests, `46` skipped).
+  - `npx eslint <touched files>` -> warnings-only baseline (`0` errors).
+
 ### 2026-03-11: Review Follow-Up (Cache Snapshot Guard + Rithmic Route Teardown + Layout Ownership Check)
 - **What changed:** Applied another review-driven hardening pass for cache snapshot consistency, route-exit socket teardown, and dashboard-layout ownership checks in bootstrap flow.
 - **What I want:** Users should not see stale trades from prior sessions when user-data cache exists without trade cache, Rithmic websocket connections should close when leaving import routes, and cached layouts should be validated against the current user before skipping fetch.

@@ -86,7 +86,13 @@ async function handleWhopCheckout(
     }
   }
 
-  const companyId = process.env.WHOP_COMPANY_ID || "biz_jh37YZGpH5dWIY";
+  const companyId = process.env.WHOP_COMPANY_ID?.trim();
+  if (!companyId) {
+    return NextResponse.json(
+      { message: "Checkout provider configuration missing." },
+      { status: 500 },
+    );
+  }
   const whop = getWhop();
 
   try {

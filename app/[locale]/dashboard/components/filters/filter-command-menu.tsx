@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList, CommandSeparator } from "@/components/ui/command"
-import { useDashboardIsMobile, useDashboardFilters } from "@/context/data-provider"
+import { useDataFilters, useDataIsMobile } from "@/context/providers/data-state-provider"
 import { useI18n } from "@/locales/client"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
@@ -28,8 +28,8 @@ interface FilterCommandMenuProps {
 
 export function FilterCommandMenu({ className, variant = "navbar" }: FilterCommandMenuProps) {
   const t = useI18n()
-  const isMobile = useDashboardIsMobile()
-  const { setDateRange, setWeekdayFilter } = useDashboardFilters()
+  const isMobile = useDataIsMobile()
+  const { setDateRange, setWeekdayFilter } = useDataFilters()
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [inputWidth, setInputWidth] = useState<number | undefined>(undefined)

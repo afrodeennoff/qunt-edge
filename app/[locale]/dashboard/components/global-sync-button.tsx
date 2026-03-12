@@ -101,7 +101,7 @@ export function GlobalSyncButton() {
             }
         }
 
-        const interval = setInterval(updateNextSync, 5000)
+        const interval = setInterval(updateNextSync, 30000)
         updateNextSync()
         return () => clearInterval(interval)
     }, [rithmicInterval, tradovate.syncInterval, tradovate.accounts])

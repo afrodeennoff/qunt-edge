@@ -7,6 +7,9 @@ import { generateTradingAnalysis } from "./actions/analysis"
 import { getUserData, computeTradingStats } from "./actions/user-data"
 import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 import { requireServiceAuth, toErrorResponse } from "@/server/authz"
+import { z } from "zod"
+
+const userIdSchema = z.string().uuid()
 
 export async function POST(req: Request, props: { params: Promise<{ userid: string }> }) {
   const params = await props.params;
@@ -15,8 +18,13 @@ export async function POST(req: Request, props: { params: Promise<{ userid: stri
     const headersList = await headers()
     requireServiceAuth(headersList.get('authorization'), { serviceName: 'email-weekly-summary' })
 
+    const userIdResult = userIdSchema.safeParse(params.userid)
+    if (!userIdResult.success) {
+      return NextResponse.json({ error: 'Invalid user id' }, { status: 400 })
+    }
+
     // Get user data and compute stats
-    const { user, newsletter, trades } = await getUserData(params.userid)
+    const { user, newsletter, trades } = await getUserData(userIdResult.data)
     const stats = await computeTradingStats(trades, user.language)
 
     // If no trades, return missing you email data

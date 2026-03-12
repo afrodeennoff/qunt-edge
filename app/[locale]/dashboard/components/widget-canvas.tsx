@@ -12,7 +12,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Minus, Maximize2, GripVertical } from 'lucide-react'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { useDashboardActions, useDashboardFilters, useDashboardIsMobile, useDashboardStats, useDashboardTradeItems } from '@/context/data-provider'
+import { useDataActions } from '@/context/providers/data-actions-provider'
+import { useDataFormattedTrades } from '@/context/providers/data-derived-provider'
+import { useDataFilters, useDataIsMobile, useDataTradeItems } from '@/context/providers/data-state-provider'
 import { useI18n } from "@/locales/client"
 import { WIDGET_REGISTRY, getWidgetComponent } from '../config/widget-registry'
 import { useAutoScroll } from '../../../../hooks/use-auto-scroll'
@@ -80,7 +82,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
   currentType: WidgetType
 }) => {
   const t = useI18n()
-  const isMobile = useDashboardIsMobile()
+  const isMobile = useDataIsMobile()
   const uiV2Enabled = isUiV2Enabled()
   const widgetRef = useRef<HTMLDivElement>(null)
   const [isSizePopoverOpen, setIsSizePopoverOpen] = useState(false)
@@ -309,9 +311,9 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
 WidgetWrapper.displayName = "WidgetWrapper"
 
 function DebugDataBadge() {
-  const trades = useDashboardTradeItems();
-  const { formattedTrades } = useDashboardStats();
-  const { instruments, accountNumbers, dateRange } = useDashboardFilters();
+  const trades = useDataTradeItems();
+  const formattedTrades = useDataFormattedTrades();
+  const { instruments, accountNumbers, dateRange } = useDataFilters();
   const isFiltered =
     instruments.length > 0 ||
     accountNumbers.length > 0 ||
@@ -332,7 +334,7 @@ export default function WidgetCanvas() {
   const layouts = useUserStore((state) => state.dashboardLayout)
   const setLayouts = useUserStore((state) => state.setDashboardLayout)
   const user = useUserStore(state => state.user)
-  const { saveDashboardLayout } = useDashboardActions()
+  const { saveDashboardLayout } = useDataActions()
   const searchParams = useSearchParams()
   const {
     isCustomizing,
