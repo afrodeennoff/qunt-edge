@@ -122,12 +122,12 @@ export default async function RootLayout({
       translate="no"
       suppressHydrationWarning
       style={{
-        ["--theme-intensity" as string]: "100%",
-        ["--font-geist" as string]: "system-ui, -apple-system, Segoe UI, sans-serif",
-        ["--font-inter" as string]: "system-ui, -apple-system, Segoe UI, sans-serif",
-        ["--font-manrope" as string]: "system-ui, -apple-system, Segoe UI, sans-serif",
-        ["--font-ibm-mono" as string]: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-      }}
+        "--theme-intensity": "100%",
+        "--font-geist": "system-ui, -apple-system, Segoe UI, sans-serif",
+        "--font-inter": "system-ui, -apple-system, Segoe UI, sans-serif",
+        "--font-manrope": "system-ui, -apple-system, Segoe UI, sans-serif",
+        "--font-ibm-mono": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+      } as React.CSSProperties}
     >
       <head>
         {/* Resource Hinting for Performance */}
