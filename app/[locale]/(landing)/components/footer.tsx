@@ -14,7 +14,7 @@ const PRODUCT_LINKS: FooterLink[] = [
   { name: 'Features', href: '/#features' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'Prop Firms', href: '/propfirms' },
-  { name: 'Deals', href: '/propfirmperk' },
+  { name: 'Deals', href: '/deals' },
   { name: 'Teams', href: '/teams' },
 ]
 

@@ -1,6 +1,14 @@
+import type { Metadata } from "next"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AuthTimeout } from "@/components/auth/auth-timeout"
 import { TeamsSidebar } from '../components/teams-sidebar'
+
+export const metadata: Metadata = {
+    robots: {
+        index: false,
+        follow: false,
+    },
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 

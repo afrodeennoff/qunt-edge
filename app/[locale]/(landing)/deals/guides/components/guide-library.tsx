@@ -41,7 +41,7 @@ export function GuideLibrary() {
           After picking a playbook, model your expected evaluation spend and break-even path in the calculator.
         </p>
         <Link
-          href="/propfirmperk/calculator"
+          href="/deals/calculator"
           className="mt-4 inline-flex rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
           Open Calculator

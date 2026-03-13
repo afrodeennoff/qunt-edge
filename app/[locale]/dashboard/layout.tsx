@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { createClient } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { DashboardProvider } from "./dashboard-context";
@@ -21,6 +22,13 @@ const DashboardHeader = dynamic(
 const DashboardClientOverlays = dynamic(
   () => import("./components/dashboard-client-overlays").then((m) => m.DashboardClientOverlays)
 );
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardLayout({
   children,

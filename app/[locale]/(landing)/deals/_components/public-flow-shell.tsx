@@ -6,16 +6,16 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 const FLOW_LINKS = [
-  { href: '/propfirmperk', label: 'Deals' },
-  { href: '/propfirmperk/compare', label: 'Matchup' },
-  { href: '/propfirmperk/guides', label: 'Playbooks' },
-  { href: '/propfirmperk/calculator', label: 'Cost Planner' },
-  { href: '/propfirmperk/faq', label: 'Help' },
+  { path: '/deals', label: 'Deals' },
+  { path: '/deals/compare', label: 'Matchup' },
+  { path: '/deals/guides', label: 'Playbooks' },
+  { path: '/deals/calculator', label: 'Cost Planner' },
+  { path: '/deals/faq', label: 'Help' },
 ]
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === '/propfirmperk') {
-    return pathname.endsWith('/propfirmperk') || pathname === '/propfirmperk'
+  if (href === '/deals') {
+    return pathname.endsWith('/deals') || pathname === '/deals'
   }
   return pathname.endsWith(href)
 }
@@ -30,6 +30,7 @@ export function PublicFlowShell({
   children: ReactNode
 }) {
   const pathname = usePathname()
+  const locale = pathname.match(/^\/([a-z]{2}(?:-[A-Za-z]{2})?)(?=\/|$)/i)?.[1] ?? "en"
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,11 +48,11 @@ export function PublicFlowShell({
           <nav className="mt-5 flex flex-wrap gap-2" aria-label="Deals flow">
             {FLOW_LINKS.map((link) => (
               <Link
-                key={link.href}
-                href={link.href}
+                key={link.path}
+                href={`/${locale}${link.path}`}
                 className={cn(
                   'rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-colors',
-                  isActive(pathname, link.href)
+                  isActive(pathname, link.path)
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border text-foreground hover:bg-muted'
                 )}

@@ -129,6 +129,7 @@ describe('saveTradesAction', () => {
 
   it('allows same trade payload for different users by generating user-scoped IDs', async () => {
     getUserIdMock.mockResolvedValue('auth-user-a')
+    prismaMock.user.findUnique.mockReset()
     prismaMock.user.findUnique.mockImplementation(async ({ where }: { where: Record<string, string> }) => {
       if (where.id === 'auth-user-a') return null
       if (where.id === 'auth-user-b') return null

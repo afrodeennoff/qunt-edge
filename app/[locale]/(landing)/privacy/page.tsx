@@ -1,11 +1,23 @@
 import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-page-shell';
+import type { Metadata } from "next";
 
 export const revalidate = 3600;
+export const metadata: Metadata = {
+  title: "Privacy Policy | Qunt Edge",
+  description:
+    "Read how Qunt Edge collects, protects, and processes account and trading data.",
+};
 
 export default function PrivacyPolicy() {
   return (
     <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-8">
       <UnifiedSurface className="space-y-8 text-fg-muted">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Privacy Policy</h1>
+          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+            This policy explains what data we collect and how we use it to provide the Qunt Edge platform.
+          </p>
+        </header>
         <section className="space-y-3">
           <h2 className="text-2xl font-semibold text-fg-primary">1. Introduction</h2>
           <p>
@@ -91,7 +103,7 @@ export default function PrivacyPolicy() {
           </p>
         </section>
 
-        <p className="border-t border-white/10 pt-5 text-xs uppercase tracking-[0.12em] text-fg-muted">
+        <p className="border-t border-border/60 pt-5 text-xs uppercase tracking-[0.12em] text-fg-muted">
           Last updated: {new Date().toISOString().split('T')[0]}
         </p>
       </UnifiedSurface>

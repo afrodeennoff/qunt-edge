@@ -20,6 +20,12 @@ export function PricingPageClient() {
   return (
     <UnifiedPageShell widthClassName="max-w-[1280px]" className="py-12 sm:py-16">
       <UnifiedSurface>
+        <header className="mb-8 space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Qunt Edge Pricing</h1>
+          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+            Choose the plan that matches your trading cadence, review depth, and team workflow.
+          </p>
+        </header>
         <PricingPlans />
       </UnifiedSurface>
     </UnifiedPageShell>

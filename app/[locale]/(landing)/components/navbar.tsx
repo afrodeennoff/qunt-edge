@@ -18,7 +18,7 @@ const LINKS: NavLink[] = [
   { title: 'Features', href: '/#features' },
   { title: 'Pricing', href: '/pricing' },
   { title: 'Prop Firms', href: '/propfirms' },
-  { title: 'Deals', href: '/propfirmperk' },
+  { title: 'Deals', href: '/deals' },
   { title: 'Teams', href: '/teams' },
   { title: 'Support', href: '/support' },
 ]
