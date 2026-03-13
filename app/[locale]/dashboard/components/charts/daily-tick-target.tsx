@@ -34,7 +34,7 @@ interface DailyTickTargetProps {
   size?: WidgetSize
 }
 
-export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTargetProps) {
+export default React.memo(function DailyTickTargetChart({ size = 'medium' }: DailyTickTargetProps) {
   const { formattedTrades: trades } = useDashboardStats()
   const { dateRange } = useDashboardFilters()
   const t = useI18n()
@@ -462,4 +462,4 @@ export default function DailyTickTargetChart({ size = 'medium' }: DailyTickTarge
       </div>
     </div>
   )
-}
+})

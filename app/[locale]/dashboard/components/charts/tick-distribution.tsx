@@ -59,7 +59,7 @@ const formatCount = (value: number) => {
   return value.toString();
 };
 
-export default function TickDistributionChart({
+export default React.memo(function TickDistributionChart({
   size = "medium",
 }: TickDistributionProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -290,4 +290,4 @@ export default function TickDistributionChart({
       </div>
     </ChartSurface>
   );
-}
+})

@@ -36,7 +36,7 @@ function normalizeModelForOpenRouter(model: string): string {
 /**
  * Returns a router-aware OpenAI-compatible language model via OpenRouter.
  * When AI router is enabled, model calls use the canonical fallback chain:
- * BYOK pool -> openrouter/free -> openrouter/auto -> requested model.
+ * openrouter/free -> openrouter/auto -> liquid fallback.
  */
 export function getAiLanguageModel(feature: AiFeature) {
   if (!aiApiKey && !hasWarnedMissingApiKey) {
@@ -60,17 +60,16 @@ export function getAiLanguageModelById(model: string) {
     return aiClient(normalizedModel);
   }
 
-  const chain = buildRouterModelChain(normalizedModel, routerConfig);
+  const chain = buildRouterModelChain(routerConfig);
   return createFallbackModel(chain);
 }
 
-function buildRouterModelChain(model: string, routerConfig: ReturnType<typeof getRouterConfig>): string[] {
+function buildRouterModelChain(routerConfig: ReturnType<typeof getRouterConfig>): string[] {
   const seen = new Set<string>();
   const chain = [
-    ...routerConfig.openrouter.models.byokFree,
     routerConfig.openrouter.models.free,
     routerConfig.openrouter.models.auto,
-    model,
+    routerConfig.openrouter.models.liquid,
   ];
   return chain.filter((id) => {
     const trimmed = id.trim();

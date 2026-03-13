@@ -146,7 +146,7 @@ export default function Navbar() {
                   onClick={handleRefresh}
                   disabled={isLoading}
                   className="h-8 w-8 rounded-xl text-fg-muted transition-all active:scale-90"
-                  title="Manual Sync"
+                  aria-label="Refresh dashboard data"
                 >
                   <RefreshCw className={cn("w-3.5 h-3.5 transition-transform duration-1000", (isRefreshing || isLoading) && "animate-spin")} />
                 </Button>

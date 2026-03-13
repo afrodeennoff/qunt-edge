@@ -45,7 +45,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function ContractQuantityChart({
+export default React.memo(function ContractQuantityChart({
   size = "medium",
 }: ContractQuantityChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -232,4 +232,4 @@ export default function ContractQuantityChart({
       </div>
     </ChartSurface>
   );
-}
+})

@@ -18,7 +18,7 @@
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 11%;
-    --muted-foreground: 0 0% 68%;
+    --muted-foreground: 0 0% 60%; /* WCAG AA compliant - was 68% */
     --accent: 0 0% 17%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 0% 30%;
@@ -200,6 +200,33 @@
     --color-success-bg: var(--accent-neutral) / 0.1;
     --color-info: 0 0% 80%;
     --color-info-bg: 0 0% 80% / 0.1;
+
+    /* ===== CONTRAST-COMPLIANT TEXT TOKENS (replaces raw text-white/xx) ===== */
+    /* Primary text on dark backgrounds - 98% luminance */
+    --text-primary: 0 0% 98%;
+    /* Secondary text - 60% luminance, WCAG AA compliant (>4.5:1) */
+    --text-secondary: 0 0% 60%;
+    /* Tertiary/muted text - 50% luminance, WCAG AA compliant for large text (>3:1) */
+    --text-tertiary: 0 0% 50%;
+    /* Disabled/placeholder - 35% luminance */
+    --text-disabled: 0 0% 35%;
+
+    /* ===== SURFACE TOKENS (replaces raw bg-white/xx and bg-black/xx) ===== */
+    /* Subtle surfaces - replaces bg-white/5 */
+    --surface-subtle: 0 0% 100% / 0.05;
+    --surface-subtle-hover: 0 0% 100% / 0.08;
+    --surface-subtle-active: 0 0% 100% / 0.12;
+    /* Muted surfaces - replaces bg-white/10 */
+    --surface-muted: 0 0% 100% / 0.1;
+    --surface-muted-hover: 0 0% 100% / 0.15;
+    /* Elevated/dark surfaces - replaces bg-black/95 */
+    --surface-elevated: 0 0% 100% / 0.03;
+    --surface-elevated-hover: 0 0% 100% / 0.06;
+
+    /* ===== BORDER TOKENS (replaces raw border-white/xx) ===== */
+    --border-subtle: 0 0% 100% / 0.08;
+    --border-muted: 0 0% 100% / 0.15;
+    --border-default: 0 0% 100% / 0.2;
     --semantic-success: 0 0% 98%;
     --semantic-success-fg: 0 0% 8%;
     --semantic-success-bg: 0 0% 100% / 0.08;
@@ -276,7 +303,7 @@
     --secondary: 0 0% 13%;
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 11%;
-    --muted-foreground: 0 0% 68%;
+    --muted-foreground: 0 0% 60%; /* WCAG AA compliant - was 68% */
     --accent: 0 0% 17%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 0% 25%;
@@ -434,6 +461,57 @@
 
   .text-fg-muted {
     color: hsl(var(--fg-muted));
+  }
+
+  /* Contrast-compliant text tokens (replaces text-white/50, text-white/60, text-white/70) */
+  .text-primary {
+    color: hsl(var(--text-primary));
+  }
+
+  .text-secondary {
+    color: hsl(var(--text-secondary));
+  }
+
+  .text-tertiary {
+    color: hsl(var(--text-tertiary));
+  }
+
+  .text-disabled {
+    color: hsl(var(--text-disabled));
+  }
+
+  /* Surface tokens (replaces bg-white/5, bg-white/10, bg-black/95) */
+  .bg-surface-subtle {
+    background-color: var(--surface-subtle);
+  }
+
+  .bg-surface-subtle-hover:hover {
+    background-color: var(--surface-subtle-hover);
+  }
+
+  .bg-surface-muted {
+    background-color: var(--surface-muted);
+  }
+
+  .bg-surface-muted-hover:hover {
+    background-color: var(--surface-muted-hover);
+  }
+
+  .bg-surface-elevated {
+    background-color: var(--surface-elevated);
+  }
+
+  .bg-surface-elevated-hover:hover {
+    background-color: var(--surface-elevated-hover);
+  }
+
+  /* Border tokens (replaces border-white/10, border-white/20) */
+  .border-subtle {
+    border-color: var(--border-subtle);
+  }
+
+  .border-muted {
+    border-color: var(--border-muted);
   }
 
   /* Glassmorphism tokens */

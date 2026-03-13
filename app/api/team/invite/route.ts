@@ -15,6 +15,11 @@ const inviteSchema = z.object({
   email: z.string().email(),
 })
 
+// Security: Use environment-configured reply-to address
+const getReplyToEmail = (): string => {
+  return process.env.TEAM_INVITE_REPLY_TO || 'team@qunt-edge.com'
+}
+
 export async function POST(req: Request) {
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY is missing')
@@ -159,11 +164,12 @@ export async function POST(req: Request) {
         ? `Invitation à rejoindre ${team.name} sur Qunt Edge`
         : `Invitation to join ${team.name} on Qunt Edge`,
       html: emailHtml,
-      replyTo: 'hugo.demenez@qunt-edge.vercel.app',
+      replyTo: getReplyToEmail(),
     })
 
     if (error) {
-      console.error('Error sending invitation email:', error)
+      // Security: Log only non-sensitive error info
+      console.error('Error sending invitation email:', error.name, error.message)
       return NextResponse.json(
         { error: 'Failed to send invitation email' },
         { status: 500 }
@@ -178,7 +184,8 @@ export async function POST(req: Request) {
   } catch (error) {
     const validationResponse = toValidationErrorResponse(error)
     if (validationResponse.status !== 500) return validationResponse
-    console.error('Error sending team invitation:', error)
+    // Security: Log only error type, not full error object which may contain sensitive data
+    console.error('Error sending team invitation:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json(
       { error: 'Internal server error', requestId: crypto.randomUUID() },
       { status: 500 }

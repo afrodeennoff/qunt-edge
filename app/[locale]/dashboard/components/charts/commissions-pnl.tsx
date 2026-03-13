@@ -93,7 +93,7 @@ const formatCenterCurrency = (value: number) => {
   })
 }
 
-export default function CommissionsPnLChart({
+export default React.memo(function CommissionsPnLChart({
   size = "medium",
 }: CommissionsPnLChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -231,4 +231,4 @@ export default function CommissionsPnLChart({
       </div>
     </ChartSurface>
   );
-}
+})

@@ -42,7 +42,11 @@ export class WidgetMessageBus {
   private secretKey: string
 
   constructor(secretKey?: string) {
-    this.secretKey = secretKey || process.env.WIDGET_MESSAGE_BUS_SECRET || 'default-secret-key-change-in-production'
+    // Security: Require explicit secret key configuration - do not use fallback
+    if (!secretKey && !process.env.WIDGET_MESSAGE_BUS_SECRET) {
+      throw new Error('WIDGET_MESSAGE_BUS_SECRET environment variable must be configured')
+    }
+    this.secretKey = secretKey || process.env.WIDGET_MESSAGE_BUS_SECRET!
   }
 
   async publish(message: Omit<WidgetMessage, 'id' | 'riskToken' | 'timestamp'>): Promise<string> {

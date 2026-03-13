@@ -560,7 +560,7 @@ const AccountsLegend = React.memo(
 );
 AccountsLegend.displayName = "AccountsLegend";
 
-export default function EquityChart({ size = "medium" }: EquityChartProps) {
+export default React.memo(function EquityChart({ size = "medium" }: EquityChartProps) {
   const pathname = usePathname();
   const isTeamView = pathname.includes("teams");
   const {
@@ -1026,4 +1026,4 @@ export default function EquityChart({ size = "medium" }: EquityChartProps) {
       </div>
     </ChartSurface>
   );
-}
+})

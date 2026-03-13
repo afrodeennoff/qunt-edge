@@ -18,6 +18,13 @@ const optionalMinString = (minLength: number) =>
     z.string().min(minLength).optional()
   );
 
+const MODEL_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:+/-]*$/;
+const optionalModelId = () =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().regex(MODEL_ID_PATTERN, "Invalid model identifier format").optional()
+  );
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: optionalString(),
@@ -28,7 +35,15 @@ const envSchema = z.object({
   UNSUBSCRIBE_TOKEN_SECRET: optionalMinString(32),
   OPENAI_API_KEY: optionalMinString(1),
   AI_BASE_URL: optionalUrl(),
-  AI_MODEL: optionalMinString(1),
+  AI_MODEL: optionalModelId(), // legacy alias
+  AI_MODEL_DEFAULT: optionalModelId(),
+  AI_MODEL_CHAT: optionalModelId(),
+  AI_MODEL_SUPPORT: optionalModelId(),
+  AI_MODEL_EDITOR: optionalModelId(),
+  AI_MODEL_MAPPINGS: optionalModelId(),
+  AI_MODEL_FORMAT_TRADES: optionalModelId(),
+  AI_MODEL_ANALYSIS: optionalModelId(),
+  AI_MODEL_SEARCH: optionalModelId(),
   AI_TIMEOUT_MS: optionalString(),
   AI_MAX_STEPS: optionalString(),
   AI_LOG_SAMPLE_RATE: optionalString(),
@@ -41,10 +56,22 @@ const envSchema = z.object({
   UPSTASH_REDIS_REST_TOKEN: optionalMinString(1),
   OPENROUTER_API_KEY: optionalMinString(1),
   AI_ROUTER_ENABLED: optionalString(),
-  AI_ROUTER_BYOK_FREE_MODELS: optionalString(),
+  AI_ROUTER_MODEL_FREE: optionalModelId(),
+  AI_ROUTER_MODEL_AUTO: optionalModelId(),
+  AI_ROUTER_MODEL_LIQUID: optionalModelId(),
+  AI_ROUTER_LIQUID_MODEL: optionalString(),
   AI_ROUTER_PROVIDER_ORDER: optionalString(),
   AI_ROUTER_MAX_PRICE_INPUT: optionalString(),
   AI_ROUTER_MAX_PRICE_OUTPUT: optionalString(),
+}).superRefine((env, ctx) => {
+  const routerEnabled = env.AI_ROUTER_ENABLED === "true";
+  if (env.NODE_ENV === "production" && routerEnabled && !env.OPENROUTER_API_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["OPENROUTER_API_KEY"],
+      message: "OPENROUTER_API_KEY is required in production when AI_ROUTER_ENABLED=true",
+    });
+  }
 });
 
 type AppEnv = z.infer<typeof envSchema>;

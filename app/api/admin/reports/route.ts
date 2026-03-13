@@ -185,18 +185,31 @@ async function generateRevenueReport(dateFilter: DateFilter) {
     total_revenue: revenue,
   }))
 
-  // Revenue by month using Prisma aggregate
-  const revenueByMonth = await prisma.$queryRaw<Array<{ month: Date; revenue: bigint }>>`
-    SELECT
-      DATE_TRUNC('month', createdAt) as month,
-      SUM(amount) as revenue
-    FROM "PaymentTransaction"
-    WHERE status = 'COMPLETED'
-      AND createdAt >= ${dateFilter.gte || new Date(0)}
-      AND createdAt <= ${dateFilter.lte || new Date()}
-    GROUP BY DATE_TRUNC('month', createdAt)
-    ORDER BY month
-  `
+  // Revenue by month using Prisma aggregate with date extraction
+  // Group by month manually since Prisma doesn't support DATE_TRUNC
+  const allTransactions = await prisma.paymentTransaction.findMany({
+    where: {
+      status: 'COMPLETED',
+      createdAt: dateFilter,
+    },
+    select: {
+      createdAt: true,
+      amount: true,
+    },
+    orderBy: { createdAt: 'asc' },
+  })
+
+  // Group by month in JavaScript (safe - no raw SQL)
+  const monthlyRevenue = new Map<string, number>()
+  for (const tx of allTransactions) {
+    const monthKey = `${tx.createdAt.getFullYear()}-${String(tx.createdAt.getMonth() + 1).padStart(2, '0')}`
+    monthlyRevenue.set(monthKey, (monthlyRevenue.get(monthKey) || 0) + Number(tx.amount))
+  }
+
+  const revenueByMonth = Array.from(monthlyRevenue.entries()).map(([month, revenue]) => ({
+    month: new Date(month + '-01'),
+    revenue,
+  }))
 
   return NextResponse.json({
     transactions,

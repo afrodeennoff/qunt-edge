@@ -79,7 +79,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
               <div
                 className={cn(
                   "flex items-center gap-[var(--space-1)] shrink-0",
-                  trend.isPositive ? "text-white" : "text-zinc-500",
+                  trend.isPositive ? "text-primary" : "text-muted-foreground",
                   currentSize.trend
                 )}
                 aria-label={`${trend.isPositive ? 'Increased' : 'Decreased'} by ${Math.abs(trend.value)}%`}
@@ -95,7 +95,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
             className={cn(
               "font-bold tracking-tight",
               currentSize.value,
-              trend?.isPositive ? "text-white" : trend?.isPositive === false ? "text-zinc-400" : "text-foreground"
+              trend?.isPositive ? "text-primary" : trend?.isPositive === false ? "text-muted-foreground" : "text-foreground"
             )}
             aria-label={`Value: ${value}`}
           >

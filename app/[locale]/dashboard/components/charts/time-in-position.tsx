@@ -48,7 +48,7 @@ const formatTime = (minutes: number) => {
   return `${mins}m`;
 };
 
-export default function TimeInPositionChart({
+export default React.memo(function TimeInPositionChart({
   size = "medium",
 }: TimeInPositionChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -245,4 +245,4 @@ export default function TimeInPositionChart({
       </div>
     </ChartSurface>
   );
-}
+})

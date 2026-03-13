@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
     // If tokenExpiresAt is null, clear the token (invalid state)
     const missingExpiry = synchronizations.filter((s) => !s.tokenExpiresAt);
     if (missingExpiry.length > 0) {
+      // Security: Log count only, not user identifiers
       console.warn(`[CRON] Clearing ${missingExpiry.length} Tradovate tokens missing tokenExpiresAt`);
       await prisma.synchronization.updateMany({
         where: {
@@ -103,7 +104,8 @@ export async function GET(request: NextRequest) {
       dailySyncs
     });
   } catch (error) {
-    console.error('Cron job error:', error);
+    // Security: Log only error type and message, not full error object
+    console.error('Cron job error:', error instanceof Error ? error.message : 'Unknown error');
     return toErrorResponse(error);
   }
 }
@@ -131,7 +133,8 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
 
     if (!renewal.ok) {
       const errorText = await renewal.text();
-      console.error(`[CRON] Failed to renew token for account ${synchronization.accountId}: ${errorText}`);
+      // Security: Log only status code, not sensitive token data
+      console.error(`[CRON] Failed to renew token for account ${synchronization.accountId}: status ${renewal.status}`);
       // Only clear token on explicit auth failures.
       // For transient provider/network errors, keep current token.
       if (renewal.status === 401 || renewal.status === 403) {
@@ -153,7 +156,9 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
 
     return true;
   } catch (error) {
-    console.error(`[CRON] Error renewing token for account ${synchronization.accountId}:`, error);
+    // Security: Log only error type and message, not full error object
+    console.error(`[CRON] Error renewing token for account ${synchronization.accountId}:`, 
+      error instanceof Error ? error.message : 'Unknown error');
     // Do not clear token on transient runtime errors.
     return false;
   }
@@ -167,24 +172,28 @@ async function renewUserToken(synchronization: SynchronizationRecord): Promise<b
 async function performDailySync(synchronization: SynchronizationRecord): Promise<boolean> {
   try {
     if (!synchronization.token) {
-      console.error(`[CRON] Cannot sync account ${synchronization.accountId}: missing access token`);
+      // Security: Log without exposing sensitive account details
+      console.error(`[CRON] Cannot sync account: missing access token`);
       return false;
     }
 
-    // Dynamically import the getTradovateTrades action to avoid circular dependencies
+    // Dynamically importing the getTradovateTrades action to avoid circular dependencies
     const { getTradovateTrades } = await import('@/app/[locale]/dashboard/components/import/tradovate/actions');
 
     // Fetch and save trades
     const result = await getTradovateTrades(synchronization.token, { userId: synchronization.userId });
 
     if (result.error) {
-      console.error(`[CRON] Failed to sync trades for account ${synchronization.accountId}:`, result.error);
+      // Security: Log only error message, not full result which may contain sensitive data
+      console.error(`[CRON] Failed to sync trades for account:`, result.error);
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error(`[CRON] Error during daily sync for account ${synchronization.accountId}:`, error);
+    // Security: Log only error type and message, not full error object
+    console.error(`[CRON] Error during daily sync for account:`, 
+      error instanceof Error ? error.message : 'Unknown error');
     return false;
   }
 }

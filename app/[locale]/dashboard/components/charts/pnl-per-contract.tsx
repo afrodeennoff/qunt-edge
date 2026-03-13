@@ -58,7 +58,7 @@ const formatWinRate = (wins: number, total: number) => {
   return ((wins / total) * 100).toFixed(1)
 }
 
-export default function PnLPerContractChart({
+export default React.memo(function PnLPerContractChart({
   size = "medium",
 }: PnLPerContractChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -270,4 +270,4 @@ export default function PnLPerContractChart({
       </div>
     </ChartSurface>
   );
-}
+})

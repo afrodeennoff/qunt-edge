@@ -44,7 +44,7 @@ const formatWinRate = (wins: number, total: number) => {
   return ((wins / total) * 100).toFixed(1)
 }
 
-export default function PnLBySideChart({
+export default React.memo(function PnLBySideChart({
   size = "medium",
 }: PnLBySideChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -250,4 +250,4 @@ export default function PnLBySideChart({
       </div>
     </ChartSurface>
   );
-}
+})

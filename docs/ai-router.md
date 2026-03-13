@@ -2,20 +2,20 @@
 
 ## Overview
 
-The AI Router is a production-ready fallback system that provides intelligent routing between multiple AI providers. It enables automatic failover, cost optimization, and improved reliability for AI features across the Qunt Edge platform.
+The AI Router is a production-ready OpenRouter fallback system that provides intelligent routing across configured OpenRouter models. It enables automatic failover, cost optimization, and improved reliability for AI features across the Qunt Edge platform.
 
 ## Architecture
 
 ```
 ┌─────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   Client    │───>│ AI Router    │───>│ Provider Chain  │
+│   Client    │───>│ AI Router    │───>│ Fallback Chain  │
 │  Request    │    │              │    │                 │
-└─────────────┘    └──────────────┘    │ 1. BYOK         │
-                                       │ 2. OpenRouter   │
-                                       │    (free)       │
-                                       │ 3. OpenRouter   │
-                                       │    (auto)       │
-                                       │ 4. Liquid LFM   │
+└─────────────┘    └──────────────┘    │ 1. openrouter/  │
+                                       │    free         │
+                                       │ 2. openrouter/  │
+                                       │    auto         │
+                                       │ 3. liquid/      │
+                                       │    lfm2-8b-a1b  │
                                        └─────────────────┘
                                              │
                                              ▼
@@ -43,20 +43,31 @@ AI_ROUTER_ENABLED=true
 # OpenRouter Configuration
 OPENROUTER_API_KEY=your_openrouter_key
 
-# Existing AI Configuration (fallback)
-OPENAI_API_KEY=your_openai_key
-AI_BASE_URL=https://api.z.ai/api/paas/v4
-AI_MODEL=glm-4.7-flash
+# Default model configuration
+AI_MODEL_DEFAULT=zai/glm-4.7-flash
+
+# Optional per-feature model overrides
+AI_MODEL_CHAT=openai/gpt-4o-mini
+AI_MODEL_SUPPORT=openai/gpt-4o-mini
+AI_MODEL_EDITOR=zai/glm-4.7-flash
+AI_MODEL_MAPPINGS=zai/glm-4.7-flash
+AI_MODEL_FORMAT_TRADES=zai/glm-4.7-flash
+AI_MODEL_ANALYSIS=zai/glm-4.7-flash
+AI_MODEL_SEARCH=zai/glm-4.7-flash
+
+# Router fallback model configuration
+AI_ROUTER_MODEL_FREE=openrouter/free
+AI_ROUTER_MODEL_AUTO=openrouter/auto
+AI_ROUTER_MODEL_LIQUID=liquid/lfm2-8b-a1b
 ```
 
 ### Provider Chain
 
-The router attempts providers in this order:
+The router attempts models in this exact order:
 
-1. **BYOK (Bring Your Own Key)**: User-configured OpenAI key
-2. **OpenRouter Free**: `meta-llama/llama-3.1-8b-instruct:free`
-3. **OpenRouter Auto**: `meta-llama/llama-3.1-8b-instruct`
-4. **Liquid LFM**: `liquid/lfm-40b:free`
+1. **OpenRouter Free**: `openrouter/free`
+2. **OpenRouter Auto**: `openrouter/auto`
+3. **Liquid LFM**: `liquid/lfm2-8b-a1b`
 
 ## Integration Guide
 

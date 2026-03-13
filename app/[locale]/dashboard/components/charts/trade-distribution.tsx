@@ -36,7 +36,7 @@ interface TooltipProps {
   payload?: TooltipPayload[]
 }
 
-export default function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
+export default React.memo(function TradeDistributionChart({ size = 'medium' }: TradeDistributionProps) {
   const { statistics: { nbWin, nbLoss, nbBe, nbTrades } } = useDashboardStats()
   const t = useI18n()
   const hasData = nbTrades > 0
@@ -188,5 +188,5 @@ export default function TradeDistributionChart({ size = 'medium' }: TradeDistrib
         </div>
       </div>
     </ChartSurface>
-  )
-}
+  );
+})

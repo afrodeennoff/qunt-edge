@@ -44,7 +44,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function WeekdayPNLChart({
+export default React.memo(function WeekdayPNLChart({
   size = "medium",
 }: WeekdayPNLChartProps) {
   const { calendarData } = useDashboardStats();
@@ -303,4 +303,4 @@ export default function WeekdayPNLChart({
       </div>
     </ChartSurface>
   );
-}
+})

@@ -44,7 +44,7 @@ const chartConfig = {
 const formatCurrency = (value: number) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-export default function TimeOfDayTradeChart({
+export default React.memo(function TimeOfDayTradeChart({
   size = "medium",
 }: TimeOfDayTradeChartProps) {
   const { formattedTrades: trades } = useDashboardStats();
@@ -279,4 +279,4 @@ export default function TimeOfDayTradeChart({
       </div>
     </ChartSurface>
   );
-}
+})

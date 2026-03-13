@@ -9,12 +9,12 @@ vi.mock("@/lib/ai/router/config", () => ({
       apiKey: "test-key",
       baseUrl: "https://openrouter.ai/api/v1",
       models: {
-        byokFree: ["groq/llama-3.1-8b-instant", "zai/glm-4.7-flash"],
         free: "openrouter/free",
         auto: "openrouter/auto",
+        liquid: "liquid/lfm2-8b-a1b",
       },
       provider: {
-        order: ["groq", "zai", "openrouter"],
+        order: ["openrouter"],
         sort: "price",
         maxPrice: { input: 0.05, output: 0.05 },
       },
@@ -57,7 +57,7 @@ describe("Fallback router order", () => {
     attempts.length = 0;
   });
 
-  it("uses BYOK -> free -> auto -> requestedModel sequence", async () => {
+  it("uses openrouter/free -> openrouter/auto -> liquid chain", async () => {
     const { FallbackRouter } = await import("@/lib/ai/router/fallback");
     const router = new FallbackRouter();
 
@@ -71,15 +71,13 @@ describe("Fallback router order", () => {
     ).rejects.toThrow("All providers failed");
 
     expect(attempts).toEqual([
-      "groq/llama-3.1-8b-instant",
-      "zai/glm-4.7-flash",
       "openrouter/free",
       "openrouter/auto",
-      "openai/gpt-4o",
+      "liquid/lfm2-8b-a1b",
     ]);
   });
 
-  it("deduplicates requestedModel when already present in BYOK pool", async () => {
+  it("keeps chain stable when requestedModel equals a chain model", async () => {
     const { FallbackRouter } = await import("@/lib/ai/router/fallback");
     const router = new FallbackRouter();
 
@@ -87,58 +85,15 @@ describe("Fallback router order", () => {
       router.createCompletion({
         userId: "u2",
         feature: "chat",
-        requestedModel: "zai/glm-4.7-flash",
-        messages: [{ role: "user", content: "hello" }],
-      }),
-    ).rejects.toThrow("All providers failed");
-
-    expect(attempts).toEqual([
-      "groq/llama-3.1-8b-instant",
-      "zai/glm-4.7-flash",
-      "openrouter/free",
-      "openrouter/auto",
-    ]);
-  });
-
-  it("deduplicates requestedModel when it equals openrouter/free", async () => {
-    const { FallbackRouter } = await import("@/lib/ai/router/fallback");
-    const router = new FallbackRouter();
-
-    await expect(
-      router.createCompletion({
-        userId: "u3",
-        feature: "chat",
         requestedModel: "openrouter/free",
         messages: [{ role: "user", content: "hello" }],
       }),
     ).rejects.toThrow("All providers failed");
 
     expect(attempts).toEqual([
-      "groq/llama-3.1-8b-instant",
-      "zai/glm-4.7-flash",
       "openrouter/free",
       "openrouter/auto",
-    ]);
-  });
-
-  it("deduplicates requestedModel when it equals openrouter/auto", async () => {
-    const { FallbackRouter } = await import("@/lib/ai/router/fallback");
-    const router = new FallbackRouter();
-
-    await expect(
-      router.createCompletion({
-        userId: "u4",
-        feature: "chat",
-        requestedModel: "openrouter/auto",
-        messages: [{ role: "user", content: "hello" }],
-      }),
-    ).rejects.toThrow("All providers failed");
-
-    expect(attempts).toEqual([
-      "groq/llama-3.1-8b-instant",
-      "zai/glm-4.7-flash",
-      "openrouter/free",
-      "openrouter/auto",
+      "liquid/lfm2-8b-a1b",
     ]);
   });
 });

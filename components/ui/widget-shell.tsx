@@ -86,13 +86,13 @@ export function WidgetShell({
     <Card
       data-widget-shell="v2"
       className={cn(
-        "h-full overflow-hidden rounded-xl border-border/55 bg-card/95 shadow-none transition-all duration-200",
-        variant === "hoverable" && "hover:shadow-md hover:border-border/70",
+        "h-full overflow-hidden rounded-[var(--radius)] border-border bg-card shadow-none transition-all duration-200",
+        variant === "hoverable" && "hover:shadow-md hover:border-border",
         className
       )}
     >
       {(title || actions || icon || description) && (
-        <CardHeader className="border-b border-border/55 px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-4)] sm:py-[var(--space-3)]">
+        <CardHeader className="border-b border-border px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-4)] sm:py-[var(--space-3)]">
           <div className="flex items-start justify-between gap-[var(--space-3)]">
             <div className="min-w-0 space-y-[var(--space-2)]">
               {(title || icon) && (
@@ -133,7 +133,7 @@ export function WidgetShell({
       </CardContent>
 
       {footer ? (
-        <CardFooter className="border-t border-border/55 p-[var(--space-4)] sm:p-[var(--space-4)]">{footer}</CardFooter>
+        <CardFooter className="border-t border-border p-[var(--space-4)] sm:p-[var(--space-4)]">{footer}</CardFooter>
       ) : null}
     </Card>
   )

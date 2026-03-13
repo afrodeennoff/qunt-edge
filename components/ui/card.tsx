@@ -43,10 +43,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         tabIndex={isInteractive ? 0 : undefined}
         onKeyDown={isInteractive ? handleKeyDown : undefined}
         className={cn(
-          "relative rounded-xl border bg-card text-card-foreground shadow-sm",
+          "relative rounded-[var(--radius)] border bg-card text-card-foreground shadow-sm",
           {
             "border-border bg-card": variant === "default",
-            "border-border/70 bg-secondary/22 backdrop-blur-md": variant === "glass",
+            "border-border-subtle bg-secondary/22 backdrop-blur-md": variant === "glass",
             "border-border bg-card shadow-md": variant === "elevated",
             "border-2 border-border bg-transparent shadow-none": variant === "outlined",
             "border-0 bg-transparent shadow-none": variant === "flat",
@@ -70,7 +70,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {...props}
       >
         {status && (
-          <div className="absolute right-[var(--space-3)] top-[var(--space-3)] z-20 flex items-center gap-[var(--space-2)] rounded-full border border-border/70 bg-background/80 px-[var(--space-2)] py-[var(--space-1)] backdrop-blur-sm">
+          <div className="absolute right-[var(--space-3)] top-[var(--space-3)] z-20 flex items-center gap-[var(--space-2)] rounded-full border border-border-muted bg-background/80 px-[var(--space-2)] py-[var(--space-1)] backdrop-blur-sm">
             <div className={cn(
               "status-dot",
               status === "live" && "status-dot-live",
@@ -85,7 +85,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         )}
 
         {variant === "matte" && (
-          <div className="absolute inset-0 pointer-events-none border border-border/40 rounded-xl" />
+          <div className="absolute inset-0 pointer-events-none border border-border/40 rounded-[var(--radius)]" />
         )}
 
         <div className="relative z-10">

@@ -51,7 +51,7 @@ function getTimeRangeLabel(range: string): string {
   return labels[range] || range
 }
 
-export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRangePerformanceChartProps) {
+export default React.memo(function TimeRangePerformanceChart({ size = 'medium' }: TimeRangePerformanceChartProps) {
   const { formattedTrades: trades } = useDashboardStats()
   const { timeRange, setTimeRange } = useDashboardFilters()
   const t = useI18n()
@@ -315,5 +315,5 @@ export default function TimeRangePerformanceChart({ size = 'medium' }: TimeRange
         </div>
       </div>
     </ChartSurface>
-  )
-}
+  );
+})

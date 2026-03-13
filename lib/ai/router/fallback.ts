@@ -47,22 +47,11 @@ export class FallbackRouter {
     }
     
     const requestedModel = options.requestedModel?.trim();
-    const byokFirstModels = config.openrouter.models.byokFree;
-    const providerHints = {
-      order: config.openrouter.provider.order,
-      sort: config.openrouter.provider.sort,
-      max_price: {
-        input: config.openrouter.provider.maxPrice.input,
-        output: config.openrouter.provider.maxPrice.output,
-      },
-    } as const;
-
     // Deduplicate complete chain while preserving stable order.
-    const providerCandidates: Array<{ name: string; model: string; provider?: typeof providerHints }> = [
-      ...byokFirstModels.map((model) => ({ name: "openrouter-byok", model, provider: providerHints })),
+    const providerCandidates: Array<{ name: string; model: string }> = [
       { name: "openrouter-free", model: config.openrouter.models.free },
       { name: "openrouter-auto", model: config.openrouter.models.auto },
-      ...(requestedModel ? [{ name: "openrouter-requested-fallback", model: requestedModel }] : []),
+      { name: "openrouter-liquid", model: config.openrouter.models.liquid },
     ];
     const seen = new Set<string>();
     const providers = providerCandidates.filter((provider) => {
@@ -83,7 +72,14 @@ export class FallbackRouter {
             model: provider.model,
             messages: options.messages,
             temperature: options.temperature,
-            provider: 'provider' in provider ? provider.provider : undefined,
+            provider: {
+              order: config.openrouter.provider.order,
+              sort: config.openrouter.provider.sort,
+              max_price: {
+                input: config.openrouter.provider.maxPrice.input,
+                output: config.openrouter.provider.maxPrice.output,
+              },
+            },
           })
         );
         
@@ -109,6 +105,8 @@ export class FallbackRouter {
       }
     }
     
-    throw new Error('All providers failed');
+    throw new Error(
+      `All providers failed for requested model: ${requestedModel ?? "n/a"}`,
+    );
   }
 }

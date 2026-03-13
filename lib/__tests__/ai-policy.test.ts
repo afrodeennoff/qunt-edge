@@ -1,32 +1,64 @@
-import { describe, expect, it } from "vitest";
-import { getAiPolicy } from "@/lib/ai/policy";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const envKeys = [
+  "AI_MODEL",
+  "AI_MODEL_DEFAULT",
+  "AI_MODEL_CHAT",
+  "AI_MODEL_SUPPORT",
+  "AI_MODEL_EDITOR",
+  "AI_MODEL_MAPPINGS",
+  "AI_MODEL_FORMAT_TRADES",
+  "AI_MODEL_ANALYSIS",
+  "AI_MODEL_SEARCH",
+  "AI_TIMEOUT_MS",
+  "AI_MAX_STEPS",
+  "AI_LOG_SAMPLE_RATE",
+] as const;
+
+const originalEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
 
 describe("AI policy", () => {
-  it("uses GLM default model when AI_MODEL is not provided", () => {
-    const originalModel = process.env.AI_MODEL;
-    delete process.env.AI_MODEL;
-
-    const policy = getAiPolicy("chat");
-    expect(policy.model).toBe("glm-4.7-flash");
-
-    if (originalModel) process.env.AI_MODEL = originalModel;
+  beforeEach(() => {
+    vi.resetModules();
+    for (const key of envKeys) {
+      delete process.env[key];
+    }
   });
 
-  it("reads env overrides for timeout and max steps", () => {
-    const originalTimeout = process.env.AI_TIMEOUT_MS;
-    const originalSteps = process.env.AI_MAX_STEPS;
+  afterEach(() => {
+    for (const key of envKeys) {
+      const value = originalEnv[key];
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
 
+  it("uses default model when no env override is provided", async () => {
+    const { getAiPolicy } = await import("@/lib/ai/policy");
+    expect(getAiPolicy("chat").model).toBe("glm-4.7-flash");
+  });
+
+  it("uses AI_MODEL_DEFAULT over legacy AI_MODEL", async () => {
+    process.env.AI_MODEL = "openai/gpt-4o-mini";
+    process.env.AI_MODEL_DEFAULT = "zai/glm-4.7-flash";
+    const { getAiPolicy } = await import("@/lib/ai/policy");
+    expect(getAiPolicy("analysis").model).toBe("zai/glm-4.7-flash");
+  });
+
+  it("uses per-feature override when provided", async () => {
+    process.env.AI_MODEL_DEFAULT = "zai/glm-4.7-flash";
+    process.env.AI_MODEL_SUPPORT = "openai/gpt-4o-mini";
+    const { getAiPolicy } = await import("@/lib/ai/policy");
+    expect(getAiPolicy("support").model).toBe("openai/gpt-4o-mini");
+    expect(getAiPolicy("chat").model).toBe("zai/glm-4.7-flash");
+  });
+
+  it("reads timeout and max steps from env", async () => {
     process.env.AI_TIMEOUT_MS = "45000";
     process.env.AI_MAX_STEPS = "7";
-
+    const { getAiPolicy } = await import("@/lib/ai/policy");
     const policy = getAiPolicy("editor");
     expect(policy.timeoutMs).toBe(45000);
     expect(policy.maxSteps).toBe(7);
-
-    if (originalTimeout) process.env.AI_TIMEOUT_MS = originalTimeout;
-    else delete process.env.AI_TIMEOUT_MS;
-
-    if (originalSteps) process.env.AI_MAX_STEPS = originalSteps;
-    else delete process.env.AI_MAX_STEPS;
   });
 });

@@ -107,7 +107,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   return null;
 };
 
-export default function PNLChart({ size = "medium" }: PNLChartProps) {
+export default React.memo(function PNLChart({ size = "medium" }: PNLChartProps) {
   const { calendarData } = useDashboardStats();
   const t = useI18n();
   const locale = useCurrentLocale();
@@ -259,4 +259,4 @@ export default function PNLChart({ size = "medium" }: PNLChartProps) {
       </div>
     </ChartSurface>
   );
-}
+})

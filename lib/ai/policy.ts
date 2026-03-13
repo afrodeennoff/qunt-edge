@@ -1,3 +1,5 @@
+import { getEnv } from "@/lib/env";
+
 export type AiFeature =
   | "chat"
   | "support"
@@ -37,11 +39,12 @@ function normalizeSampleRate(value: number): number {
 }
 
 function getBasePolicy() {
-  const model = process.env.AI_MODEL || DEFAULT_MODEL;
-  const timeoutMs = Math.max(5000, parseNumber(process.env.AI_TIMEOUT_MS, DEFAULT_TIMEOUT_MS));
-  const maxSteps = Math.max(1, Math.floor(parseNumber(process.env.AI_MAX_STEPS, DEFAULT_MAX_STEPS)));
+  const env = getEnv();
+  const model = env.AI_MODEL_DEFAULT || env.AI_MODEL || DEFAULT_MODEL;
+  const timeoutMs = Math.max(5000, parseNumber(env.AI_TIMEOUT_MS, DEFAULT_TIMEOUT_MS));
+  const maxSteps = Math.max(1, Math.floor(parseNumber(env.AI_MAX_STEPS, DEFAULT_MAX_STEPS)));
   const logSampleRate = normalizeSampleRate(
-    parseNumber(process.env.AI_LOG_SAMPLE_RATE, DEFAULT_LOG_SAMPLE_RATE),
+    parseNumber(env.AI_LOG_SAMPLE_RATE, DEFAULT_LOG_SAMPLE_RATE),
   );
 
   return {
@@ -54,6 +57,7 @@ function getBasePolicy() {
 
 export function getAiPolicy(feature: AiFeature): AiFeaturePolicy {
   const base = getBasePolicy();
+  const env = getEnv();
 
   const defaultsByFeature: Record<AiFeature, Pick<AiFeaturePolicy, "temperature">> = {
     chat: { temperature: 0.3 },
@@ -65,10 +69,20 @@ export function getAiPolicy(feature: AiFeature): AiFeaturePolicy {
     search: { temperature: 0.1 },
   };
 
+  const featureModelOverride: Record<AiFeature, string | undefined> = {
+    chat: env.AI_MODEL_CHAT,
+    support: env.AI_MODEL_SUPPORT,
+    editor: env.AI_MODEL_EDITOR,
+    mappings: env.AI_MODEL_MAPPINGS,
+    "format-trades": env.AI_MODEL_FORMAT_TRADES,
+    analysis: env.AI_MODEL_ANALYSIS,
+    search: env.AI_MODEL_SEARCH,
+  };
+
   return {
     feature,
     provider: DEFAULT_PROVIDER,
-    model: base.model,
+    model: featureModelOverride[feature] || base.model,
     timeoutMs: base.timeoutMs,
     maxSteps: base.maxSteps,
     temperature: defaultsByFeature[feature].temperature,

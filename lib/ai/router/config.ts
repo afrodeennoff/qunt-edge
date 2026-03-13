@@ -6,9 +6,9 @@ export interface RouterConfig {
     apiKey?: string;
     baseUrl: string;
     models: {
-      byokFree: string[];
       free: string;
       auto: string;
+      liquid: string;
     };
     provider: {
       order: string[];
@@ -30,11 +30,7 @@ export interface RouterConfig {
 
 export function getRouterConfig(): RouterConfig {
   const env = getEnv();
-  const byokFreeModels = (env.AI_ROUTER_BYOK_FREE_MODELS || 'groq/llama-3.1-8b-instant,zai/glm-4.7-flash,cerebras/llama-3.1-8b,together/mixtral-8x7b,deepinfra/qwen2-7b')
-    .split(',')
-    .map((model) => model.trim())
-    .filter(Boolean);
-  const providerOrder = (env.AI_ROUTER_PROVIDER_ORDER || 'groq,cerebras,zai,together,deepinfra,openrouter')
+  const providerOrder = (env.AI_ROUTER_PROVIDER_ORDER || 'openrouter')
     .split(',')
     .map((provider) => provider.trim())
     .filter(Boolean);
@@ -47,9 +43,9 @@ export function getRouterConfig(): RouterConfig {
       apiKey: env.OPENROUTER_API_KEY,
       baseUrl: 'https://openrouter.ai/api/v1',
       models: {
-        byokFree: byokFreeModels,
-        free: 'openrouter/free',
-        auto: 'openrouter/auto',
+        free: env.AI_ROUTER_MODEL_FREE || 'openrouter/free',
+        auto: env.AI_ROUTER_MODEL_AUTO || 'openrouter/auto',
+        liquid: env.AI_ROUTER_MODEL_LIQUID || env.AI_ROUTER_LIQUID_MODEL || 'liquid/lfm2-8b-a1b',
       },
       provider: {
         order: providerOrder,

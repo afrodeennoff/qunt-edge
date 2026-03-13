@@ -60,7 +60,7 @@ export function ChartSurface({
 
     if (state === "empty") {
       return (
-        <div className="flex h-full min-h-[160px] items-center justify-center p-[var(--space-3)] text-xs text-white/55">
+        <div className="flex h-full min-h-[160px] items-center justify-center p-[var(--space-3)] text-xs text-muted-foreground">
           {emptyMessage}
         </div>
       )
@@ -72,12 +72,12 @@ export function ChartSurface({
   return (
     <div
       data-chart-surface="v2"
-      className={cn("h-full flex flex-col overflow-hidden rounded-xl bg-transparent", className)}
+      className={cn("h-full flex flex-col overflow-hidden rounded-[var(--radius)] bg-transparent", className)}
     >
       {hasHeader && (
         <div
           className={cn(
-            "flex shrink-0 items-center border-b border-white/10",
+            "flex shrink-0 items-center border-b border-border-subtle",
             isSmall ? "h-10 px-2.5" : "h-12 px-3.5",
             headerClassName
           )}

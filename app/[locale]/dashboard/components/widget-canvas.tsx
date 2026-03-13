@@ -135,6 +135,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
                   variant="outline"
                   size="icon"
                   className="h-8 w-8 rounded-full border-white/25 bg-black/55 text-foreground hover:bg-black/75 hover:border-white/40 backdrop-blur-md"
+                  aria-label="Change widget size"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </Button>
@@ -269,6 +270,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
                   variant="destructive"
                   size="icon"
                   className="h-8 w-8 rounded-full border border-white/20 bg-semantic-error-bg/80 text-foreground hover:bg-semantic-error-bg"
+                  aria-label="Remove widget"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>

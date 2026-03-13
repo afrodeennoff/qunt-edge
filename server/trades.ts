@@ -758,17 +758,28 @@ export async function deleteTagFromAllTrades(tag: string) {
     throw new Error('Unauthorized')
   }
   try {
-    const trades = await prisma.trade.findMany({
+    // First, find all trades with the tag to get their IDs
+    const tradesWithTag = await prisma.trade.findMany({
       where: {
         userId,
         tags: {
           has: tag
         }
+      },
+      select: {
+        id: true,
+        tags: true
       }
     })
 
-    await Promise.all(
-      trades.map(trade =>
+    if (tradesWithTag.length === 0) {
+      return { success: true, tradesUpdated: 0 }
+    }
+
+    // Use transaction to batch update all trades with the tag removed
+    // This prevents N+1 queries by executing all updates in a single transaction
+    await prisma.$transaction(
+      tradesWithTag.map(trade =>
         prisma.trade.updateMany({
           where: { id: trade.id, userId },
           data: {
@@ -782,7 +793,7 @@ export async function deleteTagFromAllTrades(tag: string) {
 
     await invalidateTradeRelatedCaches(userId)
     revalidateTag(userId, { expire: 0 })
-    return { success: true }
+    return { success: true, tradesUpdated: tradesWithTag.length }
   } catch (error) {
     console.error('Failed to delete tag:', error)
     throw error
@@ -833,6 +844,7 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
     nextDay.setUTCDate(nextDay.getUTCDate() + 1)
     const nextDayStr = nextDay.toISOString().split('T')[0]
 
+    // First, find all trades to get their IDs and current tags
     const trades = await prisma.trade.findMany({
       where: {
         userId,
@@ -850,10 +862,20 @@ export async function addTagsToTradesForDay(date: string, tags: string[]) {
             }
           }
         ]
+      },
+      select: {
+        id: true,
+        tags: true
       }
     })
 
-    await Promise.all(
+    if (trades.length === 0) {
+      return { success: true, tradesUpdated: 0 }
+    }
+
+    // Use transaction to batch update all trades with new tags
+    // This prevents N+1 queries by executing all updates in a single transaction
+    await prisma.$transaction(
       trades.map(trade =>
         prisma.trade.updateMany({
           where: { id: trade.id, userId },
