@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { saveTradesAction } from '@/server/database';
+import { saveTradesForUserAction } from '@/server/database';
 import type { ImportTradeDraft } from '@/lib/trade-types';
 import { verifySecureToken } from '@/lib/api-auth';
 import { z } from 'zod'
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
       })
     )
 
-    const result = await saveTradesAction(trades, { userId: user.id })
+    const result = await saveTradesForUserAction(trades, user.id)
 
     // Handle duplicate trades as success, but return errors for other cases
     if (result.error && result.error !== 'DUPLICATE_TRADES') {

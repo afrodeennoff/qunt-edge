@@ -6,6 +6,38 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-13: Multi-User Data Isolation Hardening (Trades/Layout/Uploads)
+- **What changed:** Hardened multi-user data boundaries across trade ingestion, dashboard layout reads, optimized trade mutations, and upload deletion paths; removed a client-side duplicate filter that could cause false "already uploaded" conflicts.
+- **What I want:** Every read/write/delete path should be bound to the authenticated actor (or explicit trusted integration path), and two different users must be able to import identical trade datasets without cross-user duplicate collisions.
+- **What I don't want:** Caller-injected user IDs steering server writes, cross-user layout reads, unscoped trade batch updates, or import UI dedupe logic blocking valid uploads due to stale client state from another session.
+- **How we fixed that:**
+  - Split trade save paths in `server/trades.ts`:
+    - `saveTradesAction(...)` is now actor-bound (ignores caller override),
+    - `saveTradesForUserAction(...)` is explicit for trusted token-auth import routes.
+  - Updated trusted import callers to use explicit path:
+    - `app/api/thor/store/route.ts`,
+    - `app/[locale]/dashboard/components/import/tradovate/actions.ts`.
+  - Added ownership enforcement in layout reads:
+    - `server/user-data.ts#getDashboardLayout(...)` now rejects cross-user reads with `Forbidden`.
+  - Scoped optimized batch updates by `userId`:
+    - `server/optimized-trades.ts#batchUpdateTradesOptimized(...)` now uses `updateMany` with `{ id, userId }`.
+  - Removed cross-session duplicate blocking in ATAS processor:
+    - `app/[locale]/dashboard/components/import/atas/atas-processor.tsx` now dedupes only within current import batch, not against persisted store trades.
+  - Added upload deletion ownership guard:
+    - `app/[locale]/dashboard/components/tables/trade-image-editor.tsx` now deletes only storage paths under current actor prefix.
+  - Reduced persisted cross-user bleed risk:
+    - `store/user-store.ts` no longer persists `dashboardLayout`,
+    - `context/data-provider.tsx` now calls `resetUser` on detected user switch before hydration.
+  - Added regression tests:
+    - `tests/save-trades-action.test.ts` (public override guard + trusted explicit user path),
+    - `tests/server/layout-isolation.test.ts`,
+    - `tests/server/optimized-trades-isolation.test.ts`.
+- **Key Files:** `server/trades.ts`, `app/api/thor/store/route.ts`, `app/[locale]/dashboard/components/import/tradovate/actions.ts`, `server/user-data.ts`, `server/optimized-trades.ts`, `app/[locale]/dashboard/components/import/atas/atas-processor.tsx`, `app/[locale]/dashboard/components/tables/trade-image-editor.tsx`, `store/user-store.ts`, `context/data-provider.tsx`, `tests/save-trades-action.test.ts`, `tests/server/layout-isolation.test.ts`, `tests/server/optimized-trades-isolation.test.ts`
+- **Verification:**
+  - `npx vitest run tests/save-trades-action.test.ts tests/server/layout-isolation.test.ts tests/server/optimized-trades-isolation.test.ts tests/server/accounts-isolation.test.ts` -> passes (`10/10`).
+  - `npx eslint <touched files>` -> warnings-only baseline (`0` errors).
+  - `npm run -s typecheck` -> passes.
+
 ### 2026-03-13: AI Router Security Hardening Complete (Budget Fail-Closed + Cache/Injection Fixes)
 - **What changed:** Applied comprehensive security fixes to the AI Router system including fail-closed budget enforcement, cache key collision prevention, development API configuration validation, and stricter prompt injection detection.
 - **What I want:** All AI router components should fail securely with explicit errors rather than silent fallbacks, preventing budget bypass, cache poisoning, API misconfiguration, and prompt injection attacks.

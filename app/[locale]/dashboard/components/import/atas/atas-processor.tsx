@@ -403,18 +403,25 @@ export default function AtasProcessor({
       const itemEntryDateIso = item.entryDate ? new Date(item.entryDate).toISOString() : null
       const itemCloseDateIso = item.closeDate ? new Date(item.closeDate).toISOString() : null
 
-      // Check if trade already exists
-      const existingTrade = existingTrades.find(
-        (trade) =>
+      const isDuplicateInCurrentBatch = newTrades.some((trade) => {
+        const tradeEntryDateIso = trade.entryDate
+          ? new Date(trade.entryDate).toISOString()
+          : null
+        const tradeCloseDateIso = trade.closeDate
+          ? new Date(trade.closeDate).toISOString()
+          : null
+
+        return (
           trade.accountNumber === item.accountNumber &&
           trade.instrument === item.instrument &&
-          new Date(trade.entryDate).toISOString() === itemEntryDateIso &&
-          new Date(trade.closeDate).toISOString() === itemCloseDateIso &&
+          tradeEntryDateIso === itemEntryDateIso &&
+          tradeCloseDateIso === itemCloseDateIso &&
           Number(trade.quantity) === Number(item.quantity)
-      );
+        )
+      })
 
-      if (!existingTrade) {
-        newTrades.push(item as Trade);
+      if (!isDuplicateInCurrentBatch) {
+        newTrades.push(item as Trade)
       }
     });
 

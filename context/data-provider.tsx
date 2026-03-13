@@ -290,6 +290,7 @@ export const DataProvider: React.FC<{
   const groups = useUserStore((state) => state.groups);
   const accounts = useUserStore((state) => state.accounts);
   const setSupabaseUser = useUserStore((state) => state.setSupabaseUser);
+  const resetUserState = useUserStore((state) => state.resetUser);
   const setTickDetails = useTickDetailsStore((state) => state.setTickDetails);
   const tickDetails = useTickDetailsStore((state) => state.tickDetails);
   const setEvents = useFinancialEventsStore((state) => state.setEvents);
@@ -580,6 +581,7 @@ export const DataProvider: React.FC<{
       const userId = await withTimeout(getUserId(), 15000, "getUserId");
       if (activeUserIdRef.current && activeUserIdRef.current !== userId) {
         // Prevent transient cross-user UI bleed before the next user's snapshot loads.
+        resetUserState();
         setTrades([]);
         setAccounts([]);
         setGroups([]);
@@ -773,6 +775,7 @@ export const DataProvider: React.FC<{
     setTickDetails,
     setTrades,
     setUser,
+    resetUserState,
     syncSharedDataState,
     withTimeout,
     supabase,

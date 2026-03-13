@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/server/auth'
-import { saveTradesAction } from '@/server/database'
+import { saveTradesForUserAction } from '@/server/database'
 import { TickDetails } from '@/prisma/generated/prisma'
 import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
 import crypto from 'crypto'
@@ -1548,7 +1548,7 @@ export async function getTradovateTrades(
 
     // Save trades to database
     logger.info(`Attempting to save ${processedTrades.length} fill pair trades to database`)
-    const saveResult = await saveTradesAction(processedTrades, { userId })
+    const saveResult = await saveTradesForUserAction(processedTrades, userId)
 
     if (saveResult.error) {
       if (saveResult.error === "DUPLICATE_TRADES") {

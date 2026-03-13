@@ -103,6 +103,13 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
     maxFiles: MAX_IMAGES,
   });
 
+  const actorImagePrefix =
+    supabaseUser?.id
+      ? `${supabaseUser.id}/`
+      : user?.auth_user_id
+        ? `${user.auth_user_id}/`
+        : null
+
   // Determine if we have images (either URLs or legacy base64 fields)
   const hasImages = (trade.images && trade.images.length > 0) || trade.imageBase64 || trade.imageBase64Second;
 
@@ -245,7 +252,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       if (imageUrl) {
         // Extract the path from the full URL
         const path = extractTradeImagePath(imageUrl);
-        if (path) {
+        if (path && actorImagePrefix && path.startsWith(actorImagePrefix)) {
           await supabase.storage.from("trade-images").remove([path]);
         }
       }
@@ -290,7 +297,13 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       }
 
       if (imagesToRemove.length > 0) {
-        await supabase.storage.from("trade-images").remove(imagesToRemove);
+        const ownedPaths = actorImagePrefix
+          ? imagesToRemove.filter((path) => path.startsWith(actorImagePrefix))
+          : []
+
+        if (ownedPaths.length > 0) {
+          await supabase.storage.from("trade-images").remove(ownedPaths);
+        }
       }
     } catch (error) {
       console.error("Error removing all images:", error);

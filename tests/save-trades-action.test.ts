@@ -49,7 +49,7 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
-import { saveTradesAction } from '@/server/trades'
+import { saveTradesAction, saveTradesForUserAction } from '@/server/trades'
 
 const baseTrade = {
   accountNumber: 'ACC-1',
@@ -146,8 +146,8 @@ describe('saveTradesAction', () => {
       }),
     )
 
-    await saveTradesAction([baseTrade], { userId: 'auth-user-a' })
-    await saveTradesAction([baseTrade], { userId: 'auth-user-b' })
+    await saveTradesForUserAction([baseTrade], 'auth-user-a')
+    await saveTradesForUserAction([baseTrade], 'auth-user-b')
 
     const firstPayload = createManyTrades.mock.calls[0]?.[0]?.data?.[0]
     const secondPayload = createManyTrades.mock.calls[1]?.[0]?.data?.[0]
@@ -155,5 +155,30 @@ describe('saveTradesAction', () => {
     expect(firstPayload.userId).toBe('db-user-a')
     expect(secondPayload.userId).toBe('db-user-b')
     expect(firstPayload.id).not.toBe(secondPayload.id)
+  })
+
+  it('ignores caller-provided user override on public saveTradesAction path', async () => {
+    getUserIdMock.mockResolvedValue('auth-user-a')
+    prismaMock.user.findUnique.mockReset()
+    prismaMock.user.findUnique.mockImplementation(async ({ where }: { where: Record<string, string> }) => {
+      if (where.id === 'auth-user-a') return null
+      if (where.id === 'auth-user-b') return null
+      if (where.auth_user_id === 'auth-user-a') return { id: 'db-user-a' }
+      if (where.auth_user_id === 'auth-user-b') return { id: 'db-user-b' }
+      return null
+    })
+
+    const createManyTrades = vi.fn().mockResolvedValue({ count: 1 })
+    prismaMock.$transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) =>
+      cb({
+        account: { findMany: vi.fn().mockResolvedValue([]), createMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        trade: { createMany: createManyTrades },
+      }),
+    )
+
+    await saveTradesAction([baseTrade], { userId: 'auth-user-b' })
+
+    const payload = createManyTrades.mock.calls[0]?.[0]?.data?.[0]
+    expect(payload.userId).toBe('db-user-a')
   })
 })

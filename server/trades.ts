@@ -172,12 +172,11 @@ function generateTradeUUID(trade: Partial<PrismaTrade> | any): string {
   return uuidv5(tradeSignature, TRADE_NAMESPACE)
 }
 
-export async function saveTradesAction(
+async function saveTradesForResolvedUser(
   data: any[],
-  options?: { userId?: string }
+  userId: string,
+  rawUserId: string
 ): Promise<TradeResponse> {
-  const rawUserId = options?.userId ?? await getUserId()
-  const userId = await resolveWritableUserId(rawUserId)
   logger.info(`[saveTrades] Saving trades`, { count: data.length, userId, rawUserId })
 
   if (!Array.isArray(data) || data.length === 0) {
@@ -301,6 +300,23 @@ export async function saveTradesAction(
       details: error instanceof Error ? error.message : 'Unknown error'
     }
   }
+}
+
+export async function saveTradesAction(
+  data: any[],
+  _options?: { userId?: string }
+): Promise<TradeResponse> {
+  const rawUserId = await getUserId()
+  const userId = await resolveWritableUserId(rawUserId)
+  return saveTradesForResolvedUser(data, userId, rawUserId)
+}
+
+export async function saveTradesForUserAction(
+  data: any[],
+  rawUserId: string
+): Promise<TradeResponse> {
+  const userId = await resolveWritableUserId(rawUserId)
+  return saveTradesForResolvedUser(data, userId, rawUserId)
 }
 
 // Pre-computed statistics type
