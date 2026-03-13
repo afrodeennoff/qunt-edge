@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -17,8 +17,6 @@ interface TimelineItem {
 }
 
 export default function CompletedTimeline({ milestones, locale }: { milestones: TimelineItem[], locale: string }) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const observerRefs = useRef<(HTMLDivElement | null)[]>([])
   const dateLocale = locale === 'fr' ? fr : enUS
 
   const completedMilestones = useMemo(() => {
@@ -26,33 +24,6 @@ export default function CompletedTimeline({ milestones, locale }: { milestones: 
       .filter(milestone => milestone.status === 'completed' && milestone.completedDate)
       .sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime())
   }, [milestones])
-
-  useEffect(() => {
-    if (!completedMilestones.length) {
-      return
-    }
-
-    observerRefs.current = observerRefs.current.slice(0, completedMilestones.length)
-    const observers = observerRefs.current.map((ref, index) => {
-      if (ref) {
-        const observer = new IntersectionObserver(
-          ([entry]) => {
-            if (entry.isIntersecting) {
-              setActiveIndex(index)
-            }
-          },
-          { threshold: 0.9 }
-        )
-        observer.observe(ref)
-        return observer
-      }
-      return null
-    })
-
-    return () => {
-      observers.forEach(observer => observer?.disconnect())
-    }
-  }, [completedMilestones.length])
 
   return (
     <div className="relative">

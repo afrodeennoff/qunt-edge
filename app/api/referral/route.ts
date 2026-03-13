@@ -18,13 +18,6 @@ function isUnauthenticatedError(error: unknown): boolean {
   )
 }
 
-function isSupabaseEnvMissing(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    error.message.includes('Missing Supabase environment variables')
-  )
-}
-
 const cacheHeaders = {
   'Cache-Control': 'private, max-age=20, stale-while-revalidate=60',
 }
@@ -68,18 +61,6 @@ export async function GET() {
     )
   } catch (error) {
     if (isUnauthenticatedError(error)) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-    if (isSupabaseEnvMissing(error)) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-    if (isSupabaseEnvMissing(error)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

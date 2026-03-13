@@ -227,20 +227,26 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
   }
 
   // New pricing structure
-  const pricing = {
-    yearly: 120,
-    quarterly: 45,
-    monthly: 19.99,
-    lifetime: 300
-  }
+  const pricing = useMemo(
+    () => ({
+      yearly: 120,
+      quarterly: 45,
+      monthly: 19.99,
+      lifetime: 300,
+    }),
+    [],
+  )
 
   // Previous pricing (for line-through display)
-  const previousPricing = {
-    yearly: 300,
-    quarterly: 82.5,
-    monthly: 29.99,
-    lifetime: 500
-  }
+  const previousPricing = useMemo(
+    () => ({
+      yearly: 300,
+      quarterly: 82.5,
+      monthly: 29.99,
+      lifetime: 500,
+    }),
+    [],
+  )
 
   const plans: Plans = useMemo<Plans>(
     () => ({
@@ -387,6 +393,41 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
       [t, symbol, plan.price],
     )
 
+    const lookupKey = `plus_${billingPeriod}_${currency.toLowerCase()}`
+    const isCurrent = isCurrentPlan(lookupKey)
+    const isBlockedRecurring = isBlockedFromRecurring(lookupKey)
+    const isBlockedLifetime = isBlockedFromLifetime(lookupKey)
+    const isBlocked = isBlockedRecurring || isBlockedLifetime
+    const shouldShowLifetimeConfirmation = billingPeriod === 'lifetime' && !isCurrent
+
+    const handlePrimaryClick = () => {
+      if (isBlocked) {
+        return
+      }
+      if (shouldShowLifetimeConfirmation) {
+        setPendingLookupKey(lookupKey)
+        setShowLifetimeConfirm(true)
+        return
+      }
+      handlePlanSwitch(lookupKey)
+    }
+
+    const primaryButtonText = isLoading
+      ? billingPeriod === 'lifetime'
+        ? t('billing.lifetimeUpgrade')
+        : t('billing.switching')
+      : isCurrent
+        ? t('billing.currentPlan')
+        : isBlockedLifetime
+          ? t('billing.lifetimeOwned')
+          : isBlockedRecurring
+            ? t('billing.lifetimeActive')
+            : currentSubscription
+              ? billingPeriod === 'lifetime'
+                ? t('pricing.upgradeToLifetime')
+                : t('billing.changePlan')
+              : t('pricing.trialPeriod')
+
     return (
       <div className="relative z-10 w-full">
         <span className="absolute inset-[-8px] bg-[hsl(var(--chart-1)/0.15)] dark:bg-[hsl(var(--chart-1)/0.15)] rounded-[14.5867px] -z-10"></span>
@@ -518,32 +559,14 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
             )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-3">
-            {(() => {
-              const lookupKey = `plus_${billingPeriod}_${currency.toLowerCase()}`
-              const isCurrent = isCurrentPlan(lookupKey)
-              const isBlockedRecurring = isBlockedFromRecurring(lookupKey)
-              const isBlockedLifetime = isBlockedFromLifetime(lookupKey)
-              const isBlocked = isBlockedRecurring || isBlockedLifetime
-
-              return (
-                <Button
-                  onClick={() => handlePlanSwitch(lookupKey)}
-                  disabled={isLoading || isCurrent || isBlocked}
-                  variant={isCurrent || isBlocked ? "outline" : "default"}
-                  className="w-full"
-                >
-                  {isLoading ? (
-                    billingPeriod === 'lifetime' ? t('billing.lifetimeUpgrade') : t('billing.switching')
-                  ) :
-                    isCurrent ? t('billing.currentPlan') :
-                      isBlockedLifetime ? t('billing.lifetimeOwned') :
-                        isBlockedRecurring ? t('billing.lifetimeActive') :
-                          currentSubscription ? (
-                            billingPeriod === 'lifetime' ? t('pricing.upgradeToLifetime') || 'Upgrade to Lifetime' : t('billing.changePlan')
-                          ) : t('pricing.trialPeriod')}
-                </Button>
-              )
-            })()}
+            <Button
+              onClick={handlePrimaryClick}
+              disabled={isLoading || isCurrent || isBlocked}
+              variant={isCurrent || isBlocked ? "outline" : "default"}
+              className="w-full"
+            >
+              {primaryButtonText}
+            </Button>
 
             <p className="text-xs text-center text-muted-foreground">
               {t('terms.pricing.disclaimer')}
