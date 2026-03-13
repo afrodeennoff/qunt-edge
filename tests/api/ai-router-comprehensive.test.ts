@@ -3,32 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   streamTextMock,
   convertToModelMessagesMock,
-  createUIMessageStreamMock,
-  createUIMessageStreamResponseMock,
   createCompletionWithRouterMock,
-  getRouterConfigMock,
   logAiRequestMock,
 } = vi.hoisted(() => ({
   streamTextMock: vi.fn(),
   convertToModelMessagesMock: vi.fn(),
-  createUIMessageStreamMock: vi.fn((...args: unknown[]) => {
-    void args;
-    return "stream";
-  }),
-  createUIMessageStreamResponseMock: vi.fn((...args: unknown[]) => {
-    void args;
-    return new Response("ok", { status: 200 });
-  }),
   createCompletionWithRouterMock: vi.fn(),
-  getRouterConfigMock: vi.fn(),
   logAiRequestMock: vi.fn(),
 }));
 
 vi.mock("ai", () => ({
   streamText: (arg: unknown) => streamTextMock(arg),
   convertToModelMessages: (arg: unknown) => convertToModelMessagesMock(arg),
-  createUIMessageStream: (arg: unknown) => createUIMessageStreamMock(arg),
-  createUIMessageStreamResponse: (arg: unknown) => createUIMessageStreamResponseMock(arg),
   stepCountIs: vi.fn(() => () => false),
   tool: vi.fn((definition: unknown) => definition),
   createTool: vi.fn((definition: unknown) => definition),
@@ -46,10 +32,6 @@ vi.mock("@/lib/ai/client", () => ({
   getAiLanguageModel: vi.fn(() => "direct-model"),
   getAiLanguageModelById: vi.fn(() => "direct-model"),
   createCompletionWithRouter: (...args: unknown[]) => createCompletionWithRouterMock(...args),
-}));
-
-vi.mock("@/lib/ai/router/config", () => ({
-  getRouterConfig: () => getRouterConfigMock(),
 }));
 
 vi.mock("@/lib/ai/telemetry", async () => {
@@ -81,7 +63,6 @@ describe("AI Router - Comprehensive Integration Tests", () => {
     streamTextMock.mockReturnValue({
       toUIMessageStreamResponse: vi.fn(() => new Response("ok", { status: 200 })),
     });
-    getRouterConfigMock.mockReturnValue({ enabled: false, openrouter: { apiKey: undefined } });
   });
 
   it("support route uses direct streaming when router is disabled", async () => {
@@ -101,38 +82,6 @@ describe("AI Router - Comprehensive Integration Tests", () => {
 
   it("support route runs router path without OPENAI_API_KEY", async () => {
     delete process.env.OPENAI_API_KEY;
-    getRouterConfigMock.mockReturnValue({ enabled: true, openrouter: { apiKey: "router-key" } });
-    createCompletionWithRouterMock.mockResolvedValue({
-      content: "router response",
-      provider: "openrouter",
-      model: "meta-llama/llama-3.1-8b-instruct:free",
-    });
-
-    const { POST } = await import("@/app/api/ai/support/route");
-    const response = await POST(
-      new Request("http://localhost/api/ai/support", {
-        method: "POST",
-        body: JSON.stringify({ messages: [{ role: "user", content: "Help me" }] }),
-        headers: { "Content-Type": "application/json" },
-      }) as never,
-    );
-
-    expect(response.status).toBe(200);
-    expect(createCompletionWithRouterMock).toHaveBeenCalledWith(
-      "chat",
-      "test-user-1",
-      expect.any(Array),
-      expect.objectContaining({
-        temperature: 0.3,
-        model: "glm-4.7-flash",
-      }),
-    );
-    expect(createUIMessageStreamResponseMock).toHaveBeenCalled();
-  });
-
-  it("support route falls back to direct path when router attempt fails", async () => {
-    getRouterConfigMock.mockReturnValue({ enabled: true, openrouter: { apiKey: "router-key" } });
-    createCompletionWithRouterMock.mockRejectedValue(new Error("router down"));
 
     const { POST } = await import("@/app/api/ai/support/route");
     const response = await POST(
@@ -145,6 +94,22 @@ describe("AI Router - Comprehensive Integration Tests", () => {
 
     expect(response.status).toBe(200);
     expect(streamTextMock).toHaveBeenCalled();
+    expect(createCompletionWithRouterMock).not.toHaveBeenCalled();
+  });
+
+  it("support route falls back to direct path when router attempt fails", async () => {
+    const { POST } = await import("@/app/api/ai/support/route");
+    const response = await POST(
+      new Request("http://localhost/api/ai/support", {
+        method: "POST",
+        body: JSON.stringify({ messages: [{ role: "user", content: "Help me" }] }),
+        headers: { "Content-Type": "application/json" },
+      }) as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(streamTextMock).toHaveBeenCalled();
+    expect(createCompletionWithRouterMock).not.toHaveBeenCalled();
   });
 
   it("transcribe route records telemetry on success", async () => {

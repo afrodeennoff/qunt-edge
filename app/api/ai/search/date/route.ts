@@ -25,7 +25,7 @@ const requestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const policy = getAiPolicy("analysis");
+  const policy = getAiPolicy("search");
   const startedAt = Date.now();
 
   // Apply AI route guard (auth + entitlements + rate limit)
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     });
 
     const { output, usage } = await generateText({
-      model: getAiLanguageModel("analysis"),
+      model: getAiLanguageModel("search"),
       output: Output.object({ schema: dateRangeSchema }),
       prompt: `You are an expert at parsing natural language date queries into date ranges or weekday filters.
 
@@ -123,7 +123,7 @@ Return the appropriate filter type (date range OR weekday).`,
     void logAiRequest({
       userId,
       route: "/api/ai/search/date",
-      feature: "analysis",
+      feature: "search",
       model: policy.model,
       provider: policy.provider,
       usage: extractUsage(usage),
@@ -152,7 +152,7 @@ Return the appropriate filter type (date range OR weekday).`,
     void logAiRequest({
       userId,
       route: "/api/ai/search/date",
-      feature: "analysis",
+      feature: "search",
       model: policy.model,
       provider: policy.provider,
       latencyMs: Date.now() - startedAt,

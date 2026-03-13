@@ -5,6 +5,9 @@ vi.mock("@/lib/ai/route-guard", () => ({
 }))
 
 vi.mock("ai", () => ({
+  generateObject: vi.fn(async () => ({ object: {}, usage: undefined })),
+  generateText: vi.fn(async () => ({ output: {}, usage: undefined })),
+  Output: { object: vi.fn(() => ({})) },
   streamText: vi.fn(() => ({
     toUIMessageStreamResponse: () => new Response("ok"),
     toTextStreamResponse: () => new Response("ok"),
@@ -127,5 +130,39 @@ describe("AI route error contract consistency", () => {
       expect(body.error.message).toBe("Invalid analysis request payload")
       expect(body.error.details).toBeDefined()
     }
+  })
+
+  it("returns normalized validation error for mappings route", async () => {
+    const { POST } = await import("@/app/api/ai/mappings/route")
+    const response = await POST(
+      new Request("http://localhost/api/ai/mappings", {
+        method: "POST",
+        body: JSON.stringify({}),
+        headers: { "Content-Type": "application/json" },
+      }) as never,
+    )
+
+    expect(response.status).toBe(400)
+    const body = await parseError(response)
+    expect(body.error.code).toBe("VALIDATION_FAILED")
+    expect(body.error.message).toBe("Invalid mappings request payload")
+    expect(body.error.details).toBeDefined()
+  })
+
+  it("returns normalized validation error for search/date route", async () => {
+    const { POST } = await import("@/app/api/ai/search/date/route")
+    const response = await POST(
+      new Request("http://localhost/api/ai/search/date", {
+        method: "POST",
+        body: JSON.stringify({ query: 123 }),
+        headers: { "Content-Type": "application/json" },
+      }) as never,
+    )
+
+    expect(response.status).toBe(400)
+    const body = await parseError(response)
+    expect(body.error.code).toBe("VALIDATION_FAILED")
+    expect(body.error.message).toBe("Invalid date-search payload")
+    expect(body.error.details).toBeDefined()
   })
 })

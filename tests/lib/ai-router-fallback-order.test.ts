@@ -99,5 +99,46 @@ describe("Fallback router order", () => {
       "openrouter/auto",
     ]);
   });
-});
 
+  it("deduplicates requestedModel when it equals openrouter/free", async () => {
+    const { FallbackRouter } = await import("@/lib/ai/router/fallback");
+    const router = new FallbackRouter();
+
+    await expect(
+      router.createCompletion({
+        userId: "u3",
+        feature: "chat",
+        requestedModel: "openrouter/free",
+        messages: [{ role: "user", content: "hello" }],
+      }),
+    ).rejects.toThrow("All providers failed");
+
+    expect(attempts).toEqual([
+      "groq/llama-3.1-8b-instant",
+      "zai/glm-4.7-flash",
+      "openrouter/free",
+      "openrouter/auto",
+    ]);
+  });
+
+  it("deduplicates requestedModel when it equals openrouter/auto", async () => {
+    const { FallbackRouter } = await import("@/lib/ai/router/fallback");
+    const router = new FallbackRouter();
+
+    await expect(
+      router.createCompletion({
+        userId: "u4",
+        feature: "chat",
+        requestedModel: "openrouter/auto",
+        messages: [{ role: "user", content: "hello" }],
+      }),
+    ).rejects.toThrow("All providers failed");
+
+    expect(attempts).toEqual([
+      "groq/llama-3.1-8b-instant",
+      "zai/glm-4.7-flash",
+      "openrouter/free",
+      "openrouter/auto",
+    ]);
+  });
+});

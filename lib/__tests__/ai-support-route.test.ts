@@ -4,31 +4,17 @@ const {
   streamTextMock,
   convertToModelMessagesMock,
   createCompletionWithRouterMock,
-  getRouterConfigMock,
-  createUIMessageStreamMock,
-  createUIMessageStreamResponseMock,
   logAiRequestMock,
 } = vi.hoisted(() => ({
   streamTextMock: vi.fn(),
   convertToModelMessagesMock: vi.fn(),
   createCompletionWithRouterMock: vi.fn(),
-  getRouterConfigMock: vi.fn(),
-  createUIMessageStreamMock: vi.fn((...args: unknown[]) => {
-    void args;
-    return "stream";
-  }),
-  createUIMessageStreamResponseMock: vi.fn((...args: unknown[]) => {
-    void args;
-    return new Response("router-ok", { status: 200 });
-  }),
   logAiRequestMock: vi.fn(),
 }));
 
 vi.mock("ai", () => ({
   streamText: (arg: unknown) => streamTextMock(arg),
   convertToModelMessages: (arg: unknown) => convertToModelMessagesMock(arg),
-  createUIMessageStream: (arg: unknown) => createUIMessageStreamMock(arg),
-  createUIMessageStreamResponse: (arg: unknown) => createUIMessageStreamResponseMock(arg),
   tool: (definition: unknown) => definition,
 }));
 
@@ -40,10 +26,6 @@ vi.mock("@/lib/ai/client", () => ({
   getAiLanguageModel: vi.fn(() => "model"),
   getAiLanguageModelById: vi.fn(() => "model"),
   createCompletionWithRouter: (...args: unknown[]) => createCompletionWithRouterMock(...args),
-}));
-
-vi.mock("@/lib/ai/router/config", () => ({
-  getRouterConfig: () => getRouterConfigMock(),
 }));
 
 vi.mock("@/lib/ai/telemetry", async () => {
@@ -62,7 +44,6 @@ describe("ai support route", () => {
     process.env.OPENROUTER_API_KEY = "test-key";
     delete process.env.OPENAI_API_KEY;
     convertToModelMessagesMock.mockResolvedValue([{ role: "user", content: "hello" }]);
-    getRouterConfigMock.mockReturnValue({ enabled: false, openrouter: { apiKey: undefined } });
   });
 
   it("disables reasoning in stream response envelope", async () => {
@@ -91,13 +72,9 @@ describe("ai support route", () => {
   });
 
   it("supports router-only configuration without OPENAI_API_KEY", async () => {
-    delete process.env.OPENAI_API_KEY;
-    process.env.OPENROUTER_API_KEY = "test-key";
-    getRouterConfigMock.mockReturnValue({ enabled: true, openrouter: { apiKey: "router-key" } });
-    createCompletionWithRouterMock.mockResolvedValue({
-      content: "router response",
-      provider: "openrouter",
-      model: "meta-llama/llama-3.1-8b-instruct:free",
+    const toUIMessageStreamResponse = vi.fn().mockReturnValue(new Response("ok", { status: 200 }));
+    streamTextMock.mockReturnValue({
+      toUIMessageStreamResponse,
     });
 
     const res = await POST(
@@ -112,17 +89,7 @@ describe("ai support route", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(createCompletionWithRouterMock).toHaveBeenCalledWith(
-      "chat",
-      "u_1",
-      expect.any(Array),
-      expect.objectContaining({
-        temperature: 0.3,
-        model: "glm-4.7-flash",
-      }),
-    );
-    expect(createUIMessageStreamResponseMock).toHaveBeenCalledWith(
-      expect.objectContaining({ stream: "stream" }),
-    );
+    expect(streamTextMock).toHaveBeenCalled();
+    expect(createCompletionWithRouterMock).not.toHaveBeenCalled();
   });
 });

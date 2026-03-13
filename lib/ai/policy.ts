@@ -1,4 +1,11 @@
-export type AiFeature = "chat" | "editor" | "mappings" | "analysis";
+export type AiFeature =
+  | "chat"
+  | "support"
+  | "editor"
+  | "mappings"
+  | "format-trades"
+  | "analysis"
+  | "search";
 
 export interface AiFeaturePolicy {
   feature: AiFeature;
@@ -50,9 +57,12 @@ export function getAiPolicy(feature: AiFeature): AiFeaturePolicy {
 
   const defaultsByFeature: Record<AiFeature, Pick<AiFeaturePolicy, "temperature">> = {
     chat: { temperature: 0.3 },
+    support: { temperature: 0.3 },
     editor: { temperature: 0.3 },
     mappings: { temperature: 0.1 },
+    "format-trades": { temperature: 0.1 },
     analysis: { temperature: 0.25 },
+    search: { temperature: 0.1 },
   };
 
   return {

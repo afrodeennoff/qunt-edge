@@ -57,24 +57,20 @@ export class FallbackRouter {
       },
     } as const;
 
-    // Deduplicate while preserving order.
-    const seen = new Set<string>();
-    const byokChain = byokFirstModels
-      .filter((model) => {
-        if (!model || seen.has(model)) return false;
-        seen.add(model);
-        return true;
-      })
-      .map((model) => ({ name: 'openrouter-byok', model, provider: providerHints }));
-
-    const providers = [
-      ...byokChain,
-      { name: 'openrouter-free', model: config.openrouter.models.free },
-      { name: 'openrouter-auto', model: config.openrouter.models.auto },
-      ...(requestedModel && !seen.has(requestedModel)
-        ? [{ name: 'openrouter-requested-fallback', model: requestedModel }]
-        : []),
+    // Deduplicate complete chain while preserving stable order.
+    const providerCandidates: Array<{ name: string; model: string; provider?: typeof providerHints }> = [
+      ...byokFirstModels.map((model) => ({ name: "openrouter-byok", model, provider: providerHints })),
+      { name: "openrouter-free", model: config.openrouter.models.free },
+      { name: "openrouter-auto", model: config.openrouter.models.auto },
+      ...(requestedModel ? [{ name: "openrouter-requested-fallback", model: requestedModel }] : []),
     ];
+    const seen = new Set<string>();
+    const providers = providerCandidates.filter((provider) => {
+      const model = provider.model?.trim();
+      if (!model || seen.has(model)) return false;
+      seen.add(model);
+      return true;
+    });
     
     // Try each provider in sequence
     for (const provider of providers) {
