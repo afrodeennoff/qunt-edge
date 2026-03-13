@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
     });
 
     void logAiRequest({
+      userId,
       route: "/api/ai/format-trades",
       feature: "mappings",
       model: policy.model,
@@ -152,6 +153,7 @@ export async function POST(req: NextRequest) {
     const err = error as { statusCode?: number; type?: string; code?: unknown };
 
     void logAiRequest({
+      userId,
       route: "/api/ai/format-trades",
       feature: "mappings",
       model: policy.model,

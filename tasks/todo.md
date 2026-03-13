@@ -158,6 +158,13 @@
 - Root cause addressed: broad dashboard context subscriptions and client-heavy route shells causing unnecessary rerenders/hydration work.
 - Trader profile now follows server-wrapper pattern (`page.tsx` -> `page-client.tsx`) to reduce client entrypoint overhead.
 - Dashboard now has zero `useDashboardTrades()` callsites under `app/[locale]/dashboard`.
+
+## Format Preview Cleanup Plan (2026-03-13)
+
+- [ ] Audit `app/[locale]/dashboard/components/import/components/format-preview.tsx` for unused imports/variables and missing hook dependencies introduced by the batching/autoprocessing logic.
+- [ ] Stabilize the timeout helpers (`scheduleManagedTimeout`, `clearManagedTimeouts`) and the streaming effects so they clean up properly without changing UI behavior.
+- [ ] Run `npx eslint app/[locale]/dashboard/components/import/components/format-preview.tsx` and record its output once the fix is in place.
+
 - Verification:
   - `npx eslint app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/dashboard/trader-profile/page-client.tsx` -> 0 errors (warnings only).
   - `npm run -s typecheck` -> exits `0`.
@@ -233,5 +240,13 @@
 - [ ] Summarize recent edits for the user.
 - [ ] Note verification or follow-up if needed.
 
-## Review
-- [ ] Pending.
+## Task: AI backend lint cleanup (2026-03-13)
+- [x] Inspect the listed AI backend routes/libraries for clearly unused imports/vars introduced in the current state and note any obvious lint fixes.
+- [x] Remove only the safe, behavior-preserving cruft from those backend files and keep changes minimal per scope.
+- [x] Run `npx eslint app/api/ai/format-trades/route.ts app/api/ai/chat/route.ts app/api/ai/mappings/route.ts app/api/ai/support/route.ts lib/rate-limit.ts lib/ai/trade-access.ts lib/ai/client.ts` and capture the output.
+- [x] Summarize the cleanup, lint results, and any follow-up notes in this file (including verification details).
+
+## Review (AI backend lint cleanup)
+- Verification: `npx eslint app/api/ai/format-trades/route.ts app/api/ai/chat/route.ts app/api/ai/mappings/route.ts app/api/ai/support/route.ts lib/rate-limit.ts lib/ai/trade-access.ts lib/ai/client.ts` (warnings limited to complexity).
+- Summary: Added userId telemetry to `/api/ai/format-trades` and tightened the chat tool guard/mappings helper types to avoid explicit `any`.
+- Follow-up: Complexity warnings persist for large `POST` handlers, router helpers, rate limit helpers, and trade-access aggregates; they predate this cleanup and were left untouched to stay behavior-preserving.

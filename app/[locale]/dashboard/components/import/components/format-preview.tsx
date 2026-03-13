@@ -1,7 +1,7 @@
 "use client";
 
 import type { ImportTradeDraft } from "@/lib/trade-types";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Table,
   TableBody,
@@ -14,7 +14,6 @@ import { format, isValid } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils"; // Assuming you have a utility for className merging
 import { Button } from "@/components/ui/button";
-import { ArrowDownToLine, ChevronDown } from "lucide-react";
 import { parsePositionTime } from "@/lib/utils";
 import { useI18n } from "@/locales/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,11 +23,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React from "react";
 import { experimental_useObject as useObject } from '@ai-sdk/react'
 import { tradeSchema } from '@/app/api/ai/format-trades/schema'
 import { z } from 'zod/v3';
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -45,13 +42,6 @@ interface FormatPreviewProps {
   isLoading: boolean;
   headers: string[];
   mappings: { [key: string]: string };
-}
-
-function transformHeaders(headers: string[], mappings: { [key: string]: string }): string[] {
-  return headers.map(header => {
-    const mappingKey = Object.keys(mappings).find(key => key === header);
-    return mappingKey ? mappings[mappingKey] : header;
-  });
 }
 
 function transformRowData(rows: string[][], headers: string[], mappings: { [key: string]: string }): string[][] {
@@ -75,7 +65,7 @@ function transformRowData(rows: string[][], headers: string[], mappings: { [key:
     
     // For each destination column, find the corresponding data using the unique ID
     destinationColumns.forEach(destColumn => {
-      const mapping = Object.entries(uniqueIdToMapping).find(([_, mapping]) => mapping.destination === destColumn);
+      const mapping = Object.entries(uniqueIdToMapping).find(([, mapping]) => mapping.destination === destColumn);
       if (mapping) {
         const [, { sourceIndex }] = mapping;
         transformedRow.push(row[sourceIndex] || '');
@@ -94,7 +84,6 @@ export function FormatPreview({
   processedTrades,
   setProcessedTrades,
   setIsLoading,
-  isLoading,
   headers,
   mappings,
 }: FormatPreviewProps) {
@@ -114,9 +103,7 @@ export function FormatPreview({
   );
 
   const [error, setError] = useState<string | null>(null);
-  const [currentBatch, setCurrentBatch] = useState(0);
-  const [processedBatches, setProcessedBatches] = useState<Set<number>>(new Set());
-  const [processingBatches, setProcessingBatches] = useState<Set<number>>(new Set());
+  const [processingBatches] = useState<Set<number>>(new Set());
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
   const [completedBatches, setCompletedBatches] = useState<Set<number>>(new Set());
@@ -175,27 +162,27 @@ export function FormatPreview({
     isStoppedRef.current = isStopped;
   }, [isStopped]);
 
-  const scheduleManagedTimeout = (fn: () => void, delayMs: number) => {
+  const scheduleManagedTimeout = useCallback((fn: () => void, delayMs: number) => {
     const id = window.setTimeout(() => {
       scheduledTimeoutsRef.current.delete(id);
       fn();
     }, delayMs);
     scheduledTimeoutsRef.current.add(id);
-  };
+  }, []);
 
-  const clearManagedTimeouts = () => {
+  const clearManagedTimeouts = useCallback(() => {
     for (const timeoutId of scheduledTimeoutsRef.current) {
       clearTimeout(timeoutId);
     }
     scheduledTimeoutsRef.current.clear();
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
       clearManagedTimeouts();
       setIsLoading(false);
     };
-  }, [setIsLoading]);
+  }, [clearManagedTimeouts, setIsLoading]);
 
   // Split batches into two sets
   const splitBatches = () => {
@@ -430,7 +417,6 @@ export function FormatPreview({
     clearManagedTimeouts();
     setIsAutoProcessing(false);
     setIsStopped(false);
-    setCurrentBatch(0);
     setProcessedTrades([]);
     setCompletedBatches(new Set());
     setBatchSet1([]);
@@ -450,14 +436,8 @@ export function FormatPreview({
     return transformRowData(batchRows, headers, mappings);
   };
 
-  const batchToProcess = useMemo(() => {
-    const startIndex = currentBatch * batchSize;
-    const endIndex = Math.min(startIndex + batchSize, validTrades.length);
-    return validTrades.slice(startIndex, endIndex);
-  }, [currentBatch, validTrades, batchSize]);
 
-
-  const appendUniqueTrades = (incomingTrades: Partial<ImportTradeDraft>[]) => {
+  const appendUniqueTrades = useCallback((incomingTrades: Partial<ImportTradeDraft>[]) => {
     const uniqueTrades = incomingTrades.filter(newTrade =>
       !processedTradesRef.current.some(existingTrade =>
         existingTrade.entryDate === newTrade.entryDate &&
@@ -480,7 +460,7 @@ export function FormatPreview({
     scheduleManagedTimeout(() => {
       scrollToBottom();
     }, 100);
-  };
+  }, [scheduleManagedTimeout, scrollToBottom, setProcessedTrades]);
 
   // Handle streaming results from first useObject
   useEffect(() => {
@@ -488,7 +468,7 @@ export function FormatPreview({
       const newTrades = object1.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<ImportTradeDraft>[];
       appendUniqueTrades(newTrades);
     }
-  }, [object1])
+  }, [object1, appendUniqueTrades])
 
   // Handle streaming results from second useObject
   useEffect(() => {
@@ -496,7 +476,7 @@ export function FormatPreview({
       const newTrades = object2.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<ImportTradeDraft>[];
       appendUniqueTrades(newTrades);
     }
-  }, [object2])
+  }, [object2, appendUniqueTrades])
 
   const columns = useMemo<ColumnDef<Partial<ImportTradeDraft>>[]>(() => [
     {
@@ -749,7 +729,7 @@ export function FormatPreview({
     },
   });
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (tableContainerRef.current) {
       const scrollContainer = tableContainerRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
@@ -759,7 +739,7 @@ export function FormatPreview({
         });
       }
     }
-  };
+  }, []);
 
   // Calculate totals for footer
   const totals = useMemo(() => {

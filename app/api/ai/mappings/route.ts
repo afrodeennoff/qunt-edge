@@ -13,6 +13,8 @@ import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 export const maxDuration = 30;
 const mappingsRateLimit = rateLimit({ limit: 20, window: 60_000, identifier: "ai-mappings" });
 
+type MappingGeneratorResult = Awaited<ReturnType<typeof generateObject>>;
+
 const MappingOnlySchema = mappingSchema.omit({ quality: true });
 type MappingOnly = z.infer<typeof MappingOnlySchema>;
 const mappingsRequestSchema = z.object({
@@ -248,7 +250,7 @@ function buildPrompt(fieldColumns: string[], firstRows: Array<Record<string, str
   );
 }
 
-async function requestMapping(prompt: string, temperature: number): Promise<{ object: MappingOnly; usage: any }> {
+async function requestMapping(prompt: string, temperature: number): Promise<{ object: MappingOnly; usage: MappingGeneratorResult["usage"] }> {
   const result = await generateObject({
     model: getAiLanguageModel("mappings"),
     schema: MappingOnlySchema,

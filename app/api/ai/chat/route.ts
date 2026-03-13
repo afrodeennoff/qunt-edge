@@ -65,6 +65,10 @@ const availableChatTools = {
 
 type ChatToolName = keyof typeof availableChatTools;
 
+type ToolDefinition = {
+  execute?: (args: unknown, context: unknown) => Promise<unknown> | unknown;
+} & Record<string, unknown>;
+
 function extractLastUserText(messages: ParsedChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
   if (!lastUserMessage) return "";
@@ -135,7 +139,7 @@ function getToolingPolicy(intent: ChatIntent) {
   };
 }
 
-function withToolGuards(tools: Record<string, any>, maxCallsPerTool = 2) {
+function withToolGuards(tools: Record<string, ToolDefinition>, maxCallsPerTool = 2) {
   const callCount = new Map<string, number>();
   const seenArgs = new Set<string>();
 
