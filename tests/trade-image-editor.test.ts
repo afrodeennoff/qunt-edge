@@ -54,6 +54,14 @@ describe("trade image ownership guard", () => {
     );
   });
 
+  it("rejects paths that contain control characters", () => {
+    const prefix = "actor-abc/";
+    const controlCharPath = "actor-abc/trades/base\u0000image.png";
+    expect(() => ensureOwnedImagePath(controlCharPath, prefix)).toThrow(
+      /invalid characters/i
+    );
+  });
+
   it("rejects whitespace-only actor prefixes", () => {
     const path = "actor-abc/trades/inspection.png";
     expect(() => ensureOwnedImagePath(path, "   ")).toThrow(/actor context/i);

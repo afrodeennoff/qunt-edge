@@ -72,6 +72,22 @@ const buildImageUpdatePayload = (images: string[]): ImageUpdatePayload => ({
   imageBase64Second: images[1] ?? null,
 });
 
+const isNonEmptyString = (
+  value: string | null | undefined,
+): value is string => Boolean(value);
+
+const getCurrentImageList = (
+  images?: string[],
+  imageBase64?: string | null,
+  imageBase64Second?: string | null,
+): string[] => {
+  if (images && images.length > 0) {
+    return [...images];
+  }
+
+  return [imageBase64, imageBase64Second].filter(isNonEmptyString);
+};
+
 interface TradeImageEditorProps {
   trade: TradeWithImages;
   tradeIds: string[];
@@ -99,6 +115,14 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
     maxFileSize: MAX_FILE_SIZE,
     maxFiles: MAX_IMAGES,
   });
+
+  const {
+    errors: uploadErrors,
+    isSuccess: uploadSuccess,
+    setErrors: resetUploadErrors,
+    setFiles: resetUploadFiles,
+    uploadedPaths,
+  } = uploadProps;
 
   const actorImagePrefix =
     supabaseUser?.id
@@ -192,29 +216,58 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
     }
   }, [trade.id, trade.images, trade.imageBase64, trade.imageBase64Second, localImages, isLoadingImages, getTradeImages]);
 
-  const uploadCallback = useCallback(async () => {
-    if (uploadProps.isSuccess && uploadProps.uploadedPaths.length > 0) {
-      await handleUpdateImages(uploadProps.uploadedPaths);
-      setUploadDialogOpen(false);
-      toast.success(t("trade-table.imageUploadSuccess"));
-
-      // Reset upload state
-      uploadProps.setFiles([]);
-      uploadProps.setErrors([]);
-    } else if (uploadProps.errors.length > 0) {
-      const error = uploadProps.errors[0].message;
-      toast.error(t("trade-table.imageUploadError", { error }));
-    }
-  }, [uploadProps.isSuccess, uploadProps.uploadedPaths, uploadProps.errors]);
-
-  // Listen for successful uploads
   useEffect(() => {
-    uploadCallback();
-  }, [uploadProps.isSuccess, uploadProps.uploadedPaths, uploadProps.errors]);
+    if (!uploadSuccess && uploadErrors.length === 0) {
+      return;
+    }
+
+    const processUploadResult = async () => {
+      if (uploadSuccess && uploadedPaths.length > 0) {
+        const currentImages = getCurrentImageList(
+          trade.images,
+          trade.imageBase64,
+          trade.imageBase64Second,
+        );
+        const updatedImages = [...currentImages, ...uploadedPaths];
+        const update = buildImageUpdatePayload(updatedImages);
+
+        await updateTrades(tradeIds, update);
+        setUploadDialogOpen(false);
+        toast.success(t("trade-table.imageUploadSuccess"));
+        resetUploadFiles([]);
+        resetUploadErrors([]);
+        return;
+      }
+
+      if (uploadErrors.length > 0) {
+        const errorMessage = uploadErrors[0].message;
+        toast.error(t("trade-table.imageUploadError", { error: errorMessage }));
+      }
+    };
+
+    void processUploadResult();
+  }, [
+    uploadSuccess,
+    uploadedPaths,
+    uploadErrors,
+    trade.imageBase64,
+    trade.imageBase64Second,
+    trade.images,
+    tradeIds,
+    updateTrades,
+    setUploadDialogOpen,
+    resetUploadFiles,
+    resetUploadErrors,
+    t,
+  ]);
 
   const handleRemoveImage = async (imageIndex: number) => {
     try {
-      const currentImages = getCurrentImageList(trade);
+      const currentImages = getCurrentImageList(
+        trade.images,
+        trade.imageBase64,
+        trade.imageBase64Second,
+      );
 
       const imageUrl = currentImages[imageIndex];
 
@@ -274,7 +327,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
         imagesToRemove.forEach((path) => {
           try {
             ownedPaths.push(ensureOwnedImagePath(path, actorImagePrefix));
-          } catch (error) {
+          } catch {
             unauthorized.push(path);
           }
         });
@@ -307,10 +360,10 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   // Reset upload state when dialog closes
   useEffect(() => {
     if (!uploadDialogOpen) {
-      uploadProps.setFiles([]);
-      uploadProps.setErrors([]);
+      resetUploadFiles([]);
+      resetUploadErrors([]);
     }
-  }, [uploadDialogOpen]);
+  }, [uploadDialogOpen, resetUploadFiles, resetUploadErrors]);
 
   const handleThumbnailClick = (index: number) => {
     setSelectedImageIndex(index);
@@ -635,12 +688,11 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
             </AnimatePresence>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2 border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowDeleteConfirm(false);
-                setImageToDelete(null);
-              }}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                }}
               className="w-full sm:w-auto transition-colors duration-200"
             >
               Close

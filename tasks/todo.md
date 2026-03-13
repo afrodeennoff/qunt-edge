@@ -20,9 +20,9 @@
 ## Task: Trade image editor lint cleanup (2026-03-14)
 
 - [x] Capture the current ESLint output for `app/[locale]/dashboard/components/tables/trade-image-editor.tsx` (`npx eslint ...`).
-- [ ] Update the component to drop unused state/imports, tighten `trade`/update payload typing, and clean the upload effect/dependency handling without altering auth/ownership guards.
-- [ ] Re-run `npx eslint app/[locale]/dashboard/components/tables/trade-image-editor.tsx` to confirm the earlier warnings are gone.
-- [ ] Document the lint-before/after results along with a short summary of the code-quality improvements.
+- [x] Update the component to drop unused state/imports, tighten `trade`/update payload typing, and clean the upload effect/dependency handling without altering auth/ownership guards.
+- [x] Re-run `npx eslint app/[locale]/dashboard/components/tables/trade-image-editor.tsx` to confirm the earlier warnings are gone.
+- [x] Document the lint-before/after results along with a short summary of the code-quality improvements.
 
 ## Current Task: Commit and push current changes
 
@@ -294,8 +294,7 @@
 - [x] Run `npx vitest run tests/trade-image-editor.test.ts` and note the output.
 - [x] Record verification results and any residual risks/new follow-ups.
 
-## Review
-- Verification: `npx vitest run tests/trade-image-editor.test.ts` -> passes (8 tests, 0 failures).
+- Verification: `npx vitest run tests/trade-image-editor.test.ts` -> passes (9 tests, 0 failures).
 - Risks: Normalization helpers assume slash-based segments; future non-UTF-8 prefixes might need reevaluation.
 - Follow-ups: Watch for new path representations in other cleanup flows to keep this guard aligned.
 
@@ -360,9 +359,9 @@
 - [x] Step 5: Document what was fixed, changed files, and verification steps for the final report.
 ## Verification Run (2026-03-14 B)
 
-- [ ] Identify touched files for this scope and note them in the report.
-- [ ] Run targeted `vitest` suites covering the files touched in this session.
-- [ ] Run `npx eslint` on the touched files.
-- [ ] Run `npm run -s typecheck`.
-- [ ] Run `npm run -s build`.
-- [ ] Capture command outputs and summarize pass/fail fate.
+- [x] Identify touched files for this scope and note them in the report.
+- [x] Run targeted `vitest` suites covering the files touched in this session.
+- [x] Run `npx eslint` on the touched files.
+- [x] Run `npm run -s typecheck`.
+- [x] Run `npm run -s build`.
+- [x] Capture command outputs and summarize pass/fail fate.

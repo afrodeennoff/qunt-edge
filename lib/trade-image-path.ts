@@ -20,9 +20,13 @@ export function extractTradeImagePath(imageReference: string): string | null {
 }
 
 const ENCODED_RELATIVE_SEGMENT_PATTERN = /(?:%(?:2e|2E)){2}/;
+const CONTROL_CHAR_PATTERN = /[\u0000-\u001F]/;
 
 function normalizeRelativePath(value: string): string {
   const sanitized = value.replace(/\\/g, "/");
+  if (CONTROL_CHAR_PATTERN.test(sanitized)) {
+    throw new Error("Image path contains invalid characters");
+  }
   if (ENCODED_RELATIVE_SEGMENT_PATTERN.test(sanitized)) {
     throw new Error("Image path contains relative segments");
   }
