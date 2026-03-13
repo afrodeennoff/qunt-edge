@@ -125,6 +125,8 @@ export function FormatPreview({
   const [currentBatchIndex1, setCurrentBatchIndex1] = useState(0);
   const [currentBatchIndex2, setCurrentBatchIndex2] = useState(0);
   const batchSize = 5;
+  const MAX_RETRIES_PER_BATCH = 3;
+  const RETRY_BASE_DELAY_MS = 1200;
   const totalBatches = Math.ceil(validTrades.length / batchSize);
 
   // Use refs to avoid infinite loops in useEffect
@@ -136,6 +138,8 @@ export function FormatPreview({
   const currentBatchIndex2Ref = useRef<number>(currentBatchIndex2);
   const isAutoProcessingRef = useRef<boolean>(isAutoProcessing);
   const isStoppedRef = useRef<boolean>(isStopped);
+  const retryCountSet1Ref = useRef<Map<number, number>>(new Map());
+  const retryCountSet2Ref = useRef<Map<number, number>>(new Map());
   
   // Update refs when state changes
   useEffect(() => {
@@ -188,6 +192,50 @@ export function FormatPreview({
     setBatchSet2(set2);
     setCurrentBatchIndex1(0);
     setCurrentBatchIndex2(0);
+    retryCountSet1Ref.current.clear();
+    retryCountSet2Ref.current.clear();
+  };
+
+  const parseAiErrorMessage = (rawMessage: string): string => {
+    if (!rawMessage) return "Unknown AI error";
+    try {
+      const parsed = JSON.parse(rawMessage) as { error?: { message?: string } };
+      return parsed?.error?.message ?? rawMessage;
+    } catch {
+      return rawMessage;
+    }
+  };
+
+  const parseAiErrorCode = (rawMessage: string): string | null => {
+    try {
+      const parsed = JSON.parse(rawMessage) as { error?: { code?: string } };
+      return parsed?.error?.code ?? null;
+    } catch {
+      return null;
+    }
+  };
+
+  const scheduleRetryForSet = (setNumber: 1 | 2, batchIndex: number) => {
+    if (isStoppedRef.current) return;
+
+    const retryMap = setNumber === 1 ? retryCountSet1Ref.current : retryCountSet2Ref.current;
+    const attempt = (retryMap.get(batchIndex) ?? 0) + 1;
+    retryMap.set(batchIndex, attempt);
+
+    if (attempt > MAX_RETRIES_PER_BATCH) {
+      setIsAutoProcessing(false);
+      return;
+    }
+
+    const delayMs = RETRY_BASE_DELAY_MS * attempt;
+    setTimeout(() => {
+      if (!isAutoProcessingRef.current || isStoppedRef.current) return;
+      if (setNumber === 1) {
+        processNextBatchInSet1();
+      } else {
+        processNextBatchInSet2();
+      }
+    }, delayMs);
   };
 
   // First useObject instance - processes batchSet1
@@ -200,11 +248,27 @@ export function FormatPreview({
     schema: z.array(tradeSchema),
     onError(error) {
       console.error('Error processing batch set 1:', error);
-      setError(`Failed to process batch set 1: ${error.message}`);
+      const message = parseAiErrorMessage(error.message);
+      const code = parseAiErrorCode(error.message);
+      const currentBatch = batchSet1Ref.current[currentBatchIndex1Ref.current];
+      const isRetryable = code === "SERVICE_UNAVAILABLE" || code === "RATE_LIMITED";
+
+      if (isRetryable && currentBatch !== undefined && !isStoppedRef.current) {
+        const currentAttempt = (retryCountSet1Ref.current.get(currentBatch) ?? 0) + 1;
+        setError(
+          `Batch set 1 temporary issue (${message}). Retrying ${Math.min(currentAttempt, MAX_RETRIES_PER_BATCH)}/${MAX_RETRIES_PER_BATCH}...`
+        );
+        scheduleRetryForSet(1, currentBatch);
+        return;
+      }
+
+      setError(`Failed to process batch set 1: ${message}`);
+      setIsAutoProcessing(false);
     },
     onFinish() {
       const currentBatch = batchSet1Ref.current[currentBatchIndex1Ref.current];
       if (currentBatch !== undefined) {
+        retryCountSet1Ref.current.delete(currentBatch);
         setCompletedBatches(prev => {
           return new Set([...prev, currentBatch]);
         });
@@ -237,11 +301,27 @@ export function FormatPreview({
     schema: z.array(tradeSchema),
     onError(error) {
       console.error('Error processing batch set 2:', error);
-      setError(`Failed to process batch set 2: ${error.message}`);
+      const message = parseAiErrorMessage(error.message);
+      const code = parseAiErrorCode(error.message);
+      const currentBatch = batchSet2Ref.current[currentBatchIndex2Ref.current];
+      const isRetryable = code === "SERVICE_UNAVAILABLE" || code === "RATE_LIMITED";
+
+      if (isRetryable && currentBatch !== undefined && !isStoppedRef.current) {
+        const currentAttempt = (retryCountSet2Ref.current.get(currentBatch) ?? 0) + 1;
+        setError(
+          `Batch set 2 temporary issue (${message}). Retrying ${Math.min(currentAttempt, MAX_RETRIES_PER_BATCH)}/${MAX_RETRIES_PER_BATCH}...`
+        );
+        scheduleRetryForSet(2, currentBatch);
+        return;
+      }
+
+      setError(`Failed to process batch set 2: ${message}`);
+      setIsAutoProcessing(false);
     },
     onFinish() {
       const currentBatch = batchSet2Ref.current[currentBatchIndex2Ref.current];
       if (currentBatch !== undefined) {
+        retryCountSet2Ref.current.delete(currentBatch);
         setCompletedBatches(prev => {
           return new Set([...prev, currentBatch]);
         });
@@ -326,6 +406,8 @@ export function FormatPreview({
     setCurrentBatchIndex1(0);
     setCurrentBatchIndex2(0);
     processedTradesRef.current = [];
+    retryCountSet1Ref.current.clear();
+    retryCountSet2Ref.current.clear();
   };
 
   const getBatchData = (batchIndex: number) => {
