@@ -11,10 +11,25 @@ import {
 import { logger } from '@/lib/logger'
 
 function isUnauthenticatedError(error: unknown): boolean {
-  return error instanceof Error && error.message === 'User not authenticated'
+  return (
+    error instanceof Error &&
+    (error.message === 'User not authenticated' ||
+      error.message.includes('Missing Supabase environment variables'))
+  )
 }
 
-export async function GET(_req: NextRequest) {
+function isSupabaseEnvMissing(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes('Missing Supabase environment variables')
+  )
+}
+
+const cacheHeaders = {
+  'Cache-Control': 'private, max-age=20, stale-while-revalidate=60',
+}
+
+export async function GET() {
   try {
     const userId = await getDatabaseUserId()
 
@@ -35,21 +50,36 @@ export async function GET(_req: NextRequest) {
       .map((redemption) => redemption.referredUser)
       .sort((a, b) => a.email.localeCompare(b.email))
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        referral: {
-          id: referral.id,
-          slug: referral.slug,
-          count,
-          tier,
-          nextTier,
-          referredUsers,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          referral: {
+            id: referral.id,
+            slug: referral.slug,
+            count,
+            tier,
+            nextTier,
+            referredUsers,
+          },
         },
       },
-    })
+      { headers: cacheHeaders }
+    )
   } catch (error) {
     if (isUnauthenticatedError(error)) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    if (isSupabaseEnvMissing(error)) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    if (isSupabaseEnvMissing(error)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

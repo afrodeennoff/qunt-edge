@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -21,15 +21,24 @@ export default function CompletedTimeline({ milestones, locale }: { milestones: 
   const observerRefs = useRef<(HTMLDivElement | null)[]>([])
   const dateLocale = locale === 'fr' ? fr : enUS
 
+  const completedMilestones = useMemo(() => {
+    return milestones
+      .filter(milestone => milestone.status === 'completed' && milestone.completedDate)
+      .sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime())
+  }, [milestones])
+
   useEffect(() => {
+    if (!completedMilestones.length) {
+      return
+    }
+
+    observerRefs.current = observerRefs.current.slice(0, completedMilestones.length)
     const observers = observerRefs.current.map((ref, index) => {
       if (ref) {
         const observer = new IntersectionObserver(
           ([entry]) => {
             if (entry.isIntersecting) {
               setActiveIndex(index)
-            } else if (activeIndex === index) {
-              setActiveIndex(null)
             }
           },
           { threshold: 0.9 }
@@ -43,12 +52,7 @@ export default function CompletedTimeline({ milestones, locale }: { milestones: 
     return () => {
       observers.forEach(observer => observer?.disconnect())
     }
-  }, [milestones.length, activeIndex])
-
-  // Filter and sort completed milestones by completedDate, most recent first
-  const completedMilestones = milestones
-    .filter(milestone => milestone.status === 'completed' && milestone.completedDate)
-    .sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime())
+  }, [completedMilestones.length])
 
   return (
     <div className="relative">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PricingPageClient } from "./pricing-page-client";
 
 export const revalidate = 300;
+export const dynamic = "force-static";
 const SITE_ORIGIN = "https://qunt-edge.vercel.app";
 const PAGE_PATH = "/pricing";
 

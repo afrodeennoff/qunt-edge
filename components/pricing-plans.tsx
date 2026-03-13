@@ -242,36 +242,39 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
     lifetime: 500
   }
 
-  const plans: Plans = {
-    basic: {
-      name: t('pricing.basic.name'),
-      description: t('pricing.basic.description'),
-      price: { yearly: 0, quarterly: 0, monthly: 0, lifetime: 0 },
-      features: [
-        t('pricing.basic.feature1'),
-        t('pricing.basic.feature2'),
-        t('pricing.basic.feature3'),
-        t('pricing.basic.feature6'),
-        t('pricing.basic.feature7'),
-        t('pricing.basic.feature8'),
-        t('pricing.basic.feature9'),
-        t('pricing.basic.feature10'),
-        t('pricing.basic.feature11'),
-        t('pricing.basic.feature12'),
-      ]
-    },
-    plus: {
-      name: t('pricing.plus.name'),
-      description: t('pricing.plus.description'),
-      price: pricing,
-      isPopular: true,
-      features: [
-        t('pricing.plus.feature1'),
-        t('pricing.plus.feature2'),
-        t('pricing.plus.feature6'),
-      ]
-    }
-  }
+  const plans: Plans = useMemo<Plans>(
+    () => ({
+      basic: {
+        name: t('pricing.basic.name'),
+        description: t('pricing.basic.description'),
+        price: { yearly: 0, quarterly: 0, monthly: 0, lifetime: 0 },
+        features: [
+          t('pricing.basic.feature1'),
+          t('pricing.basic.feature2'),
+          t('pricing.basic.feature3'),
+          t('pricing.basic.feature6'),
+          t('pricing.basic.feature7'),
+          t('pricing.basic.feature8'),
+          t('pricing.basic.feature9'),
+          t('pricing.basic.feature10'),
+          t('pricing.basic.feature11'),
+          t('pricing.basic.feature12'),
+        ],
+      },
+      plus: {
+        name: t('pricing.plus.name'),
+        description: t('pricing.plus.description'),
+        price: pricing,
+        isPopular: true,
+        features: [
+          t('pricing.plus.feature1'),
+          t('pricing.plus.feature2'),
+          t('pricing.plus.feature6'),
+        ],
+      },
+    }),
+    [t, pricing],
+  )
 
   const formatPrice = (value: number, {
     withMonthSuffix = false,
@@ -363,23 +366,26 @@ export default function PricingPlans({ isModal, onClose, trigger, currentSubscri
 
     const t = useI18n()
 
-    const recurringBillingOptions = [
-      {
-        key: 'monthly' as BillingPeriod,
-        label: t('pricing.monthly'),
-        description: t('pricing.monthlyFlexibility')
-      },
-      {
-        key: 'quarterly' as BillingPeriod,
-        label: t('pricing.quarterly'),
-        description: `${symbol}${plan.price.quarterly} billed quarterly (${symbol}${(plan.price.quarterly / 3).toFixed(2)}/month)`
-      },
-      {
-        key: 'yearly' as BillingPeriod,
-        label: t('pricing.yearly'),
-        description: `${symbol}${plan.price.yearly} billed yearly (${symbol}${(plan.price.yearly / 12).toFixed(2)}/month)`
-      }
-    ]
+    const recurringBillingOptions = useMemo(
+      () => [
+        {
+          key: 'monthly' as BillingPeriod,
+          label: t('pricing.monthly'),
+          description: t('pricing.monthlyFlexibility'),
+        },
+        {
+          key: 'quarterly' as BillingPeriod,
+          label: t('pricing.quarterly'),
+          description: `${symbol}${plan.price.quarterly} billed quarterly (${symbol}${(plan.price.quarterly / 3).toFixed(2)}/month)`,
+        },
+        {
+          key: 'yearly' as BillingPeriod,
+          label: t('pricing.yearly'),
+          description: `${symbol}${plan.price.yearly} billed yearly (${symbol}${(plan.price.yearly / 12).toFixed(2)}/month)`,
+        },
+      ],
+      [t, symbol, plan.price],
+    )
 
     return (
       <div className="relative z-10 w-full">
