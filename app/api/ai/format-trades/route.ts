@@ -139,8 +139,14 @@ export async function POST(req: NextRequest) {
 
     return result.toTextStreamResponse();
   } catch (error: unknown) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return apiError("VALIDATION_FAILED", "Invalid request format", 400, error.errors);
+      return apiError("VALIDATION_FAILED", "Invalid request format", 400, {
+        issues: error.errors,
+      });
     }
 
     const err = error as { statusCode?: number; type?: string; code?: unknown };

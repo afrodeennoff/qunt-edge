@@ -51,7 +51,6 @@ export const getTradesDetails = tool({
             quantity: trade.quantity,
             entryPrice: trade.entryPrice,
             closePrice: trade.closePrice,
-            images: [trade.imageBase64, trade.imageBase64Second],
         }));
         return {
             items,

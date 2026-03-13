@@ -168,7 +168,7 @@ export async function createCompletionWithRouter(
       userId,
       feature,
       messages,
-      temperature: options.temperature || 0.3,
+      temperature: options.temperature ?? 0.3,
       requestedModel: normalizedModel,
     });
 

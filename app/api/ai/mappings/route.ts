@@ -331,8 +331,14 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: unknown) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return apiError("VALIDATION_FAILED", "Invalid mappings request payload", 400, error.errors);
+      return apiError("VALIDATION_FAILED", "Invalid mappings request payload", 400, {
+        issues: error.errors,
+      });
     }
 
     logAiError("Error in mappings route", error, { userId });

@@ -140,6 +140,7 @@ export function FormatPreview({
   const isStoppedRef = useRef<boolean>(isStopped);
   const retryCountSet1Ref = useRef<Map<number, number>>(new Map());
   const retryCountSet2Ref = useRef<Map<number, number>>(new Map());
+  const scheduledTimeoutsRef = useRef<Set<number>>(new Set());
   
   // Update refs when state changes
   useEffect(() => {
@@ -173,6 +174,28 @@ export function FormatPreview({
   useEffect(() => {
     isStoppedRef.current = isStopped;
   }, [isStopped]);
+
+  const scheduleManagedTimeout = (fn: () => void, delayMs: number) => {
+    const id = window.setTimeout(() => {
+      scheduledTimeoutsRef.current.delete(id);
+      fn();
+    }, delayMs);
+    scheduledTimeoutsRef.current.add(id);
+  };
+
+  const clearManagedTimeouts = () => {
+    for (const timeoutId of scheduledTimeoutsRef.current) {
+      clearTimeout(timeoutId);
+    }
+    scheduledTimeoutsRef.current.clear();
+  };
+
+  useEffect(() => {
+    return () => {
+      clearManagedTimeouts();
+      setIsLoading(false);
+    };
+  }, [setIsLoading]);
 
   // Split batches into two sets
   const splitBatches = () => {
@@ -228,7 +251,7 @@ export function FormatPreview({
     }
 
     const delayMs = RETRY_BASE_DELAY_MS * attempt;
-    setTimeout(() => {
+    scheduleManagedTimeout(() => {
       if (!isAutoProcessingRef.current || isStoppedRef.current) return;
       if (setNumber === 1) {
         processNextBatchInSet1();
@@ -283,7 +306,7 @@ export function FormatPreview({
           setIsAutoProcessing(false);
         } else if (isAutoProcessingRef.current && !isStoppedRef.current) {
           // Process next batch in set 1 if available and not stopped
-          setTimeout(() => {
+          scheduleManagedTimeout(() => {
             processNextBatchInSet1();
           }, 500);
         }
@@ -336,7 +359,7 @@ export function FormatPreview({
           setIsAutoProcessing(false);
         } else if (isAutoProcessingRef.current && !isStoppedRef.current) {
           // Process next batch in set 2 if available and not stopped
-          setTimeout(() => {
+          scheduleManagedTimeout(() => {
             processNextBatchInSet2();
           }, 500);
         }
@@ -346,8 +369,13 @@ export function FormatPreview({
 
   const isProcessing = isProcessing1 || isProcessing2;
 
+  useEffect(() => {
+    setIsLoading(isProcessing || isAutoProcessing);
+  }, [isProcessing, isAutoProcessing, setIsLoading]);
+
   // Process next batch in set 1
   const processNextBatchInSet1 = () => {
+    if (isStoppedRef.current || !isAutoProcessingRef.current) return;
     const currentIndex = currentBatchIndex1Ref.current;
     const batchSet = batchSet1Ref.current;
 
@@ -363,6 +391,7 @@ export function FormatPreview({
 
   // Process next batch in set 2
   const processNextBatchInSet2 = () => {
+    if (isStoppedRef.current || !isAutoProcessingRef.current) return;
     const currentIndex = currentBatchIndex2Ref.current;
     const batchSet = batchSet2Ref.current;
 
@@ -377,11 +406,12 @@ export function FormatPreview({
   };
 
   const startProcessing = () => {
+    clearManagedTimeouts();
     setIsAutoProcessing(true);
     setIsStopped(false);
     splitBatches();
     // Start both instances with their first batches after a small delay to ensure state is updated
-    setTimeout(() => {
+    scheduleManagedTimeout(() => {
       processNextBatchInSet1();
       processNextBatchInSet2();
     }, 100);
@@ -390,12 +420,14 @@ export function FormatPreview({
   const stopProcessing = () => {
     setIsAutoProcessing(false);
     setIsStopped(true);
+    clearManagedTimeouts();
 
     // Don't mark currently processing batches as completed - let them finish naturally
     // The onFinish callbacks will handle completion when they finish streaming
   };
 
   const resetProcessing = () => {
+    clearManagedTimeouts();
     setIsAutoProcessing(false);
     setIsStopped(false);
     setCurrentBatch(0);
@@ -408,6 +440,7 @@ export function FormatPreview({
     processedTradesRef.current = [];
     retryCountSet1Ref.current.clear();
     retryCountSet2Ref.current.clear();
+    setIsLoading(false);
   };
 
   const getBatchData = (batchIndex: number) => {
@@ -424,28 +457,36 @@ export function FormatPreview({
   }, [currentBatch, validTrades, batchSize]);
 
 
+  const appendUniqueTrades = (incomingTrades: Partial<ImportTradeDraft>[]) => {
+    const uniqueTrades = incomingTrades.filter(newTrade =>
+      !processedTradesRef.current.some(existingTrade =>
+        existingTrade.entryDate === newTrade.entryDate &&
+        existingTrade.instrument === newTrade.instrument &&
+        existingTrade.quantity === newTrade.quantity &&
+        existingTrade.side === newTrade.side &&
+        existingTrade.entryPrice === newTrade.entryPrice &&
+        existingTrade.closePrice === newTrade.closePrice &&
+        existingTrade.pnl === newTrade.pnl &&
+        existingTrade.commission === newTrade.commission &&
+        existingTrade.timeInPosition === newTrade.timeInPosition
+      )
+    );
+
+    if (uniqueTrades.length === 0) return;
+
+    const mergedTrades = [...processedTradesRef.current, ...uniqueTrades];
+    processedTradesRef.current = mergedTrades;
+    setProcessedTrades(mergedTrades);
+    scheduleManagedTimeout(() => {
+      scrollToBottom();
+    }, 100);
+  };
+
   // Handle streaming results from first useObject
   useEffect(() => {
     if (object1) {
       const newTrades = object1.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<ImportTradeDraft>[];
-      const uniqueTrades = newTrades.filter(newTrade =>
-        !processedTradesRef.current.some(existingTrade =>
-          existingTrade.entryDate === newTrade.entryDate &&
-          existingTrade.instrument === newTrade.instrument &&
-          existingTrade.quantity === newTrade.quantity &&
-          existingTrade.side === newTrade.side &&
-          existingTrade.entryPrice === newTrade.entryPrice &&
-          existingTrade.closePrice === newTrade.closePrice &&
-          existingTrade.pnl === newTrade.pnl &&
-          existingTrade.commission === newTrade.commission &&
-          existingTrade.timeInPosition === newTrade.timeInPosition
-        )
-      );
-      setProcessedTrades([...processedTradesRef.current, ...uniqueTrades]);
-      
-      setTimeout(() => {
-        scrollToBottom()
-      }, 100)
+      appendUniqueTrades(newTrades);
     }
   }, [object1])
 
@@ -453,24 +494,7 @@ export function FormatPreview({
   useEffect(() => {
     if (object2) {
       const newTrades = object2.filter((trade): trade is NonNullable<typeof trade> => trade !== undefined) as Partial<ImportTradeDraft>[];
-      const uniqueTrades = newTrades.filter(newTrade =>
-        !processedTradesRef.current.some(existingTrade =>
-          existingTrade.entryDate === newTrade.entryDate &&
-          existingTrade.instrument === newTrade.instrument &&
-          existingTrade.quantity === newTrade.quantity &&
-          existingTrade.side === newTrade.side &&
-          existingTrade.entryPrice === newTrade.entryPrice &&
-          existingTrade.closePrice === newTrade.closePrice &&
-          existingTrade.pnl === newTrade.pnl &&
-          existingTrade.commission === newTrade.commission &&
-          existingTrade.timeInPosition === newTrade.timeInPosition
-        )
-      );
-      setProcessedTrades([...processedTradesRef.current, ...uniqueTrades]);
-      
-      setTimeout(() => {
-        scrollToBottom()
-      }, 100)
+      appendUniqueTrades(newTrades);
     }
   }, [object2])
 
@@ -750,18 +774,13 @@ export function FormatPreview({
     };
   }, [processedTrades]);
 
-
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-semantic-error">{error}</div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4 h-full">
+      {error && (
+        <div className="rounded-md border border-semantic-error-border bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
+          {error}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex flex-col gap-1">

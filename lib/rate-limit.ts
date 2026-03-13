@@ -91,33 +91,53 @@ async function incrementUpstash(key: string, window: number): Promise<IncrementR
   const restToken = process.env.UPSTASH_REDIS_REST_TOKEN
   if (!restUrl || !restToken) return null
 
-  const response = await fetch(`${restUrl}/pipeline`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${restToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify([
-      ['INCR', key],
-      ['PTTL', key],
-      ['PEXPIRE', key, `${window}`, 'NX'],
-    ]),
-  })
+  let lastError: Error | null = null
+  const maxAttempts = 3
 
-  if (!response.ok) {
-    throw new Error(`Upstash rate limit request failed: ${response.status}`)
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 2500)
+
+    try {
+      const response = await fetch(`${restUrl}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${restToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['INCR', key],
+          ['PTTL', key],
+          ['PEXPIRE', key, `${window}`, 'NX'],
+        ]),
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Upstash rate limit request failed: ${response.status}`)
+      }
+
+      const payload = (await response.json()) as Array<{ result?: number | string | null }>
+      const increment = Number(payload?.[0]?.result ?? 0)
+      const ttlMs = Number(payload?.[1]?.result ?? -1)
+
+      if (!Number.isFinite(increment) || increment <= 0) {
+        throw new Error('Upstash returned invalid increment result')
+      }
+
+      const resetTime = Date.now() + (ttlMs > 0 ? ttlMs : window)
+      return { count: increment, resetTime }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 120))
+      }
+    } finally {
+      clearTimeout(timeoutId)
+    }
   }
 
-  const payload = (await response.json()) as Array<{ result?: number | string | null }>
-  const increment = Number(payload?.[0]?.result ?? 0)
-  const ttlMs = Number(payload?.[1]?.result ?? -1)
-
-  if (!Number.isFinite(increment) || increment <= 0) {
-    throw new Error('Upstash returned invalid increment result')
-  }
-
-  const resetTime = Date.now() + (ttlMs > 0 ? ttlMs : window)
-  return { count: increment, resetTime }
+  throw lastError ?? new Error('Upstash rate limit request failed')
 }
 
 async function incrementCounter(key: string, window: number): Promise<IncrementResult> {

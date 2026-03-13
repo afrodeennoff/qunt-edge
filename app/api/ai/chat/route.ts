@@ -317,8 +317,14 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
+    }
+
     if (error instanceof z.ZodError) {
-      return apiError("VALIDATION_FAILED", "Invalid chat request payload", 400, error.errors);
+      return apiError("VALIDATION_FAILED", "Invalid chat request payload", 400, {
+        issues: error.errors,
+      });
     }
 
     void logAiRequest({

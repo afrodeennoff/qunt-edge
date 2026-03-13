@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         void logAiRequest({
           userId,
           route: "/api/ai/support",
-          feature: "chat",
+          feature: "support",
           model: routerResult.model,
           provider: routerResult.provider,
           usage: { totalTokens: estimateTokenCountFromMessages(routerMessages, routerResult.content) },
@@ -199,7 +199,7 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
         void logAiRequest({
           userId,
           route: "/api/ai/support",
-          feature: "chat",
+          feature: "support",
           model: selectedModel,
           provider: policy.provider,
           usage: extractUsage(finalResult.usage),
@@ -213,7 +213,7 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
         void logAiRequest({
           userId,
           route: "/api/ai/support",
-          feature: "chat",
+          feature: "support",
           model: selectedModel,
           provider: policy.provider,
           latencyMs: Date.now() - startedAt,
@@ -243,7 +243,7 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
     void logAiRequest({
       userId,
       route: "/api/ai/support",
-      feature: "chat",
+      feature: "support",
       model: selectedModel,
       provider: policy.provider,
       latencyMs: Date.now() - startedAt,

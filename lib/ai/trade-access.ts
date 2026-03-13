@@ -80,17 +80,11 @@ const SENSITIVE_FIELDS = ['imageBase64', 'imageBase64Second'] as const
 const ANALYSIS_EXCLUDED_FIELDS = ['videoUrl', 'comment', ...SENSITIVE_FIELDS] as const
 
 /**
- * Request-scoped memoization cache.
- * Uses WeakMap to allow garbage collection when request context is gone.
- */
-const requestCache = new WeakMap<Request, Map<string, ProfiledAiTradesResult>>()
-
-/**
  * Get the request-scoped cache for memoization.
  */
 function getRequestCache(): Map<string, ProfiledAiTradesResult> {
-  // In serverless/edge environments, we use a module-level Map as fallback
-  // since WeakMap requires an object key which may not be available
+  // Process-local memoization cache.
+  // Cache keys must always include authenticated session user identity.
   if (typeof globalThis !== 'undefined') {
     const globalKey = '__trade_access_cache__'
     const cache = (globalThis as unknown as Record<string, Map<string, ProfiledAiTradesResult>>)[globalKey]
@@ -201,9 +195,27 @@ export async function getAiTrades(params: SummaryGetAiTradesParams): Promise<Sum
 export async function getAiTrades(params: RowGetAiTradesParams): Promise<RowAiTradesResult>
 export async function getAiTrades(params: GetAiTradesParams): Promise<ProfiledAiTradesResult> {
   const { profile, forceRefresh = false } = params
-  // Use provided userId or fall back to session (for backward compatibility)
-  const resolvedUserId = params.userId ?? await getUserId()
-  const cacheKey = `${resolvedUserId}:${profile}:${forceRefresh}`
+  let sessionUserId: string | null = null
+  try {
+    sessionUserId = await getUserId()
+  } catch (error) {
+    // Some utility/test contexts call getAiTrades outside request scope.
+    // In that case, explicit caller userId is required.
+    if (!params.userId) {
+      throw error
+    }
+  }
+
+  if (sessionUserId && params.userId && params.userId !== sessionUserId) {
+    throw new Error('FORBIDDEN_USER_CONTEXT_MISMATCH')
+  }
+
+  const effectiveUserId = sessionUserId ?? params.userId
+  if (!effectiveUserId) {
+    throw new Error('MISSING_USER_CONTEXT')
+  }
+
+  const cacheKey = `${effectiveUserId}:${profile}:${forceRefresh}`
 
   // Check memoization cache first
   const cache = getRequestCache()
