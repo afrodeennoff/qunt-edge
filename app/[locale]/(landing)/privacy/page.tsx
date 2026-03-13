@@ -2,11 +2,30 @@ import { UnifiedPageShell, UnifiedSurface } from '@/components/layout/unified-pa
 import type { Metadata } from "next";
 
 export const revalidate = 3600;
-export const metadata: Metadata = {
-  title: "Privacy Policy | Qunt Edge",
-  description:
-    "Read how Qunt Edge collects, protects, and processes account and trading data.",
-};
+const SITE_ORIGIN = "https://qunt-edge.vercel.app";
+const PAGE_PATH = "/privacy";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const canonical = `${SITE_ORIGIN}/${locale}${PAGE_PATH}`;
+
+  return {
+    title: "Privacy Policy | Qunt Edge",
+    description:
+      "Read how Qunt Edge collects, protects, and processes account and trading data.",
+    alternates: {
+      canonical,
+      languages: {
+        "en-US": `${SITE_ORIGIN}/en${PAGE_PATH}`,
+        "fr-FR": `${SITE_ORIGIN}/fr${PAGE_PATH}`,
+      },
+    },
+  };
+}
 
 export default function PrivacyPolicy() {
   return (

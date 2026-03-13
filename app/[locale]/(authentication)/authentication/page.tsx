@@ -1,7 +1,6 @@
 'use client'
 
 import Link from "next/link"
-import Head from "next/head"
 import { motion } from "framer-motion"
 import { ArrowLeft, LockKeyhole, ShieldCheck, Sparkles, Workflow, Gauge, CheckCircle2 } from "lucide-react"
 import { Logo } from "@/components/logo"
@@ -31,11 +30,7 @@ export default function AuthenticationPage() {
   ]
 
   return (
-    <>
-      <Head>
-        <meta name="robots" content="noindex,nofollow" />
-      </Head>
-      <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-28 top-[-8rem] h-[40rem] w-[40rem] rounded-full bg-white/[0.08] blur-3xl" />
         <div className="absolute -right-36 bottom-[-10rem] h-[42rem] w-[42rem] rounded-full bg-white/[0.05] blur-3xl" />
@@ -153,7 +148,6 @@ export default function AuthenticationPage() {
           </div>
         </div>
       </div>
-      </main>
-    </>
+    </main>
   )
 }

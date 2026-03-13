@@ -74,8 +74,8 @@ export default function Hero({ locale }: { locale: string }) {
           <span>Rithmic</span>
           <span>IBKR</span>
           <span>CQG</span>
-          <span className="font-medium tracking-[0.15em] text-[#ff4d1a]/70" aria-label="NinjaTrader">
-            NINJA<span className="mx-1 align-baseline text-[#ff4d1a]/80">|</span>TRADER
+          <span className="font-medium tracking-[0.15em] text-primary/80" aria-label="NinjaTrader">
+            NINJA<span className="mx-1 align-baseline text-primary">|</span>TRADER
           </span>
           <span>CSV Import</span>
         </div>

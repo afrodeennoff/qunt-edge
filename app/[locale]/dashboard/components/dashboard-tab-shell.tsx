@@ -39,7 +39,7 @@ export function DashboardTabShell({
   const shouldUseEnhancedSkeleton = FEATURE_FLAGS.ENABLE_SKELETON_LOADING;
 
   return (
-    <div className="relative w-full min-h-[calc(100dvh-64px)] px-3 py-3 sm:min-h-[calc(100vh-72px)] sm:px-4 sm:py-4 lg:px-6 lg:py-5 xl:px-8">
+    <div className="relative w-full min-h-[calc(100dvh-64px)] px-4 py-4 sm:min-h-[calc(100vh-72px)] sm:px-6 sm:py-5 lg:px-8 lg:py-6">
       <Suspense fallback={shouldUseEnhancedSkeleton ? <DashboardSkeleton activeTab={activeTab} /> : null}>
         {activeTab === "table" ? <TradeTableReview /> : null}
         {activeTab === "accounts" ? <AccountsOverview size="large" surface="embedded" /> : null}

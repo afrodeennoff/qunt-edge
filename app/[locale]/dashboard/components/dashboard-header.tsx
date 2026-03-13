@@ -170,7 +170,7 @@ export function DashboardHeader() {
                 isMobile ? (
                     hasActiveFilters && (
                         <div className="relative px-3 pb-3 pt-1">
-                            <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                            <div className="rounded-xl border border-border/60 bg-card/60 px-2 py-1.5">
                                 <ActiveFilterTags showAccountNumbers={true} />
                             </div>
                         </div>
@@ -178,7 +178,7 @@ export function DashboardHeader() {
                 ) : (
                     hasActiveFilters && (
                         <div className="relative px-4 pb-3 pt-1 sm:px-8">
-                            <div className="rounded-xl border border-white/10 bg-black/25 px-2 py-1.5">
+                            <div className="rounded-xl border border-border/60 bg-card/60 px-2 py-1.5">
                                 <ActiveFilterTags showAccountNumbers={true} />
                             </div>
                         </div>

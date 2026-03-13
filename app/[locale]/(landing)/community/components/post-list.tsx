@@ -33,19 +33,19 @@ export function PostList({ initialPosts }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
         <Input
           placeholder={t('community.searchPosts')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="sm:max-w-[300px]"
+          className="w-full sm:max-w-[300px]"
         />
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <Select
             value={filter}
             onValueChange={(value) => setFilter(value as PostType | 'ALL')}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder={t('community.filterByType')} />
             </SelectTrigger>
             <SelectContent>
@@ -62,7 +62,7 @@ export function PostList({ initialPosts }: Props) {
             value={statusFilter}
             onValueChange={(value) => setStatusFilter(value as PostStatus | 'ALL')}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder={t('community.filterByStatus')} />
             </SelectTrigger>
             <SelectContent>

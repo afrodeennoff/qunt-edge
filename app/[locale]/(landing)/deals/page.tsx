@@ -2,10 +2,29 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PublicFlowShell } from './_components/public-flow-shell'
 
-export const metadata: Metadata = {
-  title: 'Qunt Edge Deals',
-  description:
-    'Monitor current funding-program offers and evaluate fit before committing capital.',
+const SITE_ORIGIN = "https://qunt-edge.vercel.app";
+const PAGE_PATH = "/deals";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const canonical = `${SITE_ORIGIN}/${locale}${PAGE_PATH}`;
+
+  return {
+    title: 'Qunt Edge Deals',
+    description:
+      'Monitor current funding-program offers and evaluate fit before committing capital.',
+    alternates: {
+      canonical,
+      languages: {
+        "en-US": `${SITE_ORIGIN}/en${PAGE_PATH}`,
+        "fr-FR": `${SITE_ORIGIN}/fr${PAGE_PATH}`,
+      },
+    },
+  };
 }
 
 const deals = [

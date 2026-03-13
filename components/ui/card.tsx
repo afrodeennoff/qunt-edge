@@ -46,7 +46,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           "relative rounded-xl border bg-card text-card-foreground shadow-sm",
           {
             "border-border bg-card": variant === "default",
-            "border-border/70 bg-white/5 backdrop-blur-md": variant === "glass",
+            "border-border/70 bg-secondary/22 backdrop-blur-md": variant === "glass",
             "border-border bg-card shadow-md": variant === "elevated",
             "border-2 border-border bg-transparent shadow-none": variant === "outlined",
             "border-0 bg-transparent shadow-none": variant === "flat",
@@ -85,7 +85,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         )}
 
         {variant === "matte" && (
-          <div className="absolute inset-0 pointer-events-none border border-white/[0.03] rounded-xl" />
+          <div className="absolute inset-0 pointer-events-none border border-border/40 rounded-xl" />
         )}
 
         <div className="relative z-10">

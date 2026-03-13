@@ -76,7 +76,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                         <Link
                             key={link.name}
                             href={link.href}
-                            className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors relative group py-2"
+                            className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors relative group py-2"
                         >
                             {link.name}
                             <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-foreground transition-all duration-300 group-hover:w-full"></span>
@@ -92,18 +92,19 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                     variant="ghost"
                                     onClick={onAccessPortal}
                                     className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                    
                                 >
                                     {t('landing.navbar.signIn')}
                                 </Button>
                                 <Button
                                     onClick={onAccessPortal}
-                                    className="h-9 px-6 text-[11px] font-bold uppercase tracking-[0.15em] rounded-lg shadow-sm"
+                                    className="h-9 px-6 text-xs font-bold uppercase tracking-[0.12em] rounded-lg shadow-sm"
                                 >
                                     {t('landing.cta')}
                                 </Button>
                             </>
                         ) : (
-                            <Button asChild className="h-9 px-6 text-[11px] font-bold uppercase tracking-[0.15em] rounded-lg shadow-sm">
+                            <Button asChild className="h-9 px-6 text-xs font-bold uppercase tracking-[0.12em] rounded-lg shadow-sm">
                                 <Link href={`/${locale}/dashboard`}>
                                     {t('landing.navbar.dashboard')}
                                 </Link>
@@ -118,7 +119,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                                 <Menu className="w-6 h-6" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="w-[300px] bg-background/95 backdrop-blur-xl border-border/40 p-0 flex flex-col justify-between">
+                        <SheetContent side="right" className="w-[min(88vw,360px)] bg-background/95 backdrop-blur-xl border-border/40 p-0 flex flex-col justify-between">
                             <div className="flex flex-col h-full pt-16 px-6 pb-8">
                                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                                 <SheetDescription className="sr-only">

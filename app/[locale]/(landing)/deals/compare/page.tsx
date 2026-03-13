@@ -3,9 +3,28 @@ import { PublicFlowShell } from '../_components/public-flow-shell'
 
 import { FirmComparisonGrid } from './components/firm-comparison-grid'
 
-export const metadata: Metadata = {
-  title: 'Qunt Edge Matchup',
-  description: 'Compare futures prop firm structures with a Qunt Edge decision matrix built for practical challenge planning.',
+const SITE_ORIGIN = "https://qunt-edge.vercel.app";
+const PAGE_PATH = "/deals/compare";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const canonical = `${SITE_ORIGIN}/${locale}${PAGE_PATH}`;
+
+  return {
+    title: 'Qunt Edge Matchup',
+    description: 'Compare futures prop firm structures with a Qunt Edge decision matrix built for practical challenge planning.',
+    alternates: {
+      canonical,
+      languages: {
+        "en-US": `${SITE_ORIGIN}/en${PAGE_PATH}`,
+        "fr-FR": `${SITE_ORIGIN}/fr${PAGE_PATH}`,
+      },
+    },
+  };
 }
 
 export default function PropfirmPerkComparePage() {

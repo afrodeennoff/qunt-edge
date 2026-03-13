@@ -243,7 +243,7 @@ export function DailySummaryModal() {
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-full aspect-[7/4] bg-background text-white rounded-3xl overflow-hidden border border-white/10 relative flex flex-col sm:shadow-2xl sm:blur-[80px]"
+                    className="w-full aspect-[7/4] bg-background text-foreground rounded-3xl overflow-hidden border border-border/60 relative flex flex-col sm:shadow-2xl"
                     ref={cardRef}
                 >
                     {/* Refined Background Mesh */}
@@ -254,14 +254,14 @@ export function DailySummaryModal() {
                         {/* Header */}
                         <div className="flex justify-between items-center mb-8">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
-                                    <Zap className="w-5 h-5 text-white/90" />
+                                <div className="w-10 h-10 rounded-xl bg-secondary/30 border border-border/60 flex items-center justify-center shadow-inner">
+                                    <Zap className="w-5 h-5 text-foreground" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <h3 className="font-semibold text-lg tracking-tight text-white/90 leading-none">
+                                    <h3 className="font-semibold text-lg tracking-tight text-foreground leading-none">
                                         QuntEdge
                                     </h3>
-                                    <div className="text-[10px] text-white/60 font-medium uppercase tracking-wider mt-1">
+                                    <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mt-1">
                                         {format(new Date(), 'MMM d, yyyy')}
                                     </div>
                                 </div>
@@ -270,23 +270,23 @@ export function DailySummaryModal() {
                             <div className="flex items-center gap-4">
                                 <button
                                     type="button"
-                                    className="group flex items-center gap-2 cursor-pointer rounded-lg border border-transparent px-3 py-1.5 transition-all hover:border-white/5 hover:bg-white/5"
+                                    className="group flex items-center gap-2 cursor-pointer rounded-lg border border-transparent px-3 py-1.5 transition-all hover:border-border/60 hover:bg-secondary/30"
                                     onClick={(e) => { e.stopPropagation(); setIsEditingHandle(true); }}
                                     aria-label="Edit handle"
                                 >
                                     {isEditingHandle ? (
-                                        <input autoFocus className="w-24 border-none bg-transparent text-right text-xs font-bold uppercase tracking-wider text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" value={handle} onChange={(e) => setHandle(e.target.value)} onBlur={() => setIsEditingHandle(false)} />
+                                        <input autoFocus className="w-24 border-none bg-transparent text-right text-xs font-bold uppercase tracking-wider text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={handle} onChange={(e) => setHandle(e.target.value)} onBlur={() => setIsEditingHandle(false)} />
                                     ) : (
-                                        <span className="text-xs font-bold text-white/80 group-hover:text-white uppercase tracking-wider transition-colors">@{handle}</span>
+                                        <span className="text-xs font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-wider transition-colors">@{handle}</span>
                                     )}
                                 </button>
-                                <div className="flex items-center bg-zinc-900 rounded-lg p-0.5 border border-white/5">
-                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('currency'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'currency' ? "bg-white/10 text-white shadow-sm" : "text-white/60 hover:text-white/90")}>$</button>
-                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('percent'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'percent' ? "bg-white/10 text-white shadow-sm" : "text-white/60 hover:text-white/90")}>%</button>
+                                <div className="flex items-center bg-card rounded-lg p-0.5 border border-border/60">
+                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('currency'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'currency' ? "bg-secondary/35 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>$</button>
+                                    <button onClick={(e) => { e.stopPropagation(); setDisplayMode('percent'); }} className={cn("px-2.5 py-1 rounded-[6px] text-[10px] font-bold transition-all", displayMode === 'percent' ? "bg-secondary/35 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>%</button>
                                 </div>
                                 <button
                                     onClick={() => setIsOpen(false)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-white transition-colors"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-secondary/30 border border-border/60 text-muted-foreground hover:text-foreground transition-colors"
                                     aria-label="Close summary"
                                 >
                                     <X className="w-4 h-4" />
@@ -301,15 +301,15 @@ export function DailySummaryModal() {
                             <div className="col-span-12 lg:col-span-7 flex flex-col h-full">
                                 <div className="flex-1 flex flex-col justify-center items-center text-center">
                                     <div className="mb-4 flex items-center gap-3">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
-                                        <span className="text-xs font-bold text-white/60 uppercase tracking-[0.2em]">{timeframe === 'total' ? 'Lifetime' : timeframe} PnL</span>
+                                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/70" />
+                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">{timeframe === 'total' ? 'Lifetime' : timeframe} PnL</span>
 
                                         <div className="ml-auto flex items-center gap-2">
-                                            <select className="cursor-pointer rounded bg-transparent text-[10px] font-bold uppercase text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" value={timeframe} onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}>
-                                                <option value="daily" className="bg-zinc-950 text-white">Daily</option>
-                                                <option value="weekly" className="bg-zinc-950 text-white">Weekly</option>
-                                                <option value="monthly" className="bg-zinc-950 text-white">Monthly</option>
-                                                <option value="total" className="bg-zinc-950 text-white">All</option>
+                                            <select className="cursor-pointer rounded bg-transparent text-[10px] font-bold uppercase text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={timeframe} onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}>
+                                                <option value="daily" className="bg-popover text-popover-foreground">Daily</option>
+                                                <option value="weekly" className="bg-popover text-popover-foreground">Weekly</option>
+                                                <option value="monthly" className="bg-popover text-popover-foreground">Monthly</option>
+                                                <option value="total" className="bg-popover text-popover-foreground">All</option>
                                             </select>
                                         </div>
                                     </div>

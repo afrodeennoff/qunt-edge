@@ -61,7 +61,7 @@ export default function CompletedTimeline({ milestones, locale }: { milestones: 
               <div className="h-3 w-3 rounded-full bg-neutral-300 dark:bg-neutral-700" />
             </div>
             
-            <Link href={`/updates/${milestone.id}`} className="block hover:opacity-90 transition-opacity">
+            <Link href={`/${locale}/updates/${milestone.id}`} className="block hover:opacity-90 transition-opacity">
               <time className="mb-2 block text-sm text-neutral-600 dark:text-neutral-400">
                 {format(new Date(milestone.completedDate), 'MMMM d, yyyy', { locale: dateLocale })}
               </time>

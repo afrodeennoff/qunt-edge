@@ -6,14 +6,33 @@ import { UnifiedPageShell } from "@/components/layout/unified-page-shell"
 import Link from "next/link"
 
 export const revalidate = 1800
-export const metadata: Metadata = {
-  title: "About Qunt Edge | Trading Performance Intelligence",
-  description:
-    "Learn how Qunt Edge helps discretionary traders improve execution quality, risk discipline, and decision consistency.",
+const SITE_ORIGIN = "https://qunt-edge.vercel.app";
+const PAGE_PATH = "/about";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const canonical = `${SITE_ORIGIN}/${locale}${PAGE_PATH}`;
+
+  return {
+    title: "About Qunt Edge | Trading Performance Intelligence",
+    description:
+      "Learn how Qunt Edge helps discretionary traders improve execution quality, risk discipline, and decision consistency.",
+    alternates: {
+      canonical,
+      languages: {
+        "en-US": `${SITE_ORIGIN}/en${PAGE_PATH}`,
+        "fr-FR": `${SITE_ORIGIN}/fr${PAGE_PATH}`,
+      },
+    },
+  };
 }
 
-export default function AboutPage({ params }: { params: { locale: string } }) {
-  const { locale } = params
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
   const founderSkills = [
     { name: "Order Book Trading", icon: <BookOpen className="w-4 h-4" /> },
     { name: "Volume Profile", icon: <LineChart className="w-4 h-4" /> },

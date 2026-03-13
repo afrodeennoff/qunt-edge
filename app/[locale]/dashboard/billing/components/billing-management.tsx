@@ -97,7 +97,7 @@ export default function BillingManagement() {
                 </span>
                 <span className="text-muted-foreground">•</span>
                 {subscription?.status === 'ACTIVE' ? (
-                  <span className="text-white dark:text-white inline-flex items-center gap-1">
+                  <span className="text-foreground inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     {t('billing.status.active')}
                   </span>
@@ -107,7 +107,7 @@ export default function BillingManagement() {
                     {t('billing.scheduledToCancel')}
                   </span>
                 ) : (
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-muted-foreground">
                     {subscription?.status ? (() => {
                       const status = String(subscription.status || '').toUpperCase()
                       switch (status) {
@@ -148,7 +148,7 @@ export default function BillingManagement() {
                   <div>
                     {subscription?.plan?.interval === 'lifetime' ? (
                       <div className="space-y-1">
-                        <div className="text-2xl font-bold text-white dark:text-white">
+                        <div className="text-2xl font-bold text-foreground">
                           {t('pricing.lifetimeAccess')}
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -163,13 +163,13 @@ export default function BillingManagement() {
                           </span>
                           <span>
                             €{((subscription.plan.amount - (subscription.promotion.amount_off || (subscription.promotion.percent_off ? subscription.plan.amount * subscription.promotion.percent_off / 100 : 0))) / 100).toFixed(2)}
-                            <span className="text-lg font-normal text-gray-500">
+                            <span className="text-lg font-normal text-muted-foreground">
                               /{subscription.plan.interval}
                             </span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-white/10 text-white dark:bg-white/10 dark:text-white">
+                          <Badge variant="secondary" className="bg-secondary/25 text-foreground">
                             {subscription.promotion.percent_off
                               ? `${subscription.promotion.percent_off}% OFF`
                               : subscription.promotion.amount_off 
@@ -195,7 +195,7 @@ export default function BillingManagement() {
                           ? (
                             <>
                               €{(subscription.plan.amount / 100).toFixed(2)}
-                              <span className="text-lg font-normal text-gray-500">
+                              <span className="text-lg font-normal text-muted-foreground">
                                 /{subscription.plan.interval === 'year' ? t('pricing.year') : subscription.plan.interval === 'month' ? t('pricing.month') : subscription.plan.interval === 'quarter' ? t('pricing.quarter') : t('pricing.lifetime')}
                               </span>
                             </>
@@ -477,7 +477,7 @@ export default function BillingManagement() {
                     </div>
                     <div className="flex items-center gap-2">
                       {invoice.status === 'paid' && (
-                        <Badge variant="secondary" className="bg-white/10 text-white dark:bg-white/10 dark:text-white">
+                        <Badge variant="secondary" className="bg-secondary/25 text-foreground">
                           {t('billing.paymentStatus.succeeded')}
                         </Badge>
                       )}

@@ -11,7 +11,7 @@ function Skeleton({
 }: SkeletonProps) {
   return (
     <Component
-      className={cn("animate-pulse rounded-md bg-white/5", className)}
+      className={cn("animate-pulse rounded-md bg-secondary/30", className)}
       {...props}
     />
   )

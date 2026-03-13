@@ -164,7 +164,7 @@ export function ConsentBanner() {
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-black text-white hover:bg-black/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={handleAcceptAll}
                 >
                   {/* @ts-ignore */}
@@ -177,9 +177,9 @@ export function ConsentBanner() {
 
         {isDesktop ? (
           <>
-            {showDetails && <div className="fixed inset-0 z-9998 bg-black/20 backdrop-blur-xs" />}
+            {showDetails && <div className="fixed inset-0 z-[98] bg-black/20 backdrop-blur-xs" />}
             <Dialog open={showDetails} onOpenChange={setShowDetails}>
-              <DialogContent className="fixed left-[50%] top-[50%] z-9999 max-h-[80vh] w-[90vw] max-w-[480px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+              <DialogContent className="fixed left-[50%] top-[50%] z-[99] max-h-[80vh] w-[90vw] max-w-[480px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border border-border bg-card shadow-xl">
                 <DialogHeader className="p-6 pb-4">
                   <DialogTitle className="text-lg font-medium text-foreground">
                     {/* @ts-ignore */}

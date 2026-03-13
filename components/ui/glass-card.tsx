@@ -17,12 +17,12 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
         className={cn(
           "rounded-xl transition-all duration-200",
           {
-            "border-border/70 bg-white/5 backdrop-blur-md shadow-sm": variant === "default",
-            "border-border bg-white/10 backdrop-blur-xl shadow-md": variant === "strong",
-            "border-border/60 bg-white/3 backdrop-blur-sm shadow-none": variant === "subtle",
+            "border-border/70 bg-secondary/22 backdrop-blur-md shadow-sm": variant === "default",
+            "border-border bg-secondary/30 backdrop-blur-xl shadow-md": variant === "strong",
+            "border-border/60 bg-secondary/15 backdrop-blur-sm shadow-none": variant === "subtle",
           },
           {
-            "hover:bg-white/10 hover:shadow-md hover:-translate-y-0.5": hover,
+            "hover:bg-secondary/30 hover:shadow-md hover:-translate-y-0.5": hover,
             "cursor-pointer active:scale-[0.98]": clickable,
           },
           {

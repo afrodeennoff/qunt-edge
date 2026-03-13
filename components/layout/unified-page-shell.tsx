@@ -59,8 +59,8 @@ export function UnifiedPageHeader({
   return (
     <header
       className={cn(
-        "mb-8 rounded-3xl border border-white/12 bg-black/45 px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6",
-        "transition-colors duration-200 hover:border-white/20",
+        "mb-8 rounded-3xl border border-border/60 bg-card/70 px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6",
+        "transition-colors duration-200 hover:border-border",
         className,
       )}
     >
@@ -80,8 +80,8 @@ export function UnifiedSurface({ children, className }: UnifiedSurfaceProps) {
   return (
     <section
       className={cn(
-        "rounded-3xl border border-white/12 bg-black/45 p-4 shadow-sm backdrop-blur-sm sm:p-6",
-        "transition-colors duration-200 hover:border-white/20",
+        "rounded-3xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-sm sm:p-6",
+        "transition-colors duration-200 hover:border-border",
         className,
       )}
     >

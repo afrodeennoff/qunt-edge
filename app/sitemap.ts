@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://qunt-edge.vercel.app'
-  const now = new Date()
+  const lastModified = new Date('2026-03-13T00:00:00.000Z')
   const locales = ['en', 'fr']
   const routeDefs: Array<{ path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }> = [
     { path: '', changeFrequency: 'weekly', priority: 1 },
@@ -27,7 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return locales.flatMap((locale) =>
     routeDefs.map((route) => ({
       url: `${baseUrl}/${locale}${route.path}`,
-      lastModified: now,
+      lastModified,
       changeFrequency: route.changeFrequency,
       priority: route.priority,
     }))
