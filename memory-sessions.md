@@ -1,5 +1,10 @@
 # Memory: Sessions
 
+## 2026-03-14
+- Added deterministic Vitest coverage for server/shared.createShared, covering slug collisions and date validation, and recorded the expected log noise when validation fails.
+- Ran the targeted server isolation suites (tests/server/shared.test.ts, tests/server/accounts-isolation.test.ts, tests/server/layout-isolation.test.ts, tests/server/optimized-trades-isolation.test.ts) to ensure the new verification loop passes.
+- Flagged that front-end dashboard state-sync stores/contexts still lack deterministic automation and should be targeted next.
+
 ## 2026-03-06
 - Completed a focused architecture read of localized routing under `app/[locale]`, including middleware i18n redirect behavior, provider wiring, and protected-route auth gating.
 - Mapped primary localized route groups (`(home)`, `(landing)`, `(authentication)`, `dashboard`, `teams`, `admin`, `embed`, `shared`) and verified the catch-all not-found flow.

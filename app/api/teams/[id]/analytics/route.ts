@@ -79,7 +79,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid team id' }, { status: 400 })
     }
     const teamId = teamIdResult.data
-    const result = await updateTeamAnalytics(teamId, user.id)
+    const url = new URL(req.url)
+    const periodResult = periodSchema.safeParse(url.searchParams.get('period') ?? 'monthly')
+    if (!periodResult.success) {
+      return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
+    }
+    const period = periodResult.data
+    const result = await updateTeamAnalytics(teamId, user.id, period)
 
     if (!result.success) {
       return NextResponse.json(

@@ -1,3 +1,22 @@
+## Current Task: Extend verification for CRUD/auth/state-sync
+
+- [x] Audit existing tests for CRUD/auth/state-sync paths, noting coverage gaps and risky areas.
+- [x] Add or adjust deterministic tests/scripts focused on missing coverage.
+- [x] Run the targeted verification suites and capture exact command outputs.
+- [x] Document remaining risky untested paths and verification results.
+
+## Review
+- Verification: Pending (tests not yet run)
+- Risks: Coverage gaps still being mapped
+- Follow-ups: Update report after adding tests
+
+## Immediate AI verification run (2026-03-14)
+- [ ] Run `npx vitest run tests/api/ai-*.test.ts tests/lib/ai-router-integration.test.ts lib/__tests__/ai-support-route.test.ts tests/lib/ai-trade-access.test.ts tests/lib/ai-router-fallback-order.test.ts tests/lib/ai-client-router-propagation.test.ts`
+- [ ] Run `npm run -s typecheck`
+- [ ] Run `npx eslint <touched AI files>`
+- [ ] Run `npm run -s build`
+- [ ] Capture/finalize verification summary (pass/fail + key outputs)
+
 ## Current Task: Commit and push current changes
 
 - [x] Review git status/diff to confirm staged scope
@@ -266,3 +285,42 @@
 - [x] Fix the identified AI logic/tests within the AI subsystem without touching unrelated areas, documenting the root cause.
 - [x] Run the targeted AI tests, `npm run -s typecheck`, ESLint on touched AI files, and `npm run -s build` until they all pass for the touched scope.
 - [x] Summarize verification results and file changes for review.
+- [x] Document the verification design (docs/superpowers/specs/2026-03-14-ai-verification-design.md).
+- [x] Create the implementation plan (docs/superpowers/plans/2026-03-14-ai-verification-plan.md).
+
+## Backend CRUD Audit (2026-03-14)
+
+- [x] Review server/, app/api/, and lib/ backend CRUD/data-handling/auth flow code to understand current ownership and validation behavior.
+- [x] Identify at least two concrete issues around create/read/update/delete scoping, error contracts, or auth guards needing fixes.
+- [x] Implement minimal code changes to address the issues and add regression tests exercising those flows.
+- [x] Run relevant vitest/ESLint/typecheck subsets for modified files and capture outputs.
+- [x] Summarize findings, changes, and residual risks for the user.
+## Full-Stack CRUD/Auth/State Sync Hardening Sweep (2026-03-14)
+
+- [ ] Run parallel specialist audits (frontend/backend/security/testing) and collect actionable findings.
+- [ ] Fix frontend CRUD + UI state-sync issues (create/read/update/delete flows, optimistic updates, validation UX).
+- [ ] Fix backend CRUD + validation/auth/permission issues (ownership enforcement + error contract consistency).
+- [ ] Add or update regression tests for each fix.
+- [ ] Run verification loop until clean:
+  - [ ] targeted tests for touched flows
+  - [ ] `npm run -s typecheck`
+  - [ ] lint on touched files
+  - [ ] `npm run -s build`
+- [ ] Perform manual CRUD flow validation checks and document outcomes.
+- [ ] Document full issue/fix report, changed files, verification evidence, and residual risks.
+
+## Frontend CRUD State Sync Sweep (2026-03-14)
+
+- [ ] Investigate how deleting an account leaves stale references in `groups` and confirm the broken UI symptoms.
+- [ ] Update the dashboard data provider to purge deleted accounts from paired `groups` state while keeping rollback paths intact.
+- [ ] Add a reusable helper + targeted Vitest to confirm the cleanup logic and keep `context/data-provider.tsx` lint-clean.
+- [ ] Run `npx vitest run tests/context/data-provider-utils.test.ts` and `npx eslint context/data-provider.tsx` and capture the outputs.
+- [ ] Summarize the fix, list touched files, mention verification, and call out any remaining risks around shared views or auth.
+
+## Security CRUD Audit Plan (2026-03-14)
+
+- [x] Step 1: Inventory auth-sensitive CRUD endpoints/actions (app/api, server/, lib/) and confirm userId/file-path resolution is scoped to the authenticated actor.
+- [x] Step 2: Fail-closed: tighten authn/authz/input validation guards and ownership assertions for create/read/update/delete handlers, including path-delete flows.
+- [x] Step 3: Add regression tests that prove ownership boundaries (blocked cross-user action). Target vitest suites near touched routes.
+- [x] Step 4: Run targeted security-relevant tests (relevant vitest subsets + ESLint/typecheck if those files change) and log output.
+- [ ] Step 5: Document what was fixed, changed files, and verification steps for the final report.

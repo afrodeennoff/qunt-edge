@@ -11,8 +11,8 @@ vi.mock("@/server/teams", () => ({
 }))
 
 import { createRouteClient } from "@/lib/supabase/route-client"
-import { getTeamAnalytics, getTeamById } from "@/server/teams"
-import { GET } from "@/app/api/teams/[id]/analytics/route"
+import { getTeamAnalytics, getTeamById, updateTeamAnalytics } from "@/server/teams"
+import { GET, PUT } from "@/app/api/teams/[id]/analytics/route"
 
 describe("teams analytics route", () => {
   beforeEach(() => {
@@ -52,5 +52,23 @@ describe("teams analytics route", () => {
     expect(response.status).toBe(200)
     const payload = await response.json()
     expect(payload.teamId).toBe("t_1")
+  })
+
+  it("passes period queries through when updating analytics", async () => {
+    vi.mocked(createRouteClient).mockReturnValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u_1" } } }),
+      },
+    } as never)
+    vi.mocked(getTeamById).mockResolvedValue({ id: "t_1" } as never)
+    vi.mocked(updateTeamAnalytics).mockResolvedValue({ success: true, analytics: { teamId: "t_1" } } as never)
+
+    const response = await PUT(
+      new Request("http://localhost/api/teams/t_1/analytics?period=weekly"),
+      { params: Promise.resolve({ id: "t_1" }) } as never
+    )
+
+    expect(response.status).toBe(200)
+    expect(vi.mocked(updateTeamAnalytics)).toHaveBeenCalledWith("t_1", "u_1", "weekly")
   })
 })

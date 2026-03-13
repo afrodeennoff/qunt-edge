@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { withSupabaseImageTransform } from "@/lib/supabase-storage";
+import { ensureOwnedImagePath, extractTradeImagePath } from "@/lib/trade-image-path";
 
 const supabase = createClient();
 
@@ -52,27 +53,6 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/png",
   "image/webp",
 ];
-
-function extractTradeImagePath(imageReference: string): string | null {
-  if (!imageReference) return null;
-
-  const publicMarker = "/storage/v1/object/public/trade-images/";
-  const signedMarker = "/storage/v1/object/sign/trade-images/";
-
-  if (imageReference.includes(publicMarker)) {
-    return imageReference.split(publicMarker)[1]?.split("?")[0] ?? null;
-  }
-
-  if (imageReference.includes(signedMarker)) {
-    return imageReference.split(signedMarker)[1]?.split("?")[0] ?? null;
-  }
-
-  if (imageReference.startsWith("http://") || imageReference.startsWith("https://")) {
-    return null;
-  }
-
-  return imageReference.replace(/^\/+/, "");
-}
 
 interface TradeImageEditorProps {
   trade: any;
@@ -252,8 +232,9 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       if (imageUrl) {
         // Extract the path from the full URL
         const path = extractTradeImagePath(imageUrl);
-        if (path && actorImagePrefix && path.startsWith(actorImagePrefix)) {
-          await supabase.storage.from("trade-images").remove([path]);
+        if (path) {
+          const ownedPath = ensureOwnedImagePath(path, actorImagePrefix);
+          await supabase.storage.from("trade-images").remove([ownedPath]);
         }
       }
 
@@ -297,9 +278,24 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       }
 
       if (imagesToRemove.length > 0) {
-        const ownedPaths = actorImagePrefix
-          ? imagesToRemove.filter((path) => path.startsWith(actorImagePrefix))
-          : []
+        const ownedPaths: string[] = [];
+        const unauthorized: string[] = [];
+
+        imagesToRemove.forEach((path) => {
+          try {
+            ownedPaths.push(ensureOwnedImagePath(path, actorImagePrefix));
+          } catch (error) {
+            unauthorized.push(path);
+          }
+        });
+
+        if (unauthorized.length > 0) {
+          console.error("Blocked deletion of image paths outside actor prefix", {
+            unauthorized,
+          });
+          toast.error("Failed to delete image");
+          return;
+        }
 
         if (ownedPaths.length > 0) {
           await supabase.storage.from("trade-images").remove(ownedPaths);

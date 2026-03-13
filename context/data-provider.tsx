@@ -69,6 +69,7 @@ import { useMoodStore } from "@/store/mood-store";
 import { useSubscriptionStore } from "@/store/subscription-store";
 import { getSubscriptionData } from "@/server/billing";
 import { defaultLayouts } from "@/lib/default-layouts";
+import { removeAccountFromGroups } from "@/context/data-provider-utils";
 
 import {
   generateMockTrades
@@ -1729,19 +1730,27 @@ export const DataProvider: React.FC<{
     async (account: Account) => {
       if (!supabaseUser?.id || isSharedView) return;
 
-      const previousAccounts = [...accounts];
+      const { accounts: previousAccounts, groups: previousGroups } =
+        useUserStore.getState();
       try {
-        // Update local state immediately
-        setAccounts(accounts.filter((acc: Account) => acc.id !== account.id));
+        const { accounts: currentAccounts, groups: currentGroups } =
+          useUserStore.getState();
+
+        const updatedAccounts = currentAccounts.filter(
+          (acc: Account) => acc.id !== account.id
+        );
+        setAccounts(updatedAccounts);
+        setGroups(removeAccountFromGroups(currentGroups, account.id));
         // Delete from database
         await deleteAccountAction(account);
       } catch (error) {
         logger.error({ error }, "Error deleting account, rolling back");
         setAccounts(previousAccounts);
+        setGroups(previousGroups);
         throw error;
       }
     },
-    [supabaseUser?.id, isSharedView, accounts, setAccounts]
+    [supabaseUser?.id, isSharedView, setAccounts, setGroups]
   );
 
   // Add deletePayout function
@@ -2195,8 +2204,8 @@ export const useDashboardActions = () => {
   return context;
 };
 
-// Add getTimeRangeKey function at the top level
-function getTimeRangeKey(timeInPosition: number): string {
+ // Add getTimeRangeKey function at the top level
+ function getTimeRangeKey(timeInPosition: number): string {
   const minutes = timeInPosition / 60; // Convert seconds to minutes
   if (minutes < 1) return "under1min";
   if (minutes >= 1 && minutes < 5) return "1to5min";
