@@ -1,7 +1,5 @@
 import {
   convertToModelMessages,
-  createUIMessageStream,
-  createUIMessageStreamResponse,
   streamText,
   UIMessage,
 } from "ai";
@@ -18,7 +16,6 @@ import {
   estimateTokenCountFromMessages,
   getAiErrorCode,
   logAiError,
-  logAiWarn,
   sanitizeAiError,
 } from "@/lib/ai/error-utils";
 // Allow streaming responses up to 30 seconds

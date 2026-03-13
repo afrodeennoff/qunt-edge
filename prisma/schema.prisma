@@ -14,22 +14,22 @@ datasource db {
 // ============================================================================
 
 model User {
-  id                 String           @id @default(cuid())
-  email              String           @unique
-  auth_user_id       String           @unique
-  isFirstConnection  Boolean          @default(true)
-  isBeta             Boolean          @default(false)
-  language           String           @default("en")
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  auth_user_id       String              @unique
+  isFirstConnection  Boolean             @default(true)
+  isBeta             Boolean             @default(false)
+  language           String              @default("en")
   etpToken           String?
-  etpTokenHash       String?          @unique
+  etpTokenHash       String?             @unique
   etpTokenExpiresAt  DateTime?
   thorToken          String?
-  thorTokenHash      String?          @unique
+  thorTokenHash      String?             @unique
   thorTokenExpiresAt DateTime?
-  referral           Referral?        @relation("UserReferral")
+  referral           Referral?           @relation("UserReferral")
   referralRedemption ReferralRedemption? @relation("UserReferralRedemption")
-  subscription       Subscription?    @relation("UserSubscription")
-  dashboardLayout    DashboardLayout? @relation("UserDashboardLayout")
+  subscription       Subscription?       @relation("UserSubscription")
+  dashboardLayout    DashboardLayout?    @relation("UserDashboardLayout")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,14 +119,14 @@ model RecoveryCode {
 }
 
 model Referral {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  slug            String   @unique
+  id     String @id @default(uuid())
+  userId String @unique
+  slug   String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation("UserReferral", fields: [userId], references: [id], onDelete: Cascade)
+  user        User                 @relation("UserReferral", fields: [userId], references: [id], onDelete: Cascade)
   redemptions ReferralRedemption[] @relation("ReferralOwner")
 
   @@index([userId])
@@ -150,24 +150,24 @@ model ReferralRedemption {
 }
 
 model Subscription {
-   id                String  @id @unique @default(uuid())
-   email             String  @unique
-   plan              String
-   status            String  @default("ACTIVE")
-   cancelAtPeriodEnd Boolean @default(false)
-   interval          String?
+  id                String  @id @unique @default(uuid())
+  email             String  @unique
+  plan              String
+  status            String  @default("ACTIVE")
+  cancelAtPeriodEnd Boolean @default(false)
+  interval          String?
 
-   userId      String    @unique
-   endDate     DateTime?
-   trialEndsAt DateTime?
+  userId      String    @unique
+  endDate     DateTime?
+  trialEndsAt DateTime?
 
-   createdAt DateTime @default(now())
-   updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-   user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
 
-   @@index([email])
-   @@schema("public")
+  @@index([email])
+  @@schema("public")
 }
 
 model DashboardLayout {
@@ -398,10 +398,10 @@ model Order {
 
   user User @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, orderId])
   @@index([accountId])
   @@index([orderId])
   @@index([userId])
-  @@unique([userId, orderId])
   @@schema("public")
 }
 
@@ -1234,8 +1234,8 @@ model AiUsageLedger {
   id     String @id @default(uuid())
   userId String
 
-  route      String
-  feature    String
+  route       String
+  feature     String
   totalTokens Int
 
   createdAt DateTime @default(now())

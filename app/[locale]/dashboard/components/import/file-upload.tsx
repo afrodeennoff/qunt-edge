@@ -88,7 +88,7 @@ export default function FileUpload({
       };
       reader.readAsText(file);
     })
-  }, [setError])
+  }, [setError, MAX_FILE_SIZE, ALLOWED_TYPES])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setUploadedFiles(prevFiles => [...prevFiles, ...acceptedFiles])

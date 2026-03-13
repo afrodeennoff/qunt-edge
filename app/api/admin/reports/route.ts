@@ -124,21 +124,70 @@ async function generateRevenueReport(dateFilter: DateFilter) {
     orderBy: { createdAt: 'asc' },
   })
 
-  const revenueByPlan = await prisma.$queryRaw`
-    SELECT 
-      s.plan,
-      COUNT(DISTINCT s.userId) as unique_users,
-      SUM(pt.amount) as total_revenue
-    FROM "Subscription" s
-    INNER JOIN "PaymentTransaction" pt ON pt.userId = s.userId
-    WHERE pt.status = 'COMPLETED' 
-      AND pt.createdAt >= ${dateFilter.gte || new Date(0)}
-      AND pt.createdAt <= ${dateFilter.lte || new Date()}
-    GROUP BY s.plan
-  `
+  // Security: Use type-safe Prisma queries instead of raw SQL
+  const revenueByPlan = await prisma.subscription.groupBy({
+    by: ['plan'],
+    where: {
+      user: {
+        paymentTransactions: {
+          some: {
+            status: 'COMPLETED',
+            createdAt: dateFilter,
+          }
+        }
+      }
+    },
+    _count: {
+      userId: true,
+    },
+  })
 
-  const revenueByMonth = await prisma.$queryRaw`
-    SELECT 
+  // Get total revenue per plan using aggregations
+  const transactionsForRevenue = await prisma.paymentTransaction.groupBy({
+    by: ['userId'],
+    where: {
+      status: 'COMPLETED',
+      createdAt: dateFilter,
+    },
+    _sum: {
+      amount: true,
+    },
+  })
+
+  // Map subscriptions to their plans
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      user: {
+        paymentTransactions: {
+          some: {
+            status: 'COMPLETED',
+            createdAt: dateFilter,
+          }
+        }
+      }
+    },
+    select: {
+      plan: true,
+      userId: true,
+    },
+  })
+
+  // Calculate revenue by plan
+  const planRevenueMap = new Map<string, number>()
+  subscriptions.forEach(sub => {
+    const userRevenue = transactionsForRevenue.find(t => t.userId === sub.userId)?._sum.amount || 0
+    planRevenueMap.set(sub.plan, (planRevenueMap.get(sub.plan) || 0) + Number(userRevenue))
+  })
+
+  const revenueByPlanFormatted = Array.from(planRevenueMap.entries()).map(([plan, revenue]) => ({
+    plan,
+    unique_users: revenueByPlan.find(r => r.plan === plan)?._count.userId || 0,
+    total_revenue: revenue,
+  }))
+
+  // Revenue by month using Prisma aggregate
+  const revenueByMonth = await prisma.$queryRaw<Array<{ month: Date; revenue: bigint }>>`
+    SELECT
       DATE_TRUNC('month', createdAt) as month,
       SUM(amount) as revenue
     FROM "PaymentTransaction"
@@ -151,7 +200,7 @@ async function generateRevenueReport(dateFilter: DateFilter) {
 
   return NextResponse.json({
     transactions,
-    revenueByPlan,
+    revenueByPlan: revenueByPlanFormatted,
     revenueByMonth,
   })
 }

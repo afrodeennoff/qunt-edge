@@ -288,16 +288,16 @@
 
 ## Task: Harden trade image ownership guard (2026-03-14)
 
-- [ ] Review the current `ensureOwnedImagePath` logic and `tests/trade-image-editor.test.ts` coverage to understand normalization/ownership expectations.
-- [ ] Extend `ensureOwnedImagePath` with stricter normalization (POSIX slash normalization, trimmed leading/trailing separators, prefix normalization) and traversal/absolute path checks.
-- [ ] Expand the Vitest suite to cover new normalization behaviors, prefix normalization, blocked relative/absolute/bad characters, and ensure existing guards still trigger.
-- [ ] Run `npx vitest run tests/trade-image-editor.test.ts` and note the output.
-- [ ] Record verification results and any residual risks/new follow-ups.
+- [x] Review the current `ensureOwnedImagePath` logic and `tests/trade-image-editor.test.ts` coverage to understand normalization/ownership expectations.
+- [x] Extend `ensureOwnedImagePath` with stricter normalization (POSIX slash normalization, trimmed leading/trailing separators, prefix normalization) and traversal/absolute path checks.
+- [x] Expand the Vitest suite to cover new normalization behaviors, prefix normalization, blocked relative/absolute/bad characters, and ensure existing guards still trigger.
+- [x] Run `npx vitest run tests/trade-image-editor.test.ts` and note the output.
+- [x] Record verification results and any residual risks/new follow-ups.
 
 ## Review
-- Verification: Pending (waiting for trade image guard tests to run).
-- Risks: Path normalization edge cases still need coverage once more routes rely on the guard.
-- Follow-ups: Revisit `app/[locale]/dashboard/components/tables/trade-image-editor.tsx` if Supabase remove calls ever receive newly normalized prefixes.
+- Verification: `npx vitest run tests/trade-image-editor.test.ts` -> passes (8 tests, 0 failures).
+- Risks: Normalization helpers assume slash-based segments; future non-UTF-8 prefixes might need reevaluation.
+- Follow-ups: Watch for new path representations in other cleanup flows to keep this guard aligned.
 
 ## AI Implementation Worker (2026-03-14)
 

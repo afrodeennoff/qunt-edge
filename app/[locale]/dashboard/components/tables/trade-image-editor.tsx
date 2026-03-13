@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -54,8 +53,27 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
+interface TradeWithImages {
+  id: string;
+  images?: string[];
+  imageBase64?: string | null;
+  imageBase64Second?: string | null;
+}
+
+type ImageUpdatePayload = {
+  images: string[];
+  imageBase64: string | null;
+  imageBase64Second: string | null;
+};
+
+const buildImageUpdatePayload = (images: string[]): ImageUpdatePayload => ({
+  images,
+  imageBase64: images[0] ?? null,
+  imageBase64Second: images[1] ?? null,
+});
+
 interface TradeImageEditorProps {
-  trade: any;
+  trade: TradeWithImages;
   tradeIds: string[];
 }
 
@@ -68,7 +86,6 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [imageToDelete, setImageToDelete] = useState<number | null>(null);
   const [localImages, setLocalImages] = useState<{ imageBase64: string | null; imageBase64Second: string | null } | null>(null);
   const [resolvedImageUrls, setResolvedImageUrls] = useState<string[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
@@ -91,8 +108,6 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
         : null
 
   // Determine if we have images (either URLs or legacy base64 fields)
-  const hasImages = (trade.images && trade.images.length > 0) || trade.imageBase64 || trade.imageBase64Second;
-
   // Source images from local state (fetched on demand) or from the trade object itself
   const resolvedImageBase64 = localImages?.imageBase64 || trade.imageBase64;
   const resolvedImageBase64Second = localImages?.imageBase64Second || trade.imageBase64Second;
@@ -199,33 +214,14 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
 
   const handleRemoveImage = async (imageIndex: number) => {
     try {
-      // Get current images array or create from legacy fields
-      const currentImages =
-        trade.images && trade.images.length > 0
-          ? [...trade.images]
-          : [trade.imageBase64, trade.imageBase64Second].filter(Boolean);
+      const currentImages = getCurrentImageList(trade);
 
       const imageUrl = currentImages[imageIndex];
 
       // Update the images array by filtering out the removed image
-      const newImages = currentImages.filter(
-        (_, index) => index !== imageIndex,
-      );
+      const newImages = currentImages.filter((_, index) => index !== imageIndex);
+      const update = buildImageUpdatePayload(newImages);
 
-      // Update both new and legacy fields for backward compatibility
-      const update: any = {
-        images: newImages,
-      };
-
-      // Also update legacy fields if we're removing the first or second image
-      if (imageIndex === 0) {
-        update.imageBase64 = newImages[0] || null;
-      }
-      if (imageIndex === 1 || (imageIndex === 0 && trade.imageBase64Second)) {
-        update.imageBase64Second = newImages[1] || null;
-      }
-
-      // Update trades
       await updateTrades(tradeIds, update);
 
       // Remove the image from Supabase storage
@@ -239,7 +235,6 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
       }
 
       toast.success("Image deleted successfully");
-      setImageToDelete(null);
     } catch (error) {
       console.error("Error removing image:", error);
       toast.error("Failed to delete image");
@@ -248,12 +243,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
 
   const handleRemoveAllImages = async () => {
     try {
-      // Update both new and legacy fields
-      const update: any = {
-        images: [],
-        imageBase64: null,
-        imageBase64Second: null,
-      };
+      const update = buildImageUpdatePayload([]);
       await updateTrades(tradeIds, update);
 
       // Get all images to remove from both new and legacy fields
@@ -304,27 +294,6 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
     } catch (error) {
       console.error("Error removing all images:", error);
     }
-  };
-
-  const handleUpdateImages = async (newUrls: string[]) => {
-    console.error("handleUpdateImages called");
-    // Get current images array or create from legacy fields
-    const currentImages =
-      trade.images && trade.images.length > 0
-        ? [...trade.images]
-        : [trade.imageBase64, trade.imageBase64Second].filter(Boolean);
-
-    // Add new URLs to existing images
-    const updatedImages = [...currentImages, ...newUrls];
-
-    // Update both new and legacy fields for backward compatibility
-    const update: any = {
-      images: updatedImages,
-      imageBase64: updatedImages[0] || null,
-      imageBase64Second: updatedImages[1] || null,
-    };
-
-    await updateTrades(tradeIds, update);
   };
 
   const handleUploadClick = () => {
