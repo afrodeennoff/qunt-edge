@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/disclaimers', changeFrequency: 'monthly', priority: 0.5 },
     { path: '/propfirms', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/referral', changeFrequency: 'weekly', priority: 0.7 },
-    { path: '/deals', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/prop-firm-deals', changeFrequency: 'weekly', priority: 0.9 },
     { path: '/deals/compare', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/deals/guides', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/deals/calculator', changeFrequency: 'weekly', priority: 0.8 },

@@ -316,6 +316,7 @@ export async function POST(req: NextRequest) {
     };
 
     void logAiRequest({
+      userId,
       route: "/api/ai/mappings",
       feature: "mappings",
       model: policy.model,
@@ -346,6 +347,7 @@ export async function POST(req: NextRequest) {
     logAiError("Error in mappings route", error, { userId });
 
     void logAiRequest({
+      userId,
       route: "/api/ai/mappings",
       feature: "mappings",
       model: policy.model,

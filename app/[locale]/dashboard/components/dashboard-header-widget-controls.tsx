@@ -112,7 +112,7 @@ export function DashboardHeaderWidgetControls({ isMobile }: DashboardHeaderWidge
               <AlertDialogTrigger asChild>
                 <button
                   aria-label={t("widgets.deleteAll")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                   title={t("widgets.deleteAll")}
                 >
                   <Trash2 className="h-4 w-4" />

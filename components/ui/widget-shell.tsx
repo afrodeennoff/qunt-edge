@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/tooltip"
 
 export type WidgetShellState = "ready" | "loading" | "empty" | "error"
+export type WidgetShellVariant = "default" | "hoverable"
 
 interface WidgetShellProps {
   title?: React.ReactNode
@@ -26,6 +27,7 @@ interface WidgetShellProps {
   state?: WidgetShellState
   emptyMessage?: React.ReactNode
   errorMessage?: React.ReactNode
+  variant?: WidgetShellVariant
   className?: string
   contentClassName?: string
   children?: React.ReactNode
@@ -41,6 +43,7 @@ export function WidgetShell({
   state = "ready",
   emptyMessage = "No data available yet.",
   errorMessage = "We couldn't load this widget.",
+  variant = "default",
   className,
   contentClassName,
   children,
@@ -48,7 +51,7 @@ export function WidgetShell({
   const renderContent = () => {
     if (state === "loading") {
       return (
-        <div className="space-y-3 p-4">
+        <div className="space-y-[var(--space-3)] p-[var(--space-4)]">
           <Skeleton className="h-4 w-1/3" />
           <Skeleton className="h-28 w-full" />
           <Skeleton className="h-4 w-2/3" />
@@ -58,7 +61,7 @@ export function WidgetShell({
 
     if (state === "error") {
       return (
-        <div className="p-4">
+        <div className="p-[var(--space-4)]">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Widget Error</AlertTitle>
@@ -70,7 +73,7 @@ export function WidgetShell({
 
     if (state === "empty") {
       return (
-        <div className="flex h-full min-h-[160px] items-center justify-center p-4 text-sm text-muted-foreground">
+        <div className="flex h-full min-h-[160px] items-center justify-center p-[var(--space-4)] text-sm text-muted-foreground">
           {emptyMessage}
         </div>
       )
@@ -82,14 +85,18 @@ export function WidgetShell({
   return (
     <Card
       data-widget-shell="v2"
-      className={cn("h-full overflow-hidden rounded-xl border-border/65 bg-card/95 shadow-none", className)}
+      className={cn(
+        "h-full overflow-hidden rounded-xl border-border/55 bg-card/95 shadow-none transition-all duration-200",
+        variant === "hoverable" && "hover:shadow-md hover:border-border/70",
+        className
+      )}
     >
       {(title || actions || icon || description) && (
-        <CardHeader className="border-b border-border/55 px-3.5 py-3 sm:px-4 sm:py-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 space-y-1">
+        <CardHeader className="border-b border-border/55 px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-4)] sm:py-[var(--space-3)]">
+          <div className="flex items-start justify-between gap-[var(--space-3)]">
+            <div className="min-w-0 space-y-[var(--space-2)]">
               {(title || icon) && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-[var(--space-2)]">
                   {icon ? <span className="text-fg-muted">{icon}</span> : null}
                   {title ? (
                     <CardTitle className="line-clamp-1 text-sm font-semibold text-fg-primary sm:text-[15px]">{title}</CardTitle>
@@ -126,7 +133,7 @@ export function WidgetShell({
       </CardContent>
 
       {footer ? (
-        <CardFooter className="border-t border-border/55 p-3 sm:p-4">{footer}</CardFooter>
+        <CardFooter className="border-t border-border/55 p-[var(--space-4)] sm:p-[var(--space-4)]">{footer}</CardFooter>
       ) : null}
     </Card>
   )

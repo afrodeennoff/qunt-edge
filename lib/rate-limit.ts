@@ -175,7 +175,7 @@ export function rateLimit({
   ): Promise<{ success: boolean; limit: number; remaining: number; resetTime: number }> => {
     const ip = getTrustedClientIp(req)
     const key = opts?.subject
-      ? `${identifier}:${opts.subject}:${ip}`
+      ? `${identifier}:${opts.subject}`
       : `${identifier}:${ip}`
     const result = await incrementCounter(key, window)
 

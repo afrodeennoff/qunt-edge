@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import { deals, faqItems, firms } from './data/mock-data'
 import { PropFirmDealsExperience } from './components/prop-firm-deals-experience'
-
-const SITE_ORIGIN = 'https://qunt-edge.vercel.app'
-const PAGE_PATH = '/prop-firm-deals'
-const LAST_UPDATED = 'March 13, 2026'
+import {
+  buildPropFirmDealsFaqSchema,
+  buildPropFirmDealsMetadata,
+  PROP_FIRM_DEALS_LAST_UPDATED,
+} from './data/seo'
 
 export async function generateMetadata({
   params,
@@ -12,34 +13,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  const canonical = `${SITE_ORIGIN}/${locale}${PAGE_PATH}`
-  const title = 'Prop Firm Deals & Comparison | Qunt Edge'
-  const description =
-    'Browse verified discount codes, compare prop firms side by side, and access trader tools in one Qunt Edge workspace.'
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical,
-      languages: {
-        'en-US': `${SITE_ORIGIN}/en${PAGE_PATH}`,
-        'fr-FR': `${SITE_ORIGIN}/fr${PAGE_PATH}`,
-      },
-    },
-    openGraph: {
-      title,
-      description,
-      url: canonical,
-      siteName: 'Qunt Edge',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-    },
-  }
+  return buildPropFirmDealsMetadata(locale)
 }
 
 export default async function PropFirmDealsPage({
@@ -49,18 +23,7 @@ export default async function PropFirmDealsPage({
 }) {
   const { locale } = await params
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqItems.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  }
+  const faqSchema = buildPropFirmDealsFaqSchema(faqItems)
 
   return (
     <>
@@ -69,7 +32,7 @@ export default async function PropFirmDealsPage({
         deals={deals}
         firms={firms}
         faqs={faqItems}
-        lastUpdated={LAST_UPDATED}
+        lastUpdated={PROP_FIRM_DEALS_LAST_UPDATED}
       />
       <script
         type="application/ld+json"

@@ -43,7 +43,7 @@ export function ChartSurface({
   const renderBody = () => {
     if (state === "loading") {
       return (
-        <div className="space-y-3 p-3">
+        <div className="space-y-[var(--space-3)] p-[var(--space-3)]">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-[220px] w-full" />
         </div>
@@ -52,7 +52,7 @@ export function ChartSurface({
 
     if (state === "error") {
       return (
-        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-destructive">
+        <div className="flex h-full min-h-[160px] items-center justify-center p-[var(--space-3)] text-xs text-destructive">
           {errorMessage}
         </div>
       )
@@ -60,7 +60,7 @@ export function ChartSurface({
 
     if (state === "empty") {
       return (
-        <div className="flex h-full min-h-[160px] items-center justify-center p-3 text-xs text-white/55">
+        <div className="flex h-full min-h-[160px] items-center justify-center p-[var(--space-3)] text-xs text-white/55">
           {emptyMessage}
         </div>
       )
@@ -82,8 +82,8 @@ export function ChartSurface({
             headerClassName
           )}
         >
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="min-w-0 flex items-center gap-1.5">
+          <div className="flex w-full items-center justify-between gap-[var(--space-2)]">
+            <div className="min-w-0 flex items-center gap-[var(--space-2)]">
               {title ? (
                 <span
                   className={cn(

@@ -1,5 +1,5 @@
 import { permanentRedirect } from 'next/navigation'
 
 export default function PropfirmPerkPage() {
-  permanentRedirect('/deals')
+  permanentRedirect('/prop-firm-deals')
 }

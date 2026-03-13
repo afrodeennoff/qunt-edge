@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, convertToModelMessages } from "ai";
+import { streamText, stepCountIs, convertToModelMessages, ToolSet } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod/v3";
 import { getFinancialNews } from "./tools/get-financial-news";
@@ -61,13 +61,9 @@ const availableChatTools = {
   getWeekSummaryForDate,
   getFinancialNews,
   generateEquityChart,
-};
+} satisfies ToolSet;
 
 type ChatToolName = keyof typeof availableChatTools;
-
-type ToolDefinition = {
-  execute?: (args: unknown, context: unknown) => Promise<unknown> | unknown;
-} & Record<string, unknown>;
 
 function extractLastUserText(messages: ParsedChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((message) => message?.role === "user");
@@ -139,28 +135,29 @@ function getToolingPolicy(intent: ChatIntent) {
   };
 }
 
-function withToolGuards(tools: Record<string, ToolDefinition>, maxCallsPerTool = 2) {
+function withToolGuards<T extends ToolSet>(tools: T, maxCallsPerTool = 2): T {
   const callCount = new Map<string, number>();
   const seenArgs = new Set<string>();
 
   return Object.fromEntries(
     Object.entries(tools).map(([name, definition]) => {
-      const execute = definition?.execute;
-      if (!definition || typeof execute !== "function") {
+      if (!definition || typeof definition.execute !== "function") {
         return [name, definition];
       }
+
+      const execute = definition.execute;
 
       return [
         name,
         {
           ...definition,
-          execute: async (args: unknown, context: unknown) => {
+          execute: async (...params: Parameters<typeof execute>) => {
             const currentCount = (callCount.get(name) ?? 0) + 1;
             if (currentCount > maxCallsPerTool) {
               throw new Error(`Tool call limit reached for ${name}`);
             }
 
-            const signature = `${name}:${JSON.stringify(args ?? {})}`;
+            const signature = `${name}:${JSON.stringify(params[0] ?? {})}`;
             if (seenArgs.has(signature)) {
               throw new Error(`Duplicate tool call blocked for ${name}`);
             }
@@ -168,12 +165,12 @@ function withToolGuards(tools: Record<string, ToolDefinition>, maxCallsPerTool =
             callCount.set(name, currentCount);
             seenArgs.add(signature);
 
-            return execute(args, context);
+            return execute(...params);
           },
         },
       ];
     }),
-  );
+  ) as T;
 }
 
 export async function POST(req: NextRequest) {
@@ -286,6 +283,7 @@ export async function POST(req: NextRequest) {
       },
       onError: ({ error }) => {
         void logAiRequest({
+          userId,
           route: "/api/ai/chat",
           feature: "chat",
           model: policy.model,
@@ -300,6 +298,7 @@ export async function POST(req: NextRequest) {
       },
       onFinish: (finalResult) => {
         void logAiRequest({
+          userId,
           route: "/api/ai/chat",
           feature: "chat",
           model: policy.model,
@@ -332,6 +331,7 @@ export async function POST(req: NextRequest) {
     }
 
     void logAiRequest({
+      userId,
       route: "/api/ai/chat",
       feature: "chat",
       model: policy.model,

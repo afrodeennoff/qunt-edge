@@ -131,6 +131,7 @@ export async function POST(req: NextRequest) {
       },
       onFinish: (finalResult) => {
         void logAiRequest({
+          userId,
           route: "/api/ai/analysis/accounts",
           feature: "analysis",
           model: policy.model,
@@ -145,6 +146,7 @@ export async function POST(req: NextRequest) {
       },
       onError: ({ error }) => {
         void logAiRequest({
+          userId,
           route: "/api/ai/analysis/accounts",
           feature: "analysis",
           model: policy.model,
@@ -172,6 +174,7 @@ export async function POST(req: NextRequest) {
     }
 
     void logAiRequest({
+      userId,
       route: "/api/ai/analysis/accounts",
       feature: "analysis",
       model: policy.model,

@@ -40,13 +40,26 @@ const ALLOWLIST = [
     file: "app/[locale]/admin/components/dashboard/user-growth-chart.tsx",
   },
   {
-    file: "app/[locale]/dashboard/components/daily-summary-modal.tsx",
+    file: "app/[locale]/admin/components/dashboard/daily-summary-modal.tsx",
   },
   {
     file: "components/ui/chart.tsx",
   },
   {
     file: "components/ui/dialog.tsx",
+  },
+  {
+    file: "components/ui/accordion.tsx",
+  },
+  {
+    file: "components/ui/dropzone.tsx",
+  },
+  {
+    file: "components/ui/calendar/calendar.tsx",
+  },
+  {
+    file: "app/[locale]/(landing)/deals/_components/deals-market-illustration.tsx",
+    includes: "rgba(255,255,255",
   },
 ];
 

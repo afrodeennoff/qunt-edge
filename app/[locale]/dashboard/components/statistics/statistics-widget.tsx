@@ -1,15 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDashboardStats } from "@/context/data-provider"
-import { Clock, PiggyBank, Award, BarChart, Info } from "lucide-react"
+import { BarChart, Info } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn, calculateStatistics } from "@/lib/utils"
 import { useI18n, useCurrentLocale } from "@/locales/client"
 import { Progress } from "@/components/ui/progress"
 import { CalendarEntry } from "@/app/[locale]/dashboard/types/calendar"
 import { Trade } from "@/lib/data-types"
+import { WidgetShell } from "@/components/ui/widget-shell"
 
 interface StatisticsWidgetProps {
   size?: 'tiny' | 'small' | 'medium' | 'large' | 'small-long' | 'extra-large'
@@ -175,47 +175,14 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
   }, [])
 
   return (
-    <Card variant="matte" className="h-full flex flex-col" ref={cardRef}>
-      <CardHeader
-        className={cn(
-          "flex-none border-b border-border/55",
-          size === 'tiny'
-            ? "py-1 px-2"
-            : (size === 'small' || size === 'small-long')
-              ? "py-2 px-3"
-              : "py-3 px-4"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle
-              className={cn(
-                "line-clamp-1 font-terminal uppercase tracking-[0.08em]",
-                size === 'tiny'
-                  ? "text-xs"
-                  : (size === 'small' || size === 'small-long')
-                    ? "text-sm"
-                    : "text-base"
-              )}
-            >
-              {t('statistics.title')}
-            </CardTitle>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground/70" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('statistics.tooltip')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <BarChart className="h-3.5 w-3.5 text-muted-foreground/70" />
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 p-0">
-        <div className="grid h-full grid-cols-2">
+    <WidgetShell
+      title={t('statistics.title')}
+      icon={<BarChart className="h-3.5 w-3.5 text-fg-muted" />}
+      info={t('statistics.tooltip')}
+      className={cn("h-full flex flex-col", size === 'tiny' ? "text-xs" : (size === 'small' || size === 'small-long') ? "text-sm" : "text-base")}
+      contentClassName="flex-1 p-0"
+    >
+      <div className="grid h-full grid-cols-2">
           {/* Profit/Loss Section */}
           <div className={cn(
             "flex flex-col border-r border-b",
@@ -372,7 +339,6 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+    </WidgetShell>
   )
 } 

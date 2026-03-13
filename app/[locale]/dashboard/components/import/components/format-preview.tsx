@@ -458,9 +458,17 @@ export function FormatPreview({
     processedTradesRef.current = mergedTrades;
     setProcessedTrades(mergedTrades);
     scheduleManagedTimeout(() => {
-      scrollToBottom();
+      if (tableContainerRef.current) {
+        const scrollContainer = tableContainerRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+      }
     }, 100);
-  }, [scheduleManagedTimeout, scrollToBottom, setProcessedTrades]);
+  }, [scheduleManagedTimeout, setProcessedTrades]);
 
   // Handle streaming results from first useObject
   useEffect(() => {
@@ -481,7 +489,7 @@ export function FormatPreview({
   const columns = useMemo<ColumnDef<Partial<ImportTradeDraft>>[]>(() => [
     {
       accessorKey: "entryDate",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.entryDate')}</div>
       ),
       cell: ({ row }) => {
@@ -506,7 +514,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "instrument",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.instrument')}</div>
       ),
       cell: ({ row }) => {
@@ -530,7 +538,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "side",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.direction')}</div>
       ),
       cell: ({ row }) => {
@@ -554,7 +562,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "quantity",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.quantity')}</div>
       ),
       cell: ({ row }) => {
@@ -578,7 +586,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "entryPrice",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.entryPrice')}</div>
       ),
       cell: ({ row }) => {
@@ -602,7 +610,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "closePrice",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.exitPrice')}</div>
       ),
       cell: ({ row }) => {
@@ -626,7 +634,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "pnl",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.pnl')}</div>
       ),
       cell: ({ row }) => {
@@ -670,7 +678,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "commission",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('calendar.modal.commission')}</div>
       ),
       cell: ({ row }) => {
@@ -695,7 +703,7 @@ export function FormatPreview({
     },
     {
       accessorKey: "timeInPosition",
-      header: ({ column }) => (
+      header: () => (
         <div className="font-medium">{t('trade-table.positionTime')}</div>
       ),
       cell: ({ row }) => {
@@ -728,18 +736,6 @@ export function FormatPreview({
       minSize: 100,
     },
   });
-
-  const scrollToBottom = useCallback(() => {
-    if (tableContainerRef.current) {
-      const scrollContainer = tableContainerRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTo({
-          top: scrollContainer.scrollHeight,
-          behavior: 'smooth'
-        });
-      }
-    }
-  }, []);
 
   // Calculate totals for footer
   const totals = useMemo(() => {

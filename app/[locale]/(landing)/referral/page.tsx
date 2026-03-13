@@ -16,6 +16,19 @@ export async function generateMetadata({
     title: "Referral Program | Qunt Edge",
     description:
       "Invite traders to Qunt Edge and earn rewards through the official referral program.",
+    openGraph: {
+      title: "Referral Program | Qunt Edge",
+      description: "Invite traders to Qunt Edge and earn rewards through the official referral program.",
+      url: canonical,
+      siteName: "Qunt Edge",
+      locale: locale === "en" ? "en_US" : "fr_FR",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Referral Program | Qunt Edge",
+      description: "Invite traders to Qunt Edge and earn rewards through the official referral program.",
+    },
     alternates: {
       canonical,
       languages: {

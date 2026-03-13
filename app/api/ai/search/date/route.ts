@@ -121,6 +121,7 @@ Return the appropriate filter type (date range OR weekday).`,
     });
 
     void logAiRequest({
+      userId,
       route: "/api/ai/search/date",
       feature: "analysis",
       model: policy.model,
@@ -149,6 +150,7 @@ Return the appropriate filter type (date range OR weekday).`,
     }
 
     void logAiRequest({
+      userId,
       route: "/api/ai/search/date",
       feature: "analysis",
       model: policy.model,

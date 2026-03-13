@@ -13,13 +13,38 @@ import type { PropfirmCatalogueStats } from './actions/types'
 // Keep the translator type intentionally light to avoid "union too complex" TS errors.
 type Translator = (key: string, params?: Record<string, unknown>) => string
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getI18n()
 
   return {
-    title: `${t('landing.propfirms.title')} - Qunt Edge`,
+    title: `${t('landing.propfirms.title')} | Qunt Edge`,
     description: t('landing.propfirms.description'),
-  }
+    openGraph: {
+      title: `${t('landing.propfirms.title')} | Qunt Edge`,
+      description: t('landing.propfirms.description'),
+      url: `https://quntedge.com/${locale}/propfirms`,
+      siteName: "Qunt Edge",
+      locale: locale,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${t('landing.propfirms.title')} | Qunt Edge`,
+      description: t('landing.propfirms.description'),
+    },
+    alternates: {
+      canonical: `./${locale}/propfirms`,
+      languages: {
+        'x-default': `./en/propfirms`,
+        'en': `./en/propfirms`,
+      },
+    },
+  };
 }
 
 // Format currency with $ symbol (always USD)

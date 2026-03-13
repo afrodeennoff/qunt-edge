@@ -59,38 +59,38 @@ export function DataDebug() {
                             <Bug className="h-4 w-4 text-primary" />
                             <span className="text-xs font-bold uppercase tracking-widest text-white/90">Debug Dashboard</span>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white transition-colors">
+                        <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-colors">
                             <X className="h-4 w-4" />
                         </button>
                     </div>
 
                     <div className="space-y-3">
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">Trades in Store</span>
+                            <span className="text-white/60 uppercase font-black tracking-tighter">Trades in Store</span>
                             <span className="text-white/90 font-mono">{trades.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">Filtered Trades</span>
+                            <span className="text-white/60 uppercase font-black tracking-tighter">Filtered Trades</span>
                             <span className="text-white/90 font-mono">{formattedTrades.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">Accounts</span>
+                            <span className="text-white/60 uppercase font-black tracking-tighter">Accounts</span>
                             <span className="text-white/90 font-mono">{accounts.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">Environment</span>
+                            <span className="text-white/60 uppercase font-black tracking-tighter">Environment</span>
                             <span className={cn("font-mono", process.env.NODE_ENV === 'development' ? "text-semantic-success" : "text-semantic-warning")}>
                                 {process.env.NODE_ENV}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">Data Logic</span>
+                            <span className="text-white/60 uppercase font-black tracking-tighter">Data Logic</span>
                             <span className={cn("font-mono px-1.5 py-0.5 rounded text-[8px]", isMock ? "bg-semantic-warning-bg/10 text-semantic-warning" : "bg-semantic-success-bg/10 text-semantic-success")}>
                                 {isMock ? "MOCK (Fallback)" : "LIVE (Synced)"}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/40 uppercase font-black tracking-tighter">User ID</span>
+                            <span className="text-white/60 uppercase font-black tracking-tighter">User ID</span>
                             <span className="text-white/90 font-mono truncate max-w-[120px]">
                                 {user?.id || supabaseUser?.id || "None"}
                             </span>

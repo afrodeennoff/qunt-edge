@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { WidgetShell } from "@/components/ui/widget-shell"
 
 interface WinningStreakCardProps {
   size?: WidgetSize
@@ -20,7 +21,10 @@ export default function WinningStreakCard({ size = 'medium' }: WinningStreakCard
 
   if (isCompact) {
     return (
-      <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
+      <WidgetShell
+        className="h-full"
+        contentClassName="flex h-full items-center justify-center px-2 py-1"
+      >
         <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           <Award className="h-4 w-4 shrink-0 metric-positive" />
           <span className="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground/85">Streak</span>
@@ -36,30 +40,20 @@ export default function WinningStreakCard({ size = 'medium' }: WinningStreakCard
             </Tooltip>
           </TooltipProvider>
         </div>
-      </div>
+      </WidgetShell>
     )
   }
 
   return (
-    <div className="flex items-center justify-center h-full gap-2 p-2 bg-transparent">
-      <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md bg-secondary/30 border-border/65">
+    <WidgetShell
+      className="h-full"
+      contentClassName="flex items-center justify-center h-full gap-2 p-2"
+      info={t('widgets.winningStreak.tooltip')}
+    >
+      <div className="precision-panel flex items-center gap-1.5 px-3 py-1 rounded-md bg-secondary/30 border-border/55">
         <Award className="h-3 w-3 metric-positive" />
         <span className="font-terminal font-bold text-[11px] uppercase tracking-wider metric-positive">{winningStreak} Trade Streak</span>
-        <TooltipProvider delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HelpCircle className="h-3 w-3 text-muted-foreground/70 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              sideOffset={5}
-              className="max-w-[300px]"
-            >
-              {t('widgets.winningStreak.tooltip')}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
-    </div>
+    </WidgetShell>
   )
 }

@@ -116,7 +116,7 @@ export function AccountsBarChart({
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <CardTitle>{chartTitle}</CardTitle>
-          <p className="text-xs text-white/50">Minimal view. Add layers if you need more detail.</p>
+          <p className="text-xs text-white/60">Minimal view. Add layers if you need more detail.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button

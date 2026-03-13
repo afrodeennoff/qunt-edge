@@ -24,9 +24,9 @@ const buttonVariants = cva(
           "font-mono rounded-sm border border-border/55 bg-background text-foreground shadow-none hover:border-border/70 hover:bg-accent/50 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 active:translate-y-px",
       },
       size: {
-        default: "h-11 min-h-[44px] min-w-[44px] px-4 py-2",
-        sm: "h-10 min-h-[44px] min-w-[44px] rounded-md px-3 text-xs",
-        lg: "h-11 min-h-[44px] min-w-[44px] rounded-md px-8",
+        default: "h-11 min-h-[44px] min-w-[44px] px-[var(--space-4)] py-[var(--space-2)]",
+        sm: "h-10 min-h-[44px] min-w-[44px] rounded-md px-[var(--space-3)] text-xs",
+        lg: "h-11 min-h-[44px] min-w-[44px] rounded-md px-[var(--space-6)]",
         icon: "h-11 w-11 min-h-[44px] min-w-[44px]",
       },
     },

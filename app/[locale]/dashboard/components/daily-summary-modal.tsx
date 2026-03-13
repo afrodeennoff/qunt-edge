@@ -316,9 +316,9 @@ export function DailySummaryModal() {
                                     <div className={cn(
                                         "font-medium tracking-tighter flex items-baseline justify-center transition-colors duration-500 tabular-nums leading-none",
                                         baseFontSize,
-                                        isPositive ? "text-white" : "text-white/40"
+                                        isPositive ? "text-white" : "text-white/60"
                                     )}>
-                                        <span className={cn("text-4xl md:text-5xl mr-2 font-normal opacity-100", isPositive ? "text-white/50" : "text-white/20")}>{isPositive ? '+' : '-'}</span>
+                                        <span className={cn("text-4xl md:text-5xl mr-2 font-normal opacity-100", isPositive ? "text-white/60" : "text-white/20")}>{isPositive ? '+' : '-'}</span>
                                         {mainStr}
                                         <span className="text-3xl md:text-4xl opacity-50 ml-1 font-normal">.{decimalPart}{displayMode === 'percent' ? '%' : ''}</span>
                                     </div>
@@ -347,9 +347,9 @@ export function DailySummaryModal() {
                                         )}
                                     >
                                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {blurWeekly ? <Eye className="w-3 h-3 text-white/40" /> : <EyeOff className="w-3 h-3 text-white/40" />}
+                                            {blurWeekly ? <Eye className="w-3 h-3 text-white/60" /> : <EyeOff className="w-3 h-3 text-white/40" />}
                                         </div>
-                                        <span className="text-[9px] text-white/60 uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Weekly</span>
+                                        <span className="text-[9px] text-fg-muted uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Weekly</span>
                                         <div className={cn("text-xl font-bold tracking-tight", stats.weekly.pnl >= 0 ? "text-white" : "text-white/40")}>
                                             {displayMode === 'currency'
                                                 ? `$${toSafeNumber(stats.weekly.pnl).toLocaleString()}`
@@ -375,9 +375,9 @@ export function DailySummaryModal() {
                                         )}
                                     >
                                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {blurMonthly ? <Eye className="w-3 h-3 text-white/40" /> : <EyeOff className="w-3 h-3 text-white/40" />}
+                                            {blurMonthly ? <Eye className="w-3 h-3 text-white/60" /> : <EyeOff className="w-3 h-3 text-white/40" />}
                                         </div>
-                                        <span className="text-[9px] text-white/60 uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Monthly</span>
+                                        <span className="text-[9px] text-fg-muted uppercase tracking-[0.15em] mb-1 font-bold group-hover:text-white/80 transition-colors">Monthly</span>
                                         <div className={cn("text-xl font-bold tracking-tight", stats.monthly.pnl >= 0 ? "text-white" : "text-white/40")}>
                                             {displayMode === 'currency'
                                                 ? `$${toSafeNumber(stats.monthly.pnl).toLocaleString()}`
@@ -392,18 +392,18 @@ export function DailySummaryModal() {
                                 {/* Streak - Refined */}
                                 <div className="flex-1 bg-gradient-to-br from-zinc-900/50 to-zinc-900/20 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-white/20 transition-all">
                                     <div className="text-6xl font-black tracking-tighter text-white mb-2 relative z-10 drop-shadow-2xl">{stats.currentStreak}</div>
-                                    <div className="text-[9px] text-white/60 uppercase tracking-[0.3em] font-bold relative z-10">Win Streak</div>
+                                    <div className="text-[9px] text-fg-muted uppercase tracking-[0.3em] font-bold relative z-10">Win Streak</div>
                                     <Zap className="absolute -bottom-6 -right-6 w-32 h-32 text-white/[0.03] group-hover:text-white/[0.05] transition-colors" />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-zinc-900/30 border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-zinc-900/50 transition-colors backdrop-blur-sm">
                                         <div className="text-2xl font-black text-white/90 mb-1">{scoreVal}</div>
-                                        <div className="text-[9px] text-white/60 uppercase tracking-[0.2em] font-bold">Score</div>
+                                        <div className="text-[9px] text-fg-muted uppercase tracking-[0.2em] font-bold">Score</div>
                                     </div>
                                     <div className="bg-zinc-900/30 border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-zinc-900/50 transition-colors backdrop-blur-sm">
                                         <div className="text-2xl font-black text-white/90 mb-1">{stats.winRate}%</div>
-                                        <div className="text-[9px] text-white/60 uppercase tracking-[0.2em] font-bold">Win Rate</div>
+                                        <div className="text-[9px] text-fg-muted uppercase tracking-[0.2em] font-bold">Win Rate</div>
                                     </div>
                                 </div>
                             </div>
@@ -413,14 +413,14 @@ export function DailySummaryModal() {
                         <div className="mt-auto pt-8">
                             <div className="flex justify-between items-end mb-3">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Total Goal</span>
+                                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em]">Total Goal</span>
                                     {isEditingTarget ? (
                                         <div className="flex items-baseline relative z-50">
-                                            <span className="text-sm mr-1 text-white/50 font-bold">$</span>
+                                            <span className="text-sm mr-1 text-white/60 font-bold">$</span>
                                             <input
                                                 autoFocus
                                                 type="number"
-                                                className="w-24 border-b border-white/40 bg-transparent text-sm font-bold text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                                                className="w-24 border-b border-white/40 bg-transparent text-sm font-bold text-white placeholder:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                                                 defaultValue={customTarget}
                                                 onBlur={(e) => {
                                                     const val = parseFloat(e.target.value)
@@ -441,7 +441,7 @@ export function DailySummaryModal() {
                                         </button>
                                     )}
                                 </div>
-                                <span className={cn("text-sm font-bold", toSafeNumber(stats.total.pnl) < 0 ? "text-white/40" : "text-white")}>{Math.round(totalGoalProgress)}%</span>
+                                <span className={cn("text-sm font-bold", toSafeNumber(stats.total.pnl) < 0 ? "text-white/60" : "text-white")}>{Math.round(totalGoalProgress)}%</span>
                             </div>
                             <div className="h-2.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-white/5 p-[1px] relative shadow-inner">
                                 <motion.div

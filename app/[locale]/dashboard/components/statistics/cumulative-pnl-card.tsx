@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { WidgetShell } from "@/components/ui/widget-shell"
 
 interface CumulativePnlCardProps {
   size?: WidgetSize
@@ -45,7 +46,10 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
 
   if (isCompact) {
     return (
-      <div className="flex h-full items-center justify-center bg-transparent px-2 py-1">
+      <WidgetShell
+        className="h-full"
+        contentClassName="flex h-full items-center justify-center px-2 py-1"
+      >
         <div className="mx-auto inline-flex items-center justify-center gap-2.5 text-center">
           {isPositive ? (
             <TrendingUp className="h-4 w-4 shrink-0 metric-positive" />
@@ -67,40 +71,18 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
             </Tooltip>
           </TooltipProvider>
         </div>
-      </div>
+      </WidgetShell>
     )
   }
 
   return (
-    <div className="h-full flex flex-col justify-center gap-3 p-4 bg-transparent relative">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className={cn(
-            "precision-panel p-1.5 rounded-md transition-all duration-500",
-            isPositive ? "bg-secondary/30 border-border/65" : "bg-secondary/22 border-border/55"
-          )}>
-            {isPositive ? (
-              <TrendingUp className={cn(iconSize, "metric-positive")} />
-            ) : (
-              <TrendingDown className={cn(iconSize, "metric-negative")} />
-            )}
-          </div>
-          <span className="micro-sans text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/78">
-            {t('statistics.profitLoss.net')}
-          </span>
-        </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Info className="h-3.5 w-3.5 text-muted-foreground/70" />
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={5} className="max-w-[300px]">
-              {t('widgets.cumulativePnl.tooltip')}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
+    <WidgetShell
+      title={t('statistics.profitLoss.net')}
+      icon={isPositive ? <TrendingUp className={cn(iconSize, "metric-positive")} /> : <TrendingDown className={cn(iconSize, "metric-negative")} />}
+      info={t('widgets.cumulativePnl.tooltip')}
+      className="h-full"
+      contentClassName="flex flex-col justify-center gap-3 p-4"
+    >
       <div className={cn(
         "text-center micro-sans font-black tracking-tight tabular-nums",
         isPositive ? "metric-positive" : "metric-negative",
@@ -119,6 +101,6 @@ export default function CumulativePnlCard({ size = 'medium' }: CumulativePnlCard
           <span className="micro-sans text-[11px] font-bold metric-negative tabular-nums">{formatCurrency(safeGrossLosses)}</span>
         </div>
       </div>
-    </div>
+    </WidgetShell>
   )
 }

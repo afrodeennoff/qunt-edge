@@ -25,6 +25,8 @@ import {
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 const supportRateLimit = rateLimit({ limit: 12, window: 60_000, identifier: "ai-support" });
+const MAX_SUPPORT_BODY_BYTES = 512 * 1024;
+const MAX_SUPPORT_MESSAGES = 80;
 const requestSchema = z.object({
   messages: z.array(z.custom<UIMessage>()).min(1),
   model: z.string().optional(),
@@ -48,8 +50,22 @@ export async function POST(req: NextRequest) {
   const { userId } = guard
 
   try {
+    const lengthHeader = req.headers.get("content-length");
+    const contentLength = lengthHeader ? Number(lengthHeader) : 0;
+    if (Number.isFinite(contentLength) && contentLength > MAX_SUPPORT_BODY_BYTES) {
+      return apiError(
+        "PAYLOAD_TOO_LARGE",
+        `Request body exceeds ${Math.round(MAX_SUPPORT_BODY_BYTES / 1024)}KB.`,
+        413,
+      );
+    }
+
     const body = await req.json();
     const { messages, model, webSearch } = requestSchema.parse(body);
+    if (messages.length > MAX_SUPPORT_MESSAGES) {
+      return apiError("PAYLOAD_TOO_LARGE", `Too many messages. Maximum is ${MAX_SUPPORT_MESSAGES}.`, 413);
+    }
+
     selectedModel = model && SUPPORT_MODEL_ALLOWLIST.has(model) ? model : policy.model;
     const webSearchModel = process.env.AI_SUPPORT_WEBSEARCH_MODEL;
     const webSearchFallback = webSearch && !webSearchModel;

@@ -17,6 +17,19 @@ export async function generateMetadata({
     title: "Terms of Service | Qunt Edge",
     description:
       "Review Qunt Edge terms for subscriptions, data usage, service availability, and account responsibilities.",
+    openGraph: {
+      title: "Terms of Service | Qunt Edge",
+      description: "Review Qunt Edge terms for subscriptions, data usage, service availability, and account responsibilities.",
+      url: canonical,
+      siteName: "Qunt Edge",
+      locale: locale === "en" ? "en_US" : "fr_FR",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Terms of Service | Qunt Edge",
+      description: "Review Qunt Edge terms for subscriptions, data usage, service availability, and account responsibilities.",
+    },
     alternates: {
       canonical,
       languages: {

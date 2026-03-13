@@ -100,7 +100,7 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
             group: "Community"
         },
         {
-            href: `/${locale}/deals`,
+            href: `/${locale}/prop-firm-deals`,
             icon: <Globe className="size-4" />,
             label: "Deals",
             group: "Community"

@@ -386,7 +386,7 @@ const ChatBotDemo = () => {
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
             </PromptInputTools>
-            <PromptInputSubmit disabled={!input && !status} status={status} />
+            <PromptInputSubmit disabled={!input.trim()} status={status} />
           </PromptInputToolbar>
         </PromptInput>
       </UnifiedSurface>

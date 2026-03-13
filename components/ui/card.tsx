@@ -70,7 +70,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {...props}
       >
         {status && (
-          <div className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-2 py-0.5 backdrop-blur-sm">
+          <div className="absolute right-[var(--space-3)] top-[var(--space-3)] z-20 flex items-center gap-[var(--space-2)] rounded-full border border-border/70 bg-background/80 px-[var(--space-2)] py-[var(--space-1)] backdrop-blur-sm">
             <div className={cn(
               "status-dot",
               status === "live" && "status-dot-live",
@@ -106,18 +106,18 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, size = "md", statusDot, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "relative flex flex-col space-y-1.5",
-        {
-          "p-4": size === "sm",
-          "p-6": size === "md",
-          "p-8": size === "lg",
-        },
-        className
-      )}
+        className={cn(
+          "relative flex flex-col space-y-[var(--space-2)]",
+          {
+            "p-[var(--space-4)]": size === "sm",
+            "p-[var(--space-6)]": size === "md",
+            "p-[var(--space-8)]": size === "lg",
+          },
+          className
+        )}
       {...props}
     >
-      {statusDot ? <div className="absolute right-3 top-3">{statusDot}</div> : null}
+      {statusDot ? <div className="absolute right-[var(--space-3)] top-[var(--space-3)]">{statusDot}</div> : null}
       {children}
     </div>
   )
@@ -195,9 +195,9 @@ const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
       ref={ref}
       className={cn(
         {
-          "p-4 pt-0": size === "sm",
-          "p-6 pt-0": size === "md",
-          "p-8 pt-0": size === "lg",
+          "p-[var(--space-4)] pt-0": size === "sm",
+          "p-[var(--space-6)] pt-0": size === "md",
+          "p-[var(--space-8)] pt-0": size === "lg",
         },
         className
       )}
@@ -218,9 +218,9 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
       className={cn(
         "flex items-center",
         {
-          "p-4 pt-0": size === "sm",
-          "p-6 pt-0": size === "md",
-          "p-8 pt-0": size === "lg",
+          "p-[var(--space-4)] pt-0": size === "sm",
+          "p-[var(--space-6)] pt-0": size === "md",
+          "p-[var(--space-8)] pt-0": size === "lg",
         },
         className
       )}

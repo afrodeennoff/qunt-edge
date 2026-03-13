@@ -5,11 +5,7 @@ import { useUserStore } from "@/store/user-store"
 import { UnifiedSidebar, UnifiedSidebarItem } from "@/components/ui/unified-sidebar"
 import { usePathname } from "next/navigation"
 
-export function TeamsSidebar() {
-  const user = useUserStore(state => state.supabaseUser)
-  const timezone = useUserStore(state => state.timezone)
-  const setTimezone = useUserStore(state => state.setTimezone)
-  const pathname = usePathname()
+function resolveTeamPathContext(pathname: string) {
   const segments = pathname.split('/').filter(Boolean)
   const teamsIndex = segments.indexOf('teams')
   const hasLocalePrefix = teamsIndex === 1
@@ -18,11 +14,21 @@ export function TeamsSidebar() {
   const dashboardRoot = `${teamsRoot}/dashboard`
   const slug =
     teamsIndex !== -1 &&
-      segments[teamsIndex + 1] === 'dashboard' &&
-      segments[teamsIndex + 2] &&
-      segments[teamsIndex + 2] !== 'trader'
+    segments[teamsIndex + 1] === 'dashboard' &&
+    segments[teamsIndex + 2] &&
+    segments[teamsIndex + 2] !== 'trader'
       ? segments[teamsIndex + 2]
       : undefined
+
+  return { localePrefix, teamsRoot, dashboardRoot, slug }
+}
+
+export function TeamsSidebar() {
+  const user = useUserStore(state => state.supabaseUser)
+  const timezone = useUserStore(state => state.timezone)
+  const setTimezone = useUserStore(state => state.setTimezone)
+  const pathname = usePathname()
+  const { localePrefix, teamsRoot, dashboardRoot, slug } = resolveTeamPathContext(pathname)
 
   const navItems: UnifiedSidebarItem[] = [
     {
@@ -59,7 +65,7 @@ export function TeamsSidebar() {
       group: "Resources"
     },
     {
-      href: `${localePrefix}/deals`,
+      href: `${localePrefix}/prop-firm-deals`,
       icon: <Globe className="size-4.5" />,
       label: "Deals",
       group: "Resources"

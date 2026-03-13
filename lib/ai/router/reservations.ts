@@ -26,6 +26,7 @@ export class BudgetReservation {
 
   static async reserve(userId: string, amount: number, limit: number): Promise<boolean> {
     const budgetKey = `router:budget_usd:${userId}`;
+    const isProduction = process.env.NODE_ENV === 'production';
 
     if (isRedisConfigured()) {
       // Use Lua script for atomic check + reserve.
@@ -45,6 +46,10 @@ export class BudgetReservation {
       return success;
     }
 
+    if (isProduction) {
+      throw new Error('Redis is required for budget reservations in production')
+    }
+
     // Deterministic in-memory fallback for test/local environments.
     const currentBalance = this.memoryStore.get(budgetKey) || 0;
     if (currentBalance + amount <= limit) {
@@ -56,10 +61,15 @@ export class BudgetReservation {
   
   static async getBalance(userId: string): Promise<number> {
     const budgetKey = `router:budget_usd:${userId}`;
+    const isProduction = process.env.NODE_ENV === 'production';
     
     if (isRedisConfigured()) {
       const result = await runRedisCommand(['GET', budgetKey]);
       return result ? parseFloat(String(result)) : 0;
+    }
+
+    if (isProduction) {
+      throw new Error('Redis is required for budget balance in production')
     }
 
     return this.memoryStore.get(budgetKey) || 0;
@@ -67,10 +77,15 @@ export class BudgetReservation {
   
   static async resetBudget(userId: string): Promise<void> {
     const budgetKey = `router:budget_usd:${userId}`;
+    const isProduction = process.env.NODE_ENV === 'production';
     
     if (isRedisConfigured()) {
       await runRedisCommand(['DEL', budgetKey]);
       return;
+    }
+
+    if (isProduction) {
+      throw new Error('Redis is required for budget reset in production')
     }
 
     this.memoryStore.delete(budgetKey);

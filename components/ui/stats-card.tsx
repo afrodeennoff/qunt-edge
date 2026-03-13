@@ -63,9 +63,9 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
         aria-label={title}
         {...props}
       >
-        <CardContent size={size} className="space-y-3">
+        <CardContent size={size} className="space-y-[var(--space-3)]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-[var(--space-2)] flex-1 min-w-0">
               {Icon && (
                 <div className="shrink-0" aria-hidden="true">
                   <Icon className={cn(currentSize.icon, "text-muted-foreground group-hover:text-primary transition-colors")} />
@@ -78,7 +78,7 @@ const StatsCard = React.forwardRef<HTMLDivElement, StatsCardProps>(
             {trend && (
               <div
                 className={cn(
-                  "flex items-center gap-1 shrink-0",
+                  "flex items-center gap-[var(--space-1)] shrink-0",
                   trend.isPositive ? "text-white" : "text-zinc-500",
                   currentSize.trend
                 )}

@@ -243,16 +243,16 @@ export function TradeProgressChart({
                       <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/10 rounded-lg shadow-2xl text-[10px] space-y-2 min-w-[140px]">
                         <div className="flex items-center justify-between border-b border-white/5 pb-1">
                           <span className="font-black text-white">TRADE #{data.tradeIndex}</span>
-                          <span className="text-white/40">{data.date}</span>
+                          <span className="text-white/60">{data.date}</span>
                         </div>
                         <div className="space-y-1">
                           <div className="flex justify-between items-center">
-                            <span className="text-white/40 uppercase font-bold tracking-wider">Balance</span>
+                            <span className="text-white/60 uppercase font-bold tracking-wider">Balance</span>
                             <span className="text-white font-black">${data.balance.toLocaleString()}</span>
                           </div>
                           {!data.isPayout && !data.isReset && (
                             <div className="flex justify-between items-center">
-                              <span className="text-white/40 uppercase font-bold tracking-wider">Net P/L</span>
+                              <span className="text-white/60 uppercase font-bold tracking-wider">Net P/L</span>
                               <span className={cn(
                                 "font-black",
                                 data.pnl >= 0 ? "metric-positive" : "metric-negative"
@@ -265,11 +265,11 @@ export function TradeProgressChart({
                         <div className="space-y-1 pt-1 border-t border-white/5">
                           <div className="flex justify-between items-center">
                             <span className="text-white/20 uppercase font-bold tracking-wider">Drawdown</span>
-                            <span className="text-white/60 font-medium">${data.drawdownLevel.toLocaleString()}</span>
+                            <span className="text-fg-muted font-medium">${data.drawdownLevel.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-white/20 uppercase font-bold tracking-wider">ATH</span>
-                            <span className="text-white/60 font-medium">${data.highestBalance.toLocaleString()}</span>
+                            <span className="text-fg-muted font-medium">${data.highestBalance.toLocaleString()}</span>
                           </div>
                         </div>
                         {data.isReset && (
@@ -283,7 +283,7 @@ export function TradeProgressChart({
                               <span className="text-white font-black uppercase tracking-wider">Payout</span>
                               <span className="text-white font-black">${data.payoutAmount.toLocaleString()}</span>
                             </div>
-                            <div className="text-[8px] text-white/40 uppercase text-right tracking-widest">
+                            <div className="text-[8px] text-white/60 uppercase text-right tracking-widest">
                               {data.payoutStatus}
                             </div>
                           </div>

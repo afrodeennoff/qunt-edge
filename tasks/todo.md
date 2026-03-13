@@ -6,6 +6,14 @@
 - [x] Push to the current branch
 - [x] Record verification results (not run)
 
+## Verification Run (2026-03-13)
+
+- [x] Run the requested AI-focused `vitest` command
+- [ ] Run `npm run -s typecheck` (failed: format-preview.tsx block scope + ai chat tool typing)
+- [x] Run ESLint on the AI files touched by the implementation worker (warnings only)
+- [ ] Run `npm run -s build` (failed: missing .next/static/.../_buildManifest.js.tmp)
+- [ ] Capture and report outcomes (failures, traces, suspects)
+
 ## Review
 - Verification: Not run (commit-only request).
 - Risks: Changes not re-verified in this step.
@@ -164,6 +172,7 @@
 - [ ] Audit `app/[locale]/dashboard/components/import/components/format-preview.tsx` for unused imports/variables and missing hook dependencies introduced by the batching/autoprocessing logic.
 - [ ] Stabilize the timeout helpers (`scheduleManagedTimeout`, `clearManagedTimeouts`) and the streaming effects so they clean up properly without changing UI behavior.
 - [ ] Run `npx eslint app/[locale]/dashboard/components/import/components/format-preview.tsx` and record its output once the fix is in place.
+- Notes: Logged this cleanup plan on 2026-03-13 per worker A’s scope and lint expectations.
 
 - Verification:
   - `npx eslint app/[locale]/dashboard/trader-profile/page.tsx app/[locale]/dashboard/trader-profile/page-client.tsx` -> 0 errors (warnings only).
@@ -250,3 +259,10 @@
 - Verification: `npx eslint app/api/ai/format-trades/route.ts app/api/ai/chat/route.ts app/api/ai/mappings/route.ts app/api/ai/support/route.ts lib/rate-limit.ts lib/ai/trade-access.ts lib/ai/client.ts` (warnings limited to complexity).
 - Summary: Added userId telemetry to `/api/ai/format-trades` and tightened the chat tool guard/mappings helper types to avoid explicit `any`.
 - Follow-up: Complexity warnings persist for large `POST` handlers, router helpers, rate limit helpers, and trade-access aggregates; they predate this cleanup and were left untouched to stay behavior-preserving.
+
+## AI Implementation Worker (2026-03-14)
+
+- [x] Inventory the AI-specific tests/lint that currently fail in this workspace and confirm the scope before making changes.
+- [x] Fix the identified AI logic/tests within the AI subsystem without touching unrelated areas, documenting the root cause.
+- [x] Run the targeted AI tests, `npm run -s typecheck`, ESLint on touched AI files, and `npm run -s build` until they all pass for the touched scope.
+- [x] Summarize verification results and file changes for review.

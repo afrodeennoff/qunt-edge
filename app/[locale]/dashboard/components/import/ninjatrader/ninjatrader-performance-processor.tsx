@@ -423,7 +423,7 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
                     <TableCell className="whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l">
                       {trade.closeDate ? new Date(trade.closeDate).toLocaleString() : '-'}
                     </TableCell>
-                    <TableCell className={`whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l ${trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-white/50'}`}>
+                    <TableCell className={`whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l ${trade.pnl && trade.pnl >= 0 ? 'text-white' : 'text-white/60'}`}>
                       {trade.pnl?.toFixed(2)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap px-3 py-2 text-sm border-r border-border/50 last:border-r-0 first:border-l">
@@ -452,13 +452,13 @@ export default function NinjaTraderPerformanceProcessor({ headers, csvData, setP
         <div className="flex items-center gap-6">
           <div>
             <h3 className="text-sm font-semibold mb-1">Total PnL</h3>
-            <p className={`text-lg font-bold ${totalPnL >= 0 ? 'text-white' : 'text-white/50'}`}>
+            <p className={`text-lg font-bold ${totalPnL >= 0 ? 'text-white' : 'text-white/60'}`}>
               ${totalPnL.toFixed(2)}
             </p>
           </div>
           <div>
             <h3 className="text-sm font-semibold mb-1">Total Commission</h3>
-            <p className="text-lg font-bold text-white/50">
+            <p className="text-lg font-bold text-white/60">
               ${totalCommission.toFixed(2)}
             </p>
           </div>

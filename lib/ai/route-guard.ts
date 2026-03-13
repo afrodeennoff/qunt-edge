@@ -1,4 +1,5 @@
 import { canAccessAiFeature, type AiGuardFeature } from '@/lib/ai/entitlements'
+import { assertWithinAiBudget } from '@/lib/ai/usage-budget'
 import { apiError } from '@/lib/api-response'
 import { createRouteClient } from '@/lib/supabase/route-client'
 
@@ -40,6 +41,30 @@ export async function guardAiRequest(
         plan: entitlement.plan,
         feature,
       }),
+    }
+  }
+
+  try {
+    const budget = await assertWithinAiBudget(user.id, entitlement.isActive)
+    if (!budget.allowed) {
+      return {
+        ok: false,
+        response: apiError('BUDGET_EXCEEDED', 'Monthly AI budget exceeded for your plan.', 402, {
+          feature,
+          plan: entitlement.plan,
+          limit: budget.limit,
+          used: budget.used,
+          remaining: budget.remaining,
+        }),
+      }
+    }
+  } catch {
+    // In test/dev fallback, do not block core route behavior when budget backing store is unavailable.
+    if (process.env.NODE_ENV === 'production') {
+      return {
+        ok: false,
+        response: apiError('SERVICE_UNAVAILABLE', 'AI budget service temporarily unavailable.', 503),
+      }
     }
   }
 

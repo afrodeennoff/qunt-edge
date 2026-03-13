@@ -91,13 +91,13 @@ export function PnLSummary({ className }: PnLSummaryProps) {
       aria-live="polite"
       aria-label="Daily PnL quick summary"
       className={cn(
-        "grid w-full grid-cols-2 gap-4 liquid-panel p-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/40 shadow-2xl sm:grid-cols-3 lg:grid-cols-4",
+        "grid w-full grid-cols-2 gap-4 liquid-panel p-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/60 shadow-2xl sm:grid-cols-3 lg:grid-cols-4",
         className
       )}
     >
       {summaryItems.map((item) => (
         <div key={item.label} className="flex flex-col gap-1.5 min-w-[100px] group">
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-white/40 transition-colors">
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/60 group-hover:text-white/40 transition-colors">
             {item.label}
           </span>
           <div className="flex items-center gap-2">
