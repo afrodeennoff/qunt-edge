@@ -27,7 +27,7 @@ const firms = [
 
 export function FirmComparisonGrid() {
   return (
-    <section className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-6">
+    <section className="mt-6 rounded-3xl border border-border bg-card p-4 sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold text-foreground">Side-by-side decision matrix</h2>
@@ -54,13 +54,17 @@ export function FirmComparisonGrid() {
           </thead>
           <tbody>
             {firms.map((firm) => (
-              <tr key={firm.name} className="border-b border-border/70 last:border-b-0">
-                <td className="px-3 py-4 font-semibold text-foreground">{firm.name}</td>
+              <tr key={firm.name} className="border-b border-border/70 transition-colors hover:bg-background/50 last:border-b-0">
+                <td className="sticky left-0 bg-card px-3 py-4 font-semibold text-foreground">{firm.name}</td>
                 <td className="px-3 py-4 text-muted-foreground">{firm.onboardingCost}</td>
                 <td className="px-3 py-4 text-muted-foreground">{firm.resetPolicy}</td>
                 <td className="px-3 py-4 text-muted-foreground">{firm.drawdownStyle}</td>
                 <td className="px-3 py-4 text-muted-foreground">{firm.payoutTempo}</td>
-                <td className="px-3 py-4 text-muted-foreground">{firm.bestFor}</td>
+                <td className="px-3 py-4">
+                  <span className="rounded-full border border-border bg-background px-2 py-1 text-xs text-foreground">
+                    {firm.bestFor}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -74,7 +78,7 @@ export function FirmComparisonGrid() {
             <dl className="mt-3 grid gap-2 text-sm">
               <div>
                 <dt className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Typical Entry</dt>
-                <dd className="text-foreground">{firm.onboardingCost}</dd>
+                <dd className="text-lg font-semibold text-foreground">{firm.onboardingCost}</dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Reset Policy</dt>
@@ -90,7 +94,9 @@ export function FirmComparisonGrid() {
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Best For</dt>
-                <dd className="text-foreground">{firm.bestFor}</dd>
+                <dd className="text-foreground">
+                  <span className="rounded-full border border-border bg-card px-2 py-1 text-xs">{firm.bestFor}</span>
+                </dd>
               </div>
             </dl>
           </article>

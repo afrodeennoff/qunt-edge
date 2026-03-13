@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { PublicFlowShell } from '../_components/public-flow-shell'
 
 const SITE_ORIGIN = "https://qunt-edge.vercel.app";
@@ -21,7 +22,19 @@ export async function generateMetadata({
       languages: {
         "en-US": `${SITE_ORIGIN}/en${PAGE_PATH}`,
         "fr-FR": `${SITE_ORIGIN}/fr${PAGE_PATH}`,
+        "x-default": `${SITE_ORIGIN}/en${PAGE_PATH}`,
       },
+    },
+    openGraph: {
+      title: 'Qunt Edge Deals FAQ',
+      description: 'Answers to common questions about how Qunt Edge Deals are curated, updated, and used.',
+      url: canonical,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Qunt Edge Deals FAQ',
+      description: 'Answers to common questions about how Qunt Edge Deals are curated, updated, and used.',
     },
   };
 }
@@ -60,16 +73,40 @@ export default async function PropfirmPerkFAQPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+
   return (
     <PublicFlowShell
       title="Deals FAQ"
       subtitle="Answers written for the Qunt Edge deals flow, including how offers are curated and how to validate a setup before purchase."
     >
-      <section className="mt-5 rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <section className="mt-5 rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Frequently Asked Questions</h2>
           <p className="mt-3 max-w-3xl text-sm text-muted-foreground sm:text-base">
             Everything on this page is specific to how Qunt Edge presents and maintains prop firm deal information.
           </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {['Deals basics', 'Offer updates', 'Risk fit', 'Support'].map((chip) => (
+              <span key={chip} className="rounded-full border border-border bg-background/60 px-3 py-1 text-xs text-muted-foreground">
+                {chip}
+              </span>
+            ))}
+          </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href={`/${locale}/deals`}
@@ -86,13 +123,19 @@ export default async function PropfirmPerkFAQPage({
           </div>
       </section>
 
-      <section className="mt-6 space-y-3">
-          {faqItems.map((item) => (
-            <article key={item.question} className="rounded-xl border border-border bg-card p-5">
-              <h3 className="text-lg font-semibold text-foreground">{item.question}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
-            </article>
+      <section className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-6">
+        <Accordion type="single" collapsible className="w-full">
+          {faqItems.map((item, index) => (
+            <AccordionItem key={item.question} value={`item-${index}`} className="rounded-xl border border-border bg-background/50 px-4 mb-3">
+              <AccordionTrigger className="text-left text-base font-semibold text-foreground hover:no-underline">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="pb-5 pt-1 text-sm leading-relaxed text-muted-foreground">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
+        </Accordion>
       </section>
     </PublicFlowShell>
   )

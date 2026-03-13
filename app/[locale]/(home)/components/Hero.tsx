@@ -6,12 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export default function Hero({ locale }: { locale: string }) {
   return (
-    <section className="relative overflow-hidden px-4 pb-14 pt-24 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8 lg:pb-24 lg:pt-40">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground)/0.03)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground)/0.03)_1px,transparent_1px)] bg-[size:44px_44px] sm:bg-[size:48px_48px]" />
-        <div className="absolute -left-28 top-10 h-56 w-56 rounded-full bg-[hsl(var(--foreground)/0.12)] blur-[120px] sm:h-72 sm:w-72" />
-        <div className="absolute -right-24 top-16 h-48 w-48 rounded-full bg-[hsl(var(--foreground)/0.09)] blur-[110px] sm:h-64 sm:w-64" />
-        <div className="absolute inset-x-8 top-6 h-px bg-[hsl(var(--foreground)/0.14)] sm:inset-x-12" />
+    <section className="relative isolate overflow-hidden px-4 pb-16 pt-24 sm:px-6 sm:pb-24 sm:pt-32 lg:px-8 lg:pb-28 lg:pt-40">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(120%_85%_at_50%_-8%,hsl(var(--foreground)/0.16)_0%,transparent_58%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground)/0.04)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground)/0.04)_1px,transparent_1px)] bg-[size:44px_44px] sm:bg-[size:52px_52px]" />
+        <div className="absolute inset-x-10 top-8 h-px bg-[linear-gradient(90deg,transparent,hsl(var(--foreground)/0.25),transparent)]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl">
@@ -22,9 +21,9 @@ export default function Hero({ locale }: { locale: string }) {
           </Badge>
         </div>
 
-        <h1 className="mx-auto max-w-5xl text-center text-[clamp(2.7rem,10.2vw,6.8rem)] font-semibold leading-[0.92] tracking-[-0.032em] [font-family:var(--home-display)]">
+        <h1 className="mx-auto max-w-5xl text-center text-[clamp(3rem,10vw,7.1rem)] font-semibold leading-[0.88] tracking-[-0.04em] [font-family:var(--home-display)]">
           Build repeatable edge.
-          <span className="mt-2 block bg-[linear-gradient(92deg,hsl(var(--foreground))_0%,hsl(var(--foreground)/0.72)_100%)] bg-clip-text text-transparent">
+          <span className="mt-2 block bg-[linear-gradient(95deg,hsl(var(--foreground))_0%,hsl(var(--foreground)/0.62)_100%)] bg-clip-text text-transparent">
             Eliminate emotional drift.
           </span>
         </h1>
@@ -84,6 +83,7 @@ export default function Hero({ locale }: { locale: string }) {
           No credit card required. Be review-ready before your next open.
         </p>
       </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(to_bottom,transparent,hsl(var(--background)))]" />
     </section>
   )
 }

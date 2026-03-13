@@ -3,9 +3,40 @@ import { PublicFlowShell } from '../_components/public-flow-shell'
 
 import { EvalCostCalculator } from './components/eval-cost-calculator'
 
-export const metadata: Metadata = {
-  title: 'Qunt Edge Cost Planner',
-  description: 'Estimate prop firm evaluation economics with Qunt Edge so you can set realistic budget and payout expectations.',
+const SITE_ORIGIN = 'https://qunt-edge.vercel.app'
+const PAGE_PATH = '/deals/calculator'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params
+  const canonical = `${SITE_ORIGIN}/${locale}${PAGE_PATH}`
+
+  return {
+    title: 'Qunt Edge Cost Planner',
+    description: 'Estimate prop firm evaluation economics with Qunt Edge so you can set realistic budget and payout expectations.',
+    alternates: {
+      canonical,
+      languages: {
+        'en-US': `${SITE_ORIGIN}/en${PAGE_PATH}`,
+        'fr-FR': `${SITE_ORIGIN}/fr${PAGE_PATH}`,
+        'x-default': `${SITE_ORIGIN}/en${PAGE_PATH}`,
+      },
+    },
+    openGraph: {
+      title: 'Qunt Edge Cost Planner',
+      description: 'Estimate prop firm evaluation economics with Qunt Edge so you can set realistic budget and payout expectations.',
+      url: canonical,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Qunt Edge Cost Planner',
+      description: 'Estimate prop firm evaluation economics with Qunt Edge so you can set realistic budget and payout expectations.',
+    },
+  }
 }
 
 export default function PropfirmPerkCalculatorPage() {
@@ -14,12 +45,26 @@ export default function PropfirmPerkCalculatorPage() {
       title="Cost Planner"
       subtitle="Estimate prop firm evaluation economics with Qunt Edge so you can set realistic budget and payout expectations."
     >
-      <section className="mt-5 rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <section className="mt-5 rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Model your evaluation cost before you start</h2>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
             Use this planning view to set realistic expectations for resets, platform costs, and payout targets.
             A clear budget framework protects your edge when challenge conditions get noisy.
           </p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            <article className="rounded-xl border border-border bg-background/60 p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Input Layer</p>
+              <p className="mt-1 font-semibold text-foreground">Fees + resets</p>
+            </article>
+            <article className="rounded-xl border border-border bg-background/60 p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Output Layer</p>
+              <p className="mt-1 font-semibold text-foreground">Net after costs</p>
+            </article>
+            <article className="rounded-xl border border-border bg-background/60 p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Risk Layer</p>
+              <p className="mt-1 font-semibold text-foreground">Ratio signal</p>
+            </article>
+          </div>
       </section>
 
       <EvalCostCalculator />

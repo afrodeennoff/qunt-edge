@@ -52,8 +52,8 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
             className={cn(
                 "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
                 scrolled
-                    ? 'bg-background/85 backdrop-blur-xl border-b border-border/40 py-3'
-                    : 'bg-background/35 backdrop-blur-md border-b border-transparent py-4'
+                    ? 'bg-background/88 backdrop-blur-2xl border-b border-border/50 py-3'
+                    : 'bg-background/45 backdrop-blur-md border-b border-transparent py-4'
             )}
         >
             <div className="container-fluid flex items-center justify-between">
@@ -65,7 +65,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                             <circle cx="16" cy="16" r="4" fill="currentColor" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         </svg>
                     </div>
-                    <span className="text-lg font-bold tracking-tighter text-foreground group-hover:text-foreground/80 transition-colors uppercase">
+                    <span className="text-[15px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors group-hover:text-foreground/80 [font-family:var(--home-copy)]">
                         Qunt Edge
                     </span>
                 </Link>
@@ -76,7 +76,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAccessPortal }) => {
                         <Link
                             key={link.name}
                             href={link.href}
-                            className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground transition-colors relative group py-2"
+                            className="group relative py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground [font-family:var(--home-copy)]"
                         >
                             {link.name}
                             <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-foreground transition-all duration-300 group-hover:w-full"></span>

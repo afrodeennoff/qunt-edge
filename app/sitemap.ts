@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://qunt-edge.vercel.app'
-  const lastModified = new Date('2026-03-13T00:00:00.000Z')
+  const lastModified = new Date()
   const locales = ['en', 'fr']
   const routeDefs: Array<{ path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }> = [
     { path: '', changeFrequency: 'weekly', priority: 1 },

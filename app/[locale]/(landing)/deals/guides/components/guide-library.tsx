@@ -18,12 +18,12 @@ const guideCards = [
   },
 ]
 
-export function GuideLibrary() {
+export function GuideLibrary({ locale }: { locale: string }) {
   return (
     <section className="mt-6 space-y-4">
       {guideCards.map((guide) => (
         <article key={guide.title} className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <h2 className="text-xl font-semibold text-foreground">{guide.title}</h2>
+          <h3 className="text-xl font-semibold text-foreground">{guide.title}</h3>
           <p className="mt-2 text-sm text-muted-foreground">{guide.summary}</p>
           <ul className="mt-4 space-y-2 text-sm text-foreground">
             {guide.steps.map((step) => (
@@ -41,7 +41,7 @@ export function GuideLibrary() {
           After picking a playbook, model your expected evaluation spend and break-even path in the calculator.
         </p>
         <Link
-          href="/deals/calculator"
+          href={`/${locale}/deals/calculator`}
           className="mt-4 inline-flex rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
           Open Calculator

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 
 function toNumber(value: string, fallback: number): number {
   const parsed = Number(value)
@@ -25,15 +26,22 @@ export function EvalCostCalculator() {
     const netTargetAfterCosts = Math.max(0, payoutGoal - expectedTotalCost)
     const minReturnNeeded = expectedTotalCost === 0 ? 0 : (expectedTotalCost / Math.max(payoutGoal, 1)) * 100
 
+    const riskBand = minReturnNeeded > 40 ? 'high' : minReturnNeeded > 25 ? 'mid' : 'low'
+
     return {
       expectedTotalCost,
       netTargetAfterCosts,
       minReturnNeeded,
+      riskBand,
     }
   }, [evaluationFee, expectedResets, resetCost, monthlyPlatformFees, targetPayout])
 
   return (
-    <section className="mt-6 rounded-2xl border border-border bg-card p-5 sm:p-6">
+    <section className="mt-6 rounded-3xl border border-border bg-card p-5 sm:p-6">
+      <div className="mb-4 rounded-xl border border-border bg-background/50 p-3">
+        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Planner Inputs</p>
+        <p className="mt-1 text-sm text-foreground">Adjust values to simulate realistic month-one evaluation economics.</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm">
           <span className="font-semibold text-foreground">Evaluation fee (USD)</span>
@@ -103,6 +111,18 @@ export function EvalCostCalculator() {
         <article className="rounded-xl border border-border bg-background/50 p-4">
           <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">Cost-to-Payout Ratio</p>
           <p className="mt-2 text-2xl font-semibold text-foreground">{values.minReturnNeeded.toFixed(1)}%</p>
+          <p className="mt-2">
+            <Badge variant={values.riskBand === 'high' ? 'destructive' : values.riskBand === 'mid' ? 'default' : 'secondary'}>
+              {values.riskBand === 'high' ? 'High pressure band' : values.riskBand === 'mid' ? 'Manageable band' : 'Healthy planning range'}
+            </Badge>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {values.riskBand === 'high'
+              ? 'Reduce costs or increase expected payout buffer before starting.'
+              : values.riskBand === 'mid'
+              ? 'Manageable with strict discipline and reset controls.'
+              : 'Good baseline for controlled execution.'}
+          </p>
         </article>
       </div>
     </section>

@@ -260,10 +260,11 @@ export default async function DealsPage({
               <a
                 href={deal.href}
                 target="_blank"
-                rel="noreferrer"
+                rel="sponsored nofollow noopener noreferrer"
+                aria-label={`Open ${deal.firm} deal in a new tab`}
                 className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Get Deal
+                Open {deal.firm} Deal
               </a>
             </article>
           ))}
