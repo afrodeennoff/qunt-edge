@@ -1,4 +1,16 @@
-import { Mood, Trade } from "@/prisma/generated/prisma"
+type TradeLike = {
+  entryDate: string | Date
+  pnl: string | number | { toString(): string }
+  commission: string | number | { toString(): string } | null
+  quantity: string | number | { toString(): string }
+  comment: string | null
+  tags: string[]
+}
+
+type MoodLike = {
+  day: Date
+  emotionValue: number | null
+}
 
 export interface BehaviorInsights {
   periodDays: number
@@ -48,7 +60,7 @@ export interface BehaviorInsights {
   }>
 }
 
-type TradeWithParsedDate = Trade & {
+type TradeWithParsedDate = TradeLike & {
   parsedEntryDate: Date
   netPnL: number
   isImpulsive: boolean
@@ -121,8 +133,8 @@ function buildRiskGuard(overtradingDays: number, impulsiveTradeCount: number): s
 }
 
 export function computeBehaviorInsights(
-  tradesInput: Trade[],
-  moodsInput: Mood[],
+  tradesInput: TradeLike[],
+  moodsInput: MoodLike[],
   periodDays: number,
 ): BehaviorInsights {
   const now = new Date()

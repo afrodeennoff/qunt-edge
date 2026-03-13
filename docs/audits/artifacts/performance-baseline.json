@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-10T12:54:02.208Z",
+  "generatedAt": "2026-03-13T12:45:18.829Z",
   "baseUrl": "http://localhost:3000",
   "runs": 5,
   "routes": [
@@ -8,51 +8,51 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.496132,
-          "total": 0.497285,
-          "size": 119676,
+          "ttfb": 0.011726,
+          "total": 0.012043,
+          "size": 160433,
           "code": 200
         },
         {
           "run": 2,
-          "ttfb": 0.483451,
-          "total": 0.484255,
-          "size": 119676,
+          "ttfb": 0.013305,
+          "total": 0.013576,
+          "size": 160433,
           "code": 200
         },
         {
           "run": 3,
-          "ttfb": 0.476268,
-          "total": 0.477067,
-          "size": 119676,
+          "ttfb": 0.014566,
+          "total": 0.014923,
+          "size": 160433,
           "code": 200
         },
         {
           "run": 4,
-          "ttfb": 0.468985,
-          "total": 0.469721,
-          "size": 119676,
+          "ttfb": 0.015471,
+          "total": 0.015862,
+          "size": 160433,
           "code": 200
         },
         {
           "run": 5,
-          "ttfb": 0.469717,
-          "total": 0.470564,
-          "size": 119676,
+          "ttfb": 0.013762,
+          "total": 0.014365,
+          "size": 160433,
           "code": 200
         }
       ],
       "summary": {
-        "ttfbMedian": 0.476268,
-        "ttfbP50": 0.476268,
-        "ttfbP95": 0.496132,
-        "totalMedian": 0.477067,
-        "totalP50": 0.477067,
-        "totalP95": 0.497285,
+        "ttfbMedian": 0.013762,
+        "ttfbP50": 0.013762,
+        "ttfbP95": 0.015471,
+        "totalMedian": 0.014365,
+        "totalP50": 0.014365,
+        "totalP95": 0.015862,
         "statusCodes": [
           200
         ],
-        "sizeBytes": 119676
+        "sizeBytes": 160433
       }
     },
     {
@@ -60,51 +60,51 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.463228,
-          "total": 0.463729,
-          "size": 37272,
+          "ttfb": 1.206013,
+          "total": 1.207567,
+          "size": 37332,
           "code": 200
         },
         {
           "run": 2,
-          "ttfb": 0.489632,
-          "total": 0.490096,
-          "size": 37272,
+          "ttfb": 1.329581,
+          "total": 1.331519,
+          "size": 37332,
           "code": 200
         },
         {
           "run": 3,
-          "ttfb": 0.462529,
-          "total": 0.463018,
-          "size": 37272,
+          "ttfb": 1.039494,
+          "total": 1.040725,
+          "size": 37332,
           "code": 200
         },
         {
           "run": 4,
-          "ttfb": 0.463368,
-          "total": 0.463874,
-          "size": 37272,
+          "ttfb": 1.127988,
+          "total": 1.129164,
+          "size": 37332,
           "code": 200
         },
         {
           "run": 5,
-          "ttfb": 0.463226,
-          "total": 0.463803,
-          "size": 37272,
+          "ttfb": 1.089394,
+          "total": 1.090969,
+          "size": 37332,
           "code": 200
         }
       ],
       "summary": {
-        "ttfbMedian": 0.463228,
-        "ttfbP50": 0.463228,
-        "ttfbP95": 0.489632,
-        "totalMedian": 0.463803,
-        "totalP50": 0.463803,
-        "totalP95": 0.490096,
+        "ttfbMedian": 1.127988,
+        "ttfbP50": 1.127988,
+        "ttfbP95": 1.329581,
+        "totalMedian": 1.129164,
+        "totalP50": 1.129164,
+        "totalP95": 1.331519,
         "statusCodes": [
           200
         ],
-        "sizeBytes": 37272
+        "sizeBytes": 37332
       }
     },
     {
@@ -112,51 +112,51 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.467907,
-          "total": 0.468484,
-          "size": 56230,
+          "ttfb": 0.930723,
+          "total": 0.93204,
+          "size": 54954,
           "code": 200
         },
         {
           "run": 2,
-          "ttfb": 0.464493,
-          "total": 0.465025,
-          "size": 56230,
+          "ttfb": 0.917097,
+          "total": 0.918444,
+          "size": 54954,
           "code": 200
         },
         {
           "run": 3,
-          "ttfb": 0.461455,
-          "total": 0.461968,
-          "size": 56230,
+          "ttfb": 1.009471,
+          "total": 1.010775,
+          "size": 54954,
           "code": 200
         },
         {
           "run": 4,
-          "ttfb": 0.462836,
-          "total": 0.463332,
-          "size": 56230,
+          "ttfb": 1.129398,
+          "total": 1.130681,
+          "size": 54954,
           "code": 200
         },
         {
           "run": 5,
-          "ttfb": 0.462636,
-          "total": 0.463066,
-          "size": 56230,
+          "ttfb": 1.188978,
+          "total": 1.19101,
+          "size": 54954,
           "code": 200
         }
       ],
       "summary": {
-        "ttfbMedian": 0.462836,
-        "ttfbP50": 0.462836,
-        "ttfbP95": 0.467907,
-        "totalMedian": 0.463332,
-        "totalP50": 0.463332,
-        "totalP95": 0.468484,
+        "ttfbMedian": 1.009471,
+        "ttfbP50": 1.009471,
+        "ttfbP95": 1.188978,
+        "totalMedian": 1.010775,
+        "totalP50": 1.010775,
+        "totalP95": 1.19101,
         "statusCodes": [
           200
         ],
-        "sizeBytes": 56230
+        "sizeBytes": 54954
       }
     },
     {
@@ -164,47 +164,47 @@
       "runs": [
         {
           "run": 1,
-          "ttfb": 0.002226,
-          "total": 0.002295,
+          "ttfb": 0.005383,
+          "total": 0.00569,
           "size": 41,
           "code": 307
         },
         {
           "run": 2,
-          "ttfb": 0.001667,
-          "total": 0.001729,
+          "ttfb": 0.005608,
+          "total": 0.005835,
           "size": 41,
           "code": 307
         },
         {
           "run": 3,
-          "ttfb": 0.001449,
-          "total": 0.001504,
+          "ttfb": 0.004514,
+          "total": 0.004687,
           "size": 41,
           "code": 307
         },
         {
           "run": 4,
-          "ttfb": 0.001336,
-          "total": 0.001392,
+          "ttfb": 0.004002,
+          "total": 0.004218,
           "size": 41,
           "code": 307
         },
         {
           "run": 5,
-          "ttfb": 0.002061,
-          "total": 0.002139,
+          "ttfb": 0.003329,
+          "total": 0.003506,
           "size": 41,
           "code": 307
         }
       ],
       "summary": {
-        "ttfbMedian": 0.001667,
-        "ttfbP50": 0.001667,
-        "ttfbP95": 0.002226,
-        "totalMedian": 0.001729,
-        "totalP50": 0.001729,
-        "totalP95": 0.002295,
+        "ttfbMedian": 0.004514,
+        "ttfbP50": 0.004514,
+        "ttfbP95": 0.005608,
+        "totalMedian": 0.004687,
+        "totalP50": 0.004687,
+        "totalP95": 0.005835,
         "statusCodes": [
           307
         ],

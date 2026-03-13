@@ -39,6 +39,14 @@ export async function GET(request: NextRequest) {
         orderBy: {
           entryDate: "asc",
         },
+        select: {
+          entryDate: true,
+          pnl: true,
+          commission: true,
+          quantity: true,
+          comment: true,
+          tags: true,
+        },
       }),
       prisma.mood.findMany({
         where: {
@@ -49,6 +57,10 @@ export async function GET(request: NextRequest) {
         },
         orderBy: {
           day: "asc",
+        },
+        select: {
+          day: true,
+          emotionValue: true,
         },
       }),
     ])

@@ -9,6 +9,7 @@ import { GlobalMotionEffects } from "@/components/motion/global-motion-effects";
 import { AuthTimeout } from "@/components/auth/auth-timeout";
 
 const CHUNK_RECOVERY_SESSION_KEY = "chunk-reload-attempted";
+const SERVICE_WORKER_CLEANUP_KEY = "sw-cleanup-v1";
 
 function shouldRecoverFromChunkError(reason: unknown): boolean {
     const message =
@@ -89,7 +90,12 @@ export function RootProviders({
         }
 
         const cacheDebugEnabled = process.env.NEXT_PUBLIC_CACHE_DEBUG === "true";
+        const shouldCleanupServiceWorkers = process.env.NEXT_PUBLIC_DISABLE_SERVICE_WORKERS === "true";
         const logPrefix = "[CacheDebug]";
+
+        if (!shouldCleanupServiceWorkers) {
+            return;
+        }
 
         const unregisterAllServiceWorkers = async () => {
             const registrations = await navigator.serviceWorker.getRegistrations();
@@ -106,11 +112,25 @@ export function RootProviders({
         };
 
         const handleLoad = () => {
+            try {
+                if (localStorage.getItem(SERVICE_WORKER_CLEANUP_KEY) === "1") {
+                    return;
+                }
+            } catch {
+                // Ignore storage errors and proceed once for this page load.
+            }
+
             unregisterAllServiceWorkers().catch((error) => {
                 if (cacheDebugEnabled) {
                     console.error(`${logPrefix} failed to clear service workers`, error);
                 }
             });
+
+            try {
+                localStorage.setItem(SERVICE_WORKER_CLEANUP_KEY, "1");
+            } catch {
+                // Ignore storage errors.
+            }
         };
 
         void handleLoad();
@@ -149,6 +169,12 @@ export function PublicRootProviders({
 }: {
     children: React.ReactNode
 }) {
+    const enablePublicMotion = process.env.NEXT_PUBLIC_ENABLE_PUBLIC_MOTION === "true";
+
+    if (!enablePublicMotion) {
+        return <RootProviders>{children}</RootProviders>;
+    }
+
     return (
         <RootProviders>
             <SmoothScrollProvider>

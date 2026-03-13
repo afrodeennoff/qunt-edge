@@ -107,7 +107,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const requestNonce = (await headers()).get("x-nonce");
+  const cspNonceEnabled = process.env.ENABLE_CSP_NONCE === "true";
+  const requestNonce = cspNonceEnabled ? (await headers()).get("x-nonce") : null;
   const nonce = requestNonce && requestNonce.trim().length > 0 ? requestNonce : null;
   const isProduction = process.env.NODE_ENV === "production";
   const isVercelRuntime = process.env.VERCEL === "1";
