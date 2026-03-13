@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export default function Hero({ locale }: { locale: string }) {
   return (
-    <section className="relative overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-40 lg:px-8">
+    <section className="relative overflow-hidden px-4 pb-14 pt-24 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8 lg:pb-24 lg:pt-40">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground)/0.03)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground)/0.03)_1px,transparent_1px)] bg-[size:44px_44px] sm:bg-[size:48px_48px]" />
         <div className="absolute -left-28 top-10 h-56 w-56 rounded-full bg-[hsl(var(--foreground)/0.12)] blur-[120px] sm:h-72 sm:w-72" />
@@ -34,13 +34,13 @@ export default function Hero({ locale }: { locale: string }) {
           Every session gets a precise diagnosis, so your next session starts with intent, not guesswork.
         </p>
 
-        <div className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
-          <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-2xl text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg shadow-primary/20 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
+        <div className="mt-12 flex w-full flex-col items-center justify-center gap-3 sm:mt-14 sm:w-auto sm:flex-row sm:gap-5">
+          <Button asChild size="lg" className="h-12 w-full max-w-[320px] rounded-2xl text-[11px] font-semibold uppercase tracking-[0.14em] shadow-lg shadow-primary/20 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
             <Link href={`/${locale}/authentication?next=dashboard`}>
               Start My Performance Audit
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-2xl border-border/70 bg-card/60 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm hover:bg-card/80 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
+          <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-2xl border-border/70 bg-card/60 text-[11px] font-medium uppercase tracking-[0.14em] backdrop-blur-sm hover:bg-card/80 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
             <Link href={`/${locale}/#pricing`}>
               Compare Plans
               <ArrowRight className="ml-2 h-3.5 w-3.5" />

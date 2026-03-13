@@ -72,15 +72,15 @@ export default function Features() {
   ]
 
   return (
-    <main className="container-responsive py-8 sm:py-12 md:py-16">
+    <main className="container-responsive py-14 sm:py-18 md:py-24">
       <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4">{t("landing.features.heading")}</h1>
-      <p className="text-base sm:text-lg md:text-xl text-center text-gray-600 dark:text-gray-400 mb-8 sm:mb-12 px-4">{t("landing.features.subheading")}</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+      <p className="text-base sm:text-lg md:text-xl text-center text-muted-foreground mb-8 sm:mb-12 px-4">{t("landing.features.subheading")}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-5 md:gap-6">
         {features.map((feature, index) => (
           <Card
             id={feature.id}
             key={feature.id}
-            className={`bg-card ${
+            className={`bg-card/80 border border-border/60 shadow-[0_12px_34px_-24px_hsl(var(--foreground)/0.45)] transition-transform duration-300 hover:-translate-y-0.5 hover:border-border/85 ${
               index < 2 ? 'lg:col-span-3' :
               index === 2 ? 'lg:col-span-4' : 'lg:col-span-2'
             }`}

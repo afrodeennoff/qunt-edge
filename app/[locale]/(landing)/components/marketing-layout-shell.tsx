@@ -16,7 +16,7 @@ export default function MarketingLayoutShell({
 }: MarketingLayoutShellProps) {
   return (
     <div className={cn('marketing-shell min-h-screen w-full overflow-x-hidden', className)}>
-      <div className="pointer-events-none fixed inset-0 hidden marketing-grid opacity-30 sm:block" />
+      <div className="pointer-events-none fixed inset-0 hidden marketing-grid opacity-[0.18] sm:block" />
       <Navbar />
       <div className={cn('relative z-10 pt-20 sm:pt-28 lg:pt-32', contentClassName)}>
         <MotionStagger>

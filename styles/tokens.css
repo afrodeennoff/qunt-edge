@@ -30,6 +30,16 @@
     --ring: 0 0% 100%;
     --radius: 0.5rem;
 
+    /* ===== UI ALLOCATION TOKENS (60/30/10) ===== */
+    --ui-60-bg: var(--background);
+    --ui-60-surface: var(--card);
+    --ui-60-text: var(--foreground);
+    --ui-30-border: var(--border);
+    --ui-30-subtle: var(--secondary);
+    --ui-30-text: var(--muted-foreground);
+    --ui-10-accent: var(--primary);
+    --ui-10-accent-fg: var(--primary-foreground);
+
     --sidebar-background: 0 0% 3%;
     --sidebar-foreground: 0 0% 93%;
     --sidebar-primary: 0 0% 100%;

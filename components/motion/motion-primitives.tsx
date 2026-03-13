@@ -8,6 +8,10 @@ type MotionPrimitiveProps = {
   className?: string
 }
 
+const MOTION_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
+const MOTION_FAST = 0.4
+const MOTION_BASE = 0.55
+
 export function MotionPage({ children, className }: MotionPrimitiveProps) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -17,7 +21,7 @@ export function MotionPage({ children, className }: MotionPrimitiveProps) {
       initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
       animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       exit={prefersReducedMotion ? undefined : { opacity: 0, y: 12 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: MOTION_FAST, ease: MOTION_EASE }}
     >
       {children}
     </motion.div>
@@ -33,7 +37,7 @@ export function MotionSection({ children, className }: MotionPrimitiveProps) {
       initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12% 0px -8% 0px" }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: MOTION_BASE, ease: MOTION_EASE }}
     >
       {children}
     </motion.section>
@@ -78,7 +82,7 @@ export function MotionStaggerItem({ children, className }: MotionPrimitiveProps)
               opacity: 1,
               y: 0,
               scale: 1,
-              transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
+              transition: { duration: 0.42, ease: MOTION_EASE },
             },
       }}
     >
@@ -86,4 +90,3 @@ export function MotionStaggerItem({ children, className }: MotionPrimitiveProps)
     </motion.div>
   )
 }
-

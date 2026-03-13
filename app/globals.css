@@ -47,8 +47,8 @@
   [role="button"],
   [role="tab"] {
     transition-property: opacity, color, background-color;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 180ms;
+    transition-timing-function: var(--easing-default);
+    transition-duration: var(--transition-base);
   }
 }
 
@@ -1163,6 +1163,46 @@
 
   .marketing-pulse {
     animation: pulse-soft 2.3s ease-in-out infinite;
+  }
+
+  .ui-surface-base {
+    background: hsl(var(--ui-60-surface));
+    color: hsl(var(--ui-60-text));
+  }
+
+  .ui-surface-structural {
+    border-color: hsl(var(--ui-30-border) / 0.65);
+    background: hsl(var(--ui-30-subtle) / 0.22);
+    color: hsl(var(--ui-30-text));
+  }
+
+  .ui-emphasis {
+    background: hsl(var(--ui-10-accent));
+    color: hsl(var(--ui-10-accent-fg));
+  }
+
+  .type-label {
+    font-size: var(--type-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .type-caption {
+    font-size: var(--type-sm);
+    line-height: 1.45;
+  }
+
+  .type-body {
+    font-size: var(--type-md);
+    line-height: 1.6;
+  }
+
+  .type-title {
+    font-size: var(--type-xl);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 600;
   }
 }
 

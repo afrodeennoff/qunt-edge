@@ -2,6 +2,7 @@
 import React, { useRef } from 'react';
 import { motion, Variants, useScroll, useTransform } from 'framer-motion';
 import Link from "next/link";
+import { useCurrentLocale } from '@/locales/client';
 
 interface HeroProps {
   onStart?: () => void;
@@ -9,6 +10,7 @@ interface HeroProps {
 
 export default function Hero({  }: HeroProps) {
   const ref = useRef(null);
+  const locale = useCurrentLocale();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"]
@@ -42,10 +44,10 @@ export default function Hero({  }: HeroProps) {
   };
 
   return (
-    <section ref={ref} className="relative pt-20 sm:pt-24 pb-20 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen flex flex-col justify-center items-center text-center">
+    <section ref={ref} className="relative pt-24 sm:pt-28 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[88svh] md:min-h-screen flex flex-col justify-center items-center text-center">
       <motion.div style={{ opacity }} className="absolute inset-0 pointer-events-none">
-         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl sm:max-w-6xl md:max-w-7xl h-[300px] sm:h-[400px] md:h-[600px] bg-white/10 blur-[100px] sm:blur-[120px] md:blur-[140px] rounded-full"></div>
+         <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground)/0.04)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground)/0.04)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl sm:max-w-6xl md:max-w-7xl h-[300px] sm:h-[400px] md:h-[600px] bg-white/8 blur-[80px] sm:blur-[100px] md:blur-[120px] rounded-full"></div>
       </motion.div>
 
       <motion.div
@@ -71,7 +73,7 @@ export default function Hero({  }: HeroProps) {
 
         <motion.p
           variants={item}
-          className="text-responsive sm:text-responsive-lg md:text-xl lg:text-2xl text-zinc-400 max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed font-light px-2"
+          className="text-responsive sm:text-responsive-lg md:text-xl lg:text-2xl text-[hsl(var(--mk-text-muted))] max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed font-normal px-2"
         >
           Stop auditing the money. Audit the execution. <br className="hidden sm:block" />
           <span className="text-zinc-600">The clinical intelligence layer for professional discretionary traders.</span>
@@ -82,10 +84,10 @@ export default function Hero({  }: HeroProps) {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
         >
           <Link
-            href="/dashboard"
-            className="touch-target group relative inline-flex h-12 w-full sm:w-auto min-w-[220px] items-center justify-center rounded-full bg-white px-8 text-center text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-black transition-all hover:bg-white hover:shadow-none"
+            href={`/${locale}/authentication?next=dashboard`}
+            className="touch-target group relative inline-flex h-12 w-full sm:w-auto min-w-[220px] items-center justify-center rounded-full bg-white px-8 text-center text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] text-black transition-all hover:bg-white hover:shadow-none"
           >
-            Apply for Access
+            Start Free Audit
           </Link>
 
           <Link

@@ -55,8 +55,8 @@ export default function Navbar() {
       >
         <motion.div
           className={cn(
-            'flex h-[58px] items-center rounded-full border px-3 sm:h-[66px] sm:px-4',
-            'border-[hsl(var(--mk-border)/0.4)] bg-[hsl(var(--mk-surface)/0.72)] backdrop-blur-md sm:backdrop-blur-xl',
+            'flex h-[56px] items-center rounded-full border px-2.5 sm:h-[62px] sm:px-3.5',
+            'border-[hsl(var(--mk-border)/0.4)] bg-[hsl(var(--mk-surface)/0.72)] supports-[backdrop-filter]:bg-[hsl(var(--mk-surface)/0.68)] backdrop-blur-md sm:backdrop-blur-xl',
             scrolled ? 'shadow-[0_20px_34px_-26px_hsl(var(--brand-ink)/0.82)] sm:shadow-[0_28px_48px_-32px_hsl(var(--brand-ink)/0.86)]' : 'shadow-[0_8px_24px_-20px_hsl(var(--brand-ink)/0.7)]'
           )}
           whileHover={isMobile ? undefined : { y: -1 }}
