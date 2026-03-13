@@ -21,4 +21,12 @@ describe("trade image ownership guard", () => {
       /current actor/i
     );
   });
+
+  it("rejects paths that try to escape via relative segments", () => {
+    const prefix = "actor-secure/";
+    const sneakyPath = "actor-secure/../actor-hq/secrets.png";
+    expect(() => ensureOwnedImagePath(sneakyPath, prefix)).toThrow(
+      /relative segments/i
+    );
+  });
 });

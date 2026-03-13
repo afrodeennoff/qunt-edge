@@ -12,8 +12,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getAiPolicy } from "@/lib/ai/policy";
 import { apiError } from "@/lib/api-response";
 import { guardAiRequest } from "@/lib/ai/route-guard";
-import { getAiLanguageModelById, createCompletionWithRouter } from "@/lib/ai/client";
-import { getRouterConfig } from "@/lib/ai/router/config";
+import { getAiLanguageModelById } from "@/lib/ai/client";
 import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetry";
 import {
   estimateTokenCountFromMessages,
@@ -40,7 +39,7 @@ const SUPPORT_MODEL_ALLOWLIST = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
-  const policy = getAiPolicy("chat");
+  const policy = getAiPolicy("support");
   const startedAt = Date.now();
   let selectedModel = policy.model;
 
@@ -69,69 +68,13 @@ export async function POST(req: NextRequest) {
     selectedModel = model && SUPPORT_MODEL_ALLOWLIST.has(model) ? model : policy.model;
     const webSearchModel = process.env.AI_SUPPORT_WEBSEARCH_MODEL;
     const webSearchFallback = webSearch && !webSearchModel;
-    const routerConfig = getRouterConfig();
-    const isRouterUsable = routerConfig.enabled && Boolean(routerConfig.openrouter.apiKey);
-    const hasDirectProvider = Boolean(process.env.OPENROUTER_API_KEY);
-
-    if (!isRouterUsable && !hasDirectProvider) {
+    if (!process.env.OPENROUTER_API_KEY) {
       return apiError("SERVICE_UNAVAILABLE", "Support AI service is not configured", 503);
     }
 
     // Remove first message if it's assistant message
     if (messages.length > 0 && messages[0].role === "assistant") {
       messages.shift();
-    }
-
-    const routerMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = messages.map((m) => {
-      const validParts = m.parts?.filter(
-        (p): p is { type: 'text'; text: string } => p?.type === 'text' && typeof p?.text === 'string'
-      ) ?? [];
-      return {
-        role: m.role === 'user' ? 'user' : m.role === 'assistant' ? 'assistant' : 'system',
-        content: validParts.map((p) => p.text).join('\n'),
-      };
-    });
-
-    if (isRouterUsable) {
-      try {
-        const routerResult = await createCompletionWithRouter(
-          'chat',
-          userId,
-          routerMessages,
-          { temperature: 0.3, model: selectedModel }
-        );
-
-        void logAiRequest({
-          userId,
-          route: "/api/ai/support",
-          feature: "support",
-          model: routerResult.model,
-          provider: routerResult.provider,
-          usage: { totalTokens: estimateTokenCountFromMessages(routerMessages, routerResult.content) },
-          latencyMs: Date.now() - startedAt,
-          success: true,
-          sampleRate: policy.logSampleRate,
-          finishReason: "stop",
-        });
-
-        const stream = createUIMessageStream({
-          execute: ({ writer }) => {
-            const textId = `router-${Date.now()}`;
-            writer.write({ type: "start" });
-            writer.write({ type: "text-start", id: textId });
-            writer.write({ type: "text-delta", id: textId, delta: routerResult.content });
-            writer.write({ type: "text-end", id: textId });
-            writer.write({ type: "finish", finishReason: "stop" });
-          },
-        });
-
-        return createUIMessageStreamResponse({ stream });
-      } catch (routerError) {
-        logAiWarn("[Support] AI Router failed; falling back to direct provider", routerError, { userId });
-        if (!hasDirectProvider) {
-          throw routerError;
-        }
-      }
     }
 
     const modelMessages = await convertToModelMessages(messages);
@@ -212,13 +155,16 @@ Remember: Always be transparent about being an AI chatbot and your role in gathe
       },
       temperature: 0.3,
       onFinish: (finalResult) => {
+        const extractedText = finalResult.text ?? "";
         void logAiRequest({
           userId,
           route: "/api/ai/support",
           feature: "support",
           model: selectedModel,
           provider: policy.provider,
-          usage: extractUsage(finalResult.usage),
+          usage: extractUsage(finalResult.usage) ?? {
+            totalTokens: estimateTokenCountFromMessages(messages, extractedText),
+          },
           latencyMs: Date.now() - startedAt,
           finishReason: finalResult.finishReason ?? null,
           success: true,

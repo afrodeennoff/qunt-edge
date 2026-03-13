@@ -279,6 +279,19 @@
 - Summary: Added userId telemetry to `/api/ai/format-trades` and tightened the chat tool guard/mappings helper types to avoid explicit `any`.
 - Follow-up: Complexity warnings persist for large `POST` handlers, router helpers, rate limit helpers, and trade-access aggregates; they predate this cleanup and were left untouched to stay behavior-preserving.
 
+## Task: Harden trade image ownership guard (2026-03-14)
+
+- [ ] Review the current `ensureOwnedImagePath` logic and `tests/trade-image-editor.test.ts` coverage to understand normalization/ownership expectations.
+- [ ] Extend `ensureOwnedImagePath` with stricter normalization (POSIX slash normalization, trimmed leading/trailing separators, prefix normalization) and traversal/absolute path checks.
+- [ ] Expand the Vitest suite to cover new normalization behaviors, prefix normalization, blocked relative/absolute/bad characters, and ensure existing guards still trigger.
+- [ ] Run `npx vitest run tests/trade-image-editor.test.ts` and note the output.
+- [ ] Record verification results and any residual risks/new follow-ups.
+
+## Review
+- Verification: Pending (waiting for trade image guard tests to run).
+- Risks: Path normalization edge cases still need coverage once more routes rely on the guard.
+- Follow-ups: Revisit `app/[locale]/dashboard/components/tables/trade-image-editor.tsx` if Supabase remove calls ever receive newly normalized prefixes.
+
 ## AI Implementation Worker (2026-03-14)
 
 - [x] Inventory the AI-specific tests/lint that currently fail in this workspace and confirm the scope before making changes.
@@ -297,17 +310,31 @@
 - [x] Summarize findings, changes, and residual risks for the user.
 ## Full-Stack CRUD/Auth/State Sync Hardening Sweep (2026-03-14)
 
-- [ ] Run parallel specialist audits (frontend/backend/security/testing) and collect actionable findings.
-- [ ] Fix frontend CRUD + UI state-sync issues (create/read/update/delete flows, optimistic updates, validation UX).
-- [ ] Fix backend CRUD + validation/auth/permission issues (ownership enforcement + error contract consistency).
-- [ ] Add or update regression tests for each fix.
-- [ ] Run verification loop until clean:
-  - [ ] targeted tests for touched flows
-  - [ ] `npm run -s typecheck`
-  - [ ] lint on touched files
-  - [ ] `npm run -s build`
-- [ ] Perform manual CRUD flow validation checks and document outcomes.
-- [ ] Document full issue/fix report, changed files, verification evidence, and residual risks.
+- [x] Run parallel specialist audits (frontend/backend/security/testing) and collect actionable findings.
+- [x] Fix frontend CRUD + UI state-sync issues (create/read/update/delete flows, optimistic updates, validation UX).
+- [x] Fix backend CRUD + validation/auth/permission issues (ownership enforcement + error contract consistency).
+- [x] Add or update regression tests for each fix.
+- [x] Run verification loop until clean:
+  - [x] targeted tests for touched flows
+  - [x] `npm run -s typecheck`
+  - [x] lint on touched files
+  - [x] `npm run -s build`
+- [x] Perform manual CRUD flow validation checks and document outcomes.
+- [x] Document full issue/fix report, changed files, verification evidence, and residual risks.
+
+## Review (Full-Stack CRUD/Auth/State Sync Hardening Sweep)
+
+- Parallel specialists completed frontend, backend, security ownership, and verification scopes with implemented code changes (not report-only).
+- Verified affected CRUD/auth/state-sync/security tests pass:
+  - `npx vitest run tests/trade-image-editor.test.ts tests/context/data-provider-utils.test.ts tests/server/team-analytics.test.ts lib/__tests__/team-analytics-route.test.ts tests/server/shared.test.ts`
+  - `npx vitest run tests/context/data-provider-utils.test.ts tests/server/team-analytics.test.ts lib/__tests__/team-analytics-route.test.ts tests/server/shared.test.ts tests/trade-image-editor.test.ts tests/server/accounts-isolation.test.ts tests/server/layout-isolation.test.ts tests/server/optimized-trades-isolation.test.ts`
+- Verified project-level checks:
+  - `npm run -s typecheck` -> passes
+  - `npx eslint <touched files>` -> 0 errors (warnings-only baseline)
+  - `npm run -s build` -> passes
+- Manual runtime sanity checks captured:
+  - account-delete state-sync helper removes deleted account references from every group
+  - trade-image ownership guard allows actor-owned paths and blocks relative-segment traversal attempts
 
 ## Frontend CRUD State Sync Sweep (2026-03-14)
 
@@ -323,4 +350,12 @@
 - [x] Step 2: Fail-closed: tighten authn/authz/input validation guards and ownership assertions for create/read/update/delete handlers, including path-delete flows.
 - [x] Step 3: Add regression tests that prove ownership boundaries (blocked cross-user action). Target vitest suites near touched routes.
 - [x] Step 4: Run targeted security-relevant tests (relevant vitest subsets + ESLint/typecheck if those files change) and log output.
-- [ ] Step 5: Document what was fixed, changed files, and verification steps for the final report.
+- [x] Step 5: Document what was fixed, changed files, and verification steps for the final report.
+## Verification Run (2026-03-14 B)
+
+- [ ] Identify touched files for this scope and note them in the report.
+- [ ] Run targeted `vitest` suites covering the files touched in this session.
+- [ ] Run `npx eslint` on the touched files.
+- [ ] Run `npm run -s typecheck`.
+- [ ] Run `npm run -s build`.
+- [ ] Capture command outputs and summarize pass/fail fate.

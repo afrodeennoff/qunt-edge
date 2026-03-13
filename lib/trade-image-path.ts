@@ -29,8 +29,12 @@ export function ensureOwnedImagePath(
   if (!actorImagePrefix) {
     throw new Error("Actor context is missing");
   }
-  if (!imagePath.startsWith(actorImagePrefix)) {
+  const normalizedPath = imagePath.replace(/\\/g, "/");
+  if (normalizedPath.includes("..")) {
+    throw new Error("Image path contains relative segments");
+  }
+  if (!normalizedPath.startsWith(actorImagePrefix)) {
     throw new Error("Image path does not belong to the current actor");
   }
-  return imagePath;
+  return normalizedPath;
 }

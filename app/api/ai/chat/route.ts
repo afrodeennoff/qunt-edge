@@ -20,7 +20,7 @@ import { categorizeAiError, extractUsage, logAiRequest } from "@/lib/ai/telemetr
 import { apiError } from "@/lib/api-response";
 import { rateLimit } from "@/lib/rate-limit";
 import { guardAiRequest } from "@/lib/ai/route-guard";
-import { enforcePromptSafety, sanitizeUserMessages } from "@/lib/ai/prompt-safety";
+import { SAFETY_PREAMBLE, enforcePromptSafety, sanitizeUserMessages } from "@/lib/ai/prompt-safety";
 import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
 
 export const maxDuration = 60;
@@ -214,21 +214,22 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
-    // Apply prompt safety checks to user messages
+    let promptSafetyPreamble = "";
+
+    // Apply prompt safety checks without mutating original message structure.
     if (body.messages) {
       const sanitized = sanitizeUserMessages(body.messages)
       const safety = enforcePromptSafety(sanitized)
       if (!safety.safe) {
-        return new Response(
-          JSON.stringify(safety.response!.body),
-          { 
-            status: safety.response!.status,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        )
+        return apiError(
+          safety.response?.body.error.code ?? "PROMPT_INJECTION",
+          safety.response?.body.error.message ?? "Potential prompt injection detected. Request blocked.",
+          safety.response?.status ?? 400,
+        );
       }
-      body.messages = safety.messages as typeof body.messages
+      if (safety.preambleAdded) {
+        promptSafetyPreamble = SAFETY_PREAMBLE;
+      }
     }
 
     const { messages, username, locale, timezone } = chatRequestSchema.parse(body);
@@ -284,7 +285,7 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       model: getAiLanguageModel("chat"),
       messages: convertedMessages,
-      system: `${systemPrompt}${intentPrompt}${dataQualityPrompt}`,
+      system: `${systemPrompt}${intentPrompt}${dataQualityPrompt}${promptSafetyPreamble}`,
       temperature: policy.temperature,
       stopWhen: stepCountIs(policy.maxSteps),
       tools: scopedTools,
