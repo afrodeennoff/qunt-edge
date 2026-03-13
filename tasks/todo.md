@@ -17,6 +17,13 @@
 - [ ] Run `npm run -s build`
 - [ ] Capture/finalize verification summary (pass/fail + key outputs)
 
+## Task: Trade image editor lint cleanup (2026-03-14)
+
+- [x] Capture the current ESLint output for `app/[locale]/dashboard/components/tables/trade-image-editor.tsx` (`npx eslint ...`).
+- [ ] Update the component to drop unused state/imports, tighten `trade`/update payload typing, and clean the upload effect/dependency handling without altering auth/ownership guards.
+- [ ] Re-run `npx eslint app/[locale]/dashboard/components/tables/trade-image-editor.tsx` to confirm the earlier warnings are gone.
+- [ ] Document the lint-before/after results along with a short summary of the code-quality improvements.
+
 ## Current Task: Commit and push current changes
 
 - [x] Review git status/diff to confirm staged scope

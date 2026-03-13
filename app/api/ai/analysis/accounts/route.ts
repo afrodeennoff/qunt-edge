@@ -15,6 +15,7 @@ export const maxDuration = 300;
 const accountsAnalysisRateLimit = rateLimit({ limit: 10, window: 60_000, identifier: "ai-analysis-accounts" });
 
 const analysisSchema = z.object({
+  messages: z.array(z.custom<UIMessage>()).min(1),
   username: z.string().optional(),
   locale: z.string().default("en"),
   timezone: z.string().default("UTC"),
@@ -87,27 +88,9 @@ export async function POST(req: NextRequest) {
 
   try {
 
-    const {
-      messages,
-      username,
-      locale,
-      timezone,
-      currentTime,
-    }: {
-      messages: UIMessage[];
-      username: string;
-      currentTime: string;
-      locale: string;
-      timezone: string;
-    } = await req.json();
-
-    const validatedData = analysisSchema.parse({
-      username,
-      locale,
-      timezone,
-      currentTime,
-    });
-    const modelMessages = await convertToModelMessages(messages);
+    const body = await req.json();
+    const validatedData = analysisSchema.parse(body);
+    const modelMessages = await convertToModelMessages(validatedData.messages);
 
     let toolCallsCount = 0;
 

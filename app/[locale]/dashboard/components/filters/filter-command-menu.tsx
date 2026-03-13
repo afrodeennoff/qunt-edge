@@ -24,9 +24,9 @@ import { z } from "zod/v3"
 
 // Add schema for date parse validation
 const dateParseSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  weekdays: z.array(z.string()).optional(),
+  from: z.string().nullable().optional(),
+  to: z.string().nullable().optional(),
+  weekdays: z.array(z.number().int().min(0).max(6)).nullable().optional(),
 })
 
 interface FilterCommandMenuProps {
@@ -185,7 +185,7 @@ export function FilterCommandMenu({ className, variant = "navbar" }: FilterComma
 
       // Handle weekday filter
       if (validatedData.weekdays && Array.isArray(validatedData.weekdays) && validatedData.weekdays.length > 0) {
-        setWeekdayFilter({ days: validatedData.weekdays.map(Number) })
+        setWeekdayFilter({ days: validatedData.weekdays })
         // Clear search value after successful parse
         setSearchValue("")
         toast.success(t('filters.commandMenu.weekdayFilterApplied'))

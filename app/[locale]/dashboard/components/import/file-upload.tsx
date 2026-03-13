@@ -35,14 +35,34 @@ export default function FileUpload({
   const [parsedFiles, setParsedFiles] = useState<string[][][]>([])
   const t = useI18n()
 
+  // Security: File size and type validation
+  const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+  const ALLOWED_TYPES = [
+    'text/csv',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  ]
+
   const processFile = useCallback((file: File, index: number) => {
     return new Promise<void>((resolve, reject) => {
+      // Security: Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        reject(new Error(`File size exceeds 5MB limit. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`))
+        return
+      }
+
+      // Security: Validate file type
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        reject(new Error(`Invalid file type: ${file.type}. Only CSV and Excel files are allowed.`))
+        return
+      }
+
       // First read the first line to detect delimiter
       const reader = new FileReader();
       reader.onload = (e) => {
         const firstLine = e.target?.result?.toString().split('\n')[0] || '';
         const delimiter = firstLine.includes(';') ? ';' : ',';
-        
+
         Papa.parse(file, {
           delimiter,
           complete: (result) => {
@@ -86,7 +106,16 @@ export default function FileUpload({
     })
   }, [processFile, setError, uploadedFiles.length])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    // Security: Validate files at dropzone level
+    maxSize: MAX_FILE_SIZE,
+    accept: {
+      'text/csv': ['.csv'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+    }
+  })
 
   const removeFile = (index: number) => {
     setUploadedFiles(prevFiles => prevFiles.filter((_, i) => i !== index))

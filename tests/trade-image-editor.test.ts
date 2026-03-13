@@ -29,4 +29,33 @@ describe("trade image ownership guard", () => {
       /relative segments/i
     );
   });
+
+  it("normalizes separators, dot segments, and whitespace before returning the path", () => {
+    const prefix = "actor-abc/";
+    const messyPath = "  actor-abc\\\\//trades/./2026\\inspection.png  ";
+    expect(ensureOwnedImagePath(messyPath, prefix)).toBe(
+      "actor-abc/trades/2026/inspection.png"
+    );
+  });
+
+  it("normalizes the actor prefix before evaluating ownership", () => {
+    const prefix = "/actor-abc\\";
+    const path = "\\actor-abc\\trades\\2026\\inspection.png";
+    expect(ensureOwnedImagePath(path, prefix)).toBe(
+      "actor-abc/trades/2026/inspection.png"
+    );
+  });
+
+  it("rejects encoded traversal segments", () => {
+    const prefix = "actor-abc/";
+    const encodedPath = "actor-abc/trades/%2e%2e/secret.png";
+    expect(() => ensureOwnedImagePath(encodedPath, prefix)).toThrow(
+      /relative segments/i
+    );
+  });
+
+  it("rejects whitespace-only actor prefixes", () => {
+    const path = "actor-abc/trades/inspection.png";
+    expect(() => ensureOwnedImagePath(path, "   ")).toThrow(/actor context/i);
+  });
 });

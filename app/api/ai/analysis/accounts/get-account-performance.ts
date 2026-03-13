@@ -3,6 +3,7 @@ import { getUserId } from "@/server/auth";
 import { getGroupsAction } from "@/server/groups";
 import { normalizeTrades, type AnalyticsTrade, tradeNetPnl } from "@/lib/ai/trade-normalization";
 import { tool } from "ai";
+import { format, startOfWeek } from "date-fns";
 import { z } from 'zod/v3';
 
 // Define Zod schemas first
@@ -152,7 +153,8 @@ function calculateAccountMetrics(
   // Calculate consistency (percentage of profitable weeks)
   const weeklyGroups = accountTrades.reduce((groups, trade) => {
     const date = new Date(trade.entryDate);
-    const weekKey = `${date.getFullYear()}-W${Math.ceil(date.getDate() / 7)}`;
+    const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+    const weekKey = format(weekStart, "yyyy-MM-dd");
     if (!groups[weekKey]) groups[weekKey] = [];
     groups[weekKey].push(trade);
     return groups;
