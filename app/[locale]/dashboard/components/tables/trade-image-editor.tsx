@@ -136,10 +136,12 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
   const resolvedImageBase64 = localImages?.imageBase64 || trade.imageBase64;
   const resolvedImageBase64Second = localImages?.imageBase64Second || trade.imageBase64Second;
 
-  const imageArray =
+  const imageArray: string[] =
     trade.images && trade.images.length > 0
-      ? trade.images
-      : [resolvedImageBase64, resolvedImageBase64Second].filter(Boolean);
+      ? trade.images.filter((image): image is string => typeof image === "string" && image.length > 0)
+      : [resolvedImageBase64, resolvedImageBase64Second].filter(
+          (image): image is string => typeof image === "string" && image.length > 0,
+        );
 
   useEffect(() => {
     let cancelled = false;
