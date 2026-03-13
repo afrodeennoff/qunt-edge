@@ -436,6 +436,21 @@ export function FormatPreview({
     return transformRowData(batchRows, headers, mappings);
   };
 
+  const scrollToBottom = useCallback(() => {
+    if (!tableContainerRef.current) return;
+
+    const scrollContainer = tableContainerRef.current.querySelector<HTMLElement>(
+      '[data-radix-scroll-area-viewport]'
+    );
+
+    if (!scrollContainer) return;
+
+    scrollContainer.scrollTo({
+      top: scrollContainer.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, []);
+
 
   const appendUniqueTrades = useCallback((incomingTrades: Partial<ImportTradeDraft>[]) => {
     const uniqueTrades = incomingTrades.filter(newTrade =>
@@ -458,17 +473,9 @@ export function FormatPreview({
     processedTradesRef.current = mergedTrades;
     setProcessedTrades(mergedTrades);
     scheduleManagedTimeout(() => {
-      if (tableContainerRef.current) {
-        const scrollContainer = tableContainerRef.current.querySelector('[data-radix-scroll-area-viewport]');
-        if (scrollContainer) {
-          scrollContainer.scrollTo({
-            top: scrollContainer.scrollHeight,
-            behavior: 'smooth',
-          });
-        }
-      }
+      scrollToBottom();
     }, 100);
-  }, [scheduleManagedTimeout, setProcessedTrades]);
+  }, [scheduleManagedTimeout, scrollToBottom, setProcessedTrades]);
 
   // Handle streaming results from first useObject
   useEffect(() => {

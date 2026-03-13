@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, convertToModelMessages, ToolSet } from "ai";
+import { streamText, stepCountIs, convertToModelMessages, type ToolSet } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod/v3";
 import { getFinancialNews } from "./tools/get-financial-news";
@@ -138,39 +138,58 @@ function getToolingPolicy(intent: ChatIntent) {
 function withToolGuards<T extends ToolSet>(tools: T, maxCallsPerTool = 2): T {
   const callCount = new Map<string, number>();
   const seenArgs = new Set<string>();
+  const guarded = {} as Partial<T>;
 
-  return Object.fromEntries(
-    Object.entries(tools).map(([name, definition]) => {
-      if (!definition || typeof definition.execute !== "function") {
-        return [name, definition];
-      }
+  for (const [name, definition] of Object.entries(tools) as Array<[keyof T & string, T[keyof T & string]]>) {
+    if (!definition || typeof definition.execute !== "function") {
+      guarded[name] = definition;
+      continue;
+    }
 
-      const execute = definition.execute;
+    const execute = definition.execute;
 
-      return [
-        name,
-        {
-          ...definition,
-          execute: async (...params: Parameters<typeof execute>) => {
-            const currentCount = (callCount.get(name) ?? 0) + 1;
-            if (currentCount > maxCallsPerTool) {
-              throw new Error(`Tool call limit reached for ${name}`);
-            }
+    guarded[name] = {
+      ...definition,
+      execute: async (...params: Parameters<typeof execute>) => {
+        const currentCount = (callCount.get(name) ?? 0) + 1;
+        if (currentCount > maxCallsPerTool) {
+          throw new Error(`Tool call limit reached for ${name}`);
+        }
 
-            const signature = `${name}:${JSON.stringify(params[0] ?? {})}`;
-            if (seenArgs.has(signature)) {
-              throw new Error(`Duplicate tool call blocked for ${name}`);
-            }
+        const signature = `${name}:${JSON.stringify(params[0] ?? {})}`;
+        if (seenArgs.has(signature)) {
+          throw new Error(`Duplicate tool call blocked for ${name}`);
+        }
 
-            callCount.set(name, currentCount);
-            seenArgs.add(signature);
+        callCount.set(name, currentCount);
+        seenArgs.add(signature);
 
-            return execute(...params);
-          },
-        },
-      ];
-    }),
-  ) as T;
+        return execute(...params);
+      },
+    } as T[keyof T & string];
+  }
+
+  return guarded as T;
+}
+
+function scopeTools<T extends ToolSet>(
+  tools: T,
+  allowedToolNames: ReadonlyArray<keyof T & string> | null,
+): T {
+  if (allowedToolNames === null) {
+    return tools;
+  }
+
+  const allowed = new Set<string>(allowedToolNames);
+  const scoped = {} as Partial<T>;
+
+  for (const [toolName, definition] of Object.entries(tools) as Array<[keyof T & string, T[keyof T & string]]>) {
+    if (allowed.has(toolName)) {
+      scoped[toolName] = definition;
+    }
+  }
+
+  return scoped as T;
 }
 
 export async function POST(req: NextRequest) {
@@ -258,14 +277,7 @@ export async function POST(req: NextRequest) {
 
     const availableTools = withToolGuards(availableChatTools);
 
-    const scopedTools =
-      toolPolicy.allowedToolNames === null
-        ? availableTools
-        : Object.fromEntries(
-            Object.entries(availableTools).filter(([toolName]) =>
-              toolPolicy.allowedToolNames?.includes(toolName as ChatToolName),
-            ),
-          );
+    const scopedTools = scopeTools(availableTools, toolPolicy.allowedToolNames);
 
     let toolCallsCount = 0;
 
