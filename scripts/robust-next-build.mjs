@@ -40,10 +40,11 @@ function isTransientNextBuildFsRace(output) {
   // - .next/build-manifest.json
   // - .next/server/pages-manifest.json
   // - _buildManifest.js.tmp.* / _buildManifest.js
-  // Retry only these specific build-artifact misses.
+  // Retry only specific build-artifact misses observed in this workspace.
   return /\/\.next\/(server\/)?(pages-manifest\.json|build-manifest\.json)/.test(
     output,
-  ) || /\/\.next\/static\/.*_buildManifest\.js(\.tmp\.[^'"\s]+)?/.test(output);
+  ) || /\/\.next\/static\/.*_buildManifest\.js(\.tmp\.[^'"\s]+)?/.test(output)
+    || /\/\.next\/server\/[^'"\s]+\.nft\.json/.test(output);
 }
 
 const MAX_ATTEMPTS = Number(process.env.NEXT_BUILD_MAX_ATTEMPTS ?? "2");
@@ -66,4 +67,3 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 }
 
 process.exit(1);
-
