@@ -1,16 +1,21 @@
 import { Badge } from '@/components/ui/badge'
-import { ShieldCheck, Lock, Server, LifeBuoy, MessageSquareQuote } from 'lucide-react'
+import { ShieldCheck, Lock, Server, LifeBuoy, MessageSquareQuote, Check } from 'lucide-react'
 
 const trustPillars = [
   {
     title: 'Security By Design',
-    body: 'Protected account boundaries and scoped data access across trade imports, layouts, and analytics.',
+    body: 'Account-scoped reads and writes with ownership checks across imports, layouts, optimized updates, and uploads.',
     icon: Lock,
   },
   {
     title: 'Reliable Operations',
-    body: 'Fail-closed AI budget controls, explicit error contracts, and hardened route behavior.',
+    body: 'Fail-closed budget enforcement, explicit error contracts, and hardened routes that don’t silently fall back.',
     icon: Server,
+  },
+  {
+    title: 'Data You Control',
+    body: 'Bring your existing workflow, export review briefs, and keep your performance loop portable.',
+    icon: ShieldCheck,
   },
   {
     title: 'Support You Can Reach',
@@ -28,6 +33,17 @@ const testimonials = [
     quote: 'Our team moved from PnL storytelling to process accountability in one dashboard.',
     role: 'Desk Manager',
   },
+  {
+    quote: 'The weekly brief made coaching conversations faster because the data is already organized.',
+    role: 'Mentor / Coach',
+  },
+]
+
+const enforcement = [
+  'Ownership guards across imports, layouts, batch updates, and media deletion paths.',
+  'Clear error envelopes (no mixed formats) so clients can handle failures predictably.',
+  'Budget and routing guardrails designed to fail closed when dependencies are unavailable.',
+  'Isolation regression tests to prevent cross-user data bleed as the product evolves.',
 ]
 
 export default function TrustAndProof() {
@@ -42,9 +58,12 @@ export default function TrustAndProof() {
             Built like a trading system:
             <span className="block text-[hsl(var(--brand-primary))]">secure, observable, and review-ready</span>
           </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-[1.78] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
+            Trust is not a slogan. It is enforced boundaries, predictable failure modes, and a review loop you can audit week after week.
+          </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {trustPillars.map((pillar) => {
             const Icon = pillar.icon
             return (
@@ -59,7 +78,7 @@ export default function TrustAndProof() {
           })}
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           {testimonials.map((item) => (
             <article key={item.role} className="marketing-panel rounded-2xl p-6">
               <MessageSquareQuote className="h-5 w-5 text-[hsl(var(--brand-primary))]" />
@@ -67,6 +86,25 @@ export default function TrustAndProof() {
               <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item.role}</p>
             </article>
           ))}
+
+          <article className="marketing-panel rounded-2xl p-6">
+            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
+              What We Enforce
+            </p>
+            <h3 className="mt-2 text-lg font-semibold tracking-[-0.01em] [font-family:var(--home-display)]">
+              Hard boundaries, not hope.
+            </h3>
+            <ul className="mt-4 space-y-3">
+              {enforcement.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--mk-border)/0.32)] bg-[hsl(var(--mk-surface-muted)/0.7)] text-[hsl(var(--brand-primary))]">
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
         </div>
 
         <div className="mt-5 flex items-center justify-center gap-2 text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">

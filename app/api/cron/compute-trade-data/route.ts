@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
-import { Trade } from "@/prisma/generated/prisma";
+import type { Trade } from "@/prisma/generated/prisma";
 import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
 import { requireServiceAuth, toErrorResponse } from "@/server/authz";
 import { logger, withLogContext } from "@/lib/logger";

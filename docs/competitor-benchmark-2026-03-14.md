@@ -62,6 +62,9 @@
 - Added home structured data JSON-LD (SoftwareApplication).
 - Added explicit onboarding journey section focused on first-insight speed and weekly habit-loop progression.
 - Expanded comparison matrix to emphasize time-to-value differentiation.
+- Added an above-the-fold proof strip that leads with enforceable boundaries (account scoping, fail-closed guardrails) before testimonials.
+- Tightened CTA naming consistency across hero, pricing, and end-cap CTA (audit-first framing).
+- Reduced complexity risk in PricingSection by extracting plan URL/price logic into helpers/components (no behavior change).
 
 ## Remaining Follow-ups
 - Add evidence-backed public customer proof block (real testimonials/logos/metrics from your own user base).

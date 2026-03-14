@@ -41,7 +41,7 @@ export default function Hero({ locale }: { locale: string }) {
           </Button>
           <Button asChild variant="outline" size="lg" className="h-12 w-full max-w-[320px] rounded-2xl border-border/70 bg-card/60 text-[11px] font-medium uppercase tracking-[0.14em] backdrop-blur-sm hover:bg-card/80 sm:min-w-[220px] sm:w-auto [font-family:var(--home-copy)]">
             <Link href={`/${locale}/#pricing`}>
-              Compare Plans
+              See Pricing
               <ArrowRight className="ml-2 h-3.5 w-3.5" />
             </Link>
           </Button>
