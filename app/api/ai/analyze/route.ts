@@ -6,53 +6,47 @@ import { categorizeAiError, logAiRequest } from "@/lib/ai/telemetry";
 import { guardAiRequest } from "@/lib/ai/route-guard";
 import { apiError } from "@/lib/api-response";
 import { getAiErrorCode, logAiError } from "@/lib/ai/error-utils";
-
-// Wrapper for accounts analysis - delegates to shared handler
-const accountsAnalysisRateLimit = rateLimit({ 
-  limit: 10, 
-  window: 60_000, 
-  identifier: "ai-analysis-accounts" 
-});
-
-// Schema for accounts analysis (compatible with old API)
-const accountsSchema = z.object({
-  messages: z.array(z.any()).min(1),
-  username: z.string().optional(),
-  locale: z.string().default("en"),
-  timezone: z.string().default("UTC"),
-  currentTime: z.string().default(new Date().toISOString()),
-});
+import { 
+  unifiedSchema, 
+  handleAccountsAnalysis, 
+  handleInstrumentAnalysis, 
+  handleTimeOfDayAnalysis 
+} from "./handlers";
 
 export const maxDuration = 300;
 
-// Import shared handler
-import { handleAccountsAnalysis } from "../../analyze/handlers";
+// Unified rate limiter combining all three analysis types
+const unifiedAnalysisRateLimit = rateLimit({ 
+  limit: 10, 
+  window: 60_000, 
+  identifier: "ai-analysis-unified" 
+});
 
+// Main unified route handler
 export async function POST(req: NextRequest) {
   const policy = getAiPolicy("analysis");
   const startedAt = Date.now();
 
   // Apply AI route guard (auth + entitlements + rate limit)
-  const guard = await guardAiRequest(req, "analysis", accountsAnalysisRateLimit);
+  const guard = await guardAiRequest(req, "analysis", unifiedAnalysisRateLimit);
   if (!guard.ok) return guard.response;
   const { userId } = guard;
 
   try {
     const body = await req.json();
-    const validatedData = accountsSchema.parse(body);
+    const validatedData = unifiedSchema.parse(body);
 
-    // Transform to unified format
-    const unifiedData = {
-      type: "accounts" as const,
-      messages: validatedData.messages,
-      username: validatedData.username,
-      locale: validatedData.locale,
-      timezone: validatedData.timezone,
-      currentTime: validatedData.currentTime,
-    };
-
-    // Delegate to shared handler
-    return handleAccountsAnalysis(unifiedData, policy, startedAt, userId, "/api/ai/analysis/accounts");
+    // Type-based dispatch to handlers
+    switch (validatedData.type) {
+      case "accounts":
+        return handleAccountsAnalysis(validatedData, policy, startedAt, userId, "/api/ai/analyze");
+      case "instrument":
+        return handleInstrumentAnalysis(validatedData, policy, startedAt, userId, "/api/ai/analyze");
+      case "time-of-day":
+        return handleTimeOfDayAnalysis(validatedData, policy, startedAt, userId, "/api/ai/analyze");
+      default:
+        return apiError("VALIDATION_FAILED", "Invalid analysis type", 400);
+    }
   } catch (error) {
     if (error instanceof SyntaxError) {
       return apiError("BAD_REQUEST", "Malformed JSON request body", 400);
@@ -66,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     void logAiRequest({
       userId,
-      route: "/api/ai/analysis/accounts",
+      route: "/api/ai/analyze",
       feature: "analysis",
       model: policy.model,
       provider: policy.provider,
@@ -77,7 +71,7 @@ export async function POST(req: NextRequest) {
       sampleRate: 1,
     });
 
-    logAiError("Error in account analysis route", error, { userId });
-    return apiError("INTERNAL_ERROR", "Failed to process account analysis", 500);
+    logAiError("Error in unified analysis route", error, { userId });
+    return apiError("INTERNAL_ERROR", "Failed to process analysis", 500);
   }
 }
