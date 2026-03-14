@@ -5,6 +5,8 @@ import { apiError } from '@/lib/api-response'
 import { createRouteClient } from '@/lib/supabase/route-client'
 
 
+export const dynamic = 'force-dynamic'
+
 function serializeWithDecimals<T>(value: T): T {
   return JSON.parse(
     JSON.stringify(value, (_key, nested) => {

@@ -6,6 +6,8 @@ import { createRouteClient } from '@/lib/supabase/route-client'
 
 const MAX_PAGE_SIZE = 200
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteClient(request)

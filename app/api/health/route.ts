@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { logger, withLogContext } from '@/lib/logger'
 import { requireServiceAuth } from '@/server/authz'
 
+export const dynamic = 'force-dynamic'
+
 const DB_LATENCY_ALERT_MS = Number.parseInt(process.env.DB_LATENCY_ALERT_MS || "250", 10)
 const EXPOSE_HEALTH_DETAILS_PUBLICLY =
   process.env.NODE_ENV !== 'production' && process.env.HEALTH_DETAILS_PUBLIC === 'true'
@@ -93,7 +95,12 @@ export async function GET(request: Request) {
         })
       }
 
-      return NextResponse.json(body, { status: 200 })
+      return NextResponse.json(body, {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, max-age=15, stale-while-revalidate=60',
+        },
+      })
     }
   )
 }

@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
+import { Trade } from "@prisma/client";
 import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
 import { requireServiceAuth, toErrorResponse } from "@/server/authz";
 import { logger, withLogContext } from "@/lib/logger";
@@ -336,18 +337,43 @@ export async function GET(request: Request) {
         const lastWeekEnd = endOfWeek(subWeeks(now, 1));
 
 
-        // Fetch all trades from last week
-        const trades = await prisma.trade.findMany({
-          where: {
-            entryDate: {
-              gte: lastWeekStart.toISOString(),
-              lte: lastWeekEnd.toISOString()
+        // Batch process trades from last week using cursor-based pagination
+        // Process in chunks of 100 to avoid memory/connection exhaustion
+        const BATCH_SIZE = 100;
+        let cursor: string | undefined = undefined;
+        let hasMore = true;
+        
+        const allTrades: Trade[] = [];
+        
+        while (hasMore) {
+          const batch: Trade[] = await prisma.trade.findMany({
+            where: {
+              entryDate: {
+                gte: lastWeekStart.toISOString(),
+                lte: lastWeekEnd.toISOString()
+              }
+            },
+            take: BATCH_SIZE,
+            cursor: cursor ? { id: cursor } : undefined,
+            skip: cursor ? 1 : 0, // Skip the cursor itself to avoid reprocessing
+            orderBy: {
+              id: 'asc'
             }
-          },
-          orderBy: {
-            entryDate: 'asc'
+          });
+          
+          if (batch.length === 0) {
+            hasMore = false;
+          } else {
+            allTrades.push(...batch);
+            // Set cursor to the last item's ID for next iteration
+            cursor = batch[batch.length - 1].id;
+            hasMore = batch.length === BATCH_SIZE;
+            
+            logger.info(`[CronComputeTradeData] Fetched batch of ${batch.length} trades, total so far: ${allTrades.length}`);
           }
-        });
+        }
+        
+        const trades = allTrades;
 
 
         if (trades.length === 0) {
@@ -448,6 +474,10 @@ export async function GET(request: Request) {
           failed: failedSaves,
           instruments: Object.keys(instrumentGroups),
           priceDiscrepancies: priceDiscrepancies.length,
+          batchInfo: {
+            totalFetched: trades.length,
+            batchSize: BATCH_SIZE
+          },
           data: allProcessedTrades.slice(0, 5), // Return first 5 as sample
           summary: {
             averageMAE: allProcessedTrades.reduce((sum, t) => sum + t.mae, 0) / allProcessedTrades.length,
