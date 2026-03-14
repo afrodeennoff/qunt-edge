@@ -3,7 +3,7 @@ import {
   getRithmicSynchronizations,
   setRithmicSynchronization,
   removeRithmicSynchronization,
-} from "@/app/[locale]/dashboard/components/import/rithmic/sync/actions";
+} from "@/server/imports/rithmic-sync-actions";
 import { createRouteClient } from "@/lib/supabase/route-client";
 import { z } from "zod";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";

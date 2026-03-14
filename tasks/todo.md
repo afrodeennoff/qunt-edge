@@ -446,3 +446,16 @@ Verification: `npm run lint -- app/layout.tsx tailwind.config.ts app/globals.css
 - [x] Run `npm run -s typecheck`.
 - [x] Run `npm run -s build`.
 - [x] Capture command outputs and summarize pass/fail fate.
+
+## Task: Architecture modernization program kickoff (2026-03-15)
+
+- [x] Run parallel specialist audits across frontend topology, dashboard/charts, API layering, AI boundaries, import integrations, and DB/repository boundaries.
+- [x] Produce a consolidated architecture audit with before/after structure and migration batches in `docs/audits/architecture-refactor-program-2026-03-15.md`.
+- [x] Execute the first low-risk refactor slice: remove API -> UI import coupling for sync actions by moving import actions to `server/imports/*` with compatibility shims.
+- [x] Update affected API route imports to server-owned modules.
+- [x] Run verification gates for touched scope (`npx eslint ...`, `npm run -s typecheck`).
+
+## Review
+- `npx eslint` on touched files: 0 errors, warnings-only baseline.
+- `npm run -s typecheck`: pass (exit 0).
+- Behavior-preserving move completed; no route contract changes introduced in this batch.

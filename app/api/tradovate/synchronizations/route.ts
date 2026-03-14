@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getTradovateSynchronizations,
   removeTradovateToken,
-} from "@/app/[locale]/dashboard/components/import/tradovate/actions";
+} from "@/server/imports/tradovate-actions";
 import { createRouteClient } from "@/lib/supabase/route-client";
 import { z } from "zod";
 import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate";
