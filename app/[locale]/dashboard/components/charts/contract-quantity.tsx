@@ -10,6 +10,7 @@ import {
   Tooltip,
   Cell,
   ResponsiveContainer,
+  type TooltipProps,
 } from "recharts";
 import {
   Card,
@@ -86,27 +87,19 @@ export default React.memo(function ContractQuantityChart({
      return `hsl(var(--chart-loss) / ${intensity})`;
    };
 
-   interface TooltipParams {
-     active: boolean
-     payload: Payload[]
-     label: string
-   }
+   // Custom tooltip component properly typed with Recharts TooltipProps
+   type CustomTooltipProps = TooltipProps<number, string>;
 
-   interface Payload {
-     payload: {
-       totalQuantity: number
-       tradeCount: number
-     }
-   }
-
-   const CustomTooltip = ({ active, payload, label }: TooltipParams) => {
+   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
      if (active && payload && payload.length) {
        const data = payload[0].payload;
+       const parsedLabel = typeof label === "number" ? label : parseInt(label ?? "0", 10)
+       const hourLabel = Number.isFinite(parsedLabel) ? parsedLabel : 0
        return (
          <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
             <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
               <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
-              <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{`${parseInt(label)}:00 - ${(parseInt(label) + 1) % 24}:00`}</span>
+              <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{`${hourLabel}:00 - ${(hourLabel + 1) % 24}:00`}</span>
             </div>
            <div className="space-y-1.5">
              <div className="flex justify-between items-center">
@@ -213,7 +206,13 @@ export default React.memo(function ContractQuantityChart({
                   tickFormatter={(value: number) => value.toFixed(0)}
                 />
                  <Tooltip
-                   content={({ active, payload, label }: TooltipParams) => <CustomTooltip active={active} payload={payload} label={label} />}
+                   content={({ active, payload, label }) => (
+                     <CustomTooltip
+                       active={active}
+                       payload={payload as Payload[] | undefined}
+                       label={label}
+                     />
+                   )}
                    cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
                  />
                 <Bar

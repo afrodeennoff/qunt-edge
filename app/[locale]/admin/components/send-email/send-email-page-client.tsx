@@ -109,9 +109,8 @@ export function SendEmailPageClient() {
 
   const selectedTemplateMeta = useMemo(
     () => templateOptions.find((option) => option.value === selectedTemplate),
-    [selectedTemplate]
+    [selectedTemplate, templateOptions]
   )
-  const selectedTemplateLabel = selectedTemplateMeta ? format(selectedTemplateMeta.labelKey) : ""
 
   useEffect(() => {
     const loadUsers = async () => {
