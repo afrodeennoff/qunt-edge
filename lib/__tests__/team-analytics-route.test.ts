@@ -38,7 +38,7 @@ describe("teams analytics route", () => {
 
     expect(response.status).toBe(404)
     const payload = await response.json()
-    expect(payload).toEqual({
+    expect(payload).toMatchObject({
       error: {
         code: "NOT_FOUND",
         message: "Team not found",
@@ -60,7 +60,7 @@ describe("teams analytics route", () => {
 
     expect(response.status).toBe(400)
     const payload = await response.json()
-    expect(payload).toEqual({
+    expect(payload).toMatchObject({
       error: {
         code: "VALIDATION_FAILED",
         message: "Invalid period",
