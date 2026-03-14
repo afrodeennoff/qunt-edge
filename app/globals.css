@@ -558,9 +558,8 @@
   /* Fluid Grid System - Auto-adapting layout engine */
   .grid-fluid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(280px, 30vw, 450px)), 1fr));
-    gap: var(--fluid-gap, clamp(1rem, 2.5vw, 2.5rem));
-    width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(250px, 30vw, 400px), 1fr));
+    gap: clamp(1rem, 3vw, 2.5rem);
   }
 
   /* Fixed Aspect Ratio Utilities for Dynamic Responsiveness */

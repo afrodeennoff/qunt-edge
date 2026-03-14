@@ -128,8 +128,13 @@ export default function Navbar() {
 
                 {!isPlusUser() && (
                   <Link href="/dashboard/billing">
-                    <Button variant="ghost" size="sm" className="h-9 px-5 gap-2 rounded-xl bg-secondary/25 border border-border/60 text-foreground text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-none hover:bg-secondary/35">
-                      <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-9 px-5 gap-2 rounded-xl bg-secondary/25 border border-border/60 text-foreground text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-none hover:bg-secondary/35"
+                      aria-label="Upgrade to Elite plan"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 animate-pulse" aria-hidden="true" />
                       <span>Elite</span>
                     </Button>
                   </Link>

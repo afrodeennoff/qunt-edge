@@ -545,8 +545,8 @@ export default function WidgetCanvas() {
 
   if (!layouts) {
     return (
-      <div className="relative mt-0 w-full min-h-screen">
-        <div className="animate-pulse rounded-2xl border border-white/12 bg-black/60 p-6">
+      <div className="relative mt-0 w-full min-h-0" role="status" aria-label="Loading dashboard">
+        <div className="animate-pulse rounded-2xl border border-white/12 bg-black/60 p-6" aria-hidden="true">
           <div className="h-4 w-48 rounded bg-white/10" />
           <div className="mt-3 h-3 w-96 max-w-full rounded bg-white/10" />
           <div className="mt-6 flex gap-2">
@@ -554,14 +554,15 @@ export default function WidgetCanvas() {
             <div className="h-9 w-28 rounded bg-white/10" />
           </div>
         </div>
+        <span className="sr-only">Loading dashboard widgets...</span>
       </div>
     )
   }
 
   if (currentLayout.length === 0) {
     return (
-      <div className="relative mt-0 w-full min-h-screen">
-        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-card/90 p-6 text-foreground shadow-2xl">
+      <div className="relative mt-0 w-full min-h-0" role="status">
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-card/90 p-6 text-foreground shadow-2xl" role="alert">
           <div className="text-sm font-semibold tracking-tight">
             {(t as any)("widgets.emptyLayoutTitle") ?? "No widgets on your dashboard."}
           </div>
@@ -590,7 +591,8 @@ export default function WidgetCanvas() {
 
   return (
     <div className={cn(
-      "relative mt-0 w-full min-h-screen",
+      "relative mt-0 w-full min-h-0",
+      isMobile ? "overflow-x-hidden" : ""
     )}>
       {layouts && (
         <div className="relative">

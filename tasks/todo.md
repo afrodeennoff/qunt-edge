@@ -1,3 +1,11 @@
+## Task: /deals verification (2026-03-14)
+
+- [x] Run `npx eslint app/[locale]/(landing)/deals/page.tsx`
+- [x] Run `npm run -s typecheck`
+- [x] Run `npm run -s build`
+- [x] Document accessibility/SEO sanity pass for `app/[locale]/(landing)/deals/page.tsx`
+- [x] Capture final verification summary
+
 ## Current Task: Extend verification for CRUD/auth/state-sync
 
 - [x] Audit existing tests for CRUD/auth/state-sync paths, noting coverage gaps and risky areas.

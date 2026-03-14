@@ -343,6 +343,7 @@ model Trade {
   @@index([userId, instrument])
   @@index([userId, accountNumber, entryDate]) // Composite for dashboard trade queries
   @@index([userId, pnl]) // Composite for PnL filtering
+  @@index([userId, tags]) // GIN index for array column filtering
   @@schema("public")
 }
 
@@ -470,6 +471,7 @@ model TradeAnalytics {
 
   @@index([tradeId])
   @@index([computedAt])
+  @@index([tradeId, computedAt]) // Composite for trade analytics lookups
   @@schema("public")
 }
 

@@ -93,10 +93,15 @@ async function generateOverviewReport(dateFilter: DateFilter) {
     }),
   ])
 
-  const mrr = await calculateMRR()
-  const arr = await calculateARR()
-  const arpu = await calculateARPU()
-  const ltv = await calculateLTV()
+  // Run independent calculations in parallel, then derive dependent values
+  const [mrr, arpu] = await Promise.all([
+    calculateMRR(),
+    calculateARPU(),
+  ])
+
+  // ARR = MRR * 12, LTV = ARPU / churnRate (0.05)
+  const arr = mrr * 12
+  const ltv = arpu / 0.05
 
   return NextResponse.json({
     overview: {

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -13,8 +14,8 @@ import { useCurrency } from '@/hooks/use-currency'
 const plans = [
   {
     name: 'Starter',
-    price: '$0',
-    period: '/month',
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     subtitle: 'For traders building foundational review discipline',
     features: ['Manual journaling', 'Core trade analytics', 'Weekly process snapshot'],
     cta: 'Start Free',
@@ -23,8 +24,8 @@ const plans = [
   },
   {
     name: 'Pro AI',
-    price: '$29',
-    period: '/month',
+    monthlyPrice: 29,
+    yearlyPrice: 24,
     subtitle: 'For serious traders optimizing execution quality',
     features: [
       'AI session debriefs',
@@ -39,8 +40,8 @@ const plans = [
   },
   {
     name: 'Desk',
-    price: '$99',
-    period: '/month',
+    monthlyPrice: 99,
+    yearlyPrice: 84,
     subtitle: 'For prop teams, mentors, and performance managers',
     features: ['Team analytics workspace', 'Role-based reporting', 'Coaching intervention feed', 'Shared playbooks'],
     cta: 'Talk To Sales',
@@ -52,6 +53,9 @@ const plans = [
 export default function PricingSection() {
   const locale = useCurrentLocale()
   const { currency } = useCurrency()
+  const [billingMode, setBillingMode] = useState<'monthly' | 'annual'>('annual')
+
+  const periodLabel = useMemo(() => (billingMode === 'annual' ? '/month, billed yearly' : '/month'), [billingMode])
 
   return (
     <section id="pricing" className="relative border-y border-[hsl(var(--mk-border)/0.24)] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
@@ -67,7 +71,31 @@ export default function PricingSection() {
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.78] text-muted-foreground sm:text-[18px] [font-family:var(--home-copy)]">
             Start free. Upgrade when you want deeper diagnostics, tighter coaching loops, and desk-grade review workflows.
           </p>
-          <p className="mt-4 text-xs text-muted-foreground [font-family:var(--home-copy)]">Billed monthly. Cancel anytime.</p>
+          <div className="mx-auto mt-6 inline-flex rounded-xl border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.58)] p-1">
+            <button
+              type="button"
+              onClick={() => setBillingMode('monthly')}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.13em] transition-colors [font-family:var(--home-copy)]',
+                billingMode === 'monthly' ? 'bg-[hsl(var(--mk-surface))] text-[hsl(var(--mk-text))]' : 'text-muted-foreground hover:text-foreground'
+              )}
+              aria-pressed={billingMode === 'monthly'}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingMode('annual')}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.13em] transition-colors [font-family:var(--home-copy)]',
+                billingMode === 'annual' ? 'bg-[hsl(var(--mk-surface))] text-[hsl(var(--mk-text))]' : 'text-muted-foreground hover:text-foreground'
+              )}
+              aria-pressed={billingMode === 'annual'}
+            >
+              Annual (Best Value)
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground [font-family:var(--home-copy)]">7-day free trial on Pro AI. Cancel anytime.</p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -89,10 +117,15 @@ export default function PricingSection() {
                 <CardHeader>
                   <CardTitle className="text-[1.35rem] font-semibold tracking-[-0.015em] [font-family:var(--home-display)]">{plan.name}</CardTitle>
                   <div className="mt-4 flex items-baseline text-5xl font-semibold tracking-[-0.025em] [font-family:var(--home-display)]">
-                    {plan.price}
-                    <span className="ml-1 text-sm font-medium text-muted-foreground [font-family:var(--home-copy)]">{plan.period}</span>
+                    {plan.monthlyPrice === 0 ? '$0' : `$${billingMode === 'annual' ? plan.yearlyPrice : plan.monthlyPrice}`}
+                    <span className="ml-1 text-sm font-medium text-muted-foreground [font-family:var(--home-copy)]">{periodLabel}</span>
                   </div>
                   <CardDescription className="mt-2 text-sm leading-relaxed [font-family:var(--home-copy)]">{plan.subtitle}</CardDescription>
+                  {billingMode === 'annual' && plan.monthlyPrice > 0 && (
+                    <p className="mt-2 text-xs text-[hsl(var(--brand-primary))] [font-family:var(--home-copy)]">
+                      Save ${plan.monthlyPrice - plan.yearlyPrice}/month with annual billing
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent className="flex-1">
                   <ul className="space-y-3">
@@ -135,6 +168,9 @@ export default function PricingSection() {
             </div>
           ))}
         </div>
+        <p className="mt-6 text-center text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
+          Transparent pricing. No hidden data limits. Upgrade only when your review process needs more depth.
+        </p>
       </div>
     </section>
   )

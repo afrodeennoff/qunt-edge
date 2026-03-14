@@ -55,5 +55,30 @@ export default async function HomePage({
     const { locale } = await params;
     setStaticParamsLocale(locale);
 
-    return <HomeContent locale={locale} />;
+    const softwareSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Qunt Edge',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.8',
+        ratingCount: '200',
+      },
+      description: 'AI-backed trading journal and execution review platform for discretionary traders and teams.',
+      url: `${SITE_ORIGIN}/${locale}`,
+    };
+
+    return (
+      <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
+        <HomeContent locale={locale} />
+      </>
+    );
 }

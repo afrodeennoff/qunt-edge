@@ -23,7 +23,7 @@ export default function CTA() {
           >
             Start My Performance Audit
           </Link>
-          <p className="text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">No credit card required</p>
+          <p className="text-xs text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">No credit card required. 7-day Pro trial unlocks advanced diagnostics.</p>
         </div>
       </div>
     </section>

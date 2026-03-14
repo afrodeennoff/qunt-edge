@@ -47,6 +47,12 @@ export default function Hero({ locale }: { locale: string }) {
           </Button>
         </div>
 
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">
+          <span className="marketing-badge rounded-full px-3 py-1">No credit card required</span>
+          <span className="marketing-badge rounded-full px-3 py-1">First audit in minutes</span>
+          <span className="marketing-badge rounded-full px-3 py-1">Built for discretionary futures traders</span>
+        </div>
+
         <div className="mt-16">
           <Card className="overflow-hidden border-border/70 bg-card/75 shadow-xl backdrop-blur-md">
             <CardContent className="p-4 sm:p-6">
@@ -79,8 +85,8 @@ export default function Hero({ locale }: { locale: string }) {
           <span>CSV Import</span>
         </div>
 
-        <p className="mt-6 text-center text-xs tracking-[0.08em] text-muted-foreground/60 [font-family:var(--home-copy)]">
-          No credit card required. Be review-ready before your next open.
+        <p className="mt-6 text-center text-xs tracking-[0.08em] text-muted-foreground/70 [font-family:var(--home-copy)]">
+          Join free. Import your first session. Get a ranked diagnostic before your next open.
         </p>
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(to_bottom,transparent,hsl(var(--background)))]" />

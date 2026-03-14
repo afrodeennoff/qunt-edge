@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic'
 import ProblemStatement from './ProblemStatement'
 import Features from './Features'
+import TrustAndProof from './TrustAndProof'
 
 const SectionSkeleton = () => <div className="min-h-24 w-full" />
 
@@ -20,6 +21,7 @@ export default function DeferredHomeSections() {
       <HowItWorks />
       <AnalysisDemo />
       <WhyChooseUs />
+      <TrustAndProof />
       <ComparisonSection />
       <AIFuturesSection />
       <PricingSection />
