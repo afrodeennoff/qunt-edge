@@ -13,6 +13,7 @@ function sanitizePeriodDays(value: string | null): number {
 }
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID()
   try {
     const userId = await getDatabaseUserId()
     if (!userId) {
@@ -71,6 +72,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(insights)
   } catch (error) {
     console.error("[Behavior Insights API] Failed to build insights", error)
-    return apiError("INTERNAL_ERROR", "Failed to build behavior insights", 500)
+    return apiError("INTERNAL_ERROR", "Failed to build behavior insights", 500, { requestId })
   }
 }

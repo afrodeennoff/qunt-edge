@@ -43,7 +43,7 @@ export default function ProblemStatement() {
           </div>
 
            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-             {problems.map((item, _i) => {
+             {problems.map((item) => {
                const Icon = item.icon
                return (
                  <article

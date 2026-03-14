@@ -64,6 +64,11 @@ describe("POST /api/rithmic/synchronizations", () => {
     )
 
     expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        code: "VALIDATION_FAILED",
+      },
+    })
     expect(setRithmicSynchronizationMock).not.toHaveBeenCalled()
   })
 })
@@ -107,6 +112,12 @@ describe("DELETE /api/rithmic/synchronizations", () => {
     )
 
     expect(response.status).toBe(404)
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        code: "NOT_FOUND",
+        message: "Synchronization not found",
+      },
+    })
     expect(removeRithmicSynchronizationMock).toHaveBeenCalledWith("ACC-1")
   })
 
@@ -124,6 +135,12 @@ describe("DELETE /api/rithmic/synchronizations", () => {
     )
 
     expect(response.status).toBe(401)
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Unauthorized",
+      },
+    })
     expect(removeRithmicSynchronizationMock).not.toHaveBeenCalled()
   })
 })

@@ -65,6 +65,12 @@ describe('DELETE /api/tradovate/synchronizations', () => {
     )
 
     expect(response.status).toBe(404)
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Synchronization not found',
+      },
+    })
     expect(removeTradovateTokenMock).toHaveBeenCalledWith('ACC-1')
   })
 

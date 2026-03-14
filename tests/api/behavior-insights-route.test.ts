@@ -65,11 +65,14 @@ describe("/api/behavior/insights error envelope", () => {
 
     expect(response.status).toBe(500)
     const payload = await response.json()
-    expect(payload).toEqual({
+    expect(payload).toMatchObject({
       error: {
         code: "INTERNAL_ERROR",
         message: "Failed to build behavior insights",
       },
+    })
+    expect(payload.error.details).toMatchObject({
+      requestId: expect.any(String),
     })
   })
 })

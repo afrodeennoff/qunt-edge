@@ -50,7 +50,7 @@ function isTransientNextBuildFsRace(output) {
     || /\/\.next\/types\//.test(output);
 }
 
-const MAX_ATTEMPTS = Number(process.env.NEXT_BUILD_MAX_ATTEMPTS ?? "2");
+const MAX_ATTEMPTS = Number(process.env.NEXT_BUILD_MAX_ATTEMPTS ?? "4");
 const RETRY_DELAY_MS = Number(process.env.NEXT_BUILD_RETRY_DELAY_MS ?? "250");
 
 const nextBin = getBin("next");
