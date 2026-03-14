@@ -1,17 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { assertAdminAccess, toErrorResponse } from '@/server/authz'
+import { assertAdminAccess } from '@/server/authz'
+import { apiError } from '@/lib/api-response'
+import { parseQuery, toValidationErrorResponse } from '@/app/api/_utils/validate'
+import { z } from 'zod'
 
 type DateFilter = { gte?: Date; lte?: Date }
 
-function parseDateParam(value: string | null): Date | null {
+const reportTypeSchema = z.enum([
+  'overview',
+  'revenue',
+  'churn',
+  'subscriptions',
+  'transactions',
+])
+
+const adminReportsQuerySchema = z.object({
+  type: reportTypeSchema.default('overview'),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+})
+
+function parseDateParam(value: string | null | undefined): Date | null {
   if (!value) return null
   const parsed = new Date(value)
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-function buildDateFilter(startDate: string | null, endDate: string | null): DateFilter {
+function buildDateFilter(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+): DateFilter {
   const dateFilter: DateFilter = {}
   const parsedStartDate = parseDateParam(startDate)
   const parsedEndDate = parseDateParam(endDate)
@@ -25,26 +45,25 @@ export async function GET(req: NextRequest) {
   try {
     await assertAdminAccess(requestId)
 
-    const { searchParams } = new URL(req.url)
-    const reportType = searchParams.get('type') || 'overview'
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
+    const {
+      type: reportType,
+      startDate,
+      endDate,
+    } = parseQuery(req.nextUrl.searchParams, adminReportsQuerySchema)
 
     if (startDate && !parseDateParam(startDate)) {
-      return NextResponse.json(
-        { error: 'Invalid startDate', code: 'INVALID_DATE_FILTER', requestId },
-        { status: 400 },
-      )
+      return apiError('BAD_REQUEST', 'Invalid startDate', 400, { requestId })
     }
 
     if (endDate && !parseDateParam(endDate)) {
-      return NextResponse.json(
-        { error: 'Invalid endDate', code: 'INVALID_DATE_FILTER', requestId },
-        { status: 400 },
-      )
+      return apiError('BAD_REQUEST', 'Invalid endDate', 400, { requestId })
     }
 
     const dateFilter = buildDateFilter(startDate, endDate)
+
+    if (dateFilter.gte && dateFilter.lte && dateFilter.gte > dateFilter.lte) {
+      return apiError('BAD_REQUEST', 'startDate must be before endDate', 400, { requestId })
+    }
 
     switch (reportType) {
       case 'overview':
@@ -58,14 +77,29 @@ export async function GET(req: NextRequest) {
       case 'transactions':
         return await generateTransactionReport(dateFilter)
       default:
-        return NextResponse.json(
-          { error: 'Invalid report type', code: 'INVALID_REPORT_TYPE', requestId },
-          { status: 400 }
-        )
+        return apiError('BAD_REQUEST', 'Invalid report type', 400, { requestId })
     }
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error)
+    if (validationResponse.status !== 500) return validationResponse
+
+    if (
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      'code' in error &&
+      'message' in error
+    ) {
+      const status = Number((error as { status: unknown }).status)
+      const code = String((error as { code: unknown }).code)
+      const message = String((error as { message: unknown }).message)
+      if (Number.isFinite(status) && status >= 400 && status <= 599) {
+        return apiError(code, message, status, { requestId })
+      }
+    }
+
     logger.error('[Admin Reports] Failed to generate report', { error })
-    return toErrorResponse(error)
+    return apiError('INTERNAL_ERROR', 'Internal server error', 500, { requestId })
   }
 }
 

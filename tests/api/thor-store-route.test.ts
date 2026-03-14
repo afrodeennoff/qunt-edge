@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { NextRequest } from 'next/server'
 
 const { verifySecureToken } = vi.hoisted(() => ({
   verifySecureToken: vi.fn(),
@@ -29,15 +30,18 @@ describe('DELETE /api/thor/store', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     verifySecureToken.mockResolvedValue({ id: 'thor-user' })
+    deleteManyMock.mockResolvedValue({ count: 1 })
   })
 
   it('scopes deletions to the authenticated user and account', async () => {
     const { DELETE } = await import('@/app/api/thor/store/route')
+    const request = {
+      method: 'DELETE',
+      nextUrl: new URL('http://localhost/api/thor/store?accountNumber=ACC-1'),
+      headers: new Headers({ authorization: 'Bearer token' }),
+    } as unknown as NextRequest
     const response = await DELETE(
-      new Request('http://localhost/api/thor/store?accountNumber=ACC-1', {
-        method: 'DELETE',
-        headers: { authorization: 'Bearer token' },
-      }) as never
+      request
     )
 
     expect(response.status).toBe(200)
@@ -52,11 +56,13 @@ describe('DELETE /api/thor/store', () => {
   it('returns 401 when authentication fails', async () => {
     verifySecureToken.mockResolvedValue(null)
     const { DELETE } = await import('@/app/api/thor/store/route')
+    const request = {
+      method: 'DELETE',
+      nextUrl: new URL('http://localhost/api/thor/store?accountNumber=ACC-1'),
+      headers: new Headers({ authorization: 'Bearer token' }),
+    } as unknown as NextRequest
     const response = await DELETE(
-      new Request('http://localhost/api/thor/store?accountNumber=ACC-1', {
-        method: 'DELETE',
-        headers: { authorization: 'Bearer token' },
-      }) as never
+      request
     )
 
     expect(response.status).toBe(401)

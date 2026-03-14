@@ -13,7 +13,7 @@ vi.mock('@/lib/prisma', () => ({
       upsert,
       findMany: vi.fn(),
       count: vi.fn(),
-      deleteMany: vi.fn(),
+      deleteMany,
     },
   },
 }))
@@ -91,6 +91,7 @@ describe('/api/etp/v1/store DELETE', () => {
     deleteMany.mockReset()
     verifySecureToken.mockReset()
     verifySecureToken.mockResolvedValue({ id: 'user_1' })
+    deleteMany.mockResolvedValue({ count: 1 })
   })
 
   it('deletes orders belonging to the authenticated user', async () => {

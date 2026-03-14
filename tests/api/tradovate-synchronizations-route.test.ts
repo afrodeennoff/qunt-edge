@@ -82,6 +82,11 @@ describe('DELETE /api/tradovate/synchronizations', () => {
     )
 
     expect(response.status).toBe(401)
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        code: 'UNAUTHORIZED',
+      },
+    })
     expect(removeTradovateTokenMock).not.toHaveBeenCalled()
   })
 })

@@ -643,7 +643,8 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
 
                 return (
                   <React.Fragment key={dateString}>
-                    <div
+                    <button
+                      type="button"
                       className={cn(
                         "group relative h-full cursor-pointer overflow-hidden rounded-lg border p-2 transition-all duration-200",
                         "hover:-translate-y-[1px] hover:shadow-md",
@@ -658,6 +659,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                       onClick={() => {
                         setSelectedDate(date)
                       }}
+                      aria-label={`Open day ${format(date, 'yyyy-MM-dd')}`}
                     >
                       <div
                         className={cn(
@@ -729,11 +731,12 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           </>
                         )}
                       </div>
-                    </div>
+                    </button>
                     {isLastDayOfWeek && (() => {
                       const weeklyTotal = calculateWeeklyTotal(index, calendarDays, calendarData)
                       return (
-                        <div
+                        <button
+                          type="button"
                           className={cn(
                             "flex h-full cursor-pointer items-center justify-center rounded-lg border border-border/55 bg-card/92 px-1 transition-all",
                             "hover:bg-secondary/50 hover:border-primary/40",
@@ -741,6 +744,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                             index === 41 && "rounded-br-xl"
                           )}
                           onClick={() => setSelectedWeekDate(date)}
+                          aria-label={`Open weekly summary for ${format(date, 'yyyy-MM-dd')}`}
                         >
                           <div className={cn(
                             "truncate px-1 text-[10px] font-bold",
@@ -750,7 +754,7 @@ export default function CalendarPnl({ calendarData, hideFiltersOnMobile = false 
                           )}>
                             {formatCurrency(weeklyTotal)}
                           </div>
-                        </div>
+                        </button>
                       )
                     })()}
                   </React.Fragment>

@@ -168,10 +168,10 @@ function MobileCalendarPnlComponent({ calendarData }: { calendarData: CalendarDa
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-8 w-8 border-border/60 bg-card/92">
+            <Button variant="outline" size="icon" onClick={handlePrevMonth} className="h-10 w-10 border-border/60 bg-card/92" aria-label="Previous month">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-8 w-8 border-border/60 bg-card/92">
+            <Button variant="outline" size="icon" onClick={handleNextMonth} className="h-10 w-10 border-border/60 bg-card/92" aria-label="Next month">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -214,7 +214,8 @@ function MobileCalendarPnlComponent({ calendarData }: { calendarData: CalendarDa
             const dayPnl = dayData?.pnl ?? 0
 
             return (
-              <div
+              <button
+                type="button"
                 key={dateString} // Key is the timezone-correct date string
                 className={cn(
                   "relative flex cursor-pointer flex-col justify-between rounded-lg border p-1 transition-all",
@@ -225,6 +226,7 @@ function MobileCalendarPnlComponent({ calendarData }: { calendarData: CalendarDa
                   !isCurrentMonthDay && "opacity-45"
                 )}
                 onClick={() => setSelectedDate(dateInTZ)} // Pass the Date object parsed in the target timezone
+                aria-label={`Open day ${format(dateInTZ, 'yyyy-MM-dd')}`}
               >
                 <div
                   className={cn(
@@ -269,7 +271,7 @@ function MobileCalendarPnlComponent({ calendarData }: { calendarData: CalendarDa
                     <div className="truncate text-[10px] text-muted-foreground/70">-</div>
                   )}
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>

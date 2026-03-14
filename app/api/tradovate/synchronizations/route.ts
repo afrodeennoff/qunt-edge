@@ -4,6 +4,13 @@ import {
   removeTradovateToken,
 } from "@/app/[locale]/dashboard/components/import/tradovate/actions";
 import { createRouteClient } from "@/lib/supabase/route-client";
+import { z } from "zod";
+import { parseJson, toValidationErrorResponse } from "@/app/api/_utils/validate";
+import { apiError } from "@/lib/api-response";
+
+const tradovateDeleteBodySchema = z.object({
+  accountId: z.string().min(1),
+});
 
 async function requireSessionUser(request: Request) {
   const supabase = createRouteClient(request);
@@ -18,21 +25,15 @@ export async function GET(request: NextRequest) {
   try {
     const { user, error } = await requireSessionUser(request);
     if (error || !user?.id) {
-      return NextResponse.json({ success: false, message: "Unauthorized", data: [] }, { status: 401 });
+      return apiError("UNAUTHORIZED", "Unauthorized", 401);
     }
 
     const result = await getTradovateSynchronizations();
     if (result.error) {
       if (result.error === "User not authenticated") {
-        return NextResponse.json(
-          { success: false, message: result.error, data: [] },
-          { status: 401 }
-        );
+        return apiError("UNAUTHORIZED", result.error, 401);
       }
-      return NextResponse.json(
-        { success: false, message: result.error },
-        { status: 400 }
-      );
+      return apiError("BAD_REQUEST", result.error, 400);
     }
 
     return NextResponse.json({
@@ -41,43 +42,27 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching Tradovate synchronizations:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch Tradovate synchronizations" },
-      { status: 500 }
-    );
+    return apiError("INTERNAL_ERROR", "Failed to fetch Tradovate synchronizations", 500);
   }
 }
 
 export async function DELETE(request: NextRequest) {
+  const requestId = crypto.randomUUID();
   try {
     const { user, error } = await requireSessionUser(request);
     if (error || !user?.id) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return apiError("UNAUTHORIZED", "Unauthorized", 401);
     }
 
-    const body = await request.json();
-    const accountId = body?.accountId as string | undefined;
-
-    if (!accountId) {
-      return NextResponse.json(
-        { success: false, message: "accountId is required" },
-        { status: 400 }
-      );
-    }
+    const { accountId } = await parseJson(request, tradovateDeleteBodySchema);
 
     const result = await removeTradovateToken(accountId);
     if (result.error) {
-      return NextResponse.json(
-        { success: false, message: result.error },
-        { status: 400 }
-      );
+      return apiError("BAD_REQUEST", result.error, 400);
     }
 
     if (!result.deletedCount) {
-      return NextResponse.json(
-        { success: false, message: 'Synchronization not found' },
-        { status: 404 }
-      );
+      return apiError("NOT_FOUND", "Synchronization not found", 404, { requestId });
     }
 
     return NextResponse.json({
@@ -85,10 +70,9 @@ export async function DELETE(request: NextRequest) {
       message: "Synchronization removed",
     });
   } catch (error) {
+    const validationResponse = toValidationErrorResponse(error);
+    if (validationResponse.status !== 500) return validationResponse;
     console.error("Error deleting Tradovate synchronization:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to delete synchronization" },
-      { status: 500 }
-    );
+    return apiError("INTERNAL_ERROR", "Failed to delete synchronization", 500, { requestId });
   }
 }
