@@ -10,7 +10,6 @@ import {
   Tooltip,
   Cell,
   ResponsiveContainer,
-  type TooltipProps,
 } from "recharts";
 import {
   Card,
@@ -103,7 +102,8 @@ export default React.memo(function ContractQuantityChart({
    const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
       if (active && payload && payload.length) {
         const data = payload[0]?.payload;
-        if (!data || typeof data.totalQuantity !== 'number' || typeof data.tradeCount !== 'number') return null;
+        const totalQuantity = typeof data?.totalQuantity === "number" ? data.totalQuantity : 0
+        const tradeCount = typeof data?.tradeCount === "number" ? data.tradeCount : 0
         const parsedLabel = typeof label === "number" ? label : parseInt(label ?? "0", 10)
         const hourLabel = Number.isFinite(parsedLabel) ? parsedLabel : 0
        return (
@@ -115,12 +115,12 @@ export default React.memo(function ContractQuantityChart({
            <div className="space-y-1.5">
              <div className="flex justify-between items-center">
                <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.totalContracts")}</span>
-               <span className="font-black text-foreground text-[11px] tabular-nums">{data.totalQuantity}</span>
+               <span className="font-black text-foreground text-[11px] tabular-nums">{totalQuantity}</span>
              </div>
              <div className="flex justify-between items-center pt-1.5 border-t border-border/55">
                <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.numberOfTrades")}</span>
                <span className="font-black text-muted-foreground/85 text-[11px]">
-                 {data.tradeCount}
+                 {tradeCount}
                </span>
              </div>
            </div>
