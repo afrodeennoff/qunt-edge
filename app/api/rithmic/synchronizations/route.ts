@@ -4,7 +4,6 @@ import {
   setRithmicSynchronization,
   removeRithmicSynchronization,
 } from "@/app/[locale]/dashboard/components/import/rithmic/sync/actions";
-import { Synchronization } from "@/prisma/generated/prisma";
 import { createRouteClient } from "@/lib/supabase/route-client";
 import { z } from "zod";
 import { createRateLimitResponse, rateLimit } from "@/lib/rate-limit";
@@ -14,7 +13,7 @@ const rithmicSyncWriteRateLimit = rateLimit({ limit: 20, window: 60_000, identif
 const rithmicSyncReadRateLimit = rateLimit({ limit: 120, window: 60_000, identifier: "rithmic-sync-read" });
 const rithmicSyncWriteBodySchema = z.object({
   accountId: z.string().min(1),
-}).passthrough();
+}).strict();
 const rithmicSyncDeleteBodySchema = z.object({
   accountId: z.string().min(1),
 });
@@ -77,10 +76,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await parseJson(request, rithmicSyncWriteBodySchema);
-    const synchronization: Partial<Synchronization> = body;
-
-    await setRithmicSynchronization(synchronization);
+    const { accountId } = await parseJson(request, rithmicSyncWriteBodySchema);
+    await setRithmicSynchronization({ accountId, service: "rithmic" });
     return NextResponse.json({
       success: true,
       message: "Synchronization updated successfully",

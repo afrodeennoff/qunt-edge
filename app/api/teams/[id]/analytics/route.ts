@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getTeamById, getTeamAnalytics, updateTeamAnalytics } from "@/server/teams"
 import { createRouteClient } from "@/lib/supabase/route-client"
+import { resolveTeamUserId } from "@/server/team-membership"
 import { z } from "zod"
 
 const teamIdSchema = z.string().min(1).max(128).regex(/^[a-zA-Z0-9_-]+$/)
@@ -33,7 +34,8 @@ export async function GET(
     }
     const period = periodResult.data
 
-    const team = await getTeamById(teamId, user.id)
+    const teamUserId = await resolveTeamUserId(user.id)
+    const team = await getTeamById(teamId, teamUserId)
 
     if (!team) {
       return NextResponse.json(
@@ -85,7 +87,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
     }
     const period = periodResult.data
-    const result = await updateTeamAnalytics(teamId, user.id, period)
+    const teamUserId = await resolveTeamUserId(user.id)
+    const result = await updateTeamAnalytics(teamId, teamUserId, period)
 
     if (!result.success) {
       return NextResponse.json(

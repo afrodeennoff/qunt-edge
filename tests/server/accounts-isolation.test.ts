@@ -7,6 +7,7 @@ const {
   tradeDeleteManyMock,
   tradeCountMock,
   transactionMock,
+  accountCreateMock,
 } = vi.hoisted(() => ({
   getDatabaseUserIdMock: vi.fn(),
   updateTagMock: vi.fn(),
@@ -14,6 +15,7 @@ const {
   tradeDeleteManyMock: vi.fn(),
   tradeCountMock: vi.fn(),
   transactionMock: vi.fn(),
+  accountCreateMock: vi.fn(),
 }))
 
 vi.mock("@/server/auth", () => ({
@@ -41,7 +43,7 @@ vi.mock("@/lib/prisma", () => ({
       deleteMany: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
-      create: vi.fn(),
+      create: accountCreateMock,
       findMany: vi.fn(),
     },
     payout: {
@@ -59,6 +61,7 @@ vi.mock("@/lib/prisma", () => ({
 }))
 
 import {
+  createAccountAction,
   deleteInstrumentGroupAction,
   deleteTradesByIdsAction,
 } from "@/server/accounts"
@@ -116,5 +119,16 @@ describe("accounts multi-user isolation", () => {
         userId: "db-user-1",
       },
     })
+  })
+
+  it("invalidates user caches after account creation", async () => {
+    getDatabaseUserIdMock.mockResolvedValue("db-user-1")
+    accountCreateMock.mockResolvedValue({ id: "acc-1", number: "ACC-1" })
+
+    await createAccountAction("ACC-1")
+
+    expect(updateTagMock).toHaveBeenCalledWith("user-data-db-user-1")
+    expect(updateTagMock).toHaveBeenCalledWith("trades-db-user-1")
+    expect(invalidateAllUserCachesMock).toHaveBeenCalledWith("db-user-1")
   })
 })

@@ -43,7 +43,7 @@ export async function loadSharedData(slug: string): Promise<SharedDataResponse> 
     return {
       trades: sharedData.trades,
       params: sharedData.params,
-      groups: []
+      groups: sharedData.groups
     }
   } catch (error) {
     return {

@@ -665,6 +665,9 @@ export async function createAccountAction(accountNumber: string) {
         payoutCount: 0,
       },
     })
+    updateTag(`user-data-${userId}`)
+    updateTag(`trades-${userId}`)
+    invalidateAllUserCaches(userId)
     return account
   } catch (error) {
     console.error('Error creating account:', error)

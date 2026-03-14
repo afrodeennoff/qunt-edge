@@ -2,7 +2,7 @@
 
 import { Trade as PrismaTrade, Prisma } from '@/prisma/generated/prisma'
 import { Trade as NormalizedTrade } from '@/lib/data-types'
-import { revalidateTag, updateTag, unstable_cache } from 'next/cache'
+import { updateTag, unstable_cache } from 'next/cache'
 import { getDatabaseUserId, getUserId } from './auth'
 import { isAfter } from 'date-fns'
 import { prisma } from '@/lib/prisma'
@@ -750,7 +750,6 @@ export async function deleteTagFromAllTrades(tag: string) {
     `
 
     await invalidateTradeRelatedCaches(userId)
-    revalidateTag(userId, { expire: 0 })
     return { success: true, tradesUpdated: Number(result) }
   } catch (error) {
     console.error('Failed to delete tag:', error)
