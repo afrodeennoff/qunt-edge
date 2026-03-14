@@ -523,8 +523,11 @@ export default {
   "chat.resetConversation": "Reset conversation",
   "chat.camera": "Camera",
   "chat.folder": "Folder",
+  "chat.addAttachment": "Add attachment",
   "chat.aiThinking": "AI is thinking...",
   "chat.writeMessage": "Write a message...",
+  "chat.sendMessage": "Send message",
+  "chat.stopGeneration": "Stop generation",
   "chat.noTradesAvailable": "No trades available",
   "import.type.rithmicWeekendWarning":
     "Rithmic services are not available during weekends",

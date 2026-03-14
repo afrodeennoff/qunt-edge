@@ -52,7 +52,7 @@ interface PostComment {
   createdAt: Date
   user: {
     id: string
-    email: string
+    displayName: string
   }
   parentId: string | null
   replies: PostComment[]
@@ -236,7 +236,7 @@ export function PostCard({ post, isExpanded = false, isAuthor }: Props) {
             <h3 className="font-semibold">{post.title}</h3>
             <p className="text-sm text-muted-foreground">
               {t('community.post.postedBy', {
-                user: post.user.email.split('@')[0],
+                user: post.user.displayName,
                 time: formatDistanceToNow(post.createdAt, { locale: dateLocale })
               })}
             </p>

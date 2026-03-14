@@ -9,6 +9,18 @@ import { buildUnsubscribeUrl } from "@/lib/unsubscribe-url"
 import { requireServiceAuth, toErrorResponse } from "@/server/authz"
 import { z } from "zod"
 
+const sanitizeErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  if (typeof error === "string") {
+    return error
+  }
+  return "Unknown error"
+}
+
+const maskValue = (value?: string) => value ? `${value.slice(0, 8)}…` : 'unknown'
+
 const userIdSchema = z.string().uuid()
 
 export async function POST(req: Request, props: { params: Promise<{ userid: string }> }) {
@@ -87,7 +99,12 @@ export async function POST(req: Request, props: { params: Promise<{ userid: stri
     })
 
   } catch (error) {
-    console.error('API error:', error)
+    console.error({
+      event: "weekly-summary.post-error",
+      phase: "POST",
+      userId: maskValue(params.userid),
+      errorMessage: sanitizeErrorMessage(error),
+    })
     return toErrorResponse(error)
   }
 }

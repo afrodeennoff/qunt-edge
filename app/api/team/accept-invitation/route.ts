@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { createRouteClient } from "@/lib/supabase/route-client"
 import { MemberRole } from "@/prisma/generated/prisma"
 import { ensureTeamMembership, resolveTeamUserId } from "@/server/team-membership"
+import { apiError } from "@/lib/api-response"
 
 export const dynamic = 'force-dynamic'
 
@@ -11,19 +12,13 @@ export async function POST(req: Request) {
     const supabase = createRouteClient(req)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiError("UNAUTHORIZED", "Unauthorized", 401)
     }
 
     const { invitationId } = await req.json()
 
     if (!invitationId) {
-      return NextResponse.json(
-        { error: 'Invitation ID is required' },
-        { status: 400 }
-      )
+      return apiError("BAD_REQUEST", "Invitation ID is required", 400)
     }
 
     // Find the invitation
@@ -33,32 +28,28 @@ export async function POST(req: Request) {
     })
 
     if (!invitation) {
-      return NextResponse.json(
-        { error: 'Invitation not found' },
-        { status: 404 }
-      )
+      return apiError("NOT_FOUND", "Invitation not found", 404)
     }
 
     // Check if invitation is still valid
     if (invitation.status !== 'PENDING') {
-      return NextResponse.json(
-        { error: 'Invitation has already been used or expired' },
-        { status: 400 }
+      return apiError(
+        "BAD_REQUEST",
+        "Invitation has already been used or expired",
+        400
       )
     }
 
     if (invitation.expiresAt < new Date()) {
-      return NextResponse.json(
-        { error: 'Invitation has expired' },
-        { status: 400 }
-      )
+      return apiError("BAD_REQUEST", "Invitation has expired", 400)
     }
 
     // Check if the email matches the current user
     if (invitation.email !== user.email) {
-      return NextResponse.json(
-        { error: 'This invitation was sent to a different email address' },
-        { status: 403 }
+      return apiError(
+        "FORBIDDEN",
+        "This invitation was sent to a different email address",
+        403
       )
     }
 
@@ -86,9 +77,6 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Error accepting team invitation:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return apiError("INTERNAL_ERROR", "Internal server error", 500)
   }
 } 

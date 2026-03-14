@@ -1,11 +1,33 @@
+## Task: Harden community/public data (2026-03-14)
+
+- [x] Document the sanitization/test plan for community read responses and ownership flags (this entry).
+- [ ] Update `app/[locale]/(landing)/actions/community.ts` to expose only safe display identifiers while keeping ownership guards intact.
+- [ ] Adapt the community UI/types to the new display-only user payloads so the rendered handles stay the same.
+- [ ] Add regression tests covering the no-email contract and `isAuthor` detection, then run `npx vitest tests/community-actions.test.ts` for verification.
+
+## Task: Audit API delete handlers (2026-03-14)
+
+- [x] Capture the audit plan (this entry) for auth/ownership/tenant isolation in `app/api/**` delete routes.
+- [ ] Update the synchronizations/delete helpers to return deletion counts and fail when the requested record isn’t owned by the current session.
+- [ ] Add owner-delete + unauthorized-delete tests for the rithmic/tradovate/etp/thor delete endpoints.
+- [ ] Run targeted `npx vitest` + `npx eslint` on the touched API routes and capture the results.
+
+## Task: Delete authorization/ownership hardening (2026-03-14)
+
+- [ ] Inventory `server/*.ts` delete handlers, `app/api/**` delete routes, Prisma schema relations, and tests for auth/ownership coverage.
+- [ ] Reproduce delete failures or missing guards via targeted inspection/test runs, documenting missing ownership defenses or FK/cascade issues.
+- [ ] Implement fixes enforcing owner deletes, rejecting unauthorized deletes, and maintaining FK/cascade-safe behavior when related rows exist.
+- [ ] Add/update tests proving owner delete success, unauthorized delete blocked, and safe relational behavior for dependent records.
+- [ ] Run targeted `npx vitest` suites plus `npx eslint`/`npm run -s typecheck` on touched files; capture outputs for the report.
+
 ## Task: Competitor Benchmark + Home Funnel Upgrade (2026-03-14)
 
-- [x] Swarm specialist agents for design/CTA/marketing/UX competitor research with source links.
-- [x] Produce benchmark matrix and prioritized gap analysis.
-- [x] Implement high-impact home funnel upgrades (hero trust chips, trust/proof architecture, onboarding journey, pricing conversion framing, CTA polish).
-- [x] Add SEO structured data upgrade for home route.
-- [ ] Run lint/typecheck/build and record blockers/pass states.
-- [ ] Capture final before/after benchmark summary + follow-up map.
+## Task: Delete UI state fixes (2026-03-14)
+
+- [ ] Inspect delete/mutation paths across dashboard/community/admin surfaces and document where stale state or missing cache invalidation occurs.
+- [ ] Implement minimal fixes to serialization/mutation handlers to invalidate cached data or run refresh hooks so deleted rows/cards disappear, surfacing server errors.
+- [ ] Add or update targeted frontend tests (unit or integration) to cover the delete paths.
+- [ ] Run ESLint and the targeted Vitest suite for the touched files and summarize the verification.
 
 ## Task: /deals verification (2026-03-14)
 
@@ -15,6 +37,13 @@
 - [x] Document accessibility/SEO sanity pass for `app/[locale]/(landing)/deals/page.tsx`
 - [x] Capture final verification summary
 
+## Task: Security Logging Hardening (2026-03-14)
+
+- [x] Review existing console logs in the five targeted routes for PII leakage.
+- [x] Replace raw PII/error body logs with sanitized structured output.
+- [x] Run `npm run lint -- app/api/cron/route.ts app/api/cron/renewal-notice/route.ts app/api/email/format-name/route.ts app/api/email/weekly-summary/[userid]/route.ts app/api/trader-profile/benchmark/route.ts`.
+- [x] Document results and reference the new plan at `docs/superpowers/plans/2026-03-14-security-logging-hardening.md`.
+
 ## Current Task: Extend verification for CRUD/auth/state-sync
 
 - [x] Audit existing tests for CRUD/auth/state-sync paths, noting coverage gaps and risky areas.
@@ -22,10 +51,19 @@
 - [x] Run the targeted verification suites and capture exact command outputs.
 - [x] Document remaining risky untested paths and verification results.
 
+## Task: API Error Envelope Standardization (2026-03-14)
+
+- [x] Write the implementation plan in `docs/superpowers/plans/2026-03-14-envelope-standardization.md`.
+- [x] Update `app/api/_utils/validate.ts` and `lib/api-response.ts` so that validation failures and helper errors produce `{ error: { code, message, details? } }` envelopes via `apiError`.
+- [x] Replace inline error `NextResponse.json` calls in the targeted team and Rithmic endpoints with `apiError(...)` while preserving logging and requestId details.
+- [x] Create regression tests covering `apiError` and `toValidationErrorResponse`, then run `npx vitest tests/lib/api-response.test.ts tests/app/api/_utils/validate.test.ts`.
+- [x] Run `npm run -s typecheck` to confirm no new type issues (fails currently in `app/[locale]/(landing)/actions/community.ts`).
+- [x] Summarize verification results for these helpers/routes in this checklist.
+
 ## Review
-- Verification: Pending (tests not yet run)
-- Risks: Coverage gaps still being mapped
-- Follow-ups: Update report after adding tests
+- Verification: `npx vitest run tests/lib/api-response.test.ts tests/app/api/_utils/validate.test.ts` (pass). `npm run -s typecheck` fails upstream due to `app/[locale]/(landing)/actions/community.ts` referencing missing `user`/`replies`.
+- Risks: Surface-level helpers are verified, but existing type errors prevent a clean typecheck.
+- Follow-ups: The community actions typing issues need resolution before typecheck can pass.
 
 ## Immediate AI verification run (2026-03-14)
 - [ ] Run `npx vitest run tests/api/ai-*.test.ts tests/lib/ai-router-integration.test.ts lib/__tests__/ai-support-route.test.ts tests/lib/ai-trade-access.test.ts tests/lib/ai-router-fallback-order.test.ts tests/lib/ai-client-router-propagation.test.ts`

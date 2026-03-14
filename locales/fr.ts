@@ -546,8 +546,11 @@ export default {
   "chat.resetConversation": "Réinitialiser la conversation",
   "chat.camera": "Caméra",
   "chat.folder": "Dossier",
+  "chat.addAttachment": "Ajouter une pièce jointe",
   "chat.aiThinking": "L'IA réfléchit...",
   "chat.writeMessage": "Écrivez un message...",
+  "chat.sendMessage": "Envoyer le message",
+  "chat.stopGeneration": "Arrêter la génération",
   "chat.noTradesAvailable": "Aucun trade disponible",
   "import.type.rithmicWeekendWarning":
     "Les services Rithmic ne sont pas disponibles pendant les weekends",

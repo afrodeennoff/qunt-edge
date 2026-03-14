@@ -110,8 +110,9 @@ function SessionLegend({ containerRef }: { containerRef: React.RefObject<HTMLDiv
     <div className="p-2 bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-t shadow-lg">
       <div className="flex items-center justify-center gap-4 text-xs">
         {SESSIONS.map((session) => (
-          <div 
-            key={session.name} 
+          <button
+            type="button"
+            key={session.name}
             className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => {
               if (!containerRef.current) return
@@ -122,10 +123,11 @@ function SessionLegend({ containerRef }: { containerRef: React.RefObject<HTMLDiv
                 behavior: 'smooth'
               })
             }}
+            aria-label={`Scroll to ${session.name}`}
           >
             <div className={cn("w-2 h-2 rounded-full", session.color.replace("border", "bg"))} />
             <span className="text-muted-foreground">{session.name}</span>
-          </div>
+          </button>
         ))}
       </div>
     </div>

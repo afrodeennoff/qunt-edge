@@ -5,10 +5,18 @@ import { assertAdminAccess, toErrorResponse } from '@/server/authz'
 
 type DateFilter = { gte?: Date; lte?: Date }
 
+function parseDateParam(value: string | null): Date | null {
+  if (!value) return null
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
 function buildDateFilter(startDate: string | null, endDate: string | null): DateFilter {
   const dateFilter: DateFilter = {}
-  if (startDate) dateFilter.gte = new Date(startDate)
-  if (endDate) dateFilter.lte = new Date(endDate)
+  const parsedStartDate = parseDateParam(startDate)
+  const parsedEndDate = parseDateParam(endDate)
+  if (parsedStartDate) dateFilter.gte = parsedStartDate
+  if (parsedEndDate) dateFilter.lte = parsedEndDate
   return dateFilter
 }
 
@@ -21,6 +29,20 @@ export async function GET(req: NextRequest) {
     const reportType = searchParams.get('type') || 'overview'
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+
+    if (startDate && !parseDateParam(startDate)) {
+      return NextResponse.json(
+        { error: 'Invalid startDate', code: 'INVALID_DATE_FILTER', requestId },
+        { status: 400 },
+      )
+    }
+
+    if (endDate && !parseDateParam(endDate)) {
+      return NextResponse.json(
+        { error: 'Invalid endDate', code: 'INVALID_DATE_FILTER', requestId },
+        { status: 400 },
+      )
+    }
 
     const dateFilter = buildDateFilter(startDate, endDate)
 

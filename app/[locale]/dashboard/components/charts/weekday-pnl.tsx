@@ -218,7 +218,12 @@ export default React.memo(function WeekdayPNLChart({
           size === "small" ? "p-1" : "p-2 sm:p-3",
         )}
       >
-        <div className="w-full h-full cursor-pointer" onClick={handleClick}>
+        <button
+          type="button"
+          className="w-full h-full cursor-pointer text-left"
+          onClick={handleClick}
+          aria-label={t("weekdayPnl.title")}
+        >
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -299,7 +304,7 @@ export default React.memo(function WeekdayPNLChart({
               {t("widgets.emptyState") ?? "No trades yet."}
             </div>
           )}
-        </div>
+        </button>
       </div>
     </ChartSurface>
   );

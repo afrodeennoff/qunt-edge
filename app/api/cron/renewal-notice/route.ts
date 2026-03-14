@@ -8,6 +8,18 @@ import RenewalNoticeEmail from '@/components/emails/renewal-notice'
 import { requireServiceAuth, toErrorResponse } from '@/server/authz'
 import { buildUnsubscribeUrl } from '@/lib/unsubscribe-url'
 
+const maskId = (value?: string) => value ? `${value.slice(0, 6)}…` : 'unknown'
+
+const sanitizeErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  if (typeof error === "string") {
+    return error
+  }
+  return "Unknown error"
+}
+
 export const dynamic = 'force-dynamic'
 
 // Utility function to get date locale
@@ -135,19 +147,34 @@ export async function GET(req: Request) {
             })
 
             if (error) {
-              console.error(`Failed to send renewal notice to ${userEmail} for account ${account.id}:`, error)
+              console.error({
+                event: "renewal-notice.send-failure",
+                accountId: maskId(account.id),
+                userId: maskId(user.id),
+                daysUntilRenewal,
+                errorMessage: sanitizeErrorMessage(error),
+              })
               errorCount++
             } else {
               successCount++
 
             }
           } catch (accountError) {
-            console.error(`Error processing account ${account.id}:`, accountError)
+            console.error({
+              event: "renewal-notice.account-processing-error",
+              accountId: maskId(account.id),
+              errorMessage: sanitizeErrorMessage(accountError),
+            })
             errorCount++
           }
         }
       } catch (userError) {
-        console.error(`Error processing user ${userEmail}:`, userError)
+        console.error({
+          event: "renewal-notice.user-processing-error",
+          userId: maskId(userAccounts[0]?.user?.id),
+          accountsTouched: userAccounts.length,
+          errorMessage: sanitizeErrorMessage(userError),
+        })
         errorCount += userAccounts.length
       }
     }
@@ -165,7 +192,10 @@ export async function GET(req: Request) {
     })
 
   } catch (error) {
-    console.error('Renewal notice cron job error:', error)
+    console.error({
+      event: "renewal-notice.job-error",
+      errorMessage: sanitizeErrorMessage(error),
+    })
     return toErrorResponse(error)
   }
 }

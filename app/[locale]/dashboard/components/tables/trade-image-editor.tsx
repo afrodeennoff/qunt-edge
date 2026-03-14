@@ -575,9 +575,12 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
               <CarouselContent className="w-full flex items-center justify-center gap-2">
                 {displayImageArray.map((image: string, index: number) => (
                   <CarouselItem key={index} className="basis-auto">
-                    <div
+                    <button
+                      type="button"
                       className="relative aspect-square cursor-pointer"
                       onClick={() => handleThumbnailClick(index)}
+                      aria-label={`Select image ${index + 1}`}
+                      aria-pressed={selectedImageIndex === index}
                     >
                       <Image
                         src={withSupabaseImageTransform(image, {
@@ -595,7 +598,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                             : "hover:ring-2 hover:ring-primary/50",
                         )}
                       />
-                    </div>
+                    </button>
                   </CarouselItem>
                 ))}
                 {imageArray.length < MAX_IMAGES && (

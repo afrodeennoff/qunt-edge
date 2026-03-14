@@ -1,24 +1,22 @@
 'use server'
 import { prisma } from "@/lib/prisma"
-import { getDatabaseUserId, getUserId } from "@/server/auth"
+import { getDatabaseUserId } from "@/server/auth"
 import { Synchronization } from "@/prisma/generated/prisma"
 import { withPrismaSchemaMismatchFallback } from "@/lib/prisma-guard"
 
 async function resolveSyncUserIds() {
-  const authUserId = await getUserId()
   const databaseUserId = await getDatabaseUserId()
   return {
     databaseUserId,
-    candidateUserIds: Array.from(new Set([databaseUserId, authUserId])),
   }
 }
 
 export async function getRithmicSynchronizations() {
-  const { candidateUserIds } = await resolveSyncUserIds()
+  const { databaseUserId } = await resolveSyncUserIds()
   const synchronizations = await withPrismaSchemaMismatchFallback(
     'sync:rithmic:list',
     () => prisma.synchronization.findMany({
-      where: { userId: { in: candidateUserIds }, service: "rithmic" },
+      where: { userId: databaseUserId, service: "rithmic" },
     }),
     []
   )
@@ -56,19 +54,22 @@ export async function setRithmicSynchronization(synchronization: Partial<Synchro
 }
 
 export async function removeRithmicSynchronization(accountId: string) {
-  const { candidateUserIds } = await resolveSyncUserIds()
+  const { databaseUserId } = await resolveSyncUserIds()
 
-  await withPrismaSchemaMismatchFallback<void>(
+  const deletedCount = await withPrismaSchemaMismatchFallback(
     'sync:rithmic:delete',
     async () => {
-      await prisma.synchronization.deleteMany({
+      const result = await prisma.synchronization.deleteMany({
         where: {
-          userId: { in: candidateUserIds },
+          userId: databaseUserId,
           service: "rithmic",
           accountId,
         },
       })
+      return result.count
     },
-    undefined
+    0
   )
+
+  return { deletedCount }
 }

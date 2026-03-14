@@ -100,12 +100,10 @@ async function resolveSyncUserIdentity() {
   }
 
   const databaseUserId = await getDatabaseUserId()
-  const candidateUserIds = Array.from(new Set([databaseUserId, user.id]))
 
   return {
     user,
     databaseUserId,
-    candidateUserIds,
   }
 }
 
@@ -1196,11 +1194,11 @@ export async function getTradovateToken(accountId: string = 'default') {
     if ('error' in identity) {
       return { error: identity.error }
     }
-    const { candidateUserIds } = identity
+    const { databaseUserId } = identity
 
     const syncData = await prisma.synchronization.findFirst({
       where: {
-        userId: { in: candidateUserIds },
+        userId: databaseUserId,
         service: 'tradovate',
         accountId,
       },
@@ -1244,10 +1242,10 @@ export async function removeTradovateToken(accountId?: string) {
     if ('error' in identity) {
       return { error: identity.error }
     }
-    const { candidateUserIds } = identity
+    const { databaseUserId } = identity
 
     const whereClause: any = {
-      userId: { in: candidateUserIds },
+      userId: databaseUserId,
       service: 'tradovate'
     }
 
@@ -1256,17 +1254,18 @@ export async function removeTradovateToken(accountId?: string) {
       whereClause.accountId = accountId
     }
 
-    await withPrismaSchemaMismatchFallback<void>(
+    const deletedCount = await withPrismaSchemaMismatchFallback(
       'sync:tradovate:delete',
       async () => {
-        await prisma.synchronization.deleteMany({
+        const result = await prisma.synchronization.deleteMany({
           where: whereClause
         })
+        return result.count
       },
-      undefined
+      0
     )
 
-    return { success: true }
+    return { deletedCount }
   } catch (error) {
     console.error('Failed to remove Tradovate token:', error)
     return { error: 'Failed to remove token' }
@@ -1279,13 +1278,13 @@ export async function getTradovateSynchronizations() {
     if ('error' in identity) {
       return { error: identity.error }
     }
-    const { candidateUserIds } = identity
+    const { databaseUserId } = identity
 
     const synchronizations = await withPrismaSchemaMismatchFallback(
       'sync:tradovate:list',
       () => prisma.synchronization.findMany({
         where: {
-          userId: { in: candidateUserIds },
+          userId: databaseUserId,
           service: 'tradovate'
         },
         orderBy: {

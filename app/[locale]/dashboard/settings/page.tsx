@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useUserStore } from '../../../../store/user-store'
+import { useTradovateSyncStore } from '../../../../store/tradovate-sync-store'
 import { useTheme } from '@/context/theme-provider'
 import {
   User,
@@ -85,6 +86,7 @@ export default function SettingsPage() {
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
   const resetUser = useUserStore(state => state.resetUser)
+  const clearTradovate = useTradovateSyncStore((state) => state.clearAll)
 
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [pushNotifications, setPushNotifications] = useState(false)
@@ -627,6 +629,7 @@ export default function SettingsPage() {
                 variant="destructive"
                 className="w-full justify-start"
                 onClick={async () => {
+                  clearTradovate()
                   resetUser()
                   await signOut()
                 }}

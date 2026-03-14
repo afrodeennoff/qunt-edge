@@ -3,6 +3,16 @@ import { Prisma } from "@/prisma/generated/prisma"
 import { prisma } from "@/lib/prisma"
 import { getDatabaseUserId } from "@/server/auth"
 
+const sanitizeErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  if (typeof error === "string") {
+    return error
+  }
+  return "Unknown error"
+}
+
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 const BENCHMARK_REFRESH_WINDOW_MS = 15 * 60 * 1000
@@ -241,7 +251,11 @@ export async function GET() {
 
     return responseFromSnapshot(computed)
   } catch (error) {
-    console.error("[TraderBenchmarkAPI] failed", error)
+    console.error({
+      event: "[TraderBenchmarkAPI] failed",
+      phase: "benchmark",
+      errorMessage: sanitizeErrorMessage(error),
+    })
     return NextResponse.json({ error: "Failed to build benchmark" }, { status: 500 })
   }
 }

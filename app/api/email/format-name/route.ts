@@ -4,6 +4,7 @@ import { generateText, Output } from "ai"
 import { z } from "zod"
 import { requireServiceAuth, toErrorResponse } from "@/server/authz"
 import { parseJson, parseQuery } from "@/app/api/_utils/validate"
+import { createHash } from "node:crypto"
 
 // Schema for the AI response
 const nameInferenceSchema = z.object({
@@ -27,6 +28,20 @@ const formatNameQuerySchema = z.object({
 
 // Allow longer processing time for batch operations
 export const maxDuration = 60
+
+const sanitizeErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  if (typeof error === "string") {
+    return error
+  }
+  return "Unknown error"
+}
+
+const fingerprint = (value: string) => {
+  return createHash("sha256").update(value).digest("hex").slice(0, 8)
+}
 
 function isAuthorizedInternalRequest(req: NextRequest): boolean {
   try {
@@ -150,13 +165,18 @@ Return the inferred names with confidence levels:
             confidence: inference.confidence,
             status: "updated"
           })
-        } catch (error) {
-          console.error(`Failed to update ${inference.email}:`, error)
-          results.push({
-            email: inference.email,
-            status: "error",
-            error: error instanceof Error ? error.message : "Unknown error"
-          })
+          } catch (error) {
+            console.error({
+              event: "email-format-name.db-update-error",
+              subscriberFingerprint: fingerprint(inference.email),
+              confidence: inference.confidence,
+              errorMessage: sanitizeErrorMessage(error),
+            })
+            results.push({
+              email: inference.email,
+              status: "error",
+              error: error instanceof Error ? error.message : "Unknown error"
+            })
         }
       } else {
         results.push({
@@ -185,7 +205,11 @@ Return the inferred names with confidence levels:
     })
 
   } catch (error) {
-    console.error("Error in name inference:", error)
+    console.error({
+      event: "email-format-name.inference-error",
+      phase: "POST",
+      errorMessage: sanitizeErrorMessage(error),
+    })
     return toErrorResponse(error)
   }
 }
@@ -223,7 +247,11 @@ export async function GET(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error("Error checking subscribers:", error)
+    console.error({
+      event: "email-format-name.count-error",
+      phase: "GET",
+      errorMessage: sanitizeErrorMessage(error),
+    })
     return toErrorResponse(error)
   }
 }

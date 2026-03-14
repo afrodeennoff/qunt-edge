@@ -53,10 +53,9 @@ async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { 
-      authenticated: false, 
+    return {
+      authenticated: false,
       error: {
-        message: 'No valid authorization token found',
         status: 401
       }
     };
@@ -68,10 +67,9 @@ async function authenticateRequest(req: NextRequest) {
     const user = await verifySecureToken(token, 'thor')
     
     if (!user) {
-      return { 
-        authenticated: false, 
+      return {
+        authenticated: false,
         error: {
-          message: 'No user found with the provided token',
           status: 401
         }
       };
@@ -82,8 +80,7 @@ async function authenticateRequest(req: NextRequest) {
     return {
       authenticated: false,
       error: {
-        message: 'Database error during authentication',
-        status: 500
+        status: 401
       }
     };
   }
@@ -109,9 +106,8 @@ export async function POST(req: NextRequest) {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
+      return NextResponse.json({
+        error: 'Unauthorized',
       }, { status: auth.error?.status || 401 });
     }
     
@@ -148,7 +144,7 @@ export async function POST(req: NextRequest) {
           entryPrice: trade.entry_price,
           closePrice: trade.exit_price,
           quantity: Math.abs(trade.quantity),
-          side: trade.quantity > 0 ? 'Long' : 'Short',
+          side: trade.side === 'Buy' ? 'Long' : 'Short',
           pnl: trade.pnl,
           timeInPosition,
           commission: 0,
@@ -205,9 +201,8 @@ export async function GET(req: NextRequest) {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
+      return NextResponse.json({
+        error: 'Unauthorized',
       }, { status: auth.error?.status || 401 });
     }
     
@@ -294,9 +289,8 @@ export async function DELETE(req: NextRequest) {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({ 
-        error: 'Unauthorized', 
-        message: auth.error?.message 
+      return NextResponse.json({
+        error: 'Unauthorized',
       }, { status: auth.error?.status || 401 });
     }
     

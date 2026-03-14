@@ -284,7 +284,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setIsLoading(true)
         setAuthMethod('email')
         try {
-            await signInWithPasswordAction(values.email, values.password || '')
+            const next = getRedirectNextUrl(isSubscription, plan, nextUrl, lookupKey, referralCode, promoCode, locale)
+            await signInWithPasswordAction(values.email, values.password || '', next, locale)
             toast.success(t('success'), { description: t('auth.signIn') })
             router.push(nextUrl ? withLocalePrefix(nextUrl, locale) : `/${locale}/dashboard`)
             setLastAuthPreference('password')

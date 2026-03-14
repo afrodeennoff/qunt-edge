@@ -73,6 +73,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    if (!result.deletedCount) {
+      return NextResponse.json(
+        { success: false, message: 'Synchronization not found' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       message: "Synchronization removed",

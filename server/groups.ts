@@ -126,6 +126,16 @@ export async function deleteGroupAction(groupId: string): Promise<void> {
       throw new Error('Group not found')
     }
 
+    await prisma.account.updateMany({
+      where: {
+        groupId: existingGroup.id,
+        userId,
+      },
+      data: {
+        groupId: null,
+      },
+    })
+
     await prisma.group.delete({
       where: { id: existingGroup.id },
     })

@@ -438,8 +438,10 @@ export default async function middleware(req: NextRequest) {
       return redirectWithPrivateNoStore(authUrl)
     }
 
-    // Only allow access to admin in production
-    if (user.id !== process.env.ADMIN_USER_ID) {
+    const allowedAdminIds = [process.env.ADMIN_USER_ID, process.env.ALLOWED_ADMIN_USER_ID]
+      .filter((value): value is string => Boolean(value && value.trim()))
+
+    if (!allowedAdminIds.includes(user.id)) {
       return redirectWithPrivateNoStore(new URL(`/${locale}/dashboard`, req.url))
     }
   }

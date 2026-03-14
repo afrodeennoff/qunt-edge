@@ -14,6 +14,65 @@ import CommentNotificationEmail from '@/components/emails/blog/comment-notificat
 // resend will be initialized inside functions that need it
 const POST_NOT_FOUND_SENTINEL = "__POST_NOT_FOUND__"
 
+type CommunityUser = {
+  id: string
+  displayName: string
+}
+
+type RawPrismaComment = {
+  id: string
+  content: string
+  createdAt: Date
+  updatedAt: Date
+  postId: string
+  parentId: string | null
+  userId: string
+  user: { id: string; email?: string | null }
+  replies?: RawPrismaComment[]
+}
+
+type SanitizedComment = Omit<RawPrismaComment, 'user' | 'replies'> & {
+  user: CommunityUser
+  replies: SanitizedComment[]
+}
+
+function getCommunityDisplayName(email?: string | null) {
+  if (!email) return 'User'
+  const localPart = email.split('@')[0].trim()
+  return localPart || 'User'
+}
+
+function sanitizeCommunityUser(user: { id: string; email?: string | null }): CommunityUser {
+  return {
+    id: user.id,
+    displayName: getCommunityDisplayName(user.email ?? null)
+  }
+}
+
+function sanitizeComment(comment: {
+  id: string
+  content: string
+  createdAt: Date
+  updatedAt: Date
+  postId: string
+  parentId: string | null
+  userId: string
+  user?: { id: string; email?: string | null }
+  replies?: unknown[]
+}): SanitizedComment {
+  const normalizedReplies = Array.isArray(comment.replies)
+    ? comment.replies
+        .filter((reply): reply is Parameters<typeof sanitizeComment>[0] => typeof reply === 'object' && reply !== null)
+        .map(sanitizeComment)
+    : []
+
+  return {
+    ...comment,
+    user: sanitizeCommunityUser(comment.user ?? { id: comment.userId, email: null }),
+    replies: normalizedReplies
+  }
+}
+
 // Helper function to check if user is admin
 async function isAdmin(userId: string) {
   return userId === process.env.ALLOWED_ADMIN_USER_ID
@@ -76,10 +135,11 @@ export async function getPosts() {
       }, 0)
 
       // Remove the comments array from the post object since we only need the count
-      const { comments, ...postWithoutComments } = post
+      const { comments, user, ...postWithoutComments } = post
       void comments
       return {
         ...postWithoutComments,
+        user: sanitizeCommunityUser(user),
         _count: {
           comments: totalComments
         },
@@ -287,15 +347,7 @@ export async function getPost(id: string) {
             id: true,
           }
         },
-        votes: {
-          include: {
-            user: {
-              select: {
-                email: true,
-              }
-            }
-          }
-        },
+        votes: true,
       },
     })
 
@@ -303,6 +355,7 @@ export async function getPost(id: string) {
 
     return {
       ...post,
+      user: sanitizeCommunityUser(post.user),
       isAuthor: currentUserId ? (post.userId === currentUserId || process.env.NODE_ENV === 'development') : false
     }
   } catch (error) {
@@ -365,7 +418,7 @@ export async function getComments(postId: string) {
       }
     })
 
-    return comments
+    return comments.map(sanitizeComment)
   } catch (error) {
     console.error('Failed to fetch comments:', error)
     throw new Error('Failed to fetch comments')
@@ -460,7 +513,7 @@ export async function addComment(postId: string, content: string, parentId: stri
           }
         }
       }
-    })
+    }) as RawPrismaComment
 
     // Send email notification to post author if it's not their own comment
     if (post.user.id !== databaseUserId) {
@@ -482,7 +535,11 @@ export async function addComment(postId: string, content: string, parentId: stri
     }
 
     revalidatePath('/community')
-    return comment
+    return {
+      ...comment,
+      user: sanitizeCommunityUser(comment.user),
+      replies: [],
+    }
   } catch (error) {
     console.error('Failed to add comment:', error)
     throw new Error('Failed to add comment')

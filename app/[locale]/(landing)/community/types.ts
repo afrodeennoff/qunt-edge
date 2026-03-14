@@ -1,7 +1,12 @@
-import { Post, User, Vote } from '@/prisma/generated/prisma'
+import { Post, Vote } from '@/prisma/generated/prisma'
+
+export type CommunityUser = {
+  id: string
+  displayName: string
+}
 
 export type ExtendedPost = Post & {
-  user: Pick<User, 'email' | 'id'>
+  user: CommunityUser
   votes: Vote[]
   _count: {
     comments: number

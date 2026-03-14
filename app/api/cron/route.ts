@@ -6,6 +6,39 @@ import { requireServiceAuth, toErrorResponse } from "@/server/authz"
 
 export const dynamic = 'force-dynamic'
 
+const MAX_LOG_MESSAGE_LENGTH = 200
+
+const maskId = (value?: string) => value ? `${value.slice(0, 6)}…` : 'unknown'
+
+const snippet = (value?: string) => {
+  if (!value) return undefined
+  if (value.length <= MAX_LOG_MESSAGE_LENGTH) {
+    return value
+  }
+  return `${value.slice(0, MAX_LOG_MESSAGE_LENGTH)}…`
+}
+
+const sanitizeErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  if (typeof error === "string") {
+    return error
+  }
+  return "Unknown error"
+}
+
+const logSanitized = (
+  level: "warn" | "error",
+  event: string,
+  context: Record<string, unknown> = {},
+) => {
+  console[level]({
+    event,
+    ...context
+  })
+}
+
 // Retry configuration
 const MAX_RETRIES = 3
 const RETRY_DELAY = 1000 // 1 second
@@ -79,7 +112,9 @@ export async function GET(req: Request) {
       try {
         const emailBatch = batch.map(async (user) => {
           if (!user.email) {
-            console.warn(`No email found for user: ${user.id}`)
+            logSanitized("warn", "cron.user-without-email", {
+              userId: maskId(user.id),
+            })
             return null
           }
 
@@ -97,14 +132,23 @@ export async function GET(req: Request) {
 
             if (!response.ok) {
               const errorText = await response.text()
-              console.warn(`Failed to get email data for user ${user.id}:`, errorText)
+              logSanitized("warn", "cron.email-data-fetch-failed", {
+                userId: maskId(user.id),
+                status: response.status,
+                statusText: response.statusText,
+                bodySnippet: snippet(errorText),
+                truncated: typeof errorText === "string" ? errorText.length > MAX_LOG_MESSAGE_LENGTH : false,
+              })
               return null
             }
 
             const { emailData } = await response.json()
             return emailData
           } catch (error) {
-            console.warn(`Error processing user ${user.id}:`, error)
+            logSanitized("warn", "cron.email-batch-user-error", {
+              userId: maskId(user.id),
+              errorMessage: sanitizeErrorMessage(error),
+            })
             return null
           }
         })
@@ -117,12 +161,18 @@ export async function GET(req: Request) {
             successCount += result.data?.data.length || 0
             errorCount += batch.length - (result.data?.data.length || 0)
           } catch (error) {
-            console.error('Failed to send email batch:', error)
+            logSanitized("error", "cron.batch-send-failed", {
+              batchSize: validEmails.length,
+              errorMessage: sanitizeErrorMessage(error),
+            })
             errorCount += validEmails.length
           }
         }
       } catch (error) {
-        console.error('Error processing batch:', error)
+        logSanitized("error", "cron.batch-processing-error", {
+          batchSize: batch.length,
+          errorMessage: sanitizeErrorMessage(error),
+        })
         errorCount += batch.length
       }
     }
@@ -134,7 +184,9 @@ export async function GET(req: Request) {
     })
 
   } catch (error) {
-    console.error('Cron job error:', error)
+    logSanitized("error", "cron.job-error", {
+      errorMessage: sanitizeErrorMessage(error),
+    })
     return toErrorResponse(error)
   }
 }

@@ -20,7 +20,7 @@ interface Comment {
   createdAt: Date
   user: {
     id: string
-    email: string
+    displayName: string
   }
   parentId: string | null
   replies: Comment[]
@@ -54,6 +54,7 @@ function CommentComponent({
   const [replyContent, setReplyContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isAuthor = user?.id === comment.user.id
+  const displayName = comment.user.displayName || 'User'
 
   const handleReply = async () => {
     if (isSubmitting || !replyContent.trim()) return
@@ -104,12 +105,12 @@ function CommentComponent({
     <div className="space-y-4">
       <div className="flex gap-4">
         <Avatar className="h-8 w-8 shrink-0">
-          <AvatarFallback>{comment.user.email[0].toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{displayName[0]?.toUpperCase() || 'U'}</AvatarFallback>
         </Avatar>
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-sm">{comment.user.email.split('@')[0]}</span>
+              <span className="font-medium text-sm">{displayName}</span>
               <span className="text-xs text-muted-foreground">
                 {t('community.comments.timeAgo', { time: formatDistanceToNow(comment.createdAt) })}
               </span>

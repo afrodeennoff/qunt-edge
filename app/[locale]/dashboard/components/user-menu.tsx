@@ -5,6 +5,7 @@ import { useI18n, useChangeLocale, useCurrentLocale } from '@/locales/client'
 import { useTheme } from '@/context/theme-provider'
 import { useDashboardActions } from '@/context/data-provider'
 import { useUserStore } from '@/store/user-store'
+import { useTradovateSyncStore } from '@/store/tradovate-sync-store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -66,6 +67,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
   const resetUser = useUserStore(state => state.resetUser)
+  const clearTradovate = useTradovateSyncStore((state) => state.clearAll)
 
   const languages: { value: Locale; label: string }[] = useMemo(() => ([
     { value: 'en', label: 'English' },
@@ -277,6 +279,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={async () => {
+              clearTradovate()
               resetUser()
               await signOut()
             }}
@@ -291,4 +294,3 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
     </div>
   )
 }
-

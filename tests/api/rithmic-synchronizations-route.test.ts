@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const {
   getUserMock,
   setRithmicSynchronizationMock,
+  removeRithmicSynchronizationMock,
 } = vi.hoisted(() => ({
   getUserMock: vi.fn(),
   setRithmicSynchronizationMock: vi.fn(),
+  removeRithmicSynchronizationMock: vi.fn(),
 }))
 
 vi.mock("@/lib/supabase/route-client", () => ({
@@ -19,7 +21,7 @@ vi.mock("@/lib/supabase/route-client", () => ({
 vi.mock("@/app/[locale]/dashboard/components/import/rithmic/sync/actions", () => ({
   getRithmicSynchronizations: vi.fn(),
   setRithmicSynchronization: setRithmicSynchronizationMock,
-  removeRithmicSynchronization: vi.fn(),
+  removeRithmicSynchronization: removeRithmicSynchronizationMock,
 }))
 
 vi.mock("@/lib/rate-limit", () => ({
@@ -63,5 +65,65 @@ describe("POST /api/rithmic/synchronizations", () => {
 
     expect(response.status).toBe(400)
     expect(setRithmicSynchronizationMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("DELETE /api/rithmic/synchronizations", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    getUserMock.mockResolvedValue({ data: { user: { id: "auth-user-1" } }, error: null })
+  })
+
+  it("removes the owned synchronization", async () => {
+    removeRithmicSynchronizationMock.mockResolvedValue({ deletedCount: 1 })
+    const { DELETE } = await import("@/app/api/rithmic/synchronizations/route")
+    const response = await DELETE(
+      new Request("http://localhost/api/rithmic/synchronizations", {
+        method: "DELETE",
+        headers: {
+          authorization: "Bearer token",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ accountId: "ACC-1" }),
+      }) as never
+    )
+
+    expect(response.status).toBe(200)
+    expect(removeRithmicSynchronizationMock).toHaveBeenCalledWith("ACC-1")
+  })
+
+  it("returns 404 when the synchronization does not belong to the user", async () => {
+    removeRithmicSynchronizationMock.mockResolvedValue({ deletedCount: 0 })
+    const { DELETE } = await import("@/app/api/rithmic/synchronizations/route")
+    const response = await DELETE(
+      new Request("http://localhost/api/rithmic/synchronizations", {
+        method: "DELETE",
+        headers: {
+          authorization: "Bearer token",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ accountId: "ACC-1" }),
+      }) as never
+    )
+
+    expect(response.status).toBe(404)
+    expect(removeRithmicSynchronizationMock).toHaveBeenCalledWith("ACC-1")
+  })
+
+  it("rejects unauthenticated requests", async () => {
+    getUserMock.mockResolvedValue({ data: { user: null }, error: null })
+    const { DELETE } = await import("@/app/api/rithmic/synchronizations/route")
+    const response = await DELETE(
+      new Request("http://localhost/api/rithmic/synchronizations", {
+        method: "DELETE",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ accountId: "ACC-1" }),
+      }) as never
+    )
+
+    expect(response.status).toBe(401)
+    expect(removeRithmicSynchronizationMock).not.toHaveBeenCalled()
   })
 })

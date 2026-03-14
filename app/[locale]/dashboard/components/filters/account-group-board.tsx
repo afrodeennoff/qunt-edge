@@ -583,7 +583,6 @@ export function AccountGroupBoard() {
                   <Badge
                     key={account.id}
                     variant="secondary"
-                    role="button"
                     tabIndex={0}
                     onClick={() => toggleAccountSelection(account.id)}
                     onKeyDown={e => {
@@ -592,8 +591,8 @@ export function AccountGroupBoard() {
                         toggleAccountSelection(account.id)
                       }
                     }}
-                    className="gap-2 whitespace-nowrap h-8 cursor-pointer transition-colors border-transparent hover:bg-primary/10 hover:text-primary hover:border-transparent focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-transparent focus-visible:border-transparent active:border-transparent active:ring-0 active:ring-transparent"
-                    aria-label={t("common.delete")}
+                    className="gap-2 whitespace-nowrap h-8 cursor-pointer transition-colors border-transparent hover:bg-primary/10 hover:text-primary hover:border-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+                    aria-label={t("filters.selectAccount")}
                   >
                     <span className="truncate max-w-[180px]">{account.number}</span>
                     <X className="h-3 w-3" />

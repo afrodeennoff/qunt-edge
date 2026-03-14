@@ -1,14 +1,21 @@
-import { NextResponse } from "next/server";
-import { z, type ZodType } from "zod";
+import { type ZodType, z } from "zod";
+import { ApiErrorCode, apiError } from "@/lib/api-response";
 
 export class RequestValidationError extends Error {
   status: number;
   details?: unknown;
+  code: ApiErrorCode;
 
-  constructor(message: string, status = 400, details?: unknown) {
+  constructor(
+    message: string,
+    status = 400,
+    details?: unknown,
+    code: ApiErrorCode = "VALIDATION_FAILED"
+  ) {
     super(message);
     this.status = status;
     this.details = details;
+    this.code = code;
   }
 }
 
@@ -50,21 +57,14 @@ export function parseQuery<T>(
 
 export function toValidationErrorResponse(error: unknown) {
   if (error instanceof RequestValidationError) {
-    return NextResponse.json(
-      {
-        error: error.message,
-        ...(error.details ? { details: error.details } : {}),
-      },
-      { status: error.status }
-    );
+    return apiError(error.code, error.message, error.status, error.details);
   }
 
   if (error instanceof z.ZodError) {
-    return NextResponse.json(
-      { error: "Validation failed", details: error.issues },
-      { status: 400 }
-    );
+    return apiError("VALIDATION_FAILED", "Validation failed", 400, {
+      issues: error.issues,
+    });
   }
 
-  return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  return apiError("INTERNAL_ERROR", "Internal server error", 500);
 }

@@ -21,8 +21,13 @@ export function apiError(
   if (!resolvedHeaders.has('Cache-Control')) {
     resolvedHeaders.set('Cache-Control', 'no-store, max-age=0');
   }
+  const errorBody: Record<string, unknown> = { code, message }
+  if (details !== undefined) {
+    errorBody.details = details
+  }
+
   return NextResponse.json(
-    { error: { code, message, details } },
+    { error: errorBody },
     { status, headers: resolvedHeaders },
   )
 }

@@ -333,8 +333,9 @@ export function ChatInput({
                 type="button"
                 size="icon"
                 variant="destructive"
-                className="absolute -top-2 -right-2 h-5 w-5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity"
                 onClick={() => removeFile(index)}
+                aria-label={`Remove attachment ${index + 1}`}
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -354,7 +355,7 @@ export function ChatInput({
       >
         <Popover>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="icon" className="shrink-0" disabled={status === "streaming"}>
+            <Button type="button" variant="outline" size="icon" className="shrink-0" disabled={status === "streaming"} aria-label="Add attachment">
               <Plus className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -386,11 +387,11 @@ export function ChatInput({
           className="grow bg-background/50"
           disabled={status === "streaming"}
         />
-        <Button type="submit" size="icon" className="shrink-0" disabled={status === "streaming" || (!input.trim() && files.length === 0)}>
+        <Button type="submit" size="icon" className="shrink-0" disabled={status === "streaming" || (!input.trim() && files.length === 0)} aria-label="Send message">
           <Send className={cn("h-4 w-4", status === "streaming" && "animate-pulse")} />
         </Button>
         {status === "streaming" && (
-          <Button type="button" size="icon" variant="outline" className="shrink-0" onClick={stop}>
+          <Button type="button" size="icon" variant="outline" className="shrink-0" onClick={stop} aria-label="Stop generation">
             <StopCircle className="h-4 w-4" />
           </Button>
         )}

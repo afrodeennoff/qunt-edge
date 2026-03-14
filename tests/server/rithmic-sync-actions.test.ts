@@ -46,27 +46,27 @@ describe("rithmic sync actions", () => {
     getDatabaseUserIdMock.mockResolvedValue("db-user-1")
   })
 
-  it("lists synchronizations using both candidate user ids", async () => {
+  it("lists synchronizations using resolved database user id", async () => {
     findManyMock.mockResolvedValue([])
 
     await getRithmicSynchronizations()
 
     expect(findManyMock).toHaveBeenCalledWith({
       where: {
-        userId: { in: ["db-user-1", "auth-user-1"] },
+        userId: "db-user-1",
         service: "rithmic",
       },
     })
   })
 
-  it("deletes synchronization using both candidate user ids", async () => {
+  it("deletes synchronization using resolved database user id", async () => {
     deleteManyMock.mockResolvedValue({ count: 1 })
 
     await removeRithmicSynchronization("ACC-1")
 
     expect(deleteManyMock).toHaveBeenCalledWith({
       where: {
-        userId: { in: ["db-user-1", "auth-user-1"] },
+        userId: "db-user-1",
         service: "rithmic",
         accountId: "ACC-1",
       },

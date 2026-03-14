@@ -305,7 +305,12 @@ export function DailySummaryModal() {
                                         <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">{timeframe === 'total' ? 'Lifetime' : timeframe} PnL</span>
 
                                         <div className="ml-auto flex items-center gap-2">
-                                            <select className="cursor-pointer rounded bg-transparent text-[10px] font-bold uppercase text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={timeframe} onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}>
+                                            <select
+                                                className="cursor-pointer rounded bg-transparent text-[10px] font-bold uppercase text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                value={timeframe}
+                                                onChange={(e) => setTimeframe(e.target.value as 'daily' | 'weekly' | 'monthly' | 'total')}
+                                                aria-label="Summary timeframe"
+                                            >
                                                 <option value="daily" className="bg-popover text-popover-foreground">Daily</option>
                                                 <option value="weekly" className="bg-popover text-popover-foreground">Weekly</option>
                                                 <option value="monthly" className="bg-popover text-popover-foreground">Monthly</option>
@@ -329,23 +334,17 @@ export function DailySummaryModal() {
                                     animate={{ opacity: 1, height: 'auto', marginTop: 32 }}
                                     className="grid grid-cols-2 gap-4 overflow-hidden"
                                 >
-                                     <motion.div
+                                     <motion.button
+                                         type="button"
                                          onClick={() => setBlurWeekly(!blurWeekly)}
-                                         role="button"
-                                         tabIndex={0}
-                                         onKeyDown={(e) => {
-                                             if (e.key === 'Enter' || e.key === ' ') {
-                                                 e.preventDefault()
-                                                 setBlurWeekly(!blurWeekly)
-                                             }
-                                         }}
+                                         aria-pressed={blurWeekly}
                                          className={cn(
                                              "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
-                                            blurWeekly
-                                                ? "bg-zinc-950/40 border-white/5 blur-xl scale-[0.98] select-none"
-                                                : "bg-zinc-900/30 border-white/10 hover:bg-zinc-900/60 hover:border-white/20"
-                                        )}
-                                    >
+                                             blurWeekly
+                                                 ? "bg-zinc-950/40 border-white/5 blur-xl scale-[0.98] select-none"
+                                                 : "bg-zinc-900/30 border-white/10 hover:bg-zinc-900/60 hover:border-white/20"
+                                         )}
+                                     >
                                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {blurWeekly ? <Eye className="w-3 h-3 text-white/60" /> : <EyeOff className="w-3 h-3 text-white/40" />}
                                         </div>
@@ -355,25 +354,19 @@ export function DailySummaryModal() {
                                                 ? `$${toSafeNumber(stats.weekly.pnl).toLocaleString()}`
                                                 : `${totalAccountValue > 0 ? ((toSafeNumber(stats.weekly.pnl) / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
                                         </div>
-                                    </motion.div>
+                                     </motion.button>
 
-                                     <motion.div
+                                     <motion.button
+                                         type="button"
                                          onClick={() => setBlurMonthly(!blurMonthly)}
-                                         role="button"
-                                         tabIndex={0}
-                                         onKeyDown={(e) => {
-                                             if (e.key === 'Enter' || e.key === ' ') {
-                                                 e.preventDefault()
-                                                 setBlurMonthly(!blurMonthly)
-                                             }
-                                         }}
+                                         aria-pressed={blurMonthly}
                                          className={cn(
                                              "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
-                                            blurMonthly
-                                                ? "bg-zinc-950/40 border-white/5 blur-xl scale-[0.98] select-none"
-                                                : "bg-zinc-900/30 border-white/10 hover:bg-zinc-900/60 hover:border-white/20"
-                                        )}
-                                    >
+                                             blurMonthly
+                                                 ? "bg-zinc-950/40 border-white/5 blur-xl scale-[0.98] select-none"
+                                                 : "bg-zinc-900/30 border-white/10 hover:bg-zinc-900/60 hover:border-white/20"
+                                         )}
+                                     >
                                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {blurMonthly ? <Eye className="w-3 h-3 text-white/60" /> : <EyeOff className="w-3 h-3 text-white/40" />}
                                         </div>
@@ -383,7 +376,7 @@ export function DailySummaryModal() {
                                                 ? `$${toSafeNumber(stats.monthly.pnl).toLocaleString()}`
                                                 : `${totalAccountValue > 0 ? ((toSafeNumber(stats.monthly.pnl) / totalAccountValue) * 100).toFixed(2) : '0.00'}%`}
                                         </div>
-                                    </motion.div>
+                                     </motion.button>
                                 </motion.div>
                             </div>
 
@@ -470,11 +463,11 @@ export function DailySummaryModal() {
                 </motion.div>
 
                 <div className="mt-6 flex items-center gap-4 opacity-50 hover:opacity-100 transition-opacity">
-                    <button className="text-xs font-medium uppercase tracking-wider text-white hover:underline decoration-white/30 underline-offset-4" onClick={handleDownload} disabled={isExporting}>
+                    <button className="text-xs font-medium uppercase tracking-wider text-white hover:underline decoration-white/30 underline-offset-4" onClick={handleDownload} disabled={isExporting} aria-label="Download summary image">
                         {isExporting ? "Saving..." : "Download Image"}
                     </button>
                     <span className="text-white/20">•</span>
-                    <button className="text-xs font-medium uppercase tracking-wider text-white hover:underline decoration-white/30 underline-offset-4" onClick={handleShare} disabled={isExporting}>
+                    <button className="text-xs font-medium uppercase tracking-wider text-white hover:underline decoration-white/30 underline-offset-4" onClick={handleShare} disabled={isExporting} aria-label="Share summary image">
                         Share
                     </button>
                     {(['obsidian', 'graphite', 'silver', 'ghost'] as const).map(t => (
