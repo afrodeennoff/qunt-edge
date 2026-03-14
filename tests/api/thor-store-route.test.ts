@@ -66,6 +66,13 @@ describe('DELETE /api/thor/store', () => {
     )
 
     expect(response.status).toBe(401)
+    const payload = await response.json()
+    expect(payload).toEqual({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      },
+    })
     expect(deleteManyMock).not.toHaveBeenCalled()
   })
 })

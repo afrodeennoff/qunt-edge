@@ -1,13 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,20 +20,7 @@ interface DailyCommentProps {
   selectedDate: Date;
 }
 
-interface Mood {
-  id: string;
-  userId: string;
-  day: Date;
-  emotionValue: number;
-  hasTradingExperience: boolean | null;
-  selectedNews: string[];
-  journalContent: string | null;
-  conversation: any;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export function DailyComment({ dayData, selectedDate }: DailyCommentProps) {
+export function DailyComment({ selectedDate }: DailyCommentProps) {
   const t = useI18n();
   const user = useUserStore((state) => state.user);
   const moodHistory = useMoodStore((state) => state.moods);

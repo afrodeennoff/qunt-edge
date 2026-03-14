@@ -47,14 +47,14 @@ export function DashboardHeaderWidgetControls({ isMobile }: DashboardHeaderWidge
   const currentLayout = layouts || { desktop: [], mobile: [] };
 
   return (
-    <div
-      className={cn(
-        "ml-1 flex shrink-0 items-center gap-1.5",
-        isMobile
-          ? "rounded-lg border border-border/35 bg-background/70 p-1"
-          : "rounded-xl border border-border/50 bg-background/50 p-1.5 shadow-sm ring-1 ring-white/5 backdrop-blur-sm"
-      )}
-    >
+      <div
+        className={cn(
+          "ml-1 flex shrink-0 items-center gap-1.5",
+          isMobile
+            ? "rounded-lg border border-border/35 bg-background/70 p-1"
+            : "rounded-xl border border-border/50 bg-background/50 p-1.5 shadow-sm ring-1 ring-foreground/5 backdrop-blur-sm"
+        )}
+      >
       <button
         type="button"
         id="customize-mode"
@@ -112,7 +112,7 @@ export function DashboardHeaderWidgetControls({ isMobile }: DashboardHeaderWidge
               <AlertDialogTrigger asChild>
                 <button
                   aria-label={t("widgets.deleteAll")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-foreground/10 text-foreground/60 hover:text-foreground transition-colors"
                   title={t("widgets.deleteAll")}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -127,10 +127,10 @@ export function DashboardHeaderWidgetControls({ isMobile }: DashboardHeaderWidge
                   <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={removeAllWidgets}
-                    className="bg-white/10 text-white hover:bg-white/20 border border-white/10"
-                  >
-                    {t("widgets.confirmDeleteAll")}
-                  </AlertDialogAction>
+                  className="bg-foreground/10 text-foreground hover:bg-foreground/20 border border-foreground/10"
+                >
+                  {t("widgets.confirmDeleteAll")}
+                </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -141,26 +141,26 @@ export function DashboardHeaderWidgetControls({ isMobile }: DashboardHeaderWidge
               type="button"
               onClick={flushPendingSaves}
               aria-label="Save pending dashboard changes"
-              className={cn(
-                "flex items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors animate-pulse",
-                isMobile ? "h-11 w-11" : "h-8 w-8"
-              )}
-              title="Save Changes"
-            >
-              <CloudUpload className="w-4 h-4" />
-            </button>
-          ) : (
-            <div
-              role="status"
-              aria-label="All changes saved"
-              className={cn(
-                "flex items-center justify-center text-white/70",
-                isMobile ? "h-11 w-11" : "h-8 w-8"
-              )}
-              title="All changes saved"
-            >
-              <CheckCircle2 className="w-4 h-4 text-white" />
-            </div>
+                className={cn(
+                  "flex items-center justify-center rounded-lg bg-foreground/10 text-foreground hover:bg-foreground/20 transition-colors animate-pulse",
+                  isMobile ? "h-11 w-11" : "h-8 w-8"
+                )}
+                title="Save Changes"
+              >
+                <CloudUpload className="w-4 h-4" />
+              </button>
+            ) : (
+              <div
+                role="status"
+                aria-label="All changes saved"
+                className={cn(
+                  "flex items-center justify-center text-foreground/70",
+                  isMobile ? "h-11 w-11" : "h-8 w-8"
+                )}
+                title="All changes saved"
+              >
+                <CheckCircle2 className="w-4 h-4 text-foreground" />
+              </div>
           )}
         </div>
       )}

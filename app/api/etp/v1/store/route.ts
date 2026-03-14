@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifySecureToken } from '@/lib/api-auth'
+import { apiError } from '@/lib/api-response'
 import { z } from 'zod'
 import { createRateLimitResponse, rateLimit } from '@/lib/rate-limit'
 import { parseJson, parseQuery, toValidationErrorResponse } from '@/app/api/_utils/validate'
@@ -103,18 +104,13 @@ export async function POST(req: NextRequest) {
 
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (Number.isFinite(contentLength) && contentLength > MAX_ETP_BODY_BYTES) {
-      return NextResponse.json(
-        { error: 'Request payload is too large', requestId },
-        { status: 413 }
-      )
+      return apiError('PAYLOAD_TOO_LARGE', 'Request payload is too large', 413, { requestId })
     }
 
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({
-        error: 'Unauthorized',
-      }, { status: auth.error?.status || 401 });
+      return apiError('UNAUTHORIZED', 'Unauthorized', auth.error?.status || 401)
     }
     
     const user = auth.user!;
@@ -170,10 +166,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     const validationResponse = toValidationErrorResponse(error)
     if (validationResponse.status !== 500) return validationResponse
-    return NextResponse.json({ 
-      error: 'Failed to store orders',
-      requestId,
-    }, { status: 500 });
+    return apiError('INTERNAL_ERROR', 'Failed to store orders', 500, { requestId })
   }
 }
 
@@ -192,9 +185,7 @@ export async function GET(req: NextRequest) {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({
-        error: 'Unauthorized',
-      }, { status: auth.error?.status || 401 });
+      return apiError('UNAUTHORIZED', 'Unauthorized', auth.error?.status || 401)
     }
     
     const user = auth.user!;
@@ -259,10 +250,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     const validationResponse = toValidationErrorResponse(error)
     if (validationResponse.status !== 500) return validationResponse
-    return NextResponse.json({ 
-      error: 'Failed to retrieve orders',
-      requestId,
-    }, { status: 500 });
+    return apiError('INTERNAL_ERROR', 'Failed to retrieve orders', 500, { requestId })
   }
 }
 
@@ -281,9 +269,7 @@ export async function DELETE(req: NextRequest) {
     const auth = await authenticateRequest(req);
     
     if (!auth.authenticated) {
-      return NextResponse.json({
-        error: 'Unauthorized',
-      }, { status: auth.error?.status || 401 });
+      return apiError('UNAUTHORIZED', 'Unauthorized', auth.error?.status || 401)
     }
     
     const user = auth.user!;
@@ -301,9 +287,6 @@ export async function DELETE(req: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to delete orders',
-      requestId,
-    }, { status: 500 });
+    return apiError('INTERNAL_ERROR', 'Failed to delete orders', 500, { requestId })
   }
 } 

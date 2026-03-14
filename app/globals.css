@@ -52,6 +52,116 @@
   }
 }
 
+@layer base {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
+
+    --token-background: hsl(var(--background));
+    --token-foreground: hsl(var(--foreground));
+    --token-card: hsl(var(--card));
+    --token-card-foreground: hsl(var(--card-foreground));
+    --token-border: hsl(var(--border));
+    --token-primary: hsl(var(--primary));
+    --token-secondary: hsl(var(--secondary));
+    --token-muted: hsl(var(--muted));
+  }
+
+  .dark {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+
+    --token-background: hsl(var(--background));
+    --token-foreground: hsl(var(--foreground));
+    --token-card: hsl(var(--card));
+    --token-card-foreground: hsl(var(--card-foreground));
+    --token-border: hsl(var(--border));
+    --token-primary: hsl(var(--primary));
+    --token-secondary: hsl(var(--secondary));
+    --token-muted: hsl(var(--muted));
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --foreground-rgb: 255, 255, 255;
+      --background-start-rgb: 0, 0, 0;
+      --background-end-rgb: 0, 0, 0;
+    }
+  }
+}
+
+@theme inline {
+  --theme-color-background: hsl(var(--background));
+  --theme-color-foreground: hsl(var(--foreground));
+  --theme-color-card: hsl(var(--card));
+  --theme-color-card-foreground: hsl(var(--card-foreground));
+  --theme-color-popover: hsl(var(--popover));
+  --theme-color-popover-foreground: hsl(var(--popover-foreground));
+  --theme-color-primary: hsl(var(--primary));
+  --theme-color-primary-foreground: hsl(var(--primary-foreground));
+  --theme-color-secondary: hsl(var(--secondary));
+  --theme-color-secondary-foreground: hsl(var(--secondary-foreground));
+  --theme-color-muted: hsl(var(--muted));
+  --theme-color-muted-foreground: hsl(var(--muted-foreground));
+  --theme-color-accent: hsl(var(--accent));
+  --theme-color-accent-foreground: hsl(var(--accent-foreground));
+  --theme-color-destructive: hsl(var(--destructive));
+  --theme-color-destructive-foreground: hsl(var(--destructive-foreground));
+  --theme-color-success: hsl(var(--success));
+  --theme-color-success-foreground: hsl(var(--success-foreground));
+  --theme-color-input: hsl(var(--input));
+  --theme-color-border: hsl(var(--border));
+  --theme-color-ring: hsl(var(--ring));
+}
+
+@theme inline {
+  --theme-font-sans: var(--font-geist), var(--font-inter), system-ui, sans-serif;
+  --theme-font-mono: var(--font-ibm-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --theme-font-terminal: var(--font-ibm-mono), ui-monospace, monospace;
+}
+
+@theme inline {
+  --theme-radius-lg: var(--radius);
+  --theme-radius-md: calc(var(--radius) - 2px);
+  --theme-radius-sm: calc(var(--radius) - 4px);
+}
+
+@theme inline {
+  --theme-shadow-sm: 0 1px 3px rgb(0 0 0 / 0.28);
+  --theme-shadow-md: 0 8px 18px -12px rgb(0 0 0 / 0.55);
+  --theme-shadow-lg: 0 18px 28px -16px rgb(0 0 0 / 0.7);
+}
+
+@theme inline {
+  --theme-sidebar-background: hsl(var(--sidebar-background));
+  --theme-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --theme-sidebar-primary: hsl(var(--sidebar-primary));
+  --theme-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --theme-sidebar-accent: hsl(var(--sidebar-accent));
+  --theme-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --theme-sidebar-border: hsl(var(--sidebar-border));
+  --theme-sidebar-ring: hsl(var(--sidebar-ring));
+}
+
+@theme inline {
+  --theme-chart-1: hsl(var(--chart-1));
+  --theme-chart-2: hsl(var(--chart-2));
+  --theme-chart-3: hsl(var(--chart-3));
+  --theme-chart-4: hsl(var(--chart-4));
+  --theme-chart-5: hsl(var(--chart-5));
+  --theme-chart-6: hsl(var(--chart-6));
+  --theme-chart-7: hsl(var(--chart-7));
+  --theme-chart-8: hsl(var(--chart-8));
+  --theme-chart-win: hsl(var(--chart-win));
+  --theme-chart-loss: hsl(var(--chart-loss));
+  --theme-chart-grid: hsl(var(--chart-grid));
+  --theme-chart-axis: hsl(var(--chart-axis));
+  --theme-chart-tooltip: hsl(var(--chart-tooltip));
+  --theme-chart-tooltip-border: hsl(var(--chart-tooltip-border));
+}
+
 @utility text-balance {
   text-wrap: balance;
 }
@@ -139,22 +249,6 @@
     min-height: 44px;
     min-width: 44px;
     z-index: 9999;
-  }
-}
-
-@layer utilities {
-  :root {
-    --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 214, 219, 220;
-    --background-end-rgb: 255, 255, 255;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --foreground-rgb: 255, 255, 255;
-      --background-start-rgb: 0, 0, 0;
-      --background-end-rgb: 0, 0, 0;
-    }
   }
 }
 

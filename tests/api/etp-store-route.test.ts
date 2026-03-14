@@ -83,6 +83,13 @@ describe('/api/etp/v1/store POST', () => {
 
     const response = await POST(request)
     expect(response.status).toBe(413)
+    const payload = await response.json()
+    expect(payload).toMatchObject({
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'Request payload is too large',
+      },
+    })
   })
 })
 
@@ -122,6 +129,13 @@ describe('/api/etp/v1/store DELETE', () => {
     const response = await DELETE(request)
 
     expect(response.status).toBe(401)
+    const payload = await response.json()
+    expect(payload).toEqual({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      },
+    })
     expect(deleteMany).not.toHaveBeenCalled()
   })
 })

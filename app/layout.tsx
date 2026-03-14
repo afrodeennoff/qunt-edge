@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Cormorant_Garamond, Geist, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { headers } from "next/headers";
@@ -7,6 +8,111 @@ import ScrollLockFixLazy from "@/components/lazy/scroll-lock-fix-lazy";
 import { getUiVariant } from "@/lib/ui-v2";
 
 const siteOrigin = "https://qunt-edge.vercel.app";
+
+const fontSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fontSerif = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const siteMetadata: Metadata = {
+  metadataBase: new URL(siteOrigin),
+  title: {
+    default: "Qunt Edge",
+    template: "%s | Qunt Edge",
+  },
+  description:
+    "Qunt Edge is a premium trading analytics platform that delivers real-time trades, AI signals, and collaborative dashboards for modern traders.",
+  keywords: [
+    "trading analytics",
+    "real-time trades",
+    "trading dashboard",
+    "portfolio insight",
+    "Qunt Edge",
+  ],
+  alternates: {
+    canonical: siteOrigin,
+    languages: {
+      "en-US": siteOrigin,
+      "fr-FR": `${siteOrigin}/fr`,
+    },
+  },
+  openGraph: {
+    title: "Qunt Edge",
+    description:
+      "Qunt Edge is a premium trading analytics platform that delivers real-time trades, AI signals, and collaborative dashboards for modern traders.",
+    url: siteOrigin,
+    siteName: "Qunt Edge",
+    type: "website",
+    locale: "en-US",
+    images: [
+      {
+        url: `${siteOrigin}/opengraph-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "Qunt Edge Open Graph Image",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Qunt Edge",
+    description:
+      "Qunt Edge is a premium trading analytics platform that delivers real-time trades, AI signals, and collaborative dashboards for modern traders.",
+    images: [`${siteOrigin}/twitter-image.png`],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    other: [
+      { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "black" },
+      {
+        rel: "android-chrome",
+        sizes: "192x192",
+        url: "/android-chrome-192x192.png",
+      },
+      {
+        rel: "android-chrome",
+        sizes: "512x512",
+        url: "/android-chrome-512x512.png",
+      },
+    ],
+  },
+  manifest: "/manifest.json",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  other: { google: "notranslate" },
+  authors: [{ name: "Qunt Edge Team" }],
+  creator: "Qunt Edge",
+  publisher: "Qunt Edge",
+  formatDetection: { email: false, address: false, telephone: false },
+};
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -21,85 +127,7 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Qunt Edge",
-    description: "Next generation trading dashboard",
-    metadataBase: new URL(siteOrigin),
-    alternates: {
-      canonical: siteOrigin,
-      languages: {
-        "en-US": siteOrigin,
-        "fr-FR": `${siteOrigin}/fr`,
-      },
-    },
-    // ---------- OPEN GRAPH ----------
-    openGraph: {
-      title: "Qunt Edge",
-      description:
-        "Qunt Edge is a next generation trading dashboard that provides real-time insights and analytics for traders.",
-      images: [
-        {
-          url: "/opengraph-image.png",
-          width: 1200,
-          height: 630,
-          alt: "Qunt Edge Open Graph Image",
-        },
-      ],
-    },
-
-    // ---------- TWITTER ----------
-    twitter: {
-      card: "summary_large_image",
-      title: "Qunt Edge",
-      description: "Next generation trading dashboard",
-      images: ["/twitter-image.png"],
-    },
-
-    // ---------- ICONS ----------
-    icons: {
-      icon: [
-        { url: "/favicon.ico", sizes: "any" },
-        { url: "/icon.png", type: "image/png", sizes: "32x32" },
-      ],
-      apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-      other: [
-        { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "black" },
-        {
-          rel: "android-chrome",
-          sizes: "192x192",
-          url: "/android-chrome-192x192.png",
-        },
-        {
-          rel: "android-chrome",
-          sizes: "512x512",
-          url: "/android-chrome-512x512.png",
-        },
-      ],
-    },
-
-    // ---------- PWA ----------
-    manifest: "/manifest.json",
-
-    // ---------- ROBOTS ----------
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-
-    // ---------- OTHER ----------
-    other: { google: "notranslate" },
-    authors: [{ name: "TIMON" }],
-    creator: "TIMON",
-    publisher: "TIMON",
-    formatDetection: { email: false, address: false, telephone: false },
-  };
+  return siteMetadata;
 }
 
 export default async function RootLayout({
@@ -118,17 +146,11 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className="bg-background"
+      className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} bg-background`}
       data-ui-variant={uiVariant}
       translate="no"
       suppressHydrationWarning
-      style={{
-        "--theme-intensity": "100%",
-        "--font-geist": "system-ui, -apple-system, Segoe UI, sans-serif",
-        "--font-inter": "system-ui, -apple-system, Segoe UI, sans-serif",
-        "--font-manrope": "system-ui, -apple-system, Segoe UI, sans-serif",
-        "--font-ibm-mono": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-      } as React.CSSProperties}
+      style={{ "--theme-intensity": "100%" } as React.CSSProperties}
     >
       <head>
         {/* Resource Hinting for Performance */}

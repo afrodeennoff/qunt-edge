@@ -34,7 +34,9 @@ async function run(cmd, args) {
 
 function isTransientNextBuildFsRace(output) {
   if (!output) return false;
-  if (!output.includes("ENOENT: no such file or directory")) return false;
+  const hasEnoent = output.includes("ENOENT: no such file or directory");
+  const hasNextTypesMissing = /Type error:\s*File '.*\/\.next\/types\/.*' not found\./.test(output);
+  if (!hasEnoent && !hasNextTypesMissing) return false;
 
   // Observed intermittent races in this workspace:
   // - .next/build-manifest.json
@@ -44,7 +46,8 @@ function isTransientNextBuildFsRace(output) {
   return /\/\.next\/(server\/)?(pages-manifest\.json|build-manifest\.json)/.test(
     output,
   ) || /\/\.next\/static\/.*_buildManifest\.js(\.tmp\.[^'"\s]+)?/.test(output)
-    || /\/\.next\/server\/[^'"\s]+\.nft\.json/.test(output);
+    || /\/\.next\/server\/[^'"\s]+\.nft\.json/.test(output)
+    || /\/\.next\/types\//.test(output);
 }
 
 const MAX_ATTEMPTS = Number(process.env.NEXT_BUILD_MAX_ATTEMPTS ?? "2");

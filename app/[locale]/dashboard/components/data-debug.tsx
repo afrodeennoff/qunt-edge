@@ -48,50 +48,50 @@ export function DataDebug() {
                     variant="outline"
                     size="icon"
                     onClick={() => setIsOpen(true)}
-                    className="rounded-full bg-black/80 border-white/10 hover:bg-white/10 backdrop-blur-md shadow-lg"
+                    className="rounded-full bg-background/80 border-foreground/10 hover:bg-foreground/10 backdrop-blur-md shadow-lg"
                 >
                     <Bug className="h-4 w-4 text-primary" />
                 </Button>
             ) : (
-                <div className="w-80 bg-black/90 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                <div className="w-80 bg-background/90 border border-foreground/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center justify-between mb-4 border-b border-foreground/5 pb-2">
                         <div className="flex items-center gap-2">
                             <Bug className="h-4 w-4 text-primary" />
-                            <span className="text-xs font-bold uppercase tracking-widest text-white/90">Debug Dashboard</span>
+                            <span className="text-xs font-bold uppercase tracking-widest text-foreground/90">Debug Dashboard</span>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-colors">
+                        <button onClick={() => setIsOpen(false)} className="text-foreground/60 hover:text-foreground transition-colors">
                             <X className="h-4 w-4" />
                         </button>
                     </div>
 
                     <div className="space-y-3">
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/60 uppercase font-black tracking-tighter">Trades in Store</span>
-                            <span className="text-white/90 font-mono">{trades.length}</span>
+                            <span className="text-foreground/60 uppercase font-black tracking-tighter">Trades in Store</span>
+                            <span className="text-foreground/90 font-mono">{trades.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/60 uppercase font-black tracking-tighter">Filtered Trades</span>
-                            <span className="text-white/90 font-mono">{formattedTrades.length}</span>
+                            <span className="text-foreground/60 uppercase font-black tracking-tighter">Filtered Trades</span>
+                            <span className="text-foreground/90 font-mono">{formattedTrades.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/60 uppercase font-black tracking-tighter">Accounts</span>
-                            <span className="text-white/90 font-mono">{accounts.length}</span>
+                            <span className="text-foreground/60 uppercase font-black tracking-tighter">Accounts</span>
+                            <span className="text-foreground/90 font-mono">{accounts.length}</span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/60 uppercase font-black tracking-tighter">Environment</span>
+                            <span className="text-foreground/60 uppercase font-black tracking-tighter">Environment</span>
                             <span className={cn("font-mono", process.env.NODE_ENV === 'development' ? "text-semantic-success" : "text-semantic-warning")}>
                                 {process.env.NODE_ENV}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/60 uppercase font-black tracking-tighter">Data Logic</span>
+                            <span className="text-foreground/60 uppercase font-black tracking-tighter">Data Logic</span>
                             <span className={cn("font-mono px-1.5 py-0.5 rounded text-[8px]", isMock ? "bg-semantic-warning-bg/10 text-semantic-warning" : "bg-semantic-success-bg/10 text-semantic-success")}>
                                 {isMock ? "MOCK (Fallback)" : "LIVE (Synced)"}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-white/60 uppercase font-black tracking-tighter">User ID</span>
-                            <span className="text-white/90 font-mono truncate max-w-[120px]">
+                            <span className="text-foreground/60 uppercase font-black tracking-tighter">User ID</span>
+                            <span className="text-foreground/90 font-mono truncate max-w-[120px]">
                                 {user?.id || supabaseUser?.id || "None"}
                             </span>
                         </div>
@@ -103,7 +103,7 @@ export function DataDebug() {
                             size="sm"
                             onClick={() => refreshAllData({ force: true })}
                             disabled={isLoading}
-                            className="h-8 text-[9px] font-bold uppercase tracking-widest border-white/5 bg-white/5 hover:bg-white/10"
+                            className="h-8 text-[9px] font-bold uppercase tracking-widest border-foreground/5 bg-foreground/5 hover:bg-foreground/10"
                         >
                             <RefreshCw className={cn("h-3 w-3 mr-2", isLoading && "animate-spin")} />
                             Sync Now

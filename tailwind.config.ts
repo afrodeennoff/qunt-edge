@@ -33,9 +33,10 @@ const config = {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['var(--font-geist)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
-				mono: ['var(--font-ibm-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
-				terminal: ['var(--font-ibm-mono)', 'ui-monospace', 'monospace'],
+				sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+				serif: ['var(--font-serif)', 'Georgia', 'Cambria', 'serif'],
+				mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+				terminal: ['var(--font-mono)', 'ui-monospace', 'monospace'],
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

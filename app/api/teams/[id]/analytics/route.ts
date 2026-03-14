@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getTeamById, getTeamAnalytics, updateTeamAnalytics } from "@/server/teams"
 import { createRouteClient } from "@/lib/supabase/route-client"
 import { resolveTeamUserId } from "@/server/team-membership"
+import { apiError } from "@/lib/api-response"
 import { z } from "zod"
 
 const teamIdSchema = z.string().min(1).max(128).regex(/^[a-zA-Z0-9_-]+$/)
@@ -16,21 +17,18 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiError("UNAUTHORIZED", "Unauthorized", 401)
     }
 
     const teamIdResult = teamIdSchema.safeParse((await params).id)
     if (!teamIdResult.success) {
-      return NextResponse.json({ error: 'Invalid team id' }, { status: 400 })
+      return apiError("VALIDATION_FAILED", "Invalid team id", 400)
     }
     const teamId = teamIdResult.data
     const url = new URL(req.url)
     const periodResult = periodSchema.safeParse(url.searchParams.get('period') ?? 'monthly')
     if (!periodResult.success) {
-      return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
+      return apiError("VALIDATION_FAILED", "Invalid period", 400)
     }
     const period = periodResult.data
 
@@ -38,26 +36,17 @@ export async function GET(
     const team = await getTeamById(teamId, teamUserId)
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      )
+      return apiError("NOT_FOUND", "Team not found", 404)
     }
 
     const analytics = await getTeamAnalytics(teamId, period)
     return NextResponse.json(analytics, { status: 200 })
   } catch (error) {
     if (error instanceof Error && error.message === 'Team not found') {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      )
+      return apiError("NOT_FOUND", "Team not found", 404)
     }
     console.error('Error fetching team analytics:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
-      { status: 500 }
-    )
+    return apiError("INTERNAL_ERROR", "Failed to fetch analytics", 500)
   }
 }
 
@@ -70,39 +59,30 @@ export async function PUT(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiError("UNAUTHORIZED", "Unauthorized", 401)
     }
 
     const teamIdResult = teamIdSchema.safeParse((await params).id)
     if (!teamIdResult.success) {
-      return NextResponse.json({ error: 'Invalid team id' }, { status: 400 })
+      return apiError("VALIDATION_FAILED", "Invalid team id", 400)
     }
     const teamId = teamIdResult.data
     const url = new URL(req.url)
     const periodResult = periodSchema.safeParse(url.searchParams.get('period') ?? 'monthly')
     if (!periodResult.success) {
-      return NextResponse.json({ error: 'Invalid period' }, { status: 400 })
+      return apiError("VALIDATION_FAILED", "Invalid period", 400)
     }
     const period = periodResult.data
     const teamUserId = await resolveTeamUserId(user.id)
     const result = await updateTeamAnalytics(teamId, teamUserId, period)
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      )
+      return apiError("INTERNAL_ERROR", result.error || "Failed to update analytics", 500)
     }
 
     return NextResponse.json(result.analytics, { status: 200 })
   } catch (error) {
     console.error('Error updating team analytics:', error)
-    return NextResponse.json(
-      { error: 'Failed to update analytics' },
-      { status: 500 }
-    )
+    return apiError("INTERNAL_ERROR", "Failed to update analytics", 500)
   }
 }

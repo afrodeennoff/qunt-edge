@@ -1,3 +1,22 @@
+## Task: Root layout font + metadata refresh (2026-03-14)
+
+- [x] Review `app/layout.tsx`, `app/globals.css`, and `tailwind.config.ts` to understand the current font wiring, inline variables, and metadata defaults.
+- [x] Import and configure the three `next/font` families (`fontSans`, `fontSerif`, `fontMono`), apply their `variable` classes, and remove the outdated inline font variable definitions.
+- [x] Update the Qunt Edge metadata (title template, description, keywords, open graph, Twitter cards, etc.) so the root layout is branded and removes any “Create Next App” defaults.
+- [x] Adjust the shared CSS/tailwind font stacks to use the new `--font-sans`/`--font-mono` variables while keeping backward-compatible aliases for `--font-geist`/`--font-ibm-mono`.
+- [x] Run targeted lint(s) covering `app/layout.tsx`, `app/globals.css`, and `tailwind.config.ts` (e.g., `npm run lint -- app/layout.tsx tailwind.config.ts app/globals.css`) to confirm the changes compile.
+- [x] Summarize the verification results and changed files in this checklist.
+
+Verification: `npm run lint -- app/layout.tsx tailwind.config.ts app/globals.css` (ESLint warns `app/globals.css` is ignored because no matching config is supplied; layout and config files pass).
+
+## Task: Tailwind v4 semantic tokens foundation (2026-03-14)
+
+- [ ] Review `app/globals.css` to capture the current root/dark token definitions and base styles.
+- [ ] Implement the Tailwind v4 semantic token foundation: `:root`, `.dark`, `@theme` inline mappings (colors/fonts/radius/shadow/sidebar/chart), and base defaults with `*` and `body` selectors.
+- [ ] Preserve any existing project-specific tokens needed for current classes and keep the file structured and maintainable.
+- [ ] Run `npm run lint -- app/globals.css` (or the equivalent style check) and note any issues.
+- [ ] Summarize the verification results and changed lines for this task.
+
 ## Task: Harden community/public data (2026-03-14)
 
 - [x] Document the sanitization/test plan for community read responses and ownership flags (this entry).
@@ -19,6 +38,13 @@
 - [ ] Implement fixes enforcing owner deletes, rejecting unauthorized deletes, and maintaining FK/cascade-safe behavior when related rows exist.
 - [ ] Add/update tests proving owner delete success, unauthorized delete blocked, and safe relational behavior for dependent records.
 - [ ] Run targeted `npx vitest` suites plus `npx eslint`/`npm run -s typecheck` on touched files; capture outputs for the report.
+
+## Task: Semantic color migration (2026-03-14)
+
+- [ ] Inventory the highest-impact hardcoded color utility classes under `app/**` and `components/**`, focusing on shared or high-traffic surfaces.
+- [ ] Replace those classes with semantic tokens (`bg-background`, `text-foreground`, `border-border`, `text-muted-foreground`, `text-accent`, etc.) while keeping contrast and theme compatibility intact.
+- [ ] Run `npx eslint` on every touched file and record the output for verification.
+- [ ] Summarize the migration in a report listing files changed and the counts of replacements applied.
 
 ## Task: Competitor Benchmark + Home Funnel Upgrade (2026-03-14)
 

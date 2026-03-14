@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { apiError } from "@/lib/api-response"
 import { getDatabaseUserId } from "@/server/auth"
 import { computeBehaviorInsights } from "@/lib/behavior-insights"
 import { getRedisJson, setRedisJson } from "@/lib/redis-cache"
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const userId = await getDatabaseUserId()
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return apiError("UNAUTHORIZED", "Unauthorized", 401)
     }
 
     const periodDays = sanitizePeriodDays(request.nextUrl.searchParams.get("periodDays"))
@@ -70,9 +71,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(insights)
   } catch (error) {
     console.error("[Behavior Insights API] Failed to build insights", error)
-    return NextResponse.json(
-      { error: "Failed to build behavior insights" },
-      { status: 500 },
-    )
+    return apiError("INTERNAL_ERROR", "Failed to build behavior insights", 500)
   }
 }

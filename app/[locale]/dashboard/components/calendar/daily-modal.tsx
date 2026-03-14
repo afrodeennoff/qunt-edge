@@ -10,17 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn, parsePositionTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Trade } from "@/lib/data-types";
 import { CalendarEntry } from "@/app/[locale]/dashboard/types/calendar";
 import { Charts } from "./charts";
