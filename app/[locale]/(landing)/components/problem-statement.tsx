@@ -22,10 +22,10 @@ export default function ProblemStatement() {
             <span className="text-white/80">Lagging Indicator.</span>
           </h2>
           <div className="space-y-6 sm:space-y-8 text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg font-light">
-            <p>
-              Your bank account tells you <em>what</em> happened. It doesn't tell you <em>why</em>.
-              Legacy journals are static graveyards of data that fail to capture the most critical variable in trading: <strong className="text-white font-medium">State of Mind.</strong>
-            </p>
+             <p>
+               Your bank account tells you <em>what</em> happened. It doesn&apos;t tell you <em>why</em>.
+               Legacy journals are static graveyards of data that fail to capture the most critical variable in trading: <strong className="text-white font-medium">State of Mind.</strong>
+             </p>
             <p>
               Profit masks incompetence. You can violate every rule in your system, get lucky, and book a win. This reinforcement loop is the silent killer of careers.
             </p>

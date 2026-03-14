@@ -328,7 +328,7 @@ export function AccountGroupBoard() {
       if (setAccounts) {
         setAccounts(existingAccounts.filter((acc) => acc.id !== account.id))
       }
-      await refreshTradesOnly({ force: false })
+      await refreshTradesOnly({ force: true })
       setSelectedAccountIds(prev => prev.filter(id => id !== account.id))
       toast.success(t("common.success"), {
         description: t("filters.accountDeleted", { account: account.number }),

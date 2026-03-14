@@ -54,6 +54,14 @@ const VALUE_PATHS = [
   },
 ]
 
+const FLOW_LINKS = [
+  { path: '/deals', label: 'Deals' },
+  { path: '/deals/compare', label: 'Matchup' },
+  { path: '/deals/guides', label: 'Playbooks' },
+  { path: '/deals/calculator', label: 'Cost Planner' },
+  { path: '/deals/faq', label: 'Help' },
+]
+
 function formatMoney(value: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -107,6 +115,7 @@ export default async function DealsPage({
     <PublicFlowShell
       title="Deals"
       subtitle="One decision surface for funding offers: scan promotions, compare rules, and choose your next move without splitting across multiple pages."
+      compactHeader
     >
       <section className="relative mt-5 overflow-hidden rounded-3xl border border-border bg-card px-6 py-8 sm:px-8">
         <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
@@ -136,6 +145,26 @@ export default async function DealsPage({
                 Open Matchup
               </Link>
             </div>
+            <nav className="mt-5 flex flex-wrap gap-2" aria-label="Deals flow">
+              {FLOW_LINKS.map((link) => {
+                const href = `/${locale}${link.path}`
+                const isActive = link.path === '/deals'
+                return (
+                  <Link
+                    key={link.path}
+                    href={href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={
+                      isActive
+                        ? 'rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground'
+                        : 'rounded-full border border-border bg-background/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-foreground transition-colors hover:bg-muted'
+                    }
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </nav>
           </div>
           <div className="h-[260px] rounded-2xl border border-border bg-background/60 p-3 sm:h-[320px]">
             <DealsMarketIllustration />

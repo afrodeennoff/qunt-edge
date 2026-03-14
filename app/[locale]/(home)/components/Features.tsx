@@ -46,23 +46,23 @@ export default function Features() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => {
-            const Icon = item.icon
+           {items.map((item) => {
+             const Icon = item.icon
 
-            return (
-              <article
-                key={item.title}
-                className="marketing-panel rounded-2xl p-6"
-              >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.8)] text-[hsl(var(--brand-primary))]">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-semibold tracking-[-0.01em] [font-family:var(--home-display)]">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item.desc}</p>
-              </article>
-            )
-          })}
-        </div>
+             return (
+               <article
+                 key={item.title}
+                 className="marketing-panel rounded-2xl p-6"
+               >
+                 <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[hsl(var(--mk-border)/0.28)] bg-[hsl(var(--mk-surface-muted)/0.8)] text-[hsl(var(--brand-primary))]">
+                   <Icon className="h-5 w-5" />
+                 </div>
+                 <h3 className="text-lg font-semibold tracking-[-0.01em] [font-family:var(--home-display)]">{item.title}</h3>
+                 <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item.desc}</p>
+               </article>
+             )
+           })}
+         </div>
       </div>
     </section>
   )

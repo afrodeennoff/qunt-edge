@@ -681,7 +681,7 @@ export const DataProvider: React.FC<{
                 : [];
           setTrades(sanitizeTradesForState(tradesToUse));
 
-          if (userId && tradesToUse.length > 0) {
+          if (userId) {
             setTradesCache(userId, tradesToUse).catch((err) =>
               logger.error({ err }, "Failed to set trades cache")
             );

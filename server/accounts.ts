@@ -234,15 +234,26 @@ export async function deleteTradesByIdsAction(tradeIds: string[]): Promise<void>
   if (!userId) {
     throw new Error('Unauthorized')
   }
-  const deleted = await prisma.trade.deleteMany({
-    where: {
-      id: { in: tradeIds },
-      userId
+  await prisma.$transaction(async (tx) => {
+    const ownedCount = await tx.trade.count({
+      where: {
+        id: { in: tradeIds },
+        userId,
+      },
+    })
+
+    if (ownedCount !== tradeIds.length) {
+      throw new Error('Forbidden')
     }
+
+    await tx.trade.deleteMany({
+      where: {
+        id: { in: tradeIds },
+        userId,
+      },
+    })
   })
-  if (deleted.count !== tradeIds.length) {
-    throw new Error('Forbidden')
-  }
+
   updateTag(`trades-${userId}`)
   updateTag(`user-data-${userId}`)
   updateTag(`dashboard-${userId}`)

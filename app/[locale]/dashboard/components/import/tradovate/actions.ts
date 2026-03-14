@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/server/auth'
+import { createClient, getDatabaseUserId } from '@/server/auth'
 import { saveTradesForUserAction } from '@/server/database'
 import { TickDetails } from '@/prisma/generated/prisma'
 import type { ImportTradeDraft as Trade } from '@/lib/trade-types'
@@ -89,6 +89,24 @@ interface TradovateOAuthResult {
 interface TradovateAccountsResult {
   accounts?: TradovateAccount[]
   error?: string
+}
+
+async function resolveSyncUserIdentity() {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'User not authenticated' as const }
+  }
+
+  const databaseUserId = await getDatabaseUserId()
+  const candidateUserIds = Array.from(new Set([databaseUserId, user.id]))
+
+  return {
+    user,
+    databaseUserId,
+    candidateUserIds,
+  }
 }
 
 
@@ -1119,12 +1137,11 @@ export async function storeTradovateToken(
   accountId: string = 'default'
 ) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return { error: 'User not authenticated' }
+    const identity = await resolveSyncUserIdentity()
+    if ('error' in identity) {
+      return { error: identity.error }
     }
+    const { databaseUserId } = identity
 
     const encryptedEnvelope = authSecurityConfig.tradovateTokenEncryptionEnabled
       ? encryptToken(accessToken)
@@ -1133,7 +1150,7 @@ export async function storeTradovateToken(
     await prisma.synchronization.upsert({
       where: {
         userId_service_accountId: {
-          userId: user.id,
+          userId: databaseUserId,
           service: 'tradovate',
           accountId: accountId
         }
@@ -1149,7 +1166,7 @@ export async function storeTradovateToken(
         updatedAt: new Date()
       },
       create: {
-        userId: user.id,
+        userId: databaseUserId,
         service: 'tradovate',
         accountId: accountId,
         token: authSecurityConfig.tradovateTokenEncryptionEnabled ? null : accessToken,
@@ -1164,7 +1181,7 @@ export async function storeTradovateToken(
 
     // Revalidate user data to ensure new sync accounts appear
     const { updateTag } = await import('next/cache')
-    updateTag(`user-data-${user.id}`)
+    updateTag(`user-data-${databaseUserId}`)
 
     return { success: true }
   } catch (error) {
@@ -1175,21 +1192,21 @@ export async function storeTradovateToken(
 
 export async function getTradovateToken(accountId: string = 'default') {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return { error: 'User not authenticated' }
+    const identity = await resolveSyncUserIdentity()
+    if ('error' in identity) {
+      return { error: identity.error }
     }
+    const { candidateUserIds } = identity
 
-    const syncData = await prisma.synchronization.findUnique({
+    const syncData = await prisma.synchronization.findFirst({
       where: {
-        userId_service_accountId: {
-          userId: user.id,
-          service: 'tradovate',
-          accountId: accountId
-        }
-      }
+        userId: { in: candidateUserIds },
+        service: 'tradovate',
+        accountId,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
     })
 
     if (!syncData) {
@@ -1223,15 +1240,14 @@ export async function getTradovateToken(accountId: string = 'default') {
 
 export async function removeTradovateToken(accountId?: string) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return { error: 'User not authenticated' }
+    const identity = await resolveSyncUserIdentity()
+    if ('error' in identity) {
+      return { error: identity.error }
     }
+    const { candidateUserIds } = identity
 
     const whereClause: any = {
-      userId: user.id,
+      userId: { in: candidateUserIds },
       service: 'tradovate'
     }
 
@@ -1259,18 +1275,17 @@ export async function removeTradovateToken(accountId?: string) {
 
 export async function getTradovateSynchronizations() {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return { error: 'User not authenticated' }
+    const identity = await resolveSyncUserIdentity()
+    if ('error' in identity) {
+      return { error: identity.error }
     }
+    const { candidateUserIds } = identity
 
     const synchronizations = await withPrismaSchemaMismatchFallback(
       'sync:tradovate:list',
       () => prisma.synchronization.findMany({
         where: {
-          userId: user.id,
+          userId: { in: candidateUserIds },
           service: 'tradovate'
         },
         orderBy: {

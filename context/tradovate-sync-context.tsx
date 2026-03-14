@@ -85,13 +85,27 @@ export function TradovateSyncContextProvider({ children }: { children: ReactNode
   }, [normalizeSynchronization])
 
   const deleteAccount = useCallback(async (accountId: string) => {
+    const previousAccounts = accounts
+
     setAccounts(prev => prev.filter(acc => acc.accountId !== accountId))
-    await fetch("/api/tradovate/synchronizations", {
+    const response = await fetch("/api/tradovate/synchronizations", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ accountId })
     })
-  }, [])
+
+    let payload: { success?: boolean; message?: string } | null = null
+    try {
+      payload = await response.json()
+    } catch {
+      payload = null
+    }
+
+    if (!response.ok || !payload?.success) {
+      setAccounts(previousAccounts)
+      throw new Error(payload?.message || `Failed to delete synchronization (${response.status})`)
+    }
+  }, [accounts])
 
   // Perform sync for a specific account
   const performSyncForAccount = useCallback(async (accountId: string, options?: { skipToast?: boolean, skipRefresh?: boolean }) => {

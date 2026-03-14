@@ -1,15 +1,24 @@
 'use server'
 import { prisma } from "@/lib/prisma"
-import { getUserId } from "@/server/auth"
+import { getDatabaseUserId, getUserId } from "@/server/auth"
 import { Synchronization } from "@/prisma/generated/prisma"
 import { withPrismaSchemaMismatchFallback } from "@/lib/prisma-guard"
 
+async function resolveSyncUserIds() {
+  const authUserId = await getUserId()
+  const databaseUserId = await getDatabaseUserId()
+  return {
+    databaseUserId,
+    candidateUserIds: Array.from(new Set([databaseUserId, authUserId])),
+  }
+}
+
 export async function getRithmicSynchronizations() {
-  const userId = await getUserId()
+  const { candidateUserIds } = await resolveSyncUserIds()
   const synchronizations = await withPrismaSchemaMismatchFallback(
     'sync:rithmic:list',
     () => prisma.synchronization.findMany({
-      where: { userId: userId, service: "rithmic" },
+      where: { userId: { in: candidateUserIds }, service: "rithmic" },
     }),
     []
   )
@@ -17,28 +26,28 @@ export async function getRithmicSynchronizations() {
 }
 
 export async function setRithmicSynchronization(synchronization: Partial<Synchronization>) {
-  const userId = await getUserId()
+  const { databaseUserId } = await resolveSyncUserIds()
   await withPrismaSchemaMismatchFallback<void>(
     'sync:rithmic:upsert',
     async () => {
       await prisma.synchronization.upsert({
         where: {
           userId_service_accountId: {
-            userId: userId,
+            userId: databaseUserId,
             service: synchronization.service || 'rithmic',
             accountId: synchronization.accountId || ''
           }
         },
         update: {
           ...synchronization,
-          userId: userId
+          userId: databaseUserId
         },
         create: {
           ...synchronization,
           service: synchronization.service || 'rithmic',
           accountId: synchronization.accountId || '',
           lastSyncedAt: synchronization.lastSyncedAt || new Date(),
-          userId: userId
+          userId: databaseUserId
         },
       })
     },
@@ -47,14 +56,14 @@ export async function setRithmicSynchronization(synchronization: Partial<Synchro
 }
 
 export async function removeRithmicSynchronization(accountId: string) {
-  const userId = await getUserId()
+  const { candidateUserIds } = await resolveSyncUserIds()
 
   await withPrismaSchemaMismatchFallback<void>(
     'sync:rithmic:delete',
     async () => {
       await prisma.synchronization.deleteMany({
         where: {
-          userId,
+          userId: { in: candidateUserIds },
           service: "rithmic",
           accountId,
         },

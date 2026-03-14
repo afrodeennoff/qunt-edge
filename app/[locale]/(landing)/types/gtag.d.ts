@@ -6,5 +6,5 @@ interface Window {
       [key: string]: 'granted' | 'denied'
     }
   ) => void;
-  dataLayer: any[];
+  dataLayer: unknown[];
 } 

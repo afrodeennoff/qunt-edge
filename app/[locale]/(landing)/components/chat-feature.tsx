@@ -4,18 +4,20 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { User, Bot, Target, AlertTriangle, CheckCircle } from "lucide-react"
 import { useI18n } from "@/locales/client"
 
+interface AnalysisType {
+  metric: string
+  value: string
+  trend: "positive" | "negative" | "neutral"
+  insight: string
+}
+
 interface Message {
   id: string
   role: "user" | "assistant"
   content: string
   isStreaming?: boolean
   showAnalysis?: boolean
-  analysis?: {
-    metric: string
-    value: string
-    trend: "positive" | "negative" | "neutral"
-    insight: string
-  }
+  analysis?: AnalysisType
 }
 
 interface TradingChatAssistantProps {
@@ -118,8 +120,8 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
     [maxMessages],
   )
 
-  const simulateStreaming = useCallback(
-    async (text: string, analysis?: any) => {
+    const simulateStreaming = useCallback(
+        async (text: string, analysis?: AnalysisType) => {
       const messageId = Date.now().toString()
 
       // Add initial streaming message

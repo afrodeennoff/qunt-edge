@@ -42,23 +42,23 @@ export default function ProblemStatement() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-            {problems.map((item, i) => {
-              const Icon = item.icon
-              return (
-                <article
-                  key={item.title}
-                  className="rounded-2xl border border-[hsl(var(--mk-border)/0.3)] bg-[hsl(var(--mk-surface)/0.7)] p-5"
-                >
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-[hsl(var(--brand-primary)/0.28)] bg-[hsl(var(--brand-primary)/0.08)] text-[hsl(var(--brand-primary))]">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <h3 className="text-lg font-semibold tracking-[-0.01em] [font-family:var(--home-display)]">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item.desc}</p>
-                </article>
-              )
-            })}
-          </div>
+           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+             {problems.map((item, _i) => {
+               const Icon = item.icon
+               return (
+                 <article
+                   key={item.title}
+                   className="rounded-2xl border border-[hsl(var(--mk-border)/0.3)] bg-[hsl(var(--mk-surface)/0.7)] p-5"
+                 >
+                   <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-[hsl(var(--brand-primary)/0.28)] bg-[hsl(var(--brand-primary)/0.08)] text-[hsl(var(--brand-primary))]">
+                     <Icon className="h-4 w-4" />
+                   </div>
+                   <h3 className="text-lg font-semibold tracking-[-0.01em] [font-family:var(--home-display)]">{item.title}</h3>
+                   <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--mk-text-muted))] [font-family:var(--home-copy)]">{item.desc}</p>
+                 </article>
+               )
+             })}
+           </div>
         </div>
       </div>
     </section>

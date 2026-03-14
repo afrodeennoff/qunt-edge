@@ -81,37 +81,50 @@ export default React.memo(function ContractQuantityChart({
   const maxTradeCount = Math.max(...chartData.map((data) => data.tradeCount));
   const hasData = chartData.some((data) => data.tradeCount > 0);
 
-  const getColor = (count: number) => {
-    const intensity = Math.max(0.2, count / maxTradeCount);
-    return `hsl(var(--chart-loss) / ${intensity})`;
-  };
+   const getColor = (count: number) => {
+     const intensity = Math.max(0.2, count / maxTradeCount);
+     return `hsl(var(--chart-loss) / ${intensity})`;
+   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
-          <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
-            <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
-            <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{`${label}:00 - ${(label + 1) % 24}:00`}</span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.totalContracts")}</span>
-              <span className="font-black text-foreground text-[11px] tabular-nums">{data.totalQuantity}</span>
+   interface TooltipParams {
+     active: boolean
+     payload: Payload[]
+     label: string
+   }
+
+   interface Payload {
+     payload: {
+       totalQuantity: number
+       tradeCount: number
+     }
+   }
+
+   const CustomTooltip = ({ active, payload, label }: TooltipParams) => {
+     if (active && payload && payload.length) {
+       const data = payload[0].payload;
+       return (
+         <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
+            <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
+              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.time")}</span>
+              <span className="font-black text-foreground text-[11px] uppercase tracking-widest">{`${parseInt(label)}:00 - ${(parseInt(label) + 1) % 24}:00`}</span>
             </div>
-            <div className="flex justify-between items-center pt-1.5 border-t border-border/55">
-              <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.numberOfTrades")}</span>
-              <span className="font-black text-muted-foreground/85 text-[11px]">
-                {data.tradeCount}
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
+           <div className="space-y-1.5">
+             <div className="flex justify-between items-center">
+               <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.totalContracts")}</span>
+               <span className="font-black text-foreground text-[11px] tabular-nums">{data.totalQuantity}</span>
+             </div>
+             <div className="flex justify-between items-center pt-1.5 border-t border-border/55">
+               <span className="text-muted-foreground/70 text-[9px] font-black uppercase tracking-wider">{t("contracts.tooltip.numberOfTrades")}</span>
+               <span className="font-black text-muted-foreground/85 text-[11px]">
+                 {data.tradeCount}
+               </span>
+             </div>
+           </div>
+         </div>
+       );
+     }
+     return null;
+   };
 
   return (
     <ChartSurface>

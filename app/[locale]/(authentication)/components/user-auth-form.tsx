@@ -136,25 +136,30 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         },
     })
 
+    // Helper function to determine the next URL for redirect after authentication
+    function getRedirectNextUrl(isSubscription: boolean, plan: string | null, nextUrl: string | null, lookupKey: string | null, referralCode: string | null, promoCode: string | null, locale: string): string | null {
+        if (isSubscription) {
+            const planPath = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout'
+            const searchParams = new URLSearchParams()
+            if (lookupKey) searchParams.set('lookup_key', lookupKey)
+            if (referralCode) searchParams.set('referral', referralCode)
+            if (promoCode) searchParams.set('promo_code', promoCode)
+            if (locale) searchParams.set('locale', locale)
+            const qs = searchParams.toString()
+            return `${planPath}${qs ? `?${qs}` : ''}`
+        } else if (nextUrl) {
+            return withLocalePrefix(nextUrl, locale)
+        }
+        return null
+    }
+
     async function onSubmitEmail(values: z.infer<typeof formSchema>) {
         if (countdown > 0) return
 
         setIsLoading(true)
         setAuthMethod('email')
         try {
-            let next = nextUrl
-            if (isSubscription) {
-                const planPath = plan === 'team' ? '/api/whop/checkout-team' : '/api/whop/checkout'
-                const searchParams = new URLSearchParams()
-                if (lookupKey) searchParams.set('lookup_key', lookupKey)
-                if (referralCode) searchParams.set('referral', referralCode)
-                if (promoCode) searchParams.set('promo_code', promoCode)
-                if (locale) searchParams.set('locale', locale)
-                const qs = searchParams.toString()
-                next = `${planPath}${qs ? `?${qs}` : ''}`
-            } else if (nextUrl) {
-                next = withLocalePrefix(nextUrl, locale)
-            }
+            const next = getRedirectNextUrl(isSubscription, plan, nextUrl, lookupKey, referralCode, promoCode, locale)
             await signInWithEmail(values.email, next, locale)
             setIsEmailSent(true)
             setShowOtpInput(true)
@@ -174,7 +179,27 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         }
 
         const errorMessage = error.message.toLowerCase()
-
+        
+        // Check password-related errors first
+        const passwordError = parsePasswordError(errorMessage)
+        if (passwordError) {
+            return passwordError
+        }
+        
+        // Check email-related errors
+        const emailError = parseEmailError(errorMessage)
+        if (emailError) {
+            return emailError
+        }
+        
+        // Default: return the original error message but make it more user-friendly
+        return {
+            message: error.message || t('auth.errors.signInFailed')
+        }
+    }
+    
+    // Helper function to parse password-related errors
+    function parsePasswordError(errorMessage: string): { message: string; field: 'password' } | null {
         // Password validation errors
         if (errorMessage.includes('password should contain') ||
             errorMessage.includes('password must contain') ||
@@ -212,6 +237,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             }
         }
 
+        return null
+    }
+    
+    // Helper function to parse email-related errors
+    function parseEmailError(errorMessage: string): { message: string; field: 'email' } | null {
         if (errorMessage.includes('email not confirmed') ||
             errorMessage.includes('email_not_confirmed')) {
             return {
@@ -247,10 +277,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             }
         }
 
-        // Default: return the original error message but make it more user-friendly
-        return {
-            message: error.message || t('auth.errors.signInFailed')
-        }
+        return null
     }
 
     async function onSubmitPassword(values: z.infer<typeof formSchema>) {
