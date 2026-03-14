@@ -1,3 +1,12 @@
+## Task: Competitor Benchmark + Home Funnel Upgrade (2026-03-14)
+
+- [x] Swarm specialist agents for design/CTA/marketing/UX competitor research with source links.
+- [x] Produce benchmark matrix and prioritized gap analysis.
+- [x] Implement high-impact home funnel upgrades (hero trust chips, trust/proof architecture, onboarding journey, pricing conversion framing, CTA polish).
+- [x] Add SEO structured data upgrade for home route.
+- [ ] Run lint/typecheck/build and record blockers/pass states.
+- [ ] Capture final before/after benchmark summary + follow-up map.
+
 ## Task: /deals verification (2026-03-14)
 
 - [x] Run `npx eslint app/[locale]/(landing)/deals/page.tsx`

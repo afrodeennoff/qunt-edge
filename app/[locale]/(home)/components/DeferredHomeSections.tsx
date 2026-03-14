@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic'
 import ProblemStatement from './ProblemStatement'
 import Features from './Features'
 import TrustAndProof from './TrustAndProof'
+import OnboardingJourney from './OnboardingJourney'
 
 const SectionSkeleton = () => <div className="min-h-24 w-full" />
 
@@ -19,6 +20,7 @@ export default function DeferredHomeSections() {
       <ProblemStatement />
       <Features />
       <HowItWorks />
+      <OnboardingJourney />
       <AnalysisDemo />
       <WhyChooseUs />
       <TrustAndProof />

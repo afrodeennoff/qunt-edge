@@ -9,6 +9,11 @@ const comparisonRows = [
     others: 'Mostly post-session summaries',
   },
   {
+    item: 'Time to first useful insight',
+    qunt: 'Guided first-audit flow with immediate session diagnostics',
+    others: 'Delayed value after manual setup and report configuration',
+  },
+  {
     item: 'AI coaching output',
     qunt: 'Prioritized playbook for the next session',
     others: 'Generic observations with no ranking',

@@ -40,10 +40,15 @@ export function DailyMood({ dayData, isWeekly = false, selectedDate }: DailyMood
       const storedMoodData = localStorage.getItem(STORAGE_KEY)
       
       if (storedMoodData) {
-        const storedMood = JSON.parse(storedMoodData)
-        if (storedMood.date === focusedDay) {
-          setSelectedMood(storedMood.mood)
-          return
+        try {
+          const storedMood = JSON.parse(storedMoodData)
+          if (storedMood.date === focusedDay) {
+            setSelectedMood(storedMood.mood)
+            return
+          }
+        } catch (error) {
+          // Invalid JSON in localStorage, clear and continue
+          localStorage.removeItem(STORAGE_KEY)
         }
       }
 

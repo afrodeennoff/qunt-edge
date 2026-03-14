@@ -118,7 +118,9 @@ export default function PricingSection() {
                   <CardTitle className="text-[1.35rem] font-semibold tracking-[-0.015em] [font-family:var(--home-display)]">{plan.name}</CardTitle>
                   <div className="mt-4 flex items-baseline text-5xl font-semibold tracking-[-0.025em] [font-family:var(--home-display)]">
                     {plan.monthlyPrice === 0 ? '$0' : `$${billingMode === 'annual' ? plan.yearlyPrice : plan.monthlyPrice}`}
-                    <span className="ml-1 text-sm font-medium text-muted-foreground [font-family:var(--home-copy)]">{periodLabel}</span>
+                    <span className="ml-1 text-sm font-medium text-muted-foreground [font-family:var(--home-copy)]">
+                      {plan.monthlyPrice === 0 ? '/month' : periodLabel}
+                    </span>
                   </div>
                   <CardDescription className="mt-2 text-sm leading-relaxed [font-family:var(--home-copy)]">{plan.subtitle}</CardDescription>
                   {billingMode === 'annual' && plan.monthlyPrice > 0 && (
@@ -151,7 +153,7 @@ export default function PricingSection() {
                       href={
                         plan.name === 'Pro AI'
                           ? buildWhopCheckoutUrl({
-                              lookupKey: `plus_monthly_${currency.toLowerCase()}`,
+                              lookupKey: `plus_${billingMode === 'annual' ? 'yearly' : 'monthly'}_${currency.toLowerCase()}`,
                               locale,
                             })
                           : plan.name === 'Desk'

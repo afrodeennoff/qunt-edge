@@ -58,20 +58,24 @@ export function PublicFlowShell({
             </p>
 
             <nav className="mt-6 flex flex-wrap gap-2" aria-label="Deals flow">
-              {FLOW_LINKS.map((link) => (
+              {FLOW_LINKS.map((link) => {
+                const active = isActive(pathname, link.path)
+                return (
                 <Link
                   key={link.path}
                   href={`/${locale}${link.path}`}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
                     'rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-colors',
-                    isActive(pathname, link.path)
+                    active
                       ? 'border-primary bg-primary text-primary-foreground'
                       : 'border-border bg-background/60 text-foreground hover:bg-muted'
                   )}
                 >
                   {link.label}
                 </Link>
-              ))}
+                )
+              })}
             </nav>
           </div>
         </section>

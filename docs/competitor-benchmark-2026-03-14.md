@@ -60,6 +60,8 @@
 - Upgraded pricing section with billing mode toggle, savings framing, and clearer trial messaging.
 - Enhanced hero and final CTA conversion copy with low-friction trust chips and faster value framing.
 - Added home structured data JSON-LD (SoftwareApplication).
+- Added explicit onboarding journey section focused on first-insight speed and weekly habit-loop progression.
+- Expanded comparison matrix to emphasize time-to-value differentiation.
 
 ## Remaining Follow-ups
 - Add evidence-backed public customer proof block (real testimonials/logos/metrics from your own user base).

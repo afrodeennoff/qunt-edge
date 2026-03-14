@@ -38,10 +38,15 @@ export function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
       const storedMoodData = localStorage.getItem(STORAGE_KEY)
       
       if (storedMoodData) {
-        const storedMood: StoredMood = JSON.parse(storedMoodData)
-        if (storedMood.date === today) {
-          setSelectedMood(storedMood.mood)
-          return
+        try {
+          const storedMood: StoredMood = JSON.parse(storedMoodData)
+          if (storedMood.date === today) {
+            setSelectedMood(storedMood.mood)
+            return
+          }
+        } catch (error) {
+          // Invalid JSON in localStorage, clear and continue
+          localStorage.removeItem(STORAGE_KEY)
         }
       }
 

@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
-import { Trade } from "@prisma/client";
+import { Trade } from "@/prisma/generated/prisma";
 import { startOfWeek, endOfWeek, subWeeks, format } from "date-fns";
 import { requireServiceAuth, toErrorResponse } from "@/server/authz";
 import { logger, withLogContext } from "@/lib/logger";
@@ -415,8 +415,9 @@ export async function GET(request: Request) {
 
         // Process each instrument group
         const allProcessedTrades: TradeWithMAEMFE[] = [];
+        const instrumentGroupsTyped = instrumentGroups as { [key: string]: InstrumentData };
 
-        for (const instrumentData of Object.values(instrumentGroups)) {
+        for (const instrumentData of Object.values(instrumentGroupsTyped)) {
           const processedTrades = await processInstrumentTrades(instrumentData);
           allProcessedTrades.push(...processedTrades);
 
