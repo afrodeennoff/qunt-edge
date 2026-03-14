@@ -87,14 +87,25 @@ export default React.memo(function ContractQuantityChart({
      return `hsl(var(--chart-loss) / ${intensity})`;
    };
 
-   // Custom tooltip component properly typed with Recharts TooltipProps
-   type CustomTooltipProps = TooltipProps<number, string>;
+   // Custom tooltip component - using flexible typing for Recharts payload
+   interface CustomTooltipProps {
+     active?: boolean;
+     payload?: Array<{
+       payload?: {
+         totalQuantity: number;
+         tradeCount: number;
+         hour: number;
+       };
+     }>;
+     label?: string | number;
+   }
 
    const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-     if (active && payload && payload.length) {
-       const data = payload[0].payload;
-       const parsedLabel = typeof label === "number" ? label : parseInt(label ?? "0", 10)
-       const hourLabel = Number.isFinite(parsedLabel) ? parsedLabel : 0
+      if (active && payload && payload.length) {
+        const data = payload[0]?.payload;
+        if (!data || typeof data.totalQuantity !== 'number' || typeof data.tradeCount !== 'number') return null;
+        const parsedLabel = typeof label === "number" ? label : parseInt(label ?? "0", 10)
+        const hourLabel = Number.isFinite(parsedLabel) ? parsedLabel : 0
        return (
          <div className="bg-card/96 backdrop-blur-xl p-3 border border-border/55 rounded-lg shadow-2xl min-w-[140px]">
             <div className="flex justify-between items-center mb-2 border-b border-border/55 pb-1">
@@ -206,15 +217,16 @@ export default React.memo(function ContractQuantityChart({
                   tickFormatter={(value: number) => value.toFixed(0)}
                 />
                  <Tooltip
-                   content={({ active, payload, label }) => (
-                     <CustomTooltip
-                       active={active}
-                       payload={payload as Payload[] | undefined}
-                       label={label}
-                     />
-                   )}
-                   cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
-                 />
+                    content={({ active, payload, label }) => (
+                      <CustomTooltip
+                        active={active}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        payload={payload as any}
+                        label={label}
+                      />
+                    )}
+                    cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
+                  />
                 <Bar
                   dataKey="totalQuantity"
                   radius={[2, 2, 2, 2]}

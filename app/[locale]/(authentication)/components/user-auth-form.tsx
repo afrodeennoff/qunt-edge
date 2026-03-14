@@ -392,38 +392,47 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         }
     }
 
+    // Helper to find the appropriate mail client URL for a domain
+    function getMailClientUrl(domain: string): string | null {
+        const domainLower = domain.toLowerCase()
+
+        // Domain mappings for mail clients
+        const mailClientDomains: Record<string, string> = {
+            'gmail.com': 'https://mail.google.com',
+            'outlook.com': 'https://outlook.live.com',
+            'hotmail.com': 'https://outlook.live.com',
+            'live.com': 'https://outlook.live.com',
+            'msn.com': 'https://outlook.live.com',
+            'office365.com': 'https://outlook.live.com',
+            'proton.me': 'https://mail.proton.me',
+            'protonmail.com': 'https://mail.proton.me',
+            'pm.me': 'https://mail.proton.me',
+            'icloud.com': 'https://www.icloud.com/mail',
+            'me.com': 'https://www.icloud.com/mail',
+            'mac.com': 'https://www.icloud.com/mail',
+            'yahoo.com': 'https://mail.yahoo.com',
+            'aol.com': 'https://mail.aol.com',
+            'zoho.com': 'https://mail.zoho.com',
+        }
+
+        // Check for direct match or partial domain match
+        for (const [mailDomain, mailUrl] of Object.entries(mailClientDomains)) {
+            if (domainLower.includes(mailDomain)) {
+                return mailUrl
+            }
+        }
+
+        return null
+    }
+
     function openMailClient() {
         const email = form.getValues('email')
-        const domain = email.split('@')[1]?.toLowerCase()
+        const domain = email.split('@')[1] ?? ''
 
-        if (domain?.includes('gmail.com')) {
-            window.open('https://mail.google.com', '_blank', 'noopener,noreferrer')
-        } else if (
-            domain?.includes('outlook.com') ||
-            domain?.includes('hotmail.com') ||
-            domain?.includes('live.com') ||
-            domain?.includes('msn.com') ||
-            domain?.includes('office365.com')
-        ) {
-            window.open('https://outlook.live.com', '_blank', 'noopener,noreferrer')
-        } else if (
-            domain?.includes('proton.me') ||
-            domain?.includes('protonmail.com') ||
-            domain?.includes('pm.me')
-        ) {
-            window.open('https://mail.proton.me', '_blank', 'noopener,noreferrer')
-        } else if (
-            domain?.includes('icloud.com') ||
-            domain?.includes('me.com') ||
-            domain?.includes('mac.com')
-        ) {
-            window.open('https://www.icloud.com/mail', '_blank', 'noopener,noreferrer')
-        } else if (domain?.includes('yahoo.com')) {
-            window.open('https://mail.yahoo.com', '_blank', 'noopener,noreferrer')
-        } else if (domain?.includes('aol.com')) {
-            window.open('https://mail.aol.com', '_blank', 'noopener,noreferrer')
-        } else if (domain?.includes('zoho.com')) {
-            window.open('https://mail.zoho.com', '_blank', 'noopener,noreferrer')
+        const mailClientUrl = getMailClientUrl(domain)
+
+        if (mailClientUrl) {
+            window.open(mailClientUrl, '_blank', 'noopener,noreferrer')
         } else {
             // Default to mailto: for unknown domains
             window.location.href = `mailto:${email}`
