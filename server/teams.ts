@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { getDatabaseUserId } from '@/server/auth'
 import { MemberRole, Prisma } from '@/prisma/generated/prisma'
 import { ensureTeamMembership } from '@/server/team-membership'
 
@@ -120,12 +121,13 @@ export async function updateTeam(teamId: string, userId: string, data: { name?: 
   }
 }
 
-export async function deleteTeam(teamId: string, userId: string) {
+export async function deleteTeam(teamId: string, userId?: string) {
   try {
+    const actorUserId = userId ?? await getDatabaseUserId()
     const team = await prisma.team.findFirst({
       where: {
         id: teamId,
-        userId,
+        userId: actorUserId,
       }
     })
 
