@@ -212,10 +212,10 @@ export default React.memo(function ContractQuantityChart({
                   }}
                   tickFormatter={(value: number) => value.toFixed(0)}
                 />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
-                />
+                 <Tooltip
+                   content={({ active, payload, label }: TooltipParams) => <CustomTooltip active={active} payload={payload} label={label} />}
+                   cursor={{ fill: 'hsl(var(--foreground) / 0.35)' }}
+                 />
                 <Bar
                   dataKey="totalQuantity"
                   radius={[2, 2, 2, 2]}
