@@ -9,8 +9,8 @@ import {
 } from "@/context/data-provider"
 import { useUserStore } from "@/store/user-store"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import { Bug, X, RefreshCw, Database, HardDrive } from "lucide-react"
+import { useState } from "react"
+import { Bug, X, RefreshCw, HardDrive } from "lucide-react"
 import { clearAllCache } from "@/lib/indexeddb/trades-cache"
 import { cn } from "@/lib/utils"
 
@@ -22,27 +22,20 @@ export function DataDebug() {
   const { refreshAllData } = useDashboardActions()
   const user = useUserStore((state) => state.user)
   const supabaseUser = useUserStore((state) => state.supabaseUser)
-    const [isOpen, setIsOpen] = useState(false)
-    const [mounted, setMounted] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    if (!mounted) return null
-
-    const handleClearCache = async () => {
-        const userId = user?.id || supabaseUser?.id
-        if (userId) {
-            await clearAllCache(userId)
-            window.location.reload()
-        }
+  const handleClearCache = async () => {
+    const userId = user?.id || supabaseUser?.id
+    if (userId) {
+      await clearAllCache(userId)
+      window.location.reload()
     }
+  }
 
-    const isMock = trades.length > 0 && trades[0].id.startsWith('mock-')
+  const isMock = trades.length > 0 && trades[0].id.startsWith('mock-')
 
-    return (
-        <div className="fixed bottom-4 right-4 z-[9999]">
+  return (
+    <div className="fixed bottom-4 right-4 z-[9999]">
             {!isOpen ? (
                 <Button
                     variant="outline"

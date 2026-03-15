@@ -1,26 +1,30 @@
 /**
- * Centralized Color Token System
+ * Centralized Color Token System - LUXURY EDITION
  * Provides semantic color utilities and type-safe token access
+ * Premium palette: Champagne Gold, Rose Gold, Deep Obsidian
  */
 
 export type ColorToken = keyof typeof colorTokens;
 
 export const colorTokens = {
   backgrounds: {
-    base: '240 10% 3.9%',
-    elevated: '240 10% 5%',
-    card: '240 10% 7%',
-    cardHover: '240 10% 9%',
-    overlay: '240 10% 11%',
-    modal: '240 10% 13%',
-    highlight: '240 10% 15%',
+    base: '240 8% 1.5%',
+    elevated: '240 6% 3%',
+    card: '240 6% 4.5%',
+    cardHover: '240 5% 6%',
+    overlay: '240 5% 8%',
+    modal: '240 4% 10%',
+    highlight: '240 4% 12%',
   },
   accent: {
-    teal: '0 0% 100%',
-    tealHover: '0 0% 90%',
-    tealActive: '0 0% 80%',
-    tealSubtle: '0 0% 100% / 0.1',
-    tealGlow: '0 0% 100% / 0.3',
+    luxury: '35 40% 85%',
+    luxuryHover: '35 38% 78%',
+    luxuryActive: '35 36% 72%',
+    luxurySubtle: '35 40% 85% / 0.1',
+    luxuryGlow: '35 40% 85% / 0.2',
+    rose: '350 30% 75%',
+    roseHover: '350 28% 70%',
+    bronze: '30 45% 55%',
   },
   neutral: {
     50: '240 5% 96%',
@@ -33,47 +37,47 @@ export const colorTokens = {
     700: '240 5% 30%',
     800: '240 4% 20%',
     900: '240 6% 10%',
-    950: '240 10% 3.9%',
+    950: '240 8% 1.5%',
   },
   foreground: {
-    primary: '0 0% 98%',
-    secondary: '240 5% 65%',
-    tertiary: '240 5% 45%',
-    muted: '240 5% 35%',
-    disabled: '240 5% 25%',
+    primary: '35 15% 92%',
+    secondary: '35 10% 65%',
+    tertiary: '35 10% 50%',
+    muted: '35 10% 40%',
+    disabled: '35 8% 28%',
   },
   border: {
-    default: '240 4% 20%',
-    subtle: '240 4% 15%',
-    strong: '240 4% 25%',
-    focus: '0 0% 100%',
-    error: '0 0% 40%',
-    warning: '0 0% 60%',
-    success: '0 0% 100%',
+    default: '35 18% 18%',
+    subtle: '35 15% 14%',
+    strong: '35 20% 22%',
+    focus: '35 40% 85%',
+    error: '0 40% 35%',
+    warning: '35 60% 50%',
+    success: '35 40% 85%',
   },
   semantic: {
-    success: { fg: '0 0% 98%', bg: '0 0% 100% / 0.08', border: '0 0% 100% / 0.2' },
-    warning: { fg: '0 0% 90%', bg: '0 0% 100% / 0.06', border: '0 0% 100% / 0.16' },
-    error: { fg: '0 0% 82%', bg: '0 0% 100% / 0.05', border: '0 0% 100% / 0.14' },
-    info: { fg: '0 0% 92%', bg: '0 0% 100% / 0.07', border: '0 0% 100% / 0.18' },
+    success: { fg: '35 15% 92%', bg: '35 40% 85% / 0.1', border: '35 40% 85% / 0.2' },
+    warning: { fg: '35 15% 8%', bg: '35 60% 50% / 0.1', border: '35 60% 50% / 0.16' },
+    error: { fg: '35 15% 92%', bg: '0 40% 35% / 0.1', border: '0 40% 35% / 0.16' },
+    info: { fg: '35 15% 8%', bg: '35 25% 70% / 0.1', border: '35 25% 70% / 0.18' },
     // Back-compat aliases
-    errorBg: '0 0% 40% / 0.1',
-    warningBg: '0 0% 60% / 0.1',
-    successBg: '0 0% 100% / 0.1',
-    infoBg: '0 0% 90% / 0.1',
+    errorBg: '0 40% 35% / 0.12',
+    warningBg: '35 60% 50% / 0.1',
+    successBg: '35 40% 85% / 0.1',
+    infoBg: '35 25% 70% / 0.1',
   },
   chart: {
-    positive: '0 0% 100%',
-    negative: '0 0% 40%',
-    neutral: '240 5% 50%',
-    c1: '0 0% 100%',
-    c2: '0 0% 90%',
-    c3: '0 0% 80%',
-    c4: '0 0% 70%',
-    c5: '0 0% 60%',
-    c6: '0 0% 50%',
-    c7: '0 0% 40%',
-    c8: '0 0% 30%',
+    positive: '35 40% 85%',
+    negative: '0 40% 35%',
+    neutral: '35 10% 50%',
+    c1: '35 40% 85%',
+    c2: '35 30% 72%',
+    c3: '35 25% 58%',
+    c4: '350 30% 75%',
+    c5: '30 45% 55%',
+    c6: '35 15% 35%',
+    c7: '35 12% 25%',
+    c8: '35 10% 15%',
   },
 } as const;
 
@@ -81,17 +85,16 @@ export type GlassVariant = 'default' | 'strong' | 'subtle';
 
 export interface GlassOptions {
   variant?: GlassVariant;
-  blur?: number;
   opacity?: number;
 }
 
 export function getGlassToken(options: GlassOptions = {}): string {
-  const { variant = 'default', blur = 20, opacity } = options;
+  const { variant = 'default', opacity } = options;
 
   const baseTokens = {
-    default: { bg: '240 10% 5%', opacity: 0.6 },
-    strong: { bg: '240 10% 7%', opacity: 0.8 },
-    subtle: { bg: '240 10% 3.9%', opacity: 0.4 },
+    default: { bg: '240 6% 3%', opacity: 0.65 },
+    strong: { bg: '240 6% 4.5%', opacity: 0.85 },
+    subtle: { bg: '240 8% 1.5%', opacity: 0.45 },
   };
 
   const token = baseTokens[variant];
@@ -117,10 +120,10 @@ export function getChartColor(isPositive: boolean | null): string {
 
 export function getAccentColor(variant: 'primary' | 'hover' | 'active' | 'subtle' = 'primary'): string {
   const colors = {
-    primary: colorTokens.accent.teal,
-    hover: colorTokens.accent.tealHover,
-    active: colorTokens.accent.tealActive,
-    subtle: colorTokens.accent.tealSubtle,
+    primary: colorTokens.accent.luxury,
+    hover: colorTokens.accent.luxuryHover,
+    active: colorTokens.accent.luxuryActive,
+    subtle: colorTokens.accent.luxurySubtle,
   };
   return `hsl(${colors[variant]})`;
 }

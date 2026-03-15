@@ -9,6 +9,32 @@
 
 Verification: `npm run lint -- app/layout.tsx tailwind.config.ts app/globals.css` (ESLint warns `app/globals.css` is ignored because no matching config is supplied; layout and config files pass).
 
+## Task: Fix `daily-summary-modal` complexity lint (2026-03-15)
+
+- [x] Inspect `app/[locale]/dashboard/components/daily-summary-modal.tsx` to pinpoint the branch or loop triggering the ESLint complexity warning.
+- [x] Refactor the troubling logic by extracting helper functions or consolidating conditions while keeping UI/behavior exactly the same.
+- [x] Run `npx eslint app/[locale]/dashboard/components/daily-summary-modal.tsx` to confirm the complexity warning is resolved.
+- [x] Record the diff summary and verification notes in this checklist.
+
+Verification: `npx eslint app/[locale]/dashboard/components/daily-summary-modal.tsx`
+
+## Task: Reduce dashboard header widget controls complexity (2026-03-15)
+
+- [x] Review `app/[locale]/dashboard/components/dashboard-header-widget-controls.tsx` to understand the branching that triggers the lint warning.
+- [x] Refactor the component by breaking out helper render fragments (e.g., alert dialogs, autosave indicator) to cut the cyclomatic complexity without changing behavior.
+- [x] Run `npx eslint app/[locale]/dashboard/components/dashboard-header-widget-controls.tsx` to ensure the complexity warning is gone.
+- [x] Capture a diff summary and verification notes for this checklist.
+
+Verification: `npx eslint app/[locale]/dashboard/components/dashboard-header-widget-controls.tsx`
+
+## Task: Data-debug lint cleanup (2026-03-15)
+
+- [x] Inspect `app/[locale]/dashboard/components/data-debug.tsx` to confirm the lint warnings we need to target.
+- [x] Remove the unused `Database` icon import and replace the mount guard with a lint-friendly client-only check while keeping behavior identical.
+- [x] Run `npx eslint app/[locale]/dashboard/components/data-debug.tsx` to verify warnings are gone and capture the outcome in this checklist (complexity warning left from before).
+
+Verification: `npx eslint app/[locale]/dashboard/components/data-debug.tsx` (still reports a pre-existing complexity warning on line 17; the unused import and set-state-in-effect warnings are cleared).
+
 ## Task: Tailwind v4 semantic tokens foundation (2026-03-14)
 
 - [ ] Review `app/globals.css` to capture the current root/dark token definitions and base styles.

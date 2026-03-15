@@ -6,6 +6,24 @@ This file tracks significant architectural changes, engineering insights, and cr
 
 ## 🚀 Recent Feature Updates
 
+### 2026-03-15: Phase 7 - AI Endpoints Consolidation (Unified Analyze Route)
+- **What changed:** Consolidated three separate AI analysis endpoints (`accounts`, `instrument`, `time-of-day`) into a single unified endpoint with type-based dispatch.
+- **What I want:** A single unified `/api/ai/analyze` endpoint that dispatches based on `type` field, with the old routes maintained as thin backward-compatible wrappers.
+- **What I don't want:** Code duplication across three nearly-identical endpoints, inconsistent error handling, or breaking changes for existing consumers.
+- **How we fixed that:**
+  - Created `app/api/ai/analyze/handlers.ts` - shared handler logic with type-based dispatch
+  - Created `app/api/ai/analyze/route.ts` - new unified endpoint accepting `{ type, messages?, username?, locale?, timezone?, currentTime? }`
+  - Updated `app/api/ai/analysis/accounts/route.ts` - thin wrapper calling shared `handleAccountsAnalysis`
+  - Updated `app/api/ai/analysis/instrument/route.ts` - thin wrapper calling shared `handleInstrumentAnalysis`
+  - Updated `app/api/ai/analysis/time-of-day/route.ts` - thin wrapper calling shared `handleTimeOfDayAnalysis`
+  - All wrappers transform old API format to unified format and delegate to shared handlers
+  - Telemetry logging preserves original route paths for backward compatibility
+- **Key Files:** `app/api/ai/analyze/route.ts`, `app/api/ai/analyze/handlers.ts`, `app/api/ai/analysis/accounts/route.ts`, `app/api/ai/analysis/instrument/route.ts`, `app/api/ai/analysis/time-of-day/route.ts`
+- **Verification:**
+  - `npm run typecheck` -> passes
+  - `npm run lint` -> passes (0 errors, 1417 warnings baseline)
+  - `npm run build` -> passes with full route generation
+
 ### 2026-03-13: Multi-User Data Isolation Hardening (Trades/Layout/Uploads)
 - **What changed:** Hardened multi-user data boundaries across trade ingestion, dashboard layout reads, optimized trade mutations, and upload deletion paths; removed a client-side duplicate filter that could cause false "already uploaded" conflicts.
 - **What I want:** Every read/write/delete path should be bound to the authenticated actor (or explicit trusted integration path), and two different users must be able to import identical trade datasets without cross-user duplicate collisions.

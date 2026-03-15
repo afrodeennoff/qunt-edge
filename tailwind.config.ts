@@ -103,25 +103,68 @@ const config = {
 					Object.entries(Z_INDEX).map(([key, value]) => [key, String(value)])
 				),
 			},
-			colors: {
-				matte: {
-					obsidian: '#050505',
-					panel: '#0b0b0d',
-					layer: '#101014',
-					line: '#1a1a21',
-				},
-				precision: {
-					cobalt: '#FFFFFF',
-					'highlight': '#F5F5F5',
-					'line': '#FFFFFF10',
-				},
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				'precision-blue': '#FFFFFF',
-				'steel-grey': '#565B66',
-				'cyber-pink': '#FFFFFF',
-				'matte-black': '#050505',
-				'obsidian': '#0D0D0D',
+		colors: {
+			/* ===== LUXURY COLOR PALETTE ===== */
+			/* Champagne Gold - Primary luxury accent */
+			luxury: {
+				DEFAULT: 'hsl(var(--accent-luxury))',
+				50: '35 40% 95%',
+				100: '35 40% 90%',
+				200: '35 40% 85%',
+				300: '35 38% 78%',
+				400: '35 36% 72%',
+				500: '35 35% 65%',
+				600: '35 32% 55%',
+				700: '35 30% 45%',
+				800: '35 25% 35%',
+				900: '35 20% 25%',
+			},
+			/* Rose Gold - Secondary luxury accent */
+			rose: {
+				DEFAULT: 'hsl(var(--accent-rose))',
+				50: '350 30% 90%',
+				100: '350 30% 85%',
+				200: '350 30% 80%',
+				300: '350 30% 75%',
+				400: '350 28% 70%',
+				500: '350 25% 65%',
+				600: '350 22% 55%',
+				700: '350 20% 45%',
+				800: '350 18% 35%',
+				900: '350 15% 25%',
+			},
+			/* Bronze - Tertiary accent */
+			bronze: {
+				DEFAULT: 'hsl(var(--accent-bronze))',
+				50: '30 45% 75%',
+				100: '30 45% 70%',
+				200: '30 45% 65%',
+				300: '30 45% 60%',
+				400: '30 45% 55%',
+				500: '30 45% 50%',
+				600: '30 42% 45%',
+				700: '30 40% 38%',
+				800: '30 35% 30%',
+				900: '30 30% 22%',
+			},
+			matte: {
+				obsidian: '#050505',
+				panel: '#0b0b0d',
+				layer: '#101014',
+				line: '#1a1a21',
+			},
+			precision: {
+				cobalt: '#F5E6D3',
+				'highlight': '#F5F5F5',
+				'line': '#F5E6D310',
+			},
+			background: 'hsl(var(--background))',
+			foreground: 'hsl(var(--foreground))',
+			'precision-blue': '#F5E6D3',
+			'steel-grey': '#565B66',
+			'cyber-pink': '#B76E79',
+			'matte-black': '#050505',
+			'obsidian': '#0D0D0D',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
