@@ -620,8 +620,8 @@ export default function AtasProcessor({
                     <Card
                       key={account}
                       className={cn(
-                        "p-6 cursor-pointer hover:border-white/20 transition-colors relative group",
-                        isSelected ? "border-white/20 bg-white/5" : "border-white/10 bg-transparent"
+                        "p-6 cursor-pointer hover:border-border/60 transition-colors relative group",
+                        isSelected ? "border-border/60 bg-card/90" : "border-border/40 bg-card/20"
                       )}
                       onClick={() => {
                         if (isSelected) {
@@ -647,7 +647,7 @@ export default function AtasProcessor({
                           </p>
                         </div>
                         {isSelected && (
-                          <CheckCircle2 className="h-5 w-5 text-white shrink-0" />
+                          <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
                         )}
                       </div>
                     </Card>
@@ -660,13 +660,13 @@ export default function AtasProcessor({
           {/* Commissions Section - Only show for selected accounts */}
           {selectedAccountInstrumentPairs.length > 0 && (
             <div
-              className="flex-none bg-white/5 border border-white/10 text-white p-4 rounded-md"
+              className="flex-none bg-card/80 border border-border/50 text-muted-foreground p-4 rounded-md"
               role="alert"
             >
               <p className="font-bold">{t("import.commission.title")}</p>
-              <p className="text-white/70">{t("import.commission.description")}</p>
-              <p className="mt-2 text-sm text-white/50">{t("import.commission.help")}</p>
-              <p className="text-sm italic text-white/40">{t("import.commission.example")}</p>
+              <p className="text-muted-foreground/70">{t("import.commission.description")}</p>
+              <p className="mt-2 text-sm text-muted-foreground/60">{t("import.commission.help")}</p>
+              <p className="text-sm italic text-muted-foreground/50">{t("import.commission.example")}</p>
               <div className="mt-4 space-y-2">
                 {selectedAccountInstrumentPairs.map((pair) => {
                   const [accountNumber, instrument] = pair.split(":");
@@ -683,7 +683,7 @@ export default function AtasProcessor({
                     >
                       <label
                         htmlFor={`commission-${pair}`}
-                        className="min-w-[200px] text-white/70"
+                        className="min-w-[200px] text-muted-foreground/70"
                       >
                         {accountNumber} - {instrument} - {t("import.commission.perContract")}
                       </label>
@@ -695,13 +695,13 @@ export default function AtasProcessor({
                         onChange={(e) =>
                           handleCommissionChange(pair, e.target.value)
                         }
-                        className="w-24 bg-black/20 border-white/10 text-white"
+                        className="w-24 bg-background/60 border-border/60 text-foreground"
                       />
                     </div>
                   );
                 })}
               </div>
-              <Button onClick={applyCommissions} className="mt-4 bg-white text-black hover:bg-white/90">
+              <Button onClick={applyCommissions} className="mt-4 bg-card/90 text-foreground hover:bg-card/80">
                 {t("import.commission.apply")}
               </Button>
             </div>
@@ -709,22 +709,22 @@ export default function AtasProcessor({
 
           {allProcessedTrades.length === 0 && (
             <div
-              className="flex-none bg-white/5 border border-white/10 text-white p-4 rounded-md"
+              className="flex-none bg-card/80 border border-border/50 text-muted-foreground p-4 rounded-md"
               role="alert"
             >
               <p className="font-bold">{t("import.error.duplicateTrades")}</p>
-              <p className="text-white/70">{t("import.error.duplicateTradesDescription")}</p>
+              <p className="text-muted-foreground/70">{t("import.error.duplicateTradesDescription")}</p>
             </div>
           )}
 
           {currentSelectedAccounts.length === 0 &&
             allProcessedTrades.length > 0 && (
               <div
-                className="flex-none bg-white/5 border border-white/10 text-white p-4 rounded-md"
+                className="flex-none bg-card/80 border border-border/50 text-muted-foreground p-4 rounded-md"
                 role="alert"
               >
                 <p className="font-bold">{t("import.account.selectAccount")}</p>
-                <p className="text-white/70">{t("import.account.selectAccountToView")}</p>
+                <p className="text-muted-foreground/70">{t("import.account.selectAccountToView")}</p>
               </div>
             )}
 

@@ -139,8 +139,8 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
 
   if (!audioUrl) {
     return (
-      <div className={`p-4 bg-gray-50 dark:bg-gray-900 rounded-lg ${className}`}>
-        <div className="text-center text-gray-500 dark:text-gray-400">
+      <div className={`p-4 bg-card/30 rounded-lg ${className}`}>
+        <div className="text-center text-muted-foreground">
           No audio file loaded
         </div>
       </div>
@@ -148,10 +148,10 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
   }
 
   return (
-    <div className={`p-4 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg ${className}`}>
+    <div className={`p-4 bg-card border border-border rounded-lg ${className}`}>
       <div className="space-y-4">
         {/* File name */}
-        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+        <div className="text-sm font-medium text-foreground truncate">
           {fileName}
         </div>
 
@@ -163,10 +163,10 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
             max={duration || 0}
             value={currentTime}
             onChange={handleSeek}
-            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+            className="w-full h-2 bg-muted/30 dark:bg-muted/60 rounded-lg appearance-none cursor-pointer slider"
             disabled={!duration}
           />
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
@@ -179,10 +179,10 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
             <button
               onClick={togglePlayPause}
               disabled={isLoading}
-              className="p-2 bg-semantic-info-bg hover:bg-semantic-info-bg dark:bg-semantic-info-bg dark:hover:bg-semantic-info-bg text-white rounded-full transition-colors disabled:opacity-50"
+              className="p-2 bg-semantic-info-bg hover:bg-semantic-info-bg/90 dark:bg-semantic-info-bg dark:hover:bg-semantic-info-bg/90 text-card-foreground rounded-full transition-colors disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-border border-t-transparent rounded-full animate-spin" />
               ) : isPlaying ? (
                 <Pause className="w-4 h-4" />
               ) : (
@@ -194,7 +194,7 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleMute}
-                className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                className="p-1 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {isMuted ? (
                   <VolumeX className="w-4 h-4" />
@@ -209,7 +209,7 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
                 step="0.1"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-16 h-1 bg-muted/30 dark:bg-muted/60 rounded-lg appearance-none cursor-pointer slider"
               />
             </div>
           </div>
@@ -217,14 +217,14 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
           {/* Download button */}
           <button
             onClick={handleDownload}
-            className="p-2 bg-white/10 hover:bg-white/10 dark:bg-white/10 dark:hover:bg-white/10 text-white rounded-full transition-colors"
+            className="p-2 bg-card/20 hover:bg-card/30 text-card-foreground rounded-full transition-colors"
             title="Download audio file"
           >
             <Download className="w-4 h-4" />
           </button>
 
           {/* Duration info */}
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-muted-foreground">
             {formatTime(duration)}
           </div>
         </div>

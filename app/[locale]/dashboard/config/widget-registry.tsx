@@ -10,7 +10,7 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { useI18n } from '@/locales/client'
 import { translateWeekday } from '@/lib/translation-utils'
 
-const widgetFallback = <div className="h-full w-full rounded-xl bg-white/5" />
+const widgetFallback = <div className="h-full w-full rounded-xl bg-card/5" />
 
 const SmartInsightsWidget = dynamic(
   () => import('../components/widgets/smart-insights-widget').then((m) => m.SmartInsightsWidget),
@@ -278,7 +278,7 @@ function createMindsetPreview() {
                 "h-6 w-6 rounded-full border-2 flex items-center justify-center",
                 index === 2 ? "bg-foreground border-foreground" : "border-muted-foreground/20"
               )}>
-                <div className="h-1 w-1 rounded-full bg-white" />
+                <div className="h-1 w-1 rounded-full bg-card" />
               </div>
               {index < 6 && <div className="h-4 w-px bg-muted-foreground/20" />}
             </div>
@@ -455,7 +455,7 @@ function CreateChatPreview() {
 
 function createSmartInsightsPreview() {
   return (
-    <Card className="h-[300px] flex flex-col relative overflow-hidden bg-black/40 border-white/5">
+    <Card className="h-[300px] flex flex-col relative overflow-hidden bg-popover/40 border-border/5">
       <div className="absolute top-0 right-0 w-32 h-32 bg-semantic-info-bg/5 rounded-full blur-3xl -z-10" />
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
         <div className="space-y-1">
@@ -469,22 +469,22 @@ function createSmartInsightsPreview() {
         </div>
       </CardHeader>
       <CardContent className="flex-1 p-4 space-y-3">
-        <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3">
+        <div className="flex items-start gap-3 rounded-lg border border-border/5 bg-card/5 p-3">
           <div className="h-8 w-8 rounded-full bg-semantic-info-bg/10 border border-semantic-info-border/20 flex items-center justify-center">
             <Brain className="h-4 w-4 text-semantic-info" />
           </div>
           <div className="space-y-2 flex-1">
-            <div className="h-4 w-24 bg-white/10 rounded" />
-            <div className="h-3 w-full bg-white/5 rounded" />
+            <div className="h-4 w-24 bg-card/10 rounded" />
+            <div className="h-3 w-full bg-card/5 rounded" />
           </div>
         </div>
-        <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/5 p-3 opacity-60">
+        <div className="flex items-start gap-3 rounded-lg border border-border/5 bg-card/5 p-3 opacity-60">
           <div className="h-8 w-8 rounded-full bg-semantic-error-bg/10 border border-semantic-error-border/20 flex items-center justify-center">
             <div className="h-4 w-4 rounded-sm bg-semantic-error-bg/50" />
           </div>
           <div className="space-y-2 flex-1">
-            <div className="h-4 w-16 bg-white/10 rounded" />
-            <div className="h-3 w-3/4 bg-white/5 rounded" />
+            <div className="h-4 w-16 bg-card/10 rounded" />
+            <div className="h-3 w-3/4 bg-card/5 rounded" />
           </div>
         </div>
       </CardContent>

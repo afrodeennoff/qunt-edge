@@ -16,7 +16,7 @@ export default function FAQ() {
             <summary className="font-semibold cursor-pointer">
               {t("faq.question1")}
             </summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground/70 dark:text-muted-foreground/60">
               {t("faq.answer1")}
             </p>
           </details>
@@ -24,7 +24,7 @@ export default function FAQ() {
             <summary className="font-semibold cursor-pointer">
               {t("faq.question2")}
             </summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground/70 dark:text-muted-foreground/60">
               {t("faq.answer2")}
             </p>
           </details>
@@ -32,7 +32,7 @@ export default function FAQ() {
             <summary className="font-semibold cursor-pointer">
               {t("faq.question3")}
             </summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground/70 dark:text-muted-foreground/60">
               {t("faq.answer3")}
             </p>
           </details>
@@ -40,7 +40,7 @@ export default function FAQ() {
             <summary className="font-semibold cursor-pointer">
               {t("faq.question4")}
             </summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground/70 dark:text-muted-foreground/60">
               {t("faq.answer4")}
             </p>
           </details>
@@ -48,7 +48,7 @@ export default function FAQ() {
             <summary className="font-semibold cursor-pointer">
               {t("faq.question5")}
             </summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground/70 dark:text-muted-foreground/60">
               {t("faq.answer5")}
             </p>
           </details>
@@ -56,7 +56,7 @@ export default function FAQ() {
             <summary className="font-semibold cursor-pointer">
               {t("faq.question6")}
             </summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground/70 dark:text-muted-foreground/60">
               {t("faq.answer6")}
             </p>
           </details>

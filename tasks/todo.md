@@ -9,6 +9,15 @@
 
 Verification: `npm run lint -- app/layout.tsx tailwind.config.ts app/globals.css` (ESLint warns `app/globals.css` is ignored because no matching config is supplied; layout and config files pass).
 
+-## Task: Dashboard semantic token migration (2026-03-15)
+
+- [x] Assess the current hardcoded `white/black/gray/zinc/neutral` utility usage in the assigned dashboard files.
+- [x] Replace each occurrence with the relevant semantic token classes (`bg-card`, `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary`, etc.) without altering layout or behavior.
+- [x] Run `npx eslint` on the touched files to confirm there are no new warnings/errors and capture the results.
+- [x] Summarize the touched files and ESLint output in this checklist (replaced color utilities with semantic tokens, ESLint reported existing warnings only).
+
+Verification: `npx eslint app/[locale]/dashboard/trader-profile/page-client.tsx app/[locale]/dashboard/components/widget-canvas.tsx app/[locale]/dashboard/components/accounts/trade-progress-chart.tsx app/[locale]/dashboard/components/charts/daily-tick-target.tsx app/[locale]/dashboard/components/charts/pnl-by-side.tsx app/[locale]/dashboard/components/charts/pnl-per-contract-daily.tsx app/[locale]/dashboard/config/widget-registry.tsx app/[locale]/dashboard/settings/page.tsx`
+
 ## Task: Fix `daily-summary-modal` complexity lint (2026-03-15)
 
 - [x] Inspect `app/[locale]/dashboard/components/daily-summary-modal.tsx` to pinpoint the branch or loop triggering the ESLint complexity warning.
@@ -42,6 +51,23 @@ Verification: `npx eslint app/[locale]/dashboard/components/data-debug.tsx` (sti
 - [ ] Preserve any existing project-specific tokens needed for current classes and keep the file structured and maintainable.
 - [ ] Run `npm run lint -- app/globals.css` (or the equivalent style check) and note any issues.
 - [ ] Summarize the verification results and changed lines for this task.
+
+## Task: Admin newsletter + ATAS semantic colors (2026-03-15)
+
+- [ ] Review `app/[locale]/admin/components/newsletter/newsletter-audio-player.tsx`, `app/[locale]/admin/components/newsletter/newsletter-audio-splitter.tsx`, and `app/[locale]/dashboard/components/import/atas/atas-processor.tsx` to catalog hardcoded `gray`, `white`, and `black` utility classes.
+- [ ] Replace the hardcoded color utilities with the appropriate semantic tokens (e.g., `bg-card`, `text-foreground`, `border-border`, `text-muted-foreground`, `bg-background`) without changing the existing behavior.
+- [ ] Run `npx eslint app/[locale]/admin/components/newsletter/newsletter-audio-player.tsx app/[locale]/admin/components/newsletter/newsletter-audio-splitter.tsx app/[locale]/dashboard/components/import/atas/atas-processor.tsx` and capture warnings/errors output.
+- [ ] Record the touched files and ESLint results in this checklist after completion.
+
+Verification: `npx eslint app/[locale]/admin/components/newsletter/newsletter-audio-player.tsx app/[locale]/admin/components/newsletter/newsletter-audio-splitter.tsx app/[locale]/dashboard/components/import/atas/atas-processor.tsx` (document warnings/errors per instructions).
+
+## Task: Landing semantic token migration (2026-03-15)
+
+- [x] Document the existing `gray/zinc/neutral/white/black` utility usage in the landing files to understand the required replacements.
+- [x] Replace each hardcoded color utility with the appropriate semantic token (e.g., `bg-background`, `text-foreground`, `border-border`, `text-muted-foreground`, `bg-card`, `text-muted-foreground` as needed) while keeping the visual hierarchy intact.
+- [x] Run `npx eslint` on the touched landing files to confirm there are no new errors or warnings.
+- [x] Record the results (changed files plus any ESLint warnings/errors) in this checklist before closing the task.
+Verification: `npx eslint app/[locale]/(landing)/propfirms/page.tsx app/[locale]/(landing)/components/problem-statement.tsx app/[locale]/(landing)/referral/page-client.tsx app/[locale]/(landing)/components/completed-timeline.tsx app/[locale]/(landing)/_updates/[slug]/page.tsx app/[locale]/(landing)/components/how-it-works.tsx app/[locale]/(landing)/components/faq.tsx app/[locale]/(landing)/components/qualification.tsx` (warnings: `propfirms` arrow functions and `_updates/[slug]/page.tsx` `Page` complexity remain at 21, 15, and 12; no new errors).
 
 ## Task: Harden community/public data (2026-03-14)
 

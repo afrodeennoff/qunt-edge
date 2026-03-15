@@ -159,7 +159,7 @@ export default function SettingsPage() {
     <UnifiedPageShell density="compact">
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Profile Section */}
-        <Card className="border-white/12 bg-black/45 shadow-sm">
+        <Card className="border-border/12 bg-popover/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -209,7 +209,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Preferences Section */}
-        <Card className="border-white/12 bg-black/45 shadow-sm">
+        <Card className="border-border/12 bg-popover/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
@@ -332,7 +332,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Notifications Section */}
-        <Card className="border-white/12 bg-black/45 shadow-sm">
+        <Card className="border-border/12 bg-popover/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
@@ -402,7 +402,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Team Section */}
-        <Card className="border-white/12 bg-black/45 shadow-sm">
+        <Card className="border-border/12 bg-popover/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -505,7 +505,7 @@ export default function SettingsPage() {
         <LinkedAccounts />
 
         {/* Password (Migration) Section */}
-        <Card className="border-white/12 bg-black/45 shadow-sm">
+        <Card className="border-border/12 bg-popover/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
@@ -594,7 +594,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Account Management Section */}
-        <Card className="border-white/12 bg-black/45 shadow-sm">
+        <Card className="border-border/12 bg-popover/45 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />

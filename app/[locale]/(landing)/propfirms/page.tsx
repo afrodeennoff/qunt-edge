@@ -85,37 +85,37 @@ function renderPropfirmCard(
         <div className="flex items-start justify-between gap-4">
           <CardTitle className="text-2xl tracking-tight">{propfirmName}</CardTitle>
           <div className="text-right">
-            <div className="text-xs uppercase tracking-[0.22em] text-white/60">
-              Registered
-            </div>
-            <p className="text-3xl font-black text-white leading-none tabular-nums">
+          <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground/70">
+            Registered
+          </div>
+            <p className="text-3xl font-black text-foreground leading-none tabular-nums">
               {stat.accountsCount.toLocaleString()}
             </p>
           </div>
         </div>
         {/* Unified (non-rainbow) KPI strip + remove duplicate "registered" blocks */}
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+          <Badge variant="outline" className="border-border/60 bg-card/20 text-foreground/80">
             Paid:{' '}
-            <span className="ml-1 font-semibold text-white tabular-nums">
+            <span className="ml-1 font-semibold text-foreground tabular-nums">
               {formatCompactCurrency(paidAmount)}
             </span>
           </Badge>
-          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+          <Badge variant="outline" className="border-border/60 bg-card/20 text-foreground/80">
             Account Value:{' '}
-            <span className="ml-1 font-semibold text-white tabular-nums">
+            <span className="ml-1 font-semibold text-foreground tabular-nums">
               {formatCompactCurrency(stat.totalAccountValue)}
             </span>
           </Badge>
-          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+          <Badge variant="outline" className="border-border/60 bg-card/20 text-foreground/80">
             Size Mix:{' '}
-            <span className="ml-1 font-semibold text-white">
+            <span className="ml-1 font-semibold text-foreground">
               {stat.sizeBreakdown}
             </span>
           </Badge>
-          <Badge variant="outline" className="border-white/10 bg-white/5 text-white/80">
+          <Badge variant="outline" className="border-border/60 bg-card/20 text-foreground/80">
             Sized:{' '}
-            <span className="ml-1 font-semibold text-white tabular-nums">
+            <span className="ml-1 font-semibold text-foreground tabular-nums">
               {stat.sizedAccountsCount.toLocaleString()}
             </span>
           </Badge>
@@ -126,46 +126,46 @@ function renderPropfirmCard(
           <h3 className="text-sm font-semibold mb-3">{t('landing.propfirms.payouts.title')}</h3>
           <div className="space-y-3">
             {/* Paid */}
-            <div className="p-3 rounded-lg border border-white/10 bg-white/5">
+            <div className="p-3 rounded-lg border border-border/60 bg-card/20">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t('landing.propfirms.payouts.paid.label')}
                 </span>
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-foreground">
                   {formatCurrency(paidAmount)}
                 </span>
               </div>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-muted-foreground/70">
                 {t('landing.propfirms.payouts.count', { count: paidCount })}
               </p>
             </div>
 
             {/* Pending */}
-            <div className="p-3 rounded-lg border border-white/10 bg-white/5">
+            <div className="p-3 rounded-lg border border-border/60 bg-card/20">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t('landing.propfirms.payouts.pending.label')}
                 </span>
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-foreground">
                   {formatCurrency(pendingAmount)}
                 </span>
               </div>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-muted-foreground/70">
                 {t('landing.propfirms.payouts.count', { count: pendingCount })}
               </p>
             </div>
 
             {/* Refused */}
-            <div className="p-3 rounded-lg border border-white/10 bg-white/5">
+            <div className="p-3 rounded-lg border border-border/60 bg-card/20">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t('landing.propfirms.payouts.refused.label')}
                 </span>
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-foreground">
                   {formatCurrency(refusedAmount)}
                 </span>
               </div>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-muted-foreground/70">
                 {t('landing.propfirms.payouts.count', { count: refusedCount })}
               </p>
             </div>

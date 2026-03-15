@@ -288,14 +288,14 @@ export default React.memo(function DailyTickTargetChart({ size = 'medium' }: Dai
                       value={targetValue}
                       onChange={(e) => setTargetValue(e.target.value)}
                       placeholder={Math.round(convertToDisplayValue(progress.target)).toString()}
-                      className="bg-secondary/22 border-border/55 text-fg-primary placeholder:text-fg-muted focus:border-border/65 focus:ring-white/20 transition-all"
+                      className="bg-secondary/22 border-border/55 text-fg-primary placeholder:text-fg-muted focus:border-border/65 focus:ring-border/20 transition-all"
                     />
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-border/55 hover:bg-secondary/22 text-fg-secondary">
                       {t("common.cancel")}
                     </Button>
-                    <Button onClick={handleSaveTarget} className="bg-white hover:bg-white/90 text-black font-bold">
+                    <Button onClick={handleSaveTarget} className="bg-card hover:bg-card/90 text-foreground font-bold">
                       {t("common.save")}
                     </Button>
                   </div>
@@ -438,7 +438,7 @@ export default React.memo(function DailyTickTargetChart({ size = 'medium' }: Dai
                 )}
                 indicatorClassName={cn(
                   "transition-all duration-700",
-                  isOverTarget ? "bg-white shadow-none" : "bg-white/40"
+                  isOverTarget ? "bg-card shadow-none" : "bg-card/40"
                 )}
               />
             </div>

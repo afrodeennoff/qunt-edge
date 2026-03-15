@@ -180,7 +180,7 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
   }
 
   return (
-    <div className="p-4 bg-white dark:bg-black">
+    <div className="p-4 bg-card border border-border rounded-lg">
       {error && (
         <div className="mb-4 p-3 bg-semantic-error-bg dark:bg-semantic-error-bg/20 border border-semantic-error-border dark:border-semantic-error-border rounded-md text-semantic-error dark:text-semantic-error">
           {error}
@@ -194,26 +194,26 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
           accept="video/*,audio/*"
           onChange={handleFileChange}
           disabled={isLoading}
-          className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-semantic-info-bg dark:file:bg-semantic-info-bg/20 file:text-semantic-info dark:file:text-semantic-info hover:file:bg-semantic-info-bg dark:hover:file:bg-semantic-info-bg/30"
+          className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-semantic-info-bg dark:file:bg-semantic-info-bg/20 file:text-semantic-info dark:file:text-semantic-info hover:file:bg-semantic-info-bg dark:hover:file:bg-semantic-info-bg/30"
         />
-        <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
       </div>
       
       {isLoading && (
         <div className="mt-4 space-y-2">
-          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-semantic-info-border dark:border-semantic-info-border"></div>
             <span>
               {currentSegment ? `Creating segment ${currentSegment}...` : 'Processing audio...'}
             </span>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-muted/30 dark:bg-muted/60 rounded-full h-2">
             <div 
               className="bg-semantic-info-bg dark:bg-semantic-info-bg h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-muted-foreground">
             {Math.round(progress)}% complete
           </div>
         </div>
@@ -222,20 +222,20 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
       {/* Segments List */}
       {segments.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             Generated Segments ({segments.length})
           </h3>
           <div className="space-y-3">
             {segments.map((segment) => (
               <div 
                 key={segment.index} 
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                className="flex items-center justify-between p-3 bg-card/30 dark:bg-card/70 rounded-lg border border-border/60"
               >
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                <div className="font-medium text-foreground">
                     {segment.fileName}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted-foreground">
                     Segment {segment.index} • {segment.startTime.toFixed(1)}s - {segment.endTime.toFixed(1)}s
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
                   </button>
                   <button
                     onClick={() => downloadSegment(segment)}
-                    className="p-2 text-white dark:text-white hover:bg-white/10 dark:hover:bg-white/10 rounded-md transition-colors"
+                    className="p-2 text-card-foreground hover:bg-card/30 rounded-md transition-colors"
                     title="Download"
                   >
                     <Download className="w-4 h-4" />
@@ -267,7 +267,7 @@ export function AudioSplitter({ onSegmentsCreated, onTranscriptionComplete }: Au
           <div className="mt-4">
             <button
               onClick={() => segments.forEach(downloadSegment)}
-              className="w-full py-2 px-4 bg-semantic-info-bg dark:bg-semantic-info-bg text-white rounded-md hover:bg-semantic-info-bg dark:hover:bg-semantic-info-bg transition-colors"
+              className="w-full py-2 px-4 bg-semantic-info-bg dark:bg-semantic-info-bg text-card-foreground rounded-md hover:bg-semantic-info-bg dark:hover:bg-semantic-info-bg transition-colors"
             >
               Download All Segments
             </button>

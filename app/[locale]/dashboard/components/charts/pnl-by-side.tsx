@@ -194,7 +194,7 @@ export default React.memo(function PnLBySideChart({
             <Switch
               checked={showAverage}
               onCheckedChange={setShowAverage}
-              className="data-[state=checked]:bg-white"
+              className="data-[state=checked]:bg-card"
             />
           </div>
         </div>
@@ -230,10 +230,10 @@ export default React.memo(function PnLBySideChart({
                     />
                   ))}
                   <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central">
-                    <tspan x="50%" dy="-0.1em" className="fill-white font-black text-2xl">
+                    <tspan x="50%" dy="-0.1em" className="fill-foreground font-black text-2xl">
                       {dominantSide.label}
                     </tspan>
-                    <tspan x="50%" dy="1.35em" className="fill-white/55 text-[10px] uppercase font-black tracking-[0.16em]">
+                    <tspan x="50%" dy="1.35em" className="fill-foreground/55 text-[10px] uppercase font-black tracking-[0.16em]">
                       {dominantSide.trades} TRADES
                     </tspan>
                   </text>

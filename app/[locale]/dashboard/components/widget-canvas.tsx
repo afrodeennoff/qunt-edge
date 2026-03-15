@@ -120,10 +120,10 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
       </div>
       {isCustomizing && (
         <>
-          <div className="absolute inset-0 rounded-xl border border-white/25 border-dashed shadow-[inset_0_0_0_1px_hsl(var(--foreground)/0.08)]" />
+          <div className="absolute inset-0 rounded-xl border border-border/25 border-dashed shadow-[inset_0_0_0_1px_hsl(var(--foreground)/0.08)]" />
           <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_top,hsl(var(--foreground)/0.18),hsl(var(--background)/0.74)_62%)] opacity-100 backdrop-blur-[2px]" />
           <div className="absolute inset-0 flex items-center justify-center opacity-100 drag-handle cursor-grab active:cursor-grabbing">
-            <div className="flex flex-col items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-4 py-3 text-foreground/85 backdrop-blur-md">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-border/20 bg-popover/45 px-4 py-3 text-foreground/85 backdrop-blur-md">
               <GripVertical className="h-6 w-4" />
               <p className="text-sm font-medium">{t('widgets.dragToMove')}</p>
             </div>
@@ -134,13 +134,13 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-8 rounded-full border-white/25 bg-black/55 text-foreground hover:bg-black/75 hover:border-white/40 backdrop-blur-md"
+                  className="h-8 w-8 rounded-full border-border/25 bg-popover/55 text-foreground hover:bg-popover/75 hover:border-border/40 backdrop-blur-md"
                   aria-label="Change widget size"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 border-white/15 bg-black/85 p-2 text-foreground backdrop-blur-xl">
+              <PopoverContent className="w-56 border-border/15 bg-popover/85 p-2 text-foreground backdrop-blur-xl">
                 <div className="flex flex-col gap-1">
                   {isMobile ? (
                     <>
@@ -269,7 +269,7 @@ const WidgetWrapper = React.memo(({ children, onRemove, onChangeSize, isCustomiz
                 <Button
                   variant="destructive"
                   size="icon"
-                  className="h-8 w-8 rounded-full border border-white/20 bg-semantic-error-bg/80 text-foreground hover:bg-semantic-error-bg"
+                  className="h-8 w-8 rounded-full border border-border/20 bg-semantic-error-bg/80 text-foreground hover:bg-semantic-error-bg"
                   aria-label="Remove widget"
                 >
                   <Minus className="h-4 w-4" />
@@ -313,7 +313,7 @@ function DebugDataBadge() {
     Boolean(dateRange?.from || dateRange?.to);
 
   return (
-    <div className="absolute left-2 top-2 z-30 rounded-md border border-white/15 bg-black/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
+    <div className="absolute left-2 top-2 z-30 rounded-md border border-border/15 bg-popover/80 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground/80 backdrop-blur-sm">
       T:{trades.length} F:{formattedTrades.length}
       {isFiltered && (
         <span className="ml-2 text-foreground/40">filtered</span>
@@ -546,12 +546,12 @@ export default function WidgetCanvas() {
   if (!layouts) {
     return (
       <div className="relative mt-0 w-full min-h-0" role="status" aria-label="Loading dashboard">
-        <div className="animate-pulse rounded-2xl border border-white/12 bg-black/60 p-6" aria-hidden="true">
-          <div className="h-4 w-48 rounded bg-white/10" />
-          <div className="mt-3 h-3 w-96 max-w-full rounded bg-white/10" />
+        <div className="animate-pulse rounded-2xl border border-border/12 bg-popover/60 p-6" aria-hidden="true">
+          <div className="h-4 w-48 rounded bg-card/10" />
+          <div className="mt-3 h-3 w-96 max-w-full rounded bg-card/10" />
           <div className="mt-6 flex gap-2">
-            <div className="h-9 w-44 rounded bg-white/10" />
-            <div className="h-9 w-28 rounded bg-white/10" />
+            <div className="h-9 w-44 rounded bg-card/10" />
+            <div className="h-9 w-28 rounded bg-card/10" />
           </div>
         </div>
         <span className="sr-only">Loading dashboard widgets...</span>
@@ -562,7 +562,7 @@ export default function WidgetCanvas() {
   if (currentLayout.length === 0) {
     return (
       <div className="relative mt-0 w-full min-h-0" role="status">
-        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/12 bg-card/90 p-6 text-foreground shadow-2xl" role="alert">
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-border/12 bg-card/90 p-6 text-foreground shadow-2xl" role="alert">
           <div className="text-sm font-semibold tracking-tight">
             {(t as any)("widgets.emptyLayoutTitle") ?? "No widgets on your dashboard."}
           </div>
@@ -572,14 +572,14 @@ export default function WidgetCanvas() {
           <div className="mt-5 flex flex-wrap gap-2">
             <Button
               onClick={restoreDefaultLayout}
-              className="bg-white text-black hover:bg-white/90 font-semibold"
+              className="bg-card text-foreground hover:bg-card/90 font-semibold"
             >
               {(t as any)("widgets.restoreDefaults") ?? "Restore default layout"}
             </Button>
             <Button
               variant="outline"
               onClick={() => setIsCustomizing(true)}
-              className="border-white/15 bg-transparent text-foreground hover:bg-white/5 hover:text-foreground"
+              className="border-border/15 bg-transparent text-foreground hover:bg-card/5 hover:text-foreground"
             >
               {(t as any)("widgets.edit") ?? "Edit"}
             </Button>
@@ -646,15 +646,15 @@ export default function WidgetCanvas() {
                       currentType={widget.type}
                     >
                       <div className={cn(
-                        "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-white/12",
+                        "h-full w-full rounded-xl transition-all duration-500 group/widget overflow-hidden relative precision-panel border border-border/12",
                         isCustomizing
                           ? "border-[hsl(var(--precision-cobalt)/0.7)] bg-[hsl(var(--precision-panel-elevated)/0.98)] shadow-[0_18px_34px_-24px_hsl(var(--background)/0.95)]"
-                          : "bg-black/95 hover:border-white/20"
+                          : "bg-popover/95 hover:border-border/20"
                       )}>
                         {showDataDebug && !isCustomizing && (
                           <DebugDataBadge />
                         )}
-                        <div className="absolute inset-0 bg-linear-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-b from-card/[0.02] to-transparent pointer-events-none" />
                         <div className="relative h-full w-full">
                           {renderWidget(widget)}
                         </div>
