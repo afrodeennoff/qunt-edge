@@ -266,8 +266,8 @@ const getDisplayModeButtonClass = (mode: 'currency' | 'percent', currentMode: 'c
 const getBlurCardClass = (isActive: boolean) => cn(
     "group border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all duration-700 backdrop-blur-sm cursor-pointer relative overflow-hidden",
     isActive
-        ? "bg-zinc-950/40 border-foreground/5 blur-xl scale-[0.98] select-none"
-        : "bg-zinc-900/30 border-foreground/10 hover:bg-zinc-900/60 hover:border-foreground/20"
+        ? "bg-card/70 border-foreground/5 blur-xl scale-[0.98] select-none"
+        : "bg-card/50 border-foreground/10 hover:bg-accent/70 hover:border-foreground/20"
 )
 
 const getBlurIcon = (isActive: boolean): React.ReactElement => (
@@ -576,18 +576,18 @@ export function DailySummaryModal() {
                             {/* Secondary Stats */}
                             <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 h-full justify-center">
                                 {/* Streak - Refined */}
-                                <div className="flex-1 bg-gradient-to-br from-zinc-900/50 to-zinc-900/20 border border-foreground/10 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-foreground/20 transition-all">
+                                <div className="flex-1 bg-gradient-to-br from-card/70 to-muted/40 border border-foreground/10 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-foreground/20 transition-all">
                                     <div className="text-6xl font-black tracking-tighter text-foreground mb-2 relative z-10 drop-shadow-2xl">{stats.currentStreak}</div>
                                     <div className="text-[9px] text-fg-muted uppercase tracking-[0.3em] font-bold relative z-10">Win Streak</div>
                                     <Zap className="absolute -bottom-6 -right-6 w-32 h-32 text-foreground/[0.03] group-hover:text-foreground/[0.05] transition-colors" />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-zinc-900/30 border border-foreground/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-zinc-900/50 transition-colors backdrop-blur-sm">
+                                    <div className="bg-card/50 border border-foreground/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-accent/70 transition-colors backdrop-blur-sm">
                                         <div className="text-2xl font-black text-foreground/90 mb-1">{scoreVal}</div>
                                         <div className="text-[9px] text-fg-muted uppercase tracking-[0.2em] font-bold">Score</div>
                                     </div>
-                                    <div className="bg-zinc-900/30 border border-foreground/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-zinc-900/50 transition-colors backdrop-blur-sm">
+                                    <div className="bg-card/50 border border-foreground/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-accent/70 transition-colors backdrop-blur-sm">
                                         <div className="text-2xl font-black text-foreground/90 mb-1">{stats.winRate}%</div>
                                         <div className="text-[9px] text-fg-muted uppercase tracking-[0.2em] font-bold">Win Rate</div>
                                     </div>
@@ -612,7 +612,7 @@ export function DailySummaryModal() {
                                 </div>
                                 <span className={cn("text-sm font-bold", goalTextClass)}>{Math.round(totalGoalProgress)}%</span>
                             </div>
-                            <div className="h-2.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-foreground/5 p-[1px] relative shadow-inner">
+                            <div className="h-2.5 w-full bg-muted/60 rounded-full overflow-hidden border border-foreground/5 p-[1px] relative shadow-inner">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${totalGoalProgress}%` }}

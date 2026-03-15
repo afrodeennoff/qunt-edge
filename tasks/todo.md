@@ -485,3 +485,23 @@ Verification: `npx eslint app/[locale]/dashboard/components/data-debug.tsx` (sti
 - `npx eslint` on touched files: 0 errors, warnings-only baseline.
 - `npm run -s typecheck`: pass (exit 0).
 - Behavior-preserving move completed; no route contract changes introduced in this batch.
+
+## Task: VTRON app-wide color unification (2026-03-15)
+
+- [x] Extract and map the VTRON reference semantic token palette (light/dark) into the app theme foundation.
+- [x] Normalize global token authority in `app/globals.css` and align sidebar/ring/chart semantic tokens.
+- [x] Replace high-impact hardcoded color classes with semantic tokens across auth, dashboard, admin/newsletter, marketing/docs/community, and shared UI primitives.
+- [x] Run targeted lint on all touched files and verify warnings-only baseline (0 errors).
+- [x] Run `npm run -s typecheck`, `npm run -s build`, and `npm run -s check:color-contract`.
+- [x] Perform manual visual QA on key pages in light/dark mode (`/en/authentication`, `/en/docs`, `/en/dashboard` redirect flow).
+
+## Review (VTRON app-wide color unification)
+
+- Verification:
+  - `npx eslint <touched files>`: passes with warnings-only baseline, 0 errors.
+  - `npm run -s typecheck`: passes.
+  - `npm run -s build`: passes (full route generation).
+  - `npm run -s check:color-contract`: passes after replacing literal swatches in `components/theme-switcher.tsx`.
+  - Manual QA: light/dark walkthrough via local app + browser automation on authentication and docs surfaces; dashboard auth redirect path also checked.
+- Residual risk:
+  - Some legacy color classes remain in untouched files outside this migration batch (notably email templates and additional long-tail route components).

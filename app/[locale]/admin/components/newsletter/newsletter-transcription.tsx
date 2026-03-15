@@ -166,10 +166,10 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
 
   if (segments.length === 0) {
     return (
-      <Card className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+      <Card className="bg-muted/50 dark:bg-card border-border ">
         <CardContent className="p-6 text-center">
-          <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
+          <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">
             Aucun segment audio disponible pour la transcription
           </p>
         </CardContent>
@@ -178,9 +178,9 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
   }
 
   return (
-    <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+    <Card className="bg-card border-border ">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+        <CardTitle className="flex items-center gap-2 text-foreground">
           <Mic className="w-5 h-5" />
           Transcription Audio (Français)
         </CardTitle>
@@ -192,7 +192,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
             <Badge variant="default">
               Prêt
             </Badge>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-muted-foreground">
               {segments.length} segments disponibles
             </span>
           </div>
@@ -200,7 +200,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
           <Button
             onClick={transcribeAllSegments}
             disabled={isTranscribing}
-            className="bg-semantic-info-bg hover:bg-semantic-info-bg dark:bg-semantic-info-bg dark:hover:bg-semantic-info-bg text-white"
+            className="bg-semantic-info-bg hover:bg-semantic-info-bg dark:bg-semantic-info-bg dark:hover:bg-semantic-info-bg text-foreground"
           >
             {isTranscribing ? (
               <>
@@ -220,10 +220,10 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
         {isTranscribing && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">
+              <span className="text-muted-foreground">
                 {currentSegment ? `Segment ${currentSegment}/${segments.length}` : 'Préparation...'}
               </span>
-              <span className="text-gray-600 dark:text-gray-400">
+              <span className="text-muted-foreground">
                 {Math.round(progress)}%
               </span>
             </div>
@@ -235,7 +235,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
         {transcriptionResults.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-lg font-semibold text-foreground">
                 Résultats de transcription
               </h3>
               <div className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
                   onClick={downloadTranscription}
                   variant="outline"
                   size="sm"
-                  className="text-white dark:text-white border-white/20 dark:border-white/20 hover:bg-white/10 dark:hover:bg-white/10"
+                  className="text-foreground border-border/70 hover:bg-accent/70"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger
@@ -260,7 +260,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
                 .map((result) => (
                   <div
                     key={result.segmentIndex}
-                    className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                    className="p-3 bg-muted/50  rounded-lg border border-border "
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
@@ -268,11 +268,11 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
                           <Badge variant="secondary" className="text-xs">
                             Segment {result.segmentIndex}
                           </Badge>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                             {result.duration.toFixed(1)}s
                           </span>
                         </div>
-                        <p className="text-gray-900 dark:text-gray-100 text-sm leading-relaxed">
+                        <p className="text-foreground text-sm leading-relaxed">
                           {result.text || "Aucune transcription disponible"}
                         </p>
                       </div>
@@ -280,7 +280,7 @@ export function TranscriptionComponent({ segments, onTranscriptionComplete }: Tr
                         onClick={() => copyToClipboard(result.text, result.segmentIndex)}
                         variant="ghost"
                         size="sm"
-                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        className="text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
                       >
                         {copiedIndex === result.segmentIndex ? (
                           <Check className="w-4 h-4" />

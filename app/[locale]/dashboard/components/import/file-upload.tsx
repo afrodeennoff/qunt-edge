@@ -315,7 +315,7 @@ export default function FileUpload({
           "hover:border-primary/50 group relative",
           isDragActive 
             ? "border-primary bg-primary/5 scale-[0.99]" 
-            : "border-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-900/50",
+            : "border-border hover:bg-muted/50 ",
           "cursor-pointer flex items-center justify-center"
         )}
       >
@@ -359,8 +359,8 @@ export default function FileUpload({
               key={index} 
               className={cn(
                 "flex items-center justify-between",
-                "bg-gray-100 dark:bg-gray-800 rounded-lg",
-                "p-3 hover:bg-gray-200 dark:hover:bg-gray-700",
+                "bg-muted  rounded-lg",
+                "p-3 hover:bg-muted ",
                 "transition-all duration-200 ease-in-out",
                 "animate-in slide-in-from-bottom fade-in",
                 "group"

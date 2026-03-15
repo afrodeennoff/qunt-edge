@@ -230,11 +230,11 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case "positive":
-        return <CheckCircle className="h-3 w-3 text-black dark:text-white" />
+        return <CheckCircle className="h-3 w-3 text-foreground" />
       case "negative":
-        return <AlertTriangle className="h-3 w-3 text-black dark:text-white" />
+        return <AlertTriangle className="h-3 w-3 text-foreground" />
       default:
-        return <Target className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+        return <Target className="h-3 w-3 text-muted-foreground" />
     }
   }
 
@@ -252,17 +252,17 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full min-h-0 bg-white dark:bg-black transition-colors duration-500 ${className}`}
+      className={`relative w-full h-full min-h-0 bg-card transition-colors duration-500 ${className}`}
       style={{
         contain: "layout style paint",
         isolation: "isolate",
       }}
     >
-      <div className="w-full h-full border border-muted bg-white dark:bg-black shadow-lg dark:shadow-gray-900/50 transition-all duration-500 rounded-lg overflow-hidden">
+      <div className="w-full h-full border border-muted bg-card shadow-lg  transition-all duration-500 rounded-lg overflow-hidden">
         <div className="p-4 h-full flex flex-col min-h-0">
           <div className="flex items-center gap-2 mb-4 pb-2 border-b border-muted transition-colors duration-300 shrink-0">
-            <Bot className="h-4 w-4 text-black dark:text-white transition-colors duration-300" />
-            <span className="text-sm font-medium text-black dark:text-white transition-colors duration-300">
+            <Bot className="h-4 w-4 text-foreground transition-colors duration-300" />
+            <span className="text-sm font-medium text-foreground transition-colors duration-300">
               {t('landing.features.chat-feature.title')}
             </span>
             <div className="ml-auto text-xs text-muted-foreground">
@@ -282,27 +282,27 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
                   >
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
-                        message.role === "user" ? "bg-black dark:bg-white" : "bg-muted"
+                        message.role === "user" ? "bg-primary" : "bg-muted"
                       }`}
                     >
                       {message.role === "user" ? (
-                        <User className="h-3 w-3 text-white dark:text-black transition-colors duration-300" />
+                        <User className="h-3 w-3 text-primary-foreground transition-colors duration-300" />
                       ) : (
-                        <Bot className="h-3 w-3 text-black dark:text-white transition-colors duration-300" />
+                        <Bot className="h-3 w-3 text-foreground transition-colors duration-300" />
                       )}
                     </div>
 
                     <div
                       className={`p-2 rounded-lg transition-all duration-300 ${
                         message.role === "user"
-                          ? "bg-black dark:bg-white text-white dark:text-black"
-                          : "bg-muted text-black dark:text-white border border-muted"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground border border-muted"
                       }`}
                     >
                       <p className="leading-relaxed">
                         {message.content}
                         {message.isStreaming && (
-                          <span className="animate-pulse text-gray-500 dark:text-gray-400 ml-1">|</span>
+                          <span className="animate-pulse text-muted-foreground ml-1">|</span>
                         )}
                       </p>
 
@@ -312,22 +312,22 @@ export default function TradingChatAssistant({ className = "", maxMessages = 3 }
                             message.showAnalysis ? "max-h-32 opacity-100 mt-2" : "max-h-0 opacity-0 mt-0"
                           }`}
                         >
-                          <div className="pt-2 border-t border-muted-foreground transition-colors duration-300">
+                          <div className="pt-2 border-t border-border transition-colors duration-300">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="font-medium text-black dark:text-white text-xs">
+                              <span className="font-medium text-foreground text-xs">
                                 {message.analysis.metric}
                               </span>
                               <div className="flex items-center gap-1">
                                 {getTrendIcon(message.analysis.trend)}
-                                <span className="text-xs font-mono text-black dark:text-white">
+                                <span className="text-xs font-mono text-foreground">
                                   {getTrendLabel(message.analysis.trend)}
                                 </span>
                               </div>
                             </div>
-                            <div className="text-sm font-semibold text-black dark:text-white mb-1">
+                            <div className="text-sm font-semibold text-foreground mb-1">
                               {message.analysis.value}
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400">{message.analysis.insight}</div>
+                            <div className="text-xs text-muted-foreground">{message.analysis.insight}</div>
                           </div>
                         </div>
                       )}

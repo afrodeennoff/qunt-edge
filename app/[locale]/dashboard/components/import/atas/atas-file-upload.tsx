@@ -250,7 +250,7 @@ export default function AtasFileUpload({
           "hover:border-primary/50 group relative",
           isDragActive
             ? "border-primary bg-primary/5 scale-[0.99]"
-            : "border-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-900/50",
+            : "border-border hover:bg-muted/50 ",
           "cursor-pointer flex items-center justify-center",
         )}
       >
@@ -297,7 +297,7 @@ export default function AtasFileUpload({
           {uploadedFiles.map((file, index) => (
             <div
               key={file.name}
-              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+              className="flex items-center justify-between p-3 bg-muted/50  rounded-lg"
             >
               <div className="flex items-center space-x-3">
                 <FileIcon className="h-5 w-5 text-muted-foreground" />

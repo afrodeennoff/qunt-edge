@@ -498,7 +498,7 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
             <DialogTitle>Image Gallery</DialogTitle>
           </DialogHeader>
 
-          <div className="relative h-[70vh] sm:h-[70vh] bg-neutral-50 p-4 sm:p-8">
+          <div className="relative h-[70vh] sm:h-[70vh] bg-muted/40 p-4 sm:p-8">
             <AnimatePresence mode="wait">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -544,23 +544,23 @@ export function TradeImageEditor({ trade, tradeIds }: TradeImageEditorProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="bg-linear-to-r from-white/95 to-white/90 hover:from-white hover:to-white shadow-lg border border-gray-200 ring-1 ring-gray-100 h-7 w-7 sm:h-8 sm:w-8"
+                          className="bg-linear-to-r bg-card hover:bg-accent/70 shadow-lg border border-border ring-1 ring-border/60 h-7 w-7 sm:h-8 sm:w-8"
                           onClick={() => zoomOut()}
                           disabled={scale <= 0.5}
                         >
-                          <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                          <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4 text-foreground" />
                         </Button>
-                        <span className="min-w-10 sm:min-w-12 text-center text-xs sm:text-sm font-medium text-gray-700">
+                        <span className="min-w-10 sm:min-w-12 text-center text-xs sm:text-sm font-medium text-foreground">
                           {Math.round(scale * 100)}%
                         </span>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="bg-linear-to-r from-white/95 to-white/90 hover:from-white hover:to-white shadow-lg border border-gray-200 ring-1 ring-gray-100 h-7 w-7 sm:h-8 sm:w-8"
+                          className="bg-linear-to-r bg-card hover:bg-accent/70 shadow-lg border border-border ring-1 ring-border/60 h-7 w-7 sm:h-8 sm:w-8"
                           onClick={() => zoomIn()}
                           disabled={scale >= 3}
                         >
-                          <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                          <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4 text-foreground" />
                         </Button>
                       </div>
                     </>

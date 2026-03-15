@@ -51,13 +51,13 @@ export function ThemeSwitcher() {
             <Palette className="mr-2 h-4 w-4" />
             Color Theme
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
+            <DropdownMenuSubContent>
             <DropdownMenuItem onClick={() => handleColorThemeChange('default')}>
-              <span className="mr-2 h-3 w-3 rounded-full bg-[#F5E6D3]" />
+              <span className="mr-2 h-3 w-3 rounded-full bg-primary" />
               Default (Gold)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleColorThemeChange('tiesen')}>
-              <span className="mr-2 h-3 w-3 rounded-full bg-[#8B5CF6]" />
+              <span className="mr-2 h-3 w-3 rounded-full bg-secondary" />
               Tiesen (Purple)
             </DropdownMenuItem>
           </DropdownMenuSubContent>

@@ -95,7 +95,7 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
           <div className={cn(
             "flex items-center gap-2 cursor-pointer transition-colors",
             variant === 'navbar'
-              ? "hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-full"
+              ? "hover:bg-accent/70 p-1 rounded-full"
               : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg p-2 w-full group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
           )}>
             <div className="relative flex-none">
@@ -121,10 +121,10 @@ export default function UserMenu({ variant = 'sidebar' }: { variant?: 'navbar' |
               variant === 'sidebar' && "group-data-[collapsible=icon]:hidden",
               variant === 'navbar' && "hidden sm:grid"
             )}>
-              <span className="truncate font-bold text-zinc-900 dark:text-zinc-100">
+              <span className="truncate font-bold text-foreground">
                 {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
               </span>
-              <span className="truncate text-[10px] text-zinc-500 font-medium">
+              <span className="truncate text-[10px] text-muted-foreground font-medium">
                 {user?.email}
               </span>
             </div>
