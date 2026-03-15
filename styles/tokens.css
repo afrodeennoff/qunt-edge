@@ -581,3 +581,177 @@
     transform: scale(0.98);
   }
 }
+
+/* ===== TIESEN THEME - Purple Accent Alternative ===== */
+/* From tweakcn.com/r/themes/cmie97f2b000704l27r9g1p11 */
+/* Uses purple/violet as primary accent instead of champagne gold */
+
+:root[data-theme="tiesen"] {
+  /* ===== TIESEN LIGHT MODE ===== */
+  --accent-luxury: 266 64% 56%;
+  --accent-luxury-hover: 266 60% 50%;
+  --accent-luxury-active: 266 55% 44%;
+  --accent-luxury-subtle: 266 64% 56% / 0.12;
+  --accent-luxury-glow: 266 64% 56% / 0.25;
+
+  --accent-rose: 280 40% 65%;
+  --accent-bronze: 30 45% 55%;
+
+  /* Semantic tokens - Light */
+  --background: 0 0% 98.5%;
+  --foreground: 0 0% 20%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 20%;
+  --primary: 266 64% 56%;
+  --primary-foreground: 254 47% 96%;
+  --secondary: 0 0% 94%;
+  --secondary-foreground: 0 0% 40%;
+  --muted: 0 0% 97%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 257 50% 92%;
+  --accent-foreground: 257 70% 25%;
+  --destructive: 27 59% 46%;
+  --destructive-foreground: 254 47% 96%;
+  --input: 0 0% 94%;
+  --border: 0 0% 92%;
+  --ring: 266 64% 56%;
+
+  /* Sidebar - Light */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 20%;
+  --sidebar-primary: 266 64% 56%;
+  --sidebar-primary-foreground: 254 47% 96%;
+  --sidebar-accent: 257 50% 92%;
+  --sidebar-accent-foreground: 257 70% 25%;
+  --sidebar-border: 0 0% 92%;
+  --sidebar-ring: 266 64% 56%;
+
+  /* Chart - Purple palette */
+  --chart-1: 257 50% 92%;
+  --chart-2: 266 45% 75%;
+  --chart-3: 272 40% 60%;
+  --chart-4: 266 64% 56%;
+  --chart-5: 280 40% 65%;
+  --chart-loss: 27 59% 46%;
+  --chart-win: 266 64% 56%;
+  --chart-grid: 0 0% 90%;
+  --chart-axis: 0 0% 60%;
+
+  /* Surface tokens - Light */
+  --surface-subtle: 0 0% 100% / 0.05;
+  --surface-subtle-hover: 266 20% 96% / 0.08;
+  --surface-subtle-active: 266 20% 96% / 0.12;
+  --surface-muted: 266 10% 96% / 0.08;
+  --surface-muted-hover: 266 10% 96% / 0.12;
+  --surface-elevated: 0 0% 100% / 0.02;
+  --surface-elevated-hover: 0 0% 100% / 0.05;
+
+  /* Border tokens - Light */
+  --border-subtle: 266 10% 92% / 0.06;
+  --border-muted: 266 10% 92% / 0.1;
+  --border-default: 266 10% 92% / 0.15;
+
+  /* Text tokens - Light */
+  --text-primary: 0 0% 20%;
+  --text-secondary: 0 0% 40%;
+  --text-tertiary: 0 0% 55%;
+  --text-disabled: 0 0% 35%;
+
+  /* Semantic colors - Light */
+  --color-success: 154 48% 46%;
+  --color-success-bg: 154 48% 46% / 0.1;
+  --color-warning: 38 75% 55%;
+  --color-warning-bg: 38 75% 55% / 0.1;
+  --color-error: 27 59% 46%;
+  --color-error-bg: 27 59% 46% / 0.1;
+  --color-info: 210 60% 55%;
+  --color-info-bg: 210 60% 55% / 0.1;
+}
+
+/* Tiesen Dark Mode */
+:root[data-theme="tiesen"].dark,
+[data-theme="tiesen"] .dark {
+  /* ===== TIESEN DARK MODE ===== */
+  --accent-luxury: 266 64% 56%;
+  --accent-luxury-hover: 266 70% 62%;
+  --accent-luxury-active: 266 75% 68%;
+  --accent-luxury-subtle: 266 64% 56% / 0.15;
+  --accent-luxury-glow: 266 64% 56% / 0.3;
+
+  --accent-rose: 280 50% 70%;
+  --accent-bronze: 30 55% 50%;
+
+  /* Semantic tokens - Dark */
+  --background: 0 0% 3%;
+  --foreground: 0 0% 98%;
+  --card: 240 5% 8%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 5% 8%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 266 64% 56%;
+  --primary-foreground: 254 47% 96%;
+  --secondary: 240 5% 15%;
+  --secondary-foreground: 0 0% 80%;
+  --muted: 240 5% 12%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 260 15% 20%;
+  --accent-foreground: 257 50% 92%;
+  --destructive: 0 50% 45%;
+  --destructive-foreground: 254 47% 96%;
+  --input: 240 5% 18%;
+  --border: 240 5% 18%;
+  --ring: 266 64% 56%;
+
+  /* Sidebar - Dark */
+  --sidebar-background: 240 5% 6%;
+  --sidebar-foreground: 0 0% 90%;
+  --sidebar-primary: 266 64% 56%;
+  --sidebar-primary-foreground: 254 47% 96%;
+  --sidebar-accent: 260 15% 18%;
+  --sidebar-accent-foreground: 257 50% 92%;
+  --sidebar-border: 240 5% 15%;
+  --sidebar-ring: 266 64% 56%;
+
+  /* Chart - Dark purple palette */
+  --chart-1: 257 50% 92%;
+  --chart-2: 266 45% 60%;
+  --chart-3: 272 40% 50%;
+  --chart-4: 266 64% 56%;
+  --chart-5: 280 50% 70%;
+  --chart-loss: 0 50% 45%;
+  --chart-win: 266 64% 56%;
+  --chart-grid: 240 5% 15%;
+  --chart-axis: 0 0% 50%;
+
+  /* Surface tokens - Dark */
+  --surface-subtle: 0 0% 100% / 0.03;
+  --surface-subtle-hover: 266 30% 12% / 0.08;
+  --surface-subtle-active: 266 30% 12% / 0.12;
+  --surface-muted: 266 20% 12% / 0.08;
+  --surface-muted-hover: 266 20% 12% / 0.12;
+  --surface-elevated: 266 10% 8% / 0.02;
+  --surface-elevated-hover: 266 10% 8% / 0.05;
+
+  /* Border tokens - Dark */
+  --border-subtle: 266 20% 20% / 0.06;
+  --border-muted: 266 20% 20% / 0.1;
+  --border-default: 266 20% 20% / 0.15;
+
+  /* Text tokens - Dark */
+  --text-primary: 0 0% 98%;
+  --text-secondary: 0 0% 70%;
+  --text-tertiary: 0 0% 55%;
+  --text-disabled: 0 0% 40%;
+
+  /* Semantic colors - Dark */
+  --color-success: 154 48% 56%;
+  --color-success-bg: 154 48% 56% / 0.15;
+  --color-warning: 38 75% 55%;
+  --color-warning-bg: 38 75% 55% / 0.15;
+  --color-error: 0 50% 55%;
+  --color-error-bg: 0 50% 55% / 0.15;
+  --color-info: 210 60% 60%;
+  --color-info-bg: 210 60% 60% / 0.15;
+}

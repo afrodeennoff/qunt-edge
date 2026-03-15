@@ -1,6 +1,6 @@
 'use client'
 
-import { Moon, Sun } from 'lucide-react'
+import { Moon, Sun, Palette } from 'lucide-react'
 import { useTheme } from '@/context/theme-provider'
 import { Button } from './ui/button'
 import {
@@ -16,10 +16,14 @@ import {
 import { Slider } from './ui/slider'
 
 export function ThemeSwitcher() {
-  const { setTheme, intensity, setIntensity } = useTheme()
+  const { setTheme, setColorTheme, colorTheme, intensity, setIntensity } = useTheme()
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme)
+  }
+
+  const handleColorThemeChange = (newColorTheme: 'default' | 'tiesen') => {
+    setColorTheme(newColorTheme)
   }
 
   return (
@@ -41,6 +45,23 @@ export function ThemeSwitcher() {
         <DropdownMenuItem onClick={() => handleThemeChange('system')}>
           System
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Palette className="mr-2 h-4 w-4" />
+            Color Theme
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem onClick={() => handleColorThemeChange('default')}>
+              <span className="mr-2 h-3 w-3 rounded-full bg-[#F5E6D3]" />
+              Default (Gold)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleColorThemeChange('tiesen')}>
+              <span className="mr-2 h-3 w-3 rounded-full bg-[#8B5CF6]" />
+              Tiesen (Purple)
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>Intensity</DropdownMenuSubTrigger>

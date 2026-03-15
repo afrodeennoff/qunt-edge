@@ -3,12 +3,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, startTransition } from 'react'
 
 type Theme = 'light' | 'dark' | 'system'
+type ColorTheme = 'default' | 'tiesen'
 
 type ThemeContextType = {
   theme: Theme
   effectiveTheme: 'light' | 'dark'
+  colorTheme: ColorTheme
   intensity: number
   setTheme: (theme: Theme) => void
+  setColorTheme: (colorTheme: ColorTheme) => void
   setIntensity: (intensity: number) => void
   toggleTheme: () => void
 }
@@ -16,8 +19,10 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   effectiveTheme: 'dark',
+  colorTheme: 'default',
   intensity: 100,
   setTheme: () => { },
+  setColorTheme: () => { },
   setIntensity: () => { },
   toggleTheme: () => { },
 })
@@ -27,6 +32,7 @@ export const useTheme = () => useContext(ThemeContext)
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark')
   const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('dark')
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>('default')
   const [intensity, setIntensityState] = useState<number>(100)
 
   const applyTheme = (newTheme: Theme) => {
@@ -44,9 +50,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setEffectiveTheme(newEffectiveTheme)
   }
 
+  const applyColorTheme = (newColorTheme: ColorTheme) => {
+    const root = window.document.documentElement
+    if (newColorTheme === 'tiesen') {
+      root.setAttribute('data-theme', 'tiesen')
+    } else {
+      root.removeAttribute('data-theme')
+    }
+  }
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme | null
     const savedIntensity = localStorage.getItem('intensity')
+    const savedColorTheme = localStorage.getItem('colorTheme') as ColorTheme | null
 
     startTransition(() => {
       if (savedTheme) {
@@ -55,8 +71,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (savedIntensity) {
         setIntensityState(Number(savedIntensity))
       }
+      if (savedColorTheme) {
+        setColorThemeState(savedColorTheme)
+      }
     })
     applyTheme(savedTheme || 'system')
+    if (savedColorTheme) {
+      applyColorTheme(savedColorTheme)
+    }
   }, [])
 
   useEffect(() => {
@@ -66,10 +88,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('theme', theme)
     localStorage.setItem('intensity', intensity.toString())
 
-    // Set CSS variables for theme intensity
     const root = window.document.documentElement
     root.style.setProperty('--theme-intensity', `${intensity}%`)
   }, [theme, intensity])
+
+  useEffect(() => {
+    startTransition(() => {
+      applyColorTheme(colorTheme)
+    })
+    localStorage.setItem('colorTheme', colorTheme)
+  }, [colorTheme])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -85,6 +113,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
+  }
+
+  const setColorTheme = (newColorTheme: ColorTheme) => {
+    setColorThemeState(newColorTheme)
   }
 
   const setIntensity = (newIntensity: number) => {
@@ -103,11 +135,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({
     theme,
     effectiveTheme,
+    colorTheme,
     intensity,
     setTheme,
+    setColorTheme,
     setIntensity,
     toggleTheme,
-  }), [theme, effectiveTheme, intensity])
+  }), [theme, effectiveTheme, colorTheme, intensity])
 
   return (
     <ThemeContext.Provider value={value}>
