@@ -45,7 +45,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 </header>
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
-                        <AccordionItem key={index} value={`item-${index}`} className="mb-3 rounded-2xl border border-white/10 bg-black/35 px-4">
+                        <AccordionItem key={index} value={`item-${index}`} className="mb-3 rounded-2xl border border-border/60 bg-card/40 px-4">
                             <AccordionTrigger className="text-left font-semibold text-fg-primary hover:no-underline">
                                 {faq.question}
                             </AccordionTrigger>
@@ -62,7 +62,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 <p className="mb-5 text-fg-muted">We&apos;re here to help you elevate your trading execution.</p>
                 <a
                     href={`/${locale}/support`}
-                    className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white px-8 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors hover:bg-zinc-200"
+                    className="inline-flex items-center justify-center rounded-full border border-border/60 bg-card px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-card/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border/60 focus-visible:ring-offset-0"
                 >
                     Contact Support
                 </a>

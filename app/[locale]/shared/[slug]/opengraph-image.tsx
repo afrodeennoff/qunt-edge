@@ -143,8 +143,8 @@ export default async function Image({ params }: { params: { slug: string } }) {
 
         // Determine colors based on performance
         const isPositive = totalPnl >= 0
-        const primaryColor = isPositive ? "#10B981" : "#EF4444"
-        const secondaryColor = isPositive ? "#059669" : "#DC2626"
+         const primaryColor = isPositive ? "hsl(var(--success))" : "hsl(var(--destructive))"
+         const secondaryColor = isPositive ? "hsl(var(--success) / 0.8)" : "hsl(var(--destructive) / 0.8)"
 
         const element = (
             <div
@@ -201,8 +201,8 @@ export default async function Image({ params }: { params: { slug: string } }) {
                                     }}
                                 >
                                     <svg viewBox="0 0 255 255" xmlns="http://www.w3.org/2000/svg" style={{ width: "24px", height: "24px" }}>
-                                        <path fillRule="evenodd" clipRule="evenodd" d="M159 63L127.5 0V255H255L236.5 218H159V63Z" fill="#F8FAFC" />
-                                        <path fillRule="evenodd" clipRule="evenodd" d="M-3.05176e-05 255L127.5 -5.96519e-06L127.5 255L-3.05176e-05 255ZM64 217L121 104L121 217L64 217Z" fill="#F8FAFC" />
+                                         <path fillRule="evenodd" clipRule="evenodd" d="M159 63L127.5 0V255H255L236.5 218H159V63Z" fill="hsl(var(--muted) / 0.98)" />
+                                         <path fillRule="evenodd" clipRule="evenodd" d="M-3.05176e-05 255L127.5 -5.96519e-06L127.5 255L-3.05176e-05 255ZM64 217L121 104L121 217L64 217Z" fill="hsl(var(--muted) / 0.98)" />
                                     </svg>
                                 </div>
                                 <span
@@ -505,14 +505,14 @@ export default async function Image({ params }: { params: { slug: string } }) {
                                 }}
                             >
                                 {/* Win segment */}
-                                {winPercentage > 0 && (
-                                    <path d={winPath} fill="#10B981" stroke="rgba(15, 23, 42, 0.2)" strokeWidth="2" />
-                                )}
+                                 {winPercentage > 0 && (
+                                 <path d={winPath} fill="hsl(var(--success))" stroke="rgba(15, 23, 42, 0.2)" strokeWidth="2" />
+                                 )}
 
                                 {/* Loss segment */}
-                                {lossPercentage > 0 && (
-                                    <path d={lossPath} fill="#EF4444" stroke="rgba(15, 23, 42, 0.2)" strokeWidth="2" />
-                                )}
+                                 {lossPercentage > 0 && (
+                                 <path d={lossPath} fill="hsl(var(--destructive))" stroke="rgba(15, 23, 42, 0.2)" strokeWidth="2" />
+                                 )}
                             </svg>
                         </div>
 
@@ -610,16 +610,16 @@ export default async function Image({ params }: { params: { slug: string } }) {
                             >
                                 Avg Win
                             </p>
-                            <p
-                                style={{
-                                    fontSize: "20px",
-                                    fontWeight: "700",
-                                    color: "#10B981",
-                                    margin: "0",
-                                }}
-                            >
-                                +${avgWin.toFixed(0)}
-                            </p>
+                                 <p
+                                   style={{
+                                     fontSize: "20px",
+                                     fontWeight: "700",
+                                     color: "hsl(var(--success))",
+                                     margin: "0",
+                                   }}
+                                 >
+                                   +${avgWin.toFixed(0)}
+                                 </p>
                         </div>
                         <div
                             style={{
@@ -643,16 +643,16 @@ export default async function Image({ params }: { params: { slug: string } }) {
                             >
                                 Avg Loss
                             </p>
-                            <p
-                                style={{
-                                    fontSize: "20px",
-                                    fontWeight: "700",
-                                    color: "#EF4444",
-                                    margin: "0",
-                                }}
-                            >
-                                -${avgLoss.toFixed(0)}
-                            </p>
+                                 <p
+                                   style={{
+                                     fontSize: "20px",
+                                     fontWeight: "700",
+                                     color: "hsl(var(--destructive))",
+                                     margin: "0",
+                                   }}
+                                 >
+                                   -${avgLoss.toFixed(0)}
+                                 </p>
                         </div>
                     </div>
                 </div>

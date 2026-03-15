@@ -230,28 +230,28 @@ export function AudioPlayer({ audioBuffer, fileName, className = "" }: AudioPlay
         </div>
       </div>
 
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          background: #3b82f6;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .slider::-moz-range-thumb {
-          height: 16px;
-          width: 16px;
-          border-radius: 50%;
-          background: #3b82f6;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-      `}</style>
+       <style jsx>{`
+         .slider::-webkit-slider-thumb {
+           appearance: none;
+           height: 16px;
+           width: 16px;
+           border-radius: 50%;
+           background: hsl(var(--primary));
+           cursor: pointer;
+           border: 2px solid hsl(var(--border));
+           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+         }
+         
+         .slider::-moz-range-thumb {
+           height: 16px;
+           width: 16px;
+           border-radius: 50%;
+           background: hsl(var(--primary));
+           cursor: pointer;
+           border: 2px solid hsl(var(--border));
+           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+         }
+       `}</style>
     </div>
   )
 }

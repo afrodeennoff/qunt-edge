@@ -195,7 +195,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
   if (isInitialLoading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-border/70"></div>
       </div>
     )
   }
@@ -351,7 +351,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                   <div className="flex items-center gap-2">
                     <div className={`px-2 py-1 rounded text-xs font-medium ${
                       user.statistics.totalPnL >= 0 
-                        ? 'bg-white/10 text-white' 
+                        ? 'bg-semantic-success-bg text-semantic-success' 
                         : 'bg-semantic-error-bg text-semantic-error'
                     }`}>
                       {user.statistics.totalPnL >= 0 ? '+' : ''}{user.statistics.totalPnL.toFixed(2)}
@@ -360,10 +360,10 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                       href={`${localePrefix}/teams/dashboard/trader/${user.userId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1 hover:bg-gray-100 rounded transition-colors"
+                      className="p-1 rounded transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary/30"
                       title={t('teams.equity.viewTraderDetails')}
                     >
-                      <ExternalLink className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
                     </Link>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.avgWin')}:</span>
-                      <span className="font-medium text-white">
+                      <span className="font-medium text-foreground">
                         {user.statistics.averageWin.toFixed(2)}
                       </span>
                     </div>
@@ -397,7 +397,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
                   <div className="space-y-1">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.wins')}:</span>
-                      <span className="font-medium text-white">{user.statistics.winningTrades}</span>
+                      <span className="font-medium text-foreground">{user.statistics.winningTrades}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('teams.equity.losses')}:</span>
@@ -439,7 +439,7 @@ export function TeamEquityGridClient({ teamId }: TeamEquityGridClientProps) {
         <div ref={loadingRef} className="flex justify-center py-4">
           {isLoadingMore ? (
             <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-32"></div>
+              <div className="h-8 bg-card/80 rounded w-32"></div>
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">{t('teams.equity.scrollToLoadMore')}</div>

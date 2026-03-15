@@ -212,7 +212,7 @@ export default function EnhancedInput({
           "border-input bg-background",
           confirmed && value ? "scale-[1.02] duration-300" : "",
           isValid === false ? "border-destructive" : "",
-          isValid === true ? "border-white/40" : "",
+            isValid === true ? "border-surface-subtle/40" : "",
         )}
       >
         <Input
@@ -228,10 +228,10 @@ export default function EnhancedInput({
           aria-describedby={isValid === false ? "validation-message" : undefined}
           className={cn(
             "w-full rounded-md border-0 bg-transparent px-3 py-2 text-sm outline-hidden ring-0 focus:ring-0 pr-14",
-            "text-foreground",
-            "placeholder:text-muted-foreground",
-            isValid === false ? "text-destructive" : "",
-            isValid === true ? "text-white" : "",
+           "text-foreground",
+           "placeholder:text-muted-foreground",
+           isValid === false ? "text-destructive" : "",
+           isValid === true ? "text-surface" : "",
           )}
         />
         <div className="absolute right-0 flex items-center pr-2">

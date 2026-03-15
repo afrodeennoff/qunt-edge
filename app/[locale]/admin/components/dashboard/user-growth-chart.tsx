@@ -143,23 +143,23 @@ export function UserGrowthChart({ dailyData, allUsers }: UserGrowthChartProps) {
                     return null
                   }}
                 />
-                <Area
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="users"
-                  stroke="#3b82f6"
-                  fill="#3b82f620"
-                  strokeWidth={2}
-                />
-                {selectedMonth && (
-                  <ReferenceLine
-                    x={selectedMonth}
-                    yAxisId="left"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    strokeDasharray="3 3"
-                  />
-                )}
+                 <Area
+                   yAxisId="left"
+                   type="monotone"
+                   dataKey="users"
+                   stroke="hsl(var(--primary))"
+                   fill="hsl(var(--primary) / 0.2)"
+                   strokeWidth={2}
+                 />
+                 {selectedMonth && (
+                   <ReferenceLine
+                     x={selectedMonth}
+                     yAxisId="left"
+                     stroke="hsl(var(--destructive))"
+                     strokeWidth={2}
+                     strokeDasharray="3 3"
+                   />
+                 )}
               </AreaChart>
             </ResponsiveContainer>
           </div>

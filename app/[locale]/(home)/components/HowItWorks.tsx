@@ -19,7 +19,7 @@ export default function HowItWorks() {
         </div>
 
         <div className="relative grid gap-4 md:grid-cols-5">
-          <div className="pointer-events-none absolute left-[10%] right-[10%] top-6 hidden h-px bg-white/10 md:block" />
+          <div className="pointer-events-none absolute left-[10%] right-[10%] top-6 hidden h-px bg-surface-subtle/10 md:block" />
           {steps.map((step, i) => (
             <article
               key={step.name}

@@ -116,7 +116,7 @@ export function AccountsBarChart({
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <CardTitle>{chartTitle}</CardTitle>
-          <p className="text-xs text-white/60">Minimal view. Add layers if you need more detail.</p>
+          <p className="text-xs text-muted-foreground">Minimal view. Add layers if you need more detail.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -262,7 +262,7 @@ export function AccountsBarChart({
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  labelFormatter={(label) => <span className="font-semibold text-white">{String(label)}</span>}
+                  labelFormatter={(label) => <span className="font-semibold text-foreground">{String(label)}</span>}
                   formatter={(value, name, item) => {
                     const key = String(name)
                     if (key === "totalAccountValue" || key === "paidAmount" || key === "pendingAmount" || key === "refusedAmount") {

@@ -110,7 +110,7 @@ export default function RiskRewardRatioCard({ size = 'tiny' }: RiskRewardRatioCa
                 <Progress
                   value={profitPercentage}
                   className="h-1.5 bg-secondary/22"
-                  indicatorClassName="bg-white chart-positive-emphasis"
+                   indicatorClassName="bg-surface-subtle chart-positive-emphasis"
                 />
               </div>
             </TooltipTrigger>

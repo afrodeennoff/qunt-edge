@@ -241,14 +241,14 @@ export async function renderEmailPreview(params: {
             <base target="_blank" />
             <style>
               body { margin: 0; padding: 20px; }
-              .preview-subject { 
-                font-size: 1.25rem; 
-                font-weight: 600; 
-                margin-bottom: 1rem;
-                padding: 0.5rem;
-                background-color: #f3f4f6;
-                border-radius: 0.375rem;
-              }
+               .preview-subject { 
+                 font-size: 1.25rem; 
+                 font-weight: 600; 
+                 margin-bottom: 1rem;
+                 padding: 0.5rem;
+                 background-color: hsl(var(--muted) / 0.3);
+                 border-radius: 0.375rem;
+               }
             </style>
           </head>
           <body>

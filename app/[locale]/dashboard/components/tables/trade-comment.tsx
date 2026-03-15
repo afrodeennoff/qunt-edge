@@ -117,7 +117,7 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
                   className={cn(
                     "w-full px-3 py-2 text-sm bg-transparent border rounded min-h-[100px]",
                     "focus:outline-hidden focus:ring-2 focus:ring-primary resize-none transition-all duration-200",
-                    showSuccess && "border-border/65 ring-2 ring-white/20",
+                     showSuccess && "border-border/65 ring-2 ring-surface-subtle/20",
                     isUpdating && "border-primary/50"
                   )}
                 />

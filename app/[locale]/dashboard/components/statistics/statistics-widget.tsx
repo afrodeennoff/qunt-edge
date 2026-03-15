@@ -314,7 +314,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
                   <span className="text-muted-foreground/70 text-xs">{t('statistics.distribution.long')}</span>
                   <span className="text-sm font-medium font-terminal metric-positive">{longRate}%</span>
                 </div>
-                <Progress value={longRate} className="h-1 bg-secondary/30" indicatorClassName="bg-white chart-positive-emphasis" />
+                <Progress value={longRate} className="h-1 bg-secondary/30" indicatorClassName="bg-surface-subtle chart-positive-emphasis" />
               </div>
               {size !== 'tiny' ? (
                 <>
@@ -323,7 +323,7 @@ export default function StatisticsWidget({ size = 'medium', dayData }: Statistic
                       <span className="text-muted-foreground/70 text-xs">{t('statistics.distribution.short')}</span>
                       <span className="text-sm font-medium font-terminal metric-negative">{shortRate}%</span>
                     </div>
-                    <Progress value={shortRate} className="h-1 bg-secondary/30" indicatorClassName="bg-white/30 chart-negative-muted" />
+                     <Progress value={shortRate} className="h-1 bg-secondary/30" indicatorClassName="bg-surface-subtle/30 chart-negative-muted" />
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground/70 text-xs">{t('statistics.distribution.winningStreak')}</span>

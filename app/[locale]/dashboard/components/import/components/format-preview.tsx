@@ -655,7 +655,7 @@ export function FormatPreview({
             <Tooltip>
               <TooltipTrigger>
                 <div className="flex items-center gap-1">
-                  <span className={pnl >= 0 ? "text-white" : "text-semantic-error"}>
+                  <span className={pnl >= 0 ? "text-foreground" : "text-semantic-error"}>
                     ${pnl.toFixed(2)}
                   </span>
                   {isMismatch && (
@@ -777,14 +777,14 @@ export function FormatPreview({
           </div>
           {isAutoProcessing && (
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-white/10 rounded-full animate-pulse"></div>
-              <span className="text-xs text-white font-medium">{t('import.processing.autoProcessing')}</span>
+              <div className="w-2 h-2 bg-muted/50 rounded-full animate-pulse"></div>
+              <span className="text-xs text-foreground font-medium">{t('import.processing.autoProcessing')}</span>
             </div>
           )}
           {!isAutoProcessing && completedBatches.size === totalBatches && totalBatches > 0 && (
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-white/10 rounded-full"></div>
-              <span className="text-xs text-white font-medium">{t('import.processing.allBatchesCompleted')}</span>
+              <div className="w-2 h-2 bg-muted/50 rounded-full"></div>
+              <span className="text-xs text-foreground font-medium">{t('import.processing.allBatchesCompleted')}</span>
             </div>
           )}
         </div>
@@ -793,7 +793,7 @@ export function FormatPreview({
             <Button
               onClick={startProcessing}
               disabled={isProcessing}
-              className="bg-white/10 hover:bg-white/10 text-white"
+              className="bg-muted/50 hover:bg-muted/50 text-foreground"
             >
               {isProcessing ? t('import.processing.starting') : t('import.processing.startProcessing')}
             </Button>
@@ -932,7 +932,7 @@ export function FormatPreview({
                       {t('trade-table.footer.totalPnl')}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      <span className={totals.totalPnl >= 0 ? "text-white" : "text-semantic-error"}>
+                      <span className={totals.totalPnl >= 0 ? "text-foreground" : "text-semantic-error"}>
                         ${totals.totalPnl.toFixed(2)}
                       </span>
                     </TableCell>
@@ -946,7 +946,7 @@ export function FormatPreview({
                       {t('trade-table.footer.netPnl')}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm">
-                      <span className={totals.netPnl >= 0 ? "text-white" : "text-semantic-error"}>
+                      <span className={totals.netPnl >= 0 ? "text-foreground" : "text-semantic-error"}>
                         ${totals.netPnl.toFixed(2)}
                       </span>
                     </TableCell>

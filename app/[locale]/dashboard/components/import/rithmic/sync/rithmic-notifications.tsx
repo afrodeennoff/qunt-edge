@@ -232,7 +232,7 @@ export function RithmicSyncNotifications() {
       <Alert
         key={notifications.progress.id}
         className={cn(
-          notifications.progress.type === 'success' && "border-white/20 bg-white/5",
+          notifications.progress.type === 'success' && "border-semantic-success-border/40 bg-semantic-success-bg/20",
           isCollapsed && "w-16 h-16 p-0 ml-auto"
         )}
       >
@@ -254,7 +254,7 @@ export function RithmicSyncNotifications() {
                   cy="24"
                 />
                 <circle
-                  className="text-white"
+                  className="text-foreground"
                   strokeWidth="2"
                   strokeDasharray={125.6}
                   strokeDashoffset={Math.max(0, 125.6 - (125.6 * (progressPercentage || 0)) / 100)}
@@ -272,8 +272,8 @@ export function RithmicSyncNotifications() {
             </div>
           ) : (
             <>
-              {notifications.progress.type === 'success' && <CheckCircle2 className="h-4 w-4 text-white" />}
-              {notifications.progress.type === 'info' && <Info className="h-4 w-4 text-white/50" />}
+              {notifications.progress.type === 'success' && <CheckCircle2 className="h-4 w-4 text-semantic-success" />}
+              {notifications.progress.type === 'info' && <Info className="h-4 w-4 text-muted-foreground/50" />}
               <div className="space-y-1 w-full">
                 <div className="flex items-center justify-between">
                   <AlertTitle>{t('notification.title')}</AlertTitle>
