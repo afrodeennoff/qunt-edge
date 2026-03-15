@@ -9,7 +9,14 @@
 
 Verification: `npm run lint -- app/layout.tsx tailwind.config.ts app/globals.css` (ESLint warns `app/globals.css` is ignored because no matching config is supplied; layout and config files pass).
 
--## Task: Dashboard semantic token migration (2026-03-15)
+## Task: Color token cleanup (2026-03-15)
+
+- [x] Save the color token cleanup plan in `docs/superpowers/plans/2026-03-15-color-token-cleanup.md` and confirm the targets.
+- [x] Replace remaining `white/black/gray` utilities in the import tutorial panels and propfirms landing controls/chart with semantic tokens per the plan.
+- [x] Refresh the landing FAQ surface/CTA so it relies on `bg-card`, `border-border`, and `text-foreground` tokens instead of literal colors.
+- [x] Run `npx eslint app/[locale]/dashboard/components/import/components/platform-tutorial.tsx app/[locale]/dashboard/components/import/thor/thor-sync.tsx app/[locale]/dashboard/components/import/etp/etp-sync.tsx app/[locale]/(landing)/propfirms/components/timeframe-controls.tsx app/[locale]/(landing)/propfirms/components/sort-controls.tsx app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx app/[locale]/(landing)/faq/page.tsx` and record warnings-only output for the summary.
+
+## Task: Dashboard semantic token migration (2026-03-15)
 
 - [x] Assess the current hardcoded `white/black/gray/zinc/neutral` utility usage in the assigned dashboard files.
 - [x] Replace each occurrence with the relevant semantic token classes (`bg-card`, `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-primary`, etc.) without altering layout or behavior.
@@ -68,6 +75,23 @@ Verification: `npx eslint app/[locale]/admin/components/newsletter/newsletter-au
 - [x] Run `npx eslint` on the touched landing files to confirm there are no new errors or warnings.
 - [x] Record the results (changed files plus any ESLint warnings/errors) in this checklist before closing the task.
 Verification: `npx eslint app/[locale]/(landing)/propfirms/page.tsx app/[locale]/(landing)/components/problem-statement.tsx app/[locale]/(landing)/referral/page-client.tsx app/[locale]/(landing)/components/completed-timeline.tsx app/[locale]/(landing)/_updates/[slug]/page.tsx app/[locale]/(landing)/components/how-it-works.tsx app/[locale]/(landing)/components/faq.tsx app/[locale]/(landing)/components/qualification.tsx` (warnings: `propfirms` arrow functions and `_updates/[slug]/page.tsx` `Page` complexity remain at 21, 15, and 12; no new errors).
+
+## Task: Propfirm + import semantic color migration (2026-03-15)
+
+- [x] Review `app/[locale]/dashboard/components/import/components/platform-tutorial.tsx`, `app/[locale]/dashboard/components/import/thor/thor-sync.tsx`, `app/[locale]/dashboard/components/import/etp/etp-sync.tsx`, `app/[locale]/(landing)/propfirms/components/timeframe-controls.tsx`, `app/[locale]/(landing)/propfirms/components/sort-controls.tsx`, `app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx`, and `app/[locale]/(landing)/faq/page.tsx` to inventory legacy color utilities.
+- [x] Replace the legacy `white/black/gray/zinc/neutral` utility classes with their semantic token counterparts (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-background`, etc.) without changing visual behavior.
+- [x] Run `npx eslint` on the modified files and capture any warnings/errors.
+- [x] Update this checklist with the verification results (command output summary).
+Verification: `npx eslint app/[locale]/dashboard/components/import/components/platform-tutorial.tsx app/[locale]/dashboard/components/import/thor/thor-sync.tsx app/[locale]/dashboard/components/import/etp/etp-sync.tsx app/[locale]/(landing)/propfirms/components/timeframe-controls.tsx app/[locale]/(landing)/propfirms/components/sort-controls.tsx app/[locale]/(landing)/propfirms/components/accounts-bar-chart.tsx app/[locale]/(landing)/faq/page.tsx` (warnings: `AccountsBarChart` complexity 11 and unused `cn`/`setIsOpen`/`error` variables remain).
+
+## Task: Worker H legacy color token replacement (2026-03-15)
+
+- [ ] Review `app/[locale]/teams/components/user-equity/team-equity-grid-client.tsx`, `app/[locale]/teams/join/page.tsx`, `app/[locale]/(landing)/newsletter/page.tsx`, `app/[locale]/(landing)/disclaimers/page.tsx`, `app/[locale]/(home)/loading.tsx`, and `app/[locale]/(landing)/community/post/[id]/loading.tsx` to catalog the remaining hardcoded color utilities (e.g., `text-white`, `bg-black`, `bg-neutral-900`, `border-zinc-700`).
+- [ ] Replace those legacy classes with the appropriate semantic tokens (`text-foreground`, `text-muted-foreground`, `bg-card`, `bg-background`, `border-border`, etc.) without altering layout or spacing.
+- [ ] Run `npx eslint` across the touched files after the replacement to verify there are no new lint errors.
+- [ ] Summarize the changed files plus the ESLint output for this task in the checklist.
+Verification: `npx eslint app/[locale]/teams/components/user-equity/team-equity-grid-client.tsx app/[locale]/teams/join/page.tsx app/[locale]/(landing)/newsletter/page.tsx app/[locale]/(landing)/disclaimers/page.tsx app/[locale]/(home)/loading.tsx app/[locale]/(landing)/community/post/[id]/loading.tsx` (document warnings/errors if any).
+
 
 ## Task: Harden community/public data (2026-03-14)
 
